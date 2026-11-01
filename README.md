@@ -123,23 +123,6 @@ alors plus l'application du tout.
 Ensuite l'updater intégré prend le relais et propose les versions suivantes tout
 seul — l'endpoint est public, aucun compte GitHub n'est nécessaire pour le lire.
 
-## Publier une version
-
-```bash
-pnpm release 0.2.0 "Ce que change cette version"
-```
-
-Le script porte la version dans les trois manifestes, compile, signe l'archive
-et publie une release sur le dépôt public des binaires, `latest.json` compris.
-Les cockpits installés le lisent quelques fois par jour et proposent la mise à
-jour ; l'installation ne part jamais sans un clic, parce qu'elle relance
-l'application et arrête les agents en cours.
-
-La clé de signature vit hors du dépôt (`~/.tauri/cockpit.key`), chiffrée par un
-mot de passe rangé dans le trousseau macOS. Une archive non signée par elle est
-refusée par les applications installées : c'est ce qui fait qu'un dépôt de
-binaires compromis ne suffit pas à livrer n'importe quoi.
-
 ## Configuration
 
 Un seul fichier : `~/.config/cockpit/config.toml` (permissions 600).
