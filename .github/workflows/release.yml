@@ -357,5 +357,13 @@ jobs:
           RELEASE_ID: ${{ needs.preparer.outputs.release_id }}
         run: |
           set -euo pipefail
+          # Le tag est reposé ici : sans lui, la release sortie du brouillon
+          # restait « untagged-… » (0.85.1), et les adresses de `latest.json`
+          # (`/download/vX/…`) répondaient 404.
           gh api -X PATCH "repos/$DEPOT_BINAIRES/releases/$RELEASE_ID" \
-            -F draft=false -f make_latest=true --jq .html_url
+            -f tag_name="$TAG" -F draft=false -f make_latest=true --jq .html_url
+          # Contrôle : les fichiers annoncés doivent se télécharger à l'adresse
+          # que lisent les cockpits installés.
+          sleep 10
+          curl -fsSL -r 0-0 -o /dev/null "https://github.com/$DEPOT_BINAIRES/releases/download/$TAG/latest.json" \
+            || { echo "::error::latest.json introuvable sous $TAG après publication"; exit 1; }
