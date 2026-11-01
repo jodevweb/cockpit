@@ -356,7 +356,7 @@
 			"title": "サービス",
 			"enabled": "有効",
 			"disabled": "無効",
-			"disabledHint": "無効にすると、項目はサイドバーから消えます：何もできない画面はメニューに残しません。ここで再度有効にしてください。一方、一時停止は操作です — 画面から、または <kbd>⇧P</kbd> で行ってください。",
+			"disabledHint": "無効にすると、項目はサイドバーから消えます：何もできない画面はメニューに残しません。ここで再度有効にしてください。一方、一時停止は操作です — 画面から、または <kbd>{{mod}}{{shift}}P</kbd> で行ってください。",
 			"hours": "サービス時間",
 			"hoursHint": "空欄 = 常時。深夜 0 時をまたぐ範囲もそのまま解釈されます。",
 			"cadence": "間隔",
@@ -602,7 +602,9 @@
 		"emptyHint": ".claude/work に置かれたスクリーンショットやレポートがここに表示されます。",
 		"root": "ルート",
 		"openFolder": "Finder でフォルダを開く",
+		"openFolder_windows": "エクスプローラー でフォルダを開く",
 		"reveal": "Finder で表示",
+		"reveal_windows": "エクスプローラー で表示",
 		"close": "閉じる（Esc）",
 		"previous": "前へ（←）",
 		"next": "次へ（→）"
@@ -901,6 +903,7 @@
 				"hint": "空欄 = Cockpit のデフォルトイメージ。"
 			},
 			"loginNote": "サブスクリプションでサインインしたアカウントは、トークンをマシンのキーチェーンに保存しますが、コンテナはこれを読めません。このボタンはターミナルで <code>claude setup-token</code> を実行します — 表示されたトークンを「設定 → アクセストークン」（「分離アカウント」）に貼り付けてください。有効期間は 1 年で、期限が切れたらやり直してください。",
+			"loginNote_windows": "サブスクリプションでサインインしたアカウントは、トークンをコンテナから読めない場所に保存します。このボタンはターミナルで <code>claude setup-token</code> を実行します — 表示されたトークンを「設定 → アクセストークン」（「分離アカウント」）に貼り付けてください。有効期間は 1 年で、期限が切れたらやり直してください。",
 			"connect": "分離アカウントを接続"
 		}
 	},
@@ -943,7 +946,7 @@
 			"worktreesGroup": "Worktree",
 			"detachedHead": "切り離された HEAD",
 			"alreadyOpen": "既に開いています",
-			"openTerminalHere": "ここでターミナルを開く（⇧Enter）",
+			"openTerminalHere": "ここでターミナルを開く（{{shift}}Enter）",
 			"remoteBranchesGroup": "ここで一度もチェックアウトされていない他所のブランチ",
 			"localBranchesGroup": "worktree のないブランチ",
 			"remoteBranchHint": "{{remote}} 上 — ここにチェックアウトしてから作業",
@@ -952,7 +955,7 @@
 			"title": "ワークスペースを開く — 既存の worktree、またはこれから worktree を作成するブランチ",
 			"empty": "既知の worktree はありません。",
 			"prGroup": "プルリクエスト",
-			"prHint": "読み取り専用でレビュー — ⇧Enter：ブランチを開くだけ",
+			"prHint": "読み取り専用でレビュー — {{shift}}Enter：ブランチを開くだけ",
 			"prNote": "レビュー",
 			"prOpenBranch": "ブランチのワークスペースだけを開く",
 			"newBranchGroup": "このブランチはまだここにありません",
@@ -976,10 +979,10 @@
 		"toolbar": {
 			"addAgentTitle": "このワークスペースにエージェントを追加",
 			"addAgent": "+ エージェント",
-			"addTerminalTitle": "このワークスペースにターミナルを追加（⌘⇧T）",
+			"addTerminalTitle": "このワークスペースにターミナルを追加（{{mod}}{{shift}}T）",
 			"addTerminal": "+ ターミナル",
 			"stop": "停止",
-			"interrupt": "実行中のものを中断（⌃C）",
+			"interrupt": "実行中のものを中断（{{ctrl}}C）",
 			"clear": "画面をクリア",
 			"sleep": "脇に置く — プロセスは停止し、次回起動時にワークスペースが戻ります",
 			"closeMission": "ミッション「{{title}}」を閉じる — すべてのワークスペースが停止します"

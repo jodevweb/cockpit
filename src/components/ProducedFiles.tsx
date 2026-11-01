@@ -6,6 +6,8 @@ import { Button } from "@/components/ui";
 import { api } from "@/lib/ipc";
 import type { Turn } from "@/app/agents";
 import { useCockpit } from "@/app/store";
+import { toSlashes } from "@/lib/paths";
+import { platformContext } from "@/lib/platform";
 
 /** Les outils dont on sait lire la cible sans interpréter une ligne de commande. */
 const ECRITURES: Record<string, string> = {
@@ -38,8 +40,10 @@ const REPLI: number = 5;
 
 /** Le chemin tel qu'on le lit : relatif au chantier, qui est déjà nommé. */
 function relatif(path: string, cwd: string): string {
+	// Un agent sous Windows écrit `C:\…` ; le dossier de travail arrive en `C:/…`.
+	const slashed = toSlashes(path);
 	const base = cwd.endsWith("/") ? cwd : `${cwd}/`;
-	return path.startsWith(base) ? path.slice(base.length) : path;
+	return slashed.startsWith(base) ? slashed.slice(base.length) : path;
 }
 export function ProducedFiles({ turns, cwd }: { turns: Turn[]; cwd: string }) {
 	const files = useMemo(() => {
@@ -87,7 +91,7 @@ export function ProducedFiles({ turns, cwd }: { turns: Turn[]; cwd: string }) {
 					size="sm"
 					icon={FolderOpen}
 					className="ml-auto"
-					title={t("producedFiles.reveal.title")}
+					title={t("producedFiles.reveal.title", { context: platformContext })}
 					onClick={() => {
 						void api.system.reveal(cwd).catch((error) => notify(String(error)));
 					}}

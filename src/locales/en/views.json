@@ -34,6 +34,7 @@
 			"resumeHint": "Reopens the conversation in a Cockpit workspace",
 			"resume": "Resume the conversation",
 			"resumeTerminalHint": "Reopens the conversation in Terminal.app",
+			"resumeTerminalHint_windows": "Reopens the conversation in a terminal window",
 			"resumeTerminal": "Resume in Terminal",
 			"editor": "Editor",
 			"terminal": "Terminal",
@@ -111,6 +112,7 @@
 		"title": "Automations",
 		"new": "New",
 		"whenItRuns": "An automation runs while Cockpit is open. If the Mac is asleep at the set time, it catches up when Cockpit opens, as long as the meeting hasn't passed.",
+		"whenItRuns_windows": "An automation runs while Cockpit is open. If the computer is asleep at the set time, it catches up when Cockpit opens, as long as the meeting hasn't passed.",
 		"paused": "Paused",
 		"nextRun": "Next: {{when}}",
 		"noUpcoming": "No upcoming meeting",
@@ -188,7 +190,7 @@
 		"nothingWaiting": "Nothing is waiting on you.",
 		"summary_one": "{{count}} decision · the oldest has been waiting {{since}}",
 		"summary_other": "{{count}} decisions · the oldest has been waiting {{since}}",
-		"keys": "<up>↑</up><down>↓</down> switch · <one>1</one>…<nine>9</nine> choose · <back>⌘⇧D</back> come back",
+		"keys": "<up>↑</up><down>↓</down> switch · <one>1</one>…<nine>9</nine> choose · <back>{{mod}}{{shift}}D</back> come back",
 		"empty": "No agent is waiting on you. Questions, permission requests, expected replies and plans to approve will land here, sorted by what they unblock.",
 		"blocksTasks_one": "blocks {{count}} task",
 		"blocksTasks_other": "blocks {{count}} tasks",
@@ -215,7 +217,7 @@
 			"label": "It handed back control on a question",
 			"collapse": "Collapse its message",
 			"expand": "Read its whole message",
-			"placeholder": "Your reply — ⌘↵ to send",
+			"placeholder": "Your reply — {{mod}}{{enter}} to send",
 			"send": "Reply"
 		}
 	},
@@ -486,6 +488,7 @@
 			"nothingToResume": "This agent never opened a session: there is nothing to resume.",
 			"openTerminal": "Open a terminal here",
 			"reveal": "Show in Finder",
+			"reveal_windows": "Show in File Explorer",
 			"stop": "Stop",
 			"resume": "Resume",
 			"archive": "Archive",
@@ -510,7 +513,7 @@
 		"empty": {
 			"projectFolder": "my-project",
 			"becomes": "— becomes —",
-			"shortcut": "<key>⌘N</key>, the folder, <key>⌘↵</key>",
+			"shortcut": "<key>{{mod}}N</key>, the folder, <key>{{mod}}{{enter}}</key>",
 			"title": "One agent, one folder, that's all.",
 			"body": "No worksite, no mission, no branch if you don't want one. Your free agents are filed here, by folder, until you archive them.",
 			"launch": "Start an agent",
@@ -962,7 +965,7 @@
 		"live": "It acts for real. The actions checked in the settings are the only ones it will take, and never on a shared branch.",
 		"suspended": {
 			"message": "Resting. Engagements in progress run to completion; no new one will start.",
-			"hint": "resume with a click or ⌘⇧P"
+			"hint": "resume with a click or {{mod}}{{shift}}P"
 		},
 		"inFlight": {
 			"title": "In progress",
@@ -1085,6 +1088,7 @@
 		"in": "in {{path}}",
 		"run": "Run",
 		"openInTerminal": "Open in Terminal.app rather than in the cockpit",
+		"openInTerminal_windows": "Open in a terminal window rather than in the cockpit",
 		"required": "{{label}} is required.",
 		"title": "Scripts",
 		"subtitle": "Configurable in-house commands and repository scripts, run with live output.",
@@ -1102,6 +1106,7 @@
 		"stop": "Stop",
 		"clearOutput": "Clear the output",
 		"replayInTerminal": "Replay in Terminal.app",
+		"replayInTerminal_windows": "Replay in a terminal window",
 		"launchPrompt": "Run a command",
 		"launchHint": "The output shows up here live, with the terminal's colors."
 	},
@@ -1274,6 +1279,7 @@
 			"lightHint": "same roles, other values",
 			"system": "System",
 			"systemHint": "follows macOS, switching included",
+			"systemHint_windows": "follows Windows, switching included",
 			"help": "The choice applies to this workstation and takes effect immediately — it doesn't wait for “Save configuration”, which only covers project settings. Open terminals repaint along with everything else."
 		},
 		"relay": {
@@ -1409,11 +1415,11 @@
 		},
 		"detail": {
 			"editor": "Editor",
-			"terminalHint": "Shell on this worktree, in the work panel (⌘⇧T)",
+			"terminalHint": "Shell on this worktree, in the work panel ({{mod}}{{shift}}T)",
 			"terminal": "Terminal",
 			"agentHint": "Start an agent here, without leaving the cockpit",
 			"agent": "Agent",
-			"devHint": "{{command}} in a panel terminal — ⌃C to stop it",
+			"devHint": "{{command}} in a panel terminal — {{ctrl}}C to stop it",
 			"dev": "Dev",
 			"changes": "Changes",
 			"cleanTree": "Clean tree — nothing to compare.",

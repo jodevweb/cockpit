@@ -12,7 +12,6 @@ use std::sync::atomic::{AtomicU64, Ordering};
 use std::sync::{Arc, Mutex};
 use tauri::{AppHandle, Emitter};
 use tokio::io::{AsyncBufReadExt, BufReader};
-use tokio::process::Command;
 
 static JOB_SEQUENCE: AtomicU64 = AtomicU64::new(1);
 
@@ -43,7 +42,7 @@ pub struct JobStatus {
 #[serde(rename_all = "camelCase")]
 pub struct JobRequest {
 	pub label: String,
-	/// Ligne de commande complète, exécutée via `zsh -lc` pour hériter du PATH
+	/// Ligne de commande complète, exécutée via le shell de connexion (`zsh -lc`, Git Bash sous Windows) pour hériter du PATH
 	/// utilisateur (bun, pnpm, mise…).
 	pub command: String,
 	pub cwd: String,
@@ -109,18 +108,18 @@ pub async fn spawn_job(app: AppHandle, jobs: SharedJobs, request: JobRequest) ->
 
 	let job_id = format!("job-{}", JOB_SEQUENCE.fetch_add(1, Ordering::SeqCst));
 
-	let mut child = Command::new("zsh")
-		.arg("-lc")
-		.arg(&request.command)
+	let mut command = crate::platform::shell_async(&request.command);
+	// Groupe de processus dédié : `pnpm`/`turbo` essaiment des enfants, et
+	// une annulation doit emporter toute la descendance (sous Windows, l'arbre
+	// de processus du shell).
+	crate::platform::detach_async(&mut command);
+	let mut child = command
 		.current_dir(&cwd)
 		// Sans TTY, les outils qui détectent un terminal changent de rendu ;
 		// on force un mode non interactif propre.
 		.env("CI", "1")
 		.env("FORCE_COLOR", "1")
 		.env("TERM", "xterm-256color")
-		// Groupe de processus dédié : `pnpm`/`turbo` essaiment des enfants, et
-		// une annulation doit emporter toute la descendance.
-		.process_group(0)
 		.stdout(Stdio::piped())
 		.stderr(Stdio::piped())
 		.stdin(Stdio::null())
@@ -198,10 +197,8 @@ pub fn kill_job(jobs: &SharedJobs, job_id: &str) -> Result<()> {
 	};
 
 	if let Some(pid) = pid {
-		// Le `-` cible le groupe entier créé au spawn.
-		let _ = std::process::Command::new("kill")
-			.args(["-TERM", &format!("-{pid}")])
-			.status();
+		// Le groupe entier créé au spawn.
+		crate::platform::terminate_group(pid as i32);
 	}
 	jobs.finish(job_id, "cancelled", None);
 	Ok(())
@@ -224,8 +221,8 @@ pub async fn capture_with_env(
 	command: &str,
 	env: &[(&str, &str)],
 ) -> Result<String> {
-	let mut builder = Command::new("zsh");
-	builder.arg("-lc").arg(command).current_dir(cwd);
+	let mut builder = crate::platform::shell_async(command);
+	builder.current_dir(cwd);
 	for (name, value) in env {
 		builder.env(name, value);
 	}

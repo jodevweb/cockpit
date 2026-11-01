@@ -80,6 +80,7 @@ import {
 	type ModelSpec,
 	type Turn,
 } from "@/app/agents";
+import { basename } from "@/lib/paths";
 
 /**
  * Le nom de commande en cours de frappe, avec sa position dans le texte.
@@ -502,7 +503,7 @@ function AttachmentCard({ path }: { path: string }) {
 	const { t } = useTranslation("components1");
 	const viewer = useFileViewer();
 	const { notify } = useCockpit();
-	const name = path.split("/").pop() || path;
+	const name = basename(path);
 	const extension = name.split(".").pop()?.toLowerCase() ?? "";
 	const open = () => {
 		if (viewer) return viewer.open(path);

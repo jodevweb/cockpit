@@ -42,13 +42,47 @@ const HEIGHT: u32 = 800;
 const FRAME_WAIT: Duration = Duration::from_secs(2);
 
 /// Navigateurs qui parlent le protocole de débogage de Chrome, par préférence.
-const KNOWN: [&str; 5] = [
-	"/Applications/Google Chrome.app/Contents/MacOS/Google Chrome",
-	"/Applications/Chromium.app/Contents/MacOS/Chromium",
-	"/Applications/Microsoft Edge.app/Contents/MacOS/Microsoft Edge",
-	"/Applications/Brave Browser.app/Contents/MacOS/Brave Browser",
-	"/usr/bin/google-chrome",
-];
+#[cfg(not(windows))]
+fn known() -> Vec<PathBuf> {
+	[
+		"/Applications/Google Chrome.app/Contents/MacOS/Google Chrome",
+		"/Applications/Chromium.app/Contents/MacOS/Chromium",
+		"/Applications/Microsoft Edge.app/Contents/MacOS/Microsoft Edge",
+		"/Applications/Brave Browser.app/Contents/MacOS/Brave Browser",
+		"/usr/bin/google-chrome",
+	]
+	.iter()
+	.map(PathBuf::from)
+	.collect()
+}
+
+/// Sous Windows : Chrome là où son installeur le pose (pour tous, ou pour le
+/// seul compte), puis Edge — présent sur tout Windows 10/11, et du même moteur
+/// —, puis Chromium et Brave.
+#[cfg(windows)]
+fn known() -> Vec<PathBuf> {
+	let roots: Vec<PathBuf> = ["ProgramFiles", "ProgramFiles(x86)", "ProgramW6432", "LOCALAPPDATA"]
+		.iter()
+		.filter_map(|name| std::env::var_os(name))
+		.map(PathBuf::from)
+		.collect();
+	let mut found = Vec::new();
+	for relative in [
+		["Google", "Chrome", "Application", "chrome.exe"],
+		["Microsoft", "Edge", "Application", "msedge.exe"],
+		["Chromium", "Application", "chrome.exe", ""],
+		["BraveSoftware", "Brave-Browser", "Application", "brave.exe"],
+	] {
+		for root in &roots {
+			let mut path = root.clone();
+			for part in relative.iter().filter(|part| !part.is_empty()) {
+				path.push(part);
+			}
+			found.push(path);
+		}
+	}
+	found
+}
 
 /// Le pont entre l'agent et le navigateur.
 ///
@@ -60,7 +94,7 @@ const SHIM: &str = r#"#!/usr/bin/env node
 // Pont navigateur du cockpit — généré, ne pas éditer à la main.
 import { spawn } from "node:child_process";
 import { writeFileSync } from "node:fs";
-import { dirname } from "node:path";
+import { delimiter, dirname } from "node:path";
 
 const PORT = process.env.COCKPIT_BROWSER_PORT;
 const LAUNCH = JSON.parse(process.env.COCKPIT_BROWSER_LAUNCH ?? "[]");
@@ -70,7 +104,8 @@ const ENDPOINT = `http://127.0.0.1:${PORT}`;
 
 // `npx` est un script Node : lancé depuis le Finder, le cockpit n'a pas le
 // dossier de Node dans son PATH, et `env node` échouerait.
-const env = { ...process.env, PATH: `${dirname(process.execPath)}:${process.env.PATH ?? ""}` };
+// Le séparateur du système : `:` ici, `;` sous Windows.
+const env = { ...process.env, PATH: `${dirname(process.execPath)}${delimiter}${process.env.PATH ?? ""}` };
 
 const alive = async () => {
   try {
@@ -86,7 +121,7 @@ const ensure = () =>
   (ready ??= (async () => {
     if (await alive()) return;
     if (LAUNCH.length === 0) return;
-    const child = spawn(LAUNCH[0], LAUNCH.slice(1), { detached: true, stdio: "ignore", env });
+    const child = spawn(LAUNCH[0], LAUNCH.slice(1), { detached: true, stdio: "ignore", env, windowsHide: true });
     child.unref();
     if (PID_FILE && child.pid) writeFileSync(PID_FILE, String(child.pid));
     for (let waited = 0; waited < 15000; waited += 150) {
@@ -98,6 +133,7 @@ const ensure = () =>
 const server = spawn(SERVER[0], [...SERVER.slice(1), "--cdp-endpoint", ENDPOINT], {
   stdio: ["pipe", "inherit", "inherit"],
   env,
+  windowsHide: true,
 });
 server.on("exit", (code) => process.exit(code ?? 0));
 
@@ -163,10 +199,10 @@ fn binary() -> Option<String> {
 	if !declared.trim().is_empty() {
 		return Some(declared.trim().to_string());
 	}
-	KNOWN
-		.iter()
-		.find(|path| std::path::Path::new(path).exists())
-		.map(|path| path.to_string())
+	known()
+		.into_iter()
+		.find(|path| path.exists())
+		.map(|path| path.to_string_lossy().to_string())
 }
 
 /// La ligne qui lance le navigateur. Écrite ici seulement : le pont de l'agent
@@ -221,7 +257,22 @@ pub fn mcp_config(cwd: &str, sandboxed: bool) -> Option<PathBuf> {
 	// `npx` vit à côté de `node` ; son chemin entier évite de dépendre du PATH.
 	if server.first().map(String::as_str) == Some("npx") {
 		if let Some(dir) = std::path::Path::new(&node).parent() {
-			server[0] = dir.join("npx").to_string_lossy().to_string();
+			#[cfg(not(windows))]
+			{
+				server[0] = dir.join("npx").to_string_lossy().to_string();
+			}
+			// Sous Windows, `npx` est un `npx.cmd`, que Node refuse de lancer
+			// sans passer par `cmd` (et ses règles d'échappement). On joue
+			// directement son script avec `node`, comme le fait `npx.cmd`.
+			#[cfg(windows)]
+			{
+				let script = dir.join("node_modules").join("npm").join("bin").join("npx-cli.js");
+				if script.is_file() {
+					server.splice(0..1, [node.clone(), script.to_string_lossy().to_string()]);
+				} else {
+					server[0] = dir.join("npx.cmd").to_string_lossy().to_string();
+				}
+			}
 		}
 	}
 
@@ -405,7 +456,7 @@ async fn ensure(cwd: &str) -> Result<u16> {
 	let line = launch_line(cwd, port).ok_or_else(|| {
 		CockpitError::msg(crate::i18n::t("browser.notFound"))
 	})?;
-	let child = std::process::Command::new(&line[0])
+	let child = crate::platform::quiet_std(&mut std::process::Command::new(&line[0]))
 		.args(&line[1..])
 		.stdin(std::process::Stdio::null())
 		.stdout(std::process::Stdio::null())
@@ -856,13 +907,10 @@ pub fn unwatch(shared: &SharedBrowsers, cwd: &str) {
 fn kill(path: &std::path::Path) {
 	if let Some(pid) = std::fs::read_to_string(path)
 		.ok()
-		.and_then(|raw| raw.trim().parse::<i32>().ok())
+		.and_then(|raw| raw.trim().parse::<u32>().ok())
 	{
-		// SAFETY : `kill` ne fait qu'envoyer un signal ; un pid disparu rend une
-		// erreur qu'on ignore.
-		unsafe {
-			libc::kill(pid, libc::SIGTERM);
-		}
+		// Un pid disparu rend une erreur qu'on ignore.
+		crate::platform::terminate_pid(pid);
 	}
 	let _ = std::fs::remove_file(path);
 }

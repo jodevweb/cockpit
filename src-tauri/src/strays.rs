@@ -40,10 +40,12 @@ pub struct Table {
 ///
 /// `ps -E` n'affiche l'environnement que des processus de l'utilisateur, ce
 /// qui est exactement le périmètre voulu : le cockpit ne lance rien d'autre.
+#[cfg(not(windows))]
 pub fn read() -> Table {
-	let output = std::process::Command::new("ps")
-		.args(["-axwwE", "-o", "pid=,ppid=,rss=,command="])
-		.output();
+	let output = crate::platform::quiet_std(
+		std::process::Command::new("ps").args(["-axwwE", "-o", "pid=,ppid=,rss=,command="]),
+	)
+	.output();
 	match output {
 		Ok(output) => parse(&String::from_utf8_lossy(&output.stdout)),
 		Err(_) => Table {
@@ -53,6 +55,43 @@ pub fn read() -> Table {
 	}
 }
 
+/// Sous Windows, pas de `ps -E` : l'environnement d'un autre processus ne se
+/// lit qu'en allant le chercher dans sa mémoire (`platform::process_environment`).
+///
+/// Choix pesé contre deux autres voies. La ligne de commande (WMI,
+/// `Win32_Process`) ne porte pas la marque : un `pnpm dev` lancé par l'agent
+/// n'a aucune raison de la répéter dans ses arguments. Un registre des pid
+/// lancés par le cockpit ne connaîtrait que les racines, pas ce qu'elles
+/// engendrent — précisément ce qu'on cherche. L'environnement, lui, est hérité
+/// par toute la descendance, comme sous macOS. Seuls les processus du compte
+/// s'ouvrent en lecture : même périmètre que `ps -E`.
+#[cfg(windows)]
+pub fn read() -> Table {
+	let mut parents = HashMap::new();
+	let mut marked = Vec::new();
+	for process in crate::platform::processes() {
+		parents.insert(process.pid, (process.ppid, process.name.clone()));
+		let Some(environment) = crate::platform::process_environment(process.pid) else {
+			continue;
+		};
+		// Les noms de variables ne distinguent pas la casse sous Windows.
+		let session = environment.iter().find_map(|variable| {
+			let (name, value) = variable.split_once('=')?;
+			name.eq_ignore_ascii_case(MARKER.trim_end_matches('=')).then(|| value.trim().to_string())
+		});
+		if let Some(session) = session.filter(|session| !session.is_empty()) {
+			marked.push(Marked {
+				pid: process.pid,
+				ppid: process.ppid,
+				rss_kb: process.rss_kb,
+				session,
+			});
+		}
+	}
+	Table { parents, marked }
+}
+
+#[cfg_attr(windows, allow(dead_code))]
 fn parse(raw: &str) -> Table {
 	// Une variable peut contenir un saut de ligne — `COCKPIT_SCOPE` en sépare
 	// ses chemins — et `ps` l'imprime tel quel. Une ligne qui ne commence pas
@@ -106,6 +145,29 @@ fn parse(raw: &str) -> Table {
 	Table { parents, marked }
 }
 
+impl Marked {
+	/// Rattaché à la racine : son parent est mort. Sous macOS, launchd (pid 1)
+	/// l'a adopté ; Windows n'adopte personne, et `platform::processes` met
+	/// alors le parent à 0.
+	pub fn detached(&self) -> bool {
+		if cfg!(windows) {
+			self.ppid == 0
+		} else {
+			self.ppid == 1
+		}
+	}
+}
+
+/// Le nom de l'exécutable du cockpit (`cockpit`, `Cockpit` sous Windows selon
+/// l'installation).
+fn is_cockpit(name: &str) -> bool {
+	if cfg!(windows) {
+		name.eq_ignore_ascii_case("cockpit")
+	} else {
+		name == "cockpit"
+	}
+}
+
 impl Table {
 	/// Vrai si un cockpit vivant figure parmi les ancêtres de ce processus.
 	///
@@ -121,7 +183,7 @@ impl Table {
 			if *ppid <= 1 {
 				return false;
 			}
-			if self.parents.get(ppid).is_some_and(|(_, name)| name == "cockpit") {
+			if self.parents.get(ppid).is_some_and(|(_, name)| is_cockpit(name)) {
 				return true;
 			}
 			current = *ppid;
@@ -156,15 +218,13 @@ fn left_behind(table: &Table, living_relays: &[String]) -> Vec<u32> {
 }
 
 fn signal(signal: &str, pids: &[u32]) {
-	if pids.is_empty() {
-		return;
-	}
-	let mut command = std::process::Command::new("kill");
-	command.arg(signal);
 	for pid in pids {
-		command.arg(pid.to_string());
+		if signal == "-KILL" {
+			crate::platform::kill_pid(*pid);
+		} else {
+			crate::platform::terminate_pid(*pid);
+		}
 	}
-	let _ = command.status();
 }
 
 /// `SIGTERM` à tout ce qui porte ces marques, puis `SIGKILL` à ce qui tient

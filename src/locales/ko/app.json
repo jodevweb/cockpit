@@ -48,7 +48,7 @@
 		},
 		"libre": {
 			"launch": "자유 에이전트 실행…",
-			"launchHint": "⌘N · 폴더 하나, 에이전트 하나",
+			"launchHint": "{{mod}}N · 폴더 하나, 에이전트 하나",
 			"launchIn": "{{folder}}에서 에이전트 실행",
 			"launchInHint": "마지막 선택으로 미리 채워진 실행기"
 		},
@@ -68,7 +68,8 @@
 			"launchAgentHint": "Cockpit 안의 대화",
 			"terminal": "{{name}} 터미널",
 			"terminalHint": "Cockpit 안의 셸",
-			"terminalApp": "Terminal.app에서 {{name}} 열기"
+			"terminalApp": "Terminal.app에서 {{name}} 열기",
+			"terminalApp_windows": "터미널 창에서 {{name}} 열기"
 		},
 		"folder": {
 			"newAgent": "폴더에서 새 에이전트…",
@@ -199,32 +200,32 @@
 			"placeBranch": "새 브랜치",
 			"placeWorktree": "새 worktree",
 			"defaultModel": "이 머신의 기본 모델",
-			"title": "폴더 하나, 에이전트 하나 — cd 후 claude처럼 (⌘N)",
+			"title": "폴더 하나, 에이전트 하나 — cd 후 claude처럼 ({{mod}}N)",
 			"button": "에이전트 실행",
 			"again": "지난번처럼 다시 실행",
 			"noneYet": "아직 없습니다. 첫 실행이 다음을 위해 기억됩니다.",
 			"other": "다른 폴더, 다른 설정…"
 		},
 		"top": {
-			"mapTitle": "모든 작업의 지도 (⌘⇧C)",
-			"workspaceTitle": "열린 에이전트와 터미널 (⌘⇧A)",
+			"mapTitle": "모든 작업의 지도 ({{mod}}{{shift}}C)",
+			"workspaceTitle": "열린 에이전트와 터미널 ({{mod}}{{shift}}A)",
 			"libresTitle": "터미널에서처럼 프로젝트 밖에서 실행한 에이전트",
-			"decisionsTitle": "결정을 기다리는 항목, 해소되는 영향 순 정렬 (⌘⇧D)",
-			"recapTitle": "그림으로 보는 지금까지의 일: 에이전트 턴마다 하나의 이야기 (⌘⇧J)",
+			"decisionsTitle": "결정을 기다리는 항목, 해소되는 영향 순 정렬 ({{mod}}{{shift}}D)",
+			"recapTitle": "그림으로 보는 지금까지의 일: 에이전트 턴마다 하나의 이야기 ({{mod}}{{shift}}J)",
 			"recap": "요약",
-			"automationsTitle": "데일리처럼 스스로 준비되는 회의 (⌘⇧R)"
+			"automationsTitle": "데일리처럼 스스로 준비되는 회의 ({{mod}}{{shift}}R)"
 		},
 		"search": "이동, 실행, 질문…",
 		"atelier": {
 			"title": "모든 화면, 프로젝트, 설정",
 			"name": "공방",
 			"close": "공방 닫기",
-			"subtitle": "모든 화면 · ⌘K로 검색"
+			"subtitle": "모든 화면 · {{mod}}K로 검색"
 		},
 		"live": {
 			"missions_other": "미션 {{count}}개",
-			"missionsOngoing": "{{missions}} 진행 중 (⌘⇧M)",
-			"missionsWaiting_other": "{{missions}} 진행 중, {{count}}개 승인 대기 (⌘⇧M)",
+			"missionsOngoing": "{{missions}} 진행 중 ({{mod}}{{shift}}M)",
+			"missionsWaiting_other": "{{missions}} 진행 중, {{count}}개 승인 대기 ({{mod}}{{shift}}M)",
 			"scripts_other": "스크립트 {{count}}개 실행 중"
 		}
 	},

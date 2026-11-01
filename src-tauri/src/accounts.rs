@@ -125,6 +125,7 @@ async fn read_status(account: &AccountConfig, projects: Vec<String>) -> AccountS
 	};
 
 	let mut command = tokio::process::Command::new(&binary);
+	crate::platform::quiet_async(&mut command);
 	command.args(["auth", "status"]);
 	// Le compte du poste se lit sans rien poser : lui répéter son propre défaut
 	// n'apporte rien, et le jour où le CLI change d'emplacement, le cockpit n'a

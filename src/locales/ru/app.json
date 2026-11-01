@@ -48,7 +48,7 @@
 		},
 		"libre": {
 			"launch": "Запустить свободного агента…",
-			"launchHint": "⌘N · одна папка, один агент",
+			"launchHint": "{{mod}}N · одна папка, один агент",
 			"launchIn": "Запустить агента в {{folder}}",
 			"launchInHint": "окно запуска с вашими последними настройками"
 		},
@@ -74,7 +74,8 @@
 			"launchAgentHint": "диалог в Cockpit",
 			"terminal": "Терминал на {{name}}",
 			"terminalHint": "оболочка в Cockpit",
-			"terminalApp": "Открыть {{name}} в Terminal.app"
+			"terminalApp": "Открыть {{name}} в Terminal.app",
+			"terminalApp_windows": "Открыть {{name}} в окне терминала"
 		},
 		"folder": {
 			"newAgent": "Новый агент в папке…",
@@ -214,38 +215,38 @@
 			"placeBranch": "новая ветка",
 			"placeWorktree": "новый worktree",
 			"defaultModel": "модель по умолчанию на этой машине",
-			"title": "Одна папка, один агент — как cd, а затем claude (⌘N)",
+			"title": "Одна папка, один агент — как cd, а затем claude ({{mod}}N)",
 			"button": "Запустить агента",
 			"again": "Запустить как в прошлый раз",
 			"noneYet": "Пока ничего: ваш первый запуск будет запомнен на следующий раз.",
 			"other": "Другая папка, другие настройки…"
 		},
 		"top": {
-			"mapTitle": "Карта всей работы (⌘⇧C)",
-			"workspaceTitle": "Открытые агенты и терминалы (⌘⇧A)",
+			"mapTitle": "Карта всей работы ({{mod}}{{shift}}C)",
+			"workspaceTitle": "Открытые агенты и терминалы ({{mod}}{{shift}}A)",
 			"libresTitle": "Агенты, запущенные вне проекта, как в терминале",
-			"decisionsTitle": "Что ждёт вашего решения, по тому, что это разблокирует (⌘⇧D)",
-			"recapTitle": "Что произошло, в картинках: одна история на каждый ход агента (⌘⇧J)",
+			"decisionsTitle": "Что ждёт вашего решения, по тому, что это разблокирует ({{mod}}{{shift}}D)",
+			"recapTitle": "Что произошло, в картинках: одна история на каждый ход агента ({{mod}}{{shift}}J)",
 			"recap": "Итоги",
-			"automationsTitle": "Встречи, которые готовятся сами, как дейли (⌘⇧R)"
+			"automationsTitle": "Встречи, которые готовятся сами, как дейли ({{mod}}{{shift}}R)"
 		},
 		"search": "Перейти, запустить, спросить…",
 		"atelier": {
 			"title": "Все экраны, проект, настройки",
 			"name": "Мастерская",
 			"close": "Закрыть мастерскую",
-			"subtitle": "все экраны · ⌘K для поиска"
+			"subtitle": "все экраны · {{mod}}K для поиска"
 		},
 		"live": {
 			"missions_one": "{{count}} миссия",
 			"missions_few": "{{count}} миссии",
 			"missions_many": "{{count}} миссий",
 			"missions_other": "{{count}} миссии",
-			"missionsOngoing": "{{missions}} в работе (⌘⇧M)",
-			"missionsWaiting_one": "{{missions}} в работе, {{count}} ждёт вашего одобрения (⌘⇧M)",
-			"missionsWaiting_few": "{{missions}} в работе, {{count}} ждут вашего одобрения (⌘⇧M)",
-			"missionsWaiting_many": "{{missions}} в работе, {{count}} ждут вашего одобрения (⌘⇧M)",
-			"missionsWaiting_other": "{{missions}} в работе, {{count}} ждут вашего одобрения (⌘⇧M)",
+			"missionsOngoing": "{{missions}} в работе ({{mod}}{{shift}}M)",
+			"missionsWaiting_one": "{{missions}} в работе, {{count}} ждёт вашего одобрения ({{mod}}{{shift}}M)",
+			"missionsWaiting_few": "{{missions}} в работе, {{count}} ждут вашего одобрения ({{mod}}{{shift}}M)",
+			"missionsWaiting_many": "{{missions}} в работе, {{count}} ждут вашего одобрения ({{mod}}{{shift}}M)",
+			"missionsWaiting_other": "{{missions}} в работе, {{count}} ждут вашего одобрения ({{mod}}{{shift}}M)",
 			"scripts_one": "{{count}} скрипт выполняется",
 			"scripts_few": "{{count}} скрипта выполняются",
 			"scripts_many": "{{count}} скриптов выполняются",

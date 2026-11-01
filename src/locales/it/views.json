@@ -34,6 +34,7 @@
 			"resumeHint": "Riapre la conversazione in un workspace di Cockpit",
 			"resume": "Riprendi la conversazione",
 			"resumeTerminalHint": "Riapre la conversazione in Terminal.app",
+			"resumeTerminalHint_windows": "Riapre la conversazione in una finestra di terminale",
 			"resumeTerminal": "Riprendi nel Terminale",
 			"editor": "Editor",
 			"terminal": "Terminale",
@@ -111,6 +112,7 @@
 		"title": "Automazioni",
 		"new": "Nuova",
 		"whenItRuns": "Un'automazione gira mentre Cockpit è aperto. Se il Mac è in stop all'ora prevista, recupera all'apertura di Cockpit, purché l'appuntamento non sia passato.",
+		"whenItRuns_windows": "Un'automazione gira mentre Cockpit è aperto. Se il computer è in sospensione all'ora prevista, recupera all'apertura di Cockpit, purché l'appuntamento non sia passato.",
 		"paused": "In pausa",
 		"nextRun": "Prossima: {{when}}",
 		"noUpcoming": "Nessun appuntamento in arrivo",
@@ -188,7 +190,7 @@
 		"nothingWaiting": "Niente aspetta te.",
 		"summary_one": "{{count}} decisione · la più vecchia aspetta da {{since}}",
 		"summary_other": "{{count}} decisioni · la più vecchia aspetta da {{since}}",
-		"keys": "<up>↑</up><down>↓</down> cambia · <one>1</one>…<nine>9</nine> scegli · <back>⌘⇧D</back> torna",
+		"keys": "<up>↑</up><down>↓</down> cambia · <one>1</one>…<nine>9</nine> scegli · <back>{{mod}}{{shift}}D</back> torna",
 		"empty": "Nessun agente ti sta aspettando. Domande, richieste di permesso, risposte attese e piani da approvare arriveranno qui, ordinati per ciò che sbloccano.",
 		"blocksTasks_one": "blocca {{count}} attività",
 		"blocksTasks_other": "blocca {{count}} attività",
@@ -215,7 +217,7 @@
 			"label": "Ti ha ripassato la mano su una domanda",
 			"collapse": "Comprimi il suo messaggio",
 			"expand": "Leggi tutto il suo messaggio",
-			"placeholder": "La tua risposta — ⌘↵ per inviare",
+			"placeholder": "La tua risposta — {{mod}}{{enter}} per inviare",
 			"send": "Rispondi"
 		}
 	},
@@ -486,6 +488,7 @@
 			"nothingToResume": "Questo agente non ha mai aperto una sessione: non c'è nulla da riprendere.",
 			"openTerminal": "Apri un terminale qui",
 			"reveal": "Mostra nel Finder",
+			"reveal_windows": "Mostra in Esplora file",
 			"stop": "Ferma",
 			"resume": "Riprendi",
 			"archive": "Archivia",
@@ -510,7 +513,7 @@
 		"empty": {
 			"projectFolder": "mio-progetto",
 			"becomes": "— diventa —",
-			"shortcut": "<key>⌘N</key>, la cartella, <key>⌘↵</key>",
+			"shortcut": "<key>{{mod}}N</key>, la cartella, <key>{{mod}}{{enter}}</key>",
 			"title": "Un agente, una cartella, tutto qui.",
 			"body": "Nessun cantiere, nessuna missione, nessun branch se non lo vuoi. I tuoi agenti liberi sono ordinati qui, per cartella, finché non li archivi.",
 			"launch": "Avvia un agente",
@@ -962,7 +965,7 @@
 		"live": "Agisce davvero. Le azioni spuntate nelle impostazioni sono le sole che compirà, e mai su un branch condiviso.",
 		"suspended": {
 			"message": "A riposo. Gli interventi in corso vanno fino in fondo; non ne partirà uno nuovo.",
-			"hint": "riprendi con un clic o ⌘⇧P"
+			"hint": "riprendi con un clic o {{mod}}{{shift}}P"
 		},
 		"inFlight": {
 			"title": "In corso",
@@ -1085,6 +1088,7 @@
 		"in": "in {{path}}",
 		"run": "Esegui",
 		"openInTerminal": "Apri in Terminal.app anziché nel cockpit",
+		"openInTerminal_windows": "Apri in una finestra di terminale anziché nel cockpit",
 		"required": "{{label}} è obbligatorio.",
 		"title": "Script",
 		"subtitle": "Comandi interni configurabili e script del repository, eseguiti con l'output in diretta.",
@@ -1102,6 +1106,7 @@
 		"stop": "Ferma",
 		"clearOutput": "Svuota l'output",
 		"replayInTerminal": "Rilancia in Terminal.app",
+		"replayInTerminal_windows": "Rilancia in una finestra di terminale",
 		"launchPrompt": "Esegui un comando",
 		"launchHint": "L'output compare qui in diretta, con i colori del terminale."
 	},
@@ -1274,6 +1279,7 @@
 			"lightHint": "stessi ruoli, altri valori",
 			"system": "Sistema",
 			"systemHint": "segue macOS, cambio incluso",
+			"systemHint_windows": "segue Windows, cambio incluso",
 			"help": "La scelta vale per questa postazione e si applica subito — non aspetta «Salva la configurazione», che riguarda solo le impostazioni del progetto. I terminali aperti si ridipingono insieme al resto."
 		},
 		"relay": {
@@ -1409,11 +1415,11 @@
 		},
 		"detail": {
 			"editor": "Editor",
-			"terminalHint": "Shell su questo worktree, nel pannello di lavoro (⌘⇧T)",
+			"terminalHint": "Shell su questo worktree, nel pannello di lavoro ({{mod}}{{shift}}T)",
 			"terminal": "Terminale",
 			"agentHint": "Avvia un agente qui, senza uscire dal cockpit",
 			"agent": "Agente",
-			"devHint": "{{command}} in un terminale del pannello — ⌃C per fermarlo",
+			"devHint": "{{command}} in un terminale del pannello — {{ctrl}}C per fermarlo",
 			"dev": "Dev",
 			"changes": "Modifiche",
 			"cleanTree": "Albero pulito — niente da confrontare.",

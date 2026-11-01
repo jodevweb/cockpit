@@ -1390,6 +1390,23 @@ li strong {{ display: block; }}
 
 /// Le premier navigateur Chromium du poste : c'est lui qui sait mettre une
 /// page en PDF sans fenêtre, ce que macOS n'offre pas en ligne de commande.
+/// Sous Windows, Edge est toujours là.
+#[cfg(windows)]
+fn chromium() -> Option<PathBuf> {
+	use crate::platform::env_dir;
+	let mut candidates = Vec::new();
+	for base in ["ProgramFiles", "ProgramW6432", "ProgramFiles(x86)", "LOCALAPPDATA"] {
+		if let Some(dir) = env_dir(base) {
+			candidates.push(dir.join("Google").join("Chrome").join("Application").join("chrome.exe"));
+			candidates.push(dir.join("BraveSoftware").join("Brave-Browser").join("Application").join("brave.exe"));
+			candidates.push(dir.join("Chromium").join("Application").join("chrome.exe"));
+			candidates.push(dir.join("Microsoft").join("Edge").join("Application").join("msedge.exe"));
+		}
+	}
+	candidates.into_iter().find(|path| path.is_file())
+}
+
+#[cfg(not(windows))]
 fn chromium() -> Option<PathBuf> {
 	[
 		"/Applications/Google Chrome.app/Contents/MacOS/Google Chrome",
@@ -1425,13 +1442,14 @@ pub async fn export_pdf(id: &str, run: &str) -> Result<String> {
 	// Un profil jetable : sans lui, Chrome ouvert sur le poste refuserait de
 	// partager le sien avec une seconde instance.
 	let profile = std::env::temp_dir().join("cockpit-pdf-profile");
-	let output = tokio::process::Command::new(&browser)
+	let mut command = tokio::process::Command::new(&browser);
+	let output = crate::platform::quiet_async(&mut command)
 		.arg("--headless=new")
 		.arg("--disable-gpu")
 		.arg("--no-pdf-header-footer")
 		.arg(format!("--user-data-dir={}", profile.display()))
 		.arg(format!("--print-to-pdf={}", pdf.display()))
-		.arg(format!("file://{}", html.display()))
+		.arg(crate::platform::file_url(&html))
 		.kill_on_drop(true)
 		.output();
 	let output = tokio::time::timeout(std::time::Duration::from_secs(60), output)

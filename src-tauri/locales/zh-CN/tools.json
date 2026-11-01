@@ -1,1 +1,8 @@
-{}
+{
+	"windowsAgents": {
+		"claudeNotFoundHint": "找不到 `claude` CLI。请安装它（在 PowerShell 中运行 `irm https://claude.ai/install.ps1 | iex`，或 `npm install -g @anthropic-ai/claude-code`），或检查它是否位于 %USERPROFILE%\\.local\\bin 或 %APPDATA%\\npm。",
+		"bridgeUnavailableDetail": "代理的权限请求和问题将无法到达界面。安装 Node（`winget install OpenJS.NodeJS.LTS`）即可恢复；代理仍会按其模式运行。",
+		"ffmpegHint": "验收截图会保留，但不会合成视频。安装 ffmpeg（`winget install Gyan.FFmpeg`）即可在发现下方重新看到视频。",
+		"nodeMissing": "此电脑上找不到 Node：任务工具通过由它运行的 MCP 桥接。请安装 Node（`winget install OpenJS.NodeJS.LTS`），然后重新启动任务。普通代理仍可正常工作。"
+	}
+}

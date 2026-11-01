@@ -371,7 +371,7 @@
 			"title": "Service",
 			"enabled": "Activée",
 			"disabled": "Désactivée",
-			"disabledHint": "Désactivée, l'entrée quitte le rail : un écran qui ne peut rien faire ne reste pas au menu. On la rallume ici. Suspendre, en revanche, est un geste — il se fait depuis l'écran, ou avec <kbd>⇧P</kbd>.",
+			"disabledHint": "Désactivée, l'entrée quitte le rail : un écran qui ne peut rien faire ne reste pas au menu. On la rallume ici. Suspendre, en revanche, est un geste — il se fait depuis l'écran, ou avec <kbd>{{mod}}{{shift}}P</kbd>.",
 			"hours": "Heures de service",
 			"hoursHint": "Vide = toujours. Une plage qui passe minuit se lit telle quelle.",
 			"cadence": "Cadence",
@@ -626,7 +626,9 @@
 		"emptyHint": "Les captures et comptes rendus déposés dans .claude/work apparaîtront ici.",
 		"root": "racine",
 		"openFolder": "Ouvrir le dossier dans le Finder",
+		"openFolder_windows": "Ouvrir le dossier dans l'Explorateur de fichiers",
 		"reveal": "Révéler dans le Finder",
+		"reveal_windows": "Révéler dans l'Explorateur de fichiers",
 		"close": "Fermer (Échap)",
 		"previous": "Précédent (←)",
 		"next": "Suivant (→)"
@@ -930,6 +932,7 @@
 				"hint": "Vide = l'image par défaut du cockpit."
 			},
 			"loginNote": "Un compte connecté par abonnement range son jeton dans le trousseau du poste, qu'un conteneur ne peut pas lire. Ce bouton lance <code>claude setup-token</code> dans un terminal — colle ensuite le jeton qu'il affiche dans Réglages → Jetons d'accès (« Compte isolé »). Un an de validité, à refaire une fois expiré.",
+			"loginNote_windows": "Un compte connecté par abonnement garde son jeton hors de portée du conteneur. Ce bouton lance <code>claude setup-token</code> dans un terminal — colle ensuite le jeton qu'il affiche dans Réglages → Jetons d'accès (« Compte isolé »). Un an de validité, à refaire une fois expiré.",
 			"connect": "Connecter le compte isolé"
 		}
 	},
@@ -976,7 +979,7 @@
 			"worktreesGroup": "Worktrees",
 			"detachedHead": "HEAD détachée",
 			"alreadyOpen": "déjà ouvert",
-			"openTerminalHere": "Ouvrir un terminal ici (⇧Entrée)",
+			"openTerminalHere": "Ouvrir un terminal ici ({{shift}}Entrée)",
 			"remoteBranchesGroup": "Branches d'ailleurs, jamais sorties ici",
 			"localBranchesGroup": "Branches sans worktree",
 			"remoteBranchHint": "sur {{remote}} — la sortir ici, puis y travailler",
@@ -985,7 +988,7 @@
 			"title": "Ouvrir un workspace — un worktree existant, ou une branche dont le worktree reste à créer",
 			"empty": "Aucun worktree connu.",
 			"prGroup": "Une pull request",
-			"prHint": "la relire en lecture seule — ⇧Entrée : ouvrir seulement sa branche",
+			"prHint": "la relire en lecture seule — {{shift}}Entrée : ouvrir seulement sa branche",
 			"prNote": "revue",
 			"prOpenBranch": "Ouvrir seulement le workspace de sa branche",
 			"newBranchGroup": "Cette branche n'est pas encore ici",
@@ -1010,10 +1013,10 @@
 		"toolbar": {
 			"addAgentTitle": "Un agent de plus sur ce chantier",
 			"addAgent": "+ Agent",
-			"addTerminalTitle": "Un terminal de plus sur ce chantier (⌘⇧T)",
+			"addTerminalTitle": "Un terminal de plus sur ce chantier ({{mod}}{{shift}}T)",
 			"addTerminal": "+ Terminal",
 			"stop": "Arrêter",
-			"interrupt": "Interrompre ce qui tourne (⌃C)",
+			"interrupt": "Interrompre ce qui tourne ({{ctrl}}C)",
 			"clear": "Effacer l'écran",
 			"sleep": "Mettre de côté — les processus s'arrêtent, le workspace se retrouve au prochain lancement",
 			"closeMission": "Fermer la mission « {{title}} » — tous ses workspaces s'arrêtent"

@@ -421,18 +421,24 @@ pub fn bridge_arguments(sandboxed: bool) -> Option<(String, String)> {
 	std::fs::write(bridge_path(), BRIDGE).ok()?;
 
 	let config = config_dir().join("mcp-permission.json");
+	// Isolé, le CLI lit ces chemins depuis le conteneur : sous Windows, ils y
+	// ont la forme `/c/Users/…` (voir `sandbox::container_path`).
+	let seen = |path: &std::path::Path| {
+		let path = path.to_string_lossy().to_string();
+		if sandboxed { crate::sandbox::container_path(&path) } else { path }
+	};
 	let payload = serde_json::json!({
 		"mcpServers": {
 			"cockpit": {
 				"command": node,
-				"args": [bridge_path().to_string_lossy()],
+				"args": [seen(&bridge_path())],
 			}
 		}
 	});
 	std::fs::write(&config, serde_json::to_string_pretty(&payload).ok()?).ok()?;
 
 	Some((
-		config.to_string_lossy().to_string(),
+		seen(&config),
 		"mcp__cockpit__approve".to_string(),
 	))
 }

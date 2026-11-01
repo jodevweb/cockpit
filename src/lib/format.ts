@@ -1,6 +1,7 @@
 /** Formatages partagés — dans la langue de l'interface, toujours compacts. */
 
 import { locale, t } from "@/i18n";
+import { pathParts } from "@/lib/paths";
 
 const RELATIVE_STEPS: Array<[number, Intl.RelativeTimeFormatUnit]> = [
 	[60, "second"],
@@ -97,7 +98,7 @@ export function duration(seconds: number): string {
 
 /** Raccourcit un chemin absolu en gardant la fin, la partie qui identifie. */
 export function shortPath(path: string, segments = 3): string {
-	const parts = path.split("/").filter(Boolean);
+	const parts = pathParts(path);
 	if (parts.length <= segments) return path;
 	return `…/${parts.slice(-segments).join("/")}`;
 }

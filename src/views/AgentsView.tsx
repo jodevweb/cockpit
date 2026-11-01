@@ -53,6 +53,7 @@ import { useAsync, usePersistentState } from "@/lib/useAsync";
 import { useStickToBottom } from "@/lib/useStickToBottom";
 import { useAgentActions, useOpenRunFor } from "@/app/agents";
 import { useAllSessions, useCockpit } from "@/app/store";
+import { platformContext } from "@/lib/platform";
 
 /** Un agent est « vivant » si son journal a bougé dans les 3 dernières minutes. */
 function activityTone(idleSeconds: number) {
@@ -304,7 +305,7 @@ function SessionContext({
 					icon={PlayCircle}
 					onClick={resume}
 					className="h-8 w-full justify-center"
-					title={t("agents.context.resumeTerminalHint")}
+					title={t("agents.context.resumeTerminalHint", { context: platformContext })}
 				>
 					{t("agents.context.resumeTerminal")}
 				</Button>

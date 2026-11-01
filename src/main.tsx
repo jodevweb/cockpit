@@ -4,6 +4,7 @@ import { App } from "./app/App";
 import { cachedLanguage, initI18n } from "./i18n";
 import { api } from "./lib/ipc";
 import { applyTheme, readThemeChoice } from "./lib/theme";
+import { isMac } from "./lib/platform";
 import { installWindowZoom } from "./lib/windowZoom";
 import "./styles.css";
 
@@ -11,7 +12,8 @@ const container = document.getElementById("root");
 if (!container) throw new Error("Root element not found");
 
 // Avant le rendu : l'écouteur vit sur le document, pas sur un composant.
-installWindowZoom();
+// Sur Mac seulement : ailleurs, la barre de titre native agrandit d'elle-même.
+if (isMac) installWindowZoom();
 
 // Avant le rendu aussi, et pour la même raison : posé par un effet, le thème
 // clair n'apparaîtrait qu'après un premier écran sombre.

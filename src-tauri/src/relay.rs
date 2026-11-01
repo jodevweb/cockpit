@@ -155,13 +155,25 @@ fn quote(value: &str) -> String {
 /// substitution de processus plutôt qu'un `|` : le shell n'attend pas un
 /// `tail` qui, lui, ne finit jamais — on écrit le code de sortie dès que le CLI
 /// rend la main, puis on emporte tout le groupe, `tail` compris.
+///
+/// Le script tient en bash comme en zsh : sous Windows, c'est le bash de Git
+/// for Windows qui le joue (voir `platform::shell_program`). Les chemins y
+/// passent avec des `/`, que MSYS lit sans conversion douteuse.
+///
+/// Sous Windows, `kill -TERM -$$` vise le groupe tel que MSYS l'émule : il
+/// atteint `tail` (un programme MSYS), mais rien ne garantit qu'il atteigne un
+/// programme Windows natif. On tue donc d'abord `tail` par son pid — en bash,
+/// `$!` désigne la substitution de processus, que `exec` a remplacée par
+/// `tail`. Le CLI, lui, a déjà rendu la main à ce stade.
 fn script(dir: &Path, command: &str) -> String {
-	let at = |name: &str| quote(&dir.join(name).to_string_lossy());
+	let at = |name: &str| quote(&crate::platform::display_path(&dir.join(name)));
+	let stop_tail = if cfg!(windows) { "kill -TERM $! 2>/dev/null\n" } else { "" };
 	format!(
 		"( {command}
 ) < <(exec tail -n +1 -f {input}) > {output} 2> {error}\n\
 		 code=$?\n\
-		 print -r -- $code > {exit_tmp} && mv {exit_tmp} {exit}\n\
+		 printf '%s\\n' \"$code\" > {exit_tmp} && mv {exit_tmp} {exit}\n\
+		 {stop_tail}\
 		 kill -TERM -$$ 2>/dev/null\n",
 		input = at("in.jsonl"),
 		output = at("out.jsonl"),
@@ -198,8 +210,6 @@ pub fn spawn_in(
 	env_removals: &[String],
 	execution: &str,
 ) -> Result<Handle> {
-	use std::os::unix::process::CommandExt;
-
 	let dir = base.join(session_id);
 	std::fs::create_dir_all(&dir)
 		.map_err(|e| CockpitError::msg(crate::i18n::tf("relay.dir", &[("error", &e)])))?;
@@ -213,17 +223,17 @@ pub fn spawn_in(
 			.map_err(|e| CockpitError::msg(crate::i18n::tf("relay.file", &[("error", &e)])))?;
 	}
 
-	let mut launcher = std::process::Command::new("zsh");
+	let mut launcher = crate::platform::shell(&script(&dir, command));
 	launcher
-		.arg("-lc")
-		.arg(script(&dir, command))
 		.current_dir(cwd)
 		.stdin(std::process::Stdio::null())
 		.stdout(std::process::Stdio::null())
-		.stderr(std::process::Stdio::null())
-		// Son propre groupe : on le tue en entier, et il ne reçoit pas les
-		// signaux destinés à l'app.
-		.process_group(0);
+		.stderr(std::process::Stdio::null());
+	// Son propre groupe : on le tue en entier, et il ne reçoit pas les
+	// signaux destinés à l'app. Sous Windows, un groupe de processus à part,
+	// sans console : rien ne le relie à la vie de l'app, qui peut se fermer
+	// sans l'emporter.
+	crate::platform::detach_std(&mut launcher);
 	for (name, value) in env_vars {
 		launcher.env(name, value);
 	}
@@ -237,7 +247,8 @@ pub fn spawn_in(
 	let pgid = child.id() as i32;
 	// On ne l'attend pas, et on ne garde pas son `Child` : c'est tout le
 	// principe. Un fil récupère son code de sortie pour ne pas laisser de
-	// processus zombie tant que l'app vit ; après elle, launchd s'en charge.
+	// processus zombie tant que l'app vit ; après elle, launchd s'en charge
+	// (Windows n'a pas de zombies).
 	std::thread::spawn(move || {
 		let mut child = child;
 		let _ = child.wait();
@@ -267,8 +278,9 @@ pub fn alive(pgid: i32) -> bool {
 	if pgid <= 1 {
 		return false;
 	}
-	// Signal 0 : ne fait rien, dit seulement si quelqu'un l'aurait reçu.
-	unsafe { libc::kill(-pgid, 0) == 0 }
+	// Signal 0 : ne fait rien, dit seulement si quelqu'un l'aurait reçu. Sous
+	// Windows, le chef du groupe — le shell — est-il encore là ?
+	crate::platform::group_alive(pgid)
 }
 
 /// Écrit une ligne à l'agent.
@@ -292,9 +304,7 @@ pub fn kill(handle: &Handle) {
 	let pgid = handle.pgid;
 	let dir = handle.dir.clone();
 	if pgid > 1 {
-		unsafe {
-			libc::kill(-pgid, libc::SIGTERM);
-		}
+		crate::platform::terminate_group(pgid);
 	}
 	std::thread::spawn(move || {
 		for _ in 0..20 {
@@ -304,9 +314,7 @@ pub fn kill(handle: &Handle) {
 			std::thread::sleep(Duration::from_millis(100));
 		}
 		if alive(pgid) {
-			unsafe {
-				libc::kill(-pgid, libc::SIGKILL);
-			}
+			crate::platform::kill_group(pgid);
 		}
 		let _ = std::fs::remove_dir_all(dir);
 	});
@@ -509,7 +517,9 @@ mod tests {
 
 	/// Un faux CLI : il répond à chaque ligne reçue par un objet JSON, et rend
 	/// un `result` — de quoi éprouver le relais sans le vrai `claude`.
-	const ECHO: &str = r#"while IFS= read -r line; do print -r -- "{\"type\":\"assistant\",\"echo\":$line}"; print -r -- '{"type":"result"}'; done"#;
+	/// En `printf` plutôt qu'en `print` : il doit tourner sous bash (Windows) comme
+	/// sous zsh.
+	const ECHO: &str = r#"while IFS= read -r line; do printf '%s\n' "{\"type\":\"assistant\",\"echo\":$line}"; printf '%s\n' '{"type":"result"}'; done"#;
 
 	#[tokio::test]
 	async fn un_relais_parle_survit_et_s_arrete() {
@@ -577,7 +587,7 @@ mod tests {
 			&base,
 			"agent-court",
 			&cwd.to_string_lossy(),
-			"print -r -- '{\"type\":\"result\"}'; exit 3",
+			"printf '%s\\n' '{\"type\":\"result\"}'; exit 3",
 			&[],
 			&[],
 			"exec-court",

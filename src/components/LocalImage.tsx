@@ -2,6 +2,7 @@ import { Image as ImageIcon } from "lucide-react";
 import { useEffect, useState } from "react";
 import { api } from "@/lib/ipc";
 import { localFileUrl } from "@/lib/localFile";
+import { basename } from "@/lib/paths";
 
 /**
  * Image locale, avec repli automatique.
@@ -62,6 +63,6 @@ export const IMAGE_EXTENSIONS = ["png", "jpg", "jpeg", "gif", "webp", "avif", "b
 
 /** Ce chemin désigne-t-il une image ? */
 export function isImagePath(path: string): boolean {
-	const extension = path.split("/").pop()?.split(".").pop()?.toLowerCase() ?? "";
+	const extension = basename(path).split(".").pop()?.toLowerCase() ?? "";
 	return IMAGE_EXTENSIONS.includes(extension);
 }

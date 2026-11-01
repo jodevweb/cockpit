@@ -356,7 +356,7 @@
 			"title": "서비스",
 			"enabled": "활성화",
 			"disabled": "비활성화",
-			"disabledHint": "비활성화하면 레일에서 항목이 사라집니다: 아무것도 할 수 없는 화면은 메뉴에 남지 않습니다. 여기서 다시 켜세요. 반면 일시 정지는 동작입니다 — 화면에서 하거나 <kbd>⇧P</kbd>를 누르세요.",
+			"disabledHint": "비활성화하면 레일에서 항목이 사라집니다: 아무것도 할 수 없는 화면은 메뉴에 남지 않습니다. 여기서 다시 켜세요. 반면 일시 정지는 동작입니다 — 화면에서 하거나 <kbd>{{mod}}{{shift}}P</kbd>를 누르세요.",
 			"hours": "운영 시간",
 			"hoursHint": "비워 두면 = 항상. 자정을 넘는 범위도 그대로 읽습니다.",
 			"cadence": "주기",
@@ -602,7 +602,9 @@
 		"emptyHint": ".claude/work에 저장된 스크린샷과 보고서가 여기에 표시됩니다.",
 		"root": "루트",
 		"openFolder": "Finder에서 폴더 열기",
+		"openFolder_windows": "파일 탐색기에서 폴더 열기",
 		"reveal": "Finder에서 보기",
+		"reveal_windows": "파일 탐색기에서 보기",
 		"close": "닫기 (Esc)",
 		"previous": "이전 (←)",
 		"next": "다음 (→)"
@@ -901,6 +903,7 @@
 				"hint": "비워 두면 = Cockpit의 기본 이미지."
 			},
 			"loginNote": "구독으로 로그인한 계정은 토큰을 머신의 키체인에 저장하는데, 컨테이너는 이를 읽을 수 없습니다. 이 버튼은 터미널에서 <code>claude setup-token</code>을 실행합니다 — 표시된 토큰을 설정 → 액세스 토큰(\"격리된 계정\")에 붙여 넣으세요. 1년간 유효하며, 만료되면 다시 하세요.",
+			"loginNote_windows": "구독으로 로그인한 계정은 토큰을 컨테이너가 읽을 수 없는 곳에 저장합니다. 이 버튼은 터미널에서 <code>claude setup-token</code>을 실행합니다 — 표시된 토큰을 설정 → 액세스 토큰(\"격리된 계정\")에 붙여 넣으세요. 1년간 유효하며, 만료되면 다시 하세요.",
 			"connect": "격리된 계정 연결"
 		}
 	},
@@ -943,7 +946,7 @@
 			"worktreesGroup": "Worktree",
 			"detachedHead": "분리된 HEAD",
 			"alreadyOpen": "이미 열림",
-			"openTerminalHere": "여기서 터미널 열기 (⇧Enter)",
+			"openTerminalHere": "여기서 터미널 열기 ({{shift}}Enter)",
 			"remoteBranchesGroup": "다른 곳의 브랜치, 여기서 체크아웃한 적 없음",
 			"localBranchesGroup": "worktree가 없는 브랜치",
 			"remoteBranchHint": "{{remote}}에 있음 — 여기에 체크아웃한 뒤 작업",
@@ -952,7 +955,7 @@
 			"title": "워크스페이스 열기 — 기존 worktree, 또는 worktree를 만들어야 하는 브랜치",
 			"empty": "알려진 worktree가 없습니다.",
 			"prGroup": "풀 리퀘스트",
-			"prHint": "읽기 전용으로 리뷰 — ⇧Enter: 브랜치만 열기",
+			"prHint": "읽기 전용으로 리뷰 — {{shift}}Enter: 브랜치만 열기",
 			"prNote": "리뷰",
 			"prOpenBranch": "브랜치의 워크스페이스만 열기",
 			"newBranchGroup": "이 브랜치는 아직 여기에 없습니다",
@@ -976,10 +979,10 @@
 		"toolbar": {
 			"addAgentTitle": "이 워크스페이스에 에이전트 하나 더",
 			"addAgent": "+ 에이전트",
-			"addTerminalTitle": "이 워크스페이스에 터미널 하나 더 (⌘⇧T)",
+			"addTerminalTitle": "이 워크스페이스에 터미널 하나 더 ({{mod}}{{shift}}T)",
 			"addTerminal": "+ 터미널",
 			"stop": "중지",
-			"interrupt": "실행 중인 것 중단 (⌃C)",
+			"interrupt": "실행 중인 것 중단 ({{ctrl}}C)",
 			"clear": "화면 지우기",
 			"sleep": "보류 — 프로세스가 중지되고, 다음 실행 때 워크스페이스가 돌아옵니다",
 			"closeMission": "미션 \"{{title}}\" 닫기 — 모든 워크스페이스가 중지됩니다"

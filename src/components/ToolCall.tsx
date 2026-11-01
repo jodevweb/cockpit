@@ -20,6 +20,7 @@ import { hasTauri } from "@/lib/preview";
 import { t } from "@/i18n";
 import { useTranslation } from "react-i18next";
 import type { Turn } from "@/app/agents";
+import { basename } from "@/lib/paths";
 
 /**
  * Un appel d'outil, lisible.
@@ -182,7 +183,7 @@ function describe(turn: Turn): Shape {
  */
 export function actionCourte(turn: Turn): string {
 	const shape = describe(turn);
-	const cible = shape.isFile ? (shape.target.split("/").pop() ?? "") : shape.target;
+	const cible = shape.isFile ? basename(shape.target) : shape.target;
 	return cible ? `${shape.verb} ${cible}` : shape.verb;
 }
 
@@ -368,7 +369,7 @@ export function ToolCall({
 						>
 							<LocalImage
 								path={readFile}
-								alt={readFile.split("/").pop() ?? ""}
+								alt={basename(readFile)}
 								className="max-h-40 max-w-full object-contain"
 							/>
 						</button>

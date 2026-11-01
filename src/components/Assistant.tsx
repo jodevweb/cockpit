@@ -25,6 +25,8 @@ import { recentFolders, rememberFolder } from "@/lib/recentFolders";
 import { useReviewFlow } from "@/app/review";
 import { createWorktreeTracked } from "@/lib/worktreeFlow";
 import { startActivity, withActivity } from "@/lib/activity";
+import { formatShortcut, modKey, platformContext } from "@/lib/platform";
+import { basename } from "@/lib/paths";
 
 /**
  * L'assistant vocal : ⌥ Espace maintenu, on parle, on relâche ; il comprend,
@@ -70,7 +72,7 @@ const VIEWS: Array<{ id: ViewId; label: string }> = [
 type Phase = "idle" | "listening" | "transcribing" | "thinking" | "done" | "answered" | "error";
 
 function folderOf(path: string): string {
-	return path.split("/").filter(Boolean).pop() ?? path;
+	return basename(path);
 }
 
 export function Assistant() {
@@ -434,7 +436,7 @@ export function Assistant() {
 	// ⌘J : la même chose au clavier.
 	useEffect(() => {
 		const onKey = (event: KeyboardEvent) => {
-			if (event.metaKey && event.key.toLowerCase() === "j") {
+			if (modKey(event) && !event.shiftKey && event.key.toLowerCase() === "j") {
 				event.preventDefault();
 				setTyping((value) => !value);
 			} else if (event.key === "Escape" && typing) setTyping(false);
@@ -595,7 +597,7 @@ export function AssistantSettings() {
 			</div>
 			<ShortcutPicker status={shortcut} />
 			<div className={row}>
-				<span className={key}>⌘J</span>
+				<span className={key}>{formatShortcut("⌘J")}</span>
 				<span>{t("assistant.settings.keyboard")}</span>
 			</div>
 			<p className="text-[11.5px] leading-relaxed text-ink-faint">
@@ -632,7 +634,7 @@ export function AssistantSettings() {
 					{test.text}
 					<br />
 					<span className="text-ink-faint">
-						{t("assistant.settings.micDenied")}
+						{t("assistant.settings.micDenied", { context: platformContext })}
 					</span>
 				</p>
 			) : null}

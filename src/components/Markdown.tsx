@@ -6,6 +6,7 @@ import { FileLink, isPath, linkifyPaths, resolvePath } from "@/components/FileLi
 import { LocalImage } from "@/components/LocalImage";
 import { openLightbox } from "@/components/Lightbox";
 import { api } from "@/lib/ipc";
+import { basename } from "@/lib/paths";
 
 /**
  * Rendu markdown sans dépendance, taillé pour ce qu'on lit vraiment ici : des
@@ -239,7 +240,7 @@ export function Inline({ text, cwd }: { text: string; cwd?: string | null }) {
 					// s'affiche telle quelle : il n'y a pas de fichier à relire.
 					const distante = /^(https?:\/\/|data:image\/)/.test(source);
 					const cible = distante ? source : resolvePath(source, cwd).target;
-					const nom = cible.split("/").pop() ?? cible;
+					const nom = basename(cible);
 					return (
 						<span
 							key={key}

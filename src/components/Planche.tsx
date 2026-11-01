@@ -17,6 +17,7 @@ import { illustrationsOf } from "@/lib/illustrations";
 import { localFileUrl } from "@/lib/localFile";
 import { askToKeep, proofTestOf, type ProofTest } from "@/lib/proof";
 import { seenMedia, stageOf, type Media } from "@/lib/media";
+import { joinPath } from "@/lib/paths";
 
 /**
  * La réponse d'un agent, en planche : ce qui est vrai maintenant en une phrase,
@@ -37,7 +38,7 @@ import { seenMedia, stageOf, type Media } from "@/lib/media";
 const FOLD = 600;
 
 function resolve(path: string, cwd: string): string {
-	return path.startsWith("/") ? path : `${cwd.replace(/\/$/, "")}/${path.replace(/^\.\//, "")}`;
+	return joinPath(cwd, path);
 }
 
 /** Le texte sans sa première phrase, déjà dite en tête. */

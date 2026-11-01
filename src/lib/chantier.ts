@@ -1,6 +1,7 @@
 import type { AgentRun, Turn } from "@/app/agents";
 import type { ContextUsage } from "@/lib/types";
 import { t } from "@/i18n";
+import { joinPath as joinCited } from "@/lib/paths";
 
 /**
  * Lire un chantier comme un lieu, pas comme une suite de messages.
@@ -48,7 +49,7 @@ export function joinPath(cwd: string, path: string): string {
 }
 
 function normalize(cwd: string, path: string): string {
-	const absolute = path.startsWith("/") ? path : `${cwd.replace(/\/$/, "")}/${path}`;
+	const absolute = joinCited(cwd, path);
 	// `a/./b` et `a/b/../c` : le même fichier doit avoir le même nom partout.
 	const parts: string[] = [];
 	for (const part of absolute.split("/")) {
@@ -56,6 +57,9 @@ function normalize(cwd: string, path: string): string {
 		if (part === "..") parts.pop();
 		else parts.push(part);
 	}
+	// Sous Windows, le lecteur ouvre le chemin (`C:/…`), sans barre devant ;
+	// sa lettre en capitale, comme dans les chemins que le Rust envoie.
+	if (/^[A-Za-z]:$/.test(parts[0] ?? "")) return [parts[0].toUpperCase(), ...parts.slice(1)].join("/");
 	return `/${parts.join("/")}`;
 }
 

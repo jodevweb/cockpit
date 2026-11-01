@@ -18,6 +18,7 @@ import { api } from "@/lib/ipc";
 import type { QaFile } from "@/lib/types";
 import { useAsync } from "@/lib/useAsync";
 import { useCockpit } from "@/app/store";
+import { platformContext } from "@/lib/platform";
 
 /**
  * Livrables de self-QA d'un worktree.
@@ -83,7 +84,7 @@ export function QaGallery({ path }: { path: string }) {
 							<Button
 								size="sm"
 								icon={FolderOpen}
-								title={t("qaGallery.openFolder")}
+								title={t("qaGallery.openFolder", { context: platformContext })}
 								onClick={() => {
 									void api.system
 										.reveal(entries[0].path)
@@ -203,7 +204,7 @@ function Lightbox({
 				<Button
 					size="sm"
 					icon={FolderOpen}
-					title={t("qaGallery.reveal")}
+					title={t("qaGallery.reveal", { context: platformContext })}
 					onClick={() => {
 						void api.system.reveal(file.path).catch((error) => notify(String(error)));
 					}}

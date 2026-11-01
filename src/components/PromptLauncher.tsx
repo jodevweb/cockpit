@@ -9,6 +9,7 @@ import { useAsync } from "@/lib/useAsync";
 import { useAgentActions } from "@/app/agents";
 import { useConfirm } from "@/components/Confirm";
 import { useCockpit } from "@/app/store";
+import { platformContext } from "@/lib/platform";
 
 const EMPTY: Prompt = { id: "", label: "", group: "", text: "" };
 
@@ -180,7 +181,7 @@ export function PromptLauncher({ cwd, onClose }: { cwd: string; onClose: () => v
 												<Button
 													size="sm"
 													icon={Terminal}
-													title={t("promptLauncher.openInTerminal")}
+													title={t("promptLauncher.openInTerminal", { context: platformContext })}
 													disabled={busy}
 													onClick={() => void launchInTerminal(prompt)}
 												/>
@@ -210,6 +211,7 @@ export function PromptLauncher({ cwd, onClose }: { cwd: string; onClose: () => v
 								<Trans
 									t={t}
 									i18nKey="promptLauncher.footer"
+									context={platformContext}
 									values={{ path: "~/.config/cockpit/prompts.toml" }}
 									components={{ path: <Badge mono>{null}</Badge> }}
 								/>

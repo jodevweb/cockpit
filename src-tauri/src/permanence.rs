@@ -1952,11 +1952,9 @@ async fn ask_command(id: &str, config: &Config) -> (Verdict, String) {
 	};
 
 	let line = crate::commands::build(command, "", &[]);
-	let run = tokio::process::Command::new("zsh")
-		.arg("-lc")
-		.arg(&line)
-		.current_dir(&cwd)
-		.output();
+	let mut run = crate::platform::shell_async(&line);
+	run.current_dir(&cwd);
+	let run = run.output();
 
 	match tokio::time::timeout(ORACLE_TIMEOUT, run).await {
 		Ok(Ok(output)) if output.status.success() => (
@@ -2576,9 +2574,7 @@ async fn perform(
 			if by_agent {
 				return Err(crate::i18n::t("permanence.acts.worktreeByAgent"));
 			}
-			match tokio::process::Command::new("zsh")
-				.arg("-lc")
-				.arg(&line)
+			match crate::platform::shell_async(&line)
 				.current_dir(&repo)
 				.output()
 				.await

@@ -309,16 +309,22 @@ pub fn bridge_config(sandboxed: bool) -> Option<String> {
 	std::fs::write(bridge_path(), BRIDGE).ok()?;
 
 	let config = config_dir().join("mcp-mission.json");
+	// Isolé, le CLI lit ces chemins depuis le conteneur : sous Windows, ils y
+	// ont la forme `/c/Users/…` (voir `sandbox::container_path`).
+	let seen = |path: &std::path::Path| {
+		let path = path.to_string_lossy().to_string();
+		if sandboxed { crate::sandbox::container_path(&path) } else { path }
+	};
 	let payload = json!({
 		"mcpServers": {
 			"mission": {
 				"command": node,
-				"args": [bridge_path().to_string_lossy()],
+				"args": [seen(&bridge_path())],
 			}
 		}
 	});
 	std::fs::write(&config, serde_json::to_string_pretty(&payload).ok()?).ok()?;
-	Some(config.to_string_lossy().to_string())
+	Some(seen(&config))
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -1140,11 +1146,11 @@ pub async fn sync_verifier_worktree(
 fn same_dir(left: &str, right: &str) -> bool {
 	let clean = |value: &str| {
 		let path = std::path::Path::new(value.trim());
-		std::fs::canonicalize(path)
-			.unwrap_or_else(|_| path.to_path_buf())
-			.to_string_lossy()
-			.trim_end_matches('/')
-			.to_string()
+		crate::platform::path_key(
+			&std::fs::canonicalize(path)
+				.unwrap_or_else(|_| path.to_path_buf())
+				.to_string_lossy(),
+		)
 	};
 	!left.trim().is_empty() && !right.trim().is_empty() && clean(left) == clean(right)
 }

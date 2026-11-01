@@ -3,6 +3,8 @@ import { Fragment, type ReactNode } from "react";
 import { useFileViewer } from "@/lib/fileViewer";
 import { api } from "@/lib/ipc";
 import { useTranslation } from "react-i18next";
+import { modKey, platformContext } from "@/lib/platform";
+import { fileUrl, isAbsolutePath, joinPath, toSlashes } from "@/lib/paths";
 
 /**
  * Les chemins de fichiers cités par un agent, rendus ouvrables.
@@ -103,9 +105,12 @@ const EXTENSIONS = [
  *
  * Le suffixe `:12` ou `:12:5` est courant dans les sorties d'outils — on le
  * capture pour ne pas couper le lien au milieu, et on le retire à l'ouverture.
+ *
+ * Sous Windows, un agent écrit `C:\Users\…\app.ts` ou `src\app.ts` : la lettre
+ * de lecteur et la contre-oblique comptent aussi.
  */
 const PATH = new RegExp(
-	String.raw`(?:~\/|\.{0,2}\/)?(?:[\w.@+-]+\/)+[\w.@+-]+\.(?:${EXTENSIONS.join("|")})\b(?::\d+(?::\d+)?)?`,
+	String.raw`(?:\b[A-Za-z]:[\\/]|~[\\/]|\.{0,2}[\\/])?(?:[\w.@+-]+[\\/])+[\w.@+-]+\.(?:${EXTENSIONS.join("|")})\b(?::\d+(?::\d+)?)?`,
 	"g",
 );
 
@@ -131,10 +136,9 @@ export function resolvePath(
 	const clean = path.replace(/:\d+(?::\d+)?$/, "");
 	const line = at ? Number(at[1]) : undefined;
 
-	if (clean.startsWith("/") || clean.startsWith("~")) return { target: clean, line };
-	const base = (cwd ?? "").replace(/\/$/, "");
-	const relative = clean.replace(/^\.\//, "");
-	return { target: base ? `${base}/${relative}` : relative, line };
+	if (isAbsolutePath(clean)) return { target: toSlashes(clean), line };
+	if (!cwd) return { target: toSlashes(clean).replace(/^\.\//, ""), line };
+	return { target: joinPath(cwd, clean), line };
 }
 
 export function FileLink({
@@ -163,11 +167,11 @@ export function FileLink({
 			// que le silence — ⇧-clic, lui, copie le chemin à coup sûr.
 			draggable
 			onDragStart={(event) => {
-				event.dataTransfer.setData("text/uri-list", `file://${target}`);
+				event.dataTransfer.setData("text/uri-list", fileUrl(target));
 				event.dataTransfer.setData("text/plain", target);
 				event.dataTransfer.effectAllowed = "copy";
 			}}
-			title={`${target}\n\n${t("fileLink.hint")}`}
+			title={`${target}\n\n${t("fileLink.hint", { context: platformContext })}`}
 			onClick={(event) => {
 				event.stopPropagation();
 				// Lire sans quitter l'app est le geste courant ; l'éditeur reste à
@@ -181,7 +185,7 @@ export function FileLink({
 					void api.system.reveal(target).catch(() => undefined);
 					return;
 				}
-				if (event.metaKey || !viewer) {
+				if (modKey(event) || !viewer) {
 					void api.system.openEditor(target).catch(() => undefined);
 					return;
 				}

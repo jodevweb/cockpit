@@ -356,7 +356,7 @@
 			"title": "值守",
 			"enabled": "已启用",
 			"disabled": "已禁用",
-			"disabledHint": "禁用后，该入口会从侧边栏中移除：一个什么都做不了的界面不应留在菜单中。可在此处重新启用。而暂停则是一个操作 — 请在界面中进行，或按 <kbd>⇧P</kbd>。",
+			"disabledHint": "禁用后，该入口会从侧边栏中移除：一个什么都做不了的界面不应留在菜单中。可在此处重新启用。而暂停则是一个操作 — 请在界面中进行，或按 <kbd>{{mod}}{{shift}}P</kbd>。",
 			"hours": "值守时间",
 			"hoursHint": "留空 = 始终。跨越午夜的时间段会按原样理解。",
 			"cadence": "频率",
@@ -602,7 +602,9 @@
 		"emptyHint": "放在 .claude/work 中的截图和报告会显示在这里。",
 		"root": "根目录",
 		"openFolder": "在访达中打开文件夹",
+		"openFolder_windows": "在文件资源管理器中打开文件夹",
 		"reveal": "在访达中显示",
+		"reveal_windows": "在文件资源管理器中显示",
 		"close": "关闭（Esc）",
 		"previous": "上一个（←）",
 		"next": "下一个（→）"
@@ -901,6 +903,7 @@
 				"hint": "留空 = Cockpit 的默认镜像。"
 			},
 			"loginNote": "通过订阅登录的账户会将其令牌存储在本机钥匙串中，而容器无法读取。此按钮会在终端中运行 <code>claude setup-token</code> — 然后将显示的令牌粘贴到“设置 → 访问令牌”（“隔离账户”）中。有效期一年；过期后请重新操作。",
+			"loginNote_windows": "通过订阅登录的账户会将其令牌存放在容器无法访问的地方。此按钮会在终端中运行 <code>claude setup-token</code> — 然后将显示的令牌粘贴到“设置 → 访问令牌”（“隔离账户”）中。有效期一年；过期后请重新操作。",
 			"connect": "连接隔离账户"
 		}
 	},
@@ -943,7 +946,7 @@
 			"worktreesGroup": "Worktree",
 			"detachedHead": "分离的 HEAD",
 			"alreadyOpen": "已打开",
-			"openTerminalHere": "在此处打开终端（⇧Enter）",
+			"openTerminalHere": "在此处打开终端（{{shift}}Enter）",
 			"remoteBranchesGroup": "来自其他地方、从未在此检出的分支",
 			"localBranchesGroup": "没有 worktree 的分支",
 			"remoteBranchHint": "位于 {{remote}} — 在此检出，然后开始工作",
@@ -952,7 +955,7 @@
 			"title": "打开工作区 — 现有的 worktree，或尚未创建 worktree 的分支",
 			"empty": "没有已知的 worktree。",
 			"prGroup": "Pull request",
-			"prHint": "以只读方式审查 — ⇧Enter：仅打开其分支",
+			"prHint": "以只读方式审查 — {{shift}}Enter：仅打开其分支",
 			"prNote": "审查",
 			"prOpenBranch": "仅打开其分支的工作区",
 			"newBranchGroup": "此分支尚不在这里",
@@ -976,10 +979,10 @@
 		"toolbar": {
 			"addAgentTitle": "在此工作区中再添加一个智能体",
 			"addAgent": "+ 智能体",
-			"addTerminalTitle": "在此工作区中再添加一个终端（⌘⇧T）",
+			"addTerminalTitle": "在此工作区中再添加一个终端（{{mod}}{{shift}}T）",
 			"addTerminal": "+ 终端",
 			"stop": "停止",
-			"interrupt": "中断正在运行的内容（⌃C）",
+			"interrupt": "中断正在运行的内容（{{ctrl}}C）",
 			"clear": "清屏",
 			"sleep": "暂时搁置 — 进程会停止，工作区在下次启动时恢复",
 			"closeMission": "关闭任务“{{title}}” — 其所有工作区都会停止"

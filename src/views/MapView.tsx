@@ -63,6 +63,7 @@ import {
 	type RegionId,
 	type WorldCard,
 } from "@/lib/world";
+import { basename } from "@/lib/paths";
 
 /**
  * La carte : tout le travail, sur un seul plan.
@@ -292,7 +293,7 @@ function World() {
 	const islands: Array<IslandInput<CardData>> = useMemo(() => {
 		const list: ProjectView[] = projectList.length > 0
 			? projectList
-			: [{ id: "local", name: config?.mainRepo?.split("/").pop() ?? t("map.defaultProject") } as ProjectView];
+			: [{ id: "local", name: (config?.mainRepo ? basename(config.mainRepo) : undefined) ?? t("map.defaultProject") } as ProjectView];
 		const activeId = activeProject?.id ?? list[0]?.id;
 		return list.map((project) => ({
 			id: project.id,

@@ -32,6 +32,7 @@
 			"resumeHint": "Cockpit 워크스페이스에서 대화를 다시 엽니다",
 			"resume": "대화 재개",
 			"resumeTerminalHint": "Terminal.app에서 대화를 다시 엽니다",
+			"resumeTerminalHint_windows": "터미널 창에서 대화를 다시 엽니다",
 			"resumeTerminal": "터미널에서 재개",
 			"editor": "에디터",
 			"terminal": "터미널",
@@ -105,6 +106,7 @@
 		"title": "자동화",
 		"new": "새로 만들기",
 		"whenItRuns": "자동화는 Cockpit이 열려 있는 동안 실행됩니다. 예정된 시간에 Mac이 잠자기 상태라면, 회의 시간이 지나지 않은 한 Cockpit이 열릴 때 만회합니다.",
+		"whenItRuns_windows": "자동화는 Cockpit이 열려 있는 동안 실행됩니다. 예정된 시간에 PC가 절전 상태라면, 회의 시간이 지나지 않은 한 Cockpit이 열릴 때 만회합니다.",
 		"paused": "일시 중지됨",
 		"nextRun": "다음: {{when}}",
 		"noUpcoming": "예정된 회의 없음",
@@ -180,7 +182,7 @@
 		"title": "결정",
 		"nothingWaiting": "기다리는 항목이 없습니다.",
 		"summary_other": "결정 {{count}}건 · 가장 오래된 것은 {{since}}째 대기 중",
-		"keys": "<up>↑</up><down>↓</down> 전환 · <one>1</one>…<nine>9</nine> 선택 · <back>⌘⇧D</back> 돌아오기",
+		"keys": "<up>↑</up><down>↓</down> 전환 · <one>1</one>…<nine>9</nine> 선택 · <back>{{mod}}{{shift}}D</back> 돌아오기",
 		"empty": "기다리는 에이전트가 없습니다. 질문, 권한 요청, 기다리는 답변, 승인할 계획이 해소 효과 순으로 여기에 표시됩니다.",
 		"blocksTasks_other": "작업 {{count}}개를 막고 있음",
 		"agentStopped": "에이전트 중지됨",
@@ -206,7 +208,7 @@
 			"label": "질문과 함께 제어권을 넘겼습니다",
 			"collapse": "메시지 접기",
 			"expand": "전체 메시지 읽기",
-			"placeholder": "내 답변 — ⌘↵로 보내기",
+			"placeholder": "내 답변 — {{mod}}{{enter}}로 보내기",
 			"send": "답변"
 		}
 	},
@@ -460,6 +462,7 @@
 			"nothingToResume": "이 에이전트는 세션을 연 적이 없습니다: 재개할 것이 없습니다.",
 			"openTerminal": "여기서 터미널 열기",
 			"reveal": "Finder에서 보기",
+			"reveal_windows": "파일 탐색기에서 보기",
 			"stop": "중지",
 			"resume": "재개",
 			"archive": "보관",
@@ -484,7 +487,7 @@
 		"empty": {
 			"projectFolder": "my-project",
 			"becomes": "— 이렇게 바뀝니다 —",
-			"shortcut": "<key>⌘N</key>, 폴더, <key>⌘↵</key>",
+			"shortcut": "<key>{{mod}}N</key>, 폴더, <key>{{mod}}{{enter}}</key>",
 			"title": "에이전트 하나, 폴더 하나, 그게 전부입니다.",
 			"body": "작업장도, 미션도, 원하지 않으면 브랜치도 없습니다. 자유 에이전트는 보관할 때까지 폴더별로 여기에 정리됩니다.",
 			"launch": "에이전트 시작",
@@ -895,7 +898,7 @@
 		"live": "실제로 작업합니다. 설정에서 선택한 작업만 수행하며, 공유 브랜치에서는 절대 하지 않습니다.",
 		"suspended": {
 			"message": "쉬는 중. 진행 중인 개입은 끝까지 진행되며, 새 개입은 시작되지 않습니다.",
-			"hint": "클릭 또는 ⌘⇧P로 재개"
+			"hint": "클릭 또는 {{mod}}{{shift}}P로 재개"
 		},
 		"inFlight": {
 			"title": "진행 중",
@@ -1004,6 +1007,7 @@
 		"in": "{{path}}에서",
 		"run": "실행",
 		"openInTerminal": "Cockpit 대신 Terminal.app에서 열기",
+		"openInTerminal_windows": "Cockpit 대신 터미널 창에서 열기",
 		"required": "{{label}}은(는) 필수입니다.",
 		"title": "스크립트",
 		"subtitle": "설정 가능한 사내 명령과 저장소 스크립트를 실시간 출력과 함께 실행합니다.",
@@ -1021,6 +1025,7 @@
 		"stop": "중지",
 		"clearOutput": "출력 지우기",
 		"replayInTerminal": "Terminal.app에서 다시 실행",
+		"replayInTerminal_windows": "터미널 창에서 다시 실행",
 		"launchPrompt": "명령 실행",
 		"launchHint": "출력은 터미널 색상 그대로 여기에 실시간으로 표시됩니다."
 	},
@@ -1193,6 +1198,7 @@
 			"lightHint": "같은 역할, 다른 값",
 			"system": "시스템",
 			"systemHint": "macOS를 따름, 전환 포함",
+			"systemHint_windows": "Windows를 따름, 전환 포함",
 			"help": "이 선택은 이 작업 환경에 적용되며 즉시 반영됩니다 — 프로젝트 설정에만 해당하는 “설정 저장”을 기다리지 않습니다. 열린 터미널도 함께 다시 그려집니다."
 		},
 		"relay": {
@@ -1324,11 +1330,11 @@
 		},
 		"detail": {
 			"editor": "에디터",
-			"terminalHint": "작업 패널에서 이 worktree의 셸 (⌘⇧T)",
+			"terminalHint": "작업 패널에서 이 worktree의 셸 ({{mod}}{{shift}}T)",
 			"terminal": "터미널",
 			"agentHint": "Cockpit을 떠나지 않고 여기서 에이전트 시작",
 			"agent": "에이전트",
-			"devHint": "패널 터미널에서 {{command}} — ⌃C로 중지",
+			"devHint": "패널 터미널에서 {{command}} — {{ctrl}}C로 중지",
 			"dev": "Dev",
 			"changes": "변경 사항",
 			"cleanTree": "깨끗한 트리 — 비교할 것이 없습니다.",

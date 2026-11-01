@@ -11,6 +11,7 @@ import { locale } from "@/i18n";
 import { fuzzy } from "@/lib/fuzzy";
 import { api } from "@/lib/ipc";
 import { useAsync, usePersistentState } from "@/lib/useAsync";
+import { isMac, modKey } from "@/lib/platform";
 
 /**
  * Ouvrir un fichier du worktree, par son nom.
@@ -145,12 +146,13 @@ export function FileFinder({ group }: { group: WorkGroup }) {
 		return () => window.removeEventListener("mousedown", dismiss);
 	}, [open]);
 
-	// ⌘P, comme partout où l'on ouvre un fichier par son nom.
+	// ⌘P, comme partout où l'on ouvre un fichier par son nom (Ctrl+P sous
+	// Windows, sauf dans un terminal où Ctrl+P remonte l'historique).
 	const toggle = useRef(() => {});
 	toggle.current = () => (open ? setOpen(false) : show());
 	useEffect(() => {
 		const onKey = (event: KeyboardEvent) => {
-			if ((event.metaKey || event.ctrlKey) && !event.shiftKey && !event.altKey && event.key.toLowerCase() === "p") {
+			if ((isMac ? event.metaKey || event.ctrlKey : modKey(event)) && !event.shiftKey && !event.altKey && event.key.toLowerCase() === "p") {
 				event.preventDefault();
 				toggle.current();
 			}

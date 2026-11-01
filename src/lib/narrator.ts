@@ -334,7 +334,8 @@ export function humanize(text: string, max = 230): string {
 		.replace(/`([^`]+)`/g, (_, code: string) =>
 			CODE.test(code) || /\s/.test(code) ? DROPPED : readable(code.split("/").pop() ?? code),
 		)
-		.replace(/(?:~|\.{0,2})?\/?(?:[\w.@-]+\/)+([\w.@-]+)/g, (_, file: string) => readable(file))
+		// `C:\…\app.ts` aussi : un agent sous Windows cite ses chemins ainsi.
+		.replace(/(?:\b[A-Za-z]:(?=[\\/]))?(?:~|\.{0,2})?[\\/]?(?:[\w.@-]+[\\/])+([\w.@-]+)/g, (_, file: string) => readable(file))
 		.replace(/\b[\w-]+\.(?:tsx?|jsx?|mjs|json|rs|py|rb|go|php|css|scss|md|ya?ml|toml|sql|sh|lock|env)\b/g, (file) =>
 			readable(file),
 		)

@@ -1081,7 +1081,7 @@ pub fn for_mission(mission: &str) -> Vec<Execution> {
 pub fn for_cwd(cwd: &str) -> Vec<Execution> {
 	let mut found: Vec<Execution> = fold()
 		.into_iter()
-		.filter(|exec| exec.opening.cwd == cwd)
+		.filter(|exec| crate::platform::same_path(&exec.opening.cwd, cwd))
 		.collect();
 	found.sort_by(|a, b| b.started_at.cmp(&a.started_at));
 	found

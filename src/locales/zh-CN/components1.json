@@ -84,7 +84,7 @@
 			"quoted": "“{{text}}”",
 			"currentFallback": "当前指令",
 			"new": "新指令 — 地图上的新一行",
-			"flipTitle": "切换 — 或按 ⌥Enter 以另一种方式发送",
+			"flipTitle": "切换 — 或按 {{alt}}Enter 以另一种方式发送",
 			"toNew": "新指令",
 			"toFollow": "追问"
 		},
@@ -114,7 +114,7 @@
 			"label": "操作",
 			"title": "适用于此智能体的现成提示词",
 			"empty": "没有已保存的提示词。",
-			"footer": "提示词会填入回复框 — ⇧Enter 直接发送。提示词库：<mono>~/.config/cockpit/prompts.toml</mono>"
+			"footer": "提示词会填入回复框 — {{shift}}Enter 直接发送。提示词库：<mono>~/.config/cockpit/prompts.toml</mono>"
 		},
 		"model": {
 			"currentTitle": "当前模型：{{model}}\n切换后智能体会在同一对话线程上重新启动。",
@@ -532,17 +532,21 @@
 		}
 	},
 	"fileLink": {
-		"hint": "点击：在 Cockpit 中阅读\n⌘-点击：在编辑器中打开\n⌥-点击：在访达中显示\n⇧-点击：复制路径"
+		"hint": "点击：在 Cockpit 中阅读\n{{modKey}}-点击：在编辑器中打开\n{{altKey}}-点击：在访达中显示\n{{shiftKey}}-点击：复制路径",
+		"hint_windows": "点击：在 Cockpit 中阅读\n{{modKey}}-点击：在编辑器中打开\n{{altKey}}-点击：在文件资源管理器中显示\n{{shiftKey}}-点击：复制路径"
 	},
 	"fileViewer": {
 		"opaque": {
 			"unplayable": "Cockpit 无法播放此格式。Mac 自带的应用几乎肯定可以。",
+			"unplayable_windows": "Cockpit 无法播放此格式。Windows 的默认应用几乎肯定可以。",
 			"unknown": "Cockpit 不显示此类文件。请用 Mac 的应用打开 {{name}}。",
+			"unknown_windows": "Cockpit 不显示此类文件。请用 Windows 的默认应用打开 {{name}}。",
 			"openDefault": "用默认应用打开",
-			"showInFinder": "在访达中显示"
+			"showInFinder": "在访达中显示",
+			"showInFinder_windows": "在文件资源管理器中显示"
 		},
 		"unsaved": "未保存",
-		"saveTitle": "保存（⌘S）",
+		"saveTitle": "保存（{{mod}}S）",
 		"save": "保存",
 		"discardTitle": "放弃更改",
 		"cancel": "取消",
@@ -550,14 +554,16 @@
 		"edit": "编辑",
 		"copyPath": "复制路径",
 		"reveal": "在访达中显示",
+		"reveal_windows": "在文件资源管理器中显示",
 		"openWithTitle": "用 Mac 的应用打开",
+		"openWithTitle_windows": "用 Windows 的默认应用打开",
 		"openWith": "打开方式…",
 		"externalEditorTitle": "在外部编辑器中编辑",
 		"externalEditor": "编辑器",
 		"close": "关闭（Esc）",
-		"searchPlaceholder": "在文件中搜索…（⌘F）",
+		"searchPlaceholder": "在文件中搜索…（{{mod}}F）",
 		"noMatch": "无",
-		"previousMatch": "上一个匹配（⇧⏎）",
+		"previousMatch": "上一个匹配（{{shift}}{{enter}}）",
 		"nextMatch": "下一个匹配（⏎）",
 		"truncated": "文件在 {{size}} 处被截断 — 请在编辑器中打开查看其余部分。"
 	},
@@ -727,7 +733,7 @@
 		"title": "启动智能体",
 		"subtitle": "一个文件夹，一个智能体。无需项目，无需任务。",
 		"close": "关闭",
-		"allSet": "所有内容都已填好。选择一个文件夹，然后按 <key>⌘↵</key>：智能体即会启动。",
+		"allSet": "所有内容都已填好。选择一个文件夹，然后按 <key>{{mod}}{{enter}}</key>：智能体即会启动。",
 		"folder": {
 			"noteLibre": "自由智能体",
 			"noteRecent": "最近的智能体",
@@ -736,6 +742,7 @@
 			"path": "文件夹路径",
 			"placeholder": "~/Sites/my-project",
 			"browse": "在访达中选择…",
+			"browse_windows": "在文件资源管理器中选择…",
 			"missing": "此文件夹不存在。",
 			"gitRepo": "Git 仓库 · {{branch}} · {{state}}",
 			"detached": "分离的 HEAD",
@@ -779,7 +786,7 @@
 			"title": "准备就绪",
 			"prompt": "第一条指令 <muted>— 可选</muted>",
 			"placeholder": "留空：智能体会等待你的第一句话，就像直接运行“claude”一样。",
-			"remember": "为 <code>{{folder}}</code> 记住这些选择 — 下次只需 ⌘N 然后 ⌘↵",
+			"remember": "为 <code>{{folder}}</code> 记住这些选择 — 下次只需 {{mod}}N 然后 {{mod}}{{enter}}",
 			"button": "启动"
 		},
 		"command": "你原本需要输入的命令",
@@ -832,13 +839,14 @@
 		"count_other": "涉及 {{count}} 个文件",
 		"reveal": {
 			"title": "在访达中打开 worktree",
+			"title_windows": "在文件资源管理器中打开 worktree",
 			"label": "文件夹"
 		}
 	},
 	"quickMenu": {
 		"search": "搜索…",
 		"noMatch": "没有该名称的项。",
-		"extraHint": "{{title}}（⇧Enter）"
+		"extraHint": "{{title}}（{{shift}}Enter）"
 	},
 	"reliabilityPanel": {
 		"title": "闭环状态",
@@ -920,6 +928,7 @@
 		},
 		"setup": {
 			"title": "在这台 Mac 上只需做一次",
+			"title_windows": "在这台电脑上只需做一次",
 			"detail": "该脚本会设置本地 ntfy 服务器，将其发布到 tailnet（与此页面并列），并打印出需要粘贴到下方的主题和令牌。Apple 的中继只能看到主题的哈希值；内容来自这里。"
 		},
 		"ntfy": {

@@ -19,7 +19,9 @@ use serde::Serialize;
 use std::collections::HashMap;
 use std::io::{Read, Write};
 use std::sync::atomic::{AtomicU64, Ordering};
-use std::sync::{Arc, Mutex, OnceLock};
+use std::sync::{Arc, Mutex};
+#[cfg(not(windows))]
+use std::sync::OnceLock;
 use tauri::{AppHandle, Emitter};
 
 static TERMINAL_SEQUENCE: AtomicU64 = AtomicU64::new(1);
@@ -99,6 +101,14 @@ impl TerminalRegistry {
 /// la base des utilisateurs, comme le fait Terminal.app. Réponse mise en cache,
 /// parce que `dscl` coûte quelques dizaines de millisecondes et que la commande
 /// d'ouverture, elle, s'exécute sur le fil principal.
+#[cfg(windows)]
+fn login_shell() -> String {
+	// Sous Windows, le bash de Git for Windows : celui qui joue déjà toutes les
+	// lignes de commande du cockpit (voir `platform::shell_program`).
+	crate::platform::shell_program().to_string_lossy().to_string()
+}
+
+#[cfg(not(windows))]
 fn login_shell() -> String {
 	static RESOLVED: OnceLock<String> = OnceLock::new();
 	RESOLVED
@@ -111,9 +121,10 @@ fn login_shell() -> String {
 
 			let user = std::env::var("USER").unwrap_or_default();
 			if !user.is_empty() {
-				if let Ok(output) = std::process::Command::new("dscl")
-					.args([".", "-read", &format!("/Users/{user}"), "UserShell"])
-					.output()
+				if let Ok(output) = crate::platform::quiet_std(
+					std::process::Command::new("dscl").args([".", "-read", &format!("/Users/{user}"), "UserShell"]),
+				)
+				.output()
 				{
 					let text = String::from_utf8_lossy(&output.stdout);
 					if let Some(shell) = text.split_whitespace().nth(1) {
@@ -171,6 +182,15 @@ pub fn open(
 	// mise, nvm), sans quoi `pnpm` reste introuvable pour une app lancée depuis
 	// le Finder.
 	builder.arg("-l");
+	// Sous Windows, le bash de Git derrière ConPTY ne se reconnaît pas toujours
+	// interactif : on le lui dit, comme le font les terminaux des éditeurs. Et
+	// `CHERE_INVOKING` retient le profil MSYS de ramener le shell dans `$HOME` —
+	// il doit s'ouvrir dans le dossier demandé.
+	#[cfg(windows)]
+	{
+		builder.arg("-i");
+		builder.env("CHERE_INVOKING", "1");
+	}
 	builder.cwd(&cwd);
 	builder.env("TERM", "xterm-256color");
 	builder.env("COLORTERM", "truecolor");
@@ -327,13 +347,9 @@ fn reap(running: &mut Running) {
 		// se créant sa propre session n'est plus dans le groupe du shell, et le
 		// `kill -pid` ne le touche pas. C'est précisément celui qui survivait.
 		let descendants = descendants_of(pid);
-		let _ = std::process::Command::new("kill")
-			.args(["-TERM", &format!("-{pid}")])
-			.status();
+		crate::platform::terminate_group(pid as i32);
 		for enfant in descendants {
-			let _ = std::process::Command::new("kill")
-				.args(["-TERM", &enfant.to_string()])
-				.status();
+			crate::platform::terminate_pid(enfant);
 		}
 	}
 	let _ = running.killer.kill();
@@ -346,14 +362,24 @@ fn reap(running: &mut Running) {
 /// gigaoctets. On descend donc jusqu'au bout, avec une borne : un cycle est
 /// impossible sur des pid, mais une arborescence pathologique ne doit pas faire
 /// tourner cette boucle indéfiniment.
+///
+/// Sous Windows, pas de `pgrep` : un seul instantané des processus suffit
+/// (`platform::descendants`).
+#[cfg(windows)]
+fn descendants_of(pid: u32) -> Vec<u32> {
+	crate::platform::descendants(pid)
+}
+
+#[cfg(not(windows))]
 fn descendants_of(pid: u32) -> Vec<u32> {
 	let mut trouves = Vec::new();
 	let mut a_visiter = vec![pid];
 	for _ in 0..64 {
 		let Some(courant) = a_visiter.pop() else { break };
-		let Ok(sortie) = std::process::Command::new("pgrep")
-			.args(["-P", &courant.to_string()])
-			.output()
+		let Ok(sortie) = crate::platform::quiet_std(
+			std::process::Command::new("pgrep").args(["-P", &courant.to_string()]),
+		)
+		.output()
 		else {
 			continue;
 		};

@@ -330,22 +330,60 @@ fn now() -> String {
 
 // ──────────────────────────────── Tailscale ────────────────────────────────
 
-fn tailscale_bin() -> Option<&'static str> {
-	const CANDIDATES: [&str; 3] = [
-		"/Applications/Tailscale.app/Contents/MacOS/Tailscale",
-		"/usr/local/bin/tailscale",
-		"/opt/homebrew/bin/tailscale",
-	];
-	CANDIDATES
-		.into_iter()
-		.find(|path| std::path::Path::new(path).exists())
+fn tailscale_bin() -> Option<std::path::PathBuf> {
+	#[cfg(windows)]
+	{
+		// L'installeur de Tailscale pose son CLI à côté du service.
+		let mut candidates: Vec<std::path::PathBuf> = ["ProgramFiles", "ProgramW6432", "ProgramFiles(x86)"]
+			.iter()
+			.filter_map(|name| std::env::var(name).ok())
+			.map(|base| std::path::Path::new(&base).join("Tailscale").join("tailscale.exe"))
+			.collect();
+		let mut command = std::process::Command::new("where");
+		command.arg("tailscale.exe");
+		if let Ok(output) = crate::platform::quiet_std(&mut command).output() {
+			candidates.extend(
+				String::from_utf8_lossy(&output.stdout)
+					.lines()
+					.map(|line| std::path::PathBuf::from(line.trim())),
+			);
+		}
+		candidates.into_iter().find(|path| path.is_file())
+	}
+	#[cfg(not(windows))]
+	{
+		const CANDIDATES: [&str; 3] = [
+			"/Applications/Tailscale.app/Contents/MacOS/Tailscale",
+			"/usr/local/bin/tailscale",
+			"/opt/homebrew/bin/tailscale",
+		];
+		CANDIDATES
+			.into_iter()
+			.find(|path| std::path::Path::new(path).exists())
+			.map(std::path::PathBuf::from)
+	}
 }
 
 async fn tailscale(arguments: &str) -> Option<String> {
 	let binary = tailscale_bin()?;
-	crate::runner::capture("/", &format!("{binary} {arguments}"))
-		.await
-		.ok()
+	#[cfg(windows)]
+	{
+		// Lancé directement, sans shell : `C:\Program Files\…` a une espace, et
+		// les arguments sont des constantes de ce module.
+		let mut command = tokio::process::Command::new(&binary);
+		command.args(arguments.split_whitespace());
+		let output = crate::platform::quiet_async(&mut command).output().await.ok()?;
+		output
+			.status
+			.success()
+			.then(|| String::from_utf8_lossy(&output.stdout).to_string())
+	}
+	#[cfg(not(windows))]
+	{
+		crate::runner::capture("/", &format!("{} {arguments}", binary.display()))
+			.await
+			.ok()
+	}
 }
 
 /// Nom DNS de la machine dans le tailnet : c'est l'origine de la PWA, donc le

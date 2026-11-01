@@ -501,7 +501,7 @@
 		"quoted": "„{{text}}“",
 		"close": "Schließen",
 		"placeholder": "Öffne den Warenkorb-Workspace, starte eine Mission aus NW-3050…",
-		"hint": "{{shortcut}} gedrückt halten zum Sprechen · ⌘J zum Tippen",
+		"hint": "{{shortcut}} gedrückt halten zum Sprechen · {{mod}}J zum Tippen",
 		"errors": {
 			"worktreeNotFound": "Ich finde den Worktree „{{name}}“ nicht.",
 			"agentNotFound": "Ich finde den Agenten „{{name}}“ nicht.",
@@ -554,12 +554,13 @@
 			"hold": "Halten, sprechen, loslassen: Der Assistent versteht, handelt und antwortet laut — auch wenn Cockpit hinter einem anderen Fenster liegt.",
 			"keyboard": "Dasselbe über die Tastatur, mit Cockpit im Vordergrund.",
 			"cost": "Was du sagst, wird von ElevenLabs transkribiert (der Stimmschlüssel oben) und dann von Claude verstanden, über dein Abo: ein paar Sekunden deines ElevenLabs-Plans und ein wenig deines Claude-Kontingents pro Anfrage. Aktionen werden direkt ausgeführt; was er nicht findet, rät er nicht.",
-			"noKey": "Ohne ElevenLabs-Schlüssel kann dich der Assistent nicht hören — ⌘J funktioniert trotzdem. Hinterlege ihn im Abschnitt Stimme.",
+			"noKey": "Ohne ElevenLabs-Schlüssel kann dich der Assistent nicht hören — {{mod}}J funktioniert trotzdem. Hinterlege ihn im Abschnitt Stimme.",
 			"speak": "Sprich… (4 s)",
 			"testMic": "Mikrofon testen",
 			"appOnly": "Nur in der App.",
 			"heard": "Gehört:",
-			"micDenied": "Wenn das Mikrofon verweigert wird: Systemeinstellungen → Datenschutz & Sicherheit → Mikrofon → Cockpit."
+			"micDenied": "Wenn das Mikrofon verweigert wird: Systemeinstellungen → Datenschutz & Sicherheit → Mikrofon → Cockpit.",
+			"micDenied_windows": "Wenn das Mikrofon verweigert wird: Windows-Einstellungen → Datenschutz und Sicherheit → Mikrofon → Desktop-Apps Zugriff auf das Mikrofon erlauben."
 		},
 		"shortcut": {
 			"active": "{{shortcut}} ist aktiv, in jeder Anwendung.",
@@ -750,7 +751,7 @@
 		"uncommitted": "Geändert, noch nicht committet",
 		"files_one": "{{count}} Datei",
 		"files_other": "{{count}} Dateien",
-		"buttonHint": "Eine Datei dieses Worktree nach Namen öffnen (⌘P)",
+		"buttonHint": "Eine Datei dieses Worktree nach Namen öffnen ({{mod}}P)",
 		"button": "Dateien",
 		"placeholder": "Ein Dateiname — „agentmap“, „panel work“, „apps/web env“",
 		"scanning": "Durchsuche das Repository…",
@@ -759,7 +760,7 @@
 		"total_one": "{{formatted}} Datei",
 		"total_other": "{{formatted}} Dateien",
 		"scanningShort": "durchsuche das Repository…",
-		"keys": "↑↓ zum Wählen · Enter zum Öffnen · ⌘P",
+		"keys": "↑↓ zum Wählen · Enter zum Öffnen · {{mod}}P",
 		"whyAgent": "von einem Agenten geschrieben",
 		"whyChanged": "geändert"
 	},
@@ -908,16 +909,19 @@
 		"listening": "Hört zu",
 		"listen": "Zuhören",
 		"elevenLabsFailed": "ElevenLabs ist ausgefallen, die Mac-Stimme hat übernommen: {{reason}}",
+		"elevenLabsFailed_windows": "ElevenLabs ist ausgefallen, die Systemstimme hat übernommen: {{reason}}",
 		"voiceAndRate": "Stimme und Tempo"
 	},
 	"voiceSettings": {
 		"engine": "Engine",
 		"macVoice": "Mac-Stimme",
+		"macVoice_windows": "Systemstimme",
 		"elevenLabsHint": "Die menschlichste Stimme, angerechnet auf die Zeichen deines ElevenLabs-Plans. Kein Claude- oder ChatGPT-Abo stellt einer anderen Anwendung eine Stimme bereit.",
 		"systemHint": "Kostenlos und offline. Viel besser mit einer Premium-Stimme.",
 		"elevenLabsKey": "ElevenLabs-Schlüssel",
 		"createKey": "Schlüssel erstellen",
 		"keyStored": "Im Mac-Schlüsselbund gespeichert",
+		"keyStored_windows": "Auf diesem Rechner gespeichert",
 		"removeKey": "Entfernen",
 		"storeKey": "Speichern",
 		"voice": "Stimme",
@@ -926,8 +930,10 @@
 		"model": "Modell",
 		"browserVoice": "Browser-Stimme, in der Vorschau.",
 		"noPremiumVoice": "Keine Premium-Stimme installiert. Lade eine herunter: Systemeinstellungen → Bedienungshilfen → Gesprochene Inhalte → Systemstimme → Stimmen verwalten.",
+		"noPremiumVoice_windows": "Keine natürliche Stimme installiert. Füge eine hinzu: Windows-Einstellungen → Zeit und Sprache → Spracherkennung → Stimmen verwalten.",
 		"rate": "Tempo",
 		"fallback": "Die Mac-Stimme hat übernommen: {{reason}}",
+		"fallback_windows": "Die Systemstimme hat übernommen: {{reason}}",
 		"sample": "Er hat die Rundung im Warenkorb korrigiert und die Tests neu ausgeführt. Er ist fertig: Er hat drei Dateien geändert, und die Tests bestehen.",
 		"tryVoice": "Diese Stimme ausprobieren",
 		"allSettings": "Alle Einstellungen zu Stimme und Assistent"
@@ -948,8 +954,10 @@
 		"cancel": "Abbrechen",
 		"save": "Speichern",
 		"openInTerminal": "Stattdessen in Terminal.app öffnen",
+		"openInTerminal_windows": "Stattdessen in einem Terminalfenster öffnen",
 		"new": "Neuer Prompt",
-		"footer": "Ein Klick startet den Agenten hier, mit der Unterhaltung und dem Antwortfeld in Cockpit. Das Terminal-Symbol öffnet ihn stattdessen in Terminal.app, für alles, was ein echtes TTY braucht. Die Bibliothek liegt in <path>{{path}}</path>."
+		"footer": "Ein Klick startet den Agenten hier, mit der Unterhaltung und dem Antwortfeld in Cockpit. Das Terminal-Symbol öffnet ihn stattdessen in Terminal.app, für alles, was ein echtes TTY braucht. Die Bibliothek liegt in <path>{{path}}</path>.",
+		"footer_windows": "Ein Klick startet den Agenten hier, mit der Unterhaltung und dem Antwortfeld in Cockpit. Das Terminal-Symbol öffnet ihn stattdessen in einem Terminalfenster, für alles, was ein echtes TTY braucht. Die Bibliothek liegt in <path>{{path}}</path>."
 	},
 	"panelReport": {
 		"verdict": {
@@ -1031,6 +1039,7 @@
 		"agents": "Agenten",
 		"terminals": "Terminals",
 		"footnote": "Speicherzahlen werden addiert, ohne zu berücksichtigen, was Prozesse teilen: Die Summe ist also eine Obergrenze, keine exakte Rechnung. Die Oberfläche selbst läuft in einem WebKit-Prozess, den macOS ohne Privilegien niemandem zuordnet — rechne mit etwa sechzig Megabyte mehr.",
+		"footnote_windows": "Speicherzahlen werden addiert, ohne zu berücksichtigen, was Prozesse teilen: Die Summe ist also eine Obergrenze, keine exakte Rechnung. Die Oberfläche selbst läuft in WebView2-Prozessen (msedgewebview2), die hier nicht mitgezählt werden — rechne mit etwas mehr.",
 		"spendNoQuota": "Heute verbrauchte Tokens. Die CLI meldet das Kontingent nicht.",
 		"spendLeft": "{{left}} % übrig bei „{{window}}“",
 		"spendLeftResets": "{{left}} % übrig bei „{{window}}“, setzt sich {{resets}} zurück",
@@ -1043,6 +1052,6 @@
 		"scripts": "Skripte",
 		"scriptsHint": "Repository-Skripte und eigene Befehle",
 		"noScripts": "Keine Skripte in diesem Ordner.",
-		"footer": "Der Befehl wird in dieser Shell getippt und dann ausgeführt — ⇧Enter macht das Gegenteil des gewählten Eintrags."
+		"footer": "Der Befehl wird in dieser Shell getippt und dann ausgeführt — {{shift}}Enter macht das Gegenteil des gewählten Eintrags."
 	}
 }

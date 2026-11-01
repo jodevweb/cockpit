@@ -1,5 +1,6 @@
 import { FitAddon } from "@xterm/addon-fit";
 import { Terminal } from "@xterm/xterm";
+import { isMac } from "@/lib/platform";
 import "@xterm/xterm/css/xterm.css";
 import {
 	createContext,
@@ -288,7 +289,8 @@ export function TerminalsProvider({ children }: { children: ReactNode }) {
 
 			const term = new Terminal({
 				theme: terminalTheme(),
-				fontFamily: 'ui-monospace, "SF Mono", "JetBrains Mono", "Menlo", monospace',
+				// Cascadia et Consolas : les chasses fixes de Windows, après celles du Mac.
+				fontFamily: 'ui-monospace, "SF Mono", "JetBrains Mono", "Menlo", "Cascadia Mono", "Consolas", monospace',
 				fontSize: 12,
 				lineHeight: 1.25,
 				cursorBlink: true,
@@ -299,6 +301,7 @@ export function TerminalsProvider({ children }: { children: ReactNode }) {
 			const fit = new FitAddon();
 			term.loadAddon(fit);
 			term.open(host);
+			if (!isMac) windowsClipboard(term);
 			try {
 				fit.fit();
 			} catch {
@@ -448,4 +451,35 @@ export function useTerminals(): TerminalsStore {
 		throw new Error("useTerminals must be used inside TerminalsProvider");
 	}
 	return useMemo(() => ({ ...actions, tabs }), [actions, tabs]);
+}
+
+/**
+ * Copier-coller dans un terminal, sous Windows.
+ *
+ * Sur Mac, ⌘C et ⌘V n'arrivent jamais au shell : le navigateur copie et colle,
+ * ⌃C interrompt. Sous Windows, Ctrl sert aux deux. On fait comme Windows
+ * Terminal : Ctrl+C copie s'il y a une sélection, interrompt sinon ; Ctrl+V et
+ * Ctrl+Maj+V collent ; Ctrl+Maj+C copie. Ces frappes-là ne remontent pas à
+ * l'app — Ctrl+Maj+C y mène à la carte, et on veut copier.
+ */
+function windowsClipboard(term: Terminal) {
+	term.attachCustomKeyEventHandler((event) => {
+		if (event.type !== "keydown" || !event.ctrlKey || event.altKey || event.metaKey) return true;
+		const key = event.key.toLowerCase();
+		if (key === "c" && (event.shiftKey || term.hasSelection())) {
+			const text = term.getSelection();
+			if (text) void navigator.clipboard.writeText(text).catch(() => undefined);
+			if (!event.shiftKey) term.clearSelection();
+			event.preventDefault();
+			event.stopPropagation();
+			return false;
+		}
+		if (key === "v") {
+			// Le collage natif arrive par l'événement `paste` du champ de xterm,
+			// qui le relaie au shell : on laisse faire le navigateur, sans envoyer ^V.
+			event.stopPropagation();
+			return false;
+		}
+		return true;
+	});
 }

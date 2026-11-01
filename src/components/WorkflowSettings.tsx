@@ -7,6 +7,7 @@ import { api } from "@/lib/ipc";
 import type { Engine, Role, TeamMember } from "@/lib/types";
 import { useCockpit } from "@/app/store";
 import { useTerminals } from "@/app/terminals";
+import { isMac, platformContext } from "@/lib/platform";
 
 /**
  * Ce qui décrit la façon de travailler d'une équipe, et ce qui la sert.
@@ -377,7 +378,11 @@ export function WorkflowSettings() {
 						<TextInput
 							value={draft.browserCommand}
 							onChange={(browserCommand) => setDraft({ ...draft, browserCommand })}
-							placeholder="/Applications/Google Chrome.app/Contents/MacOS/Google Chrome"
+							placeholder={
+								isMac
+									? "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome"
+									: "C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe"
+							}
 							mono
 						/>
 					</Field>
@@ -1567,6 +1572,7 @@ export function SandboxSettings() {
 						<Trans
 							t={t}
 							i18nKey="workflowSettings.sandbox.loginNote"
+							context={platformContext}
 							components={{ code: <code className="rounded bg-base px-1 py-0.5 text-[10.5px]" /> }}
 						/>
 					</p>

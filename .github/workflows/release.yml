@@ -1,0 +1,339 @@
+# Publie une version de Cockpit, pour macOS et Windows.
+#
+# Déclenché par le tag `vX.Y.Z` que pose `scripts/release.sh`. Trois temps :
+#
+#   1. préparer — vérifie que le tag et les manifestes disent la même version,
+#      lit les notes dans le message du tag, ouvre une release en brouillon sur
+#      le dépôt des binaires (`jodevweb/cockpit-releases`) ;
+#   2. compiler — une machine par plateforme, chacune dépose son archive et sa
+#      signature de mise à jour dans ce brouillon ;
+#   3. publier — assemble un seul `latest.json` qui couvre toutes les
+#      plateformes, puis sort la release du brouillon.
+#
+# Le `latest.json` n'est pas laissé à chaque compilation : deux machines qui le
+# réécrivent en même temps, et l'une efface l'autre. Tant que la release est un
+# brouillon, `releases/latest/download/latest.json` — l'adresse que lisent les
+# cockpits installés — continue de servir la version précédente : une
+# publication à moitié faite n'est jamais proposée.
+#
+# Secrets attendus (voir docs/RELEASING.md) :
+#   TAURI_SIGNING_PRIVATE_KEY, TAURI_SIGNING_PRIVATE_KEY_PASSWORD — obligatoires
+#   RELEASES_TOKEN — jeton avec droit d'écriture sur jodevweb/cockpit-releases
+#   APPLE_CERTIFICATE, APPLE_CERTIFICATE_PASSWORD, APPLE_SIGNING_IDENTITY —
+#     facultatifs : l'identité « Cockpit Signing » exportée en .p12
+
+name: Release
+
+on:
+  push:
+    tags: ["v*.*.*"]
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: "Tag à (re)publier, par exemple v0.85.0"
+        required: true
+
+permissions:
+  contents: read
+
+concurrency:
+  group: release-${{ github.event.inputs.tag || github.ref_name }}
+  cancel-in-progress: false
+
+env:
+  DEPOT_BINAIRES: jodevweb/cockpit-releases
+  TAG: ${{ github.event.inputs.tag || github.ref_name }}
+
+jobs:
+  preparer:
+    runs-on: ubuntu-latest
+    outputs:
+      release_id: ${{ steps.brouillon.outputs.release_id }}
+      version: ${{ steps.version.outputs.version }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: refs/tags/${{ env.TAG }}
+
+      - name: Version
+        id: version
+        run: |
+          set -euo pipefail
+          if [[ ! "$TAG" =~ ^v[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+            echo "::error::Tag attendu sous la forme vX.Y.Z (reçu : $TAG)"
+            exit 1
+          fi
+          VERSION="${TAG#v}"
+          # Les trois manifestes doivent dire la même chose que le tag : sinon
+          # l'archive annoncerait une version et en contiendrait une autre, et
+          # l'updater la reproposerait sans fin.
+          for fichier in src-tauri/tauri.conf.json package.json; do
+            lue="$(python3 -c 'import json,sys; print(json.load(open(sys.argv[1]))["version"])' "$fichier")"
+            [[ "$lue" == "$VERSION" ]] || { echo "::error::$fichier est en $lue, le tag en $VERSION"; exit 1; }
+          done
+          lue="$(sed -n 's/^version = "\(.*\)"/\1/p' src-tauri/Cargo.toml | head -1)"
+          [[ "$lue" == "$VERSION" ]] || { echo "::error::Cargo.toml est en $lue, le tag en $VERSION"; exit 1; }
+          echo "version=$VERSION" >> "$GITHUB_OUTPUT"
+
+      - name: Notes de version
+        run: |
+          set -euo pipefail
+          # `actions/checkout` pose le tag comme une simple référence : on
+          # va chercher l'objet annoté pour lire son message.
+          git fetch --force --no-tags origin "refs/tags/$TAG:refs/tags/$TAG"
+          git tag -l --format='%(contents)' "$TAG" \
+            | sed '/-----BEGIN PGP SIGNATURE-----/,$d' > "$RUNNER_TEMP/notes.md"
+          if [[ ! -s "$RUNNER_TEMP/notes.md" ]] || ! grep -q '[^[:space:]]' "$RUNNER_TEMP/notes.md"; then
+            echo "Version ${TAG#v}" > "$RUNNER_TEMP/notes.md"
+          fi
+          cat "$RUNNER_TEMP/notes.md"
+
+      - name: Release en brouillon
+        id: brouillon
+        env:
+          GH_TOKEN: ${{ secrets.RELEASES_TOKEN }}
+        run: |
+          set -euo pipefail
+          [[ -n "$GH_TOKEN" ]] || { echo "::error::Secret RELEASES_TOKEN absent"; exit 1; }
+          VERSION="${TAG#v}"
+          # Un brouillon n'a pas encore de tag sur le dépôt des binaires : on
+          # le retrouve dans la liste, pas par `releases/tags/…`. Une relance
+          # reprend le brouillon existant ; une release déjà publiée, on n'y
+          # touche pas.
+          existante="$(gh api "repos/$DEPOT_BINAIRES/releases?per_page=100" \
+            --jq "[.[] | select(.tag_name == \"$TAG\")][0] // empty | \"\(.id) \(.draft)\"")"
+          if [[ -n "$existante" ]]; then
+            read -r id brouillon <<<"$existante"
+            if [[ "$brouillon" != "true" ]]; then
+              echo "::error::La release $TAG est déjà publiée sur $DEPOT_BINAIRES"
+              exit 1
+            fi
+            gh api -X PATCH "repos/$DEPOT_BINAIRES/releases/$id" \
+              -f name="Cockpit $VERSION" -F body=@"$RUNNER_TEMP/notes.md" >/dev/null
+          else
+            id="$(gh api -X POST "repos/$DEPOT_BINAIRES/releases" \
+              -f tag_name="$TAG" -f name="Cockpit $VERSION" \
+              -F body=@"$RUNNER_TEMP/notes.md" -F draft=true --jq .id)"
+          fi
+          echo "release_id=$id" >> "$GITHUB_OUTPUT"
+          echo "Brouillon $id sur $DEPOT_BINAIRES"
+
+  compiler:
+    needs: preparer
+    name: ${{ matrix.plateforme }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - plateforme: darwin-aarch64
+            os: macos-latest
+            cible: aarch64-apple-darwin
+            bundles: app
+            facultative: false
+          # Les Mac Intel, compilés en croisé sur le même runner Apple Silicon.
+          # Facultatif : un échec ici n'empêche pas la publication, la
+          # plateforme manque simplement au `latest.json`.
+          - plateforme: darwin-x86_64
+            os: macos-latest
+            cible: x86_64-apple-darwin
+            bundles: app
+            facultative: true
+          - plateforme: windows-x86_64
+            os: windows-latest
+            cible: x86_64-pc-windows-msvc
+            bundles: nsis
+            facultative: false
+    runs-on: ${{ matrix.os }}
+    continue-on-error: ${{ matrix.facultative }}
+    defaults:
+      run:
+        shell: bash
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: refs/tags/${{ env.TAG }}
+
+      - uses: pnpm/action-setup@ea17c68df8912ef543352723c149a84f56e3d413 # v6.1.0
+        with:
+          version: 10
+
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version: 22
+          cache: pnpm
+
+      - uses: dtolnay/rust-toolchain@b725eda525362e7cf34af9a7243cac1e3f01a7ec # stable
+        with:
+          toolchain: stable
+          targets: ${{ matrix.cible }}
+
+      - uses: Swatinem/rust-cache@d1527c8f67ef9af357290475d4af4b0fab8f12e0 # v2.9.3
+        with:
+          workspaces: src-tauri -> target
+          key: ${{ matrix.cible }}
+
+      - name: Dépendances
+        run: pnpm install --frozen-lockfile
+
+      # Voir scripts/signing-identity.sh : macOS rattache les autorisations
+      # accordées à l'identité qui signe. Sans elle, chaque version installée
+      # redemande photos, dossiers protégés, etc. Le certificat est auto-signé :
+      # il faut le déclarer de confiance pour que `codesign` le voie comme une
+      # identité. Absent ou inutilisable, on compile quand même, sans signature.
+      - name: Identité de signature macOS
+        if: runner.os == 'macOS'
+        env:
+          APPLE_CERTIFICATE: ${{ secrets.APPLE_CERTIFICATE }}
+          APPLE_CERTIFICATE_PASSWORD: ${{ secrets.APPLE_CERTIFICATE_PASSWORD }}
+          IDENTITE: ${{ secrets.APPLE_SIGNING_IDENTITY }}
+        run: |
+          set -euo pipefail
+          if [[ -z "${APPLE_CERTIFICATE:-}" ]]; then
+            echo "::warning::Secret APPLE_CERTIFICATE absent : l'app ne sera pas signée, les postes mis à jour redemanderont leurs autorisations système."
+            exit 0
+          fi
+          IDENTITE="${IDENTITE:-Cockpit Signing}"
+          TROUSSEAU="$RUNNER_TEMP/cockpit-signing.keychain-db"
+          MDP="$(openssl rand -hex 16)"
+          echo "$APPLE_CERTIFICATE" | base64 --decode > "$RUNNER_TEMP/identite.p12"
+          security create-keychain -p "$MDP" "$TROUSSEAU"
+          security set-keychain-settings -lut 21600 "$TROUSSEAU"
+          security unlock-keychain -p "$MDP" "$TROUSSEAU"
+          security import "$RUNNER_TEMP/identite.p12" -k "$TROUSSEAU" \
+            -P "$APPLE_CERTIFICATE_PASSWORD" -T /usr/bin/codesign
+          rm -f "$RUNNER_TEMP/identite.p12"
+          security set-key-partition-list -S apple-tool:,apple:,codesign: -s -k "$MDP" "$TROUSSEAU" >/dev/null
+          security list-keychains -d user -s "$TROUSSEAU" $(security list-keychains -d user | tr -d '"')
+          security find-certificate -c "$IDENTITE" -p "$TROUSSEAU" > "$RUNNER_TEMP/identite.pem"
+          sudo security add-trusted-cert -d -r trustRoot -p codeSign \
+            -k /Library/Keychains/System.keychain "$RUNNER_TEMP/identite.pem" \
+            || echo "::warning::Confiance refusée pour « $IDENTITE »."
+          if security find-identity -v -p codesigning "$TROUSSEAU" | grep -qF "$IDENTITE"; then
+            echo "APPLE_SIGNING_IDENTITY=$IDENTITE" >> "$GITHUB_ENV"
+            echo "Signature : $IDENTITE"
+          else
+            echo "::warning::« $IDENTITE » n'est pas une identité de signature utilisable : compilation sans signature."
+            security find-identity -p codesigning "$TROUSSEAU" || true
+          fi
+
+      # Voir scripts/release.sh : rustc écrit le chemin de chaque source dans
+      # le binaire, et ce chemin contient le dossier personnel de la machine.
+      - name: Chemins anonymisés
+        run: |
+          if [[ "$RUNNER_OS" == "Windows" ]]; then racine="$USERPROFILE"; else racine="$HOME"; fi
+          echo "RUSTFLAGS=--remap-path-prefix=$racine=~" >> "$GITHUB_ENV"
+
+      - name: Compilation et dépôt dans le brouillon
+        uses: tauri-apps/tauri-action@1deb371b0cd8bd54025b384f1cd735e725c4060f # action-v1.0.0
+        env:
+          GITHUB_TOKEN: ${{ secrets.RELEASES_TOKEN }}
+          TAURI_SIGNING_PRIVATE_KEY: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY }}
+          TAURI_SIGNING_PRIVATE_KEY_PASSWORD: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY_PASSWORD }}
+        with:
+          owner: jodevweb
+          repo: cockpit-releases
+          releaseId: ${{ needs.preparer.outputs.release_id }}
+          uploadUpdaterJson: false
+          # Les artefacts de mise à jour ne sont demandés qu'ici (voir
+          # scripts/release.sh). Par `--config` et non par la variable
+          # TAURI_CONFIG : tauri-action lit cet argument pour savoir qu'il doit
+          # déposer les `.sig`, et ignore la variable.
+          args: --target ${{ matrix.cible }} --bundles ${{ matrix.bundles }} --config '{"bundle":{"createUpdaterArtifacts":true}}'
+          retryAttempts: 1
+
+  publier:
+    needs: [preparer, compiler]
+    runs-on: ubuntu-latest
+    steps:
+      - name: latest.json multi-plateforme
+        env:
+          GH_TOKEN: ${{ secrets.RELEASES_TOKEN }}
+          RELEASE_ID: ${{ needs.preparer.outputs.release_id }}
+          VERSION: ${{ needs.preparer.outputs.version }}
+        run: |
+          set -euo pipefail
+          cd "$RUNNER_TEMP"
+          gh api "repos/$DEPOT_BINAIRES/releases/$RELEASE_ID" > release.json
+          gh api "repos/$DEPOT_BINAIRES/releases/$RELEASE_ID/assets?per_page=100" > assets.json
+
+          # Les signatures sont des assets du brouillon : on les lit par l'API,
+          # un brouillon n'ayant pas encore d'adresse de téléchargement publique.
+          python3 - <<'PY'
+          import json, os, re, subprocess, datetime, pathlib, sys
+
+          depot = os.environ["DEPOT_BINAIRES"]
+          tag = os.environ["TAG"]
+          version = os.environ["VERSION"]
+          assets = json.load(open("assets.json"))
+          noms = {a["name"]: a for a in assets}
+
+          def signature(nom):
+              asset = noms.get(nom + ".sig")
+              if not asset:
+                  return None
+              return subprocess.run(
+                  ["gh", "api", "-H", "Accept: application/octet-stream",
+                   f"repos/{depot}/releases/assets/{asset['id']}"],
+                  check=True, capture_output=True, text=True,
+              ).stdout.strip()
+
+          def trouver(motif):
+              return sorted(n for n in noms if re.search(motif, n))
+
+          # plateforme de l'updater → motif du nom d'archive, obligatoire ?
+          attendues = {
+              "darwin-aarch64": (r"_aarch64\.app\.tar\.gz$", True),
+              "darwin-x86_64": (r"_(x64|x86_64)\.app\.tar\.gz$", False),
+              "windows-x86_64": (r"_x64-setup\.exe$", True),
+          }
+          plateformes, manquantes = {}, []
+          for cible, (motif, obligatoire) in attendues.items():
+              candidats = [n for n in trouver(motif) if signature(n)]
+              if not candidats:
+                  if obligatoire:
+                      manquantes.append(cible)
+                  print(f"· {cible} : absente" + (" (obligatoire)" if obligatoire else ""))
+                  continue
+              nom = candidats[-1]
+              plateformes[cible] = {
+                  "signature": signature(nom),
+                  "url": f"https://github.com/{depot}/releases/download/{tag}/{nom}",
+              }
+              print(f"· {cible} : {nom}")
+
+          if manquantes:
+              print("::error::Plateformes manquantes : " + ", ".join(manquantes))
+              print("Assets présents : " + ", ".join(sorted(noms)))
+              sys.exit(1)
+
+          notes = (json.load(open("release.json")).get("body") or "").strip() or f"Version {version}"
+          pathlib.Path("latest.json").write_text(json.dumps({
+              "version": version,
+              "notes": notes,
+              "pub_date": datetime.datetime.now(datetime.timezone.utc)
+                  .isoformat(timespec="seconds").replace("+00:00", "Z"),
+              "platforms": plateformes,
+          }, indent="\t", ensure_ascii=False) + "\n")
+          PY
+          cat latest.json
+
+          # Une relance remplace le fichier plutôt que d'en déposer un second.
+          ancien="$(python3 -c 'import json; print(next((str(a["id"]) for a in json.load(open("assets.json")) if a["name"] == "latest.json"), ""))')"
+          if [[ -n "$ancien" ]]; then
+            gh api -X DELETE "repos/$DEPOT_BINAIRES/releases/assets/$ancien"
+          fi
+          curl -fsS -X POST \
+            -H "Authorization: Bearer $GH_TOKEN" \
+            -H "Accept: application/vnd.github+json" \
+            -H "Content-Type: application/json" \
+            --data-binary @latest.json \
+            "https://uploads.github.com/repos/$DEPOT_BINAIRES/releases/$RELEASE_ID/assets?name=latest.json" >/dev/null
+
+      - name: Sortie du brouillon
+        env:
+          GH_TOKEN: ${{ secrets.RELEASES_TOKEN }}
+          RELEASE_ID: ${{ needs.preparer.outputs.release_id }}
+        run: |
+          set -euo pipefail
+          gh api -X PATCH "repos/$DEPOT_BINAIRES/releases/$RELEASE_ID" \
+            -F draft=false -f make_latest=true --jq .html_url

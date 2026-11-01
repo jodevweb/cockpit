@@ -48,7 +48,7 @@
 		},
 		"libre": {
 			"launch": "启动自由智能体…",
-			"launchHint": "⌘N · 一个文件夹，一个智能体",
+			"launchHint": "{{mod}}N · 一个文件夹，一个智能体",
 			"launchIn": "在 {{folder}} 中启动智能体",
 			"launchInHint": "启动器，已预填你上次的选择"
 		},
@@ -68,7 +68,8 @@
 			"launchAgentHint": "在 Cockpit 中对话",
 			"terminal": "{{name}} 的终端",
 			"terminalHint": "Cockpit 中的 shell",
-			"terminalApp": "在 Terminal.app 中打开 {{name}}"
+			"terminalApp": "在 Terminal.app 中打开 {{name}}",
+			"terminalApp_windows": "在 终端窗口 中打开 {{name}}"
 		},
 		"folder": {
 			"newAgent": "在文件夹中新建智能体…",
@@ -199,32 +200,32 @@
 			"placeBranch": "新分支",
 			"placeWorktree": "新 worktree",
 			"defaultModel": "本机默认模型",
-			"title": "一个文件夹，一个智能体 — 就像 cd 后运行 claude（⌘N）",
+			"title": "一个文件夹，一个智能体 — 就像 cd 后运行 claude（{{mod}}N）",
 			"button": "启动智能体",
 			"again": "按上次的设置重新启动",
 			"noneYet": "暂无记录：你的第一次启动会被记住，供下次使用。",
 			"other": "其他文件夹、其他设置…"
 		},
 		"top": {
-			"mapTitle": "所有工作的地图（⌘⇧C）",
-			"workspaceTitle": "打开的智能体和终端（⌘⇧A）",
+			"mapTitle": "所有工作的地图（{{mod}}{{shift}}C）",
+			"workspaceTitle": "打开的智能体和终端（{{mod}}{{shift}}A）",
 			"libresTitle": "在项目之外启动的智能体，就像在终端中一样",
-			"decisionsTitle": "等待你决定的事项，按其解除阻塞的影响排序（⌘⇧D）",
-			"recapTitle": "以图像呈现发生的事：每个智能体回合一个故事（⌘⇧J）",
+			"decisionsTitle": "等待你决定的事项，按其解除阻塞的影响排序（{{mod}}{{shift}}D）",
+			"recapTitle": "以图像呈现发生的事：每个智能体回合一个故事（{{mod}}{{shift}}J）",
 			"recap": "回顾",
-			"automationsTitle": "自动准备的会议，例如每日站会（⌘⇧R）"
+			"automationsTitle": "自动准备的会议，例如每日站会（{{mod}}{{shift}}R）"
 		},
 		"search": "前往、启动、提问…",
 		"atelier": {
 			"title": "所有界面、项目、设置",
 			"name": "工坊",
 			"close": "关闭工坊",
-			"subtitle": "所有界面 · ⌘K 搜索"
+			"subtitle": "所有界面 · {{mod}}K 搜索"
 		},
 		"live": {
 			"missions_other": "{{count}} 个任务",
-			"missionsOngoing": "{{missions}}进行中（⌘⇧M）",
-			"missionsWaiting_other": "{{missions}}进行中，{{count}} 个等待你批准（⌘⇧M）",
+			"missionsOngoing": "{{missions}}进行中（{{mod}}{{shift}}M）",
+			"missionsWaiting_other": "{{missions}}进行中，{{count}} 个等待你批准（{{mod}}{{shift}}M）",
 			"scripts_other": "{{count}} 个脚本正在运行"
 		}
 	},

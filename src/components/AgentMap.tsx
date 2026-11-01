@@ -93,6 +93,8 @@ import {
 	type Loop,
 } from "@/lib/episodes";
 import { duration, fromSeconds } from "@/lib/format";
+import { formatShortcut } from "@/lib/platform";
+import { basename } from "@/lib/paths";
 
 /**
  * La carte d'un agent : ce qu'il fait, dessiné plutôt que raconté.
@@ -185,10 +187,6 @@ function heightOf(data: MapNode): number {
 	if (data.icon === "answer" || data.icon === "question") return ROW + (count === 1 ? 120 : 72) + diagram;
 	if (data.icon !== "visual" && data.icon !== "delivered") return ROW + 44 + warn;
 	return ROW + (count === 1 ? 120 : count === 2 ? 72 : 140) + warn;
-}
-
-function basename(path: string): string {
-	return path.split("/").filter(Boolean).pop() ?? path;
 }
 
 function capitalize(value: string): string {
@@ -1251,7 +1249,7 @@ function StepRemark({ runId, nodeId, node }: { runId: string; nodeId: string; no
 				<Button size="sm" onClick={() => submit(true)} disabled={!text.trim()} title={t("agentMap.remark.laterTitle")}>
 					{t("agentMap.remark.later")}
 				</Button>
-				<Button size="sm" variant="solid" icon={Send} onClick={() => submit(false)} disabled={!text.trim()} title="⌘↵">
+				<Button size="sm" variant="solid" icon={Send} onClick={() => submit(false)} disabled={!text.trim()} title={formatShortcut("⌘↵")}>
 					{t("agentMap.remark.send")}
 				</Button>
 			</div>

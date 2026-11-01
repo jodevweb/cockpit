@@ -71,4 +71,4 @@ strip = false
 # mobile) en a besoin, on la compile donc avec l'app.
 [target.'cfg(windows)'.dependencies]
 openssl = { version = "0.10", features = ["vendored"] }
-windows-sys = { version = "0.59", features = ["Win32_Foundation", "Win32_System_Threading", "Win32_Globalization"] }
+windows-sys = { version = "0.59", features = ["Win32_Foundation", "Win32_System_Threading", "Win32_Globalization", "Win32_Security_Credentials", "Win32_NetworkManagement_IpHelper", "Win32_System_Diagnostics_ToolHelp", "Win32_System_ProcessStatus", "Wdk_System_Threading", "Win32_System_Diagnostics_Debug", "Win32_System_Memory", "Win32_System_SystemInformation"] }

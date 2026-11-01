@@ -20,6 +20,7 @@ import { api, events } from "@/lib/ipc";
 import type { Automation, AutomationOverview, AutomationRun } from "@/lib/types";
 import { useAsync, usePersistentState } from "@/lib/useAsync";
 import { locale } from "@/i18n";
+import { platformContext } from "@/lib/platform";
 
 /**
  * Les automatisations : des rendez-vous qui se préparent seuls.
@@ -127,7 +128,7 @@ export function AutomationsView() {
 					))}
 				</div>
 				<p className="rounded-xl bg-surface p-3 text-[12px] leading-relaxed text-ink-muted shadow-card">
-					{t("automations.whenItRuns")}
+					{t("automations.whenItRuns", { context: platformContext })}
 				</p>
 			</aside>
 			{current ? (

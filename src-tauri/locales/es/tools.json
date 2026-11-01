@@ -1,1 +1,8 @@
-{}
+{
+	"windowsAgents": {
+		"claudeNotFoundHint": "No se encuentra la CLI `claude`. Instálala (`irm https://claude.ai/install.ps1 | iex` en PowerShell, o `npm install -g @anthropic-ai/claude-code`), o comprueba que esté en %USERPROFILE%\\.local\\bin o %APPDATA%\\npm.",
+		"bridgeUnavailableDetail": "Las solicitudes de permiso y las preguntas de los agentes no llegarán a la interfaz. Instala Node (`winget install OpenJS.NodeJS.LTS`) para recuperarlas; los agentes siguen funcionando según su modo.",
+		"ffmpegHint": "Las capturas de la prueba se conservan, pero no se monta ningún vídeo con ellas. Instala ffmpeg (`winget install Gyan.FFmpeg`) para recuperarlo bajo los hallazgos.",
+		"nodeMissing": "No se encuentra Node en este equipo: las herramientas de misión pasan por un puente MCP que él ejecuta. Instala Node (`winget install OpenJS.NodeJS.LTS`) y vuelve a lanzar la misión. Los agentes normales siguen funcionando."
+	}
+}

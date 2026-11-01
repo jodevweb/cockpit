@@ -371,7 +371,7 @@
 			"title": "Serviço",
 			"enabled": "Ativada",
 			"disabled": "Desativada",
-			"disabledHint": "Quando desativada, a entrada sai do menu lateral: uma tela que não pode fazer nada não fica no menu. Reative-a aqui. Já pausar é um gesto — faça-o pela tela, ou com <kbd>⇧P</kbd>.",
+			"disabledHint": "Quando desativada, a entrada sai do menu lateral: uma tela que não pode fazer nada não fica no menu. Reative-a aqui. Já pausar é um gesto — faça-o pela tela, ou com <kbd>{{mod}}{{shift}}P</kbd>.",
 			"hours": "Horário de atendimento",
 			"hoursHint": "Vazio = sempre. Um intervalo que passa da meia-noite é lido como está.",
 			"cadence": "Cadência",
@@ -626,7 +626,9 @@
 		"emptyHint": "Capturas e relatórios colocados em .claude/work vão aparecer aqui.",
 		"root": "raiz",
 		"openFolder": "Abrir a pasta no Finder",
+		"openFolder_windows": "Abrir a pasta no Explorador de Arquivos",
 		"reveal": "Mostrar no Finder",
+		"reveal_windows": "Mostrar no Explorador de Arquivos",
 		"close": "Fechar (Esc)",
 		"previous": "Anterior (←)",
 		"next": "Próximo (→)"
@@ -930,6 +932,7 @@
 				"hint": "Vazio = a imagem padrão do Cockpit."
 			},
 			"loginNote": "Uma conta conectada por assinatura guarda o token no keychain da máquina, que um contêiner não consegue ler. Este botão executa <code>claude setup-token</code> em um terminal — depois cole o token exibido em Configurações → Tokens de acesso (\"Conta isolada\"). Válido por um ano; refaça quando expirar.",
+			"loginNote_windows": "Uma conta conectada por assinatura guarda o token fora do alcance do contêiner. Este botão executa <code>claude setup-token</code> em um terminal — depois cole o token exibido em Configurações → Tokens de acesso (\"Conta isolada\"). Válido por um ano; refaça quando expirar.",
 			"connect": "Conectar a conta isolada"
 		}
 	},
@@ -976,7 +979,7 @@
 			"worktreesGroup": "Worktrees",
 			"detachedHead": "HEAD destacado",
 			"alreadyOpen": "já aberto",
-			"openTerminalHere": "Abrir um terminal aqui (⇧Enter)",
+			"openTerminalHere": "Abrir um terminal aqui ({{shift}}Enter)",
 			"remoteBranchesGroup": "Branches de outros lugares, nunca em checkout aqui",
 			"localBranchesGroup": "Branches sem worktree",
 			"remoteBranchHint": "em {{remote}} — fazer checkout aqui e depois trabalhar nela",
@@ -985,7 +988,7 @@
 			"title": "Abrir um workspace — um worktree existente, ou uma branch cujo worktree ainda será criado",
 			"empty": "Nenhum worktree conhecido.",
 			"prGroup": "Um pull request",
-			"prHint": "revisá-lo em somente leitura — ⇧Enter: só abrir a branch dele",
+			"prHint": "revisá-lo em somente leitura — {{shift}}Enter: só abrir a branch dele",
 			"prNote": "revisão",
 			"prOpenBranch": "Só abrir o workspace da branch dele",
 			"newBranchGroup": "Esta branch ainda não está aqui",
@@ -1010,10 +1013,10 @@
 		"toolbar": {
 			"addAgentTitle": "Mais um agente neste workspace",
 			"addAgent": "+ Agente",
-			"addTerminalTitle": "Mais um terminal neste workspace (⌘⇧T)",
+			"addTerminalTitle": "Mais um terminal neste workspace ({{mod}}{{shift}}T)",
 			"addTerminal": "+ Terminal",
 			"stop": "Parar",
-			"interrupt": "Interromper o que está rodando (⌃C)",
+			"interrupt": "Interromper o que está rodando ({{ctrl}}C)",
 			"clear": "Limpar a tela",
 			"sleep": "Deixar de lado — os processos param, o workspace volta no próximo lançamento",
 			"closeMission": "Fechar a missão \"{{title}}\" — todos os workspaces dela param"

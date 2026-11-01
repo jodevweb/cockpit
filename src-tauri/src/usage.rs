@@ -272,6 +272,7 @@ pub async fn limits() -> Limits {
 	commande
 		.args(["-p", "/usage"])
 		.current_dir(dirs::home_dir().unwrap_or_default());
+	crate::platform::quiet_async(&mut commande);
 	// Les plafonds sont ceux d'un compte, pas d'un poste : les demander sans dire
 	// lequel rendait ceux du compte par défaut, même en pilotant un projet
 	// rattaché à un autre — un quota rassurant emprunté à quelqu'un d'autre.
@@ -436,7 +437,9 @@ fn read_samples() -> Vec<Sample> {
 				continue;
 			};
 			if let Some(found) = value.get("cwd").and_then(|v| v.as_str()) {
-				cwd = found.to_string();
+				// Sous Windows, le CLI écrit `C:\Users\…` ; les chantiers se
+				// comparent et se découpent sur `/`.
+				cwd = crate::platform::display_path(std::path::Path::new(found));
 			}
 			let Some(usage) = value.pointer("/message/usage") else {
 				continue;

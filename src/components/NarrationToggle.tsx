@@ -29,6 +29,7 @@ import {
 } from "@/lib/narrator";
 import { hasTauri } from "@/lib/preview";
 import type { CloudVoice, Voice } from "@/lib/types";
+import { platformContext } from "@/lib/platform";
 
 /** Au-delà d'une minute sans rien dire pendant qu'il travaille, on donne des nouvelles. */
 const QUIET_MS = 60_000;
@@ -151,7 +152,7 @@ export function NarrationToggle({ runId }: { runId: string }) {
 			<button
 				type="button"
 				onClick={() => setOpen((value) => !value)}
-				title={fallback ? t("narration.elevenLabsFailed", { reason: fallback }) : t("narration.voiceAndRate")}
+				title={fallback ? t("narration.elevenLabsFailed", { context: platformContext, reason: fallback }) : t("narration.voiceAndRate")}
 				className={clsx(
 					"focus-ring grid h-7 w-5 place-items-center rounded-r-lg",
 					on ? "bg-accent text-accent-ink" : "text-ink-faint hover:bg-hover hover:text-ink",
@@ -259,7 +260,7 @@ export function VoiceSettings({ inMenu = false }: { inMenu?: boolean }) {
 				<Segment<Engine>
 					value={settings.engine}
 					options={[
-						[t("voiceSettings.macVoice"), "system"],
+						[t("voiceSettings.macVoice", { context: platformContext }), "system"],
 						["ElevenLabs", "elevenlabs"],
 					]}
 					onChange={(engine) => updateVoice({ engine })}
@@ -290,7 +291,7 @@ export function VoiceSettings({ inMenu = false }: { inMenu?: boolean }) {
 					{hasKey ? (
 						<div className="flex items-center gap-2 text-[11.5px] text-ink">
 							<KeyRound size={12} className="text-success" />
-							<span className="flex-1">{t("voiceSettings.keyStored")}</span>
+							<span className="flex-1">{t("voiceSettings.keyStored", { context: platformContext })}</span>
 							<button type="button" onClick={() => void saveKey("")} className="text-[11px] text-ink-faint hover:text-critical">
 								{t("voiceSettings.removeKey")}
 							</button>
@@ -373,7 +374,7 @@ export function VoiceSettings({ inMenu = false }: { inMenu?: boolean }) {
 					)}
 					{native && voices.length > 0 && !hasGoodSystemVoice(voices) ? (
 						<span className="text-[10px] leading-snug text-warning">
-							{t("voiceSettings.noPremiumVoice")}
+							{t("voiceSettings.noPremiumVoice", { context: platformContext })}
 						</span>
 					) : null}
 				</label>
@@ -387,7 +388,7 @@ export function VoiceSettings({ inMenu = false }: { inMenu?: boolean }) {
 			{fallback && settings.engine === "elevenlabs" ? (
 				<p className="flex gap-1.5 rounded-md bg-warning/10 px-2 py-1.5 text-[10.5px] leading-snug text-warning">
 					<AlertTriangle size={11} className="mt-px shrink-0" />
-					<span>{t("voiceSettings.fallback", { reason: fallback })}</span>
+					<span>{t("voiceSettings.fallback", { context: platformContext, reason: fallback })}</span>
 				</p>
 			) : null}
 

@@ -58,7 +58,7 @@ use runner::{JobRegistry, JobRequest, JobStatus, SharedJobs};
 use serde_json::Value;
 use std::path::{Path, PathBuf};
 use std::sync::Arc;
-use tauri::{AppHandle, Emitter, Manager, State};
+use tauri::{AppHandle, Emitter, State};
 
 /// Config rechargée à chaque commande : le fichier peut être édité à la main
 /// pendant que l'app tourne, et on veut que ça prenne effet sans redémarrage.
@@ -3647,7 +3647,7 @@ async fn launch_master(
 	// exécutant. Mieux vaut ne pas le lancer et dire ce qui manque — c'est
 	// exactement l'échec qu'on voyait passer pour un problème d'agent.
 	if agent::node_binary().is_none() {
-		return Err(CockpitError::msg(i18n::t("lib.mission.nodeMissing")));
+		return Err(CockpitError::msg(i18n::t(if cfg!(windows) { "windowsAgents.nodeMissing" } else { "lib.mission.nodeMissing" })));
 	}
 
 	let agents = app
@@ -5416,7 +5416,7 @@ pub fn run() {
 	let browsers = browser::SharedBrowsers::default();
 	let browsers_at_exit = browsers.clone();
 
-	tauri::Builder::default()
+	let builder = tauri::Builder::default()
 		.plugin(tauri_plugin_opener::init())
 		.plugin(tauri_plugin_notification::init())
 		.plugin(tauri_plugin_updater::Builder::new().build())
@@ -5451,14 +5451,17 @@ pub fn run() {
 		.manage(jobs)
 		.manage(agents)
 		.manage(terminals)
-		.manage(browsers)
-		// Sous forte pression mémoire, macOS peut tuer le processus qui dessine la
-		// page. WebKit n'en relance pas d'autre de lui-même : la fenêtre restait
-		// vide jusqu'à ce qu'on quitte le cockpit — et avec lui, ses agents.
-		// Recharger la page suffit, l'état vit côté Rust.
-		.on_web_content_process_terminate(|webview| {
-			let _ = webview.reload();
-		})
+		.manage(browsers);
+	// Sous forte pression mémoire, macOS peut tuer le processus qui dessine la
+	// page. WebKit n'en relance pas d'autre de lui-même : la fenêtre restait
+	// vide jusqu'à ce qu'on quitte le cockpit — et avec lui, ses agents.
+	// Recharger la page suffit, l'état vit côté Rust. Propre à WebKit : Tauri
+	// ne l'offre pas sous Windows (WebView2).
+	#[cfg(target_os = "macos")]
+	let builder = builder.on_web_content_process_terminate(|webview| {
+		let _ = webview.reload();
+	});
+	builder
 		.setup(|app| {
 			// Pris par une autre application, le raccourci ne fait pas échouer
 			// le démarrage : l'échec est retenu, et les Réglages le disent.
@@ -5801,13 +5804,19 @@ pub fn run() {
 		.build(tauri::generate_context!())
 		.expect("Le cockpit n'a pas pu démarrer")
 		.run(move |app, event| {
+			// Seul `Reopen`, propre à macOS, se sert de l'app.
+			#[cfg(not(target_os = "macos"))]
+			let _ = &app;
 			match event {
 				tauri::RunEvent::Exit => {
 					agent::stop_all(&agents_at_exit);
 					terminal::close_all(&terminals_at_exit);
 					browser::stop_all(&browsers_at_exit);
 				}
+				// Clic sur l'icône du Dock, fenêtre fermée : propre à macOS.
+				#[cfg(target_os = "macos")]
 				tauri::RunEvent::Reopen { .. } => {
+					use tauri::Manager;
 					if let Some(window) = app.get_webview_window("main") {
 						let _ = window.show();
 						let _ = window.unminimize();

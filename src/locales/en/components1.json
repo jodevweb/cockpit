@@ -84,7 +84,7 @@
 			"quoted": "“{{text}}”",
 			"currentFallback": "the current instruction",
 			"new": "New instruction — a new line on the map",
-			"flipTitle": "Switch — or ⌥Enter to send it the other way",
+			"flipTitle": "Switch — or {{alt}}Enter to send it the other way",
 			"toNew": "new instruction",
 			"toFollow": "follow-up"
 		},
@@ -114,7 +114,7 @@
 			"label": "Actions",
 			"title": "Ready-made prompts for this agent",
 			"empty": "No saved prompts.",
-			"footer": "The prompt goes into the reply field — ⇧Enter sends it directly. Library: <mono>~/.config/cockpit/prompts.toml</mono>"
+			"footer": "The prompt goes into the reply field — {{shift}}Enter sends it directly. Library: <mono>~/.config/cockpit/prompts.toml</mono>"
 		},
 		"model": {
 			"currentTitle": "Current model: {{model}}\nSwitching restarts the agent on the same thread.",
@@ -549,17 +549,21 @@
 		}
 	},
 	"fileLink": {
-		"hint": "Click: read in Cockpit\n⌘-click: open in the editor\n⌥-click: reveal in Finder\n⇧-click: copy the path"
+		"hint": "Click: read in Cockpit\n{{modKey}}-click: open in the editor\n{{altKey}}-click: reveal in Finder\n{{shiftKey}}-click: copy the path",
+		"hint_windows": "Click: read in Cockpit\n{{modKey}}-click: open in the editor\n{{altKey}}-click: reveal in File Explorer\n{{shiftKey}}-click: copy the path"
 	},
 	"fileViewer": {
 		"opaque": {
 			"unplayable": "Cockpit can't play this format. The Mac's own app almost certainly can.",
+			"unplayable_windows": "Cockpit can't play this format. The default Windows app almost certainly can.",
 			"unknown": "Cockpit doesn't display this kind of file. Open {{name}} with the Mac's app.",
+			"unknown_windows": "Cockpit doesn't display this kind of file. Open {{name}} with the default Windows app.",
 			"openDefault": "Open with the default app",
-			"showInFinder": "Show in Finder"
+			"showInFinder": "Show in Finder",
+			"showInFinder_windows": "Show in File Explorer"
 		},
 		"unsaved": "unsaved",
-		"saveTitle": "Save (⌘S)",
+		"saveTitle": "Save ({{mod}}S)",
 		"save": "Save",
 		"discardTitle": "Discard the changes",
 		"cancel": "Cancel",
@@ -567,14 +571,16 @@
 		"edit": "Edit",
 		"copyPath": "Copy the path",
 		"reveal": "Reveal in Finder",
+		"reveal_windows": "Reveal in File Explorer",
 		"openWithTitle": "Open with the Mac's app",
+		"openWithTitle_windows": "Open with the default Windows app",
 		"openWith": "Open with…",
 		"externalEditorTitle": "Edit in the external editor",
 		"externalEditor": "Editor",
 		"close": "Close (Esc)",
-		"searchPlaceholder": "Search in the file… (⌘F)",
+		"searchPlaceholder": "Search in the file… ({{mod}}F)",
 		"noMatch": "none",
-		"previousMatch": "Previous match (⇧⏎)",
+		"previousMatch": "Previous match ({{shift}}{{enter}})",
 		"nextMatch": "Next match (⏎)",
 		"truncated": "File truncated at {{size}} — open it in the editor to see the rest."
 	},
@@ -757,7 +763,7 @@
 		"title": "Launch an agent",
 		"subtitle": "One folder, one agent. No project, no mission.",
 		"close": "Close",
-		"allSet": "Everything is already filled in. Pick a folder, then <key>⌘↵</key>: the agent starts.",
+		"allSet": "Everything is already filled in. Pick a folder, then <key>{{mod}}{{enter}}</key>: the agent starts.",
 		"folder": {
 			"noteLibre": "free agent",
 			"noteRecent": "recent agent",
@@ -766,6 +772,7 @@
 			"path": "Folder path",
 			"placeholder": "~/Sites/my-project",
 			"browse": "Choose in Finder…",
+			"browse_windows": "Choose in File Explorer…",
 			"missing": "This folder doesn't exist.",
 			"gitRepo": "Git repository · {{branch}} · {{state}}",
 			"detached": "detached HEAD",
@@ -810,7 +817,7 @@
 			"title": "Ready to go",
 			"prompt": "First instruction <muted>— optional</muted>",
 			"placeholder": "Empty: the agent waits for your first sentence, just like plain “claude”.",
-			"remember": "Remember these choices for <code>{{folder}}</code> — next time, ⌘N then ⌘↵ is enough",
+			"remember": "Remember these choices for <code>{{folder}}</code> — next time, {{mod}}N then {{mod}}{{enter}} is enough",
 			"button": "Launch"
 		},
 		"command": "What you would have typed",
@@ -866,13 +873,14 @@
 		"count_other": "{{count}} files touched",
 		"reveal": {
 			"title": "Open the worktree in Finder",
+			"title_windows": "Open the worktree in File Explorer",
 			"label": "The folder"
 		}
 	},
 	"quickMenu": {
 		"search": "Search…",
 		"noMatch": "Nothing by that name.",
-		"extraHint": "{{title}} (⇧Enter)"
+		"extraHint": "{{title}} ({{shift}}Enter)"
 	},
 	"reliabilityPanel": {
 		"title": "State of the loop",
@@ -957,6 +965,7 @@
 		},
 		"setup": {
 			"title": "To do once on this Mac",
+			"title_windows": "To do once on this computer",
 			"detail": "The script sets up the local ntfy server, publishes it on the tailnet next to this page, and prints the topic and token to paste below. Apple's relay only sees a hash of the topic; the content comes from here."
 		},
 		"ntfy": {

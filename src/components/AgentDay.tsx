@@ -10,6 +10,7 @@ import type { Execution } from "@/lib/types";
 import { useAsync } from "@/lib/useAsync";
 import { useTranslation } from "react-i18next";
 import { locale, t as translate } from "@/i18n";
+import { basename } from "@/lib/paths";
 
 /**
  * La journée des agents : une ligne par agent, une barre par période de travail.
@@ -50,7 +51,7 @@ function tone(run: Execution): string {
 }
 
 function labelOf(run: Execution): { label: string; sub: string } {
-	const folder = run.cwd.split("/").filter(Boolean).pop() ?? run.cwd;
+	const folder = basename(run.cwd);
 	const role = run.origin.role && run.origin.role !== "me" ? run.origin.role : "";
 	if (role) return { label: role, sub: folder };
 	return { label: folder, sub: run.origin.actor === "permanence" ? translate("components1:agentDay.permanence") : run.model };

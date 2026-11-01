@@ -634,7 +634,13 @@ async fn local_changes(
 // ── Outils communs ──────────────────────────────────────────────────────────
 
 fn local_repo(config: &Config) -> String {
-	config.general.main_repo.trim().trim_end_matches('/').to_string()
+	let repo = config.general.main_repo.trim().trim_end_matches('/');
+	// Sous Windows, le réglage peut finir par `\`.
+	if cfg!(windows) {
+		repo.trim_end_matches(['/', '\\']).to_string()
+	} else {
+		repo.to_string()
+	}
 }
 
 /// Branches sorties en worktree, pour savoir où l'analyse pourra lire le code.

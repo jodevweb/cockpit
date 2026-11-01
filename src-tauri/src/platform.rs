@@ -77,6 +77,10 @@ pub fn shell_available() -> bool {
 pub fn shell(script: &str) -> std::process::Command {
 	let mut command = std::process::Command::new(shell_program());
 	command.arg("-lc").arg(script);
+	// Sans elle, le profil MSYS ramène le shell dans `$HOME` et ignore le
+	// dossier de travail demandé.
+	#[cfg(windows)]
+	command.env("CHERE_INVOKING", "1");
 	quiet_std(&mut command);
 	command
 }
@@ -85,6 +89,8 @@ pub fn shell(script: &str) -> std::process::Command {
 pub fn shell_async(script: &str) -> tokio::process::Command {
 	let mut command = tokio::process::Command::new(shell_program());
 	command.arg("-lc").arg(script);
+	#[cfg(windows)]
+	command.env("CHERE_INVOKING", "1");
 	quiet_async(&mut command);
 	command
 }
@@ -238,15 +244,26 @@ pub fn kill_pid(pid: u32) {
 
 #[cfg(windows)]
 fn taskkill(pid: u32, force: bool) {
-	let mut command = std::process::Command::new("taskkill");
-	command.args(["/PID", &pid.to_string(), "/T"]);
-	if force {
-		command.arg("/F");
+	let run = |force: bool| {
+		let mut command = std::process::Command::new("taskkill");
+		command.args(["/PID", &pid.to_string(), "/T"]);
+		if force {
+			command.arg("/F");
+		}
+		quiet_std(&mut command)
+			.stdout(std::process::Stdio::null())
+			.stderr(std::process::Stdio::null())
+			.status()
+			.map(|status| status.success())
+			.unwrap_or(false)
+	};
+	// Sans `/F`, `taskkill` envoie WM_CLOSE : un programme console sans fenêtre
+	// (node, bash, claude) le refuse. L'arrêt « poli » qui échoue devient forcé,
+	// sinon annuler un job ou fermer un terminal ne tuerait rien.
+	if !force && run(false) {
+		return;
 	}
-	let _ = quiet_std(&mut command)
-		.stdout(std::process::Stdio::null())
-		.stderr(std::process::Stdio::null())
-		.status();
+	run(true);
 }
 
 // ─────────────────────────────── Bureau ───────────────────────────────
@@ -381,5 +398,484 @@ mod tests {
 	#[test]
 	fn ce_processus_est_vivant() {
 		assert!(pid_alive(std::process::id()));
+	}
+}
+
+// ── processus et terminal ──
+//
+// Sous macOS, `ps`, `pgrep`, `vm_stat` et `sysctl` disent tout ce qu'il faut ;
+// sous Windows, on demande directement au système. Rien ici ne sert sous
+// macOS : chaque appelant garde sa voie macOS intacte.
+
+/// Un processus de la machine, vu par Windows.
+#[cfg(windows)]
+#[derive(Debug, Clone)]
+pub struct ProcessEntry {
+	pub pid: u32,
+	/// Le parent, ou 0 s'il n'existe plus. Windows garde le pid du parent mort
+	/// tel quel, et ce pid peut avoir été redonné depuis à un processus sans
+	/// rapport : on ne retient le lien que si le parent est plus ancien que
+	/// l'enfant — ce qui fait de 0 l'équivalent du « rattaché à launchd ».
+	pub ppid: u32,
+	/// L'exécutable, sans son `.exe` : `cockpit`, `node`, `claude`.
+	pub name: String,
+	/// Mémoire résidente (« working set »), en kilo-octets ; 0 si illisible.
+	pub rss_kb: u64,
+	/// Temps processeur consommé depuis le lancement, en secondes.
+	pub cpu_seconds: f64,
+}
+
+#[cfg(windows)]
+fn filetime_ticks(time: &windows_sys::Win32::Foundation::FILETIME) -> u64 {
+	((time.dwHighDateTime as u64) << 32) | time.dwLowDateTime as u64
+}
+
+/// Tous les processus de la machine, d'un seul relevé.
+///
+/// La liste vient de l'instantané ToolHelp (pid, parent, exécutable) ; mémoire,
+/// temps processeur et date de création s'y ajoutent pour les processus qu'on a
+/// le droit d'ouvrir — les nôtres, ce qui est le périmètre voulu.
+#[cfg(windows)]
+pub fn processes() -> Vec<ProcessEntry> {
+	use windows_sys::Win32::Foundation::{CloseHandle, FILETIME, INVALID_HANDLE_VALUE};
+	use windows_sys::Win32::System::Diagnostics::ToolHelp::{
+		CreateToolhelp32Snapshot, Process32FirstW, Process32NextW, PROCESSENTRY32W, TH32CS_SNAPPROCESS,
+	};
+	use windows_sys::Win32::System::ProcessStatus::{GetProcessMemoryInfo, PROCESS_MEMORY_COUNTERS};
+	use windows_sys::Win32::System::Threading::{GetProcessTimes, OpenProcess, PROCESS_QUERY_LIMITED_INFORMATION};
+
+	let mut raw: Vec<(ProcessEntry, Option<u64>)> = Vec::new();
+	unsafe {
+		let snapshot = CreateToolhelp32Snapshot(TH32CS_SNAPPROCESS, 0);
+		if snapshot == INVALID_HANDLE_VALUE || snapshot.is_null() {
+			return Vec::new();
+		}
+		let mut entry: PROCESSENTRY32W = std::mem::zeroed();
+		entry.dwSize = std::mem::size_of::<PROCESSENTRY32W>() as u32;
+		let mut more = Process32FirstW(snapshot, &mut entry) != 0;
+		while more {
+			let length = entry.szExeFile.iter().position(|c| *c == 0).unwrap_or(entry.szExeFile.len());
+			let exe = String::from_utf16_lossy(&entry.szExeFile[..length]);
+			let name = match exe.len().checked_sub(4) {
+				Some(cut) if exe[cut..].eq_ignore_ascii_case(".exe") => exe[..cut].to_string(),
+				_ => exe,
+			};
+			let mut process = ProcessEntry {
+				pid: entry.th32ProcessID,
+				ppid: entry.th32ParentProcessID,
+				name,
+				rss_kb: 0,
+				cpu_seconds: 0.0,
+			};
+			let mut created = None;
+			let handle = OpenProcess(PROCESS_QUERY_LIMITED_INFORMATION, 0, process.pid);
+			if !handle.is_null() {
+				let mut counters: PROCESS_MEMORY_COUNTERS = std::mem::zeroed();
+				counters.cb = std::mem::size_of::<PROCESS_MEMORY_COUNTERS>() as u32;
+				if GetProcessMemoryInfo(handle, &mut counters, counters.cb) != 0 {
+					process.rss_kb = (counters.WorkingSetSize / 1024) as u64;
+				}
+				let zero = FILETIME { dwLowDateTime: 0, dwHighDateTime: 0 };
+				let (mut creation, mut exit, mut kernel, mut user) = (zero, zero, zero, zero);
+				if GetProcessTimes(handle, &mut creation, &mut exit, &mut kernel, &mut user) != 0 {
+					// Des tranches de 100 ns.
+					process.cpu_seconds = (filetime_ticks(&kernel) + filetime_ticks(&user)) as f64 / 10_000_000.0;
+					created = Some(filetime_ticks(&creation));
+				}
+				CloseHandle(handle);
+			}
+			raw.push((process, created));
+			more = Process32NextW(snapshot, &mut entry) != 0;
+		}
+		CloseHandle(snapshot);
+	}
+
+	let created: std::collections::HashMap<u32, Option<u64>> =
+		raw.iter().map(|(process, created)| (process.pid, *created)).collect();
+	raw.into_iter()
+		.map(|(mut process, born)| {
+			let parent_ok = match created.get(&process.ppid) {
+				None => false,
+				// Parent plus jeune que l'enfant : son pid a été redonné.
+				Some(Some(parent_born)) => born.map_or(true, |born| *parent_born <= born),
+				// Parent qu'on ne peut pas ouvrir (système, autre compte) : on
+				// garde le lien, faute de mieux.
+				Some(None) => true,
+			};
+			if !parent_ok || process.ppid == process.pid {
+				process.ppid = 0;
+			}
+			process
+		})
+		.collect()
+}
+
+/// Les descendants d'un processus, à toute profondeur, les plus profonds
+/// d'abord. Sous Windows, d'un seul instantané ; ailleurs, vide (les appelants
+/// macOS ont leur propre voie).
+pub fn descendants(pid: u32) -> Vec<u32> {
+	#[cfg(windows)]
+	{
+		let mut children: std::collections::HashMap<u32, Vec<u32>> = std::collections::HashMap::new();
+		for process in processes() {
+			if process.ppid != 0 {
+				children.entry(process.ppid).or_default().push(process.pid);
+			}
+		}
+		let mut found = Vec::new();
+		let mut to_visit = vec![pid];
+		while let Some(current) = to_visit.pop() {
+			for child in children.get(&current).into_iter().flatten() {
+				if *child != pid && !found.contains(child) && found.len() < 4096 {
+					found.push(*child);
+					to_visit.push(*child);
+				}
+			}
+		}
+		found.reverse();
+		found
+	}
+	#[cfg(not(windows))]
+	{
+		let _ = pid;
+		Vec::new()
+	}
+}
+
+/// L'environnement d'un autre processus, tel qu'il l'a reçu à sa naissance.
+///
+/// Windows n'offre pas d'appel public pour ça : on le lit là où le système le
+/// range, dans le bloc de paramètres du processus (`PEB` →
+/// `RTL_USER_PROCESS_PARAMETERS` → `Environment`) — la méthode de Process
+/// Explorer et de `psutil`. Il faut le droit de lire sa mémoire, donc que le
+/// processus soit à nous ; sinon, `None`. Une variable posée après coup par le
+/// processus lui-même peut ne pas y figurer — ce qu'on cherche (une marque
+/// héritée à la naissance) y est toujours.
+#[cfg(windows)]
+pub fn process_environment(pid: u32) -> Option<Vec<String>> {
+	use windows_sys::Wdk::System::Threading::{NtQueryInformationProcess, ProcessBasicInformation};
+	use windows_sys::Win32::Foundation::CloseHandle;
+	use windows_sys::Win32::System::Diagnostics::Debug::ReadProcessMemory;
+	use windows_sys::Win32::System::Memory::{VirtualQueryEx, MEMORY_BASIC_INFORMATION};
+	use windows_sys::Win32::System::Threading::{OpenProcess, PROCESS_QUERY_LIMITED_INFORMATION, PROCESS_VM_READ};
+
+	// `PROCESS_BASIC_INFORMATION`, recopiée pour ne pas tirer une feature de
+	// plus pour une structure de six champs.
+	#[repr(C)]
+	struct BasicInformation {
+		exit_status: i32,
+		peb: usize,
+		affinity: usize,
+		base_priority: i32,
+		pid: usize,
+		parent: usize,
+	}
+	// Décalages documentés par l'usage (winternl.h, psutil) : stables depuis
+	// Vista.
+	#[cfg(target_pointer_width = "64")]
+	const OFFSETS: (usize, usize, usize) = (0x20, 0x80, 0x3F0);
+	#[cfg(target_pointer_width = "32")]
+	const OFFSETS: (usize, usize, usize) = (0x10, 0x48, 0x290);
+	let (parameters_at, environment_at, environment_size_at) = OFFSETS;
+
+	unsafe fn read_at<T: Copy>(handle: windows_sys::Win32::Foundation::HANDLE, address: usize) -> Option<T> {
+		let mut value = std::mem::MaybeUninit::<T>::uninit();
+		let mut read = 0usize;
+		unsafe {
+			let ok = ReadProcessMemory(
+				handle,
+				address as *const _,
+				value.as_mut_ptr() as *mut _,
+				std::mem::size_of::<T>(),
+				&mut read,
+			) != 0;
+			(ok && read == std::mem::size_of::<T>()).then(|| value.assume_init())
+		}
+	}
+
+	if pid <= 4 {
+		return None;
+	}
+	unsafe {
+		let handle = OpenProcess(PROCESS_QUERY_LIMITED_INFORMATION | PROCESS_VM_READ, 0, pid);
+		if handle.is_null() {
+			return None;
+		}
+		let result = (|| {
+			let mut info: BasicInformation = std::mem::zeroed();
+			let mut length = 0u32;
+			let status = NtQueryInformationProcess(
+				handle,
+				ProcessBasicInformation,
+				&mut info as *mut _ as *mut _,
+				std::mem::size_of::<BasicInformation>() as u32,
+				&mut length,
+			);
+			if status < 0 || info.peb == 0 {
+				return None;
+			}
+			let parameters: usize = read_at(handle, info.peb + parameters_at)?;
+			let environment: usize = read_at(handle, parameters + environment_at)?;
+			if environment == 0 {
+				return None;
+			}
+			// La taille annoncée peut être périmée si le processus a réécrit son
+			// environnement : on la borne à la région mémoire réellement lisible.
+			let declared: usize = read_at(handle, parameters + environment_size_at).unwrap_or(0);
+			let mut region: MEMORY_BASIC_INFORMATION = std::mem::zeroed();
+			let readable = if VirtualQueryEx(
+				handle,
+				environment as *const _,
+				&mut region,
+				std::mem::size_of::<MEMORY_BASIC_INFORMATION>(),
+			) != 0
+			{
+				(region.BaseAddress as usize + region.RegionSize).saturating_sub(environment)
+			} else {
+				declared
+			};
+			let size = if declared > 0 { declared.min(readable) } else { readable }.min(1 << 20);
+			if size < 4 {
+				return None;
+			}
+			let mut buffer = vec![0u16; size / 2];
+			let mut read = 0usize;
+			if ReadProcessMemory(
+				handle,
+				environment as *const _,
+				buffer.as_mut_ptr() as *mut _,
+				buffer.len() * 2,
+				&mut read,
+			) == 0
+			{
+				return None;
+			}
+			buffer.truncate(read / 2);
+			let mut variables = Vec::new();
+			for entry in buffer.split(|c| *c == 0) {
+				if entry.is_empty() {
+					// Deux zéros de suite : fin du bloc.
+					break;
+				}
+				variables.push(String::from_utf16_lossy(entry));
+			}
+			Some(variables)
+		})();
+		CloseHandle(handle);
+		result
+	}
+}
+
+/// Mémoire physique de la machine : totale et utilisée, en mégaoctets.
+/// « Utilisée » = tout sauf ce que Windows dit disponible, comme le
+/// gestionnaire des tâches.
+#[cfg(windows)]
+pub fn machine_memory_mb() -> (f64, f64) {
+	use windows_sys::Win32::System::SystemInformation::{GlobalMemoryStatusEx, MEMORYSTATUSEX};
+	unsafe {
+		let mut status: MEMORYSTATUSEX = std::mem::zeroed();
+		status.dwLength = std::mem::size_of::<MEMORYSTATUSEX>() as u32;
+		if GlobalMemoryStatusEx(&mut status) == 0 {
+			return (0.0, 0.0);
+		}
+		let total = status.ullTotalPhys as f64 / 1024.0 / 1024.0;
+		let used = status.ullTotalPhys.saturating_sub(status.ullAvailPhys) as f64 / 1024.0 / 1024.0;
+		(total, used)
+	}
+}
+
+// ── agents, outils, sessions ──
+
+/// Un chemin natif tel qu'un script du shell doit l'écrire dans son `PATH`.
+///
+/// Le bash de Git for Windows tient un `PATH` à la mode POSIX — séparé par `:`,
+/// `C:\Users\moi` écrit `/c/Users/moi` : y glisser un chemin Windows tel quel
+/// le couperait en deux sur le `:` du lecteur. Ailleurs, rien à changer.
+pub fn shell_path(path: &str) -> String {
+	if cfg!(windows) {
+		msys_path(path)
+	} else {
+		path.to_string()
+	}
+}
+
+/// `C:\Users\moi` → `/c/Users/moi`. Un chemin sans lecteur garde sa forme,
+/// séparateurs redressés.
+fn msys_path(path: &str) -> String {
+	let slashed = path.replace('\\', "/");
+	let bytes = slashed.as_bytes();
+	if bytes.len() >= 2 && bytes[1] == b':' && bytes[0].is_ascii_alphabetic() {
+		let drive = (bytes[0] as char).to_ascii_lowercase();
+		let rest = slashed[2..].trim_start_matches('/');
+		if rest.is_empty() {
+			format!("/{drive}")
+		} else {
+			format!("/{drive}/{rest}")
+		}
+	} else {
+		slashed
+	}
+}
+
+/// La forme sous laquelle comparer deux chemins de dossier : sans séparateur
+/// final. Sous Windows en plus, séparateurs `/`, sans préfixe `\\?\` (ce que
+/// rend `canonicalize`), et sans casse — le système n'en tient pas compte.
+pub fn path_key(path: &str) -> String {
+	let path = path.trim();
+	if cfg!(windows) {
+		let slashed = path.replace('\\', "/");
+		let slashed = slashed.strip_prefix("//?/").unwrap_or(&slashed);
+		slashed.trim_end_matches('/').to_lowercase()
+	} else {
+		path.trim_end_matches('/').to_string()
+	}
+}
+
+/// Deux chemins désignent-ils le même dossier, à l'écriture près ? Ailleurs que
+/// sous Windows, la comparaison reste exacte.
+pub fn same_path(left: &str, right: &str) -> bool {
+	if cfg!(windows) {
+		path_key(left) == path_key(right)
+	} else {
+		left == right
+	}
+}
+
+/// Chemin absolu d'un programme installé, tel que la personne le lancerait.
+///
+/// Lancé depuis le Finder ou le menu Démarrer, le cockpit n'hérite que d'un
+/// `PATH` minimal : on demande au shell de connexion (`command -v`). Sous
+/// Windows, `where` d'abord — il connaît le `PATH` du compte et les extensions
+/// exécutables —, puis le bash de Git, dont la réponse est traduite en chemin
+/// natif (`cygpath -w`). Seul un fichier lançable sans shell est retenu : npm
+/// pose à côté de `claude.cmd` un script `claude` sans extension, que Windows
+/// ne sait pas exécuter.
+pub fn locate(name: &str) -> Option<String> {
+	// Le nom est joué par le shell : rien d'autre qu'un nom de programme.
+	if name.is_empty() || !name.chars().all(|c| c.is_ascii_alphanumeric() || matches!(c, '-' | '_' | '.')) {
+		return None;
+	}
+	#[cfg(windows)]
+	{
+		if let Ok(output) = quiet_std(std::process::Command::new("where").arg(name)).output() {
+			for line in String::from_utf8_lossy(&output.stdout).lines() {
+				if let Some(found) = runnable(std::path::Path::new(line.trim())) {
+					return Some(found);
+				}
+			}
+		}
+		if shell_available() {
+			if let Ok(output) = shell(&format!("p=\"$(command -v {name})\" && cygpath -w \"$p\"")).output() {
+				let found = String::from_utf8_lossy(&output.stdout).trim().to_string();
+				if !found.is_empty() {
+					if let Some(found) = runnable(std::path::Path::new(&found)) {
+						return Some(found);
+					}
+				}
+			}
+		}
+		None
+	}
+	#[cfg(not(windows))]
+	{
+		let output = shell(&format!("command -v {name}")).output().ok()?;
+		let found = String::from_utf8_lossy(&output.stdout).trim().to_string();
+		(!found.is_empty() && std::path::Path::new(&found).exists()).then_some(found)
+	}
+}
+
+/// Le premier candidat qui existe — sous Windows, qui se lance sans shell
+/// (`.exe`, `.cmd`, `.bat`, `.com`, au besoin en ajoutant l'extension).
+pub fn first_runnable(candidates: &[PathBuf]) -> Option<String> {
+	candidates.iter().find_map(|path| {
+		#[cfg(windows)]
+		{
+			runnable(path)
+		}
+		#[cfg(not(windows))]
+		{
+			path.exists().then(|| path.to_string_lossy().to_string())
+		}
+	})
+}
+
+#[cfg(windows)]
+fn runnable(path: &std::path::Path) -> Option<String> {
+	const EXTENSIONS: [&str; 4] = ["exe", "cmd", "bat", "com"];
+	if path.as_os_str().is_empty() {
+		return None;
+	}
+	let known = path
+		.extension()
+		.map(|ext| EXTENSIONS.contains(&ext.to_string_lossy().to_lowercase().as_str()))
+		.unwrap_or(false);
+	if known {
+		return path.is_file().then(|| path.to_string_lossy().to_string());
+	}
+	EXTENSIONS.iter().find_map(|ext| {
+		let candidate = PathBuf::from(format!("{}.{ext}", path.to_string_lossy()));
+		candidate.is_file().then(|| candidate.to_string_lossy().to_string())
+	})
+}
+
+/// Un dossier désigné par une variable d'environnement (`APPDATA`,
+/// `LOCALAPPDATA`, `ProgramFiles`…), quand elle est posée.
+pub fn env_dir(name: &str) -> Option<PathBuf> {
+	std::env::var_os(name).filter(|value| !value.is_empty()).map(PathBuf::from)
+}
+
+/// L'adresse `file://` d'un fichier local, lisible par un navigateur sur
+/// chaque système (`file:///C:/…` sous Windows).
+pub fn file_url(path: &std::path::Path) -> String {
+	let text = display_path(path);
+	if text.starts_with('/') {
+		format!("file://{text}")
+	} else {
+		format!("file:///{text}")
+	}
+}
+
+#[cfg(test)]
+mod agents_tests {
+	use super::*;
+
+	#[test]
+	fn un_chemin_windows_devient_un_chemin_du_bash_de_git() {
+		assert_eq!(msys_path(r"C:\Users\moi\.local\bin"), "/c/Users/moi/.local/bin");
+		assert_eq!(msys_path("D:/outils"), "/d/outils");
+		assert_eq!(msys_path(r"C:\"), "/c");
+		assert_eq!(msys_path("/usr/bin"), "/usr/bin");
+	}
+
+	#[test]
+	fn ailleurs_qu_a_windows_le_chemin_du_shell_est_le_chemin_natif() {
+		if !cfg!(windows) {
+			assert_eq!(shell_path("/Users/moi/.local/bin"), "/Users/moi/.local/bin");
+			assert!(same_path("/a/b", "/a/b"));
+			assert!(!same_path("/a/b", "/a/b/"));
+		} else {
+			assert!(same_path(r"C:\Users\Moi\proj", "c:/users/moi/proj/"));
+			assert!(same_path(r"\\?\C:\Users\moi", "C:/Users/moi"));
+		}
+	}
+
+	#[test]
+	fn la_cle_d_un_chemin_perd_son_separateur_final() {
+		assert_eq!(path_key("/tmp/projet/"), path_key("/tmp/projet"));
+	}
+
+	#[test]
+	fn un_nom_qui_n_est_pas_un_programme_n_est_pas_joue() {
+		assert_eq!(locate("x; rm -rf ~"), None);
+		assert_eq!(locate(""), None);
+	}
+
+	#[test]
+	fn une_adresse_de_fichier_a_trois_barres() {
+		if cfg!(windows) {
+			assert_eq!(file_url(std::path::Path::new(r"C:\a\b.html")), "file:///C:/a/b.html");
+		} else {
+			assert_eq!(file_url(std::path::Path::new("/a/b.html")), "file:///a/b.html");
+		}
 	}
 }

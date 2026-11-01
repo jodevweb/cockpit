@@ -25,6 +25,7 @@ import { bumpProjectEpoch } from "@/lib/projectScope";
 import { useAsync } from "@/lib/useAsync";
 import { toast as sonner } from "sonner";
 import { t } from "@/i18n";
+import { basename } from "@/lib/paths";
 
 export type ViewId =
 	// Tout le travail sur un plan : les projets en îles, le travail dans le
@@ -322,7 +323,7 @@ export function CockpitProvider({ children }: { children: ReactNode }) {
 			entry.notified = true;
 			void api.system
 				.notify(
-					session.gitBranch ?? session.cwd.split("/").pop() ?? "Agent",
+					session.gitBranch ?? (basename(session.cwd) || "Agent"),
 					t("app:store.notify.waitingReply", { title: session.title }),
 				)
 				.catch(() => undefined);

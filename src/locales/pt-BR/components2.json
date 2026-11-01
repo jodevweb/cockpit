@@ -501,7 +501,7 @@
 		"quoted": "“{{text}}”",
 		"close": "Fechar",
 		"placeholder": "Abra o workspace do carrinho, inicie uma missão a partir de NW-3050…",
-		"hint": "Segure {{shortcut}} para falar · ⌘J para digitar",
+		"hint": "Segure {{shortcut}} para falar · {{mod}}J para digitar",
 		"errors": {
 			"worktreeNotFound": "Não encontro o worktree “{{name}}”.",
 			"agentNotFound": "Não encontro o agente “{{name}}”.",
@@ -554,12 +554,13 @@
 			"hold": "Segure, fale, solte: o assistente entende, age e responde em voz alta — mesmo quando o Cockpit está atrás de outra janela.",
 			"keyboard": "O mesmo pelo teclado, com o Cockpit em primeiro plano.",
 			"cost": "O que você diz é transcrito pela ElevenLabs (a chave de voz, acima) e depois entendido pelo Claude, na sua assinatura: alguns segundos do seu plano ElevenLabs e um pouco da sua cota do Claude por pedido. As ações são executadas diretamente; o que ele não encontra, ele não adivinha.",
-			"noKey": "Sem uma chave da ElevenLabs, o assistente não consegue ouvir você — o ⌘J continua funcionando. Guarde-a na seção Voz.",
+			"noKey": "Sem uma chave da ElevenLabs, o assistente não consegue ouvir você — o {{mod}}J continua funcionando. Guarde-a na seção Voz.",
 			"speak": "Fale… (4 s)",
 			"testMic": "Testar o microfone",
 			"appOnly": "Somente no app.",
 			"heard": "Ouvido:",
-			"micDenied": "Se o microfone for negado: Ajustes do Sistema → Privacidade e Segurança → Microfone → Cockpit."
+			"micDenied": "Se o microfone for negado: Ajustes do Sistema → Privacidade e Segurança → Microfone → Cockpit.",
+			"micDenied_windows": "Se o microfone for negado: Configurações do Windows → Privacidade e segurança → Microfone → Permitir que aplicativos da área de trabalho acessem o microfone."
 		},
 		"shortcut": {
 			"active": "{{shortcut}} está ativo, em todos os aplicativos.",
@@ -750,7 +751,7 @@
 		"uncommitted": "Modificados, ainda sem commit",
 		"files_one": "{{count}} arquivo",
 		"files_other": "{{count}} arquivos",
-		"buttonHint": "Abrir um arquivo deste worktree pelo nome (⌘P)",
+		"buttonHint": "Abrir um arquivo deste worktree pelo nome ({{mod}}P)",
 		"button": "Arquivos",
 		"placeholder": "Um nome de arquivo — “agentmap”, “panel work”, “apps/web env”",
 		"scanning": "Varrendo o repositório…",
@@ -759,7 +760,7 @@
 		"total_one": "{{formatted}} arquivo",
 		"total_other": "{{formatted}} arquivos",
 		"scanningShort": "varrendo o repositório…",
-		"keys": "↑↓ para escolher · Enter para abrir · ⌘P",
+		"keys": "↑↓ para escolher · Enter para abrir · {{mod}}P",
 		"whyAgent": "escrito por um agente",
 		"whyChanged": "modificado"
 	},
@@ -908,16 +909,19 @@
 		"listening": "Ouvindo",
 		"listen": "Ouvir",
 		"elevenLabsFailed": "A ElevenLabs falhou, a voz do Mac assumiu: {{reason}}",
+		"elevenLabsFailed_windows": "A ElevenLabs falhou, a voz do sistema assumiu: {{reason}}",
 		"voiceAndRate": "Voz e velocidade"
 	},
 	"voiceSettings": {
 		"engine": "Motor",
 		"macVoice": "Voz do Mac",
+		"macVoice_windows": "Voz do sistema",
 		"elevenLabsHint": "A voz mais humana, descontada dos caracteres do seu plano ElevenLabs. Nenhuma assinatura do Claude ou do ChatGPT fornece voz para outro aplicativo.",
 		"systemHint": "Gratuita e offline. Muito melhor com uma voz Premium.",
 		"elevenLabsKey": "Chave da ElevenLabs",
 		"createKey": "Criar uma chave",
 		"keyStored": "Guardada no keychain do Mac",
+		"keyStored_windows": "Guardada neste computador",
 		"removeKey": "Remover",
 		"storeKey": "Salvar",
 		"voice": "Voz",
@@ -926,8 +930,10 @@
 		"model": "Modelo",
 		"browserVoice": "Voz do navegador, em prévia.",
 		"noPremiumVoice": "Nenhuma voz Premium instalada. Baixe uma: Ajustes do Sistema → Acessibilidade → Conteúdo Falado → Voz do Sistema → Gerenciar Vozes.",
+		"noPremiumVoice_windows": "Nenhuma voz natural instalada. Adicione uma: Configurações do Windows → Hora e idioma → Fala → Gerenciar vozes.",
 		"rate": "Velocidade",
 		"fallback": "A voz do Mac assumiu: {{reason}}",
+		"fallback_windows": "A voz do sistema assumiu: {{reason}}",
 		"sample": "Ele corrigiu o arredondamento do carrinho e rodou os testes de novo. Pronto: ele alterou três arquivos, e os testes passam.",
 		"tryVoice": "Experimentar esta voz",
 		"allSettings": "Todas as configurações de voz e do assistente"
@@ -948,8 +954,10 @@
 		"cancel": "Cancelar",
 		"save": "Salvar",
 		"openInTerminal": "Abrir no Terminal.app em vez disso",
+		"openInTerminal_windows": "Abrir em uma janela de terminal em vez disso",
 		"new": "Novo prompt",
-		"footer": "Um clique lança o agente aqui, com a conversa e a caixa de resposta no Cockpit. O ícone de terminal o abre no Terminal.app, para o que precisa de um TTY de verdade. A biblioteca fica em <path>{{path}}</path>."
+		"footer": "Um clique lança o agente aqui, com a conversa e a caixa de resposta no Cockpit. O ícone de terminal o abre no Terminal.app, para o que precisa de um TTY de verdade. A biblioteca fica em <path>{{path}}</path>.",
+		"footer_windows": "Um clique lança o agente aqui, com a conversa e a caixa de resposta no Cockpit. O ícone de terminal o abre em uma janela de terminal, para o que precisa de um TTY de verdade. A biblioteca fica em <path>{{path}}</path>."
 	},
 	"panelReport": {
 		"verdict": {
@@ -1031,6 +1039,7 @@
 		"agents": "Agentes",
 		"terminals": "Terminais",
 		"footnote": "Os números de memória são somados sem considerar o que os processos compartilham: o total é portanto um teto, não uma conta exata. A própria interface roda em um processo WebKit que o macOS não atribui a ninguém sem privilégios — conte uns sessenta megabytes a mais.",
+		"footnote_windows": "Os números de memória são somados sem considerar o que os processos compartilham: o total é portanto um teto, não uma conta exata. A própria interface roda em processos WebView2 (msedgewebview2) que não são contados aqui — conte um pouco mais.",
 		"spendNoQuota": "Tokens usados hoje. A CLI não informa a cota.",
 		"spendLeft": "{{left}}% restante em “{{window}}”",
 		"spendLeftResets": "{{left}}% restante em “{{window}}”, reinicia {{resets}}",
@@ -1043,6 +1052,6 @@
 		"scripts": "Scripts",
 		"scriptsHint": "Scripts do repositório e comandos personalizados",
 		"noScripts": "Nenhum script nesta pasta.",
-		"footer": "O comando é digitado e depois executado neste shell — ⇧Enter faz o contrário da opção escolhida."
+		"footer": "O comando é digitado e depois executado neste shell — {{shift}}Enter faz o contrário da opção escolhida."
 	}
 }

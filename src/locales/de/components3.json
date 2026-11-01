@@ -371,7 +371,7 @@
 			"title": "Dienst",
 			"enabled": "Aktiviert",
 			"disabled": "Deaktiviert",
-			"disabledHint": "Deaktiviert verschwindet der Eintrag aus der Leiste: Eine Ansicht, die nichts tun kann, bleibt nicht im Menü. Schalte sie hier wieder ein. Pausieren ist dagegen eine Geste — mach es in der Ansicht oder mit <kbd>⇧P</kbd>.",
+			"disabledHint": "Deaktiviert verschwindet der Eintrag aus der Leiste: Eine Ansicht, die nichts tun kann, bleibt nicht im Menü. Schalte sie hier wieder ein. Pausieren ist dagegen eine Geste — mach es in der Ansicht oder mit <kbd>{{mod}}{{shift}}P</kbd>.",
 			"hours": "Dienstzeiten",
 			"hoursHint": "Leer = immer. Ein Bereich über Mitternacht wird so gelesen, wie er ist.",
 			"cadence": "Takt",
@@ -626,7 +626,9 @@
 		"emptyHint": "In .claude/work abgelegte Screenshots und Berichte erscheinen hier.",
 		"root": "Wurzel",
 		"openFolder": "Ordner im Finder öffnen",
+		"openFolder_windows": "Ordner im Explorer öffnen",
 		"reveal": "Im Finder zeigen",
+		"reveal_windows": "Im Explorer zeigen",
 		"close": "Schließen (Esc)",
 		"previous": "Zurück (←)",
 		"next": "Weiter (→)"
@@ -930,6 +932,7 @@
 				"hint": "Leer = das Standard-Image von Cockpit."
 			},
 			"loginNote": "Ein über ein Abo angemeldetes Konto speichert sein Token im Schlüsselbund des Rechners, den ein Container nicht lesen kann. Diese Schaltfläche führt <code>claude setup-token</code> in einem Terminal aus — füge das angezeigte Token dann unter Einstellungen → Zugriffstokens („Isoliertes Konto“) ein. Ein Jahr gültig; wiederhole es, wenn es abläuft.",
+			"loginNote_windows": "Ein über ein Abo angemeldetes Konto bewahrt sein Token außerhalb der Reichweite des Containers auf. Diese Schaltfläche führt <code>claude setup-token</code> in einem Terminal aus — füge das angezeigte Token dann unter Einstellungen → Zugriffstokens („Isoliertes Konto“) ein. Ein Jahr gültig; wiederhole es, wenn es abläuft.",
 			"connect": "Isoliertes Konto verbinden"
 		}
 	},
@@ -976,7 +979,7 @@
 			"worktreesGroup": "Worktrees",
 			"detachedHead": "Detached HEAD",
 			"alreadyOpen": "bereits offen",
-			"openTerminalHere": "Hier ein Terminal öffnen (⇧Enter)",
+			"openTerminalHere": "Hier ein Terminal öffnen ({{shift}}Enter)",
 			"remoteBranchesGroup": "Branches von anderswo, hier nie ausgecheckt",
 			"localBranchesGroup": "Branches ohne Worktree",
 			"remoteBranchHint": "auf {{remote}} — hier auschecken, dann daran arbeiten",
@@ -985,7 +988,7 @@
 			"title": "Einen Workspace öffnen — einen vorhandenen Worktree oder einen Branch, dessen Worktree noch anzulegen ist",
 			"empty": "Kein bekannter Worktree.",
 			"prGroup": "Ein Pull Request",
-			"prHint": "nur lesend reviewen — ⇧Enter: nur seinen Branch öffnen",
+			"prHint": "nur lesend reviewen — {{shift}}Enter: nur seinen Branch öffnen",
 			"prNote": "Review",
 			"prOpenBranch": "Nur den Workspace seines Branch öffnen",
 			"newBranchGroup": "Dieser Branch ist noch nicht hier",
@@ -1010,10 +1013,10 @@
 		"toolbar": {
 			"addAgentTitle": "Noch ein Agent in diesem Workspace",
 			"addAgent": "+ Agent",
-			"addTerminalTitle": "Noch ein Terminal in diesem Workspace (⌘⇧T)",
+			"addTerminalTitle": "Noch ein Terminal in diesem Workspace ({{mod}}{{shift}}T)",
 			"addTerminal": "+ Terminal",
 			"stop": "Stoppen",
-			"interrupt": "Unterbrechen, was läuft (⌃C)",
+			"interrupt": "Unterbrechen, was läuft ({{ctrl}}C)",
 			"clear": "Bildschirm leeren",
 			"sleep": "Beiseitelegen — Prozesse stoppen, der Workspace kommt beim nächsten Start zurück",
 			"closeMission": "Mission „{{title}}“ schließen — alle ihre Workspaces stoppen"

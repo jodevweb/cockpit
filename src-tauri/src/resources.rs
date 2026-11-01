@@ -73,6 +73,7 @@ struct Sample {
 static PREVIOUS: Mutex<Option<(Instant, HashMap<u32, f64>)>> = Mutex::new(None);
 
 /// « 12:34.56 », « 1-02:03:04 » — le format de `ps`, en secondes.
+#[cfg_attr(windows, allow(dead_code))]
 fn parse_cpu_time(value: &str) -> f64 {
 	let (days, rest) = match value.split_once('-') {
 		Some((d, rest)) => (d.parse::<f64>().unwrap_or(0.0), rest),
@@ -85,10 +86,32 @@ fn parse_cpu_time(value: &str) -> f64 {
 	days * 86_400.0 + seconds
 }
 
+/// Sous Windows, pas de `ps` : le système donne la même table directement
+/// (voir `platform::processes`), sans lancer de programme.
+#[cfg(windows)]
 fn read_processes() -> HashMap<u32, Sample> {
-	let output = std::process::Command::new("ps")
-		.args(["-axo", "pid=,ppid=,rss=,cputime=,comm="])
-		.output();
+	crate::platform::processes()
+		.into_iter()
+		.map(|process| {
+			(
+				process.pid,
+				Sample {
+					ppid: process.ppid,
+					rss_kb: process.rss_kb,
+					cpu_seconds: process.cpu_seconds,
+					command: process.name,
+				},
+			)
+		})
+		.collect()
+}
+
+#[cfg(not(windows))]
+fn read_processes() -> HashMap<u32, Sample> {
+	let output = crate::platform::quiet_std(
+		std::process::Command::new("ps").args(["-axo", "pid=,ppid=,rss=,cputime=,comm="]),
+	)
+	.output();
 	let Ok(output) = output else {
 		return HashMap::new();
 	};
@@ -187,9 +210,15 @@ impl Walker<'_> {
 }
 
 /// Mémoire physique totale et utilisée de la machine, en mégaoctets.
+#[cfg(windows)]
 pub(crate) fn machine_memory() -> (f64, f64) {
-	let total = std::process::Command::new("sysctl")
-		.args(["-n", "hw.memsize"])
+	crate::platform::machine_memory_mb()
+}
+
+/// Mémoire physique totale et utilisée de la machine, en mégaoctets.
+#[cfg(not(windows))]
+pub(crate) fn machine_memory() -> (f64, f64) {
+	let total = crate::platform::quiet_std(std::process::Command::new("sysctl").args(["-n", "hw.memsize"]))
 		.output()
 		.ok()
 		.and_then(|out| String::from_utf8_lossy(&out.stdout).trim().parse::<f64>().ok())
@@ -199,7 +228,7 @@ pub(crate) fn machine_memory() -> (f64, f64) {
 
 	// `vm_stat` compte en pages ; « utilisée » = tout sauf ce qui est libre ou
 	// spéculatif, ce qui correspond à ce qu'affiche le moniteur d'activité.
-	let used = std::process::Command::new("vm_stat")
+	let used = crate::platform::quiet_std(&mut std::process::Command::new("vm_stat"))
 		.output()
 		.ok()
 		.map(|out| {
@@ -261,7 +290,7 @@ pub fn report(
 	let strays: Vec<(String, u32)> = crate::strays::read()
 		.marked
 		.into_iter()
-		.filter(|marked| marked.ppid == 1 && !roots.contains(&marked.pid))
+		.filter(|marked| marked.detached() && !roots.contains(&marked.pid))
 		.map(|marked| (marked.session, marked.pid))
 		.collect();
 	for (_, pid) in &strays {

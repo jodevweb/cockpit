@@ -34,6 +34,7 @@
 			"resumeHint": "Öffnet die Unterhaltung erneut in einem Cockpit-Workspace",
 			"resume": "Unterhaltung fortsetzen",
 			"resumeTerminalHint": "Öffnet die Unterhaltung erneut in Terminal.app",
+			"resumeTerminalHint_windows": "Öffnet die Unterhaltung erneut in einem Terminalfenster",
 			"resumeTerminal": "Im Terminal fortsetzen",
 			"editor": "Editor",
 			"terminal": "Terminal",
@@ -111,6 +112,7 @@
 		"title": "Automatisierungen",
 		"new": "Neu",
 		"whenItRuns": "Eine Automatisierung läuft, während Cockpit offen ist. Schläft der Mac zur festgelegten Zeit, holt sie es beim Öffnen von Cockpit nach, solange der Termin noch nicht vorbei ist.",
+		"whenItRuns_windows": "Eine Automatisierung läuft, während Cockpit offen ist. Schläft der Rechner zur festgelegten Zeit, holt sie es beim Öffnen von Cockpit nach, solange der Termin noch nicht vorbei ist.",
 		"paused": "Pausiert",
 		"nextRun": "Nächster: {{when}}",
 		"noUpcoming": "Kein anstehender Termin",
@@ -188,7 +190,7 @@
 		"nothingWaiting": "Nichts wartet auf dich.",
 		"summary_one": "{{count}} Entscheidung · die älteste wartet {{since}}",
 		"summary_other": "{{count}} Entscheidungen · die älteste wartet {{since}}",
-		"keys": "<up>↑</up><down>↓</down> wechseln · <one>1</one>…<nine>9</nine> wählen · <back>⌘⇧D</back> zurückkehren",
+		"keys": "<up>↑</up><down>↓</down> wechseln · <one>1</one>…<nine>9</nine> wählen · <back>{{mod}}{{shift}}D</back> zurückkehren",
 		"empty": "Kein Agent wartet auf dich. Fragen, Berechtigungsanfragen, erwartete Antworten und freizugebende Pläne landen hier, sortiert nach dem, was sie freigeben.",
 		"blocksTasks_one": "blockiert {{count}} Aufgabe",
 		"blocksTasks_other": "blockiert {{count}} Aufgaben",
@@ -215,7 +217,7 @@
 			"label": "Er hat die Kontrolle mit einer Frage zurückgegeben",
 			"collapse": "Seine Nachricht einklappen",
 			"expand": "Seine ganze Nachricht lesen",
-			"placeholder": "Deine Antwort — ⌘↵ zum Senden",
+			"placeholder": "Deine Antwort — {{mod}}{{enter}} zum Senden",
 			"send": "Antworten"
 		}
 	},
@@ -486,6 +488,7 @@
 			"nothingToResume": "Dieser Agent hat nie eine Sitzung geöffnet: Es gibt nichts fortzusetzen.",
 			"openTerminal": "Hier ein Terminal öffnen",
 			"reveal": "Im Finder zeigen",
+			"reveal_windows": "Im Explorer zeigen",
 			"stop": "Stoppen",
 			"resume": "Fortsetzen",
 			"archive": "Archivieren",
@@ -510,7 +513,7 @@
 		"empty": {
 			"projectFolder": "mein-projekt",
 			"becomes": "— wird zu —",
-			"shortcut": "<key>⌘N</key>, der Ordner, <key>⌘↵</key>",
+			"shortcut": "<key>{{mod}}N</key>, der Ordner, <key>{{mod}}{{enter}}</key>",
 			"title": "Ein Agent, ein Ordner, das ist alles.",
 			"body": "Keine Baustelle, keine Mission, kein Branch, wenn du keinen willst. Deine freien Agenten werden hier nach Ordner abgelegt, bis du sie archivierst.",
 			"launch": "Agent starten",
@@ -962,7 +965,7 @@
 		"live": "Sie handelt wirklich. Die in den Einstellungen angehakten Aktionen sind die einzigen, die sie ausführt, und nie auf einem geteilten Branch.",
 		"suspended": {
 			"message": "In Ruhe. Laufende Einsätze werden zu Ende geführt; kein neuer beginnt.",
-			"hint": "mit einem Klick oder ⌘⇧P fortsetzen"
+			"hint": "mit einem Klick oder {{mod}}{{shift}}P fortsetzen"
 		},
 		"inFlight": {
 			"title": "Laufend",
@@ -1085,6 +1088,7 @@
 		"in": "in {{path}}",
 		"run": "Ausführen",
 		"openInTerminal": "In Terminal.app statt im Cockpit öffnen",
+		"openInTerminal_windows": "In einem Terminalfenster statt im Cockpit öffnen",
 		"required": "{{label}} ist erforderlich.",
 		"title": "Skripte",
 		"subtitle": "Konfigurierbare hauseigene Befehle und Repository-Skripte, mit Live-Ausgabe ausgeführt.",
@@ -1102,6 +1106,7 @@
 		"stop": "Stoppen",
 		"clearOutput": "Ausgabe leeren",
 		"replayInTerminal": "In Terminal.app erneut abspielen",
+		"replayInTerminal_windows": "In einem Terminalfenster erneut abspielen",
 		"launchPrompt": "Befehl ausführen",
 		"launchHint": "Die Ausgabe erscheint hier live, mit den Farben des Terminals."
 	},
@@ -1274,6 +1279,7 @@
 			"lightHint": "gleiche Rollen, andere Werte",
 			"system": "System",
 			"systemHint": "folgt macOS, Umschalten inklusive",
+			"systemHint_windows": "folgt Windows, Umschalten inklusive",
 			"help": "Die Wahl gilt für diesen Arbeitsplatz und wirkt sofort — sie wartet nicht auf „Konfiguration speichern“, das nur die Projekteinstellungen betrifft. Offene Terminals werden mit allem anderen neu gezeichnet."
 		},
 		"relay": {
@@ -1409,11 +1415,11 @@
 		},
 		"detail": {
 			"editor": "Editor",
-			"terminalHint": "Shell auf diesem Worktree, im Arbeitsbereich (⌘⇧T)",
+			"terminalHint": "Shell auf diesem Worktree, im Arbeitsbereich ({{mod}}{{shift}}T)",
 			"terminal": "Terminal",
 			"agentHint": "Hier einen Agenten starten, ohne das Cockpit zu verlassen",
 			"agent": "Agent",
-			"devHint": "{{command}} in einem Terminal im Arbeitsbereich — ⌃C zum Stoppen",
+			"devHint": "{{command}} in einem Terminal im Arbeitsbereich — {{ctrl}}C zum Stoppen",
 			"dev": "Dev",
 			"changes": "Änderungen",
 			"cleanTree": "Sauberer Baum — nichts zu vergleichen.",

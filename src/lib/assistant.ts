@@ -11,14 +11,21 @@
 
 import { t } from "@/i18n";
 import { languageName } from "@/lib/language";
+import { isMac } from "@/lib/platform";
 
 const MODIFIERS: Record<string, string> = { control: "⌃", ctrl: "⌃", alt: "⌥", option: "⌥", shift: "⇧", super: "⌘", cmd: "⌘", command: "⌘" };
+/** Sous Windows : des noms, joints par « + » ; `super` est la touche Windows. */
+const MODIFIER_NAMES: Record<string, string> = { control: "Ctrl", ctrl: "Ctrl", alt: "Alt", option: "Alt", shift: "Shift", super: "Win", cmd: "Win", command: "Win" };
 
-/** `control+alt+KeyJ` → « ⌃⌥ J », `alt+Space` → « ⌥ Espace » (dans la langue de l'interface). */
+/**
+ * `control+alt+KeyJ` → « ⌃⌥ J », `alt+Space` → « ⌥ Espace » (dans la langue de
+ * l'interface) ; sous Windows, « Ctrl+Alt+J », « Alt+Espace ».
+ */
 export function shortcutLabel(accelerator: string): string {
 	const parts = accelerator.split("+").filter(Boolean);
 	const key = parts.pop() ?? "";
-	const mods = parts.map((part) => MODIFIERS[part.toLowerCase()] ?? part).join("");
+	const names = isMac ? MODIFIERS : MODIFIER_NAMES;
+	const mods = parts.map((part) => names[part.toLowerCase()] ?? part).join(isMac ? "" : "+");
 	const name =
 		key === "Space"
 			? t("lib:assistant.keys.space")
@@ -27,7 +34,8 @@ export function shortcutLabel(accelerator: string): string {
 					.replace(/^Digit/, "")
 					.replace(/^Arrow(.*)$/, (_, direction: string) => t("lib:assistant.keys.arrow", { direction }))
 					.replace("Backquote", "`");
-	return mods ? `${mods} ${name}` : name;
+	if (!mods) return name;
+	return isMac ? `${mods} ${name}` : `${mods}+${name}`;
 }
 
 /**

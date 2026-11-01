@@ -1,1 +1,9 @@
-{}
+{
+	"desktop": {
+		"editorNotFound": "在此电脑上找不到 {{editor}}：请安装它，或将其命令行启动器加入 PATH。",
+		"terminalFailed": "无法打开终端窗口。",
+		"bashMissing": "需要 Git for Windows：找不到它的 bash。",
+		"credentialsRefused": "Windows 凭据管理器拒绝了该密钥：{{error}}",
+		"programRefused": "Cockpit 不运行程序或脚本：{{path}}"
+	}
+}

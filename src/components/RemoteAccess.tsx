@@ -8,6 +8,7 @@ import { api } from "@/lib/ipc";
 import { useAsync } from "@/lib/useAsync";
 import { useCockpit } from "@/app/store";
 import { Trans, useTranslation } from "react-i18next";
+import { platformContext } from "@/lib/platform";
 
 /**
  * Répondre à un agent depuis son téléphone.
@@ -131,7 +132,7 @@ export function RemoteAccess() {
 				<>
 					<div className="rounded-xl border border-line-soft bg-surface/40 p-3">
 						<div className="mb-1.5 text-[10px] font-semibold tracking-[0.08em] text-ink-faint uppercase">
-							{t("remoteAccess.setup.title")}
+							{t("remoteAccess.setup.title", { context: platformContext })}
 						</div>
 						<code className="text-selectable block rounded-lg bg-void px-2.5 py-2 font-mono text-[11px] text-ink-muted">
 							pnpm setup:mobile

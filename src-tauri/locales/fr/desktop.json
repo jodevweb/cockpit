@@ -1,1 +1,9 @@
-{}
+{
+	"desktop": {
+		"editorNotFound": "{{editor}} est introuvable sur ce poste : installez-le, ou mettez son lanceur en ligne de commande dans le PATH.",
+		"terminalFailed": "Aucune fenêtre de terminal n'a pu s'ouvrir.",
+		"bashMissing": "Git for Windows est nécessaire : son bash est introuvable.",
+		"credentialsRefused": "Le Gestionnaire d'identifiants Windows a refusé la clé : {{error}}",
+		"programRefused": "Cockpit ne lance ni programme ni script : {{path}}"
+	}
+}

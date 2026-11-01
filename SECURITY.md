@@ -24,12 +24,23 @@ Sont dans le périmètre :
 - **Les serveurs locaux** (débogage Chrome, MCP) — ils ne doivent répondre
   qu'au poste lui-même.
 - **Les secrets** — les jetons d'API restent côté Rust, dans
-  `~/.config/cockpit/config.toml` (permissions 600), et ne descendent jamais
-  dans la webview.
+  `~/.config/cockpit/config.toml` (permissions 600 sous macOS ; sous Windows,
+  le dossier personnel de l'utilisateur, `%USERPROFILE%\.config\cockpit`),
+  et ne descendent jamais dans la webview.
 - **La mise à jour** — seule une archive signée par la clé du projet est
-  installée.
+  installée, sous macOS comme sous Windows (l'installeur NSIS porte la même
+  signature de mise à jour). Les versions sont compilées et signées par
+  GitHub Actions ; la clé privée n'existe que dans les secrets du dépôt et
+  chez le mainteneur.
 
 Hors périmètre : ce qu'un agent fait avec les droits qu'on lui a donnés.
 Un agent lancé sans isolation peut faire tout ce que peut faire l'utilisateur ;
 c'est le rôle de l'isolation (`sandbox.rs`) et des réglages d'autorisation de
 le borner.
+
+Sous Windows, l'installeur n'est pas signé Authenticode : rien ne garantit à
+Windows l'origine d'un installeur téléchargé à la main, d'où l'avertissement
+SmartScreen. Télécharge-le uniquement depuis
+[jodevweb/cockpit-releases](https://github.com/jodevweb/cockpit-releases/releases).
+Les mises à jour intégrées, elles, vérifient la signature du projet avant
+d'installer quoi que ce soit.

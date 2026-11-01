@@ -10,6 +10,8 @@ import { api } from "@/lib/ipc";
 import { isPreview, PREVIEW_PAGE } from "@/lib/preview";
 import type { BrowserAction, ListeningPort } from "@/lib/types";
 import { useAsync, usePersistentState } from "@/lib/useAsync";
+import { isAltGraph, isMac } from "@/lib/platform";
+import { basename } from "@/lib/paths";
 
 /**
  * Le navigateur d'un workspace : la page que l'agent pilote, en direct.
@@ -42,6 +44,9 @@ export function gestureLabel(tool: string): string {
 	return translate(`components3:browserView.gesture.${gesture}`);
 }
 
+/** Sous Windows, les touches Ctrl+… qui vont à la page plutôt qu'à l'app. */
+const PAGE_EDIT_KEYS = new Set(["a", "c", "x", "z", "y"]);
+
 /** Les touches de modification, dans l'encodage du protocole de débogage. */
 function modifiersOf(event: { altKey: boolean; ctrlKey: boolean; metaKey: boolean; shiftKey: boolean }): number {
 	return (event.altKey ? 1 : 0) | (event.ctrlKey ? 2 : 0) | (event.metaKey ? 4 : 0) | (event.shiftKey ? 8 : 0);
@@ -73,7 +78,7 @@ function placeOf(server: ListeningPort, cwd: string): string {
 
 /** Le nom court d'un serveur, pour sa pastille : son dossier, sinon son processus. */
 function nameOf(server: ListeningPort, cwd: string): string {
-	return placeOf(server, cwd).split("/").pop() || server.process;
+	return basename(placeOf(server, cwd)) || server.process;
 }
 
 /** Les serveurs qui rendent des pages, à leur nom de processus. */
@@ -429,9 +434,18 @@ export function BrowserView({
 		// ⌘V : le collage natif arrive dans le champ caché, et `onPaste` le relaie.
 		// Les autres raccourcis ⌘ restent à l'app : ⌘K, ⌘W, changer d'onglet.
 		if (event.metaKey) return;
+		// Sous Windows, Ctrl tient ce rôle : Ctrl+V colle par le même chemin, et
+		// les raccourcis de l'app (Ctrl+K, Ctrl+Maj+…) lui restent. Seules les
+		// commandes d'édition — tout sélectionner, copier, couper, annuler,
+		// rétablir — partent à la page, où elles agissent sur sa sélection.
+		const altGraph = isAltGraph(event);
+		const lower = event.key.toLowerCase();
+		const pageEdit = PAGE_EDIT_KEYS.has(lower) && (!event.shiftKey || lower === "z");
+		if (!isMac && event.ctrlKey && !altGraph && !pageEdit) return;
 		// Une touche morte ou une composition : le texte viendra par `onInput`.
 		if (event.key === "Dead" || event.key === "Process" || event.nativeEvent.isComposing || event.keyCode === 229) return;
-		const printable = event.key.length === 1 && !event.ctrlKey;
+		// AltGr (Ctrl+Alt pour la webview) donne un caractère, pas un raccourci.
+		const printable = event.key.length === 1 && (!event.ctrlKey || altGraph);
 		// ⌥ + touche donne un caractère sur un clavier Mac (« | », « { », « ~ ») :
 		// envoyé comme touche avec ⌥ enfoncé, la page y verrait un raccourci.
 		if (printable && event.altKey) {

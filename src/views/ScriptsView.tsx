@@ -20,6 +20,7 @@ import { api } from "@/lib/ipc";
 import type { JobStatus, RepoCommand } from "@/lib/types";
 import { useAsync } from "@/lib/useAsync";
 import { useCockpit } from "@/app/store";
+import { platformContext } from "@/lib/platform";
 
 function jobTone(job: JobStatus) {
 	if (job.state === "running") return "info" as const;
@@ -194,7 +195,7 @@ function CommandForm({
 					variant="outline"
 					icon={Terminal}
 					className="h-8 justify-center"
-					title={t("scripts.openInTerminal")}
+					title={t("scripts.openInTerminal", { context: platformContext })}
 					onClick={() => {
 						void api.system.openTerminal(cwd, line).catch(() => undefined);
 					}}
@@ -447,7 +448,7 @@ export function ScriptsView() {
 								<Button
 									size="sm"
 									icon={Terminal}
-									title={t("scripts.replayInTerminal")}
+									title={t("scripts.replayInTerminal", { context: platformContext })}
 									onClick={() => {
 										void api.system
 											.openTerminal(activeJob.cwd, activeJob.command)

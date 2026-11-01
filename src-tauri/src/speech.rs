@@ -11,9 +11,16 @@
 //!
 //! Une seule phrase à la fois : la suivante attend que la précédente soit dite,
 //! et `stop` coupe net.
+//!
+//! Sous Windows, le moteur du système est SAPI (`System.Speech`, par
+//! PowerShell), la clé dort dans le Gestionnaire d'identifiants, et l'audio
+//! d'ElevenLabs est lu par le `MediaPlayer` de WPF — voir `windows`.
 
+#[cfg(not(windows))]
 use std::io::Write;
-use std::process::{Child, Command, Stdio};
+use std::process::Child;
+#[cfg(not(windows))]
+use std::process::{Command, Stdio};
 use std::sync::Mutex;
 use std::time::Duration;
 
@@ -32,6 +39,7 @@ pub struct Voice {
 }
 
 /// `Amélie              fr_CA    # Bonjour! Je m’appelle Amélie.`
+#[cfg_attr(windows, allow(dead_code))]
 fn parse_voice(line: &str) -> Option<Voice> {
 	let (head, _) = line.split_once('#')?;
 	let head = head.trim_end();
@@ -45,6 +53,18 @@ fn parse_voice(line: &str) -> Option<Voice> {
 }
 
 pub fn voices() -> Result<Vec<Voice>> {
+	#[cfg(windows)]
+	{
+		windows::voices()
+	}
+	#[cfg(not(windows))]
+	{
+		system_voices()
+	}
+}
+
+#[cfg(not(windows))]
+fn system_voices() -> Result<Vec<Voice>> {
 	let output = Command::new("/usr/bin/say")
 		.args(["-v", "?"])
 		.output()
@@ -87,6 +107,16 @@ async fn play(child: Child) {
 /// Le texte passe par l'entrée standard plutôt qu'en argument : une phrase
 /// d'agent qui commence par un tiret serait prise pour une option.
 async fn say_system(text: &str, voice: Option<&str>, rate: Option<u32>) -> Result<()> {
+	#[cfg(windows)]
+	let child = windows::say(text, voice, rate)?;
+	#[cfg(not(windows))]
+	let child = say_mac(text, voice, rate)?;
+	play(child).await;
+	Ok(())
+}
+
+#[cfg(not(windows))]
+fn say_mac(text: &str, voice: Option<&str>, rate: Option<u32>) -> Result<Child> {
 	let mut command = Command::new("/usr/bin/say");
 	if let Some(voice) = voice.filter(|v| !v.trim().is_empty()) {
 		command.args(["-v", voice.trim()]);
@@ -104,8 +134,7 @@ async fn say_system(text: &str, voice: Option<&str>, rate: Option<u32>) -> Resul
 	if let Some(mut stdin) = child.stdin.take() {
 		let _ = stdin.write_all(text.as_bytes());
 	}
-	play(child).await;
-	Ok(())
+	Ok(child)
 }
 
 /* ── ElevenLabs ─────────────────────────────────────────────────────── */
@@ -124,6 +153,25 @@ fn valid_key(key: &str) -> bool {
 /// `security -i` : en argument, elle se lirait dans la liste des processus.
 pub fn set_key(key: &str) -> Result<()> {
 	let key = key.trim();
+	#[cfg(windows)]
+	{
+		if key.is_empty() {
+			windows::delete_key();
+			return Ok(());
+		}
+		if !valid_key(key) {
+			return Err(CockpitError::msg(crate::i18n::t("speech.invalidKey")));
+		}
+		windows::write_key(key)
+	}
+	#[cfg(not(windows))]
+	{
+		set_key_mac(key)
+	}
+}
+
+#[cfg(not(windows))]
+fn set_key_mac(key: &str) -> Result<()> {
 	if key.is_empty() {
 		let _ = Command::new("/usr/bin/security")
 			.args(["delete-generic-password", "-a", KEYCHAIN_ACCOUNT, "-s", KEYCHAIN_SERVICE])
@@ -159,6 +207,18 @@ pub fn set_key(key: &str) -> Result<()> {
 }
 
 fn key() -> Option<String> {
+	#[cfg(windows)]
+	{
+		windows::read_key()
+	}
+	#[cfg(not(windows))]
+	{
+		key_mac()
+	}
+}
+
+#[cfg(not(windows))]
+fn key_mac() -> Option<String> {
 	let output = Command::new("/usr/bin/security")
 		.args(["find-generic-password", "-a", KEYCHAIN_ACCOUNT, "-s", KEYCHAIN_SERVICE, "-w"])
 		.output()
@@ -303,6 +363,9 @@ async fn say_cloud(text: &str, voice: Option<&str>, model: Option<&str>, rate: O
 
 	let path = std::env::temp_dir().join(format!("cockpit-voix-{}.mp3", std::process::id()));
 	std::fs::write(&path, &audio).map_err(|e| CockpitError::msg(crate::i18n::tf("speech.audioFile", &[("error", &e)])))?;
+	#[cfg(windows)]
+	let child = windows::play_mp3(&path)?;
+	#[cfg(not(windows))]
 	let child = Command::new("/usr/bin/afplay")
 		.arg(&path)
 		.stdout(Stdio::null())
@@ -339,6 +402,211 @@ pub async fn speak(
 	Ok(None)
 }
 
+/* ── Windows ────────────────────────────────────────────────────────── */
+
+/// Une ligne de la liste des voix SAPI : `Microsoft Hortense Desktop\tfr-FR`.
+#[cfg_attr(not(windows), allow(dead_code))]
+fn parse_sapi_voice(line: &str) -> Option<Voice> {
+	let (name, culture) = line.trim_end_matches('\r').split_once('\t')?;
+	let name = name.trim();
+	let culture = culture.trim().replace('-', "_");
+	let valid = !name.is_empty() && culture.len() >= 5 && culture.as_bytes()[2] == b'_';
+	valid.then(|| Voice { name: name.to_string(), locale: culture })
+}
+
+/// Le débit du Mac (mots par minute, 185 par défaut) ramené à l'échelle de
+/// SAPI : de −10 à 10, où 10 parle environ trois fois plus vite que 0.
+#[cfg_attr(not(windows), allow(dead_code))]
+fn sapi_rate(rate: Option<u32>) -> i32 {
+	let words = rate.unwrap_or(185).clamp(90, 400) as f64;
+	((words / 185.0).ln() / 3f64.ln() * 10.0).round().clamp(-10.0, 10.0) as i32
+}
+
+#[cfg(windows)]
+mod windows {
+	//! Rien de ce qui vient de l'extérieur n'est interpolé dans un script
+	//! PowerShell : les scripts sont des constantes, passées encodées
+	//! (`-EncodedCommand`) ; le texte arrive par l'entrée standard, la voix et
+	//! le fichier audio par l'environnement.
+
+	use super::{parse_sapi_voice, sapi_rate, Voice, KEYCHAIN_ACCOUNT, KEYCHAIN_SERVICE};
+	use crate::error::{CockpitError, Result};
+	use base64::Engine;
+	use std::io::Write;
+	use std::process::{Child, Command, Stdio};
+
+	fn powershell(script: &str) -> Command {
+		let utf16: Vec<u8> = script.encode_utf16().flat_map(|unit| unit.to_le_bytes()).collect();
+		let encoded = base64::engine::general_purpose::STANDARD.encode(utf16);
+		let mut command = Command::new("powershell.exe");
+		command.args(["-NoProfile", "-NonInteractive", "-ExecutionPolicy", "Bypass", "-EncodedCommand", &encoded]);
+		crate::platform::quiet_std(&mut command);
+		command
+	}
+
+	/// La liste sort en octets UTF-8, sans passer par la page de code de la
+	/// console, qui abîmerait les noms accentués.
+	const VOICES: &str = r#"
+$ErrorActionPreference = 'Stop'
+Add-Type -AssemblyName System.Speech
+$s = New-Object System.Speech.Synthesis.SpeechSynthesizer
+$lines = foreach ($v in $s.GetInstalledVoices()) {
+	if ($v.Enabled) { $v.VoiceInfo.Name + "`t" + $v.VoiceInfo.Culture.Name }
+}
+$bytes = [System.Text.Encoding]::UTF8.GetBytes(($lines -join "`n"))
+$out = [Console]::OpenStandardOutput()
+$out.Write($bytes, 0, $bytes.Length)
+$out.Flush()
+"#;
+
+	const SAY: &str = r#"
+$ErrorActionPreference = 'Stop'
+$in = [Console]::OpenStandardInput()
+$buffer = New-Object System.IO.MemoryStream
+$in.CopyTo($buffer)
+$text = [System.Text.Encoding]::UTF8.GetString($buffer.ToArray())
+Add-Type -AssemblyName System.Speech
+$s = New-Object System.Speech.Synthesis.SpeechSynthesizer
+if ($env:COCKPIT_VOICE) { try { $s.SelectVoice($env:COCKPIT_VOICE) } catch {} }
+if ($env:COCKPIT_RATE) { $s.Rate = [int]$env:COCKPIT_RATE }
+$s.SetOutputToDefaultAudioDevice()
+$s.Speak($text)
+"#;
+
+	/// `MediaPlayer` (PresentationCore, livré avec .NET Framework sur tout
+	/// Windows 10/11) lit le mp3 sans rien installer. Il n'attend pas la fin de
+	/// la lecture : on attend sa durée, ou une estimation par la taille du
+	/// fichier (128 kbit/s) s'il ne la donne pas.
+	const PLAY: &str = r#"
+$ErrorActionPreference = 'Stop'
+Add-Type -AssemblyName PresentationCore
+$p = New-Object System.Windows.Media.MediaPlayer
+$p.Open([Uri]::new($env:COCKPIT_AUDIO))
+$p.Volume = 1
+$p.Play()
+$waited = 0
+while (-not $p.NaturalDuration.HasTimeSpan -and $waited -lt 5000) { Start-Sleep -Milliseconds 50; $waited += 50 }
+if ($p.NaturalDuration.HasTimeSpan) {
+	Start-Sleep -Milliseconds ([int]$p.NaturalDuration.TimeSpan.TotalMilliseconds + 300)
+} else {
+	Start-Sleep -Seconds ([math]::Ceiling((Get-Item -LiteralPath $env:COCKPIT_AUDIO).Length / 16000) + 1)
+}
+$p.Close()
+"#;
+
+	pub fn voices() -> Result<Vec<Voice>> {
+		let output = powershell(VOICES)
+			.stdin(Stdio::null())
+			.output()
+			.map_err(|e| CockpitError::msg(format!("PowerShell : {e}")))?;
+		let raw = String::from_utf8_lossy(&output.stdout);
+		Ok(raw.lines().filter_map(parse_sapi_voice).collect())
+	}
+
+	pub fn say(text: &str, voice: Option<&str>, rate: Option<u32>) -> Result<Child> {
+		let mut command = powershell(SAY);
+		if let Some(voice) = voice.filter(|v| !v.trim().is_empty()) {
+			command.env("COCKPIT_VOICE", voice.trim());
+		}
+		if rate.is_some() {
+			command.env("COCKPIT_RATE", sapi_rate(rate).to_string());
+		}
+		let mut child = command
+			.stdin(Stdio::piped())
+			.stdout(Stdio::null())
+			.stderr(Stdio::null())
+			.spawn()
+			.map_err(|e| CockpitError::msg(format!("PowerShell : {e}")))?;
+		if let Some(mut stdin) = child.stdin.take() {
+			let _ = stdin.write_all(text.as_bytes());
+		}
+		Ok(child)
+	}
+
+	pub fn play_mp3(path: &std::path::Path) -> Result<Child> {
+		powershell(PLAY)
+			.env("COCKPIT_AUDIO", path)
+			.stdin(Stdio::null())
+			.stdout(Stdio::null())
+			.stderr(Stdio::null())
+			.spawn()
+			.map_err(|e| CockpitError::msg(format!("PowerShell : {e}")))
+	}
+
+	/* ── Gestionnaire d'identifiants ── */
+
+	use windows_sys::Win32::Foundation::GetLastError;
+	use windows_sys::Win32::Security::Credentials::{
+		CredDeleteW, CredFree, CredReadW, CredWriteW, CREDENTIALW, CRED_PERSIST_LOCAL_MACHINE, CRED_TYPE_GENERIC,
+	};
+
+	fn wide(text: &str) -> Vec<u16> {
+		text.encode_utf16().chain(std::iter::once(0)).collect()
+	}
+
+	/// Le même nom que l'élément du trousseau macOS : `cockpit-elevenlabs`.
+	fn target() -> Vec<u16> {
+		wide(KEYCHAIN_SERVICE)
+	}
+
+	pub fn write_key(key: &str) -> Result<()> {
+		let mut target = target();
+		let mut user = wide(KEYCHAIN_ACCOUNT);
+		let mut blob = key.as_bytes().to_vec();
+		let credential = CREDENTIALW {
+			Flags: 0,
+			Type: CRED_TYPE_GENERIC,
+			TargetName: target.as_mut_ptr(),
+			Comment: std::ptr::null_mut(),
+			LastWritten: unsafe { std::mem::zeroed() },
+			CredentialBlobSize: blob.len() as u32,
+			CredentialBlob: blob.as_mut_ptr(),
+			Persist: CRED_PERSIST_LOCAL_MACHINE,
+			AttributeCount: 0,
+			Attributes: std::ptr::null_mut(),
+			TargetAlias: std::ptr::null_mut(),
+			UserName: user.as_mut_ptr(),
+		};
+		let ok = unsafe { CredWriteW(&credential, 0) } != 0;
+		if !ok {
+			let code = unsafe { GetLastError() };
+			return Err(CockpitError::msg(crate::i18n::tf(
+				"desktop.credentialsRefused",
+				&[("error", &std::io::Error::from_raw_os_error(code as i32))],
+			)));
+		}
+		Ok(())
+	}
+
+	pub fn read_key() -> Option<String> {
+		let target = target();
+		let mut found: *mut CREDENTIALW = std::ptr::null_mut();
+		let ok = unsafe { CredReadW(target.as_ptr(), CRED_TYPE_GENERIC, 0, &mut found) } != 0;
+		if !ok || found.is_null() {
+			return None;
+		}
+		let key = unsafe {
+			let credential = &*found;
+			let bytes = if credential.CredentialBlob.is_null() {
+				&[][..]
+			} else {
+				std::slice::from_raw_parts(credential.CredentialBlob, credential.CredentialBlobSize as usize)
+			};
+			let key = String::from_utf8_lossy(bytes).trim().to_string();
+			CredFree(found as *const core::ffi::c_void);
+			key
+		};
+		(!key.is_empty()).then_some(key)
+	}
+
+	pub fn delete_key() {
+		let target = target();
+		unsafe {
+			CredDeleteW(target.as_ptr(), CRED_TYPE_GENERIC, 0);
+		}
+	}
+}
+
 #[cfg(test)]
 mod tests {
 	use super::{parse_voice, speed_of, valid_key};
@@ -365,6 +633,23 @@ mod tests {
 		assert!(!valid_key("sk-abc\ndelete-keychain"));
 		assert!(!valid_key("sk abc"));
 		assert!(!valid_key(""));
+	}
+
+	#[test]
+	fn lit_les_voix_de_windows() {
+		let voice = super::parse_sapi_voice("Microsoft Hortense Desktop\tfr-FR\r").unwrap();
+		assert_eq!(voice.name, "Microsoft Hortense Desktop");
+		assert_eq!(voice.locale, "fr_FR");
+		assert!(super::parse_sapi_voice("sans culture").is_none());
+		assert!(super::parse_sapi_voice("\tfr-FR").is_none());
+	}
+
+	#[test]
+	fn le_debit_du_mac_se_traduit_pour_sapi() {
+		assert_eq!(super::sapi_rate(None), 0);
+		assert_eq!(super::sapi_rate(Some(185)), 0);
+		assert!(super::sapi_rate(Some(400)) > 0 && super::sapi_rate(Some(400)) <= 10);
+		assert!(super::sapi_rate(Some(90)) < 0 && super::sapi_rate(Some(90)) >= -10);
 	}
 
 	#[test]

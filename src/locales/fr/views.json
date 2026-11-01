@@ -34,6 +34,7 @@
 			"resumeHint": "Rouvre la conversation dans un workspace du cockpit",
 			"resume": "Reprendre la conversation",
 			"resumeTerminalHint": "Rouvre la conversation dans Terminal.app",
+			"resumeTerminalHint_windows": "Rouvre la conversation dans une fenêtre de terminal",
 			"resumeTerminal": "Reprendre dans Terminal",
 			"editor": "Éditeur",
 			"terminal": "Terminal",
@@ -111,6 +112,7 @@
 		"title": "Automatisations",
 		"new": "Nouvelle",
 		"whenItRuns": "Une automatisation tourne quand Cockpit est ouvert. Mac en veille à l'heure dite, elle se rattrape à l'ouverture, tant que le rendez-vous n'est pas passé.",
+		"whenItRuns_windows": "Une automatisation tourne quand Cockpit est ouvert. Ordinateur en veille à l'heure dite, elle se rattrape à l'ouverture, tant que le rendez-vous n'est pas passé.",
 		"paused": "En pause",
 		"nextRun": "Prochaine : {{when}}",
 		"noUpcoming": "Aucun rendez-vous à venir",
@@ -188,7 +190,7 @@
 		"nothingWaiting": "Rien ne t'attend.",
 		"summary_one": "{{count}} décision · la plus ancienne attend {{since}}",
 		"summary_other": "{{count}} décisions · la plus ancienne attend {{since}}",
-		"keys": "<up>↑</up><down>↓</down> changer · <one>1</one>…<nine>9</nine> choisir · <back>⌘⇧D</back> revenir",
+		"keys": "<up>↑</up><down>↓</down> changer · <one>1</one>…<nine>9</nine> choisir · <back>{{mod}}{{shift}}D</back> revenir",
 		"empty": "Aucun agent ne t'attend. Les questions, autorisations, réponses attendues et plans à approuver arriveront ici, rangés par ce qu'ils débloquent.",
 		"blocksTasks_one": "bloque {{count}} tâche",
 		"blocksTasks_other": "bloque {{count}} tâches",
@@ -215,7 +217,7 @@
 			"label": "Il a rendu la main sur une question",
 			"collapse": "Replier son message",
 			"expand": "Lire tout son message",
-			"placeholder": "Ta réponse — ⌘↵ pour envoyer",
+			"placeholder": "Ta réponse — {{mod}}{{enter}} pour envoyer",
 			"send": "Répondre"
 		}
 	},
@@ -486,6 +488,7 @@
 			"nothingToResume": "Cet agent n'a jamais ouvert de session : il n'y a rien à reprendre.",
 			"openTerminal": "Ouvrir un terminal ici",
 			"reveal": "Montrer dans le Finder",
+			"reveal_windows": "Montrer dans l'Explorateur de fichiers",
 			"stop": "Arrêter",
 			"resume": "Reprendre",
 			"archive": "Archiver",
@@ -510,7 +513,7 @@
 		"empty": {
 			"projectFolder": "mon-projet",
 			"becomes": "— devient —",
-			"shortcut": "<key>⌘N</key>, le dossier, <key>⌘↵</key>",
+			"shortcut": "<key>{{mod}}N</key>, le dossier, <key>{{mod}}{{enter}}</key>",
 			"title": "Un agent, un dossier, c'est tout.",
 			"body": "Sans chantier, sans mission, sans branche si tu n'en veux pas. Tes agents libres se rangent ici, par dossier, jusqu'à ce que tu les archives.",
 			"launch": "Lancer un agent",
@@ -962,7 +965,7 @@
 		"live": "Elle agit pour de vrai. Les gestes cochés dans les réglages sont les seuls qu'elle posera, et jamais sur une branche partagée.",
 		"suspended": {
 			"message": "Au repos. Les engagements en cours vont au bout ; aucun nouveau ne démarrera.",
-			"hint": "reprend d'un clic ou avec ⌘⇧P"
+			"hint": "reprend d'un clic ou avec {{mod}}{{shift}}P"
 		},
 		"inFlight": {
 			"title": "En cours",
@@ -1085,6 +1088,7 @@
 		"in": "dans {{path}}",
 		"run": "Exécuter",
 		"openInTerminal": "Ouvrir dans Terminal.app plutôt que dans le cockpit",
+		"openInTerminal_windows": "Ouvrir dans une fenêtre de terminal plutôt que dans le cockpit",
 		"required": "{{label}} est requis.",
 		"title": "Scripts",
 		"subtitle": "Commandes maison paramétrables et scripts du dépôt, exécutés avec sortie live.",
@@ -1102,6 +1106,7 @@
 		"stop": "Stop",
 		"clearOutput": "Vider la sortie",
 		"replayInTerminal": "Rejouer dans Terminal.app",
+		"replayInTerminal_windows": "Rejouer dans une fenêtre de terminal",
 		"launchPrompt": "Lance une commande",
 		"launchHint": "La sortie s'affiche ici en direct, avec les couleurs du terminal."
 	},
@@ -1274,6 +1279,7 @@
 			"lightHint": "mêmes rôles, autres valeurs",
 			"system": "Système",
 			"systemHint": "suit macOS, bascule comprise",
+			"systemHint_windows": "suit Windows, bascule comprise",
 			"help": "Le choix vaut pour ce poste et s'applique tout de suite — il n'attend pas « Enregistrer la configuration », qui ne concerne que les réglages du projet. Les terminaux ouverts se repeignent avec le reste."
 		},
 		"relay": {
@@ -1409,11 +1415,11 @@
 		},
 		"detail": {
 			"editor": "Éditeur",
-			"terminalHint": "Shell sur ce worktree, dans le panneau de travail (⌘⇧T)",
+			"terminalHint": "Shell sur ce worktree, dans le panneau de travail ({{mod}}{{shift}}T)",
 			"terminal": "Terminal",
 			"agentHint": "Lancer un agent ici, sans quitter le cockpit",
 			"agent": "Agent",
-			"devHint": "{{command}} dans un terminal du panneau — ⌃C pour l'arrêter",
+			"devHint": "{{command}} dans un terminal du panneau — {{ctrl}}C pour l'arrêter",
 			"dev": "Dev",
 			"changes": "Modifications",
 			"cleanTree": "Arbre propre — rien à comparer.",

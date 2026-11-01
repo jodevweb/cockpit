@@ -129,7 +129,7 @@ fn approvals_path() -> PathBuf {
 /// commun. Un worktree neuf hérite ainsi de l'approbation de son dépôt — tant
 /// que son `.mcp.json` dit la même chose.
 fn repo_identity(cwd: &str) -> String {
-	std::process::Command::new("git")
+	crate::platform::quiet_std(&mut std::process::Command::new("git"))
 		.args(["rev-parse", "--path-format=absolute", "--git-common-dir"])
 		.current_dir(cwd)
 		.output()

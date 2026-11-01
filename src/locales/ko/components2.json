@@ -459,7 +459,7 @@
 		"quoted": "“{{text}}”",
 		"close": "닫기",
 		"placeholder": "cart 워크스페이스 열기, NW-3050으로 미션 시작…",
-		"hint": "{{shortcut}}을(를) 누른 채 말하기 · ⌘J로 입력",
+		"hint": "{{shortcut}}을(를) 누른 채 말하기 · {{mod}}J로 입력",
 		"errors": {
 			"worktreeNotFound": "worktree “{{name}}”을(를) 찾을 수 없습니다.",
 			"agentNotFound": "에이전트 “{{name}}”을(를) 찾을 수 없습니다.",
@@ -512,12 +512,13 @@
 			"hold": "누르고, 말하고, 떼세요: 어시스턴트가 이해하고, 실행하고, 소리 내어 답합니다 — Cockpit이 다른 창 뒤에 있어도 됩니다.",
 			"keyboard": "Cockpit이 앞에 있을 때 키보드로도 똑같이 할 수 있습니다.",
 			"cost": "말한 내용은 ElevenLabs(위의 음성 키)가 받아쓰고, 구독 중인 Claude가 이해합니다: 요청마다 ElevenLabs 요금제에서 몇 초, Claude 할당량에서 약간을 사용합니다. 작업은 바로 실행되며, 찾지 못한 것은 추측하지 않습니다.",
-			"noKey": "ElevenLabs 키가 없으면 어시스턴트가 듣지 못합니다 — ⌘J는 그대로 작동합니다. 음성 섹션에서 키를 저장하세요.",
+			"noKey": "ElevenLabs 키가 없으면 어시스턴트가 듣지 못합니다 — {{mod}}J는 그대로 작동합니다. 음성 섹션에서 키를 저장하세요.",
 			"speak": "말하세요… (4초)",
 			"testMic": "마이크 테스트",
 			"appOnly": "앱 안에서만.",
 			"heard": "들은 내용:",
-			"micDenied": "마이크가 거부되었다면: 시스템 설정 → 개인정보 보호 및 보안 → 마이크 → Cockpit."
+			"micDenied": "마이크가 거부되었다면: 시스템 설정 → 개인정보 보호 및 보안 → 마이크 → Cockpit.",
+			"micDenied_windows": "마이크가 거부되었다면: Windows 설정 → 개인 정보 및 보안 → 마이크 → 데스크톱 앱이 마이크에 액세스하도록 허용."
 		},
 		"shortcut": {
 			"active": "{{shortcut}}이(가) 모든 애플리케이션에서 활성화되어 있습니다.",
@@ -701,7 +702,7 @@
 		"writtenByAgents": "에이전트가 작성한 파일",
 		"uncommitted": "수정됨, 아직 커밋 안 됨",
 		"files_other": "파일 {{count}}개",
-		"buttonHint": "이름으로 이 worktree의 파일 열기 (⌘P)",
+		"buttonHint": "이름으로 이 worktree의 파일 열기 ({{mod}}P)",
 		"button": "파일",
 		"placeholder": "파일 이름 — “agentmap”, “panel work”, “apps/web env”",
 		"scanning": "저장소를 스캔하는 중…",
@@ -709,7 +710,7 @@
 		"typeToSearch": "이름의 일부를 입력하면 저장소 전체를 검색합니다.",
 		"total_other": "파일 {{formatted}}개",
 		"scanningShort": "저장소 스캔 중…",
-		"keys": "↑↓ 선택 · Enter 열기 · ⌘P",
+		"keys": "↑↓ 선택 · Enter 열기 · {{mod}}P",
 		"whyAgent": "에이전트가 작성함",
 		"whyChanged": "수정됨"
 	},
@@ -854,16 +855,19 @@
 		"listening": "듣는 중",
 		"listen": "듣기",
 		"elevenLabsFailed": "ElevenLabs가 실패해 Mac 음성으로 대신합니다: {{reason}}",
+		"elevenLabsFailed_windows": "ElevenLabs가 실패해 시스템 음성으로 대신합니다: {{reason}}",
 		"voiceAndRate": "음성과 속도"
 	},
 	"voiceSettings": {
 		"engine": "엔진",
 		"macVoice": "Mac 음성",
+		"macVoice_windows": "시스템 음성",
 		"elevenLabsHint": "가장 사람 같은 음성이며, ElevenLabs 요금제의 글자 수에서 차감됩니다. Claude나 ChatGPT 구독은 다른 애플리케이션에 음성을 제공하지 않습니다.",
 		"systemHint": "무료이며 오프라인에서 작동합니다. Premium 음성을 쓰면 훨씬 좋습니다.",
 		"elevenLabsKey": "ElevenLabs 키",
 		"createKey": "키 만들기",
 		"keyStored": "Mac 키체인에 저장됨",
+		"keyStored_windows": "이 PC에 저장됨",
 		"removeKey": "삭제",
 		"storeKey": "저장",
 		"voice": "음성",
@@ -872,8 +876,10 @@
 		"model": "모델",
 		"browserVoice": "브라우저 음성, 미리보기용.",
 		"noPremiumVoice": "설치된 Premium 음성이 없습니다. 시스템 설정 → 손쉬운 사용 → 읽기 및 말하기 → 시스템 음성 → 음성 관리에서 다운로드하세요.",
+		"noPremiumVoice_windows": "설치된 자연스러운 음성이 없습니다. Windows 설정 → 시간 및 언어 → 음성 → 음성 관리에서 추가하세요.",
 		"rate": "속도",
 		"fallback": "Mac 음성으로 대신합니다: {{reason}}",
+		"fallback_windows": "시스템 음성으로 대신합니다: {{reason}}",
 		"sample": "장바구니 반올림을 고치고 테스트를 다시 실행했습니다. 완료되었습니다: 파일 세 개를 변경했고, 테스트가 통과합니다.",
 		"tryVoice": "이 음성 들어 보기",
 		"allSettings": "모든 음성 및 어시스턴트 설정"
@@ -894,8 +900,10 @@
 		"cancel": "취소",
 		"save": "저장",
 		"openInTerminal": "대신 Terminal.app에서 열기",
+		"openInTerminal_windows": "대신 터미널 창에서 열기",
 		"new": "새 프롬프트",
-		"footer": "클릭하면 여기서 에이전트가 실행되며, 대화와 답변 상자는 Cockpit에 있습니다. 터미널 아이콘을 누르면 실제 TTY가 필요한 작업을 위해 Terminal.app에서 엽니다. 라이브러리는 <path>{{path}}</path>에 있습니다."
+		"footer": "클릭하면 여기서 에이전트가 실행되며, 대화와 답변 상자는 Cockpit에 있습니다. 터미널 아이콘을 누르면 실제 TTY가 필요한 작업을 위해 Terminal.app에서 엽니다. 라이브러리는 <path>{{path}}</path>에 있습니다.",
+		"footer_windows": "클릭하면 여기서 에이전트가 실행되며, 대화와 답변 상자는 Cockpit에 있습니다. 터미널 아이콘을 누르면 실제 TTY가 필요한 작업을 위해 터미널 창에서 엽니다. 라이브러리는 <path>{{path}}</path>에 있습니다."
 	},
 	"panelReport": {
 		"verdict": {
@@ -973,6 +981,7 @@
 		"agents": "에이전트",
 		"terminals": "터미널",
 		"footnote": "메모리 수치는 프로세스 간 공유분을 고려하지 않고 합산됩니다: 따라서 합계는 정확한 값이 아니라 상한입니다. 인터페이스 자체는 macOS가 권한 없이는 누구에게도 귀속시키지 않는 WebKit 프로세스에서 실행되므로, 약 60MB를 더해 계산하세요.",
+		"footnote_windows": "메모리 수치는 프로세스 간 공유분을 고려하지 않고 합산됩니다: 따라서 합계는 정확한 값이 아니라 상한입니다. 인터페이스 자체는 여기서 집계되지 않는 WebView2 프로세스(msedgewebview2)에서 실행되므로, 조금 더 더해 계산하세요.",
 		"spendNoQuota": "오늘 사용한 토큰. CLI는 할당량을 보고하지 않습니다.",
 		"spendLeft": "“{{window}}”에 {{left}}% 남음",
 		"spendLeftResets": "“{{window}}”에 {{left}}% 남음, {{resets}} 초기화",
@@ -985,6 +994,6 @@
 		"scripts": "스크립트",
 		"scriptsHint": "저장소 스크립트와 사용자 지정 명령",
 		"noScripts": "이 폴더에 스크립트가 없습니다.",
-		"footer": "명령이 이 셸에 입력된 뒤 실행됩니다 — ⇧Enter는 선택한 항목과 반대로 동작합니다."
+		"footer": "명령이 이 셸에 입력된 뒤 실행됩니다 — {{shift}}Enter는 선택한 항목과 반대로 동작합니다."
 	}
 }

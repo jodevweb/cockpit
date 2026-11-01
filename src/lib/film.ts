@@ -4,6 +4,7 @@ import { lazyLabels } from "@/lib/language";
 import { delivered } from "@/lib/delivered";
 import { commandOf, isTestCommand, kindOf, pathOf, type Episode } from "@/lib/episodes";
 import { mediaOfPath, type Media } from "@/lib/media";
+import { basename } from "@/lib/paths";
 
 /**
  * Le film d'un épisode : huit images au plus, tirées de ce que l'agent a fait.
@@ -62,10 +63,6 @@ const MAX_FRAMES = 8;
 /** Ce que l'agent fait dans un navigateur : le sien, ou celui d'un serveur MCP du dépôt. */
 export function isBrowserTool(name: string | undefined): boolean {
 	return !!name && (name.startsWith("mcp__navigateur__") || /playwright|browser|chrome/i.test(name));
-}
-
-function basename(path: string): string {
-	return path.split("/").filter(Boolean).pop() ?? path;
 }
 
 function text(value: unknown): string {

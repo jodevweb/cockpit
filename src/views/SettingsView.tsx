@@ -51,6 +51,7 @@ import { usePersistentState, useAsync } from "@/lib/useAsync";
 import { useCockpit } from "@/app/store";
 import { RESUME_KEY, type ResumeMode } from "@/app/hibernate";
 import { DOCK_KEY } from "@/components/WorkspacePanel";
+import { platformContext } from "@/lib/platform";
 
 /**
  * Les rubriques des réglages, dans l'ordre où l'on s'en sert.
@@ -1134,7 +1135,7 @@ function ThemeSetting() {
 	const options: Array<{ value: ThemeChoice; label: string; hint: string }> = [
 		{ value: "dark", label: t("settings.theme.dark"), hint: t("settings.theme.darkHint") },
 		{ value: "light", label: t("settings.theme.light"), hint: t("settings.theme.lightHint") },
-		{ value: "system", label: t("settings.theme.system"), hint: t("settings.theme.systemHint") },
+		{ value: "system", label: t("settings.theme.system"), hint: t("settings.theme.systemHint", { context: platformContext }) },
 	];
 
 	return (

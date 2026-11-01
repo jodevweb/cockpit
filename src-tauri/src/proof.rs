@@ -20,7 +20,7 @@
 use crate::config::config_dir;
 use serde_json::json;
 use std::collections::HashMap;
-use std::path::{Path, PathBuf};
+use std::path::PathBuf;
 use std::sync::{Mutex, OnceLock};
 use std::time::{Duration, Instant};
 
@@ -188,18 +188,41 @@ fn ffmpeg() -> Option<String> {
 		.get_or_init(|| {
 			// Lancé depuis le Finder, le cockpit n'a qu'un PATH minimal : même
 			// recherche que pour `claude` (voir `agent::claude_binary`).
-			if let Ok(output) = std::process::Command::new("zsh").arg("-lc").arg("command -v ffmpeg").output() {
-				let found = String::from_utf8_lossy(&output.stdout).trim().to_string();
-				if !found.is_empty() && Path::new(&found).exists() {
-					return Some(found);
-				}
+			if let Some(found) = crate::platform::locate("ffmpeg") {
+				return Some(found);
 			}
-			["/opt/homebrew/bin/ffmpeg", "/usr/local/bin/ffmpeg"]
-				.into_iter()
-				.find(|path| Path::new(path).exists())
-				.map(str::to_string)
+			crate::platform::first_runnable(&ffmpeg_candidates())
 		})
 		.clone()
+}
+
+/// Où l'on trouve ffmpeg quand le shell ne le connaît pas.
+fn ffmpeg_candidates() -> Vec<PathBuf> {
+	#[cfg(windows)]
+	{
+		use crate::platform::env_dir;
+		let mut found = Vec::new();
+		// winget pose ses liens ici ; scoop et Chocolatey, leurs cales.
+		if let Some(local) = env_dir("LOCALAPPDATA") {
+			found.push(local.join("Microsoft").join("WinGet").join("Links").join("ffmpeg.exe"));
+		}
+		if let Some(home) = dirs::home_dir() {
+			found.push(home.join("scoop").join("shims").join("ffmpeg.exe"));
+		}
+		if let Some(data) = env_dir("ProgramData") {
+			found.push(data.join("chocolatey").join("bin").join("ffmpeg.exe"));
+		}
+		for base in ["ProgramFiles", "ProgramW6432"] {
+			if let Some(dir) = env_dir(base) {
+				found.push(dir.join("ffmpeg").join("bin").join("ffmpeg.exe"));
+			}
+		}
+		found
+	}
+	#[cfg(not(windows))]
+	{
+		vec!["/opt/homebrew/bin/ffmpeg".into(), "/usr/local/bin/ffmpeg".into()]
+	}
 }
 
 /// La liste que lit ffmpeg : chaque image et le temps qu'elle reste, comprimé.
@@ -210,12 +233,12 @@ fn concat_list(frames: &[(PathBuf, Duration)]) -> (String, f64) {
 		let next = frames.get(index + 1).map(|(_, next)| *next).unwrap_or(*at + Duration::from_millis(1200));
 		let hold = (next.saturating_sub(*at)).as_secs_f64().clamp(0.08, MAX_HOLD);
 		total += hold;
-		list.push_str(&format!("file '{}'\nduration {hold:.3}\n", path.to_string_lossy().replace('\'', "'\\''")));
+		list.push_str(&format!("file '{}'\nduration {hold:.3}\n", crate::platform::display_path(path).replace('\'', "'\\''")));
 	}
 	// ffmpeg ignore la durée de la dernière entrée : on la répète pour qu'elle
 	// reste à l'écran.
 	if let Some((last, _)) = frames.last() {
-		list.push_str(&format!("file '{}'\n", last.to_string_lossy().replace('\'', "'\\''")));
+		list.push_str(&format!("file '{}'\n", crate::platform::display_path(last).replace('\'', "'\\''")));
 	}
 	(list, total)
 }
@@ -242,7 +265,7 @@ fn assemble(recording: Recording) -> Option<Film> {
 				&crate::i18n::t("proof.unavailable"),
 				&crate::i18n::t("proof.ffmpegMissing"),
 				false,
-				&crate::i18n::t("proof.ffmpegHint"),
+				&crate::i18n::t(if cfg!(windows) { "windowsAgents.ffmpegHint" } else { "proof.ffmpegHint" }),
 			);
 		});
 		return None;
@@ -251,7 +274,7 @@ fn assemble(recording: Recording) -> Option<Film> {
 	let list_path = recording.dir.join("images.ffconcat");
 	std::fs::write(&list_path, list).ok()?;
 	let output = recording.dir.join("preuve.mp4");
-	let status = std::process::Command::new(binary)
+	let status = crate::platform::quiet_std(&mut std::process::Command::new(binary))
 		.args(["-y", "-loglevel", "error", "-f", "concat", "-safe", "0", "-i"])
 		.arg(&list_path)
 		// Dimensions paires et couleurs 4:2:0 : ce que le lecteur du webview

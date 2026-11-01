@@ -84,7 +84,7 @@
 			"quoted": "« {{text}} »",
 			"currentFallback": "la consigne en cours",
 			"new": "Nouvelle consigne — une nouvelle ligne sur la carte",
-			"flipTitle": "Changer — ou ⌥Entrée pour envoyer de l'autre côté",
+			"flipTitle": "Changer — ou {{alt}}Entrée pour envoyer de l'autre côté",
 			"toNew": "nouvelle consigne",
 			"toFollow": "suite"
 		},
@@ -114,7 +114,7 @@
 			"label": "Actions",
 			"title": "Prompts prêts à l'emploi pour cet agent",
 			"empty": "Aucun prompt enregistré.",
-			"footer": "Le prompt part dans le champ de réponse — ⇧Entrée l'envoie directement. Bibliothèque : <mono>~/.config/cockpit/prompts.toml</mono>"
+			"footer": "Le prompt part dans le champ de réponse — {{shift}}Entrée l'envoie directement. Bibliothèque : <mono>~/.config/cockpit/prompts.toml</mono>"
 		},
 		"model": {
 			"currentTitle": "Modèle en cours : {{model}}\nChanger relance l'agent sur le même fil.",
@@ -549,17 +549,21 @@
 		}
 	},
 	"fileLink": {
-		"hint": "Clic : lire dans le cockpit\n⌘-clic : ouvrir dans l'éditeur\n⌥-clic : révéler dans le Finder\n⇧-clic : copier le chemin"
+		"hint": "Clic : lire dans le cockpit\n{{modKey}}-clic : ouvrir dans l'éditeur\n{{altKey}}-clic : révéler dans le Finder\n{{shiftKey}}-clic : copier le chemin",
+		"hint_windows": "Clic : lire dans le cockpit\n{{modKey}}-clic : ouvrir dans l'éditeur\n{{altKey}}-clic : révéler dans l'Explorateur de fichiers\n{{shiftKey}}-clic : copier le chemin"
 	},
 	"fileViewer": {
 		"opaque": {
 			"unplayable": "Le cockpit ne sait pas lire ce format. L'application du Mac, elle, le saura sûrement.",
+			"unplayable_windows": "Le cockpit ne sait pas lire ce format. L'application par défaut de Windows, elle, le saura sûrement.",
 			"unknown": "Le cockpit n'affiche pas ce genre de fichier. Ouvre {{name}} avec l'application du Mac.",
+			"unknown_windows": "Le cockpit n'affiche pas ce genre de fichier. Ouvre {{name}} avec l'application par défaut de Windows.",
 			"openDefault": "Ouvrir avec l'app par défaut",
-			"showInFinder": "Montrer dans le Finder"
+			"showInFinder": "Montrer dans le Finder",
+			"showInFinder_windows": "Montrer dans l'Explorateur de fichiers"
 		},
 		"unsaved": "non enregistré",
-		"saveTitle": "Enregistrer (⌘S)",
+		"saveTitle": "Enregistrer ({{mod}}S)",
 		"save": "Enregistrer",
 		"discardTitle": "Abandonner les modifications",
 		"cancel": "Annuler",
@@ -567,14 +571,16 @@
 		"edit": "Modifier",
 		"copyPath": "Copier le chemin",
 		"reveal": "Révéler dans le Finder",
+		"reveal_windows": "Révéler dans l'Explorateur de fichiers",
 		"openWithTitle": "Ouvrir avec l'application du Mac",
+		"openWithTitle_windows": "Ouvrir avec l'application par défaut de Windows",
 		"openWith": "Ouvrir avec…",
 		"externalEditorTitle": "Modifier dans l'éditeur externe",
 		"externalEditor": "Éditeur",
 		"close": "Fermer (Échap)",
-		"searchPlaceholder": "Chercher dans le fichier… (⌘F)",
+		"searchPlaceholder": "Chercher dans le fichier… ({{mod}}F)",
 		"noMatch": "aucun",
-		"previousMatch": "Occurrence précédente (⇧⏎)",
+		"previousMatch": "Occurrence précédente ({{shift}}{{enter}})",
 		"nextMatch": "Occurrence suivante (⏎)",
 		"truncated": "Fichier tronqué à {{size}} — ouvre-le dans l'éditeur pour la suite."
 	},
@@ -757,7 +763,7 @@
 		"title": "Lancer un agent",
 		"subtitle": "Un dossier, un agent. Ni chantier ni mission.",
 		"close": "Fermer",
-		"allSet": "Tout est déjà rempli. Choisis un dossier, puis <key>⌘↵</key> : l'agent part.",
+		"allSet": "Tout est déjà rempli. Choisis un dossier, puis <key>{{mod}}{{enter}}</key> : l'agent part.",
 		"folder": {
 			"noteLibre": "agent libre",
 			"noteRecent": "agent récent",
@@ -766,6 +772,7 @@
 			"path": "Chemin du dossier",
 			"placeholder": "~/Sites/mon-projet",
 			"browse": "Choisir dans le Finder…",
+			"browse_windows": "Choisir dans l'Explorateur de fichiers…",
 			"missing": "Ce dossier n'existe pas.",
 			"gitRepo": "Dépôt git · {{branch}} · {{state}}",
 			"detached": "HEAD détachée",
@@ -810,7 +817,7 @@
 			"title": "Prêt à partir",
 			"prompt": "Première consigne <muted>— facultatif</muted>",
 			"placeholder": "Vide : l'agent attend ta première phrase, comme « claude » tout court.",
-			"remember": "Retenir ces choix pour <code>{{folder}}</code> — la prochaine fois, ⌘N puis ⌘↵ suffit",
+			"remember": "Retenir ces choix pour <code>{{folder}}</code> — la prochaine fois, {{mod}}N puis {{mod}}{{enter}} suffit",
 			"button": "Lancer"
 		},
 		"command": "Ce que tu aurais tapé",
@@ -866,13 +873,14 @@
 		"count_other": "{{count}} fichiers touchés",
 		"reveal": {
 			"title": "Ouvrir le worktree dans le Finder",
+			"title_windows": "Ouvrir le worktree dans l'Explorateur de fichiers",
 			"label": "Le dossier"
 		}
 	},
 	"quickMenu": {
 		"search": "Chercher…",
 		"noMatch": "Rien à ce nom.",
-		"extraHint": "{{title}} (⇧Entrée)"
+		"extraHint": "{{title}} ({{shift}}Entrée)"
 	},
 	"reliabilityPanel": {
 		"title": "État de la boucle",
@@ -957,6 +965,7 @@
 		},
 		"setup": {
 			"title": "À faire une fois sur ce Mac",
+			"title_windows": "À faire une fois sur cet ordinateur",
 			"detail": "Le script configure le serveur ntfy local, le publie sur le tailnet à côté de cette page, et rend le sujet et le jeton à coller ci-dessous. Le relais Apple ne voit que l'empreinte du sujet ; le contenu vient d'ici."
 		},
 		"ntfy": {

@@ -48,7 +48,7 @@
 		},
 		"libre": {
 			"launch": "Lanzar un agente libre…",
-			"launchHint": "⌘N · una carpeta, un agente",
+			"launchHint": "{{mod}}N · una carpeta, un agente",
 			"launchIn": "Lanzar un agente en {{folder}}",
 			"launchInHint": "el lanzador, con tus últimas elecciones"
 		},
@@ -70,7 +70,8 @@
 			"launchAgentHint": "conversación en el cockpit",
 			"terminal": "Terminal en {{name}}",
 			"terminalHint": "shell en el cockpit",
-			"terminalApp": "Abrir {{name}} en Terminal.app"
+			"terminalApp": "Abrir {{name}} en Terminal.app",
+			"terminalApp_windows": "Abrir {{name}} en una ventana de terminal"
 		},
 		"folder": {
 			"newAgent": "Nuevo agente en una carpeta…",
@@ -204,34 +205,34 @@
 			"placeBranch": "nueva rama",
 			"placeWorktree": "nuevo worktree",
 			"defaultModel": "modelo por defecto de la máquina",
-			"title": "Una carpeta, un agente: como cd y luego claude (⌘N)",
+			"title": "Una carpeta, un agente: como cd y luego claude ({{mod}}N)",
 			"button": "Lanzar un agente",
 			"again": "Relanzar como la última vez",
 			"noneYet": "Nada todavía: tu primer lanzamiento se recordará para la próxima vez.",
 			"other": "Otra carpeta, otros ajustes…"
 		},
 		"top": {
-			"mapTitle": "El mapa de todo el trabajo (⌘⇧C)",
-			"workspaceTitle": "Agentes y terminales abiertos (⌘⇧A)",
+			"mapTitle": "El mapa de todo el trabajo ({{mod}}{{shift}}C)",
+			"workspaceTitle": "Agentes y terminales abiertos ({{mod}}{{shift}}A)",
 			"libresTitle": "Agentes lanzados fuera de un proyecto, como en una terminal",
-			"decisionsTitle": "Lo que espera tu decisión, ordenado por lo que desbloquea (⌘⇧D)",
-			"recapTitle": "Lo que ha pasado, en imágenes: una historia por turno de agente (⌘⇧J)",
+			"decisionsTitle": "Lo que espera tu decisión, ordenado por lo que desbloquea ({{mod}}{{shift}}D)",
+			"recapTitle": "Lo que ha pasado, en imágenes: una historia por turno de agente ({{mod}}{{shift}}J)",
 			"recap": "Resumen",
-			"automationsTitle": "Reuniones que se preparan solas, como la daily (⌘⇧R)"
+			"automationsTitle": "Reuniones que se preparan solas, como la daily ({{mod}}{{shift}}R)"
 		},
 		"search": "Ir a, lanzar, preguntar…",
 		"atelier": {
 			"title": "Todas las pantallas, el proyecto, los ajustes",
 			"name": "Taller",
 			"close": "Cerrar el taller",
-			"subtitle": "todas las pantallas · ⌘K para buscar"
+			"subtitle": "todas las pantallas · {{mod}}K para buscar"
 		},
 		"live": {
 			"missions_one": "{{count}} misión",
 			"missions_other": "{{count}} misiones",
-			"missionsOngoing": "{{missions}} en curso (⌘⇧M)",
-			"missionsWaiting_one": "{{missions}} en curso, {{count}} espera tu aprobación (⌘⇧M)",
-			"missionsWaiting_other": "{{missions}} en curso, {{count}} esperan tu aprobación (⌘⇧M)",
+			"missionsOngoing": "{{missions}} en curso ({{mod}}{{shift}}M)",
+			"missionsWaiting_one": "{{missions}} en curso, {{count}} espera tu aprobación ({{mod}}{{shift}}M)",
+			"missionsWaiting_other": "{{missions}} en curso, {{count}} esperan tu aprobación ({{mod}}{{shift}}M)",
 			"scripts_one": "{{count}} script en ejecución",
 			"scripts_other": "{{count}} scripts en ejecución"
 		}

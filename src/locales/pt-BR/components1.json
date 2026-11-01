@@ -84,7 +84,7 @@
 			"quoted": "“{{text}}”",
 			"currentFallback": "a instrução atual",
 			"new": "Nova instrução — uma nova linha no mapa",
-			"flipTitle": "Alternar — ou ⌥Enter para enviar do outro jeito",
+			"flipTitle": "Alternar — ou {{alt}}Enter para enviar do outro jeito",
 			"toNew": "nova instrução",
 			"toFollow": "continuação"
 		},
@@ -114,7 +114,7 @@
 			"label": "Ações",
 			"title": "Prompts prontos para este agente",
 			"empty": "Nenhum prompt salvo.",
-			"footer": "O prompt vai para o campo de resposta — ⇧Enter envia direto. Biblioteca: <mono>~/.config/cockpit/prompts.toml</mono>"
+			"footer": "O prompt vai para o campo de resposta — {{shift}}Enter envia direto. Biblioteca: <mono>~/.config/cockpit/prompts.toml</mono>"
 		},
 		"model": {
 			"currentTitle": "Modelo atual: {{model}}\nTrocar reinicia o agente na mesma conversa.",
@@ -549,17 +549,21 @@
 		}
 	},
 	"fileLink": {
-		"hint": "Clique: ler no Cockpit\n⌘-clique: abrir no editor\n⌥-clique: mostrar no Finder\n⇧-clique: copiar o caminho"
+		"hint": "Clique: ler no Cockpit\n{{modKey}}-clique: abrir no editor\n{{altKey}}-clique: mostrar no Finder\n{{shiftKey}}-clique: copiar o caminho",
+		"hint_windows": "Clique: ler no Cockpit\n{{modKey}}-clique: abrir no editor\n{{altKey}}-clique: mostrar no Explorador de Arquivos\n{{shiftKey}}-clique: copiar o caminho"
 	},
 	"fileViewer": {
 		"opaque": {
 			"unplayable": "O Cockpit não consegue reproduzir este formato. O app do próprio Mac quase certamente consegue.",
+			"unplayable_windows": "O Cockpit não consegue reproduzir este formato. O app padrão do Windows quase certamente consegue.",
 			"unknown": "O Cockpit não exibe este tipo de arquivo. Abra {{name}} com o app do Mac.",
+			"unknown_windows": "O Cockpit não exibe este tipo de arquivo. Abra {{name}} com o app padrão do Windows.",
 			"openDefault": "Abrir com o app padrão",
-			"showInFinder": "Mostrar no Finder"
+			"showInFinder": "Mostrar no Finder",
+			"showInFinder_windows": "Mostrar no Explorador de Arquivos"
 		},
 		"unsaved": "não salvo",
-		"saveTitle": "Salvar (⌘S)",
+		"saveTitle": "Salvar ({{mod}}S)",
 		"save": "Salvar",
 		"discardTitle": "Descartar as alterações",
 		"cancel": "Cancelar",
@@ -567,14 +571,16 @@
 		"edit": "Editar",
 		"copyPath": "Copiar o caminho",
 		"reveal": "Mostrar no Finder",
+		"reveal_windows": "Mostrar no Explorador de Arquivos",
 		"openWithTitle": "Abrir com o app do Mac",
+		"openWithTitle_windows": "Abrir com o app padrão do Windows",
 		"openWith": "Abrir com…",
 		"externalEditorTitle": "Editar no editor externo",
 		"externalEditor": "Editor",
 		"close": "Fechar (Esc)",
-		"searchPlaceholder": "Buscar no arquivo… (⌘F)",
+		"searchPlaceholder": "Buscar no arquivo… ({{mod}}F)",
 		"noMatch": "nenhum",
-		"previousMatch": "Ocorrência anterior (⇧⏎)",
+		"previousMatch": "Ocorrência anterior ({{shift}}{{enter}})",
 		"nextMatch": "Próxima ocorrência (⏎)",
 		"truncated": "Arquivo truncado em {{size}} — abra-o no editor para ver o resto."
 	},
@@ -757,7 +763,7 @@
 		"title": "Lançar um agente",
 		"subtitle": "Uma pasta, um agente. Sem projeto, sem missão.",
 		"close": "Fechar",
-		"allSet": "Tudo já está preenchido. Escolha uma pasta e depois <key>⌘↵</key>: o agente começa.",
+		"allSet": "Tudo já está preenchido. Escolha uma pasta e depois <key>{{mod}}{{enter}}</key>: o agente começa.",
 		"folder": {
 			"noteLibre": "agente livre",
 			"noteRecent": "agente recente",
@@ -766,6 +772,7 @@
 			"path": "Caminho da pasta",
 			"placeholder": "~/Sites/meu-projeto",
 			"browse": "Escolher no Finder…",
+			"browse_windows": "Escolher no Explorador de Arquivos…",
 			"missing": "Esta pasta não existe.",
 			"gitRepo": "Repositório git · {{branch}} · {{state}}",
 			"detached": "HEAD destacado",
@@ -810,7 +817,7 @@
 			"title": "Pronto para começar",
 			"prompt": "Primeira instrução <muted>— opcional</muted>",
 			"placeholder": "Vazio: o agente espera sua primeira frase, igual ao “claude” puro.",
-			"remember": "Lembrar estas escolhas para <code>{{folder}}</code> — da próxima vez, ⌘N e depois ⌘↵ bastam",
+			"remember": "Lembrar estas escolhas para <code>{{folder}}</code> — da próxima vez, {{mod}}N e depois {{mod}}{{enter}} bastam",
 			"button": "Lançar"
 		},
 		"command": "O que você teria digitado",
@@ -866,13 +873,14 @@
 		"count_other": "{{count}} arquivos tocados",
 		"reveal": {
 			"title": "Abrir o worktree no Finder",
+			"title_windows": "Abrir o worktree no Explorador de Arquivos",
 			"label": "A pasta"
 		}
 	},
 	"quickMenu": {
 		"search": "Buscar…",
 		"noMatch": "Nada com esse nome.",
-		"extraHint": "{{title}} (⇧Enter)"
+		"extraHint": "{{title}} ({{shift}}Enter)"
 	},
 	"reliabilityPanel": {
 		"title": "Estado do ciclo",
@@ -957,6 +965,7 @@
 		},
 		"setup": {
 			"title": "A fazer uma vez neste Mac",
+			"title_windows": "A fazer uma vez neste computador",
 			"detail": "O script configura o servidor ntfy local, publica-o na tailnet ao lado desta página e mostra o tópico e o token para colar abaixo. O relay da Apple só vê um hash do tópico; o conteúdo vem daqui."
 		},
 		"ntfy": {

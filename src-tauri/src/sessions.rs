@@ -50,10 +50,59 @@ pub fn projects_roots() -> Vec<PathBuf> {
 
 /// Nom du dossier où Claude Code range les conversations d'un répertoire.
 ///
-/// L'encodage est celui du CLI : chaque séparateur devient un tiret, le point
-/// aussi — `/Users/moi/Sites/api` donne `-Users-moi-Sites-api`.
+/// L'encodage est celui du CLI (lu dans son code, 2.1) : tout ce qui n'est pas
+/// une lettre ou un chiffre ASCII devient un tiret — `/Users/moi/Sites/api`
+/// donne `-Users-moi-Sites-api`, `C:\Users\moi\api` donne `C--Users-moi-api`.
+/// Le CLI compte en unités UTF-16 : un caractère hors du plan de base en
+/// donne deux. Au-delà de 200, il tronque et ajoute une empreinte du chemin
+/// complet, pour que deux longs chemins voisins ne se confondent pas.
+///
+/// Remplacer seulement `/` et `.` — ce qu'on faisait — ratait tout dossier
+/// dont le nom porte une espace ou un `_`, et tous les chemins Windows.
 pub fn project_key(cwd: &str) -> String {
-	cwd.replace(['/', '.'], "-")
+	const MAX: usize = 200;
+	let cwd = normalized_cwd(cwd);
+	let encoded: String = cwd
+		.chars()
+		.flat_map(|c| {
+			let width = if c.is_ascii_alphanumeric() { 1 } else { c.len_utf16() };
+			std::iter::repeat_n(if c.is_ascii_alphanumeric() { c } else { '-' }, width)
+		})
+		.collect();
+	if encoded.len() <= MAX {
+		return encoded;
+	}
+	// `Math.abs(hash).toString(36)` : l'empreinte de `String.hashCode` en Java,
+	// sur les unités UTF-16 du chemin.
+	let hash = cwd
+		.encode_utf16()
+		.fold(0i32, |hash, unit| hash.wrapping_mul(31).wrapping_add(unit as i32));
+	format!("{}-{}", &encoded[..MAX], base36((hash as i64).unsigned_abs()))
+}
+
+/// Le dossier tel que le CLI le voit. Sous Windows, la lettre du lecteur en
+/// majuscule — `process.cwd()` l'écrit ainsi, et `c:` comme `C:` désignent le
+/// même dossier pour le système, pas pour l'encodage.
+fn normalized_cwd(cwd: &str) -> String {
+	let mut text = cwd.to_string();
+	if cfg!(windows) && text.as_bytes().get(1) == Some(&b':') {
+		text[..1].make_ascii_uppercase();
+	}
+	text
+}
+
+fn base36(mut value: u64) -> String {
+	const DIGITS: &[u8; 36] = b"0123456789abcdefghijklmnopqrstuvwxyz";
+	if value == 0 {
+		return "0".into();
+	}
+	let mut out = Vec::new();
+	while value > 0 {
+		out.push(DIGITS[(value % 36) as usize]);
+		value /= 36;
+	}
+	out.reverse();
+	String::from_utf8(out).unwrap_or_default()
 }
 
 /// Oublie les conversations tenues dans un répertoire.
@@ -289,7 +338,8 @@ fn ingest(acc: &mut Accumulator, entry: &Value) {
 	}
 	if acc.summary.cwd.is_empty() {
 		if let Some(cwd) = entry.get("cwd").and_then(|v| v.as_str()) {
-			acc.summary.cwd = cwd.to_string();
+			// Sous Windows, le CLI écrit `C:\…` : l'interface attend des `/`.
+			acc.summary.cwd = crate::platform::display_path(std::path::Path::new(cwd));
 		}
 	}
 	if acc.summary.git_branch.is_none() {
@@ -1027,6 +1077,33 @@ pub fn read_subagents(session_file: &Path) -> Result<Vec<SubagentRun>> {
 
 #[cfg(test)]
 mod tests {
+	#[test]
+	fn le_dossier_des_conversations_s_encode_comme_le_cli() {
+		// Valeurs relevées en rejouant l'encodage du CLI (`replace(/[^a-zA-Z0-9]/g, "-")`).
+		assert_eq!(super::project_key("/Users/moi/Sites/api"), "-Users-moi-Sites-api");
+		assert_eq!(super::project_key("/Users/moi/mon projet_v2.1"), "-Users-moi-mon-projet-v2-1");
+		assert_eq!(super::project_key(r"C:\Users\me\proj"), "C--Users-me-proj");
+		assert_eq!(super::project_key("C:/Users/me/proj"), "C--Users-me-proj");
+		// Un caractère hors du plan de base compte deux unités UTF-16.
+		assert_eq!(super::project_key("/Users/moi/été/🚀x"), "-Users-moi--t----x");
+	}
+
+	#[test]
+	fn un_long_chemin_est_tronque_et_signe_comme_le_cli() {
+		let long = format!("/Users/moi/{}fin", "dossier-tres-long/".repeat(12));
+		let key = super::project_key(&long);
+		assert!(key.ends_with("-dossier-t-5cp5p9"), "{key}");
+		assert_eq!(key.len(), 200 + 1 + "5cp5p9".len());
+		// Une empreinte négative : le CLI en prend la valeur absolue.
+		assert!(super::project_key(&format!("{long}/v0")).ends_with("-ql2s4"));
+	}
+
+	#[test]
+	fn sous_windows_la_lettre_du_lecteur_ne_change_pas_le_dossier() {
+		if cfg!(windows) {
+			assert_eq!(super::project_key(r"c:\Users\me\proj"), "C--Users-me-proj");
+		}
+	}
 	use super::*;
 	use crate::executions::ExecEvent;
 

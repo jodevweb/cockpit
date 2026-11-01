@@ -84,7 +84,7 @@
 			"quoted": "「{{text}}」",
 			"currentFallback": "現在の指示",
 			"new": "新しい指示 — マップに新しい線を追加",
-			"flipTitle": "切り替え — または ⌥Enter でもう一方として送信",
+			"flipTitle": "切り替え — または {{alt}}Enter でもう一方として送信",
 			"toNew": "新しい指示",
 			"toFollow": "続き"
 		},
@@ -114,7 +114,7 @@
 			"label": "アクション",
 			"title": "このエージェント用の既成プロンプト",
 			"empty": "保存されたプロンプトはありません。",
-			"footer": "プロンプトは返信欄に入ります — ⇧Enter で直接送信。ライブラリ：<mono>~/.config/cockpit/prompts.toml</mono>"
+			"footer": "プロンプトは返信欄に入ります — {{shift}}Enter で直接送信。ライブラリ：<mono>~/.config/cockpit/prompts.toml</mono>"
 		},
 		"model": {
 			"currentTitle": "現在のモデル：{{model}}\n切り替えると、同じスレッドでエージェントが再起動します。",
@@ -532,17 +532,21 @@
 		}
 	},
 	"fileLink": {
-		"hint": "クリック：Cockpit で読む\n⌘-クリック：エディタで開く\n⌥-クリック：Finder で表示\n⇧-クリック：パスをコピー"
+		"hint": "クリック：Cockpit で読む\n{{modKey}}-クリック：エディタで開く\n{{altKey}}-クリック：Finder で表示\n{{shiftKey}}-クリック：パスをコピー",
+		"hint_windows": "クリック：Cockpit で読む\n{{modKey}}-クリック：エディタで開く\n{{altKey}}-クリック：エクスプローラー で表示\n{{shiftKey}}-クリック：パスをコピー"
 	},
 	"fileViewer": {
 		"opaque": {
 			"unplayable": "Cockpit はこの形式を再生できません。Mac 標準のアプリならほぼ確実に再生できます。",
+			"unplayable_windows": "Cockpit はこの形式を再生できません。Windows の既定のアプリならほぼ確実に再生できます。",
 			"unknown": "Cockpit はこの種類のファイルを表示しません。{{name}} を Mac のアプリで開いてください。",
+			"unknown_windows": "Cockpit はこの種類のファイルを表示しません。{{name}} を Windows の既定のアプリで開いてください。",
 			"openDefault": "デフォルトのアプリで開く",
-			"showInFinder": "Finder で表示"
+			"showInFinder": "Finder で表示",
+			"showInFinder_windows": "エクスプローラー で表示"
 		},
 		"unsaved": "未保存",
-		"saveTitle": "保存（⌘S）",
+		"saveTitle": "保存（{{mod}}S）",
 		"save": "保存",
 		"discardTitle": "変更を破棄",
 		"cancel": "キャンセル",
@@ -550,14 +554,16 @@
 		"edit": "編集",
 		"copyPath": "パスをコピー",
 		"reveal": "Finder で表示",
+		"reveal_windows": "エクスプローラー で表示",
 		"openWithTitle": "Mac のアプリで開く",
+		"openWithTitle_windows": "Windows の既定のアプリで開く",
 		"openWith": "このアプリで開く…",
 		"externalEditorTitle": "外部エディタで編集",
 		"externalEditor": "エディタ",
 		"close": "閉じる（Esc）",
-		"searchPlaceholder": "ファイル内を検索…（⌘F）",
+		"searchPlaceholder": "ファイル内を検索…（{{mod}}F）",
 		"noMatch": "なし",
-		"previousMatch": "前の一致（⇧⏎）",
+		"previousMatch": "前の一致（{{shift}}{{enter}}）",
 		"nextMatch": "次の一致（⏎）",
 		"truncated": "ファイルは {{size}} で切り詰められています — 残りを見るにはエディタで開いてください。"
 	},
@@ -727,7 +733,7 @@
 		"title": "エージェントを起動",
 		"subtitle": "1 フォルダに 1 エージェント。プロジェクトもミッションもなし。",
 		"close": "閉じる",
-		"allSet": "すべて入力済みです。フォルダを選んで <key>⌘↵</key> を押すと、エージェントが起動します。",
+		"allSet": "すべて入力済みです。フォルダを選んで <key>{{mod}}{{enter}}</key> を押すと、エージェントが起動します。",
 		"folder": {
 			"noteLibre": "フリーエージェント",
 			"noteRecent": "最近のエージェント",
@@ -736,6 +742,7 @@
 			"path": "フォルダのパス",
 			"placeholder": "~/Sites/my-project",
 			"browse": "Finder で選択…",
+			"browse_windows": "エクスプローラー で選択…",
 			"missing": "このフォルダは存在しません。",
 			"gitRepo": "Git リポジトリ · {{branch}} · {{state}}",
 			"detached": "切り離された HEAD",
@@ -779,7 +786,7 @@
 			"title": "準備完了",
 			"prompt": "最初の指示 <muted>— 任意</muted>",
 			"placeholder": "空欄：ただの「claude」と同じく、エージェントはあなたの最初の一文を待ちます。",
-			"remember": "<code>{{folder}}</code> 用にこの選択を記憶する — 次回は ⌘N のあと ⌘↵ だけで済みます",
+			"remember": "<code>{{folder}}</code> 用にこの選択を記憶する — 次回は {{mod}}N のあと {{mod}}{{enter}} だけで済みます",
 			"button": "起動"
 		},
 		"command": "入力するはずだったコマンド",
@@ -832,13 +839,14 @@
 		"count_other": "変更したファイル {{count}} 個",
 		"reveal": {
 			"title": "worktree を Finder で開く",
+			"title_windows": "worktree を エクスプローラー で開く",
 			"label": "フォルダ"
 		}
 	},
 	"quickMenu": {
 		"search": "検索…",
 		"noMatch": "その名前のものはありません。",
-		"extraHint": "{{title}}（⇧Enter）"
+		"extraHint": "{{title}}（{{shift}}Enter）"
 	},
 	"reliabilityPanel": {
 		"title": "ループの状態",
@@ -920,6 +928,7 @@
 		},
 		"setup": {
 			"title": "この Mac で一度だけ行うこと",
+			"title_windows": "この PC で一度だけ行うこと",
 			"detail": "スクリプトがローカルの ntfy サーバーを設定し、このページと同じく tailnet に公開して、下に貼り付けるトピックとトークンを表示します。Apple のリレーが見るのはトピックのハッシュだけで、内容はここから送られます。"
 		},
 		"ntfy": {

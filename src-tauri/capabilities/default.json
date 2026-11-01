@@ -7,15 +7,15 @@
 		"core:default",
 		{
 			"identifier": "core:window:allow-start-dragging",
-			"comment": "Déplacer la fenêtre. `core:window:default` ne l'accorde pas, et la barre de titre native est masquée (`titleBarStyle: Overlay`) : sans cette permission, la fenêtre est clouée à l'écran où elle s'ouvre."
+			"comment": "Déplacer la fenêtre. `core:window:default` ne l'accorde pas, et sous macOS la barre de titre native est masquée (`titleBarStyle: Overlay`, dans `tauri.macos.conf.json`) : sans cette permission, la fenêtre y est clouée à l'écran où elle s'ouvre. Sous Windows, la fenêtre garde sa barre native."
 		},
 		{
 			"identifier": "core:window:allow-set-theme",
-			"comment": "Accorder le thème choisi à la fenêtre elle-même. Ce que nous peignons suit `data-theme`, mais pas la barre de titre en surimpression ni les ascenseurs natifs : sans cela, une interface claire garde une barre sombre et des ascenseurs blancs sur blanc."
+			"comment": "Accorder le thème choisi à la fenêtre elle-même. Ce que nous peignons suit `data-theme`, mais pas la barre de titre (en surimpression sous macOS, native sous Windows) ni les ascenseurs natifs : sans cela, une interface claire garde une barre sombre et des ascenseurs blancs sur blanc."
 		},
 		{
 			"identifier": "core:window:allow-set-background-color",
-			"comment": "Peindre le fond de la fenêtre aux couleurs du thème. Sans cela, la fenêtre garde la teinte déclarée au lancement : un éclair sombre à chaque ouverture en thème clair, et un fond sombre visible derrière la page si WebKit tarde à dessiner."
+			"comment": "Peindre le fond de la fenêtre aux couleurs du thème. Sans cela, la fenêtre garde la teinte déclarée au lancement : un éclair sombre à chaque ouverture en thème clair, et un fond sombre visible derrière la page si la webview (WebKit, WebView2) tarde à dessiner."
 		},
 		"notification:default",
 		{

@@ -83,9 +83,10 @@ pub fn list(root: String) -> Result<Vec<FileEntry>> {
 		let Ok(relative) = entry.path().strip_prefix(&root) else {
 			continue;
 		};
+		// Séparateurs `/` : l'interface découpe les chemins dessus.
 		entries.push(FileEntry {
-			path: entry.path().to_string_lossy().to_string(),
-			relative: relative.to_string_lossy().to_string(),
+			path: crate::platform::display_path(entry.path()),
+			relative: crate::platform::display_path(relative),
 		});
 		if entries.len() >= MAX_FILES {
 			break;
@@ -203,6 +204,8 @@ fn sanitize(name: &str) -> String {
 		.map(|c| match c {
 			'/' | '\\' | ':' => '-',
 			c if c.is_control() => '-',
+			// Ce que Windows refuse dans un nom de fichier.
+			'<' | '>' | '"' | '|' | '?' | '*' if cfg!(windows) => '-',
 			c => c,
 		})
 		.collect();

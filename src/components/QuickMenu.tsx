@@ -3,6 +3,7 @@ import { ChevronDown, Search } from "lucide-react";
 import { useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import { Button, Spinner } from "@/components/ui";
 import { useTranslation } from "react-i18next";
+import { modKey } from "@/lib/platform";
 
 /**
  * Menu de raccourcis d'un onglet de travail.
@@ -144,7 +145,7 @@ export function QuickMenu({
 			event.preventDefault();
 			const action = visibles[cursor];
 			// ⇧Entrée déclenche le second geste — envoyer sans relire, par exemple.
-			if (action) choose(action, event.shiftKey || event.metaKey);
+			if (action) choose(action, event.shiftKey || modKey(event));
 		}
 	};
 

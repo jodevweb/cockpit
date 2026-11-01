@@ -48,7 +48,7 @@
 		},
 		"libre": {
 			"launch": "Launch a free agent…",
-			"launchHint": "⌘N · one folder, one agent",
+			"launchHint": "{{mod}}N · one folder, one agent",
 			"launchIn": "Launch an agent in {{folder}}",
 			"launchInHint": "the launcher, prefilled with your last choices"
 		},
@@ -70,7 +70,8 @@
 			"launchAgentHint": "conversation in the cockpit",
 			"terminal": "Terminal on {{name}}",
 			"terminalHint": "shell in the cockpit",
-			"terminalApp": "Open {{name}} in Terminal.app"
+			"terminalApp": "Open {{name}} in Terminal.app",
+			"terminalApp_windows": "Open {{name}} in a terminal window"
 		},
 		"folder": {
 			"newAgent": "New agent in a folder…",
@@ -204,34 +205,34 @@
 			"placeBranch": "new branch",
 			"placeWorktree": "new worktree",
 			"defaultModel": "machine's default model",
-			"title": "One folder, one agent — like cd then claude (⌘N)",
+			"title": "One folder, one agent — like cd then claude ({{mod}}N)",
 			"button": "Launch an agent",
 			"again": "Relaunch like last time",
 			"noneYet": "Nothing yet: your first launch will be remembered for next time.",
 			"other": "Another folder, other settings…"
 		},
 		"top": {
-			"mapTitle": "The map of all the work (⌘⇧C)",
-			"workspaceTitle": "Open agents and terminals (⌘⇧A)",
+			"mapTitle": "The map of all the work ({{mod}}{{shift}}C)",
+			"workspaceTitle": "Open agents and terminals ({{mod}}{{shift}}A)",
 			"libresTitle": "Agents launched outside a project, like in a terminal",
-			"decisionsTitle": "What's waiting for your decision, sorted by what it unblocks (⌘⇧D)",
-			"recapTitle": "What happened, in pictures: one story per agent turn (⌘⇧J)",
+			"decisionsTitle": "What's waiting for your decision, sorted by what it unblocks ({{mod}}{{shift}}D)",
+			"recapTitle": "What happened, in pictures: one story per agent turn ({{mod}}{{shift}}J)",
 			"recap": "Recap",
-			"automationsTitle": "Meetings that prepare themselves, like the daily (⌘⇧R)"
+			"automationsTitle": "Meetings that prepare themselves, like the daily ({{mod}}{{shift}}R)"
 		},
 		"search": "Go to, launch, ask…",
 		"atelier": {
 			"title": "All screens, the project, settings",
 			"name": "Workshop",
 			"close": "Close the workshop",
-			"subtitle": "all screens · ⌘K to search"
+			"subtitle": "all screens · {{mod}}K to search"
 		},
 		"live": {
 			"missions_one": "{{count}} mission",
 			"missions_other": "{{count}} missions",
-			"missionsOngoing": "{{missions}} in progress (⌘⇧M)",
-			"missionsWaiting_one": "{{missions}} in progress, {{count}} waiting for your approval (⌘⇧M)",
-			"missionsWaiting_other": "{{missions}} in progress, {{count}} waiting for your approval (⌘⇧M)",
+			"missionsOngoing": "{{missions}} in progress ({{mod}}{{shift}}M)",
+			"missionsWaiting_one": "{{missions}} in progress, {{count}} waiting for your approval ({{mod}}{{shift}}M)",
+			"missionsWaiting_other": "{{missions}} in progress, {{count}} waiting for your approval ({{mod}}{{shift}}M)",
 			"scripts_one": "{{count}} script running",
 			"scripts_other": "{{count}} scripts running"
 		}

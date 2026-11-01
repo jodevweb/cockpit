@@ -239,7 +239,8 @@ pub async fn file_diff(root: &Path, base: &str, file: &str, untracked: bool) -> 
 	if !untracked {
 		return run_git(root, &["diff", "--no-renames", base, "--", file]).await;
 	}
-	let output = Command::new("git")
+	// `/dev/null` : Git for Windows le reconnaît aussi.
+	let output = crate::platform::quiet_async(&mut Command::new("git"))
 		.args(["diff", "--no-index", "--", "/dev/null", file])
 		.current_dir(root)
 		.output()

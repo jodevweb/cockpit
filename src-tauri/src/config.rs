@@ -2232,7 +2232,8 @@ pub fn project_named(repo: &str) -> String {
 /// dépôt alors que c'est le chemin qui n'avait pas été compris. On cherche
 /// longtemps du mauvais côté.
 pub fn resolve_path(raw: &str, projects_root: &str) -> String {
-	let trimmed = raw.trim().trim_end_matches('/');
+	// `is_separator` : `/` partout, `\` aussi sous Windows.
+	let trimmed = raw.trim().trim_end_matches(std::path::is_separator);
 	if trimmed.is_empty() {
 		return String::new();
 	}
@@ -2242,7 +2243,7 @@ pub fn resolve_path(raw: &str, projects_root: &str) -> String {
 			// `join("")` ajoute une barre finale : « ~ » seul doit rendre le
 			// dossier personnel, pas « /Users/moi/ ».
 			Some(home) => {
-				let rest = rest.trim_start_matches('/');
+				let rest = rest.trim_start_matches(std::path::is_separator);
 				if rest.is_empty() {
 					home
 				} else {
@@ -3580,18 +3581,31 @@ mod permanence_tests {
 	/// rendu accusait alors le dépôt git au lieu du chemin mal compris.
 	#[test]
 	fn un_chemin_se_lit_comme_on_l_ecrit() {
-		let home = dirs::home_dir().expect("dossier personnel").to_string_lossy().to_string();
-		let root = format!("{home}/Sites");
+		// Chemins construits comme le système les écrit : le test vaut aussi
+		// sous Windows.
+		let home_dir = dirs::home_dir().expect("dossier personnel");
+		let home = home_dir.to_string_lossy().to_string();
+		let root = home_dir.join("Sites").to_string_lossy().to_string();
 
-		assert_eq!(resolve_path("~/Sites/produit", &root), format!("{home}/Sites/produit"));
+		assert_eq!(
+			resolve_path("~/Sites/produit", &root),
+			home_dir.join("Sites/produit").to_string_lossy()
+		);
 		assert_eq!(resolve_path("~", &root), home);
 		// Un nom seul se résout sous le dossier des projets : c'est exactement à
 		// ça qu'il sert.
-		assert_eq!(resolve_path("produit", &root), format!("{root}/produit"));
+		assert_eq!(
+			resolve_path("produit", &root),
+			std::path::Path::new(&root).join("produit").to_string_lossy()
+		);
 		// Un chemin absolu ne bouge pas.
-		assert_eq!(resolve_path("/opt/truc", &root), "/opt/truc");
+		let absolu = std::env::temp_dir().join("truc").to_string_lossy().to_string();
+		assert_eq!(resolve_path(&absolu, &root), absolu);
 		// Les espaces d'un copier-coller, et la barre finale d'une complétion.
-		assert_eq!(resolve_path("  /opt/truc/  ", &root), "/opt/truc");
+		assert_eq!(
+			resolve_path(&format!("  {absolu}{}  ", std::path::MAIN_SEPARATOR), &root),
+			absolu
+		);
 		assert_eq!(resolve_path("   ", &root), "");
 		// Sans dossier de projets déclaré, un nom relatif reste relatif : le
 		// cockpit n'invente pas de racine.

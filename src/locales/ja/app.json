@@ -48,7 +48,7 @@
 		},
 		"libre": {
 			"launch": "フリーエージェントを起動…",
-			"launchHint": "⌘N · 1 フォルダに 1 エージェント",
+			"launchHint": "{{mod}}N · 1 フォルダに 1 エージェント",
 			"launchIn": "{{folder}} でエージェントを起動",
 			"launchInHint": "前回の選択を入力済みのランチャー"
 		},
@@ -68,7 +68,8 @@
 			"launchAgentHint": "Cockpit 内での会話",
 			"terminal": "{{name}} のターミナル",
 			"terminalHint": "Cockpit 内のシェル",
-			"terminalApp": "{{name}} を Terminal.app で開く"
+			"terminalApp": "{{name}} を Terminal.app で開く",
+			"terminalApp_windows": "{{name}} を ターミナルウィンドウ で開く"
 		},
 		"folder": {
 			"newAgent": "フォルダで新しいエージェント…",
@@ -199,32 +200,32 @@
 			"placeBranch": "新しいブランチ",
 			"placeWorktree": "新しい worktree",
 			"defaultModel": "マシンのデフォルトモデル",
-			"title": "1 フォルダに 1 エージェント — cd してから claude と同じ（⌘N）",
+			"title": "1 フォルダに 1 エージェント — cd してから claude と同じ（{{mod}}N）",
 			"button": "エージェントを起動",
 			"again": "前回と同じ設定で再起動",
 			"noneYet": "まだ何もありません。最初の起動内容が次回のために記憶されます。",
 			"other": "別のフォルダ、別の設定…"
 		},
 		"top": {
-			"mapTitle": "すべての作業のマップ（⌘⇧C）",
-			"workspaceTitle": "開いているエージェントとターミナル（⌘⇧A）",
+			"mapTitle": "すべての作業のマップ（{{mod}}{{shift}}C）",
+			"workspaceTitle": "開いているエージェントとターミナル（{{mod}}{{shift}}A）",
 			"libresTitle": "ターミナルのように、プロジェクト外で起動したエージェント",
-			"decisionsTitle": "あなたの判断を待っているもの。解除されるものの大きさ順（⌘⇧D）",
-			"recapTitle": "起きたことを画像で：エージェントのターンごとに 1 つのストーリー（⌘⇧J）",
+			"decisionsTitle": "あなたの判断を待っているもの。解除されるものの大きさ順（{{mod}}{{shift}}D）",
+			"recapTitle": "起きたことを画像で：エージェントのターンごとに 1 つのストーリー（{{mod}}{{shift}}J）",
 			"recap": "振り返り",
-			"automationsTitle": "デイリーのように、自動で準備されるミーティング（⌘⇧R）"
+			"automationsTitle": "デイリーのように、自動で準備されるミーティング（{{mod}}{{shift}}R）"
 		},
 		"search": "移動、起動、質問…",
 		"atelier": {
 			"title": "すべての画面、プロジェクト、設定",
 			"name": "工房",
 			"close": "工房を閉じる",
-			"subtitle": "すべての画面 · ⌘K で検索"
+			"subtitle": "すべての画面 · {{mod}}K で検索"
 		},
 		"live": {
 			"missions_other": "ミッション {{count}} 件",
-			"missionsOngoing": "{{missions}} 進行中（⌘⇧M）",
-			"missionsWaiting_other": "{{missions}} 進行中、{{count}} 件があなたの承認待ち（⌘⇧M）",
+			"missionsOngoing": "{{missions}} 進行中（{{mod}}{{shift}}M）",
+			"missionsWaiting_other": "{{missions}} 進行中、{{count}} 件があなたの承認待ち（{{mod}}{{shift}}M）",
 			"scripts_other": "スクリプト {{count}} 件実行中"
 		}
 	},

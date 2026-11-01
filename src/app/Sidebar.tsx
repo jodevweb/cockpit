@@ -50,6 +50,8 @@ import { useLibreLaunch } from "@/components/LibreLauncher";
 import { useLibresWaiting } from "@/views/LibresView";
 import { MODELS, PERMISSION_MODES } from "./agents";
 import { useAllSessions, useCockpit, type ViewId } from "./store";
+import { dragRegion, formatShortcut, isMac } from "@/lib/platform";
+import { homeOf } from "@/lib/paths";
 
 interface Entry {
 	id: ViewId;
@@ -253,7 +255,7 @@ function WorkspaceTail({ shortcut }: { shortcut: string }) {
 	if (count === 0) {
 		return (
 			<span className="font-mono text-[10px] text-ink-faint/0 group-hover:text-ink-faint/60">
-				⌘{shortcut}
+				{formatShortcut(`⌘${shortcut}`)}
 			</span>
 		);
 	}
@@ -391,7 +393,7 @@ function LaunchButton() {
 		return () => window.removeEventListener("mousedown", dismiss);
 	}, [menu]);
 
-	const home = (path: string) => /^\/Users\/[^/]+/.exec(path)?.[0] ?? "";
+	const home = homeOf;
 	const describe = (entry: (typeof recents)[number]) => {
 		const choices = entry.choices;
 		if (!choices) return "";
@@ -476,7 +478,7 @@ function LaunchButton() {
 					>
 						<Zap size={15} />
 						<span className="flex-1">{t("sidebar.launch.other")}</span>
-						<KeyHint>⌘N</KeyHint>
+						<KeyHint>{formatShortcut("⌘N")}</KeyHint>
 					</button>
 				</div>
 			) : null}
@@ -511,11 +513,12 @@ export function Sidebar({ onOpenPalette }: { onOpenPalette: () => void }) {
 	return (
 		<>
 			<header
-				data-tauri-drag-region="deep"
+				data-tauri-drag-region={dragRegion}
 				className={clsx(
 					"hairline-b relative z-30 flex h-11 shrink-0 items-center gap-1 bg-base pr-2",
-					// Les pastilles de fenêtre de macOS occupent le coin.
-					hasTauri() ? "pl-[84px]" : "pl-3",
+					// Les pastilles de fenêtre de macOS occupent le coin. Ailleurs, la
+					// barre de titre est native, au-dessus : rien à réserver.
+					hasTauri() && isMac ? "pl-[84px]" : "pl-3",
 				)}
 			>
 				<Logo size={20} className="mr-1.5 shadow-sm shadow-black/30" />
@@ -596,7 +599,7 @@ export function Sidebar({ onOpenPalette }: { onOpenPalette: () => void }) {
 					</>
 				) : null}
 
-				<span data-tauri-drag-region="deep" className="h-full min-w-4 flex-1" />
+				<span data-tauri-drag-region={dragRegion} className="h-full min-w-4 flex-1" />
 
 				<button
 					type="button"
@@ -604,7 +607,7 @@ export function Sidebar({ onOpenPalette }: { onOpenPalette: () => void }) {
 					className="focus-ring flex h-7 w-56 min-w-[132px] shrink items-center justify-between gap-2 rounded-lg border border-line-soft bg-surface px-2.5 text-[11px] text-ink-faint transition-colors duration-150 hover:border-line hover:text-ink-muted"
 				>
 					<span className="truncate whitespace-nowrap">{t("sidebar.search")}</span>
-					<KeyHint>⌘K</KeyHint>
+					<KeyHint>{formatShortcut("⌘K")}</KeyHint>
 				</button>
 				{/* Ce qu'on dépense et ce que la machine encaisse : à voir sans rien
 				    ouvrir, un quota qui s'épuise coûte plus cher qu'un écran de plus. */}
@@ -825,7 +828,7 @@ function Atelier({ onClose }: { onClose: () => void }) {
 													{badge}
 												</span>
 											) : entry.shortcut ? (
-												<span className="font-mono text-[10px] text-ink-faint/60">⌘{entry.shortcut}</span>
+												<span className="font-mono text-[10px] text-ink-faint/60">{formatShortcut(`⌘${entry.shortcut}`)}</span>
 											) : null}
 										</button>
 									);
@@ -844,7 +847,7 @@ function Atelier({ onClose }: { onClose: () => void }) {
 				>
 					<Settings size={14} className={view === "settings" ? "text-accent-soft" : "text-ink-faint"} />
 					{t("sidebar.views.settings")}
-					<span className="ml-auto font-mono text-[10px] text-ink-faint/60">⌘,</span>
+					<span className="ml-auto font-mono text-[10px] text-ink-faint/60">{formatShortcut("⌘,")}</span>
 				</button>
 			</motion.nav>
 		</>

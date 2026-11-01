@@ -48,7 +48,7 @@
 		},
 		"libre": {
 			"launch": "Freien Agenten starten…",
-			"launchHint": "⌘N · ein Ordner, ein Agent",
+			"launchHint": "{{mod}}N · ein Ordner, ein Agent",
 			"launchIn": "Agent in {{folder}} starten",
 			"launchInHint": "der Starter, vorausgefüllt mit deiner letzten Auswahl"
 		},
@@ -70,7 +70,8 @@
 			"launchAgentHint": "Unterhaltung im Cockpit",
 			"terminal": "Terminal auf {{name}}",
 			"terminalHint": "Shell im Cockpit",
-			"terminalApp": "{{name}} in Terminal.app öffnen"
+			"terminalApp": "{{name}} in Terminal.app öffnen",
+			"terminalApp_windows": "{{name}} in einem Terminalfenster öffnen"
 		},
 		"folder": {
 			"newAgent": "Neuer Agent in einem Ordner…",
@@ -204,34 +205,34 @@
 			"placeBranch": "neuer Branch",
 			"placeWorktree": "neuer Worktree",
 			"defaultModel": "Standardmodell des Rechners",
-			"title": "Ein Ordner, ein Agent — wie cd und dann claude (⌘N)",
+			"title": "Ein Ordner, ein Agent — wie cd und dann claude ({{mod}}N)",
 			"button": "Agent starten",
 			"again": "Wie beim letzten Mal starten",
 			"noneYet": "Noch nichts: Dein erster Start wird fürs nächste Mal gemerkt.",
 			"other": "Anderer Ordner, andere Einstellungen…"
 		},
 		"top": {
-			"mapTitle": "Die Karte der gesamten Arbeit (⌘⇧C)",
-			"workspaceTitle": "Offene Agenten und Terminals (⌘⇧A)",
+			"mapTitle": "Die Karte der gesamten Arbeit ({{mod}}{{shift}}C)",
+			"workspaceTitle": "Offene Agenten und Terminals ({{mod}}{{shift}}A)",
 			"libresTitle": "Außerhalb eines Projekts gestartete Agenten, wie in einem Terminal",
-			"decisionsTitle": "Was auf deine Entscheidung wartet, sortiert nach dem, was es freigibt (⌘⇧D)",
-			"recapTitle": "Was passiert ist, in Bildern: eine Geschichte pro Agenten-Runde (⌘⇧J)",
+			"decisionsTitle": "Was auf deine Entscheidung wartet, sortiert nach dem, was es freigibt ({{mod}}{{shift}}D)",
+			"recapTitle": "Was passiert ist, in Bildern: eine Geschichte pro Agenten-Runde ({{mod}}{{shift}}J)",
 			"recap": "Rückblick",
-			"automationsTitle": "Termine, die sich selbst vorbereiten, wie das Daily (⌘⇧R)"
+			"automationsTitle": "Termine, die sich selbst vorbereiten, wie das Daily ({{mod}}{{shift}}R)"
 		},
 		"search": "Gehe zu, starte, frage…",
 		"atelier": {
 			"title": "Alle Ansichten, das Projekt, die Einstellungen",
 			"name": "Werkstatt",
 			"close": "Werkstatt schließen",
-			"subtitle": "alle Ansichten · ⌘K zum Suchen"
+			"subtitle": "alle Ansichten · {{mod}}K zum Suchen"
 		},
 		"live": {
 			"missions_one": "{{count}} Mission",
 			"missions_other": "{{count}} Missionen",
-			"missionsOngoing": "{{missions}} laufend (⌘⇧M)",
-			"missionsWaiting_one": "{{missions}} laufend, {{count}} wartet auf deine Freigabe (⌘⇧M)",
-			"missionsWaiting_other": "{{missions}} laufend, {{count}} warten auf deine Freigabe (⌘⇧M)",
+			"missionsOngoing": "{{missions}} laufend ({{mod}}{{shift}}M)",
+			"missionsWaiting_one": "{{missions}} laufend, {{count}} wartet auf deine Freigabe ({{mod}}{{shift}}M)",
+			"missionsWaiting_other": "{{missions}} laufend, {{count}} warten auf deine Freigabe ({{mod}}{{shift}}M)",
 			"scripts_one": "{{count}} Skript läuft",
 			"scripts_other": "{{count}} Skripte laufen"
 		}

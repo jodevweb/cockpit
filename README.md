@@ -1,16 +1,18 @@
 # Cockpit
 
-Poste de pilotage macOS pour les agents de code — Claude Code, Codex, Gemini.
+Poste de pilotage pour les agents de code — Claude Code, Codex, Gemini — sur
+macOS et Windows.
 On lance des agents sur des worktrees, on suit ce qu'ils font, on répond quand
 ils ont besoin de toi, et on relit ce qu'ils livrent, dans une seule fenêtre
 native.
 
-*A native macOS cockpit to run, watch and steer coding agents (Claude Code,
-Codex, Gemini) across git worktrees. Available in 10 languages; the docs are in
+*A native macOS and Windows cockpit to run, watch and steer coding agents
+(Claude Code, Codex, Gemini) across git worktrees. Available in 10 languages; the docs are in
 French.*
 
 [![Licence MIT](https://img.shields.io/badge/licence-MIT-blue.svg)](LICENSE)
 ![macOS 13+](https://img.shields.io/badge/macOS-13%2B-lightgrey.svg)
+![Windows 10/11](https://img.shields.io/badge/Windows-10%20%7C%2011-lightgrey.svg)
 ![Tauri 2](https://img.shields.io/badge/Tauri-2-24C8DB.svg)
 
 <picture>
@@ -50,25 +52,39 @@ des données d'exemple.</sub>
 ```bash
 pnpm install
 pnpm dev          # développement, rechargement à chaud
-pnpm install:app  # compile et installe Cockpit.app dans /Applications
-pnpm build        # produit Cockpit.app + un .dmg dans src-tauri/target/release/bundle
+pnpm install:app  # compile et installe l'app sur ce poste
+pnpm build        # macOS : Cockpit.app + .dmg ; Windows : installeur NSIS
+                  # (dans src-tauri/target/release/bundle)
 ```
 
-`pnpm install:app` est la commande du quotidien : elle installe l'app dans
-`/Applications`, d'où elle se lance comme n'importe quelle autre (Spotlight,
-Launchpad, Dock) sans dépendre d'un terminal ouvert. Elle saute volontairement
-la cible `.dmg`, dont le script de bundling attend une autorisation
-d'automatisation du Finder et reste bloqué sans elle.
+`pnpm install:app` est la commande du quotidien. Sous macOS, elle installe
+l'app dans `/Applications`, d'où elle se lance comme n'importe quelle autre
+(Spotlight, Launchpad, Dock) sans dépendre d'un terminal ouvert ; elle saute
+volontairement la cible `.dmg`, dont le script de bundling attend une
+autorisation d'automatisation du Finder et reste bloqué sans elle. Sous
+Windows, elle produit l'installeur NSIS et le joue en silence : l'app
+s'installe pour l'utilisateur courant (`%LOCALAPPDATA%\Cockpit`), sans droits
+administrateur, et apparaît dans le menu Démarrer.
+
+Les scripts `pnpm install:app` et `pnpm setup:mobile` passent par
+`scripts/plateforme.mjs`, qui choisit la variante du système : le `.sh` sous
+macOS, le `.ps1` sous Windows quand il existe (sinon le `.sh`, joué par le
+bash de Git for Windows).
 
 ## Prérequis
 
-**Le poste.** macOS 13 minimum, et macOS seulement : le cockpit parle à
-`osascript`, `open`, Terminal.app et `dscl`, il n'a pas d'équivalent ailleurs.
-Le shell utilisé pour tout ce qu'il lance est `zsh` — celui de macOS convient.
+**Le poste.** macOS 13 minimum, ou Windows 10 (21H2 et suivantes) / 11, en
+x64. Pas de Linux. Le shell utilisé pour tout ce que le cockpit lance est
+`zsh` sous macOS — celui du système convient — et le bash de **Git for
+Windows** sous Windows (voir plus bas).
 
-**Pour compiler.** Node 20+, pnpm, Rust stable (`rustup`), Xcode Command Line
-Tools (`xcode-select --install`). La première compilation Rust prend plusieurs
-minutes ; les suivantes sont incrémentales.
+**Pour compiler.** Node 20+, pnpm, Rust stable (`rustup`). Sous macOS, les
+Xcode Command Line Tools (`xcode-select --install`). Sous Windows, la chaîne
+MSVC de Rust (`rustup default stable-x86_64-pc-windows-msvc`, celle par
+défaut) et les **Visual Studio Build Tools** avec la charge de travail
+« Développement Desktop en C++ » (compilateur MSVC et SDK Windows) ; Perl,
+fourni avec Git for Windows, sert à compiler OpenSSL. La première compilation
+Rust prend plusieurs minutes ; les suivantes sont incrémentales.
 
 **Les outils qu'il pilote.** Rien n'est embarqué : le cockpit se sert de ce qui
 est déjà installé sur le poste.
@@ -82,8 +98,8 @@ est déjà installé sur le poste.
 | `zed`, `cursor`, `code`| Ouverture d'un fichier dans l'éditeur                      | les liens vers l'éditeur ne font rien           |
 | Tailscale              | `pnpm setup:mobile` uniquement                             | pas d'accès mobile                              |
 
-Le CLI `claude` est cherché dans le `PATH` du shell de connexion, puis dans
-`~/.local/bin`, `~/.claude/local`, `/opt/homebrew/bin`, `/usr/local/bin`,
+Le CLI `claude` est cherché dans le `PATH` du shell de connexion (Git Bash
+sous Windows), puis, sous macOS, dans `~/.local/bin`, `~/.claude/local`, `/opt/homebrew/bin`, `/usr/local/bin`,
 `~/.bun/bin` et `~/.volta/bin`. L'écran Agents lit `~/.claude/projects` en
 lecture seule : sur un poste qui n'a jamais fait tourner Claude Code, il est
 vide, et c'est normal.
@@ -98,22 +114,25 @@ un bloc sans jeton laisse simplement son écran vide.
 fournie d'office : chaque projet déclare les siennes, ou les fait détecter
 depuis les scripts de son dépôt (voir « Ajouter une commande au catalogue »).
 
-## Installer sans compiler
+## Installer sans compiler (macOS)
 
 Les versions publiées vivent sur [jodevweb/cockpit-releases](https://github.com/jodevweb/cockpit-releases/releases/latest) :
-une archive `Cockpit_<version>_<arch>.app.tar.gz`, pas de `.dmg`.
+une archive `Cockpit_<version>_<arch>.app.tar.gz` par architecture Mac, pas de
+`.dmg` (pour Windows, voir la section « Windows » plus bas).
 
 ```bash
-tar xzf Cockpit_<version>_arm64.app.tar.gz
+tar xzf Cockpit_<version>_aarch64.app.tar.gz
 mv Cockpit.app /Applications/
 xattr -dr com.apple.quarantine /Applications/Cockpit.app
 ```
 
-L'archive est compilée pour l'architecture de la machine qui publie — en
-pratique Apple Silicon. Un Mac Intel doit passer par les sources.
+Les versions sont compilées par GitHub Actions pour Apple Silicon (`aarch64`)
+et, quand la compilation croisée passe, pour les Mac Intel (`x64`). Une version
+sans archive `x64` ne se propose pas aux Mac Intel : ils passent alors par les
+sources.
 
-**La troisième ligne n'est pas facultative.** L'application est signée ad hoc et
-non notarisée : sans elle, Gatekeeper refuse de l'ouvrir. Et le vieux contournement
+**La troisième ligne n'est pas facultative.** L'application est signée par une
+identité auto-signée (ou ad hoc) et non notarisée : sans elle, Gatekeeper refuse de l'ouvrir. Et le vieux contournement
 — clic droit → Ouvrir — **a disparu depuis macOS 15** : il n'y a plus d'entrée
 « Ouvrir quand même » dans le menu contextuel, seulement au fond de Réglages
 Système → Confidentialité et sécurité, après une première tentative refusée.
@@ -122,6 +141,61 @@ alors plus l'application du tout.
 
 Ensuite l'updater intégré prend le relais et propose les versions suivantes tout
 seul — l'endpoint est public, aucun compte GitHub n'est nécessaire pour le lire.
+
+## Windows
+
+**Prérequis du poste.**
+
+- **Windows 10 (21H2+) ou 11**, x64.
+- **[Git for Windows](https://git-scm.com/download/win), obligatoire.** Le
+  cockpit joue toutes ses commandes — scripts du catalogue, lancement des
+  agents, `git` lui-même — dans le bash de Git for Windows, comme Claude Code
+  sous Windows. Il le trouve à partir de `git` dans le `PATH`, puis dans
+  `Program Files\Git` et `%LOCALAPPDATA%\Programs\Git` ; la variable
+  `COCKPIT_BASH` force un autre chemin vers `bash.exe`. Le `bash.exe` de
+  `System32` (WSL) n'est jamais utilisé.
+- **WebView2**, déjà présent sur Windows 11 et sur un Windows 10 à jour.
+  Absent, l'installeur le télécharge et l'installe tout seul.
+- **Claude Code** installé et authentifié (`claude` joignable depuis Git Bash),
+  comme sur Mac. Les autres outils du tableau ci-dessus (`gh`, Docker Desktop,
+  un éditeur…) restent facultatifs.
+
+**Installer depuis la release.** Les versions publiées sur
+[jodevweb/cockpit-releases](https://github.com/jodevweb/cockpit-releases/releases/latest)
+contiennent un installeur `Cockpit_<version>_x64-setup.exe`. Il installe le
+cockpit pour l'utilisateur courant, sans droits administrateur, et l'ajoute au
+menu Démarrer. L'updater intégré propose ensuite les versions suivantes, comme
+sur Mac : l'installation part sur un clic et relance l'app.
+
+**SmartScreen.** L'installeur n'est pas signé Authenticode : au premier
+lancement, Windows affiche « Windows a protégé votre ordinateur ». Cliquer sur
+**Informations complémentaires**, puis **Exécuter quand même**. Si le
+navigateur bloque le téléchargement lui-même, choisir **Conserver** dans sa
+liste de téléchargements. On peut aussi débloquer le fichier avant de le lancer :
+clic droit → Propriétés → cocher **Débloquer**, ou en PowerShell
+`Unblock-File .\Cockpit_<version>_x64-setup.exe`.
+
+**Compiler.** Avec les prérequis de compilation ci-dessus, depuis PowerShell ou
+Git Bash :
+
+```powershell
+pnpm install
+pnpm install:app   # compile l'installeur NSIS et l'installe
+```
+
+**Ce qui diffère du Mac.**
+
+- Les raccourcis utilisent `Ctrl` là où le Mac utilise `⌘` (`Ctrl+K` pour la
+  palette, etc.) ; dans un terminal, seuls les raccourcis avec `Maj` restent à
+  l'app, `Ctrl`+lettre appartient au shell.
+- La fenêtre garde la barre de titre native de Windows.
+- Ce qui passe sous macOS par le Finder, Terminal.app ou `open` passe par
+  l'Explorateur et les associations de fichiers de Windows.
+- L'accès mobile se prépare avec `pnpm setup:mobile`, qui joue
+  `scripts/setup-mobile.ps1` : Tailscale pour Windows et Docker Desktop requis.
+- Pas de signature de code : rien d'équivalent aux autorisations macOS n'est
+  redemandé d'une version à l'autre, mais SmartScreen avertit à chaque
+  installation manuelle (pas lors des mises à jour intégrées).
 
 ## Configuration
 
@@ -265,7 +339,7 @@ src-tauri/src/
   executions.rs    ce que chaque agent a fait : identité, tours, coûts, timeline
   docs.rs          découverte des livrables markdown
   runner.rs        exécution de commandes, streaming ligne à ligne, groupes de processus
-  system.rs        éditeur, Terminal.app, Finder, Docker, ports
+  system.rs        éditeur, terminal, Finder/Explorateur, Docker, ports
   integrations.rs  Sentry, Better Stack, Linear, GitHub, Trigger, Railway, Stripe
   monitor.rs       recensement des changements en vol, toutes forges confondues
   impact.rs        dossier factuel d'un changement, lecture par agent, relecture du rapport
@@ -340,8 +414,11 @@ forme vérifiée — et le relevé le dit plutôt que de le combler.
 
 ## Limites connues
 
-- **macOS uniquement.** Le cockpit s'appuie sur `osascript`, `open`,
-  Terminal.app et le trousseau ; aucun portage Linux ou Windows n'est prévu.
+- **macOS et Windows seulement.** Aucun portage Linux n'est prévu. Sous
+  Windows, Git for Windows est indispensable : sans son bash, le cockpit
+  s'ouvre mais ne lance rien.
+- **Windows** : l'installeur n'est pas signé Authenticode (avertissement
+  SmartScreen, voir « Windows »).
 - **Cursor** n'expose pas ses conversations en fichiers lisibles (SQLite interne) :
   seuls ses livrables écrits sur disque apparaissent, dans l'écran Documents.
 - **Codex et Gemini** (`codex-exec`, `gemini-stream-json`) n'ont pas été
@@ -376,9 +453,11 @@ relectures par des locuteurs natifs sont les bienvenues.
 
 ## Contribuer
 
-Les issues et pull requests sont les bienvenues. Pour une faille de sécurité,
-passe par le signalement privé décrit dans [SECURITY.md](SECURITY.md), pas par
-une issue publique.
+Les issues et pull requests sont les bienvenues ; la CI vérifie chaque pull
+request sous macOS et Windows (types, catalogues de traduction, tests Rust).
+Pour une faille de sécurité, passe par le signalement privé décrit dans
+[SECURITY.md](SECURITY.md), pas par une issue publique. La publication d'une
+version est réservée au mainteneur : voir [docs/RELEASING.md](docs/RELEASING.md).
 
 ## Licence
 

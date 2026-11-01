@@ -246,14 +246,14 @@ mod tests {
 	/// Le vrai binaire `codex` est absent de tout poste où ce module a été
 	/// écrit et testé : ce test fait tourner un faux `codex` (un script qui
 	/// imite la forme documentée de `codex exec`/`codex exec resume --json`)
-	/// à travers `zsh -lc`, exactement comme `agent.rs` le ferait — pour
+	/// à travers le shell de `platform` (`zsh -lc`, le bash de Git sous
+	/// Windows), exactement comme `agent.rs` le ferait — pour
 	/// vérifier la ligne de commande *et* le chemin d'I/O asynchrone
 	/// (`tokio::process::Command`, `BufReader::lines()`), pas seulement le
 	/// texte produit par `first_turn`/`resume_turn`.
 	#[tokio::test]
 	async fn le_faux_codex_confirme_la_ligne_de_commande_et_la_lecture() {
 		use tokio::io::{AsyncBufReadExt, BufReader};
-		use tokio::process::Command;
 
 		let dir = std::env::temp_dir().join(format!("cockpit-codex-test-{}", std::process::id()));
 		std::fs::create_dir_all(&dir).unwrap();
@@ -286,9 +286,7 @@ fi
 		}
 
 		async fn run(command: &str) -> Vec<Value> {
-			let child = Command::new("zsh")
-				.arg("-lc")
-				.arg(command)
+			let child = crate::platform::shell_async(command)
 				.stdout(std::process::Stdio::piped())
 				.spawn()
 				.expect("le faux codex doit se lancer");
@@ -305,7 +303,7 @@ fi
 
 		let command = format!(
 			"export PATH={}:$PATH; {}",
-			dir.display(),
+			crate::platform::shell_path(&dir.to_string_lossy()),
 			first_turn("codex", "fix the failing test")
 		);
 		let events = run(&command).await;
@@ -324,7 +322,7 @@ fi
 		// se lance et rend vraiment le `thread_id` qu'on lui a donné.
 		let command = format!(
 			"export PATH={}:$PATH; {}",
-			dir.display(),
+			crate::platform::shell_path(&dir.to_string_lossy()),
 			resume_turn("codex", "thread-xyz", "go on")
 		);
 		let events = run(&command).await;

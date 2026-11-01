@@ -459,7 +459,7 @@
 		"quoted": "“{{text}}”",
 		"close": "关闭",
 		"placeholder": "打开购物车工作区，从 NW-3050 开始一个任务…",
-		"hint": "按住 {{shortcut}} 说话 · ⌘J 输入文字",
+		"hint": "按住 {{shortcut}} 说话 · {{mod}}J 输入文字",
 		"errors": {
 			"worktreeNotFound": "找不到 worktree“{{name}}”。",
 			"agentNotFound": "找不到智能体“{{name}}”。",
@@ -512,12 +512,13 @@
 			"hold": "按住、说话、松开：助手会理解、执行并大声回答 — 即使 Cockpit 位于其他窗口之后。",
 			"keyboard": "通过键盘也能使用，前提是 Cockpit 在前台。",
 			"cost": "你说的话会先由 ElevenLabs 转写（即上方的语音密钥），再由 Claude 通过你的订阅理解：每次请求消耗 ElevenLabs 套餐的几秒钟，以及少量 Claude 配额。操作会直接执行；找不到的内容，它不会去猜。",
-			"noKey": "没有 ElevenLabs 密钥，助手就听不到你 — ⌘J 仍然可用。请在“语音”部分保存密钥。",
+			"noKey": "没有 ElevenLabs 密钥，助手就听不到你 — {{mod}}J 仍然可用。请在“语音”部分保存密钥。",
 			"speak": "请说话…（4 秒）",
 			"testMic": "测试麦克风",
 			"appOnly": "仅在应用内。",
 			"heard": "听到的内容：",
-			"micDenied": "如果麦克风被拒绝：系统设置 → 隐私与安全性 → 麦克风 → Cockpit。"
+			"micDenied": "如果麦克风被拒绝：系统设置 → 隐私与安全性 → 麦克风 → Cockpit。",
+			"micDenied_windows": "如果麦克风被拒绝：Windows 设置 → 隐私和安全性 → 麦克风 → 允许桌面应用访问你的麦克风。"
 		},
 		"shortcut": {
 			"active": "{{shortcut}} 已生效，在所有应用中可用。",
@@ -701,7 +702,7 @@
 		"writtenByAgents": "由智能体写入",
 		"uncommitted": "已修改，尚未提交",
 		"files_other": "{{count}} 个文件",
-		"buttonHint": "按名称打开此 worktree 中的文件（⌘P）",
+		"buttonHint": "按名称打开此 worktree 中的文件（{{mod}}P）",
 		"button": "文件",
 		"placeholder": "文件名 — “agentmap”、“panel work”、“apps/web env”",
 		"scanning": "正在扫描仓库…",
@@ -709,7 +710,7 @@
 		"typeToSearch": "输入名称的一部分以搜索整个仓库。",
 		"total_other": "{{formatted}} 个文件",
 		"scanningShort": "正在扫描仓库…",
-		"keys": "↑↓ 选择 · Enter 打开 · ⌘P",
+		"keys": "↑↓ 选择 · Enter 打开 · {{mod}}P",
 		"whyAgent": "由智能体写入",
 		"whyChanged": "已修改"
 	},
@@ -854,16 +855,19 @@
 		"listening": "正在收听",
 		"listen": "收听",
 		"elevenLabsFailed": "ElevenLabs 出错，已切换为 Mac 语音：{{reason}}",
+		"elevenLabsFailed_windows": "ElevenLabs 出错，已切换为系统语音：{{reason}}",
 		"voiceAndRate": "语音与语速"
 	},
 	"voiceSettings": {
 		"engine": "引擎",
 		"macVoice": "Mac 语音",
+		"macVoice_windows": "系统语音",
 		"elevenLabsHint": "最接近真人的语音，按 ElevenLabs 套餐的字符数计费。Claude 或 ChatGPT 的订阅都不会向其他应用提供语音。",
 		"systemHint": "免费且离线可用。使用高级语音效果会好得多。",
 		"elevenLabsKey": "ElevenLabs 密钥",
 		"createKey": "创建密钥",
 		"keyStored": "已保存在 Mac 钥匙串中",
+		"keyStored_windows": "已保存在这台电脑上",
 		"removeKey": "移除",
 		"storeKey": "保存",
 		"voice": "语音",
@@ -872,8 +876,10 @@
 		"model": "模型",
 		"browserVoice": "浏览器语音，用于预览。",
 		"noPremiumVoice": "未安装高级语音。请下载一个：系统设置 → 辅助功能 → 朗读内容 → 系统语音 → 管理语音。",
+		"noPremiumVoice_windows": "未安装自然语音。请添加一个：Windows 设置 → 时间和语言 → 语音 → 管理语音。",
 		"rate": "语速",
 		"fallback": "已切换为 Mac 语音：{{reason}}",
+		"fallback_windows": "已切换为系统语音：{{reason}}",
 		"sample": "它修复了购物车的舍入问题并重新运行了测试。完成了：它修改了三个文件，测试通过。",
 		"tryVoice": "试听此语音",
 		"allSettings": "所有语音和助手设置"
@@ -894,8 +900,10 @@
 		"cancel": "取消",
 		"save": "保存",
 		"openInTerminal": "改为在 Terminal.app 中打开",
+		"openInTerminal_windows": "改为在 终端窗口 中打开",
 		"new": "新建提示词",
-		"footer": "点击即在此处启动智能体，对话和回复框都在 Cockpit 中。终端图标则改为在 Terminal.app 中打开，适用于需要真实 TTY 的情况。提示词库位于 <path>{{path}}</path>。"
+		"footer": "点击即在此处启动智能体，对话和回复框都在 Cockpit 中。终端图标则改为在 Terminal.app 中打开，适用于需要真实 TTY 的情况。提示词库位于 <path>{{path}}</path>。",
+		"footer_windows": "点击即在此处启动智能体，对话和回复框都在 Cockpit 中。终端图标则改为在 终端窗口 中打开，适用于需要真实 TTY 的情况。提示词库位于 <path>{{path}}</path>。"
 	},
 	"panelReport": {
 		"verdict": {
@@ -973,6 +981,7 @@
 		"agents": "智能体",
 		"terminals": "终端",
 		"footnote": "内存数字是直接相加的，未考虑进程之间的共享：因此总数是上限，而非精确值。界面本身运行在一个 WebKit 进程中，macOS 在没有特权的情况下不会将其归属给任何人 — 大约还需再加六十兆字节。",
+		"footnote_windows": "内存数字是直接相加的，未考虑进程之间的共享：因此总数是上限，而非精确值。界面本身运行在 WebView2 进程（msedgewebview2）中，这里没有计入 — 请再多算一些。",
 		"spendNoQuota": "今天使用的 token。CLI 未报告配额。",
 		"spendLeft": "“{{window}}”剩余 {{left}}%",
 		"spendLeftResets": "“{{window}}”剩余 {{left}}%，{{resets}}重置",
@@ -985,6 +994,6 @@
 		"scripts": "脚本",
 		"scriptsHint": "仓库脚本和自定义命令",
 		"noScripts": "此文件夹中没有脚本。",
-		"footer": "命令会在此 shell 中输入并运行 — ⇧Enter 执行与所选项相反的操作。"
+		"footer": "命令会在此 shell 中输入并运行 — {{shift}}Enter 执行与所选项相反的操作。"
 	}
 }

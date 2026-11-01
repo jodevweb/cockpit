@@ -15,6 +15,7 @@ import {
 	type Source,
 	type Table,
 } from "@/lib/illustrations";
+import { joinPath } from "@/lib/paths";
 
 /**
  * Une image décrite par un agent, dessinée par le cockpit.
@@ -319,7 +320,7 @@ function TableView({ item }: { item: Table }) {
 }
 
 function resolve(path: string, cwd: string): string {
-	return path.startsWith("/") ? path : `${cwd.replace(/\/$/, "")}/${path.replace(/^\.\//, "")}`;
+	return joinPath(cwd, path);
 }
 
 function CaptureView({ item, cwd }: { item: Capture; cwd: string }) {

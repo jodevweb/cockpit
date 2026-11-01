@@ -1,1 +1,9 @@
-{}
+{
+	"desktop": {
+		"editorNotFound": "このコンピューターに {{editor}} が見つかりません。インストールするか、コマンドライン ランチャーを PATH に追加してください。",
+		"terminalFailed": "ターミナル ウィンドウを開けませんでした。",
+		"bashMissing": "Git for Windows が必要です。bash が見つかりません。",
+		"credentialsRefused": "Windows 資格情報マネージャーがキーを拒否しました: {{error}}",
+		"programRefused": "Cockpit はプログラムやスクリプトを実行しません: {{path}}"
+	}
+}

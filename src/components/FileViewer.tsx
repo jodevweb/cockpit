@@ -24,6 +24,8 @@ import { api } from "@/lib/ipc";
 import { localFileUrl } from "@/lib/localFile";
 import { useAsync } from "@/lib/useAsync";
 import { useTranslation } from "react-i18next";
+import { modKey, platformContext } from "@/lib/platform";
+import { basename, dirname } from "@/lib/paths";
 
 /**
  * Lecture d'un fichier sans quitter le cockpit.
@@ -170,7 +172,7 @@ function Line({
 }
 
 function extensionOf(path: string): string {
-	return path.split("/").pop()?.split(".").pop()?.toLowerCase() ?? "";
+	return basename(path).split(".").pop()?.toLowerCase() ?? "";
 }
 
 /**
@@ -187,8 +189,8 @@ function Opaque({ path, name, reason }: { path: string; name: string; reason: "u
 			</span>
 			<p className="max-w-sm text-[12.5px] leading-relaxed text-ink-muted">
 				{reason === "unplayable"
-					? t("fileViewer.opaque.unplayable")
-					: t("fileViewer.opaque.unknown", { name })}
+					? t("fileViewer.opaque.unplayable", { context: platformContext })
+					: t("fileViewer.opaque.unknown", { context: platformContext, name })}
 			</p>
 			<div className="flex gap-2">
 				<Button
@@ -202,7 +204,7 @@ function Opaque({ path, name, reason }: { path: string; name: string; reason: "u
 					{t("fileViewer.opaque.openDefault")}
 				</Button>
 				<Button icon={FolderOpen} onClick={() => void api.system.reveal(path).catch(() => undefined)}>
-					{t("fileViewer.opaque.showInFinder")}
+					{t("fileViewer.opaque.showInFinder", { context: platformContext })}
 				</Button>
 			</div>
 			{error ? <p className="max-w-md text-[11px] text-critical">{error}</p> : null}
@@ -245,7 +247,7 @@ function Viewer({
 	const isOpaque = OPAQUE.includes(extension) || unplayable;
 	/** Rendu par le webview : rien à lire, rien à éditer, rien à chercher. */
 	const isBinaryView = isImage || isEmbedded || isVideo || isAudio || isOpaque;
-	const name = path.split("/").pop() ?? path;
+	const name = basename(path);
 
 	const file = useAsync(
 		() => (isBinaryView ? Promise.resolve("") : api.docs.read(path)),
@@ -309,14 +311,14 @@ function Viewer({
 		const handler = (event: KeyboardEvent) => {
 			// ⌘S enregistre, comme partout — sans quoi le réflexe irait chercher
 			// une sauvegarde du navigateur qui n'existe pas.
-			if (event.key === "s" && event.metaKey && draft !== null) {
+			if (event.key === "s" && modKey(event) && draft !== null) {
 				event.preventDefault();
 				void save();
 				return;
 			}
 			// Échap ne referme pas sur un texte modifié : on ne perd pas une
 			// correction par un réflexe de fermeture.
-			if (event.key === "f" && event.metaKey && !isBinaryView) {
+			if (event.key === "f" && modKey(event) && !isBinaryView) {
 				event.preventDefault();
 				search.current?.focus();
 				search.current?.select();
@@ -469,14 +471,14 @@ function Viewer({
 						size="sm"
 						icon={FolderOpen}
 						onClick={() => void api.system.reveal(path).catch(() => undefined)}
-						title={t("fileViewer.reveal")}
+						title={t("fileViewer.reveal", { context: platformContext })}
 					/>
 					{isBinaryView || notText ? (
 						<Button
 							size="sm"
 							icon={AppWindow}
 							onClick={() => void api.system.openFile(path).catch(() => undefined)}
-							title={t("fileViewer.openWithTitle")}
+							title={t("fileViewer.openWithTitle", { context: platformContext })}
 						>
 							{t("fileViewer.openWith")}
 						</Button>
@@ -593,7 +595,7 @@ function Viewer({
 						</div>
 					) : rendered ? (
 						<div className="px-6 py-5">
-							<Markdown source={body} cwd={path.slice(0, path.lastIndexOf("/"))} />
+							<Markdown source={body} cwd={dirname(path)} />
 						</div>
 					) : (
 						// Numéros de ligne : c'est par eux qu'on se repère quand un

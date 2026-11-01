@@ -35,6 +35,8 @@ import { hasTauri } from "@/lib/preview";
 import { recentFolders, rememberFolder } from "@/lib/recentFolders";
 import { useAsync } from "@/lib/useAsync";
 import { Modal, Spinner } from "./ui";
+import { formatShortcut, modKey, platformContext } from "@/lib/platform";
+import { basename, dirname, homeOf, toSlashes } from "@/lib/paths";
 
 /**
  * Le lanceur d'un agent libre.
@@ -72,19 +74,10 @@ const depths = (t: TFunction) => [
 	{ id: "deep", label: t("libreLauncher.depths.deep") },
 ];
 
-/** Le dossier personnel, deviné d'un chemin absolu : de quoi écrire `~` comme un terminal. */
-function homeOf(path: string): string {
-	return /^\/Users\/[^/]+/.exec(path)?.[0] ?? "";
-}
-
-function basename(path: string): string {
-	return path.replace(/\/+$/, "").split("/").pop() || path;
-}
-
 /** Même règle que `libre.rs` : `<dépôt>-<fin de la branche>`, à côté du dépôt. */
 function worktreeFor(root: string, branch: string): string {
 	const tail = (branch.split("/").pop() ?? "").replace(/[^A-Za-z0-9._-]/g, "-").replace(/^-+|-+$/g, "") || "agent";
-	const parent = root.replace(/\/+$/, "").split("/").slice(0, -1).join("/");
+	const parent = dirname(toSlashes(root).replace(/\/+$/, ""));
 	return `${parent}/${basename(root)}-${tail}`;
 }
 
@@ -287,7 +280,7 @@ export function LibreLauncher({ initialFolder }: { initialFolder: string }) {
 	// ⌘↵ lance d'où que l'on soit dans le lanceur.
 	useEffect(() => {
 		const onKey = (event: KeyboardEvent) => {
-			if (event.metaKey && event.key === "Enter") {
+			if (modKey(event) && event.key === "Enter") {
 				event.preventDefault();
 				void launch();
 			}
@@ -409,7 +402,7 @@ export function LibreLauncher({ initialFolder }: { initialFolder: string }) {
 											spellCheck={false}
 											onChange={(event) => setQuery(event.target.value)}
 											onKeyDown={(event) => {
-												if (event.key === "Enter" && !event.metaKey) {
+												if (event.key === "Enter" && !modKey(event)) {
 													event.preventDefault();
 													setFolder(query.trim());
 													setStep(2);
@@ -427,7 +420,7 @@ export function LibreLauncher({ initialFolder }: { initialFolder: string }) {
 											className="focus-ring flex h-10 items-center gap-2 rounded-[10px] border border-line px-3.5 text-[12.5px] font-medium text-ink hover:bg-hover"
 										>
 											<FolderOpen size={15} />
-											{t("libreLauncher.folder.browse")}
+											{t("libreLauncher.folder.browse", { context: platformContext })}
 										</button>
 									) : null}
 								</div>
@@ -809,7 +802,7 @@ export function LibreLauncher({ initialFolder }: { initialFolder: string }) {
 					>
 						{launching ? <Spinner /> : null}
 						{t("libreLauncher.launch.button")}
-						<span className="font-mono text-[11px] opacity-80">⌘↵</span>
+						<span className="font-mono text-[11px] opacity-80">{formatShortcut("⌘↵")}</span>
 					</button>
 				</footer>
 			</div>

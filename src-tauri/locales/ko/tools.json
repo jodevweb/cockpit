@@ -1,1 +1,8 @@
-{}
+{
+	"windowsAgents": {
+		"claudeNotFoundHint": "`claude` CLI를 찾을 수 없습니다. 설치하거나(PowerShell에서 `irm https://claude.ai/install.ps1 | iex`, 또는 `npm install -g @anthropic-ai/claude-code`) %USERPROFILE%\\.local\\bin 또는 %APPDATA%\\npm에 있는지 확인하세요.",
+		"bridgeUnavailableDetail": "에이전트의 권한 요청과 질문이 인터페이스에 도달하지 않습니다. Node(`winget install OpenJS.NodeJS.LTS`)를 설치하면 복구됩니다. 에이전트는 모드에 따라 계속 실행됩니다.",
+		"ffmpegHint": "QA 스크린샷은 보관되지만 영상으로 합쳐지지 않습니다. ffmpeg(`winget install Gyan.FFmpeg`)를 설치하면 발견 사항 아래에 영상이 다시 표시됩니다.",
+		"nodeMissing": "이 컴퓨터에서 Node를 찾을 수 없습니다. 미션 도구는 Node가 실행하는 MCP 브리지를 거칩니다. Node(`winget install OpenJS.NodeJS.LTS`)를 설치한 뒤 미션을 다시 시작하세요. 일반 에이전트는 계속 작동합니다."
+	}
+}

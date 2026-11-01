@@ -459,7 +459,7 @@
 		"quoted": "「{{text}}」",
 		"close": "閉じる",
 		"placeholder": "カートのワークスペースを開いて、NW-3050 からミッションを開始…",
-		"hint": "{{shortcut}} を長押しで話す · ⌘J で入力",
+		"hint": "{{shortcut}} を長押しで話す · {{mod}}J で入力",
 		"errors": {
 			"worktreeNotFound": "worktree「{{name}}」が見つかりません。",
 			"agentNotFound": "エージェント「{{name}}」が見つかりません。",
@@ -512,12 +512,13 @@
 			"hold": "押したまま話して離すだけ：アシスタントが理解し、実行し、声で返答します — Cockpit が他のウィンドウの後ろにあっても動作します。",
 			"keyboard": "Cockpit が前面にあるときは、キーボードでも同じことができます。",
 			"cost": "話した内容は ElevenLabs（上の音声キー）で文字起こしされ、あなたのサブスクリプションの Claude が理解します：1 リクエストにつき ElevenLabs プランの数秒分と、Claude クォータの少量を消費します。アクションは直接実行されます。見つからないものを推測することはありません。",
-			"noKey": "ElevenLabs キーがないと、アシスタントはあなたの声を聞けません — ⌘J は引き続き使えます。音声セクションで保存してください。",
+			"noKey": "ElevenLabs キーがないと、アシスタントはあなたの声を聞けません — {{mod}}J は引き続き使えます。音声セクションで保存してください。",
 			"speak": "話してください…（4 秒）",
 			"testMic": "マイクをテスト",
 			"appOnly": "アプリ内のみ。",
 			"heard": "聞き取った内容：",
-			"micDenied": "マイクが拒否されている場合：システム設定 → プライバシーとセキュリティ → マイク → Cockpit。"
+			"micDenied": "マイクが拒否されている場合：システム設定 → プライバシーとセキュリティ → マイク → Cockpit。",
+			"micDenied_windows": "マイクが拒否されている場合：Windows の設定 → プライバシーとセキュリティ → マイク → デスクトップ アプリにマイクへのアクセスを許可する。"
 		},
 		"shortcut": {
 			"active": "{{shortcut}} はすべてのアプリケーションで有効です。",
@@ -701,7 +702,7 @@
 		"writtenByAgents": "エージェントが書き込んだもの",
 		"uncommitted": "変更済み、未コミット",
 		"files_other": "ファイル {{count}} 個",
-		"buttonHint": "この worktree のファイルを名前で開く（⌘P）",
+		"buttonHint": "この worktree のファイルを名前で開く（{{mod}}P）",
 		"button": "ファイル",
 		"placeholder": "ファイル名 —「agentmap」「panel work」「apps/web env」",
 		"scanning": "リポジトリをスキャン中…",
@@ -709,7 +710,7 @@
 		"typeToSearch": "名前の一部を入力すると、リポジトリ全体を検索します。",
 		"total_other": "{{formatted}} ファイル",
 		"scanningShort": "リポジトリをスキャン中…",
-		"keys": "↑↓ で選択 · Enter で開く · ⌘P",
+		"keys": "↑↓ で選択 · Enter で開く · {{mod}}P",
 		"whyAgent": "エージェントが書き込み",
 		"whyChanged": "変更済み"
 	},
@@ -854,16 +855,19 @@
 		"listening": "再生中",
 		"listen": "聞く",
 		"elevenLabsFailed": "ElevenLabs が失敗したため、Mac の音声に切り替えました：{{reason}}",
+		"elevenLabsFailed_windows": "ElevenLabs が失敗したため、システムの音声に切り替えました：{{reason}}",
 		"voiceAndRate": "音声と速度"
 	},
 	"voiceSettings": {
 		"engine": "エンジン",
 		"macVoice": "Mac の音声",
+		"macVoice_windows": "システムの音声",
 		"elevenLabsHint": "最も人間らしい音声。ElevenLabs プランの文字数から消費されます。Claude や ChatGPT のサブスクリプションは、他のアプリケーションに音声を提供しません。",
 		"systemHint": "無料でオフライン。Premium 音声ならはるかに良くなります。",
 		"elevenLabsKey": "ElevenLabs キー",
 		"createKey": "キーを作成",
 		"keyStored": "Mac のキーチェーンに保存済み",
+		"keyStored_windows": "この PC に保存済み",
 		"removeKey": "削除",
 		"storeKey": "保存",
 		"voice": "音声",
@@ -872,8 +876,10 @@
 		"model": "モデル",
 		"browserVoice": "プレビューではブラウザの音声を使用。",
 		"noPremiumVoice": "Premium 音声がインストールされていません。ダウンロードしてください：システム設定 → アクセシビリティ → 読み上げコンテンツ → システムの声 → 声を管理。",
+		"noPremiumVoice_windows": "自然な音声がインストールされていません。追加してください：Windows の設定 → 時刻と言語 → 音声認識 → 音声の管理。",
 		"rate": "速度",
 		"fallback": "Mac の音声に切り替えました：{{reason}}",
+		"fallback_windows": "システムの音声に切り替えました：{{reason}}",
 		"sample": "カートの端数処理を修正して、テストを再実行しました。完了です：3 つのファイルを変更し、テストは通っています。",
 		"tryVoice": "この音声を試す",
 		"allSettings": "音声とアシスタントのすべての設定"
@@ -894,8 +900,10 @@
 		"cancel": "キャンセル",
 		"save": "保存",
 		"openInTerminal": "代わりに Terminal.app で開く",
+		"openInTerminal_windows": "代わりに ターミナルウィンドウ で開く",
 		"new": "新しいプロンプト",
-		"footer": "クリックすると、ここでエージェントが起動し、会話と返信欄は Cockpit 内に表示されます。ターミナルアイコンなら Terminal.app で開きます（本物の TTY が必要な場合）。ライブラリは <path>{{path}}</path> にあります。"
+		"footer": "クリックすると、ここでエージェントが起動し、会話と返信欄は Cockpit 内に表示されます。ターミナルアイコンなら Terminal.app で開きます（本物の TTY が必要な場合）。ライブラリは <path>{{path}}</path> にあります。",
+		"footer_windows": "クリックすると、ここでエージェントが起動し、会話と返信欄は Cockpit 内に表示されます。ターミナルアイコンなら ターミナルウィンドウ で開きます（本物の TTY が必要な場合）。ライブラリは <path>{{path}}</path> にあります。"
 	},
 	"panelReport": {
 		"verdict": {
@@ -973,6 +981,7 @@
 		"agents": "エージェント",
 		"terminals": "ターミナル",
 		"footnote": "メモリの数値はプロセス間の共有分を考慮せずに合算しています：合計は正確な値ではなく上限です。インターフェース自体は、権限なしでは macOS が誰にも帰属させない WebKit プロセスで動いています — さらに約 60 MB を見込んでください。",
+		"footnote_windows": "メモリの数値はプロセス間の共有分を考慮せずに合算しています：合計は正確な値ではなく上限です。インターフェース自体は WebView2 プロセス（msedgewebview2）で動いており、ここには含まれていません — その分を少し見込んでください。",
 		"spendNoQuota": "今日使用したトークン。CLI はクォータを報告しません。",
 		"spendLeft": "「{{window}}」の残り {{left}}%",
 		"spendLeftResets": "「{{window}}」の残り {{left}}%、{{resets}}にリセット",
@@ -985,6 +994,6 @@
 		"scripts": "スクリプト",
 		"scriptsHint": "リポジトリのスクリプトとカスタムコマンド",
 		"noScripts": "このフォルダにスクリプトはありません。",
-		"footer": "コマンドはこのシェルに入力されてから実行されます — ⇧Enter は選んだ項目と逆の動作をします。"
+		"footer": "コマンドはこのシェルに入力されてから実行されます — {{shift}}Enter は選んだ項目と逆の動作をします。"
 	}
 }

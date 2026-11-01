@@ -50,6 +50,7 @@ import {
 	type Remark,
 } from "@/lib/remarks";
 import { useAsync } from "@/lib/useAsync";
+import { basename } from "@/lib/paths";
 
 /**
  * La carte du chantier : tous les agents d'un worktree, posés sur le code.
@@ -72,10 +73,6 @@ import { useAsync } from "@/lib/useAsync";
  */
 
 const ago = (at: number | null | undefined) => (at ? fromSeconds((Date.now() - at) / 1000) : "—");
-
-function basename(path: string): string {
-	return path.split("/").filter(Boolean).pop() ?? path;
-}
 
 function agentState(run: AgentRun, t: TFunction): { label: string; tone: string } {
 	if (!run.running) return { label: t("chantierMap.state.stopped"), tone: "text-ink-faint" };

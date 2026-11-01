@@ -48,7 +48,7 @@ pub struct Worktree {
 }
 
 pub async fn run_git(cwd: &Path, args: &[&str]) -> Result<String> {
-	let output = Command::new("git")
+	let output = crate::platform::quiet_async(&mut Command::new("git"))
 		.args(args)
 		.current_dir(cwd)
 		.output()
@@ -396,6 +396,32 @@ fn usage_cache() -> &'static std::sync::Mutex<std::collections::HashMap<String, 
 /// `du` plutôt qu'un parcours maison : c'est l'outil du système pour ça, il
 /// compte les blocs occupés et ne suit pas les liens symboliques. Rend `None`
 /// quand rien ne se lit — une taille inconnue ne doit pas passer pour un zéro.
+///
+/// Windows n'a pas de `du` : on additionne la taille des fichiers, sans suivre
+/// les liens — l'octet près plutôt que le bloc, l'ordre de grandeur est le même.
+#[cfg(windows)]
+async fn du_bytes(path: &Path) -> Option<u64> {
+	let root = path.to_path_buf();
+	tokio::task::spawn_blocking(move || {
+		if !root.is_dir() {
+			return None;
+		}
+		Some(
+			walkdir::WalkDir::new(&root)
+				.follow_links(false)
+				.into_iter()
+				.filter_map(|entry| entry.ok())
+				.filter(|entry| entry.file_type().is_file())
+				.filter_map(|entry| entry.metadata().ok())
+				.map(|meta| meta.len())
+				.sum(),
+		)
+	})
+	.await
+	.ok()?
+}
+
+#[cfg(not(windows))]
 async fn du_bytes(path: &Path) -> Option<u64> {
 	let output = Command::new("du").arg("-sk").arg(path).output().await.ok()?;
 	// `du` sort en erreur dès qu'un sous-dossier est illisible, tout en ayant

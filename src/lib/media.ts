@@ -1,6 +1,7 @@
 import type { Turn } from "@/app/agents";
 import { isImagePath } from "@/components/LocalImage";
 import type { Episode } from "@/lib/episodes";
+import { basename } from "@/lib/paths";
 
 /**
  * Ce qu'une conversation donne à voir plutôt qu'à lire : captures, images,
@@ -39,10 +40,6 @@ export function isPdfPath(path: string): boolean {
 /** Ce que le webview sait lire : une démo filmée par un agent, typiquement. */
 export function isVideoPath(path: string): boolean {
 	return /\.(mp4|m4v|mov|webm)$/i.test(path);
-}
-
-function basename(path: string): string {
-	return path.split("/").filter(Boolean).pop() ?? path;
 }
 
 export function mediaOfPath(path: string): Media | null {

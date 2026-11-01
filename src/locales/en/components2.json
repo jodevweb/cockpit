@@ -501,7 +501,7 @@
 		"quoted": "“{{text}}”",
 		"close": "Close",
 		"placeholder": "Open the cart workspace, start a mission from NW-3050…",
-		"hint": "Hold {{shortcut}} to speak · ⌘J to type",
+		"hint": "Hold {{shortcut}} to speak · {{mod}}J to type",
 		"errors": {
 			"worktreeNotFound": "I can't find the worktree “{{name}}”.",
 			"agentNotFound": "I can't find the agent “{{name}}”.",
@@ -554,12 +554,13 @@
 			"hold": "Hold, speak, release: the assistant understands, acts and answers out loud — even when Cockpit is behind another window.",
 			"keyboard": "The same from the keyboard, with Cockpit in front.",
 			"cost": "What you say is transcribed by ElevenLabs (the voice key, above) then understood by Claude, on your subscription: a few seconds of your ElevenLabs plan and a little of your Claude quota per request. Actions run directly; what it can't find, it doesn't guess.",
-			"noKey": "Without an ElevenLabs key, the assistant can't hear you — ⌘J still works. Store it in the Voice section.",
+			"noKey": "Without an ElevenLabs key, the assistant can't hear you — {{mod}}J still works. Store it in the Voice section.",
 			"speak": "Speak… (4 s)",
 			"testMic": "Test the mic",
 			"appOnly": "In the app only.",
 			"heard": "Heard:",
-			"micDenied": "If the mic is denied: System Settings → Privacy & Security → Microphone → Cockpit."
+			"micDenied": "If the mic is denied: System Settings → Privacy & Security → Microphone → Cockpit.",
+			"micDenied_windows": "If the mic is denied: Windows Settings → Privacy & security → Microphone → Let desktop apps access your microphone."
 		},
 		"shortcut": {
 			"active": "{{shortcut}} is active, in every application.",
@@ -750,7 +751,7 @@
 		"uncommitted": "Modified, not yet committed",
 		"files_one": "{{count}} file",
 		"files_other": "{{count}} files",
-		"buttonHint": "Open a file from this worktree by name (⌘P)",
+		"buttonHint": "Open a file from this worktree by name ({{mod}}P)",
 		"button": "Files",
 		"placeholder": "A file name — “agentmap”, “panel work”, “apps/web env”",
 		"scanning": "Scanning the repository…",
@@ -759,7 +760,7 @@
 		"total_one": "{{formatted}} file",
 		"total_other": "{{formatted}} files",
 		"scanningShort": "scanning the repository…",
-		"keys": "↑↓ to choose · Enter to open · ⌘P",
+		"keys": "↑↓ to choose · Enter to open · {{mod}}P",
 		"whyAgent": "written by an agent",
 		"whyChanged": "modified"
 	},
@@ -908,16 +909,19 @@
 		"listening": "Listening",
 		"listen": "Listen",
 		"elevenLabsFailed": "ElevenLabs failed, the Mac voice took over: {{reason}}",
+		"elevenLabsFailed_windows": "ElevenLabs failed, the system voice took over: {{reason}}",
 		"voiceAndRate": "Voice and speed"
 	},
 	"voiceSettings": {
 		"engine": "Engine",
 		"macVoice": "Mac voice",
+		"macVoice_windows": "System voice",
 		"elevenLabsHint": "The most human voice, counted against the characters of your ElevenLabs plan. No Claude or ChatGPT subscription provides a voice to another application.",
 		"systemHint": "Free and offline. Much better with a Premium voice.",
 		"elevenLabsKey": "ElevenLabs key",
 		"createKey": "Create a key",
 		"keyStored": "Stored in the Mac keychain",
+		"keyStored_windows": "Stored on this computer",
 		"removeKey": "Remove",
 		"storeKey": "Save",
 		"voice": "Voice",
@@ -926,8 +930,10 @@
 		"model": "Model",
 		"browserVoice": "Browser voice, in preview.",
 		"noPremiumVoice": "No Premium voice installed. Download one: System Settings → Accessibility → Spoken Content → System Voice → Manage Voices.",
+		"noPremiumVoice_windows": "No natural voice installed. Add one: Windows Settings → Time & language → Speech → Manage voices.",
 		"rate": "Speed",
 		"fallback": "The Mac voice took over: {{reason}}",
+		"fallback_windows": "The system voice took over: {{reason}}",
 		"sample": "It fixed the cart rounding and reran the tests. It's done: it changed three files, and the tests pass.",
 		"tryVoice": "Try this voice",
 		"allSettings": "All voice and assistant settings"
@@ -948,8 +954,10 @@
 		"cancel": "Cancel",
 		"save": "Save",
 		"openInTerminal": "Open in Terminal.app instead",
+		"openInTerminal_windows": "Open in a terminal window instead",
 		"new": "New prompt",
-		"footer": "A click launches the agent here, with the conversation and the reply box in Cockpit. The terminal icon opens it in Terminal.app instead, for anything that needs a real TTY. The library lives in <path>{{path}}</path>."
+		"footer": "A click launches the agent here, with the conversation and the reply box in Cockpit. The terminal icon opens it in Terminal.app instead, for anything that needs a real TTY. The library lives in <path>{{path}}</path>.",
+		"footer_windows": "A click launches the agent here, with the conversation and the reply box in Cockpit. The terminal icon opens it in a terminal window instead, for anything that needs a real TTY. The library lives in <path>{{path}}</path>."
 	},
 	"panelReport": {
 		"verdict": {
@@ -1031,6 +1039,7 @@
 		"agents": "Agents",
 		"terminals": "Terminals",
 		"footnote": "Memory figures are added up without accounting for what processes share: the total is therefore a ceiling, not an exact bill. The interface itself runs in a WebKit process that macOS doesn't attribute to anyone without privileges — count about sixty more megabytes.",
+		"footnote_windows": "Memory figures are added up without accounting for what processes share: the total is therefore a ceiling, not an exact bill. The interface itself runs in WebView2 processes (msedgewebview2) that aren't counted here — allow some more.",
 		"spendNoQuota": "Tokens used today. The CLI doesn't report the quota.",
 		"spendLeft": "{{left}}% left on “{{window}}”",
 		"spendLeftResets": "{{left}}% left on “{{window}}”, resets {{resets}}",
@@ -1043,6 +1052,6 @@
 		"scripts": "Scripts",
 		"scriptsHint": "Repository scripts and custom commands",
 		"noScripts": "No scripts in this folder.",
-		"footer": "The command is typed then run in this shell — ⇧Enter does the opposite of the chosen entry."
+		"footer": "The command is typed then run in this shell — {{shift}}Enter does the opposite of the chosen entry."
 	}
 }

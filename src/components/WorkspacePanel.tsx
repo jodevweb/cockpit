@@ -51,6 +51,8 @@ import { useTerminals, type TerminalTab } from "@/app/terminals";
 import { isQuestion } from "@/app/agents";
 import { useHibernate, type SleepingGroup } from "@/app/hibernate";
 import { useWorkspace, type TabRef } from "@/app/workspace";
+import { dragRegion, formatShortcut } from "@/lib/platform";
+import { basename } from "@/lib/paths";
 
 /**
  * Un workspace : un worktree, ses agents, ses terminaux.
@@ -80,10 +82,6 @@ export interface WorkGroup {
 	 * rattachement permet de les présenter ensemble, sous le nom de la mission.
 	 */
 	mission: { id: string; title: string; role: string } | null;
-}
-
-function basename(path: string): string {
-	return path.split("/").filter(Boolean).pop() ?? path;
 }
 
 /** `2056`, `#2056` ou l'adresse d'une PR → son numéro. */
@@ -542,7 +540,7 @@ function GroupRail({
 			    chercher la colonne de gauche. Les entrées, elles, se refusent au
 			    geste : elles se déplacent au pointeur pour être réordonnées, et
 			    un glissement qui emmène la fenêtre entière les figerait. */}
-			<div data-tauri-drag-region="deep" className="flex items-center gap-1 px-2 py-1.5">
+			<div data-tauri-drag-region={dragRegion} className="flex items-center gap-1 px-2 py-1.5">
 				<div className="flex min-w-0 flex-1 items-center gap-1 overflow-x-auto">
 					{rows.map((row) => {
 						if (row.kind === "mission") {
@@ -1309,7 +1307,7 @@ export function WorkspacePanel() {
 			{/* Cet écran n'a pas d'en-tête de vue : c'est cette barre qui tient
 			    lieu de barre de titre, donc aussi de poignée de fenêtre. */}
 			<div
-				data-tauri-drag-region="deep"
+				data-tauri-drag-region={dragRegion}
 				className="hairline-b flex items-center gap-1.5 px-2.5 py-2"
 			>
 				<GitBranch size={13} className="shrink-0 text-accent-soft" />
@@ -1475,7 +1473,7 @@ export function WorkspacePanel() {
 								onClick={() => terminals.interrupt(terminal.id)}
 								title={t("workspacePanel.toolbar.interrupt")}
 							>
-								⌃C
+								{formatShortcut("⌃C")}
 							</Button>
 						) : null}
 						<Button

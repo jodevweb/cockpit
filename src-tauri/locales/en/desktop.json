@@ -1,1 +1,9 @@
-{}
+{
+	"desktop": {
+		"editorNotFound": "{{editor}} was not found on this computer: install it, or put its command-line launcher in the PATH.",
+		"terminalFailed": "No terminal window could be opened.",
+		"bashMissing": "Git for Windows is required: its bash was not found.",
+		"credentialsRefused": "Windows Credential Manager refused the key: {{error}}",
+		"programRefused": "Cockpit does not run programs or scripts: {{path}}"
+	}
+}

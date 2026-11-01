@@ -32,6 +32,8 @@ import {
 } from "@/lib/libre";
 import { useAsync } from "@/lib/useAsync";
 import { t } from "@/i18n";
+import { formatShortcut, platformContext } from "@/lib/platform";
+import { homeOf } from "@/lib/paths";
 
 /**
  * L'écran des agents libres.
@@ -53,10 +55,6 @@ interface Entry {
 
 function stateLabel(state: Entry["state"]): string {
 	return t(`views:libres.state.${state}`);
-}
-
-function homeOf(path: string): string {
-	return /^\/Users\/[^/]+/.exec(path)?.[0] ?? "";
 }
 
 function show(path: string): string {
@@ -379,7 +377,7 @@ function AgentDetail({ entry }: { entry: Entry }) {
 					<IconAction label={t("libres.detail.openTerminal")} onClick={() => void api.system.openTerminal(agent.cwd)}>
 						<SquareTerminal size={15} />
 					</IconAction>
-					<IconAction label={t("libres.detail.reveal")} onClick={() => void api.system.reveal(agent.cwd)}>
+					<IconAction label={t("libres.detail.reveal", { context: platformContext })} onClick={() => void api.system.reveal(agent.cwd)}>
 						<FolderOpen size={15} />
 					</IconAction>
 					{run?.running ? (
@@ -658,7 +656,7 @@ function LibresEmpty() {
 				>
 					<Zap size={15} />
 					{t("libres.empty.launch")}
-					<span className="font-mono text-[11px] opacity-80">⌘N</span>
+					<span className="font-mono text-[11px] opacity-80">{formatShortcut("⌘N")}</span>
 				</button>
 				{projectList.some((project) => project.mainRepo) ? (
 					<div className="mt-8 w-full text-left">

@@ -249,9 +249,7 @@ pub(crate) fn forwards_subagents(binary: &str) -> bool {
 	// Le binaire est résolu une fois pour toutes en amont (`claude_binary`) :
 	// la réponse ne dépend donc pas de l'argument d'un appel à l'autre.
 	*SUPPORTE.get_or_init(|| {
-		std::process::Command::new("zsh")
-			.arg("-lc")
-			.arg(format!("{} --help", shell_quote(binary)))
+		crate::platform::shell(&format!("{} --help", shell_quote(binary)))
 			.output()
 			.map(|out| {
 				String::from_utf8_lossy(&out.stdout).contains("--forward-subagent-text")
@@ -264,29 +262,12 @@ pub(crate) fn claude_binary() -> Option<String> {
 	static RESOLVED: OnceLock<Option<String>> = OnceLock::new();
 	RESOLVED
 		.get_or_init(|| {
-			// Un shell de login couvre Homebrew, nvm et les PATH déclarés en profil.
-			if let Ok(output) = std::process::Command::new("zsh")
-				.arg("-lc")
-				.arg("command -v claude")
-				.output()
-			{
-				let found = String::from_utf8_lossy(&output.stdout).trim().to_string();
-				if !found.is_empty() && std::path::Path::new(&found).exists() {
-					return Some(found);
-				}
+			// Un shell de login couvre Homebrew, nvm et les PATH déclarés en profil
+			// (sous Windows : `where`, puis le bash de Git).
+			if let Some(found) = crate::platform::locate("claude") {
+				return Some(found);
 			}
-
-			let home = std::env::var("HOME").unwrap_or_default();
-			[
-				format!("{home}/.local/bin/claude"),
-				format!("{home}/.claude/local/claude"),
-				"/opt/homebrew/bin/claude".to_string(),
-				"/usr/local/bin/claude".to_string(),
-				format!("{home}/.bun/bin/claude"),
-				format!("{home}/.volta/bin/claude"),
-			]
-			.into_iter()
-			.find(|path| std::path::Path::new(path).exists())
+			crate::platform::first_runnable(&claude_candidates())
 		})
 		.clone()
 }
@@ -307,30 +288,108 @@ pub(crate) fn node_binary() -> Option<String> {
 	static RESOLVED: OnceLock<Option<String>> = OnceLock::new();
 	RESOLVED
 		.get_or_init(|| {
-			if let Ok(output) = std::process::Command::new("zsh")
-				.arg("-lc")
-				.arg("command -v node")
-				.output()
-			{
-				let found = String::from_utf8_lossy(&output.stdout).trim().to_string();
-				if !found.is_empty() && std::path::Path::new(&found).exists() {
-					return Some(found);
-				}
+			if let Some(found) = crate::platform::locate("node") {
+				return Some(found);
 			}
-
-			let home = std::env::var("HOME").unwrap_or_default();
-			[
-				"/opt/homebrew/bin/node".to_string(),
-				"/usr/local/bin/node".to_string(),
-				format!("{home}/.volta/bin/node"),
-				format!("{home}/.bun/bin/node"),
-				format!("{home}/.local/bin/node"),
-				"/usr/bin/node".to_string(),
-			]
-			.into_iter()
-			.find(|path| std::path::Path::new(path).exists())
+			crate::platform::first_runnable(&node_candidates())
 		})
 		.clone()
+}
+
+/// Où l'on trouve `claude` quand le shell ne le connaît pas.
+fn claude_candidates() -> Vec<std::path::PathBuf> {
+	let home = dirs::home_dir().unwrap_or_default();
+	#[cfg(windows)]
+	{
+		use crate::platform::env_dir;
+		let mut found = vec![
+			// L'installeur natif (`install.ps1`).
+			home.join(".local").join("bin").join("claude.exe"),
+			home.join(".claude").join("local").join("claude.exe"),
+			home.join(".claude").join("local").join("claude.cmd"),
+			home.join(".bun").join("bin").join("claude.exe"),
+		];
+		if let Some(appdata) = env_dir("APPDATA") {
+			// `npm install -g` pose un `claude.cmd`.
+			found.push(appdata.join("npm").join("claude.cmd"));
+		}
+		if let Some(local) = env_dir("LOCALAPPDATA") {
+			found.push(local.join("Programs").join("claude").join("claude.exe"));
+			found.push(local.join("Volta").join("bin").join("claude.exe"));
+		}
+		found
+	}
+	#[cfg(not(windows))]
+	{
+		vec![
+			home.join(".local/bin/claude"),
+			home.join(".claude/local/claude"),
+			"/opt/homebrew/bin/claude".into(),
+			"/usr/local/bin/claude".into(),
+			home.join(".bun/bin/claude"),
+			home.join(".volta/bin/claude"),
+		]
+	}
+}
+
+/// Où l'on trouve `node` quand le shell ne le connaît pas.
+fn node_candidates() -> Vec<std::path::PathBuf> {
+	let home = dirs::home_dir().unwrap_or_default();
+	#[cfg(windows)]
+	{
+		use crate::platform::env_dir;
+		let mut found = Vec::new();
+		// nvm-windows tient le Node actif derrière un lien qu'il annonce ici.
+		if let Some(link) = env_dir("NVM_SYMLINK") {
+			found.push(link.join("node.exe"));
+		}
+		for base in ["ProgramFiles", "ProgramW6432", "ProgramFiles(x86)"] {
+			if let Some(dir) = env_dir(base) {
+				found.push(dir.join("nodejs").join("node.exe"));
+			}
+		}
+		if let Some(local) = env_dir("LOCALAPPDATA") {
+			found.push(local.join("Volta").join("bin").join("node.exe"));
+			found.push(local.join("Programs").join("nodejs").join("node.exe"));
+		}
+		found.push(home.join(".bun").join("bin").join("node.exe"));
+		found.push(home.join("scoop").join("shims").join("node.exe"));
+		found
+	}
+	#[cfg(not(windows))]
+	{
+		vec![
+			"/opt/homebrew/bin/node".into(),
+			"/usr/local/bin/node".into(),
+			home.join(".volta/bin/node"),
+			home.join(".bun/bin/node"),
+			home.join(".local/bin/node"),
+			"/usr/bin/node".into(),
+		]
+	}
+}
+
+/// Le `PATH` à donner à un CLI lancé sans shell : son propre dossier d'abord,
+/// puis celui hérité, puis les dossiers habituels du système.
+fn path_with(dir: &std::path::Path) -> String {
+	let inherited = std::env::var("PATH").unwrap_or_default();
+	#[cfg(windows)]
+	{
+		format!("{}{}{inherited}", dir.display(), crate::platform::PATH_SEPARATOR)
+	}
+	#[cfg(not(windows))]
+	{
+		format!("{}:{inherited}:/usr/local/bin:/opt/homebrew/bin:/usr/bin:/bin", dir.display())
+	}
+}
+
+/// `export PATH=<dossier>:$PATH; ` — pour un script joué par le shell, qui
+/// tient son `PATH` à sa façon (voir `platform::shell_path`).
+pub(crate) fn export_path(dir: &std::path::Path) -> String {
+	format!(
+		"export PATH={}:$PATH; ",
+		shell_quote(&crate::platform::shell_path(&dir.to_string_lossy()))
+	)
 }
 
 /// Ce qu'un agent lancé pour une seule question a rendu.
@@ -396,9 +455,10 @@ pub async fn ask_bare(
 	let _ = std::fs::create_dir_all(&neutral);
 	let mut path = std::env::var("PATH").unwrap_or_default();
 	if let Some(dir) = std::path::Path::new(&binary).parent() {
-		path = format!("{}:{path}:/usr/local/bin:/opt/homebrew/bin:/usr/bin:/bin", dir.display());
+		path = path_with(dir);
 	}
 	let mut command = Command::new(&binary);
+	crate::platform::quiet_async(&mut command);
 	command
 		.args(["-p", "--output-format", "json", "--model", model])
 		.args(["--tools", "", "--strict-mcp-config", "--disable-slash-commands", "--no-session-persistence"])
@@ -520,10 +580,7 @@ pub async fn run_once_with_tools(
 
 	let mut command = String::new();
 	if let Some(dir) = std::path::Path::new(&binary).parent() {
-		command.push_str(&format!(
-			"export PATH={}:$PATH; ",
-			shell_quote(&dir.to_string_lossy())
-		));
+		command.push_str(&export_path(dir));
 	}
 	// `bypassPermissions` parce qu'il n'y a personne pour répondre : sans TTY ni
 	// interface branchée sur cette exécution, la moindre demande resterait
@@ -557,10 +614,8 @@ pub async fn run_once_with_tools(
 		command.push_str(engine.extra_args.trim());
 	}
 
-	let mut launcher = Command::new("zsh");
+	let mut launcher = crate::platform::shell_async(&command);
 	launcher
-		.arg("-lc")
-		.arg(&command)
 		.current_dir(cwd)
 		.stdin(Stdio::piped())
 		.stdout(Stdio::piped())
@@ -902,7 +957,7 @@ async fn start_inner(
 	// c'est le seul CLI que le cockpit sache trouver tout seul.
 	let binary = match engine.command.trim() {
 		"" if dialect == crate::protocol::Protocol::Claude => claude_binary().ok_or_else(|| {
-			CockpitError::msg(crate::i18n::t("agent.claudeNotFoundHint"))
+			CockpitError::msg(crate::i18n::t(if cfg!(windows) { "windowsAgents.claudeNotFoundHint" } else { "agent.claudeNotFoundHint" }))
 		})?,
 		"" => {
 			return Err(CockpitError::msg(crate::i18n::tf(
@@ -980,10 +1035,7 @@ async fn start_inner(
 		let mut command = String::new();
 		if !config.sandbox.enabled {
 			if let Some(dir) = std::path::Path::new(&binary).parent() {
-				command.push_str(&format!(
-					"export PATH={}:$PATH; ",
-					shell_quote(&dir.to_string_lossy())
-				));
+				command.push_str(&export_path(dir));
 			}
 		}
 		command.push_str(&format!(
@@ -1041,7 +1093,7 @@ async fn start_inner(
 		if let Some(declares) = crate::mcp::config_for(&cwd, config.sandbox.enabled) {
 			command.push_str(&format!(
 				" --mcp-config {}",
-				shell_quote(&declares.to_string_lossy())
+				shell_quote(&seen_by_agent(&declares, config.sandbox.enabled))
 			));
 		}
 
@@ -1052,7 +1104,7 @@ async fn start_inner(
 			if let Some(browser) = crate::browser::mcp_config(&cwd, config.sandbox.enabled) {
 				command.push_str(&format!(
 					" --mcp-config {}",
-					shell_quote(&browser.to_string_lossy())
+					shell_quote(&seen_by_agent(&browser, config.sandbox.enabled))
 				));
 			}
 		}
@@ -1077,7 +1129,11 @@ async fn start_inner(
 						&crate::i18n::t("agent.bridgeUnavailable.title"),
 						&crate::i18n::t("agent.bridgeUnavailable.subject"),
 						false,
-						&crate::i18n::t("agent.bridgeUnavailable.detail"),
+						&crate::i18n::t(if cfg!(windows) {
+							"windowsAgents.bridgeUnavailableDetail"
+						} else {
+							"agent.bridgeUnavailable.detail"
+						}),
 					);
 				});
 			}
@@ -1270,8 +1326,8 @@ async fn start_inner(
 				)
 			}
 			None => {
-				let mut native = Command::new("zsh");
-				native.arg("-lc").arg(&command).current_dir(&cwd);
+				let mut native = crate::platform::shell_async(&command);
+				native.current_dir(&cwd);
 				for (name, value) in &env_vars {
 					native.env(name, value);
 				}
@@ -1850,8 +1906,8 @@ async fn respawn_turn(
 			crate::sandbox::build(sandbox_cfg, runtime, session_id, cwd, &[], &command, &forge)
 		}
 		None => {
-			let mut native = Command::new("zsh");
-			native.arg("-lc").arg(&command).current_dir(cwd);
+			let mut native = crate::platform::shell_async(&command);
+			native.current_dir(cwd);
 			native
 		}
 	};
@@ -2267,6 +2323,17 @@ pub fn adopt_relays(app: &AppHandle, agents: &SharedAgents) -> Adopted {
 		});
 	}
 	adopted
+}
+
+/// Un fichier de l'hôte tel que l'agent le lit : depuis le conteneur quand il
+/// est isolé (sous Windows, `/c/Users/…` — voir `sandbox::container_path`).
+fn seen_by_agent(path: &std::path::Path, sandboxed: bool) -> String {
+	let path = path.to_string_lossy().to_string();
+	if sandboxed {
+		crate::sandbox::container_path(&path)
+	} else {
+		path
+	}
 }
 
 pub(crate) fn shell_quote(value: &str) -> String {

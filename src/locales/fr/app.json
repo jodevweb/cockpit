@@ -48,7 +48,7 @@
 		},
 		"libre": {
 			"launch": "Lancer un agent libre…",
-			"launchHint": "⌘N · un dossier, un agent",
+			"launchHint": "{{mod}}N · un dossier, un agent",
 			"launchIn": "Lancer un agent dans {{folder}}",
 			"launchInHint": "le lanceur, rempli avec tes derniers choix"
 		},
@@ -70,7 +70,8 @@
 			"launchAgentHint": "conversation dans le cockpit",
 			"terminal": "Terminal sur {{name}}",
 			"terminalHint": "shell dans le cockpit",
-			"terminalApp": "Ouvrir {{name}} dans Terminal.app"
+			"terminalApp": "Ouvrir {{name}} dans Terminal.app",
+			"terminalApp_windows": "Ouvrir {{name}} dans une fenêtre de terminal"
 		},
 		"folder": {
 			"newAgent": "Nouvel agent dans un dossier…",
@@ -204,34 +205,34 @@
 			"placeBranch": "branche neuve",
 			"placeWorktree": "worktree neuf",
 			"defaultModel": "modèle du poste",
-			"title": "Un dossier, un agent — comme cd puis claude (⌘N)",
+			"title": "Un dossier, un agent — comme cd puis claude ({{mod}}N)",
 			"button": "Lancer un agent",
 			"again": "Relancer comme la dernière fois",
 			"noneYet": "Rien encore : le premier lancement se retient pour la suite.",
 			"other": "Autre dossier, autres réglages…"
 		},
 		"top": {
-			"mapTitle": "La carte de tout le travail (⌘⇧C)",
-			"workspaceTitle": "Les agents et terminaux ouverts (⌘⇧A)",
+			"mapTitle": "La carte de tout le travail ({{mod}}{{shift}}C)",
+			"workspaceTitle": "Les agents et terminaux ouverts ({{mod}}{{shift}}A)",
 			"libresTitle": "Les agents lancés hors chantier, comme au terminal",
-			"decisionsTitle": "Ce qui attend ta décision, rangé par ce que ça débloque (⌘⇧D)",
-			"recapTitle": "Ce qui s'est passé, en images : une histoire par tour d'agent (⌘⇧J)",
+			"decisionsTitle": "Ce qui attend ta décision, rangé par ce que ça débloque ({{mod}}{{shift}}D)",
+			"recapTitle": "Ce qui s'est passé, en images : une histoire par tour d'agent ({{mod}}{{shift}}J)",
 			"recap": "Récap",
-			"automationsTitle": "Les rendez-vous qui se préparent seuls, comme le daily (⌘⇧R)"
+			"automationsTitle": "Les rendez-vous qui se préparent seuls, comme le daily ({{mod}}{{shift}}R)"
 		},
 		"search": "Aller à, lancer, demander…",
 		"atelier": {
 			"title": "Tous les écrans, le projet, les réglages",
 			"name": "Atelier",
 			"close": "Fermer l'atelier",
-			"subtitle": "tous les écrans · ⌘K pour chercher"
+			"subtitle": "tous les écrans · {{mod}}K pour chercher"
 		},
 		"live": {
 			"missions_one": "{{count}} mission",
 			"missions_other": "{{count}} missions",
-			"missionsOngoing": "{{missions}} en cours (⌘⇧M)",
-			"missionsWaiting_one": "{{missions}} en cours, {{count}} attend ton accord (⌘⇧M)",
-			"missionsWaiting_other": "{{missions}} en cours, {{count}} attendent ton accord (⌘⇧M)",
+			"missionsOngoing": "{{missions}} en cours ({{mod}}{{shift}}M)",
+			"missionsWaiting_one": "{{missions}} en cours, {{count}} attend ton accord ({{mod}}{{shift}}M)",
+			"missionsWaiting_other": "{{missions}} en cours, {{count}} attendent ton accord ({{mod}}{{shift}}M)",
 			"scripts_one": "{{count}} script en cours",
 			"scripts_other": "{{count}} scripts en cours"
 		}

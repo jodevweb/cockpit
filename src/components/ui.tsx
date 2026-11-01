@@ -4,6 +4,7 @@ import { useEffect, useState, type ReactNode } from "react";
 import { createPortal } from "react-dom";
 import { useTranslation } from "react-i18next";
 import type { Severity } from "@/lib/types";
+import { dragRegion } from "@/lib/platform";
 
 /* ── Primitives ────────────────────────────────────────────────────────── */
 
@@ -312,7 +313,7 @@ export function ViewHeader({
 		// bloquent le glissement d'eux-mêmes : le script de Tauri s'arrête sur
 		// le premier élément cliquable qu'il rencontre.
 		<header
-			data-tauri-drag-region="deep"
+			data-tauri-drag-region={dragRegion}
 			className="hairline-b flex h-13 shrink-0 items-center justify-between gap-4 px-5 py-2.5"
 		>
 			<div className="min-w-0">

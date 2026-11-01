@@ -1,6 +1,7 @@
 import type { Turn } from "@/app/agents";
 import { commandOf, kindOf, pathOf, type Episode } from "@/lib/episodes";
 import { mediaOfPath, type Media } from "@/lib/media";
+import { joinPath } from "@/lib/paths";
 
 /**
  * Ce qu'un épisode a livré : la question qu'on se pose en revenant vers un
@@ -31,7 +32,8 @@ const COMMIT = /^\[([^\s\]]+)(?: \([^)]*\))? ([0-9a-f]{7,40})\] (.+)$/gm;
 // `+ 3f2a1bc...9e8d7f6 feat/x -> feat/x (forced update)`
 const PUSHED = /^\s*(?:\*|\+|[0-9a-f]{7,}\.\.\.?[0-9a-f]{7,}|\[new branch\])\s+.*?->\s+(\S+)(?:\s+\(.*\))?\s*$/gm;
 // Un chemin absolu vers une image ou un PDF, tel qu'un agent l'écrit en conclusion.
-const MEDIA_PATH = /(?:^|[\s(`"'])((?:\/|\.{0,2}\/?[\w.@+-]+\/)[^\s`"')]*\.(?:pdf|png|jpe?g|gif|webp|svg|mp4|m4v|mov|webm))\b/gi;
+// `C:\…` et `dossier\fichier` aussi : un agent sous Windows cite ses chemins ainsi.
+const MEDIA_PATH = /(?:^|[\s(`"'])((?:[A-Za-z]:[\\/]|\/|\.{0,2}[\\/]?[\w.@+-]+[\\/])[^\s`"')]*\.(?:pdf|png|jpe?g|gif|webp|svg|mp4|m4v|mov|webm))\b/gi;
 
 function textOf(turn: Turn): string {
 	return typeof turn.output === "string" ? turn.output : "";
@@ -84,7 +86,7 @@ export function delivered(episode: Episode, answer: Turn | null, cwd: string): D
 		for (const match of answer.text.matchAll(MEDIA_PATH)) {
 			// Un agent cite ses fichiers relativement à son dossier de travail :
 			// « Vidéo : .claude/work/demo/demo.mp4 ».
-			const cited = match[1].startsWith("/") ? match[1] : `${cwd.replace(/\/$/, "")}/${match[1].replace(/^\.\//, "")}`;
+			const cited = joinPath(cwd, match[1]);
 			const item = mediaOfPath(cited);
 			if (item) media.set(item.key, item);
 		}

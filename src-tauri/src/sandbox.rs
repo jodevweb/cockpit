@@ -40,32 +40,120 @@ const DEFAULT_DOCKERFILE: &str = include_str!("../../sandbox/Dockerfile");
 /// `/opt/homebrew/bin` — là où Docker Desktop et OrbStack posent leur CLI.
 /// Un `docker` bel et bien installé se voyait donc déclaré absent. On
 /// redemande à un shell de login, qui lit le profil, avant de céder.
+///
+/// Sous Windows, Docker Desktop pose `docker.exe` dans
+/// `C:\Program Files\Docker\Docker\resources\bin` ; OrbStack n'existe pas.
 fn which(binary: &str) -> Option<String> {
+	// Un chemin absolu déclaré en réglage vaut pour lui-même.
+	if std::path::Path::new(binary).is_absolute() {
+		return std::path::Path::new(binary).is_file().then(|| binary.to_string());
+	}
+	// Sinon un nom de programme, jamais un morceau de commande : il part dans
+	// une ligne de shell juste en dessous.
+	if binary.is_empty() || !binary.chars().all(|c| c.is_ascii_alphanumeric() || "-_.".contains(c)) {
+		return None;
+	}
+	let file = crate::platform::exe(binary);
 	if std::env::var_os("PATH").is_some_and(|paths| {
-		std::env::split_paths(&paths).any(|dir| dir.join(binary).is_file())
+		std::env::split_paths(&paths).any(|dir| dir.join(&file).is_file())
 	}) {
 		return Some(binary.to_string());
 	}
 
-	if let Ok(output) = std::process::Command::new("zsh")
-		.arg("-lc")
-		.arg(format!("command -v {binary}"))
-		.output()
+	#[cfg(windows)]
 	{
-		let found = String::from_utf8_lossy(&output.stdout).trim().to_string();
-		if !found.is_empty() && std::path::Path::new(&found).exists() {
-			return Some(found);
+		let mut command = std::process::Command::new("where");
+		command.arg(&file);
+		if let Ok(output) = crate::platform::quiet_std(&mut command).output() {
+			if let Some(found) = String::from_utf8_lossy(&output.stdout)
+				.lines()
+				.map(str::trim)
+				.find(|line| std::path::Path::new(line).is_file())
+			{
+				return Some(found.to_string());
+			}
 		}
+		["ProgramFiles", "ProgramW6432"]
+			.iter()
+			.filter_map(|name| std::env::var(name).ok())
+			.map(|base| {
+				std::path::Path::new(&base)
+					.join("Docker")
+					.join("Docker")
+					.join("resources")
+					.join("bin")
+					.join(&file)
+			})
+			.find(|path| path.is_file())
+			.map(|path| path.to_string_lossy().to_string())
 	}
 
-	let home = std::env::var("HOME").unwrap_or_default();
-	[
-		format!("/opt/homebrew/bin/{binary}"),
-		format!("/usr/local/bin/{binary}"),
-		format!("{home}/.orbstack/bin/{binary}"),
-	]
-	.into_iter()
-	.find(|path| std::path::Path::new(path).exists())
+	#[cfg(not(windows))]
+	{
+		if let Ok(output) = crate::platform::shell(&format!("command -v {binary}")).output() {
+			let found = String::from_utf8_lossy(&output.stdout).trim().to_string();
+			if !found.is_empty() && std::path::Path::new(&found).exists() {
+				return Some(found);
+			}
+		}
+
+		let home = home().map(|path| path.to_string_lossy().to_string()).unwrap_or_default();
+		[
+			format!("/opt/homebrew/bin/{binary}"),
+			format!("/usr/local/bin/{binary}"),
+			format!("{home}/.orbstack/bin/{binary}"),
+		]
+		.into_iter()
+		.find(|path| std::path::Path::new(path).exists())
+	}
+}
+
+/// Un `Command` du runtime, sans fenêtre console sous Windows.
+fn runtime_command(runtime: &str) -> Command {
+	let mut command = Command::new(runtime);
+	crate::platform::quiet_async(&mut command);
+	command
+}
+
+/// Le chemin d'un dossier de l'hôte **dans le conteneur**.
+///
+/// Sous macOS, le même : le worktree est monté au même chemin absolu (voir
+/// `build`). Sous Windows, un conteneur Linux n'a pas de `C:` : `C:\Users\a`
+/// y devient `/c/Users/a` — la forme que Git Bash donne au même dossier.
+pub fn container_path(host: &str) -> String {
+	if !cfg!(windows) {
+		return host.to_string();
+	}
+	let forward = host.replace('\\', "/");
+	let bytes = forward.as_bytes();
+	if bytes.len() >= 2 && bytes[0].is_ascii_alphabetic() && bytes[1] == b':' {
+		let rest = forward[2..].trim_start_matches('/');
+		return format!("/{}/{}", (bytes[0] as char).to_ascii_lowercase(), rest)
+			.trim_end_matches('/')
+			.to_string();
+	}
+	forward
+}
+
+/// Le chemin de l'hôte tel que `docker -v` l'attend : `C:/Users/a` sous
+/// Windows (Docker Desktop reconnaît la lettre de lecteur), inchangé ailleurs.
+fn volume_source(host: &str) -> String {
+	if cfg!(windows) {
+		host.replace('\\', "/")
+	} else {
+		host.to_string()
+	}
+}
+
+/// `-v <hôte>:<conteneur>[:ro]`.
+fn volume(host: &std::path::Path, read_only: bool) -> String {
+	let host = host.to_string_lossy();
+	format!(
+		"{}:{}{}",
+		volume_source(&host),
+		container_path(&host),
+		if read_only { ":ro" } else { "" }
+	)
 }
 
 /// Le runtime effectivement disponible (chemin absolu) : celui déclaré en
@@ -81,7 +169,7 @@ pub fn resolve_runtime(declared: &str) -> Option<String> {
 }
 
 async fn image_exists(runtime: &str, image: &str) -> bool {
-	Command::new(runtime)
+	runtime_command(runtime)
 		.arg("image")
 		.arg("inspect")
 		.arg(image)
@@ -111,7 +199,7 @@ pub fn dockerfile_stamp() -> String {
 
 /// L'empreinte que porte l'image installée, quand elle en porte une.
 async fn image_stamp(runtime: &str, image: &str) -> Option<String> {
-	let output = Command::new(runtime)
+	let output = runtime_command(runtime)
 		.arg("inspect")
 		.arg("--format")
 		.arg("{{ index .Config.Labels \"cockpit.dockerfile\" }}")
@@ -135,7 +223,7 @@ async fn build_default_image(runtime: &str) -> Result<(), String> {
 		.await
 		.map_err(|error| crate::i18n::tf("sandbox.writeDockerfile", &[("error", &error)]))?;
 
-	let output = Command::new(runtime)
+	let output = runtime_command(runtime)
 		.arg("build")
 		.arg("-t")
 		.arg(DEFAULT_IMAGE)
@@ -192,7 +280,7 @@ pub fn container_name(session_id: &str) -> String {
 }
 
 fn home() -> Option<PathBuf> {
-	std::env::var_os("HOME").map(PathBuf::from)
+	dirs::home_dir()
 }
 
 /// Le dépôt d'origine d'un worktree, lu dans son fichier `.git`.
@@ -219,7 +307,23 @@ fn worktree_origin(cwd: &str) -> Option<PathBuf> {
 /// de confiance sur `.claude/settings.json` — vérifié faux par la suite : ce
 /// premier essai n'avait rien à avertir, faute d'un `.claude/settings.json` à
 /// lire dans le dépôt de test. Voir `trust_worktree`.
+///
+/// Sous Windows, ni `id` ni uid : Docker Desktop présente les dossiers montés
+/// depuis `C:` comme accessibles à tous, et l'image n'exige que de ne pas
+/// tourner en `root`. 1000:1000, le premier compte ordinaire d'un Linux.
 fn host_ids() -> Option<(String, String)> {
+	#[cfg(windows)]
+	{
+		Some(("1000".to_string(), "1000".to_string()))
+	}
+	#[cfg(not(windows))]
+	{
+		host_ids_unix()
+	}
+}
+
+#[cfg(not(windows))]
+fn host_ids_unix() -> Option<(String, String)> {
 	let uid = std::process::Command::new("id").arg("-u").output().ok()?;
 	let gid = std::process::Command::new("id").arg("-g").output().ok()?;
 	if !uid.status.success() || !gid.status.success() {
@@ -407,7 +511,9 @@ pub fn build(
 		sandbox.image.trim()
 	};
 
-	let mut cmd = Command::new(runtime);
+	// Les chemins tels que l'agent les verra dans le conteneur.
+	let inside = container_path(cwd);
+	let mut cmd = runtime_command(runtime);
 	cmd.arg("run")
 		.arg("--rm")
 		.arg("-i")
@@ -416,9 +522,9 @@ pub fn build(
 		.arg("--memory")
 		.arg(format!("{}m", sandbox.memory_limit_mb()))
 		.arg("--workdir")
-		.arg(cwd)
+		.arg(&inside)
 		.arg("--volume")
-		.arg(format!("{cwd}:{cwd}"));
+		.arg(volume(std::path::Path::new(cwd), false));
 
 	// Un worktree n'est jamais autonome : son `.git` est un fichier — pas un
 	// dossier — qui pointe vers `<dépôt>/.git/worktrees/<nom>`, vérifié sur un
@@ -428,8 +534,7 @@ pub fn build(
 	// `notebook::seal` ne pouvait pas distinguer d'un agent qui n'a rien fait.
 	if let Some(origin) = worktree_origin(cwd) {
 		if origin.exists() {
-			cmd.arg("--volume")
-				.arg(format!("{}:{}", origin.display(), origin.display()));
+			cmd.arg("--volume").arg(volume(&origin, false));
 		}
 	}
 
@@ -475,7 +580,8 @@ pub fn build(
 		// ci-dessous ; les ponts MCP (`permissions.rs`, `orchestrator.rs`), qui
 		// dérivent leurs chemins de `homedir()` côté Node, écrivaient dans un
 		// `/root/.config/cockpit` que personne côté hôte n'allait jamais lire.
-		cmd.arg("-e").arg(format!("HOME={}", home.display()));
+		cmd.arg("-e")
+			.arg(format!("HOME={}", container_path(&home.to_string_lossy())));
 
 		// `.claude.json` : la configuration du CLI, un fichier au même niveau
 		// que le dossier `.claude` — pas dedans. Manquant, `claude` s'arrête sur
@@ -483,8 +589,7 @@ pub fn build(
 		for rel in [".claude", ".claude.json", ".gitconfig", ".ssh"] {
 			let path = home.join(rel);
 			if path.exists() {
-				cmd.arg("--volume")
-					.arg(format!("{}:{}:ro", path.display(), path.display()));
+				cmd.arg("--volume").arg(volume(&path, true));
 			}
 		}
 
@@ -502,13 +607,11 @@ pub fn build(
 		// qu'on isolait justement. Un utilisateur du conteneur a le même uid
 		// que l'hôte : le 600 du fichier ne le protégeait de rien.
 		for file in bridge_files(&crate::config::config_dir(), cwd) {
-			cmd.arg("--volume")
-				.arg(format!("{}:{}:ro", file.display(), file.display()));
+			cmd.arg("--volume").arg(volume(&file, true));
 		}
 		for dir in [crate::permissions::permissions_dir(), crate::orchestrator::calls_dir()] {
 			if dir.exists() {
-				cmd.arg("--volume")
-					.arg(format!("{}:{}", dir.display(), dir.display()));
+				cmd.arg("--volume").arg(volume(&dir, false));
 			}
 		}
 	}
@@ -526,14 +629,14 @@ pub fn build(
 	// de l'hôte ne vaudrait rien ici — voir `sandbox_account_dir`.
 	let account_dir = sandbox_account_dir();
 	let _ = std::fs::create_dir_all(&account_dir);
-	trust_worktree(&account_dir, cwd);
+	trust_worktree(&account_dir, &inside);
 	// La confiance se lit sur le dépôt d'origine, pas sur le worktree — vérifié
 	// empiriquement : le message cite le chemin du dépôt, pas celui d'où
 	// `claude` tourne. `.claude/settings.json` y est suivi par git, le worktree
 	// ne fait que le refléter ; approuver les deux coûte rien et couvre le cas
 	// où une version future changerait d'avis sur lequel des deux compte.
 	if let Some(origin) = worktree_origin(cwd) {
-		trust_worktree(&account_dir, &origin.to_string_lossy());
+		trust_worktree(&account_dir, &container_path(&origin.to_string_lossy()));
 	}
 	if let Some(host) = home() {
 		sync_mcp_servers(&host.join(".claude.json"), &account_dir);
@@ -561,13 +664,11 @@ pub fn build(
 			),
 		],
 	);
-	cmd.arg("--volume").arg(format!(
-		"{}:{}",
-		account_dir.display(),
-		account_dir.display()
+	cmd.arg("--volume").arg(volume(&account_dir, false));
+	cmd.arg("-e").arg(format!(
+		"CLAUDE_CONFIG_DIR={}",
+		container_path(&account_dir.to_string_lossy())
 	));
-	cmd.arg("-e")
-		.arg(format!("CLAUDE_CONFIG_DIR={}", account_dir.display()));
 
 	// `claude setup-token` n'écrit son jeton dans aucun fichier — vérifié
 	// empiriquement, ce n'était pas ce qu'on supposait au premier essai : il
@@ -664,7 +765,7 @@ pub fn kill(runtime: &str, session_id: &str) {
 	let runtime = runtime.to_string();
 	let name = container_name(session_id);
 	tauri::async_runtime::spawn(async move {
-		let _ = Command::new(&runtime).arg("kill").arg(&name).output().await;
+		let _ = runtime_command(&runtime).arg("kill").arg(&name).output().await;
 	});
 }
 
@@ -674,10 +775,9 @@ pub fn kill(runtime: &str, session_id: &str) {
 /// genre de fuite que ce module existe pour éviter.
 pub fn kill_blocking(runtime: &str, session_id: &str) {
 	let name = container_name(session_id);
-	let _ = std::process::Command::new(runtime)
-		.arg("kill")
-		.arg(&name)
-		.output();
+	let mut command = std::process::Command::new(runtime);
+	command.arg("kill").arg(&name);
+	let _ = crate::platform::quiet_std(&mut command).output();
 }
 
 #[cfg(test)]
@@ -820,11 +920,9 @@ mod tests {
 		let command = login_command().expect("claude doit être trouvé en test");
 
 		let script = format!("set -- {command}; for a; do printf '%s\\n' \"$a\"; done");
-		let output = std::process::Command::new("zsh")
-			.arg("-c")
-			.arg(script)
+		let output = crate::platform::shell(&script)
 			.output()
-			.expect("zsh doit pouvoir découper la commande");
+			.expect("le shell doit pouvoir découper la commande");
 		assert!(output.status.success());
 		let args: Vec<String> = String::from_utf8_lossy(&output.stdout)
 			.lines()
@@ -865,6 +963,28 @@ mod tests {
 		assert!(names.contains(&"mcp-permission.mjs".to_string()));
 		assert!(names.contains(&ici));
 		let _ = std::fs::remove_dir_all(&root);
+	}
+
+	#[test]
+	fn un_chemin_de_l_hote_se_retrouve_dans_le_conteneur() {
+		if cfg!(windows) {
+			assert_eq!(container_path("C:\\Users\\ana\\wt"), "/c/Users/ana/wt");
+			assert_eq!(container_path("D:/repos/x/"), "/d/repos/x");
+			assert_eq!(
+				volume(std::path::Path::new("C:\\Users\\ana\\.ssh"), true),
+				"C:/Users/ana/.ssh:/c/Users/ana/.ssh:ro"
+			);
+		} else {
+			assert_eq!(container_path("/Users/ana/wt"), "/Users/ana/wt");
+			assert_eq!(volume(std::path::Path::new("/Users/ana/.ssh"), true), "/Users/ana/.ssh:/Users/ana/.ssh:ro");
+		}
+	}
+
+	#[test]
+	fn un_runtime_n_est_qu_un_nom_de_programme() {
+		assert!(which("docker; rm -rf ~").is_none());
+		assert!(which("$(curl x)").is_none());
+		assert!(which("").is_none());
 	}
 
 	#[test]
@@ -959,7 +1079,7 @@ mod tests {
 		};
 
 		let jetable = format!("cockpit-agent-test-{}:latest", std::process::id());
-		let _ = Command::new(&runtime).arg("rmi").arg(&jetable).output().await;
+		let _ = runtime_command(&runtime).arg("rmi").arg(&jetable).output().await;
 		assert!(!image_exists(&runtime, &jetable).await);
 
 		let sandbox = SandboxConfig {

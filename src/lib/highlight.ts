@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { basename } from "@/lib/paths";
 
 /**
  * La coloration du code, pour le lire — pas pour l'éditer.
@@ -46,7 +47,7 @@ const BY_NAME: Record<string, string> = {
 
 /** Le langage d'un fichier d'après son nom, ou rien si on ne le colorie pas. */
 export function languageOf(path: string): string | null {
-	const name = (path.split("/").pop() ?? "").toLowerCase();
+	const name = basename(path).toLowerCase();
 	if (BY_NAME[name]) return BY_NAME[name];
 	if (name.startsWith(".env.")) return "ini";
 	if (name.startsWith("dockerfile")) return "dockerfile";

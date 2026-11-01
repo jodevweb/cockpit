@@ -24,6 +24,7 @@ import { PermanenceView } from "@/views/PermanenceView";
 import { WorktreesView } from "@/views/WorktreesView";
 import { LibreHost, LibresView } from "@/views/LibresView";
 import { openLauncher } from "@/lib/libre";
+import { modKey } from "@/lib/platform";
 import { ConfirmProvider } from "@/components/Confirm";
 import { ViewBoundary } from "@/components/ViewBoundary";
 import { Assistant } from "@/components/Assistant";
@@ -52,7 +53,7 @@ const SHORTCUTS: Record<string, ViewId> = {
 	"8": "worktrees",
 	"9": "git",
 	"0": "scripts",
-	// Les préférences sont sur ⌘, partout sur macOS.
+	// Les préférences sont sur ⌘, partout sur macOS (Ctrl+, sous Windows).
 	",": "settings",
 };
 
@@ -85,7 +86,8 @@ function Shortcuts({ onTogglePalette }: { onTogglePalette: () => void }) {
 
 	useEffect(() => {
 		const handler = (event: KeyboardEvent) => {
-			if (!event.metaKey) return;
+			// ⌘ sur Mac, Ctrl ailleurs — voir `modKey` pour ce que Ctrl laisse à la saisie.
+			if (!modKey(event)) return;
 			// ⌘⇧A : bascule entre l'écran Workspaces et l'écran qu'on lisait.
 			if (event.shiftKey && event.key.toLowerCase() === "a") {
 				event.preventDefault();

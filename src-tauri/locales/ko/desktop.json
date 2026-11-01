@@ -1,1 +1,9 @@
-{}
+{
+	"desktop": {
+		"editorNotFound": "이 컴퓨터에서 {{editor}}을(를) 찾을 수 없습니다. 설치하거나 명령줄 실행기를 PATH에 추가하세요.",
+		"terminalFailed": "터미널 창을 열 수 없습니다.",
+		"bashMissing": "Git for Windows가 필요합니다. bash를 찾을 수 없습니다.",
+		"credentialsRefused": "Windows 자격 증명 관리자가 키를 거부했습니다: {{error}}",
+		"programRefused": "Cockpit은 프로그램이나 스크립트를 실행하지 않습니다: {{path}}"
+	}
+}

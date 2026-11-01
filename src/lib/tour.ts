@@ -1,5 +1,6 @@
 import type { Turn } from "@/app/agents";
 import { commandOf, kindOf, pathOf } from "@/lib/episodes";
+import { joinPath } from "@/lib/paths";
 
 /**
  * Ce que la conversation apporte à la visite des changements : le pourquoi.
@@ -33,7 +34,7 @@ function clip(text: string, max: number): string {
 
 /** Un chemin tel que l'outil l'a reçu, ramené à la racine du dépôt. */
 export function relativeTo(root: string, cwd: string, path: string): string | null {
-	const absolute = path.startsWith("/") ? path : `${cwd.replace(/\/$/, "")}/${path.replace(/^\.\//, "")}`;
+	const absolute = joinPath(cwd, path);
 	const base = `${root.replace(/\/$/, "")}/`;
 	return absolute.startsWith(base) ? absolute.slice(base.length) : null;
 }

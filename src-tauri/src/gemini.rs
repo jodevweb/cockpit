@@ -188,7 +188,6 @@ mod tests {
 	#[tokio::test]
 	async fn le_faux_gemini_confirme_la_ligne_de_commande_et_la_lecture() {
 		use tokio::io::{AsyncBufReadExt, BufReader};
-		use tokio::process::Command;
 
 		let dir = std::env::temp_dir().join(format!("cockpit-gemini-test-{}", std::process::id()));
 		std::fs::create_dir_all(&dir).unwrap();
@@ -217,12 +216,10 @@ echo '{"type":"result","status":"success","stats":{"total_tokens":10}}'
 
 		let command = format!(
 			"export PATH={}:$PATH; {}",
-			dir.display(),
+			crate::platform::shell_path(&dir.to_string_lossy()),
 			first_turn("gemini", "list the files")
 		);
-		let child = Command::new("zsh")
-			.arg("-lc")
-			.arg(&command)
+		let child = crate::platform::shell_async(&command)
 			.stdout(std::process::Stdio::piped())
 			.spawn()
 			.expect("le faux gemini doit se lancer");

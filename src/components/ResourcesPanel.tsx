@@ -7,6 +7,8 @@ import { locale, t as translate } from "@/i18n";
 import { api } from "@/lib/ipc";
 import type { NamedUsage, ResourceReport } from "@/lib/types";
 import { useAsync } from "@/lib/useAsync";
+import { basename } from "@/lib/paths";
+import { platformContext } from "@/lib/platform";
 
 /**
  * Ce que le cockpit fait peser sur la machine, et à cause de quoi.
@@ -28,7 +30,7 @@ function memory(mb: number): string {
 }
 
 function shortCwd(cwd: string): string {
-	return cwd.split("/").filter(Boolean).pop() ?? cwd;
+	return basename(cwd);
 }
 
 /** Barre de proportion : la part de ce workspace dans le total mesuré. */
@@ -190,7 +192,7 @@ export function ResourcesPanel({ onClose }: { onClose: () => void }) {
 						) : null}
 
 						<p className="mt-4 px-2 text-[10px] leading-relaxed text-ink-faint">
-							{t("resources.footnote")}
+							{t("resources.footnote", { context: platformContext })}
 						</p>
 					</div>
 				)}

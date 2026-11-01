@@ -1,1 +1,9 @@
-{}
+{
+	"desktop": {
+		"editorNotFound": "{{editor}} non è stato trovato su questo computer: installalo o aggiungi il suo avvio da riga di comando al PATH.",
+		"terminalFailed": "Non è stato possibile aprire alcuna finestra di terminale.",
+		"bashMissing": "È necessario Git for Windows: la sua bash non è stata trovata.",
+		"credentialsRefused": "Gestione credenziali di Windows ha rifiutato la chiave: {{error}}",
+		"programRefused": "Cockpit non esegue programmi né script: {{path}}"
+	}
+}

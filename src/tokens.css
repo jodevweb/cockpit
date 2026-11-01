@@ -81,9 +81,9 @@
 	--agent-5: #d39a62;
 	--agent-6: #7f9cff;
 
-	--font-sans: "Instrument Sans Variable", "Instrument Sans", -apple-system, "SF Pro Text",
+	--font-sans: "Instrument Sans Variable", "Instrument Sans", -apple-system, "SF Pro Text", "Segoe UI Variable", "Segoe UI",
 		system-ui, sans-serif;
-	--font-mono: "Geist Mono", ui-monospace, "SF Mono", "Menlo", monospace;
+	--font-mono: "Geist Mono", ui-monospace, "SF Mono", "Menlo", "Cascadia Mono", "Consolas", monospace;
 
 	--radius-panel: 16px;
 	--ease-out-quart: cubic-bezier(0.25, 1, 0.5, 1);

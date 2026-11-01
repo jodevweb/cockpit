@@ -25,9 +25,11 @@ import { api } from "@/lib/ipc";
 import { truncate } from "@/lib/format";
 import { useAsync } from "@/lib/useAsync";
 import { useAgentActions } from "./agents";
-import { libreFolders, openLauncher } from "@/lib/libre";
+import { libreFolders, openLauncher, tilde } from "@/lib/libre";
 import { useTerminalActions } from "./terminals";
 import { useAllSessions, useCockpit, type ViewId } from "./store";
+import { basename, homeOf } from "@/lib/paths";
+import { platformContext } from "@/lib/platform";
 
 interface Action {
 	id: string;
@@ -141,7 +143,7 @@ export function CommandPalette({ onClose }: { onClose: () => void }) {
 			list.push({
 				id: `libre:${entry.folder}`,
 				label: t("commandPalette.libre.launchIn", {
-					folder: entry.folder.replace(/^\/Users\/[^/]+/, "~"),
+					folder: tilde(entry.folder, homeOf(entry.folder)),
 				}),
 				hint: t("commandPalette.libre.launchInHint"),
 				group: t("commandPalette.group.libres"),
@@ -235,7 +237,7 @@ export function CommandPalette({ onClose }: { onClose: () => void }) {
 			});
 			list.push({
 				id: `wt-term-app:${tree.path}`,
-				label: t("commandPalette.worktree.terminalApp", { name }),
+				label: t("commandPalette.worktree.terminalApp", { context: platformContext, name }),
 				hint: tree.path,
 				group: "Worktrees",
 				icon: Terminal,
@@ -307,7 +309,7 @@ export function CommandPalette({ onClose }: { onClose: () => void }) {
 			list.push({
 				id: `folder:${path}`,
 				label: t("commandPalette.folder.newAgentIn", {
-					folder: path.split("/").filter(Boolean).pop() ?? path,
+					folder: basename(path),
 				}),
 				hint: path,
 				group: t("commandPalette.group.recentFolders"),

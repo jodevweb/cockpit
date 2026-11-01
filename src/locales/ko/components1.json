@@ -84,7 +84,7 @@
 			"quoted": "“{{text}}”",
 			"currentFallback": "현재 지시",
 			"new": "새 지시 — 지도에 새 줄이 생깁니다",
-			"flipTitle": "전환 — 또는 ⌥Enter로 반대 방식으로 보내기",
+			"flipTitle": "전환 — 또는 {{alt}}Enter로 반대 방식으로 보내기",
 			"toNew": "새 지시",
 			"toFollow": "후속 지시"
 		},
@@ -114,7 +114,7 @@
 			"label": "작업",
 			"title": "이 에이전트를 위한 준비된 프롬프트",
 			"empty": "저장된 프롬프트가 없습니다.",
-			"footer": "프롬프트가 답변 입력란에 들어갑니다 — ⇧Enter를 누르면 바로 보냅니다. 라이브러리: <mono>~/.config/cockpit/prompts.toml</mono>"
+			"footer": "프롬프트가 답변 입력란에 들어갑니다 — {{shift}}Enter를 누르면 바로 보냅니다. 라이브러리: <mono>~/.config/cockpit/prompts.toml</mono>"
 		},
 		"model": {
 			"currentTitle": "현재 모델: {{model}}\n변경하면 같은 대화에서 에이전트가 다시 시작됩니다.",
@@ -532,17 +532,21 @@
 		}
 	},
 	"fileLink": {
-		"hint": "클릭: Cockpit에서 읽기\n⌘-클릭: 에디터에서 열기\n⌥-클릭: Finder에서 보기\n⇧-클릭: 경로 복사"
+		"hint": "클릭: Cockpit에서 읽기\n{{modKey}}-클릭: 에디터에서 열기\n{{altKey}}-클릭: Finder에서 보기\n{{shiftKey}}-클릭: 경로 복사",
+		"hint_windows": "클릭: Cockpit에서 읽기\n{{modKey}}-클릭: 에디터에서 열기\n{{altKey}}-클릭: 파일 탐색기에서 보기\n{{shiftKey}}-클릭: 경로 복사"
 	},
 	"fileViewer": {
 		"opaque": {
 			"unplayable": "Cockpit에서 이 형식을 재생할 수 없습니다. Mac의 기본 앱으로는 거의 확실히 재생할 수 있습니다.",
+			"unplayable_windows": "Cockpit에서 이 형식을 재생할 수 없습니다. Windows 기본 앱으로는 거의 확실히 재생할 수 있습니다.",
 			"unknown": "Cockpit은 이런 종류의 파일을 표시하지 않습니다. Mac 앱으로 {{name}}을(를) 여세요.",
+			"unknown_windows": "Cockpit은 이런 종류의 파일을 표시하지 않습니다. Windows 기본 앱으로 {{name}}을(를) 여세요.",
 			"openDefault": "기본 앱으로 열기",
-			"showInFinder": "Finder에서 보기"
+			"showInFinder": "Finder에서 보기",
+			"showInFinder_windows": "파일 탐색기에서 보기"
 		},
 		"unsaved": "저장 안 됨",
-		"saveTitle": "저장 (⌘S)",
+		"saveTitle": "저장 ({{mod}}S)",
 		"save": "저장",
 		"discardTitle": "변경 사항 버리기",
 		"cancel": "취소",
@@ -550,14 +554,16 @@
 		"edit": "편집",
 		"copyPath": "경로 복사",
 		"reveal": "Finder에서 보기",
+		"reveal_windows": "파일 탐색기에서 보기",
 		"openWithTitle": "Mac 앱으로 열기",
+		"openWithTitle_windows": "Windows 기본 앱으로 열기",
 		"openWith": "다음으로 열기…",
 		"externalEditorTitle": "외부 에디터에서 편집",
 		"externalEditor": "에디터",
 		"close": "닫기 (Esc)",
-		"searchPlaceholder": "파일에서 검색… (⌘F)",
+		"searchPlaceholder": "파일에서 검색… ({{mod}}F)",
 		"noMatch": "없음",
-		"previousMatch": "이전 결과 (⇧⏎)",
+		"previousMatch": "이전 결과 ({{shift}}{{enter}})",
 		"nextMatch": "다음 결과 (⏎)",
 		"truncated": "파일이 {{size}}에서 잘렸습니다 — 나머지를 보려면 에디터에서 여세요."
 	},
@@ -727,7 +733,7 @@
 		"title": "에이전트 실행",
 		"subtitle": "폴더 하나, 에이전트 하나. 프로젝트도 미션도 없습니다.",
 		"close": "닫기",
-		"allSet": "모두 채워져 있습니다. 폴더를 선택한 뒤 <key>⌘↵</key>를 누르면 에이전트가 시작됩니다.",
+		"allSet": "모두 채워져 있습니다. 폴더를 선택한 뒤 <key>{{mod}}{{enter}}</key>를 누르면 에이전트가 시작됩니다.",
 		"folder": {
 			"noteLibre": "자유 에이전트",
 			"noteRecent": "최근 에이전트",
@@ -736,6 +742,7 @@
 			"path": "폴더 경로",
 			"placeholder": "~/Sites/my-project",
 			"browse": "Finder에서 선택…",
+			"browse_windows": "파일 탐색기에서 선택…",
 			"missing": "이 폴더는 존재하지 않습니다.",
 			"gitRepo": "Git 저장소 · {{branch}} · {{state}}",
 			"detached": "분리된 HEAD",
@@ -779,7 +786,7 @@
 			"title": "준비 완료",
 			"prompt": "첫 지시 <muted>— 선택 사항</muted>",
 			"placeholder": "비워 두면: 그냥 “claude”처럼 에이전트가 첫 문장을 기다립니다.",
-			"remember": "<code>{{folder}}</code>에 대해 이 선택 기억 — 다음에는 ⌘N 후 ⌘↵만 누르면 됩니다",
+			"remember": "<code>{{folder}}</code>에 대해 이 선택 기억 — 다음에는 {{mod}}N 후 {{mod}}{{enter}}만 누르면 됩니다",
 			"button": "실행"
 		},
 		"command": "직접 입력했다면 이렇게 됩니다",
@@ -832,13 +839,14 @@
 		"count_other": "수정된 파일 {{count}}개",
 		"reveal": {
 			"title": "Finder에서 worktree 열기",
+			"title_windows": "파일 탐색기에서 worktree 열기",
 			"label": "폴더"
 		}
 	},
 	"quickMenu": {
 		"search": "검색…",
 		"noMatch": "그 이름의 항목이 없습니다.",
-		"extraHint": "{{title}} (⇧Enter)"
+		"extraHint": "{{title}} ({{shift}}Enter)"
 	},
 	"reliabilityPanel": {
 		"title": "루프 상태",
@@ -920,6 +928,7 @@
 		},
 		"setup": {
 			"title": "이 Mac에서 한 번만 할 일",
+			"title_windows": "이 PC에서 한 번만 할 일",
 			"detail": "스크립트가 로컬 ntfy 서버를 설정하고, 이 페이지와 함께 tailnet에 게시한 뒤, 아래에 붙여 넣을 토픽과 토큰을 출력합니다. Apple의 릴레이는 토픽의 해시만 봅니다. 내용은 여기서 옵니다."
 		},
 		"ntfy": {

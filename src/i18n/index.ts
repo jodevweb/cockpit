@@ -1,5 +1,6 @@
 import i18n from "i18next";
 import { initReactI18next } from "react-i18next";
+import { shortcutVariables } from "@/lib/platform";
 
 /**
  * Les langues de Cockpit.
@@ -65,7 +66,9 @@ export async function initI18n(language: string) {
 		defaultNS: "common",
 		ns: ["common"],
 		resources: {},
-		interpolation: { escapeValue: false },
+		// `{{mod}}`, `{{shift}}`… : les touches de la plateforme, connues de
+		// chaque `t()` sans qu'on les passe — « ⌘⇧C » sur Mac, « Ctrl+Shift+C » ailleurs.
+		interpolation: { escapeValue: false, defaultVariables: shortcutVariables },
 		returnNull: false,
 		react: { useSuspense: false },
 	});

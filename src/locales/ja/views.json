@@ -32,6 +32,7 @@
 			"resumeHint": "Cockpit のワークスペースで会話を再開します",
 			"resume": "会話を再開",
 			"resumeTerminalHint": "Terminal.app で会話を再開します",
+			"resumeTerminalHint_windows": "ターミナルウィンドウ で会話を再開します",
 			"resumeTerminal": "ターミナルで再開",
 			"editor": "エディタ",
 			"terminal": "ターミナル",
@@ -105,6 +106,7 @@
 		"title": "自動化",
 		"new": "新規",
 		"whenItRuns": "自動化は Cockpit が開いている間に実行されます。設定時刻に Mac がスリープしていた場合、ミーティングの時刻を過ぎていなければ、Cockpit を開いたときに後から実行します。",
+		"whenItRuns_windows": "自動化は Cockpit が開いている間に実行されます。設定時刻に PC がスリープしていた場合、ミーティングの時刻を過ぎていなければ、Cockpit を開いたときに後から実行します。",
 		"paused": "一時停止中",
 		"nextRun": "次回：{{when}}",
 		"noUpcoming": "予定されたミーティングはありません",
@@ -180,7 +182,7 @@
 		"title": "判断待ち",
 		"nothingWaiting": "あなたを待っているものはありません。",
 		"summary_other": "判断待ち {{count}} 件 · 最も古いものは {{since}} 待っています",
-		"keys": "<up>↑</up><down>↓</down> 切り替え · <one>1</one>…<nine>9</nine> 選択 · <back>⌘⇧D</back> 戻る",
+		"keys": "<up>↑</up><down>↓</down> 切り替え · <one>1</one>…<nine>9</nine> 選択 · <back>{{mod}}{{shift}}D</back> 戻る",
 		"empty": "あなたを待っているエージェントはいません。質問、権限のリクエスト、返答待ち、承認待ちの計画は、解除されるものの大きさ順にここに並びます。",
 		"blocksTasks_other": "タスク {{count}} 件をブロック中",
 		"agentStopped": "エージェント停止",
@@ -206,7 +208,7 @@
 			"label": "質問で操作を返しました",
 			"collapse": "メッセージを折りたたむ",
 			"expand": "メッセージ全文を読む",
-			"placeholder": "あなたの返答 — ⌘↵ で送信",
+			"placeholder": "あなたの返答 — {{mod}}{{enter}} で送信",
 			"send": "返答"
 		}
 	},
@@ -460,6 +462,7 @@
 			"nothingToResume": "このエージェントはセッションを開いていません：再開するものはありません。",
 			"openTerminal": "ここでターミナルを開く",
 			"reveal": "Finder で表示",
+			"reveal_windows": "エクスプローラー で表示",
 			"stop": "停止",
 			"resume": "再開",
 			"archive": "アーカイブ",
@@ -484,7 +487,7 @@
 		"empty": {
 			"projectFolder": "my-project",
 			"becomes": "— これが —",
-			"shortcut": "<key>⌘N</key>、フォルダ、<key>⌘↵</key>",
+			"shortcut": "<key>{{mod}}N</key>、フォルダ、<key>{{mod}}{{enter}}</key>",
 			"title": "1 つのフォルダに 1 つのエージェント、それだけ。",
 			"body": "作業場もミッションも、不要ならブランチもなし。フリーエージェントは、アーカイブするまでフォルダごとにここに整理されます。",
 			"launch": "エージェントを起動",
@@ -895,7 +898,7 @@
 		"live": "実際に行動しています。設定でチェックしたアクションのみを実行し、共有ブランチでは決して行いません。",
 		"suspended": {
 			"message": "休止中。進行中の対応は最後まで実行され、新しい対応は開始しません。",
-			"hint": "クリックまたは ⌘⇧P で再開"
+			"hint": "クリックまたは {{mod}}{{shift}}P で再開"
 		},
 		"inFlight": {
 			"title": "進行中",
@@ -1004,6 +1007,7 @@
 		"in": "{{path}} 内",
 		"run": "実行",
 		"openInTerminal": "Cockpit ではなく Terminal.app で開く",
+		"openInTerminal_windows": "Cockpit ではなく ターミナルウィンドウ で開く",
 		"required": "{{label}} は必須です。",
 		"title": "スクリプト",
 		"subtitle": "設定可能な独自コマンドとリポジトリのスクリプト。出力をライブで表示しながら実行します。",
@@ -1021,6 +1025,7 @@
 		"stop": "停止",
 		"clearOutput": "出力をクリア",
 		"replayInTerminal": "Terminal.app で再実行",
+		"replayInTerminal_windows": "ターミナルウィンドウ で再実行",
 		"launchPrompt": "コマンドを実行",
 		"launchHint": "出力はターミナルの色付きで、ここにライブで表示されます。"
 	},
@@ -1193,6 +1198,7 @@
 			"lightHint": "同じ役割、別の値",
 			"system": "システム",
 			"systemHint": "macOS に追従、切り替えにも対応",
+			"systemHint_windows": "Windows に追従、切り替えにも対応",
 			"help": "この選択はこのワークステーションに適用され、すぐに反映されます — 「設定を保存」を待ちません（そちらはプロジェクトの設定のみが対象です）。開いているターミナルも一緒に再描画されます。"
 		},
 		"relay": {
@@ -1324,11 +1330,11 @@
 		},
 		"detail": {
 			"editor": "エディタ",
-			"terminalHint": "作業パネルで、この worktree のシェル（⌘⇧T）",
+			"terminalHint": "作業パネルで、この worktree のシェル（{{mod}}{{shift}}T）",
 			"terminal": "ターミナル",
 			"agentHint": "Cockpit を離れずに、ここでエージェントを起動",
 			"agent": "エージェント",
-			"devHint": "パネルのターミナルで {{command}} — ⌃C で停止",
+			"devHint": "パネルのターミナルで {{command}} — {{ctrl}}C で停止",
 			"dev": "Dev",
 			"changes": "変更",
 			"cleanTree": "クリーンなツリー — 比較するものはありません。",

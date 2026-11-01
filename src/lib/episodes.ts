@@ -1,5 +1,6 @@
 import type { Turn } from "@/app/agents";
 import { t } from "@/i18n";
+import { basename } from "@/lib/paths";
 
 /**
  * Lire le fil d'un agent comme une suite d'épisodes : une consigne, et tout
@@ -85,7 +86,7 @@ export function commandOf(turn: Turn): string {
  */
 export function gestureOf(turn: Turn): string {
 	const path = pathOf(turn);
-	const file = path.split("/").filter(Boolean).pop() ?? path;
+	const file = basename(path);
 	const input = turn.input ?? {};
 	switch (kindOf(turn)) {
 		case "run":

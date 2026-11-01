@@ -48,7 +48,7 @@
 		},
 		"libre": {
 			"launch": "Lançar um agente livre…",
-			"launchHint": "⌘N · uma pasta, um agente",
+			"launchHint": "{{mod}}N · uma pasta, um agente",
 			"launchIn": "Lançar um agente em {{folder}}",
 			"launchInHint": "o lançador, preenchido com suas últimas escolhas"
 		},
@@ -70,7 +70,8 @@
 			"launchAgentHint": "conversa no cockpit",
 			"terminal": "Terminal em {{name}}",
 			"terminalHint": "shell no cockpit",
-			"terminalApp": "Abrir {{name}} no Terminal.app"
+			"terminalApp": "Abrir {{name}} no Terminal.app",
+			"terminalApp_windows": "Abrir {{name}} em uma janela de terminal"
 		},
 		"folder": {
 			"newAgent": "Novo agente em uma pasta…",
@@ -204,34 +205,34 @@
 			"placeBranch": "nova branch",
 			"placeWorktree": "novo worktree",
 			"defaultModel": "modelo padrão da máquina",
-			"title": "Uma pasta, um agente — como cd e depois claude (⌘N)",
+			"title": "Uma pasta, um agente — como cd e depois claude ({{mod}}N)",
 			"button": "Lançar um agente",
 			"again": "Relançar como da última vez",
 			"noneYet": "Nada ainda: seu primeiro lançamento será lembrado para a próxima vez.",
 			"other": "Outra pasta, outras configurações…"
 		},
 		"top": {
-			"mapTitle": "O mapa de todo o trabalho (⌘⇧C)",
-			"workspaceTitle": "Agentes e terminais abertos (⌘⇧A)",
+			"mapTitle": "O mapa de todo o trabalho ({{mod}}{{shift}}C)",
+			"workspaceTitle": "Agentes e terminais abertos ({{mod}}{{shift}}A)",
 			"libresTitle": "Agentes lançados fora de um projeto, como em um terminal",
-			"decisionsTitle": "O que aguarda sua decisão, ordenado pelo que desbloqueia (⌘⇧D)",
-			"recapTitle": "O que aconteceu, em imagens: uma história por turno de agente (⌘⇧J)",
+			"decisionsTitle": "O que aguarda sua decisão, ordenado pelo que desbloqueia ({{mod}}{{shift}}D)",
+			"recapTitle": "O que aconteceu, em imagens: uma história por turno de agente ({{mod}}{{shift}}J)",
 			"recap": "Resumo",
-			"automationsTitle": "Reuniões que se preparam sozinhas, como a daily (⌘⇧R)"
+			"automationsTitle": "Reuniões que se preparam sozinhas, como a daily ({{mod}}{{shift}}R)"
 		},
 		"search": "Ir para, lançar, perguntar…",
 		"atelier": {
 			"title": "Todas as telas, o projeto, as configurações",
 			"name": "Ateliê",
 			"close": "Fechar o ateliê",
-			"subtitle": "todas as telas · ⌘K para buscar"
+			"subtitle": "todas as telas · {{mod}}K para buscar"
 		},
 		"live": {
 			"missions_one": "{{count}} missão",
 			"missions_other": "{{count}} missões",
-			"missionsOngoing": "{{missions}} em andamento (⌘⇧M)",
-			"missionsWaiting_one": "{{missions}} em andamento, {{count}} aguardando sua aprovação (⌘⇧M)",
-			"missionsWaiting_other": "{{missions}} em andamento, {{count}} aguardando sua aprovação (⌘⇧M)",
+			"missionsOngoing": "{{missions}} em andamento ({{mod}}{{shift}}M)",
+			"missionsWaiting_one": "{{missions}} em andamento, {{count}} aguardando sua aprovação ({{mod}}{{shift}}M)",
+			"missionsWaiting_other": "{{missions}} em andamento, {{count}} aguardando sua aprovação ({{mod}}{{shift}}M)",
 			"scripts_one": "{{count}} script rodando",
 			"scripts_other": "{{count}} scripts rodando"
 		}

@@ -220,7 +220,11 @@ pub async fn transcribe(audio: Vec<u8>) -> Result<String> {
 /* ── Le raccourci ───────────────────────────────────────────────────── */
 
 /// Par défaut ⌥ Espace ; ChatGPT, Raycast ou Alfred le prennent volontiers.
+#[cfg(not(windows))]
 pub const DEFAULT_SHORTCUT: &str = "alt+Space";
+/// Sous Windows, `Alt+Espace` ouvre le menu système de la fenêtre.
+#[cfg(windows)]
+pub const DEFAULT_SHORTCUT: &str = "control+alt+Space";
 
 /// Où en est le raccourci : celui qu'on a voulu, et s'il est vraiment actif.
 ///

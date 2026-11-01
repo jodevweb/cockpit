@@ -32,6 +32,7 @@
 			"resumeHint": "在 Cockpit 工作区中重新打开对话",
 			"resume": "恢复对话",
 			"resumeTerminalHint": "在 Terminal.app 中重新打开对话",
+			"resumeTerminalHint_windows": "在 终端窗口 中重新打开对话",
 			"resumeTerminal": "在终端中恢复",
 			"editor": "编辑器",
 			"terminal": "终端",
@@ -105,6 +106,7 @@
 		"title": "自动化",
 		"new": "新建",
 		"whenItRuns": "自动化在 Cockpit 打开时运行。如果到了设定时间 Mac 处于睡眠状态，它会在 Cockpit 打开时补跑，前提是会议尚未结束。",
+		"whenItRuns_windows": "自动化在 Cockpit 打开时运行。如果到了设定时间电脑处于睡眠状态，它会在 Cockpit 打开时补跑，前提是会议尚未结束。",
 		"paused": "已暂停",
 		"nextRun": "下一次：{{when}}",
 		"noUpcoming": "没有即将到来的会议",
@@ -180,7 +182,7 @@
 		"title": "决策",
 		"nothingWaiting": "没有等待你处理的事项。",
 		"summary_other": "{{count}} 项决策 · 最早的已等待 {{since}}",
-		"keys": "<up>↑</up><down>↓</down> 切换 · <one>1</one>…<nine>9</nine> 选择 · <back>⌘⇧D</back> 返回",
+		"keys": "<up>↑</up><down>↓</down> 切换 · <one>1</one>…<nine>9</nine> 选择 · <back>{{mod}}{{shift}}D</back> 返回",
 		"empty": "没有智能体在等你。问题、权限请求、待回复的消息以及待批准的计划都会出现在这里，按其解除阻塞的影响排序。",
 		"blocksTasks_other": "阻塞 {{count}} 个子任务",
 		"agentStopped": "智能体已停止",
@@ -206,7 +208,7 @@
 			"label": "它在一个问题上交还了控制权",
 			"collapse": "收起其消息",
 			"expand": "阅读其完整消息",
-			"placeholder": "你的回复 — ⌘↵ 发送",
+			"placeholder": "你的回复 — {{mod}}{{enter}} 发送",
 			"send": "回复"
 		}
 	},
@@ -460,6 +462,7 @@
 			"nothingToResume": "此智能体从未打开过会话：没有可恢复的内容。",
 			"openTerminal": "在此处打开终端",
 			"reveal": "在访达中显示",
+			"reveal_windows": "在文件资源管理器中显示",
 			"stop": "停止",
 			"resume": "恢复",
 			"archive": "归档",
@@ -484,7 +487,7 @@
 		"empty": {
 			"projectFolder": "my-project",
 			"becomes": "— 变为 —",
-			"shortcut": "<key>⌘N</key>，选择文件夹，<key>⌘↵</key>",
+			"shortcut": "<key>{{mod}}N</key>，选择文件夹，<key>{{mod}}{{enter}}</key>",
 			"title": "一个智能体，一个文件夹，仅此而已。",
 			"body": "无需工地，无需任务，如果你不想要，也无需分支。你的自由智能体会按文件夹归档在这里，直到你将其归档。",
 			"launch": "启动智能体",
@@ -895,7 +898,7 @@
 		"live": "它在真正执行。设置中勾选的操作是它唯一会采取的操作，且绝不会在共享分支上进行。",
 		"suspended": {
 			"message": "休息中。进行中的介入会运行完毕；不会开始新的介入。",
-			"hint": "点击或按 ⌘⇧P 恢复"
+			"hint": "点击或按 {{mod}}{{shift}}P 恢复"
 		},
 		"inFlight": {
 			"title": "进行中",
@@ -1004,6 +1007,7 @@
 		"in": "位于 {{path}}",
 		"run": "运行",
 		"openInTerminal": "在 Terminal.app 而非 Cockpit 中打开",
+		"openInTerminal_windows": "在 终端窗口 而非 Cockpit 中打开",
 		"required": "{{label}} 为必填项。",
 		"title": "脚本",
 		"subtitle": "可配置的内部命令和仓库脚本，实时显示输出。",
@@ -1021,6 +1025,7 @@
 		"stop": "停止",
 		"clearOutput": "清除输出",
 		"replayInTerminal": "在 Terminal.app 中重新运行",
+		"replayInTerminal_windows": "在 终端窗口 中重新运行",
 		"launchPrompt": "运行命令",
 		"launchHint": "输出会实时显示在这里，保留终端的颜色。"
 	},
@@ -1193,6 +1198,7 @@
 			"lightHint": "相同的角色，不同的取值",
 			"system": "跟随系统",
 			"systemHint": "跟随 macOS，包括自动切换",
+			"systemHint_windows": "跟随 Windows，包括自动切换",
 			"help": "此选择适用于本工作站并立即生效 — 无需等待“保存配置”，后者只涉及项目设置。打开的终端也会随之重绘。"
 		},
 		"relay": {
@@ -1324,11 +1330,11 @@
 		},
 		"detail": {
 			"editor": "编辑器",
-			"terminalHint": "此 worktree 的 shell，位于工作面板中（⌘⇧T）",
+			"terminalHint": "此 worktree 的 shell，位于工作面板中（{{mod}}{{shift}}T）",
 			"terminal": "终端",
 			"agentHint": "在此处启动智能体，无需离开 Cockpit",
 			"agent": "智能体",
-			"devHint": "在面板终端中运行 {{command}} — ⌃C 停止",
+			"devHint": "在面板终端中运行 {{command}} — {{ctrl}}C 停止",
 			"dev": "Dev",
 			"changes": "更改",
 			"cleanTree": "工作区干净 — 没有可比较的内容。",
