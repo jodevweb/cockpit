@@ -1181,7 +1181,7 @@ mod usage_tests {
 
 		let noms: Vec<String> = builds
 			.iter()
-			.map(|p| p.strip_prefix(&racine).unwrap().to_string_lossy().to_string())
+			.map(|p| p.strip_prefix(&racine).unwrap().to_string_lossy().replace('\\', "/"))
 			.collect();
 		assert!(noms.contains(&"apps/web/.next".to_string()));
 		assert!(noms.contains(&"packages/ui/dist".to_string()));

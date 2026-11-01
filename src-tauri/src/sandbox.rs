@@ -1077,6 +1077,18 @@ mod tests {
 		let Some(runtime) = resolve_runtime("") else {
 			return;
 		};
+		// L'image des agents est une image Linux : un moteur qui ne fait tourner
+		// que des conteneurs Windows (Docker des machines Windows de GitHub, ou
+		// Docker Desktop basculé en mode Windows) ne peut pas la construire.
+		let os_type = runtime_command(&runtime)
+			.args(["info", "--format", "{{.OSType}}"])
+			.output()
+			.await
+			.map(|output| String::from_utf8_lossy(&output.stdout).trim().to_string())
+			.unwrap_or_default();
+		if os_type != "linux" {
+			return;
+		}
 
 		let jetable = format!("cockpit-agent-test-{}:latest", std::process::id());
 		let _ = runtime_command(&runtime).arg("rmi").arg(&jetable).output().await;
