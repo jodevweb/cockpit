@@ -41,6 +41,11 @@ concurrency:
   cancel-in-progress: false
 
 env:
+  # OpenSSL (passkeys de l'accès mobile) se compile avec l'app sous Windows, et
+  # son script de configuration veut un Perl complet : celui de Git Bash n'a pas
+  # tous ses modules. Strawberry Perl est installé sur les machines Windows de
+  # GitHub ; ailleurs la variable est ignorée.
+  OPENSSL_SRC_PERL: C:/Strawberry/perl/bin/perl.exe
   DEPOT_BINAIRES: jodevweb/cockpit-releases
   TAG: ${{ github.event.inputs.tag || github.ref_name }}
 

@@ -82,8 +82,11 @@ Windows** sous Windows (voir plus bas).
 Xcode Command Line Tools (`xcode-select --install`). Sous Windows, la chaîne
 MSVC de Rust (`rustup default stable-x86_64-pc-windows-msvc`, celle par
 défaut) et les **Visual Studio Build Tools** avec la charge de travail
-« Développement Desktop en C++ » (compilateur MSVC et SDK Windows) ; Perl,
-fourni avec Git for Windows, sert à compiler OpenSSL. La première compilation
+« Développement Desktop en C++ » (compilateur MSVC et SDK Windows), et
+**Strawberry Perl** (`winget install StrawberryPerl.StrawberryPerl`) pour
+compiler OpenSSL : le Perl de Git for Windows n'a pas tous les modules
+nécessaires. Si `perl` désigne encore celui de Git, indiquez le bon avec
+`set OPENSSL_SRC_PERL=C:\Strawberry\perl\bin\perl.exe`. La première compilation
 Rust prend plusieurs minutes ; les suivantes sont incrémentales.
 
 **Les outils qu'il pilote.** Rien n'est embarqué : le cockpit se sert de ce qui
