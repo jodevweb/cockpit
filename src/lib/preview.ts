@@ -2204,14 +2204,14 @@ const REPONSES: Record<string, unknown> = {
 		tightest: "Week",
 		resetsAt: "Monday",
 		quotas: [
-			{ label: "Current session", percent: 41, resetsAt: "at 6:00 PM" },
-			{ label: "This week", percent: 78, resetsAt: "Monday" },
-			{ label: "This week (Fable)", percent: 12, resetsAt: "" },
+			{ kind: "session", label: "Current session", percent: 41, resetsAt: "at 6:00 PM" },
+			{ kind: "week", label: "This week", percent: 78, resetsAt: "Monday" },
+			{ kind: "week", label: "This week (Fable)", percent: 12, resetsAt: "" },
 		],
 	},
 	usage_limits: {
 		limits: [
-			{ label: "Session", percent: 41, resetsAt: "at 6:00 PM" },
+			{ kind: "session", label: "Session", percent: 41, resetsAt: "at 6:00 PM" },
 			{ label: "Week", percent: 78, resetsAt: "Monday" },
 		],
 		note: "These figures only cover this machine.",

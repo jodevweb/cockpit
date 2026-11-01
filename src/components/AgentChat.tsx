@@ -1900,7 +1900,7 @@ function ModelCost({ spec, quotas }: { spec: ModelSpec; quotas: UsageLimit[] }) 
 function QuotaFooter({ quotas }: { quotas: UsageLimit[] }) {
 	const { t } = useTranslation("components1");
 	const commun = quotas.find(
-		(entry) => entry.label.startsWith("Cette semaine") && !entry.label.includes("("),
+		(entry) => entry.kind === "week" && !entry.label.includes("("),
 	);
 
 	return (

@@ -89,7 +89,11 @@
 	"usage": {
 		"claudeNotFound": "The `claude` CLI cannot be found.",
 		"cliRefused": "The CLI refused the request.",
-		"limitsRead": "Reading the limits: {{error}}"
+		"limitsRead": "Reading the limits: {{error}}",
+		"limits": {
+			"session": "Current session",
+			"week": "This week"
+		}
 	},
 	"monitor": {
 		"localRepoSource": "{{label}} · local repository",
@@ -245,7 +249,7 @@
 		"defaultEnvironment": "Default",
 		"worktreeHostileValue": "Value refused in the worktree command (shell character): {{value}}",
 		"roles": {
-			"master": "Master agent",
+			"master": "Lead agent",
 			"backend": "Back-end development",
 			"frontend": "Front-end development",
 			"qa": "Testing and QA",
@@ -405,11 +409,11 @@
 			"workerLaunched": "Worker launched",
 			"ticketNoId": "This issue has no readable identifier.",
 			"alreadyOpen": "A mission is already open on {{identifier}}: going back to it rather than opening a second one.",
-			"openedGuided": "Mission opened on {{identifier}}: the master reads the issue, and you read it with them.",
-			"opened": "Mission opened on {{identifier}}, the master is analysing the issue.",
+			"openedGuided": "Mission opened on {{identifier}}: the lead reads the issue, and you read it with them.",
+			"opened": "Mission opened on {{identifier}}, the lead is analysing the issue.",
 			"nodeMissing": "Node cannot be found on this machine: the mission tools go through an MCP bridge that it runs. Install Node (`brew install node`), then relaunch the mission. Ordinary agents keep working.",
-			"integrationWorktreeFailed": "Integration worktree impossible for `{{branch}}`: {{error}}. The master will not be launched in the main repository.",
-			"masterLaunched": "Master launched",
+			"integrationWorktreeFailed": "Integration worktree impossible for `{{branch}}`: {{error}}. The lead will not be launched in the main repository.",
+			"masterLaunched": "Lead launched",
 			"unclearVerdict": "{{tasks}} returned a report without a readable verdict: there is no telling whether the work passes. Relaunch the check and ask it to conclude with `VERDICT: ok`, `concerns` or `blocking`. If you give up on its opinion, mark the task abandoned — it will be a decision, not an oversight.",
 			"blockingVerdict": "{{tasks}} returned a blocking verdict. Fix what is criticised, then relaunch the check: its new verdict will lift the refusal. If you consider the criticism unfounded, send it back with `rework` and say so.",
 			"unintegrated": "{{count}} task(s) are not in `{{branch}}`: {{tasks}}. Integrate them, or mark them abandoned if you give up on their work.",
@@ -432,12 +436,12 @@
 			"checkNoVerdictDetail": "Its report does not conclude readably: Cockpit cannot tell whether the work passes. Relaunch it, or decide by hand.",
 			"checkBlocking": "Blocking check",
 			"checkBlockingDetail": "The pull request stays closed until this refusal is lifted.",
-			"masterTimedOut": "Master interrupted — turn too long",
-			"masterTimedOutDetail": "No response for {{minutes}} minutes: cut off so automatic recovery can relaunch a fresh master.",
-			"allDelivered": "All workers have delivered. The master is recombining.",
-			"masterNotRelaunched": "Master not relaunched",
+			"masterTimedOut": "Lead interrupted — turn too long",
+			"masterTimedOutDetail": "No response for {{minutes}} minutes: cut off so automatic recovery can relaunch a fresh lead.",
+			"allDelivered": "All workers have delivered. The lead is recombining.",
+			"masterNotRelaunched": "Lead not relaunched",
 			"integrationResumed": "Integration resumed",
-			"integrationResumedDetail": "No master was holding the mission; one is relaunched on what remains to be done.",
+			"integrationResumedDetail": "No lead was holding the mission; one is relaunched on what remains to be done.",
 			"integrationNotResumed": "Integration not resumed",
 			"outOfScopeRefused": "Out-of-scope write refused"
 		},

@@ -596,11 +596,11 @@ export function modelCore(id: string | null): string {
  */
 export function modelQuota(
 	spec: ModelSpec,
-	quotas: Array<{ label: string; percent: number; resetsAt: string }>,
+	quotas: Array<{ kind?: string; label: string; percent: number; resetsAt: string }>,
 ): { label: string; percent: number; resetsAt: string } | null {
 	if (!spec.id) return null;
-	// L'intitulé vient du Rust : l'ancien français et l'anglais sont reconnus.
-	const weekly = quotas.filter((entry) => /^(Cette semaine|This week)/.test(entry.label));
+	// `kind` plutôt que l'intitulé, qui est traduit.
+	const weekly = quotas.filter((entry) => entry.kind === "week");
 	if (weekly.length === 0) return null;
 	if (spec.quota) {
 		return weekly.find((entry) => entry.label.includes(`(${spec.quota})`)) ?? null;

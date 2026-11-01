@@ -753,6 +753,8 @@ export interface UsageBucket {
 
 /** Un plafond d'abonnement et son échéance, tels que le CLI les rapporte. */
 export interface UsageLimit {
+	/** `session` ou `week` : à comparer, contrairement au libellé, traduit. */
+	kind: string;
 	label: string;
 	percent: number;
 	/** Quand le compteur repart, en clair ; vide si le CLI ne l'annonce pas. */

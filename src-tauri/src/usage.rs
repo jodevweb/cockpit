@@ -113,7 +113,10 @@ pub struct Spend {
 #[derive(Debug, Clone, Serialize)]
 #[serde(rename_all = "camelCase")]
 pub struct Limit {
-	/// « Session », « Semaine », « Semaine (Fable) »…
+	/// `session` ou `week` : ce que le code compare. Le libellé, lui, est
+	/// traduit et ne se compare jamais.
+	pub kind: String,
+	/// « Session en cours », « Cette semaine », « Cette semaine (Fable) »…
 	pub label: String,
 	pub percent: u32,
 	/// Quand le compteur repart, tel que le CLI l'écrit. Vide si non annoncé.
@@ -328,13 +331,15 @@ fn parse_limits(texte: &str) -> Limits {
 			continue;
 		};
 
+		let intitule = intitule.trim();
 		limits.push(Limit {
-			label: match intitule.trim() {
-				"session" => "Session en cours".to_string(),
-				"week (all models)" => "Cette semaine".to_string(),
+			kind: if intitule == "session" { "session" } else { "week" }.to_string(),
+			label: match intitule {
+				"session" => crate::i18n::t("usage.limits.session"),
+				"week (all models)" => crate::i18n::t("usage.limits.week"),
 				autre => {
 					let autre = autre.strip_prefix("week ").unwrap_or(autre);
-					format!("Cette semaine {autre}")
+					format!("{} {autre}", crate::i18n::t("usage.limits.week"))
 				}
 			},
 			percent,
@@ -646,15 +651,15 @@ mod limit_tests {
 		let lu = parse_limits(sortie);
 		assert_eq!(lu.limits.len(), 3, "trois plafonds annoncés");
 
-		assert_eq!(lu.limits[0].label, "Session en cours");
+		assert_eq!(lu.limits[0].label, "Current session");
 		assert_eq!(lu.limits[0].percent, 20);
 		assert_eq!(lu.limits[0].resets_at, "Aug 4 at 8:20pm (Europe/Paris)");
 
-		assert_eq!(lu.limits[1].label, "Cette semaine");
+		assert_eq!(lu.limits[1].label, "This week");
 		assert_eq!(lu.limits[1].percent, 21);
 
 		// Sans échéance annoncée, le champ reste vide plutôt qu'inventé.
-		assert_eq!(lu.limits[2].label, "Cette semaine (Fable)");
+		assert_eq!(lu.limits[2].label, "This week (Fable)");
 		assert_eq!(lu.limits[2].percent, 0);
 		assert!(lu.limits[2].resets_at.is_empty());
 

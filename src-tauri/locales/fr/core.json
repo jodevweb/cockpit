@@ -89,7 +89,11 @@
 	"usage": {
 		"claudeNotFound": "Le CLI `claude` est introuvable.",
 		"cliRefused": "Le CLI a refusé la demande.",
-		"limitsRead": "Lecture des plafonds : {{error}}"
+		"limitsRead": "Lecture des plafonds : {{error}}",
+		"limits": {
+			"session": "Session en cours",
+			"week": "Cette semaine"
+		}
 	},
 	"monitor": {
 		"localRepoSource": "{{label}} · dépôt local",
