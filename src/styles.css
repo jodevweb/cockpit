@@ -1,0 +1,503 @@
+@import "tailwindcss";
+@import "@fontsource-variable/instrument-sans";
+@import "@fontsource/geist-mono/400.css";
+@import "@fontsource/geist-mono/500.css";
+@import "@fontsource/geist-mono/600.css";
+@import "./tokens.css";
+
+/* ── Direction artistique ──────────────────────────────────────────────────
+   Graphite, une seule couleur d'accent (indigo) et un jeu de gris resserré.
+   Les couleurs sémantiques ne servent qu'aux états : dans un outil de
+   supervision, la couleur doit vouloir dire quelque chose.
+
+   Les surfaces ont été remontées d'environ huit points de luminance : le thème
+   d'origine, presque noir, écrasait la hiérarchie — panneaux, survols et
+   séparateurs se distinguaient à peine du fond. Les gris de texte suivent le
+   même mouvement pour garder le contraste, et les lignes deviennent visibles
+   sans devenir bruyantes.
+   ────────────────────────────────────────────────────────────────────────── */
+/* Le thème ne fait plus que traduire : les valeurs vivent dans `tokens.css`,
+   que la page mobile charge de son côté. Une teinte ne se change donc qu'à un
+   seul endroit, et les deux interfaces la reçoivent ensemble. */
+@theme {
+	--color-void: var(--void);
+	--color-base: var(--base);
+	--color-surface: var(--surface);
+	--color-raised: var(--raised);
+	--color-hover: var(--hover);
+	--color-line: var(--line);
+	--color-line-soft: var(--line-soft);
+	--color-overlay: var(--overlay);
+
+	--color-ink: var(--ink);
+	--color-ink-muted: var(--ink-muted);
+	--color-ink-faint: var(--ink-faint);
+
+	--color-accent: var(--accent);
+	--color-accent-soft: var(--accent-soft);
+	--color-accent-dim: var(--accent-dim);
+	--color-accent-ink: var(--accent-ink);
+
+	--color-critical: var(--critical);
+	--color-warning: var(--warning);
+	--color-success: var(--success);
+	--color-info: var(--info);
+}
+
+@layer base {
+	* {
+		border-color: var(--color-line);
+	}
+
+	html,
+	body,
+	#root {
+		height: 100%;
+	}
+
+	body {
+		margin: 0;
+		background: var(--color-void);
+		color: var(--color-ink);
+		font-family: var(--font-sans);
+		font-size: 13.5px;
+		line-height: 1.55;
+		font-feature-settings: "ss01", "cv11";
+		-webkit-font-smoothing: antialiased;
+		text-rendering: optimizeLegibility;
+		/* L'app est une fenêtre, pas une page : rien ne défile au niveau body. */
+		overflow: hidden;
+		user-select: none;
+		cursor: default;
+	}
+
+	::selection {
+		background: var(--color-accent-dim);
+		color: var(--color-ink);
+	}
+
+	::-webkit-scrollbar {
+		width: 10px;
+		height: 10px;
+	}
+	::-webkit-scrollbar-track {
+		background: transparent;
+	}
+	::-webkit-scrollbar-thumb {
+		background: color-mix(in srgb, var(--color-line) 90%, white 10%);
+		border: 3px solid transparent;
+		background-clip: content-box;
+		border-radius: 999px;
+	}
+	::-webkit-scrollbar-thumb:hover {
+		background: color-mix(in srgb, var(--color-ink-faint) 60%, transparent);
+		background-clip: content-box;
+	}
+
+	input,
+	textarea,
+	select {
+		user-select: text;
+		font-family: inherit;
+	}
+
+	button {
+		font-family: inherit;
+		cursor: default;
+	}
+}
+
+@layer utilities {
+	/* Le glissement de fenêtre ne passe pas par le CSS.
+	   `-webkit-app-region` est une extension de Chromium : Electron la comprend,
+	   WKWebView — donc Tauri sur macOS — l'ignore en silence. La fenêtre se
+	   déplace avec l'attribut `data-tauri-drag-region`, posé sur les zones qui
+	   tiennent lieu de barre de titre.
+
+	   Toujours avec la valeur `deep`. Sans valeur, l'attribut ne vaut que pour
+	   l'élément exactement cliqué : viser le titre d'un en-tête fonctionnait,
+	   viser son sous-titre ou l'espace entre deux éléments ne faisait rien —
+	   la cible était l'enfant, pas le conteneur. `deep` couvre le sous-arbre.
+
+	   Rien à ajouter sur les boutons : le script de Tauri s'arrête au premier
+	   élément cliquable qu'il rencontre en remontant (`button`, `a`, `input`,
+	   tout ce qui porte un `role` interactif ou un `tabindex`). C'est ce qui
+	   remplace l'ancien `no-drag`. */
+
+	.text-selectable {
+		user-select: text;
+	}
+
+	/* La coloration du code dans la visionneuse (`src/lib/highlight.ts`). */
+	.hljs-keyword,
+	.hljs-literal,
+	.hljs-selector-tag,
+	.hljs-meta .hljs-keyword {
+		color: var(--syntax-keyword);
+	}
+	.hljs-string,
+	.hljs-regexp,
+	.hljs-addition,
+	.hljs-meta .hljs-string {
+		color: var(--syntax-string);
+	}
+	.hljs-number,
+	.hljs-built_in,
+	.hljs-symbol,
+	.hljs-bullet {
+		color: var(--syntax-number);
+	}
+	.hljs-title,
+	.hljs-section,
+	.hljs-selector-id,
+	.hljs-selector-class {
+		color: var(--syntax-function);
+	}
+	.hljs-type,
+	.hljs-name,
+	.hljs-title.class_,
+	.hljs-tag {
+		color: var(--syntax-type);
+	}
+	.hljs-attr,
+	.hljs-attribute,
+	.hljs-property,
+	.hljs-variable,
+	.hljs-template-variable {
+		color: var(--syntax-property);
+	}
+	.hljs-comment,
+	.hljs-quote,
+	.hljs-meta {
+		color: var(--syntax-comment);
+	}
+	.hljs-comment,
+	.hljs-quote {
+		font-style: italic;
+	}
+	.hljs-deletion {
+		color: var(--color-critical);
+	}
+
+	/* Ligne de séparation d'un pixel qui reste nette en Retina. */
+	.hairline-b {
+		box-shadow: inset 0 -1px 0 var(--color-line-soft);
+	}
+	.hairline-r {
+		box-shadow: inset -1px 0 0 var(--color-line-soft);
+	}
+
+	/* Une carte se pose par son ombre, plus par un trait. */
+	.panel {
+		background: var(--color-surface);
+		border: 1px solid transparent;
+		border-radius: var(--radius-panel);
+		box-shadow: var(--shadow-card);
+	}
+
+	/* React Flow, aux couleurs du thème : ses propres variables, alimentées
+	   par nos jetons, pour que clair et sombre suivent sans rien d'autre. */
+	.mission-graph .react-flow {
+		--xy-background-color: transparent;
+		--xy-background-pattern-dots-color: color-mix(in srgb, var(--color-accent) 22%, transparent);
+		--xy-edge-stroke: var(--color-line);
+		--xy-controls-button-background-color: var(--color-surface);
+		--xy-controls-button-background-color-hover: var(--color-hover);
+		--xy-controls-button-color: var(--color-ink-muted);
+		--xy-controls-button-color-hover: var(--color-ink);
+		--xy-controls-button-border-color: var(--color-line-soft);
+		--xy-controls-box-shadow: var(--shadow-card);
+	}
+	.mission-graph .react-flow__controls {
+		border-radius: 10px;
+		overflow: hidden;
+	}
+	.mission-graph .react-flow__node {
+		font-family: var(--font-sans);
+	}
+
+	.shadow-card {
+		box-shadow: var(--shadow-card);
+	}
+	.shadow-pop {
+		box-shadow: var(--shadow-pop);
+	}
+
+	.focus-ring:focus-visible {
+		outline: 2px solid var(--color-accent);
+		outline-offset: 1px;
+	}
+
+	@keyframes cockpit-fade-up {
+		from {
+			opacity: 0;
+			transform: translateY(4px);
+		}
+		to {
+			opacity: 1;
+			transform: none;
+		}
+	}
+	.animate-in {
+		animation: cockpit-fade-up 180ms var(--ease-out-quart) both;
+	}
+
+	/* La jauge de l'image en cours, dans la salle du film : elle se remplit le
+	   temps que l'image reste à l'écran (`FRAME_SECONDS`, `Film.tsx`). */
+	@keyframes film-fill {
+		from {
+			width: 0;
+		}
+		to {
+			width: 100%;
+		}
+	}
+
+	/* Un voile plein écran ne se translate pas : les quatre pixels du
+	   `fade-up` le décalaient vers le bas et laissaient une bande cliquable en
+	   haut de l'écran. Il n'a besoin que d'apparaître. */
+	@keyframes cockpit-veil {
+		from {
+			opacity: 0;
+		}
+		to {
+			opacity: 1;
+		}
+	}
+	.animate-veil {
+		animation: cockpit-veil 140ms var(--ease-out-quart) both;
+	}
+
+	@keyframes cockpit-pulse {
+		0%,
+		100% {
+			opacity: 1;
+		}
+		50% {
+			opacity: 0.35;
+		}
+	}
+	.animate-pulse-dot {
+		animation: cockpit-pulse 1.6s ease-in-out infinite;
+	}
+
+	@keyframes cockpit-spin {
+		to {
+			transform: rotate(360deg);
+		}
+	}
+	.animate-spin-slow {
+		animation: cockpit-spin 900ms linear infinite;
+	}
+
+	/* Le tour du spinner : il s'élance et retient, là où l'icône de
+	   rafraîchissement ci-dessus tourne régulièrement. `will-change` lui vaut son
+	   propre calque, sans lequel le compositeur ne prendrait rien en charge. */
+	.animate-tourne {
+		transform-origin: 50% 50%;
+		will-change: transform;
+		animation: cockpit-spin 1.5s cubic-bezier(0.55, 0, 0.45, 1) infinite;
+	}
+
+	/* ── Attente ───────────────────────────────────────────────────────────────
+	   Trois façons d'attendre, parce qu'elles ne disent pas la même chose.
+
+	   Le **squelette** montre la forme de ce qui arrive : sur un premier
+	   chargement, il occupe la place exacte du contenu, et l'écran ne saute pas
+	   quand les données tombent. C'est le seul qui apprend quelque chose.
+
+	   La **barre** dit qu'on rafraîchit ce qui est déjà lu : elle passe en haut de
+	   la vue sans rien masquer, là où un voile ferait disparaître ce qu'on était
+	   en train de lire.
+
+	   Le **cercle** ne reste que pour les actions courtes et locales — un bouton
+	   qui travaille. Partout ailleurs, il ne fait qu'occuper le temps.
+	   ────────────────────────────────────────────────────────────────────────── */
+	@keyframes cockpit-shimmer {
+		from {
+			background-position: -180% 0;
+		}
+		to {
+			background-position: 180% 0;
+		}
+	}
+	.skeleton {
+		background-image: linear-gradient(
+			90deg,
+			var(--color-raised) 0%,
+			var(--color-hover) 42%,
+			var(--color-raised) 84%
+		);
+		background-size: 220% 100%;
+		animation: cockpit-shimmer 1.6s ease-in-out infinite;
+		border-radius: 6px;
+	}
+
+	@keyframes cockpit-sweep {
+		0% {
+			transform: translateX(-100%) scaleX(0.35);
+		}
+		50% {
+			transform: translateX(0) scaleX(0.6);
+		}
+		100% {
+			transform: translateX(100%) scaleX(0.35);
+		}
+	}
+	.loading-bar::after {
+		content: "";
+		position: absolute;
+		inset: 0;
+		background: linear-gradient(
+			90deg,
+			transparent,
+			var(--color-accent-soft),
+			transparent
+		);
+		animation: cockpit-sweep 1.1s var(--ease-out-quart) infinite;
+	}
+
+	/* Le cercle de progression : un arc qui tourne, et qui n'avance pas à vitesse
+	   constante. Une roue régulière donne l'impression que rien ne progresse ;
+	   une rotation qui s'élance puis retient lit comme une activité.
+
+	   La longueur de l'arc respirait, autrefois, en animant `stroke-dasharray`.
+	   C'était le bon geste visuel et le mauvais moyen : aucune propriété de tracé
+	   SVG n'est confiée au compositeur, si bien que le spinner recalculait le
+	   style du document entier à chaque image — mesuré à onze pour cent d'un cœur,
+	   en continu, et il reste affiché tant qu'un agent travaille. La respiration
+	   passe donc du tracé au rythme : même intention, portée par une
+	   transformation, qui elle est gratuite. */
+	.animate-arc {
+		stroke-dasharray: 30 70;
+	}
+
+	/* ── Vie ──────────────────────────────────────────────────────────────────
+	   Un poste de pilotage n'est pas une page : des agents y travaillent pendant
+	   qu'on regarde ailleurs, et l'écran doit le laisser voir. Le mouvement dit
+	   ici quelque chose — ce qui vient d'arriver, ce qui respire, ce qui attend —
+	   et rien ne bouge sans raison. Une interface qui s'agite pour faire moderne
+	   fatigue en une demi-heure d'usage quotidien.
+	   ────────────────────────────────────────────────────────────────────────── */
+
+	/* L'horizon du logo dérive de deux degrés : l'instrument est vivant, l'appareil
+	   est stable. Seize secondes — on ne le surprend qu'en s'y arrêtant.
+
+	   La dérive porte sur un SVG entier, jamais sur un groupe à l'intérieur d'un
+	   SVG : WebKit ne confie au compositeur que les transformations d'éléments de
+	   niveau document. Portée par un `<g>`, la même animation se recalculait sur
+	   le fil principal et entraînait une résolution de style du document entier à
+	   chaque image — dix pour cent d'un cœur en permanence, sur tous les écrans,
+	   pour deux degrés que personne ne remarque. `will-change` force le calque
+	   séparé sans lequel le compositeur ne prendrait rien en charge. */
+	.logo-cadre {
+		position: relative;
+		display: inline-block;
+		flex-shrink: 0;
+		overflow: hidden;
+		background: var(--color-raised);
+		/* La proportion de l'icône de l'app : 228 sur une grille de 1024. Elle
+		   appartient au dessin, pas à l'endroit qui l'affiche — un logo posé
+		   ailleurs ne doit pas sortir carré faute d'une classe fournie. */
+		border-radius: 22.27%;
+	}
+	.logo-cadre > svg {
+		position: absolute;
+		inset: 0;
+		width: 100%;
+		height: 100%;
+	}
+	@keyframes cockpit-derive {
+		0%,
+		100% {
+			transform: rotate(-14deg);
+		}
+		50% {
+			transform: rotate(-10deg);
+		}
+	}
+	.logo-derive {
+		/* Le cadran découpe l'horizon : r=322 sur une grille de 1024. */
+		clip-path: circle(31.44% at 50% 50%);
+		will-change: transform;
+		animation: cockpit-derive 16s ease-in-out infinite;
+	}
+
+	/* Ce qui vient d'apparaître se pose, au lieu de surgir : l'œil suit un
+	   mouvement, il ne suit pas une apparition. */
+	@keyframes cockpit-rise {
+		from {
+			opacity: 0;
+			transform: translateY(6px) scale(0.995);
+		}
+		to {
+			opacity: 1;
+			transform: none;
+		}
+	}
+	.rise {
+		animation: cockpit-rise 260ms var(--ease-out-quart) both;
+	}
+	/* Une liste se déroule au lieu de tomber d'un bloc — cinquante millisecondes
+	   d'écart suffisent à faire lire un ordre. */
+	.rise-1 {
+		animation-delay: 40ms;
+	}
+	.rise-2 {
+		animation-delay: 90ms;
+	}
+	.rise-3 {
+		animation-delay: 140ms;
+	}
+
+	/* Ce qui attend une décision respire : une pulsation lente sur la bordure,
+	   pas un clignotement. On doit pouvoir travailler à côté sans l'avoir dans
+	   l'œil, et le retrouver dès qu'on relève la tête. */
+	@keyframes cockpit-breathe {
+		0%,
+		100% {
+			box-shadow: 0 0 0 0 color-mix(in srgb, var(--warning) 35%, transparent);
+		}
+		50% {
+			box-shadow: 0 0 0 4px color-mix(in srgb, var(--warning) 0%, transparent);
+		}
+	}
+	.breathe {
+		animation: cockpit-breathe 2.8s ease-in-out infinite;
+	}
+
+	/* Un compteur qui change ne doit pas changer en silence : il s'éclaire une
+	   fois. C'est le seul signal qu'une valeur vient de bouger. */
+	@keyframes cockpit-flash {
+		from {
+			color: var(--accent-soft);
+		}
+		to {
+			color: inherit;
+		}
+	}
+	.flash {
+		animation: cockpit-flash 900ms ease-out;
+	}
+
+	/* Une préférence système à respecter : ces animations sont décoratives, et
+	   quelqu'un qui demande moins de mouvement ne doit pas en subir trois. */
+	@media (prefers-reduced-motion: reduce) {
+		.logo-derive,
+		.rise,
+		.breathe,
+		.flash {
+			animation: none;
+		}
+	}
+	@media (prefers-reduced-motion: reduce) {
+		.skeleton,
+		.loading-bar::after,
+		.animate-tourne,
+		.animate-spin-slow,
+		.animate-pulse-dot {
+			animation-duration: 0.001ms;
+			animation-iteration-count: 1;
+		}
+	}
+}

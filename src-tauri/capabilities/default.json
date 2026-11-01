@@ -1,0 +1,34 @@
+{
+	"$schema": "../gen/schemas/desktop-schema.json",
+	"identifier": "default",
+	"description": "Permissions du cockpit : IPC applicatif. Aucune permission du plugin `opener` : l'interface ouvre liens et fichiers par les commandes `open_external`, `open_file` et `reveal_in_finder`, qui filtrent ce qu'elles reçoivent. `opener:allow-open-path` sur `**` laissait une page compromise lancer n'importe quel fichier du poste (un `.command`, une `.app`).",
+	"windows": ["main"],
+	"permissions": [
+		"core:default",
+		{
+			"identifier": "core:window:allow-start-dragging",
+			"comment": "Déplacer la fenêtre. `core:window:default` ne l'accorde pas, et la barre de titre native est masquée (`titleBarStyle: Overlay`) : sans cette permission, la fenêtre est clouée à l'écran où elle s'ouvre."
+		},
+		{
+			"identifier": "core:window:allow-set-theme",
+			"comment": "Accorder le thème choisi à la fenêtre elle-même. Ce que nous peignons suit `data-theme`, mais pas la barre de titre en surimpression ni les ascenseurs natifs : sans cela, une interface claire garde une barre sombre et des ascenseurs blancs sur blanc."
+		},
+		{
+			"identifier": "core:window:allow-set-background-color",
+			"comment": "Peindre le fond de la fenêtre aux couleurs du thème. Sans cela, la fenêtre garde la teinte déclarée au lancement : un éclair sombre à chaque ouverture en thème clair, et un fond sombre visible derrière la page si WebKit tarde à dessiner."
+		},
+		"notification:default",
+		{
+			"identifier": "dialog:allow-open",
+			"comment": "Choisir un dossier à ouvrir en workspace. Lecture seule : le dialogue rend un chemin, rien de plus."
+		},
+		{
+			"identifier": "updater:default",
+			"comment": "Chercher, télécharger et poser une nouvelle version. Ce que l'app accepte d'installer est borné ailleurs : seule une archive signée par la clé du projet passe la vérification."
+		},
+		{
+			"identifier": "process:allow-restart",
+			"comment": "Relancer après une mise à jour. Rien d'autre du plugin n'est accordé : `process:allow-exit` laisserait fermer l'app depuis le webview, ce dont personne n'a besoin."
+		}
+	]
+}

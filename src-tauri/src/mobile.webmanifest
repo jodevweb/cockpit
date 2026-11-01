@@ -1,0 +1,16 @@
+{
+	"name": "Cockpit",
+	"short_name": "Cockpit",
+	"start_url": "/",
+	"display": "standalone",
+	"background_color": "#101117",
+	"theme_color": "#101117",
+	"icons": [
+		{
+			"src": "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 192 192'%3E%3Crect width='192' height='192' rx='42' fill='%23101117'/%3E%3Ccircle cx='96' cy='96' r='34' fill='none' stroke='%237c7aff' stroke-width='12'/%3E%3Ccircle cx='96' cy='96' r='8' fill='%23a8a6ff'/%3E%3C/svg%3E",
+			"sizes": "192x192",
+			"type": "image/svg+xml",
+			"purpose": "any"
+		}
+	]
+}

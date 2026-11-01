@@ -1,0 +1,68 @@
+[package]
+name = "cockpit"
+version = "0.83.0"
+description = "Cockpit — poste de pilotage du développement"
+authors = ["jodevweb"]
+license = "MIT"
+repository = "https://github.com/jodevweb/cockpit"
+edition = "2021"
+rust-version = "1.77"
+
+[lib]
+name = "cockpit_lib"
+crate-type = ["staticlib", "cdylib", "rlib"]
+
+[build-dependencies]
+tauri-build = { version = "2", features = [] }
+
+[dependencies]
+# `protocol-asset` : sert les fichiers locaux à la webview — sans lui, aucune
+# capture ni vidéo de QA ne peut s'afficher.
+tauri = { version = "2", features = ["macos-private-api", "tray-icon", "protocol-asset"] }
+tauri-plugin-opener = "2"
+tauri-plugin-notification = "2"
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+tokio = { version = "1", features = ["full"] }
+reqwest = { version = "0.12", features = ["json", "gzip", "multipart"] }
+chrono = { version = "0.4", features = ["serde"] }
+anyhow = "1"
+thiserror = "2"
+dirs = "5"
+toml = "0.8"
+libc = "0.2"
+notify = "7"
+walkdir = "2"
+futures = "0.3"
+urlencoding = "2"
+portable-pty = "0.9.0"
+base64 = "0.23.0"
+tauri-plugin-window-state = "2"
+tauri-plugin-dialog = "2"
+axum = "0.8.4"
+webauthn-rs = "0.5.0"
+rand = "0.9.5"
+sha2 = "0.10.9"
+qrcode = "0.14.1"
+async-trait = "0.1.91"
+tauri-plugin-updater = "2.0.0-rc.4"
+tauri-plugin-process = "2.0.0-rc.1"
+cpal = "0.15"
+hound = "3"
+tauri-plugin-global-shortcut = "~2.3"
+tokio-tungstenite = "0.29.0"
+
+[profile.release]
+codegen-units = 1
+lto = true
+opt-level = "s"
+panic = "abort"
+strip = true
+
+# Les macros (serde_derive, thiserror…) se compilent en bibliothèques que rustc
+# recharge aussitôt. Strippées avec le remap des chemins de `release.sh`, le
+# chargeur de macOS les refuse (« mis-aligned LINKEDIT string pool ») : la
+# publication de la 0.81.0 a échoué deux fois là-dessus, reproduit et levé en
+# désactivant le strip pour elles seules. Le binaire distribué reste strippé.
+[profile.release.build-override]
+strip = false

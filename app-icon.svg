@@ -1,0 +1,63 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024" width="1024" height="1024">
+  <!--
+    Cockpit — l'horizon artificiel.
+
+    L'instrument central de tout poste de pilotage, et la seule métaphore qui dise
+    ce que fait l'outil : d'un regard, savoir si l'on vole à plat. Un logo de
+    supervision n'a pas à représenter du code — ce qu'on pilote ici, ce sont des
+    décisions et un produit ; le code est ce que d'autres écrivent.
+
+    Trois éléments, pas un de plus, parce qu'une icône se lit à seize pixels :
+    un ciel, une terre, et le repère fixe qui dit où l'on se tient. L'horizon est
+    incliné : à plat il ferait un logo mort, et un instrument qui ne bouge jamais
+    n'apprend rien.
+  -->
+  <defs>
+    <linearGradient id="fond" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#1f2029"/>
+      <stop offset="1" stop-color="#101117"/>
+    </linearGradient>
+    <linearGradient id="ciel" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#a8a6ff"/>
+      <stop offset="1" stop-color="#7c7aff"/>
+    </linearGradient>
+    <linearGradient id="terre" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#252448"/>
+      <stop offset="1" stop-color="#141524"/>
+    </linearGradient>
+    <clipPath id="cadran">
+      <circle cx="512" cy="512" r="322"/>
+    </clipPath>
+  </defs>
+
+  <!-- Le boîtier : coins très arrondis, comme les icônes du système. -->
+  <rect width="1024" height="1024" rx="228" fill="url(#fond)"/>
+
+  <!-- Le cadran, incliné de douze degrés : l'assiette du moment. -->
+  <g clip-path="url(#cadran)">
+    <g transform="rotate(-12 512 512)">
+      <rect x="112" y="12" width="800" height="500" fill="url(#ciel)"/>
+      <rect x="112" y="512" width="800" height="500" fill="url(#terre)"/>
+      <!-- La ligne d'horizon, la seule arête franche du dessin. -->
+      <rect x="92" y="502" width="840" height="10" fill="#f4f5f9" opacity="0.9"/>
+      <!-- Graduations d'assiette, discrètes : elles donnent l'échelle sans se
+           lire individuellement. -->
+      <rect x="432" y="404" width="160" height="8" rx="4" fill="#f4f5f9" opacity="0.2"/>
+      <rect x="472" y="612" width="80" height="8" rx="4" fill="#f4f5f9" opacity="0.2"/>
+    </g>
+  </g>
+
+  <!-- Le cerclage du cadran. -->
+  <circle cx="512" cy="512" r="322" fill="none" stroke="#f4f5f9" stroke-opacity="0.14" stroke-width="16"/>
+
+  <!--
+    Le repère fixe. Il ne tourne pas avec l'horizon : c'est le point de vue de
+    celui qui pilote, et c'est ce qui rend l'inclinaison lisible.
+  -->
+  <g stroke="#f4f5f9" stroke-width="30" stroke-linecap="round" fill="none">
+    <path d="M 268 512 H 356"/>
+    <path d="M 668 512 H 756"/>
+  </g>
+  <circle cx="512" cy="512" r="24" fill="#f4f5f9"/>
+  <circle cx="512" cy="512" r="24" fill="none" stroke="#101117" stroke-width="8" stroke-opacity="0.5"/>
+</svg>

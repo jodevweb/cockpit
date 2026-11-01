@@ -1,0 +1,80 @@
+{
+	"$schema": "https://schema.tauri.app/config/2",
+	"productName": "Cockpit",
+	"version": "0.83.0",
+	"identifier": "com.cockpit.app",
+	"build": {
+		"beforeDevCommand": "pnpm vite:dev",
+		"devUrl": "http://localhost:5273",
+		"beforeBuildCommand": "pnpm vite:build",
+		"frontendDist": "../dist"
+	},
+	"app": {
+		"macOSPrivateApi": true,
+		"windows": [
+			{
+				"title": "Cockpit",
+				"width": 1480,
+				"height": 940,
+				"minWidth": 1080,
+				"minHeight": 680,
+				"titleBarStyle": "Overlay",
+				"acceptFirstMouse": true,
+				"hiddenTitle": true,
+				"backgroundColor": "#eceff2",
+				"theme": "Dark",
+				"center": true
+			}
+		],
+		"security": {
+			"csp": "default-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data: https: asset: http://asset.localhost; media-src 'self' asset: http://asset.localhost; font-src 'self' data:; connect-src 'self' ipc: http://ipc.localhost asset: http://asset.localhost",
+			"assetProtocol": {
+				"enable": true,
+				"scope": {
+					"allow": [
+						"$HOME/**",
+						"$HOME/**/.*/**"
+					],
+					"deny": [
+						"$HOME/.ssh/**",
+						"$HOME/.gnupg/**",
+						"$HOME/.aws/**",
+						"$HOME/.kube/**",
+						"$HOME/.docker/**",
+						"$HOME/.netrc",
+						"$HOME/.npmrc",
+						"$HOME/.config/gh/**",
+						"$HOME/.config/cockpit/config.toml*",
+						"$HOME/.config/cockpit/sandbox-account/**",
+						"$HOME/.claude.json",
+						"$HOME/.claude/.credentials.json",
+						"$HOME/Library/Keychains/**",
+						"$HOME/Library/Cookies/**"
+					]
+				}
+			}
+		}
+	},
+	"bundle": {
+		"active": true,
+		"targets": [
+			"app",
+			"dmg"
+		],
+		"icon": [
+			"icons/icon.icns"
+		],
+		"macOS": {
+			"minimumSystemVersion": "13.0",
+			"entitlements": "Entitlements.plist"
+		}
+	},
+	"plugins": {
+		"updater": {
+			"pubkey": "dW50cnVzdGVkIGNvbW1lbnQ6IG1pbmlzaWduIHB1YmxpYyBrZXk6IEJDNzBCMjc1RENFNzVDOApSV1RJZGM1ZEp3dkhDNFQxL3hZWWdrNEVOVUhlVzd3aklZeWxVOE9kZkxKeUxxQUppNkxGU2VFQgo=",
+			"endpoints": [
+				"https://github.com/jodevweb/cockpit-releases/releases/latest/download/latest.json"
+			]
+		}
+	}
+}

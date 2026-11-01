@@ -1,0 +1,2072 @@
+<!doctype html>
+<html lang="fr">
+	<head>
+		<meta charset="utf-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+		<meta name="apple-mobile-web-app-capable" content="yes" />
+		<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+		<link rel="manifest" href="/manifest.webmanifest" />
+		<!-- Palette partagée avec l'app du poste : une teinte ne se change qu'à un
+		     seul endroit, et les deux interfaces la reçoivent ensemble. -->
+		<link rel="stylesheet" href="/tokens.css" />
+		<title>Cockpit</title>
+		<script>
+			// Le téléphone suit le thème du système : en plein soleil, le clair
+			// est précisément le cas où il sert.
+			document.documentElement.dataset.theme = window.matchMedia(
+				"(prefers-color-scheme: light)",
+			).matches
+				? "light"
+				: "dark";
+			window
+				.matchMedia("(prefers-color-scheme: light)")
+				.addEventListener("change", (event) => {
+					document.documentElement.dataset.theme = event.matches ? "light" : "dark";
+				});
+		</script>
+		<style>
+			/*
+			 * Le cockpit dans la poche.
+			 *
+			 * Sur le poste on pilote ; d'ici on répond, on regarde, on freine. Trois
+			 * questions, une par onglet : qu'est-ce qui m'attend, que font mes agents,
+			 * où en sont mes missions. Et pour chaque agent, la même règle que sur le
+			 * poste : ce qu'il montre passe avant ce qu'il raconte.
+			 *
+			 * Les couleurs viennent de `/tokens.css`, partagé avec l'app du poste.
+			 */
+			:root {
+				--top: env(safe-area-inset-top);
+				--bottom: env(safe-area-inset-bottom);
+				--radius: 20px;
+			}
+			:root[data-theme="dark"] {
+				color-scheme: dark;
+			}
+			:root[data-theme="light"] {
+				color-scheme: light;
+			}
+			* {
+				box-sizing: border-box;
+				-webkit-tap-highlight-color: transparent;
+			}
+			html,
+			body {
+				height: 100%;
+				overflow: hidden;
+			}
+			body {
+				margin: 0;
+				background: var(--base);
+				color: var(--ink);
+				font:
+					15px/1.45 -apple-system,
+					"SF Pro Text",
+					system-ui,
+					sans-serif;
+				-webkit-font-smoothing: antialiased;
+				overscroll-behavior: none;
+			}
+			button,
+			input,
+			textarea {
+				font: inherit;
+				color: inherit;
+			}
+			button {
+				border: 0;
+				background: none;
+				padding: 0;
+				cursor: pointer;
+				text-align: inherit;
+			}
+			.mono {
+				font-family: "SF Mono", ui-monospace, Menlo, monospace;
+			}
+
+			/* Toute requête qu'on attend fait courir cette barre : sur un téléphone
+			   relié par un tunnel, « rien ne se passe » et « ça charge » ne doivent
+			   pas se ressembler. */
+			#bar {
+				position: fixed;
+				inset: 0 0 auto 0;
+				height: 2px;
+				z-index: 50;
+				background: linear-gradient(90deg, transparent, var(--accent), transparent);
+				background-size: 40% 100%;
+				background-repeat: no-repeat;
+				opacity: 0;
+			}
+			#bar.on {
+				opacity: 1;
+				animation: run 1s linear infinite;
+			}
+			@keyframes run {
+				from {
+					background-position: -40% 0;
+				}
+				to {
+					background-position: 140% 0;
+				}
+			}
+
+			/* ── L'écran principal ─────────────────────────────────────────── */
+			#home {
+				position: absolute;
+				inset: 0;
+				display: flex;
+				flex-direction: column;
+			}
+			.top {
+				padding: calc(var(--top) + 14px) 20px 6px;
+				display: flex;
+				align-items: flex-end;
+				gap: 12px;
+			}
+			.top h1 {
+				margin: 0;
+				font-size: 30px;
+				line-height: 1.1;
+				font-weight: 700;
+				letter-spacing: -0.02em;
+			}
+			.top .say {
+				margin-top: 4px;
+				font-size: 13.5px;
+				color: var(--ink-muted);
+			}
+			.gear {
+				width: 38px;
+				height: 38px;
+				border-radius: 50%;
+				background: var(--surface);
+				box-shadow: var(--shadow-card);
+				display: grid;
+				place-items: center;
+				color: var(--ink-muted);
+				flex: none;
+			}
+			.scroll {
+				flex: 1;
+				min-height: 0;
+				overflow-y: auto;
+				-webkit-overflow-scrolling: touch;
+				padding: 6px 16px calc(var(--bottom) + 104px);
+			}
+
+			/* Le pouls : une pastille par agent. On sait d'un regard combien
+			   travaillent, lequel attend, sans lire une ligne. */
+			.pulse {
+				display: flex;
+				gap: 12px;
+				overflow-x: auto;
+				padding: 12px 4px 16px;
+				scrollbar-width: none;
+			}
+			.pulse::-webkit-scrollbar {
+				display: none;
+			}
+			.orb {
+				flex: none;
+				width: 64px;
+				display: flex;
+				flex-direction: column;
+				align-items: center;
+				gap: 6px;
+			}
+			.orb .disc {
+				position: relative;
+				width: 52px;
+				height: 52px;
+				border-radius: 50%;
+				display: grid;
+				place-items: center;
+				font-weight: 700;
+				font-size: 18px;
+				background: var(--surface);
+				color: var(--ink-muted);
+				box-shadow: var(--shadow-card);
+			}
+			.orb.live .disc {
+				background: var(--accent);
+				color: var(--accent-ink);
+			}
+			.orb.wait .disc {
+				background: var(--warning);
+				color: var(--accent-ink);
+			}
+			.orb.live .disc::after,
+			.orb.wait .disc::after {
+				content: "";
+				position: absolute;
+				inset: -5px;
+				border-radius: 50%;
+				border: 2px solid currentColor;
+				color: var(--accent);
+				opacity: 0.5;
+				animation: breathe 1.8s ease-in-out infinite;
+			}
+			.orb.wait .disc::after {
+				color: var(--warning);
+			}
+			@keyframes breathe {
+				50% {
+					transform: scale(1.12);
+					opacity: 0;
+				}
+			}
+			.orb span {
+				font-size: 10.5px;
+				color: var(--ink-muted);
+				max-width: 64px;
+				overflow: hidden;
+				text-overflow: ellipsis;
+				white-space: nowrap;
+			}
+
+			.section {
+				margin: 18px 4px 8px;
+				font-size: 11px;
+				letter-spacing: 0.09em;
+				text-transform: uppercase;
+				color: var(--ink-faint);
+				font-weight: 600;
+			}
+			.card {
+				display: block;
+				width: 100%;
+				background: var(--surface);
+				border-radius: var(--radius);
+				box-shadow: var(--shadow-card);
+				padding: 16px;
+				margin-bottom: 10px;
+			}
+			.card.tap:active {
+				transform: scale(0.985);
+			}
+			.card.yours {
+				box-shadow:
+					0 0 0 1.5px var(--warning),
+					0 0 0 5px color-mix(in srgb, var(--warning) 18%, transparent);
+			}
+			.who {
+				display: flex;
+				align-items: center;
+				gap: 8px;
+				font-size: 11.5px;
+				color: var(--ink-faint);
+				margin-bottom: 6px;
+			}
+			.who b {
+				color: var(--ink-muted);
+				font-weight: 600;
+			}
+			.verb {
+				font-size: 17px;
+				font-weight: 650;
+				line-height: 1.25;
+			}
+			.code {
+				margin: 10px 0 0;
+				padding: 10px 12px;
+				border-radius: 12px;
+				background: var(--raised);
+				font-size: 12px;
+				line-height: 1.5;
+				white-space: pre-wrap;
+				word-break: break-word;
+				max-height: 180px;
+				overflow: auto;
+			}
+			.row {
+				display: flex;
+				gap: 8px;
+				margin-top: 14px;
+			}
+			.btn {
+				flex: 1;
+				padding: 13px 14px;
+				border-radius: 14px;
+				background: var(--raised);
+				font-weight: 600;
+				font-size: 15px;
+				text-align: center;
+			}
+			.btn.primary {
+				background: var(--accent);
+				color: var(--accent-ink);
+			}
+			.btn.danger {
+				color: var(--critical);
+			}
+			.btn.small {
+				flex: none;
+				padding: 9px 14px;
+				font-size: 13.5px;
+			}
+			.btn:disabled {
+				opacity: 0.4;
+			}
+			.btn.busy {
+				opacity: 0.6;
+			}
+			.choices {
+				display: flex;
+				flex-direction: column;
+				gap: 8px;
+				margin-top: 10px;
+			}
+			.choice {
+				padding: 12px 14px;
+				border-radius: 14px;
+				background: var(--raised);
+				font-size: 14.5px;
+			}
+			.choice.on {
+				background: var(--accent-dim);
+				box-shadow: inset 0 0 0 1.5px var(--accent);
+			}
+
+			.pill {
+				flex: none;
+				font-size: 11px;
+				font-weight: 600;
+				padding: 3px 9px;
+				border-radius: 999px;
+				background: var(--raised);
+				color: var(--ink-muted);
+			}
+			.pill.live {
+				background: var(--accent-dim);
+				color: var(--accent-soft);
+			}
+			:root[data-theme="light"] .pill.live {
+				color: var(--accent);
+			}
+			.pill.wait {
+				background: color-mix(in srgb, var(--warning) 18%, transparent);
+				color: var(--warning);
+			}
+			.pill.done {
+				background: color-mix(in srgb, var(--success) 16%, transparent);
+				color: var(--success);
+			}
+			.pill.bad {
+				background: color-mix(in srgb, var(--critical) 16%, transparent);
+				color: var(--critical);
+			}
+
+			/* Une carte d'agent : son nom, son état, sa dernière phrase. */
+			.agent {
+				display: flex;
+				gap: 12px;
+				align-items: flex-start;
+			}
+			.agent .mark {
+				flex: none;
+				width: 4px;
+				align-self: stretch;
+				border-radius: 4px;
+				background: var(--line);
+			}
+			.agent.live .mark {
+				background: var(--accent);
+			}
+			.agent.wait .mark {
+				background: var(--warning);
+			}
+			.agent .name {
+				display: flex;
+				align-items: center;
+				gap: 8px;
+				font-weight: 650;
+				font-size: 16px;
+			}
+			.agent .name span:first-child {
+				min-width: 0;
+				flex: 1;
+				overflow: hidden;
+				text-overflow: ellipsis;
+				white-space: nowrap;
+			}
+			.sub {
+				font-size: 12px;
+				color: var(--ink-faint);
+				margin-top: 2px;
+			}
+			.last {
+				font-size: 13.5px;
+				color: var(--ink-muted);
+				margin-top: 8px;
+				display: -webkit-box;
+				-webkit-line-clamp: 2;
+				-webkit-box-orient: vertical;
+				overflow: hidden;
+			}
+
+			/* Une mission : un segment par tâche, coloré par son état. */
+			.track {
+				display: flex;
+				gap: 4px;
+				margin: 12px 0 4px;
+			}
+			.track i {
+				flex: 1;
+				height: 6px;
+				border-radius: 6px;
+				background: var(--line);
+			}
+			.track i.running {
+				background: var(--accent);
+				animation: glow 1.6s ease-in-out infinite;
+			}
+			.track i.delivered,
+			.track i.integrated {
+				background: var(--success);
+			}
+			.track i.failed {
+				background: var(--critical);
+			}
+			@keyframes glow {
+				50% {
+					opacity: 0.45;
+				}
+			}
+			.task {
+				display: flex;
+				align-items: center;
+				gap: 10px;
+				padding: 10px 0;
+				border-top: 1px solid var(--line-soft);
+				width: 100%;
+			}
+			.task .what {
+				flex: 1;
+				min-width: 0;
+				font-size: 13.5px;
+			}
+			.task .what b {
+				color: var(--accent-soft);
+				font-weight: 600;
+			}
+			:root[data-theme="light"] .task .what b {
+				color: var(--accent);
+			}
+
+			.empty {
+				text-align: center;
+				padding: 48px 24px;
+				color: var(--ink-muted);
+				font-size: 14.5px;
+			}
+			.empty .big {
+				font-size: 22px;
+				font-weight: 700;
+				color: var(--ink);
+				margin-bottom: 6px;
+				letter-spacing: -0.01em;
+			}
+			.skel {
+				height: 92px;
+				border-radius: var(--radius);
+				margin-bottom: 10px;
+				background: linear-gradient(90deg, var(--surface), var(--raised), var(--surface));
+				background-size: 200% 100%;
+				animation: shimmer 1.2s linear infinite;
+			}
+			@keyframes shimmer {
+				to {
+					background-position: -200% 0;
+				}
+			}
+
+			/* ── La barre d'onglets, posée au-dessus du contenu ───────────────── */
+			.tabs {
+				position: absolute;
+				left: 16px;
+				right: 16px;
+				bottom: calc(var(--bottom) + 12px);
+				display: flex;
+				padding: 6px;
+				border-radius: 26px;
+				background: color-mix(in srgb, var(--surface) 82%, transparent);
+				backdrop-filter: blur(22px) saturate(1.4);
+				-webkit-backdrop-filter: blur(22px) saturate(1.4);
+				box-shadow: var(--shadow-pop);
+			}
+			.tabs button {
+				flex: 1;
+				display: flex;
+				flex-direction: column;
+				align-items: center;
+				gap: 3px;
+				padding: 9px 0 7px;
+				border-radius: 20px;
+				font-size: 11px;
+				font-weight: 600;
+				color: var(--ink-faint);
+				position: relative;
+				transition:
+					background 0.2s,
+					color 0.2s;
+			}
+			.tabs button.on {
+				background: var(--accent-dim);
+				color: var(--accent-soft);
+			}
+			:root[data-theme="light"] .tabs button.on {
+				color: var(--accent);
+			}
+			.tabs svg {
+				width: 22px;
+				height: 22px;
+			}
+			.tabs .count {
+				position: absolute;
+				top: 4px;
+				left: calc(50% + 6px);
+				min-width: 18px;
+				height: 18px;
+				padding: 0 5px;
+				border-radius: 9px;
+				background: var(--warning);
+				color: var(--accent-ink);
+				font-size: 11px;
+				line-height: 18px;
+				text-align: center;
+			}
+
+			/* ── L'écran d'un agent, qui glisse par-dessus ─────────────────────── */
+			#agent,
+			#sheet {
+				position: absolute;
+				inset: 0;
+				background: var(--base);
+				display: flex;
+				flex-direction: column;
+				transform: translateX(100%);
+				transition: transform 0.28s cubic-bezier(0.25, 1, 0.5, 1);
+				z-index: 10;
+			}
+			#agent.on,
+			#sheet.on {
+				transform: none;
+			}
+			.bar {
+				padding: calc(var(--top) + 10px) 12px 10px;
+				display: flex;
+				align-items: center;
+				gap: 6px;
+			}
+			.back {
+				width: 40px;
+				height: 40px;
+				border-radius: 50%;
+				display: grid;
+				place-items: center;
+				font-size: 26px;
+				line-height: 1;
+				color: var(--accent);
+				flex: none;
+			}
+			.bar h2 {
+				margin: 0;
+				font-size: 17px;
+				font-weight: 650;
+				overflow: hidden;
+				text-overflow: ellipsis;
+				white-space: nowrap;
+			}
+			.seg {
+				display: flex;
+				margin: 0 16px 8px;
+				padding: 4px;
+				border-radius: 14px;
+				background: var(--raised);
+			}
+			.seg button {
+				flex: 1;
+				padding: 8px 0;
+				border-radius: 10px;
+				font-size: 13.5px;
+				font-weight: 600;
+				color: var(--ink-muted);
+				text-align: center;
+			}
+			.seg button.on {
+				background: var(--surface);
+				color: var(--ink);
+				box-shadow: var(--shadow-card);
+			}
+			#agentScroll {
+				padding-bottom: 16px;
+			}
+
+			/* Ce qu'il montre : ses captures, à faire défiler du pouce. */
+			.shots {
+				display: flex;
+				gap: 10px;
+				overflow-x: auto;
+				scroll-snap-type: x mandatory;
+				margin: 0 -16px 10px;
+				padding: 2px 16px;
+				scrollbar-width: none;
+			}
+			.shots::-webkit-scrollbar {
+				display: none;
+			}
+			.shot {
+				position: relative;
+				flex: none;
+				width: 86%;
+				scroll-snap-align: center;
+				border-radius: 16px;
+				overflow: hidden;
+				background: var(--surface);
+				box-shadow: var(--shadow-card);
+				aspect-ratio: 16 / 10;
+			}
+			.shot:only-child {
+				width: 100%;
+			}
+			.shot img {
+				width: 100%;
+				height: 100%;
+				object-fit: cover;
+				display: block;
+			}
+			.shot .tag,
+			.live-tag {
+				position: absolute;
+				top: 10px;
+				left: 10px;
+				padding: 3px 9px;
+				border-radius: 999px;
+				font-size: 11px;
+				font-weight: 650;
+				background: color-mix(in srgb, var(--overlay) 78%, transparent);
+				color: #fff;
+			}
+			.shot .tag.after {
+				background: var(--accent);
+				color: var(--accent-ink);
+			}
+
+			/* Le constat : une ligne par zone du dépôt, une tuile par fichier. */
+			.zone {
+				margin-top: 12px;
+			}
+			.zone:first-of-type {
+				margin-top: 10px;
+			}
+			.zone .head {
+				display: flex;
+				gap: 8px;
+				font-size: 11.5px;
+				color: var(--ink-faint);
+				margin-bottom: 6px;
+			}
+			.zone .head span:first-child {
+				flex: 1;
+				min-width: 0;
+				overflow: hidden;
+				text-overflow: ellipsis;
+				white-space: nowrap;
+			}
+			.tiles {
+				display: flex;
+				flex-wrap: wrap;
+				gap: 4px;
+			}
+			.tiles i {
+				height: 16px;
+				border-radius: 4px;
+				background: color-mix(in srgb, var(--info) 55%, transparent);
+			}
+			.tiles i.deleted,
+			.key i.deleted {
+				background: var(--critical);
+			}
+			.tiles i.created,
+			.key i.created {
+				background: var(--success);
+			}
+			.key {
+				display: flex;
+				flex-wrap: wrap;
+				gap: 12px;
+				font-size: 12px;
+				color: var(--ink-muted);
+				margin-top: 12px;
+			}
+			.key span {
+				display: flex;
+				align-items: center;
+				gap: 6px;
+			}
+			.key i {
+				width: 10px;
+				height: 10px;
+				border-radius: 3px;
+				background: color-mix(in srgb, var(--info) 55%, transparent);
+			}
+			.files {
+				margin-top: 10px;
+				border-top: 1px solid var(--line-soft);
+			}
+			.files div {
+				display: flex;
+				gap: 8px;
+				align-items: center;
+				padding: 7px 0;
+				font-size: 12.5px;
+				border-bottom: 1px solid var(--line-soft);
+			}
+			.files div span:nth-child(2) {
+				flex: 1;
+				min-width: 0;
+				overflow: hidden;
+				text-overflow: ellipsis;
+				white-space: nowrap;
+			}
+			.files .gone span:nth-child(2) {
+				text-decoration: line-through;
+				color: var(--ink-faint);
+			}
+			.files i {
+				flex: none;
+				width: 9px;
+				height: 9px;
+				border-radius: 3px;
+				background: color-mix(in srgb, var(--info) 55%, transparent);
+			}
+			.files i.deleted {
+				background: var(--critical);
+			}
+			.files i.created {
+				background: var(--success);
+			}
+			.files small {
+				color: var(--ink-faint);
+			}
+			details > summary {
+				list-style: none;
+			}
+			details > summary::-webkit-details-marker {
+				display: none;
+			}
+
+			/* Ce qu'il dit, mis en forme. */
+			.md {
+				font-size: 15px;
+				line-height: 1.55;
+				word-break: break-word;
+			}
+			.md p {
+				margin: 0 0 10px;
+			}
+			.md p:last-child {
+				margin-bottom: 0;
+			}
+			.md h3 {
+				margin: 14px 0 6px;
+				font-size: 15.5px;
+			}
+			.md ul {
+				margin: 0 0 10px;
+				padding-left: 20px;
+			}
+			.md li {
+				margin-bottom: 4px;
+			}
+			.md code {
+				font-family: "SF Mono", ui-monospace, Menlo, monospace;
+				font-size: 0.88em;
+				background: var(--raised);
+				padding: 1px 5px;
+				border-radius: 5px;
+			}
+			.md pre {
+				margin: 0 0 10px;
+				padding: 10px 12px;
+				border-radius: 12px;
+				background: var(--raised);
+				font-size: 12px;
+				overflow-x: auto;
+			}
+			.md pre code {
+				background: none;
+				padding: 0;
+			}
+			.md .schema {
+				font-size: 11.5px;
+				color: var(--ink-faint);
+				margin: -4px 0 10px;
+			}
+
+			/* Le fil : ce qu'on s'est dit, ses gestes repliés entre deux. */
+			.msg {
+				max-width: 88%;
+				padding: 10px 14px;
+				border-radius: 18px;
+				margin-bottom: 8px;
+				background: var(--surface);
+				box-shadow: var(--shadow-card);
+			}
+			.msg.user {
+				margin-left: auto;
+				background: var(--accent);
+				color: var(--accent-ink);
+				box-shadow: none;
+				border-bottom-right-radius: 6px;
+				white-space: pre-wrap;
+				word-break: break-word;
+			}
+			.msg.assistant {
+				border-bottom-left-radius: 6px;
+			}
+			.gestes {
+				margin: 0 0 8px;
+				font-size: 12.5px;
+				color: var(--ink-faint);
+			}
+			.gestes summary {
+				display: inline-flex;
+				align-items: center;
+				gap: 6px;
+				padding: 6px 12px;
+				border-radius: 999px;
+				background: var(--raised);
+				max-width: 100%;
+			}
+			.gestes summary span {
+				overflow: hidden;
+				text-overflow: ellipsis;
+				white-space: nowrap;
+			}
+			.gestes summary.err {
+				color: var(--critical);
+			}
+			.gestes .lines {
+				margin: 8px 0 0;
+				padding: 10px 12px;
+				border-radius: 12px;
+				background: var(--raised);
+				font-size: 11.5px;
+				line-height: 1.6;
+				white-space: pre-wrap;
+				word-break: break-word;
+			}
+			.gestes .lines .err {
+				color: var(--critical);
+			}
+
+			/* Son écran : la page de son navigateur. */
+			.screen {
+				position: relative;
+				border-radius: 16px;
+				overflow: hidden;
+				background: var(--surface);
+				box-shadow: var(--shadow-card);
+			}
+			.screen img {
+				width: 100%;
+				display: block;
+			}
+			.live-tag {
+				display: flex;
+				align-items: center;
+				gap: 6px;
+				background: var(--accent);
+				color: var(--accent-ink);
+			}
+			.live-tag::before {
+				content: "";
+				width: 6px;
+				height: 6px;
+				border-radius: 50%;
+				background: currentColor;
+				animation: glow 1.2s ease-in-out infinite;
+			}
+			.address {
+				margin-top: 10px;
+				font-size: 12px;
+				color: var(--ink-faint);
+				word-break: break-all;
+			}
+
+			.composer {
+				display: flex;
+				gap: 8px;
+				align-items: flex-end;
+				padding: 10px 12px calc(var(--bottom) + 10px);
+				background: color-mix(in srgb, var(--surface) 88%, transparent);
+				backdrop-filter: blur(20px);
+				-webkit-backdrop-filter: blur(20px);
+				border-top: 1px solid var(--line-soft);
+			}
+			.composer textarea {
+				flex: 1;
+				resize: none;
+				border: 0;
+				outline: none;
+				border-radius: 20px;
+				padding: 10px 14px;
+				background: var(--raised);
+				font-size: 16px;
+				line-height: 1.35;
+				max-height: 140px;
+			}
+			.send {
+				flex: none;
+				width: 40px;
+				height: 40px;
+				border-radius: 50%;
+				background: var(--accent);
+				color: var(--accent-ink);
+				font-size: 20px;
+				font-weight: 700;
+				display: grid;
+				place-items: center;
+			}
+			.send:disabled {
+				background: var(--raised);
+				color: var(--ink-faint);
+			}
+			.jump {
+				position: absolute;
+				left: 50%;
+				bottom: calc(var(--bottom) + 76px);
+				transform: translateX(-50%);
+				padding: 8px 16px;
+				border-radius: 999px;
+				background: var(--accent);
+				color: var(--accent-ink);
+				font-size: 13px;
+				font-weight: 600;
+				box-shadow: var(--shadow-pop);
+				opacity: 0;
+				pointer-events: none;
+				transition: opacity 0.2s;
+			}
+			.jump.on {
+				opacity: 1;
+				pointer-events: auto;
+			}
+
+			.field {
+				width: 100%;
+				margin-top: 10px;
+				padding: 13px;
+				border: 0;
+				outline: none;
+				border-radius: 14px;
+				background: var(--raised);
+				font-size: 16px;
+			}
+			.field.code-in {
+				font-size: 20px;
+				letter-spacing: 0.2em;
+				text-align: center;
+				text-transform: uppercase;
+			}
+
+			.toast {
+				position: fixed;
+				left: 50%;
+				bottom: calc(var(--bottom) + 96px);
+				transform: translate(-50%, 12px);
+				max-width: 86%;
+				padding: 10px 16px;
+				border-radius: 14px;
+				background: var(--ink);
+				color: var(--base);
+				font-size: 13.5px;
+				font-weight: 500;
+				opacity: 0;
+				pointer-events: none;
+				transition:
+					opacity 0.2s,
+					transform 0.2s;
+				z-index: 60;
+			}
+			.toast.on {
+				opacity: 1;
+				transform: translate(-50%, 0);
+			}
+		</style>
+	</head>
+	<body>
+		<div id="bar"></div>
+
+		<!-- L'écran principal : trois onglets, une question chacun. -->
+		<div id="home">
+			<div class="top">
+				<div style="flex: 1; min-width: 0">
+					<h1 id="title">Cockpit</h1>
+					<div class="say" id="say">Connexion…</div>
+				</div>
+				<button class="gear" id="gear" aria-label="Cet appareil">
+					<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="7" y="2" width="10" height="20" rx="2.5" /><path d="M11 18h2" /></svg>
+				</button>
+			</div>
+			<div class="scroll" id="view"></div>
+			<nav class="tabs" id="tabs">
+				<button data-tab="you">
+					<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 13h4l2 3h4l2-3h4" /><path d="M5.5 5h13L21 13v5a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1v-5z" /></svg>
+					À toi<span class="count" id="countYou" hidden></span>
+				</button>
+				<button data-tab="agents">
+					<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="8" width="16" height="12" rx="3" /><path d="M12 8V4M9 13v2M15 13v2" /><circle cx="12" cy="3.5" r="1" /></svg>
+					Agents
+				</button>
+				<button data-tab="missions">
+					<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="6" cy="6" r="2.5" /><circle cx="18" cy="18" r="2.5" /><path d="M8.5 6H14a4 4 0 0 1 0 8h-4a4 4 0 0 0 0 8" transform="translate(0 -2)" /></svg>
+					Missions
+				</button>
+			</nav>
+		</div>
+
+		<!-- Un agent : ce qu'il montre, ce qu'il dit, ce qu'il a sous les yeux. -->
+		<section id="agent">
+			<div class="bar">
+				<button class="back" id="back" aria-label="Retour">‹</button>
+				<div style="flex: 1; min-width: 0">
+					<h2 id="agentName"></h2>
+					<div class="sub" id="agentSub" style="margin: 0"></div>
+				</div>
+				<span class="pill" id="agentState"></span>
+			</div>
+			<div class="seg" id="seg">
+				<button data-seg="summary">Résumé</button>
+				<button data-seg="thread">Fil</button>
+				<button data-seg="screen">Écran</button>
+			</div>
+			<div class="scroll" id="agentScroll"></div>
+			<button class="jump" id="jump">↓ du nouveau</button>
+			<div class="composer">
+				<textarea id="draft" rows="1" placeholder="Répondre à l'agent…"></textarea>
+				<button class="send" id="send" disabled aria-label="Envoyer">↑</button>
+			</div>
+		</section>
+
+		<!-- Cet appareil : sa clé d'accès, ses notifications. -->
+		<section id="sheet">
+			<div class="bar">
+				<button class="back" id="sheetBack" aria-label="Retour">‹</button>
+				<h2 style="flex: 1">Cet appareil</h2>
+			</div>
+			<div class="scroll" id="sheetBody"></div>
+		</section>
+
+		<div class="toast" id="toast"></div>
+
+		<script>
+			// ── Socle ─────────────────────────────────────────────────────────
+			const $ = (id) => document.getElementById(id);
+			const store = {
+				get token() {
+					return localStorage.getItem("cockpit.token");
+				},
+				set token(value) {
+					localStorage.setItem("cockpit.token", value);
+				},
+				clear() {
+					localStorage.removeItem("cockpit.token");
+				},
+			};
+
+			// Tout ce qui vient d'un agent passe par ici avant d'entrer dans la
+			// page, attributs compris.
+			const esc = (value) =>
+				String(value ?? "").replace(
+					/[<>&"']/g,
+					(c) => ({ "<": "&lt;", ">": "&gt;", "&": "&amp;", '"': "&quot;", "'": "&#39;" })[c],
+				);
+
+			let toastTimer = null;
+			function toast(message) {
+				$("toast").textContent = message;
+				$("toast").classList.add("on");
+				clearTimeout(toastTimer);
+				toastTimer = setTimeout(() => $("toast").classList.remove("on"), 2800);
+			}
+
+			// La barre de chargement compte les requêtes en vol : deux appels
+			// simultanés ne doivent pas l'éteindre l'un pour l'autre.
+			let inFlight = 0;
+			function loading(delta) {
+				inFlight = Math.max(0, inFlight + delta);
+				$("bar").classList.toggle("on", inFlight > 0);
+			}
+
+			const auth = () => (store.token ? { authorization: `Bearer ${store.token}` } : {});
+
+			async function api(path, options = {}, silent = false) {
+				if (!silent) loading(1);
+				try {
+					const response = await fetch(path, {
+						...options,
+						headers: { "content-type": "application/json", ...auth(), ...(options.headers ?? {}) },
+					});
+					const payload = await response.json().catch(() => ({}));
+					if (!response.ok) throw new Error(payload.error ?? `Erreur ${response.status}`);
+					return payload;
+				} finally {
+					if (!silent) loading(-1);
+				}
+			}
+
+			// Une image a besoin du jeton comme le reste, et une balise ne sait pas
+			// le porter : on la lit nous-mêmes, puis on la confie à la page.
+			const pictures = new Map();
+			async function picture(path, keep = true) {
+				if (keep && pictures.has(path)) return pictures.get(path);
+				const response = await fetch(path, { headers: auth() });
+				if (!response.ok) throw new Error(String(response.status));
+				const found = {
+					src: URL.createObjectURL(await response.blob()),
+					page: decodeURIComponent(response.headers.get("x-page-url") ?? ""),
+				};
+				if (keep) pictures.set(path, found);
+				return found;
+			}
+			/** Charge les images annoncées par `data-src` ; celle qui manque s'efface. */
+			function hydrate(root) {
+				root.querySelectorAll("img[data-src]").forEach((img) => {
+					const path = img.dataset.src;
+					img.removeAttribute("data-src");
+					picture(path)
+						.then((found) => (img.src = found.src))
+						.catch(() => img.closest(".shot")?.remove());
+				});
+			}
+
+			// ── WebAuthn ──────────────────────────────────────────────────────
+			const fromB64 = (value) =>
+				Uint8Array.from(atob(value.replace(/-/g, "+").replace(/_/g, "/")), (c) => c.charCodeAt(0));
+			const toB64 = (buffer) =>
+				btoa(String.fromCharCode(...new Uint8Array(buffer)))
+					.replace(/\+/g, "-")
+					.replace(/\//g, "_")
+					.replace(/=+$/, "");
+
+			function decodeRequest(options) {
+				const publicKey = { ...options.publicKey };
+				publicKey.challenge = fromB64(publicKey.challenge);
+				if (publicKey.user) publicKey.user = { ...publicKey.user, id: fromB64(publicKey.user.id) };
+				for (const key of ["allowCredentials", "excludeCredentials"]) {
+					if (publicKey[key])
+						publicKey[key] = publicKey[key].map((e) => ({ ...e, id: fromB64(e.id) }));
+				}
+				return { publicKey };
+			}
+
+			function encodeCredential(credential) {
+				const r = credential.response;
+				const encoded = {
+					id: credential.id,
+					rawId: toB64(credential.rawId),
+					type: credential.type,
+					extensions: {},
+					response: { clientDataJSON: toB64(r.clientDataJSON) },
+				};
+				if (r.attestationObject) {
+					encoded.response.attestationObject = toB64(r.attestationObject);
+				} else {
+					encoded.response.authenticatorData = toB64(r.authenticatorData);
+					encoded.response.signature = toB64(r.signature);
+					encoded.response.userHandle = r.userHandle ? toB64(r.userHandle) : null;
+				}
+				return encoded;
+			}
+
+			/** Face ID, puis exécution — le défi ne vaut que pour cette action. */
+			async function confirmed(action) {
+				const { actionId, options } = await api("/api/challenge", {
+					method: "POST",
+					body: JSON.stringify(action),
+				});
+				const credential = await navigator.credentials.get(decodeRequest(options));
+				return api("/api/execute", {
+					method: "POST",
+					body: JSON.stringify({ actionId, credential: encodeCredential(credential) }),
+				});
+			}
+
+			/** Enrobe une action : le bouton tourne, l'erreur se dit, la vue suit. */
+			async function act(button, run, done) {
+				button.classList.add("busy");
+				button.disabled = true;
+				try {
+					await run();
+					if (done) toast(done);
+				} catch (error) {
+					toast(String(error.message ?? error));
+				} finally {
+					button.classList.remove("busy");
+					button.disabled = false;
+				}
+			}
+
+			// ── Appairage ─────────────────────────────────────────────────────
+			function pairingScreen() {
+				$("say").textContent = "Cet appareil n'est pas encore appairé";
+				$("tabs").hidden = true;
+				$("view").innerHTML = `
+					<div class="card" style="margin-top:16px">
+						<div class="verb">Appairer ce téléphone</div>
+						<div class="sub" style="font-size:13.5px;margin-top:6px">
+							Sur le poste, ouvre Réglages → Accès mobile, et saisis le code affiché.
+						</div>
+						<input class="field code-in mono" id="code" placeholder="CODE" autocapitalize="characters" autocomplete="off" />
+						<input class="field" id="name" value="iPhone" />
+						<div class="row"><button class="btn primary" id="go">Appairer</button></div>
+					</div>`;
+				$("go").onclick = (event) =>
+					act(event.target, async () => {
+						const result = await api("/api/pair", {
+							method: "POST",
+							body: JSON.stringify({
+								code: $("code").value.trim().toUpperCase(),
+								name: $("name").value.trim() || "iPhone",
+							}),
+						});
+						store.token = result.token;
+						$("tabs").hidden = false;
+						await enroll();
+					});
+			}
+
+			async function enroll() {
+				try {
+					const options = await api("/api/register/start", { method: "POST" });
+					const credential = await navigator.credentials.create(decodeRequest(options));
+					await api("/api/register/finish", {
+						method: "POST",
+						body: JSON.stringify(encodeCredential(credential)),
+					});
+					toast("Face ID activé.");
+				} catch (error) {
+					toast(`Clé d'accès : ${error.message ?? error}`);
+				}
+				lastPrint = "";
+				refresh();
+			}
+
+			// ── Ce que dit le poste ───────────────────────────────────────────
+			/** Le dernier état reçu : tout ce que les onglets dessinent en vient. */
+			let inbox = null;
+			let tab = "you";
+			let firstLoad = true;
+			/** Empreinte du dernier rendu : repeindre à l'identique n'apporte rien. */
+			let lastPrint = "";
+
+			const agentOf = (sessionId) => (inbox?.workspaces ?? []).find((entry) => entry.sessionId === sessionId);
+
+			/** L'état d'un agent, en un mot et une couleur. */
+			function stateOf(agent) {
+				if (agent.waiting) return ["wait", agent.waiting > 1 ? `${agent.waiting} à décider` : "t'attend"];
+				if (agent.working) return ["live", "travaille"];
+				if (agent.running) return ["", "en attente"];
+				return ["", "terminé"];
+			}
+
+			function questionsOf(input) {
+				const raw = input?.questions;
+				if (!Array.isArray(raw)) return null;
+				const questions = raw
+					.map((entry) => ({
+						header: String(entry.header ?? entry.question ?? ""),
+						question: String(entry.question ?? ""),
+						options: (entry.options ?? []).map((o) => String(o.label ?? o)).filter(Boolean),
+					}))
+					.filter((entry) => entry.options.length > 0);
+				return questions.length ? questions : null;
+			}
+
+			/** Ce qu'un agent demande à faire, dit comme un geste plutôt qu'un nom d'outil. */
+			function describe(request) {
+				const input = request.input ?? {};
+				const tool = String(request.tool ?? "");
+				if (tool === "Bash") return ["Lancer une commande", input.command ?? ""];
+				if (tool === "Write") return ["Écrire un fichier", input.file_path ?? ""];
+				if (["Edit", "MultiEdit", "NotebookEdit"].includes(tool))
+					return ["Modifier un fichier", input.file_path ?? input.notebook_path ?? ""];
+				if (tool === "WebFetch") return ["Lire une page web", input.url ?? ""];
+				if (tool.startsWith("mcp__")) {
+					const [, server, ...name] = tool.split("__");
+					return [`Utiliser ${name.join(" ").replace(/_/g, " ")} (${server})`, JSON.stringify(input, null, 2)];
+				}
+				return [`Utiliser ${tool}`, JSON.stringify(input, null, 2)];
+			}
+
+			function decisionCard(request) {
+				const from = agentOf(request.sessionId);
+				const who = `<div class="who">${from ? `<b>${esc(from.label)}</b> demande` : "Un agent demande"}</div>`;
+				const questions = questionsOf(request.input);
+				if (questions) {
+					return `<div class="card yours" data-id="${esc(request.id)}">
+						<div class="who">${from ? `<b>${esc(from.label)}</b> te pose une question` : "Une question t'attend"}</div>
+						${questions
+							.map(
+								(q, index) => `<div data-question="${index}" data-header="${esc(q.header)}" ${index ? 'style="margin-top:14px"' : ""}>
+									<div class="verb">${esc(q.question || q.header)}</div>
+									<div class="choices">
+										${q.options.map((o) => `<button class="choice" data-choice="${esc(o)}">${esc(o)}</button>`).join("")}
+									</div>
+								</div>`,
+							)
+							.join("")}
+						<div class="row"><button class="btn primary" data-act="answer" disabled>Répondre</button></div>
+					</div>`;
+				}
+				const [verb, body] = describe(request);
+				return `<div class="card yours" data-id="${esc(request.id)}">
+					${who}
+					<div class="verb">${esc(verb)}</div>
+					${body ? `<pre class="code mono">${esc(body)}</pre>` : ""}
+					<div class="row">
+						<button class="btn danger" data-act="deny">Refuser</button>
+						<button class="btn primary" data-act="allow">Autoriser</button>
+					</div>
+				</div>`;
+			}
+
+			const MISSION = {
+				planning: ["Analyse", ""],
+				awaitingApproval: ["Attend ton accord", "wait"],
+				running: ["Exécution", "live"],
+				integrating: ["Intégration", "live"],
+				failed: ["Échouée", "bad"],
+			};
+			const TASK = {
+				planned: ["à lancer", ""],
+				running: ["en cours", "live"],
+				delivered: ["livrée", "done"],
+				integrated: ["intégrée", "done"],
+				failed: ["échouée", "bad"],
+			};
+
+			/** Une mission : son avancée d'un regard, et ce qu'elle attend de toi. */
+			function missionCard(mission) {
+				const [label, tone] = MISSION[mission.state] ?? ["En cours", ""];
+				const tasks = mission.tasks ?? [];
+				const done = tasks.filter((task) => task.state === "delivered" || task.state === "integrated").length;
+				const rows = tasks
+					.map((task) => {
+						const [state, pill] = TASK[task.state] ?? ["", ""];
+						const inner = `<span class="what"><b>${esc(task.role)}</b> ${esc(task.title)}${
+							task.note ? `<div class="sub">${esc(task.note)}</div>` : ""
+						}</span><span class="pill ${pill}">${state}</span>`;
+						// Un exécutant lancé s'ouvre d'une frappe : on suit la tâche
+						// depuis la mission, sans la chercher parmi les agents.
+						return task.sessionId
+							? `<button class="task" data-session="${esc(task.sessionId)}">${inner}</button>`
+							: `<div class="task">${inner}</div>`;
+					})
+					.join("");
+				const waiting = mission.state === "awaitingApproval";
+				return `<div class="card ${waiting ? "yours" : ""}" data-mission="${esc(mission.id)}">
+					<div class="who">${mission.project ? `<b>${esc(mission.project)}</b> · ` : ""}${esc(mission.ticket || mission.branch || "")}</div>
+					<div class="agent">
+						<div style="flex:1;min-width:0"><div class="verb">${esc(mission.title)}</div></div>
+						<span class="pill ${tone}">${label}</span>
+					</div>
+					${
+						tasks.length
+							? `<div class="track">${tasks.map((task) => `<i class="${esc(task.state)}"></i>`).join("")}</div>
+								<div class="sub">${done} sur ${tasks.length} tâche${tasks.length > 1 ? "s" : ""} rendue${done > 1 ? "s" : ""}</div>`
+							: ""
+					}
+					${
+						mission.summary
+							? `<div class="last" style="-webkit-line-clamp:${waiting ? 12 : 3}">${esc(mission.summary)}</div>`
+							: waiting && mission.plan
+								? `<pre class="code">${esc(mission.plan)}</pre>`
+								: ""
+					}
+					${rows ? `<div style="margin-top:10px">${rows}</div>` : ""}
+					${waiting ? `<div class="row"><button class="btn primary" data-act="approve">Approuver le plan</button></div>` : ""}
+					${
+						/* Le téléphone freine, il ne démarre pas : suspendre et arrêter y
+						   ont leur place, reprendre se décide devant la machine. */
+						mission.paused
+							? `<div class="sub" style="margin-top:10px">En pause — elle se reprend depuis le poste.</div>`
+							: mission.state === "running" || mission.state === "integrating"
+								? `<div class="row">
+										<button class="btn small" data-act="pause">Mettre en pause</button>
+										<button class="btn small danger" data-act="stop">Tout arrêter</button>
+									</div>`
+								: ""
+					}
+				</div>`;
+			}
+
+			function agentCard(agent) {
+				const [tone, label] = stateOf(agent);
+				return `<button class="card tap" data-session="${esc(agent.sessionId)}">
+					<div class="agent ${tone}">
+						<span class="mark"></span>
+						<div style="flex:1;min-width:0">
+							<div class="name"><span>${esc(agent.label)}</span><span class="pill ${tone}">${label}</span></div>
+							<div class="sub">${agent.project ? `${esc(agent.project)} · ` : ""}${esc(agent.folder)}${agent.screen ? " · navigateur ouvert" : ""}</div>
+							${agent.last ? `<div class="last">${esc(agent.last)}</div>` : ""}
+						</div>
+					</div>
+				</button>`;
+			}
+
+			/** Une pastille par agent : l'état de la flotte sans une ligne à lire. */
+			function pulse(agents) {
+				if (!agents.length) return "";
+				return `<div class="pulse">${agents
+					.map((agent) => {
+						const [tone] = stateOf(agent);
+						return `<button class="orb ${tone}" data-session="${esc(agent.sessionId)}">
+							<span class="disc">${esc((agent.label.split("/").pop() || "?").charAt(0).toUpperCase())}</span>
+							<span>${esc(agent.label.split("/").pop())}</span>
+						</button>`;
+					})
+					.join("")}</div>`;
+			}
+
+			function render() {
+				if (!inbox) return;
+				const agents = inbox.workspaces ?? [];
+				const missions = inbox.missions ?? [];
+				const asks = inbox.permissions ?? [];
+				const plans = missions.filter((mission) => mission.state === "awaitingApproval");
+				const failed = missions.filter(
+					(mission) => !plans.includes(mission) && (mission.tasks ?? []).some((task) => task.state === "failed"),
+				);
+				const yours = asks.length + plans.length;
+				const working = agents.filter((agent) => agent.working).length;
+
+				$("countYou").hidden = yours === 0;
+				$("countYou").textContent = yours;
+				document.querySelectorAll("#tabs button").forEach((button) => button.classList.toggle("on", button.dataset.tab === tab));
+
+				$("title").textContent = tab === "you" ? "À toi" : tab === "agents" ? "Agents" : "Missions";
+				$("say").textContent = [
+					yours ? `${yours} décision${yours > 1 ? "s" : ""} t'attend${yours > 1 ? "ent" : ""}` : null,
+					working ? `${working} agent${working > 1 ? "s" : ""} au travail` : agents.length ? "aucun agent ne travaille" : "aucun agent ouvert",
+				]
+					.filter(Boolean)
+					.join(" · ");
+
+				const parts = [];
+				if (tab === "you") {
+					if (!inbox.armed) {
+						parts.push(`<div class="card">
+							<div class="verb">Face ID n'est pas activé</div>
+							<div class="sub" style="font-size:13.5px;margin-top:6px">Sans lui, ce téléphone peut lire et refuser, jamais autoriser.</div>
+							${inbox.enrollOpen
+								? `<div class="row"><button class="btn primary" data-enroll>Activer Face ID</button></div>`
+								: `<div class="sub" style="font-size:13.5px;margin-top:6px">Le délai d'activation est passé : révoque ce téléphone sur le poste, puis appaire-le à nouveau.</div>`}
+						</div>`);
+					}
+					parts.push(...asks.map(decisionCard), ...plans.map(missionCard));
+					if (failed.length) {
+						parts.push(`<div class="section">En échec</div>`, ...failed.map(missionCard));
+					}
+					if (!yours && !failed.length) {
+						parts.push(`<div class="empty">
+							<div class="big">Rien ne t'attend</div>
+							${working ? "Tes agents avancent sans toi." : "Tout est calme."}
+						</div>`);
+					}
+					if (agents.length) parts.push(`<div class="section">La flotte</div>`, pulse(agents));
+				} else if (tab === "agents") {
+					// Ce qui t'attend d'abord, puis ce qui travaille, puis le reste.
+					const rank = (agent) => (agent.waiting ? 0 : agent.working ? 1 : agent.running ? 2 : 3);
+					const sorted = [...agents].sort((a, b) => rank(a) - rank(b));
+					parts.push(pulse(sorted), ...sorted.map(agentCard));
+					if (!agents.length) {
+						parts.push(`<div class="empty"><div class="big">Aucun agent ouvert</div>Ils se lancent depuis le poste.</div>`);
+					}
+				} else {
+					parts.push(...missions.map(missionCard));
+					if (!missions.length) {
+						parts.push(`<div class="empty"><div class="big">Aucune mission en cours</div>Elles se lancent depuis le poste.</div>`);
+					}
+				}
+
+				// Sans cette comparaison, l'écran se réécrivait toutes les quatre
+				// secondes : un plan qu'on était en train de lire remontait en haut.
+				const html = parts.join("");
+				if (html === lastPrint) return;
+				const offset = $("view").scrollTop;
+				lastPrint = html;
+				$("view").innerHTML = html;
+				$("view").scrollTop = offset;
+			}
+
+			async function refresh(silent = false) {
+				if (!store.token) return pairingScreen();
+				if (firstLoad) {
+					$("view").innerHTML = `<div class="skel"></div><div class="skel" style="opacity:.6"></div><div class="skel" style="opacity:.3"></div>`;
+				}
+				try {
+					inbox = await api("/api/inbox", {}, silent);
+				} catch (error) {
+					const message = String(error.message ?? error);
+					if (message.includes("révoqué") || message.includes("inconnu")) {
+						store.clear();
+						return pairingScreen();
+					}
+					$("say").textContent = "Le poste ne répond pas";
+					if (firstLoad) $("view").innerHTML = `<div class="empty"><div class="big">Injoignable</div>${esc(message)}</div>`;
+					return;
+				}
+				firstLoad = false;
+				render();
+				if (current) paintAgentHeader();
+			}
+
+			// Un seul écouteur pour tout ce qui se touche : les cartes se
+			// redessinent, lui reste.
+			document.addEventListener("click", (event) => {
+				const target = event.target.closest("button, [data-session]");
+				if (!target) return;
+
+				if (target.dataset.tab) {
+					tab = target.dataset.tab;
+					lastPrint = "";
+					render();
+					$("view").scrollTop = 0;
+					return;
+				}
+				if (target.dataset.session) return openAgent(target.dataset.session);
+				if (target.dataset.seg) return showSegment(target.dataset.seg);
+				if ("enroll" in target.dataset) return enroll();
+				if (target.dataset.copy) {
+					navigator.clipboard.writeText(target.dataset.copy).then(
+						() => toast("Copié."),
+						() => toast(target.dataset.copy),
+					);
+					return;
+				}
+				if (target.dataset.choice !== undefined) {
+					const group = target.closest("[data-question]");
+					group.querySelectorAll("[data-choice]").forEach((other) => other.classList.remove("on"));
+					target.classList.add("on");
+					const card = target.closest(".card");
+					const done = card.querySelectorAll("[data-question] .on").length;
+					card.querySelector("[data-act='answer']").disabled = done < card.querySelectorAll("[data-question]").length;
+					return;
+				}
+				if (target.dataset.act) decide(target);
+			});
+
+			const DONE = {
+				deny: "Refusé.",
+				allow: "Autorisé.",
+				approve: "Plan approuvé — les exécutants peuvent partir.",
+				pause: "Mission suspendue — les exécutants sont coupés.",
+				stop: "Mission arrêtée. Le travail produit reste en place.",
+				answer: "Répondu.",
+			};
+
+			function decide(button) {
+				const card = button.closest(".card");
+				const kind = button.dataset.act;
+				act(
+					button,
+					async () => {
+						// Tout ce qui engage quelque chose passe par Face ID ; refuser
+						// ne casse rien, il fait attendre.
+						if (kind === "approve") await confirmed({ kind: "approvePlan", id: card.dataset.mission });
+						else if (kind === "pause") await confirmed({ kind: "pauseMission", id: card.dataset.mission });
+						else if (kind === "stop") await confirmed({ kind: "stopMission", id: card.dataset.mission });
+						else if (kind === "deny") await api("/api/deny", { method: "POST", body: JSON.stringify({ id: card.dataset.id }) });
+						else if (kind === "allow") await confirmed({ kind: "allowTool", id: card.dataset.id });
+						else {
+							const answers = [...card.querySelectorAll("[data-question]")].map((group) => ({
+								header: group.dataset.header,
+								choice: group.querySelector(".on")?.dataset.choice ?? "",
+							}));
+							await confirmed({ kind: "answerQuestion", id: card.dataset.id, answers });
+						}
+						await refresh(true);
+						if (current) paintSegment(true);
+					},
+					DONE[kind],
+				);
+			}
+
+			// ── Cet appareil ──────────────────────────────────────────────────
+			$("gear").onclick = () => {
+				const notify = inbox?.notify;
+				$("sheetBody").innerHTML = `
+					<div class="card">
+						<div class="who">Appareil</div>
+						<div class="verb">${esc(inbox?.device ?? "Non appairé")}</div>
+						<div class="sub" style="font-size:13.5px;margin-top:6px">${
+							inbox?.armed
+								? "Face ID est activé : ce téléphone peut autoriser, répondre et freiner."
+								: "Face ID n'est pas activé : ce téléphone peut lire et refuser, jamais autoriser."
+						}</div>
+						${inbox && !inbox.armed && inbox.enrollOpen ? `<div class="row"><button class="btn primary" data-enroll>Activer Face ID</button></div>` : ""}
+					</div>
+					${
+						notify?.topic
+							? `<div class="section">Notifications</div>
+								<div class="card">
+									<div class="sub" style="font-size:13.5px;margin:0 0 4px">Dans l'app ntfy, abonne-toi à ce sujet, sur ce serveur.</div>
+									<div class="row"><button class="btn small" data-copy="${esc(notify.topic)}">Copier le sujet</button>
+									<button class="btn small" data-copy="${esc(notify.server)}">Copier le serveur</button></div>
+								</div>`
+							: ""
+					}
+					<div class="section">Ce que ce téléphone peut faire</div>
+					<div class="card"><div class="sub" style="font-size:13.5px;margin:0">
+						Lire, autoriser ou refuser un geste, répondre à un agent, approuver un plan, suspendre ou arrêter une mission.
+						Lancer un agent, reprendre une mission et changer un réglage se font devant le poste.
+					</div></div>`;
+				$("sheet").classList.add("on");
+			};
+			$("sheetBack").onclick = () => $("sheet").classList.remove("on");
+
+			// ── Un agent ──────────────────────────────────────────────────────
+			/** L'agent ouvert : sa conversation, son constat, ce qu'on y regarde. */
+			let current = null;
+			let agentTimer = null;
+
+			const scroller = () => $("agentScroll");
+			const atBottom = () => scroller().scrollHeight - scroller().scrollTop - scroller().clientHeight < 90;
+			function toBottom(smooth) {
+				scroller().scrollTo({ top: scroller().scrollHeight, behavior: smooth ? "smooth" : "auto" });
+				$("jump").classList.remove("on");
+			}
+
+			function openAgent(sessionId) {
+				const known = agentOf(sessionId);
+				current = {
+					sessionId,
+					segment: "summary",
+					events: [],
+					total: 0,
+					working: known?.working ?? false,
+					running: known?.running ?? true,
+					changes: null,
+					print: "",
+					loaded: false,
+				};
+				$("draft").value = "";
+				$("send").disabled = true;
+				paintAgentHeader();
+				showSegment("summary");
+				$("agent").classList.add("on");
+				pull(true);
+				// Le constat ne bouge qu'avec le dépôt : on le relit quand l'agent
+				// rend la main, pas à chaque battement.
+				loadChanges();
+				clearInterval(agentTimer);
+				agentTimer = setInterval(() => {
+					if (!document.hidden) beat();
+				}, 2500);
+			}
+
+			function closeAgent() {
+				$("agent").classList.remove("on");
+				clearInterval(agentTimer);
+				agentTimer = null;
+				current = null;
+				refresh(true);
+			}
+
+			function paintAgentHeader() {
+				const known = agentOf(current.sessionId);
+				$("agentName").textContent = known?.label ?? "Agent";
+				$("agentSub").textContent = [known?.project, known?.folder].filter(Boolean).join(" · ");
+				const [tone, label] = known?.waiting
+					? stateOf(known)
+					: current.working
+						? ["live", "travaille"]
+						: current.running
+							? ["", "en attente"]
+							: ["", "terminé"];
+				$("agentState").className = `pill ${tone}`;
+				$("agentState").textContent = label;
+				// L'écran n'a de sens que si son navigateur tourne.
+				$("seg").querySelector("[data-seg='screen']").style.display = known?.screen ? "" : "none";
+			}
+
+			function showSegment(segment) {
+				if (!current) return;
+				current.segment = segment;
+				current.print = "";
+				document.querySelectorAll("#seg button").forEach((button) => button.classList.toggle("on", button.dataset.seg === segment));
+				$("jump").classList.remove("on");
+				paintSegment(true);
+				if (segment === "thread") toBottom(false);
+				else scroller().scrollTop = 0;
+				if (segment === "screen") look();
+			}
+
+			let beats = 0;
+			/** Un battement : la conversation, et l'écran si c'est lui qu'on regarde. */
+			function beat() {
+				if (!current) return;
+				beats += 1;
+				if (current.segment === "screen") {
+					look();
+					// L'image passe devant : la conversation se relit moins souvent, le
+					// serveur compte les requêtes de chaque appareil.
+					if (beats % 4 === 0) pull(false);
+				} else {
+					pull(false);
+				}
+			}
+
+			async function pull(reset) {
+				const agent = current;
+				if (!agent) return;
+				let data;
+				try {
+					data = await api(`/api/agents/${encodeURIComponent(agent.sessionId)}/transcript?since=${reset ? 0 : agent.total}`, {}, !reset);
+				} catch (error) {
+					if (reset && current === agent) scroller().innerHTML = `<div class="empty">${esc(error.message)}</div>`;
+					return;
+				}
+				if (current !== agent) return;
+				// Le serveur repart de zéro quand la conversation a été tronquée.
+				if (reset || data.from === 0) agent.events = [];
+				agent.events.push(...(data.events ?? []));
+				agent.total = data.total ?? agent.events.length;
+				const stopped = agent.working && !data.working;
+				agent.working = Boolean(data.working);
+				agent.running = data.running !== false;
+				agent.loaded = true;
+				paintAgentHeader();
+				paintSegment(false);
+				// Il vient de rendre la main : c'est le moment où le dépôt a changé.
+				if (stopped) loadChanges();
+			}
+
+			async function loadChanges() {
+				const agent = current;
+				if (!agent) return;
+				try {
+					const found = await api(`/api/agents/${encodeURIComponent(agent.sessionId)}/changes`, {}, true);
+					if (current !== agent) return;
+					agent.changes = found;
+					paintSegment(false);
+				} catch {
+					// Pas de constat : le résumé s'en passe.
+				}
+			}
+
+			// ── Résumé : ce qu'il montre, ce que dit le dépôt, ce qu'il conclut ──
+			const IMAGE = /(?:^|[\s(`"'])((?:\/|\.{0,2}\/?[\w.@+-]+\/)[^\s`"')]*\.(?:png|jpe?g|gif|webp))\b/gi;
+
+			/** Les images qu'un message cite, dans l'ordre : l'avant, l'après, le reste. */
+			function shotsOf(text) {
+				const found = new Map();
+				for (const match of text.matchAll(/!\[([^\]]*)\]\(([^)\s]+\.(?:png|jpe?g|gif|webp))\)/gi)) {
+					found.set(match[2], match[1]);
+				}
+				for (const match of text.matchAll(IMAGE)) if (!found.has(match[1])) found.set(match[1], "");
+				const stage = (path) => {
+					const name = path.split("/").pop();
+					return /^(avant|before)\b/i.test(name) ? "avant" : /^(apr[eè]s|after)\b/i.test(name) ? "après" : "";
+				};
+				return [...found]
+					.map(([path, caption]) => ({ path, caption, stage: stage(path) }))
+					.sort((a, b) => (a.stage === "avant" ? 0 : a.stage === "après" ? 1 : 2) - (b.stage === "avant" ? 0 : b.stage === "après" ? 1 : 2));
+			}
+
+			/** Le constat, rangé par zones du dépôt — la même lecture que sur le poste. */
+			function footprint(changes) {
+				const files = changes?.files ?? [];
+				if (!files.length) return null;
+				const folders = (path) => path.split("/").filter(Boolean).slice(0, -1);
+				const fate = (state) => (state === "deleted" ? "deleted" : state === "added" || state === "untracked" ? "created" : "modified");
+				// Un lockfile à la racine ne fait pas une zone à lui seul.
+				const nested = files.filter((file) => folders(file.path).length > 0);
+				let depth = 3;
+				for (let level = 1; level <= 3; level++) {
+					if (new Set(nested.map((file) => folders(file.path).slice(0, level).join("/"))).size > 1) {
+						depth = level;
+						break;
+					}
+				}
+				const zones = new Map();
+				for (const file of files) {
+					const name = folders(file.path).slice(0, depth).join("/") || "racine";
+					const zone = zones.get(name) ?? { name, tiles: [], added: 0, removed: 0 };
+					zone.tiles.push({ ...file, fate: fate(file.state), name: file.path.split("/").pop() });
+					zone.added += file.added;
+					zone.removed += file.removed;
+					zones.set(name, zone);
+				}
+				const ranked = [...zones.values()].sort((a, b) => b.added + b.removed - (a.added + a.removed));
+				for (const zone of ranked) zone.tiles.sort((a, b) => b.added + b.removed - (a.added + a.removed));
+				const count = (wanted) => files.filter((file) => fate(file.state) === wanted).length;
+				return { zones: ranked.slice(0, 5), more: Math.max(0, ranked.length - 5), deleted: count("deleted"), created: count("created"), modified: count("modified") };
+			}
+
+			function footprintHtml(changes) {
+				const print = footprint(changes);
+				if (!print) return "";
+				const say = (count, word) => (count ? `<span><i class="${word === "supprimé" ? "deleted" : word === "créé" ? "created" : ""}"></i>${count} ${word}${count > 1 ? "s" : ""}</span>` : "");
+				const width = (tile) => Math.round(Math.min(96, Math.max(10, Math.sqrt(tile.added + tile.removed) * 3.2)));
+				return `<div class="section">Le constat · ${esc(changes.baseLabel ?? "")}</div>
+					<div class="card">
+						<div class="sub" style="margin:0">Lu dans le dépôt, pas dans ce qu'il raconte.</div>
+						<div class="key">${say(print.deleted, "supprimé")}${say(print.created, "créé")}${say(print.modified, "modifié")}
+							<span class="mono" style="margin-left:auto">+${changes.additions} −${changes.deletions}</span></div>
+						${print.zones
+							.map(
+								(zone) => `<details class="zone">
+									<summary>
+										<div class="head mono"><span>${esc(zone.name)}</span><span>+${zone.added} −${zone.removed}</span></div>
+										<div class="tiles">${zone.tiles.map((tile) => `<i class="${tile.fate}" style="width:${width(tile)}px"></i>`).join("")}</div>
+									</summary>
+									<div class="files">${zone.tiles
+										.map(
+											(tile) => `<div class="${tile.fate === "deleted" ? "gone" : ""}"><i class="${tile.fate}"></i><span>${esc(tile.name)}</span><small class="mono">+${tile.added} −${tile.removed}</small></div>`,
+										)
+										.join("")}</div>
+								</details>`,
+							)
+							.join("")}
+						${print.more ? `<div class="sub" style="margin-top:10px">et ${print.more} autre${print.more > 1 ? "s" : ""} zone${print.more > 1 ? "s" : ""}</div>` : ""}
+					</div>`;
+			}
+
+			/** Markdown, pour ce qu'un agent écrit vraiment : titres, listes, code. */
+			function md(source) {
+				const inline = (text) =>
+					esc(text)
+						.replace(/!\[[^\]]*\]\([^)\s]+\)/g, "")
+						.replace(/`([^`]+)`/g, "<code>$1</code>")
+						.replace(/\*\*([^*]+)\*\*/g, "<b>$1</b>")
+						.replace(/\[([^\]]+)\]\((https?:[^)\s]+)\)/g, "$1");
+				const out = [];
+				const lines = String(source ?? "").replace(/\r\n/g, "\n").split("\n");
+				let index = 0;
+				while (index < lines.length) {
+					const line = lines[index];
+					if (line.trimStart().startsWith("```")) {
+						const language = line.trim().slice(3).trim().toLowerCase();
+						const body = [];
+						index += 1;
+						while (index < lines.length && !lines[index].trimStart().startsWith("```")) body.push(lines[index++]);
+						index += 1;
+						out.push(`<pre><code>${esc(body.join("\n"))}</code></pre>`);
+						// Le schéma se dessine sur le poste ; ici on en garde le texte.
+						if (language === "mermaid") out.push(`<div class="schema">Un schéma — il se dessine sur le poste.</div>`);
+						continue;
+					}
+					if (!line.trim()) {
+						index += 1;
+						continue;
+					}
+					const heading = line.match(/^#{1,6}\s+(.*)$/);
+					if (heading) {
+						out.push(`<h3>${inline(heading[1])}</h3>`);
+						index += 1;
+						continue;
+					}
+					if (/^\s*([-*+]|\d+[.)])\s+/.test(line)) {
+						const items = [];
+						while (index < lines.length && /^\s*([-*+]|\d+[.)])\s+/.test(lines[index])) {
+							items.push(`<li>${inline(lines[index++].replace(/^\s*([-*+]|\d+[.)])\s+/, ""))}</li>`);
+						}
+						out.push(`<ul>${items.join("")}</ul>`);
+						continue;
+					}
+					const paragraph = [];
+					while (index < lines.length && lines[index].trim() && !/^(#{1,6}\s|\s*([-*+]|\d+[.)])\s+|\s*```)/.test(lines[index])) {
+						paragraph.push(lines[index++]);
+					}
+					const text = inline(paragraph.join(" ")).trim();
+					if (text) out.push(`<p>${text}</p>`);
+				}
+				return out.join("");
+			}
+
+			function summaryHtml(agent) {
+				if (!agent.loaded) return `<div class="skel" style="height:180px"></div><div class="skel"></div>`;
+				const said = agent.events.filter((event) => event.kind === "assistant" && (event.text ?? "").trim());
+				const asked = agent.events.filter((event) => event.kind === "user" && (event.text ?? "").trim());
+				const conclusion = said.at(-1);
+				const ask = asked.at(-1);
+				const parts = [];
+
+				// Ce qui t'attend de lui passe devant tout le reste.
+				const mine = (inbox?.permissions ?? []).filter((request) => request.sessionId === agent.sessionId);
+				parts.push(...mine.map(decisionCard));
+
+				const shots = conclusion ? shotsOf(conclusion.text) : [];
+				if (shots.length) {
+					const base = `/api/agents/${encodeURIComponent(agent.sessionId)}/media?path=`;
+					parts.push(`<div class="shots">${shots
+						.map(
+							(shot) => `<div class="shot">
+								<img alt="${esc(shot.caption)}" data-src="${esc(base + encodeURIComponent(shot.path))}" />
+								${shot.stage ? `<span class="tag ${shot.stage === "après" ? "after" : ""}">${shot.stage}</span>` : ""}
+							</div>`,
+						)
+						.join("")}</div>`);
+				}
+				if (conclusion) {
+					parts.push(`<div class="section">${agent.working ? "Ce qu'il vient de dire" : "Sa conclusion"}</div>
+						<div class="card"><div class="md">${md(conclusion.text)}</div></div>`);
+				} else {
+					parts.push(`<div class="empty"><div class="big">${agent.working ? "Il travaille" : "Rien à montrer"}</div>Il n'a encore rien dit.</div>`);
+				}
+				parts.push(footprintHtml(agent.changes));
+				if (ask) {
+					parts.push(`<div class="section">Ta consigne</div>
+						<div class="card"><div class="last" style="-webkit-line-clamp:6;margin:0;color:var(--ink)">${esc(ask.text)}</div></div>`);
+				}
+				return parts.join("");
+			}
+
+			/** Le nom d'un outil, sans son préfixe de serveur : « browser click ». */
+			const toolName = (tool) => String(tool ?? "").replace(/^mcp__[^_]+(?:_[^_]+)*?__/, "").replace(/_/g, " ");
+
+			// ── Fil : ce qu'on s'est dit, ses gestes repliés entre deux ────────
+			function threadHtml(agent) {
+				if (!agent.loaded) return `<div class="skel"></div><div class="skel" style="opacity:.5"></div>`;
+				const out = [];
+				let gestures = [];
+				const flush = () => {
+					if (!gestures.length) return;
+					const failed = gestures.filter((event) => event.kind === "tool-error").length;
+					const last = gestures.at(-1);
+					const lines = gestures
+						.map((event) => `<span class="${event.kind === "tool-error" ? "err" : ""}">${esc(toolName(event.tool))} ${esc((event.detail || event.text || "").slice(0, 160))}</span>`)
+						.join("\n");
+					out.push(`<details class="gestes">
+						<summary class="${failed ? "err" : ""}"><span>${gestures.length} geste${gestures.length > 1 ? "s" : ""}${failed ? ` · ${failed} en erreur` : ""} · ${esc(toolName(last.tool))}</span></summary>
+						<div class="lines mono">${lines}</div>
+					</details>`);
+					gestures = [];
+				};
+				for (const event of agent.events) {
+					if (event.kind === "user" || event.kind === "assistant") {
+						if (!(event.text ?? "").trim()) continue;
+						flush();
+						out.push(event.kind === "user" ? `<div class="msg user">${esc(event.text)}</div>` : `<div class="msg assistant md">${md(event.text)}</div>`);
+					} else if (event.kind !== "thinking") {
+						gestures.push(event);
+					}
+				}
+				flush();
+				return out.join("") || `<div class="empty">La conversation n'a pas commencé.</div>`;
+			}
+
+			// ── Écran : la page de son navigateur ───────────────────────────────
+			function screenHtml() {
+				return `<div class="screen"><img id="shotLive" alt="" /><span class="live-tag">en direct</span></div>
+					<div class="address mono" id="shotUrl"></div>
+					<div class="sub" style="margin-top:8px">La page que cet agent a sous les yeux, relue toutes les deux à trois secondes. Tu regardes ; pour y cliquer, c'est sur le poste.</div>`;
+			}
+
+			let looking = false;
+			async function look() {
+				const agent = current;
+				if (!agent || looking || agent.segment !== "screen") return;
+				looking = true;
+				try {
+					const found = await picture(`/api/agents/${encodeURIComponent(agent.sessionId)}/screen`, false);
+					const img = $("shotLive");
+					if (current === agent && img) {
+						const old = img.src;
+						img.src = found.src;
+						if (old.startsWith("blob:")) URL.revokeObjectURL(old);
+						$("shotUrl").textContent = found.page;
+					}
+				} catch {
+					if (current === agent && $("shotUrl")) $("shotUrl").textContent = "Son navigateur ne tourne plus.";
+				} finally {
+					looking = false;
+				}
+			}
+
+			/** Redessine le segment ouvert, si son contenu a changé. */
+			function paintSegment(force) {
+				const agent = current;
+				if (!agent) return;
+				if (agent.segment === "screen") {
+					if (force) scroller().innerHTML = screenHtml();
+					return;
+				}
+				const html = agent.segment === "summary" ? summaryHtml(agent) : threadHtml(agent);
+				if (!force && html === agent.print) return;
+				const stick = agent.segment === "thread" && atBottom();
+				const grew = agent.print !== "" && html !== agent.print;
+				const offset = scroller().scrollTop;
+				agent.print = html;
+				scroller().innerHTML = html;
+				hydrate(scroller());
+				if (agent.segment === "thread") {
+					if (stick || force) toBottom(!force);
+					else {
+						scroller().scrollTop = offset;
+						if (grew) $("jump").classList.add("on");
+					}
+				} else {
+					scroller().scrollTop = offset;
+				}
+			}
+
+			$("back").onclick = closeAgent;
+			$("jump").onclick = () => toBottom(true);
+			scroller().addEventListener("scroll", () => {
+				if (atBottom()) $("jump").classList.remove("on");
+			});
+
+			// La zone de saisie grandit avec le texte, jusqu'à un plafond.
+			$("draft").addEventListener("input", (event) => {
+				const field = event.target;
+				field.style.height = "auto";
+				field.style.height = `${Math.min(field.scrollHeight, 140)}px`;
+				$("send").disabled = !field.value.trim();
+			});
+
+			$("send").onclick = () => {
+				const text = $("draft").value.trim();
+				if (!text || !current) return;
+				act(
+					$("send"),
+					async () => {
+						await confirmed({ kind: "message", sessionId: current.sessionId, text });
+						$("draft").value = "";
+						$("draft").style.height = "auto";
+						$("send").disabled = true;
+						await pull(false);
+						showSegment("thread");
+					},
+					"Envoyé.",
+				);
+			};
+
+			// ── Boucle de vie ─────────────────────────────────────────────────
+			// L'accueil se rafraîchit en silence, et se tait quand un agent est
+			// ouvert : c'est lui qu'on regarde, et chaque requête compte.
+			if ("serviceWorker" in navigator) {
+				navigator.serviceWorker.register("/sw.js").catch(() => {});
+			}
+
+			let ticks = 0;
+			refresh();
+			setInterval(() => {
+				if (document.hidden) return;
+				ticks += 1;
+				// Un agent ouvert garde l'état de la flotte à jour, mais moins souvent.
+				if (current && ticks % 3 !== 0) return;
+				refresh(true);
+			}, 4000);
+			document.addEventListener("visibilitychange", () => {
+				if (document.hidden) return;
+				refresh(true);
+				if (current) beat();
+			});
+		</script>
+	</body>
+</html>

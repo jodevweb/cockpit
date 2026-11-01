@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+	Ce que le cockpit dit à macOS avant de lui demander quelque chose.
+
+	Tauri fusionne ce fichier avec l'Info.plist qu'il fabrique. On n'y met que
+	les motifs d'accès : macOS n'affiche une demande d'autorisation que s'il
+	trouve la clé correspondante, et une demande qu'il ne peut pas formuler est
+	un accès refusé sans que rien ne l'explique.
+
+	Ces accès ne sont pas ceux du cockpit lui-même, qui ne touche ni aux photos
+	ni à la musique : ce sont ceux des agents qu'il lance. Un processus enfant
+	n'a pas d'identité propre aux yeux du système — c'est l'application qui l'a
+	lancé que macOS interroge, et c'est donc ici que les motifs doivent être.
+-->
+<plist version="1.0">
+<dict>
+	<key>NSDesktopFolderUsageDescription</key>
+	<string>Un agent lancé depuis le cockpit lit ou écrit des fichiers sur le Bureau.</string>
+	<key>NSDocumentsFolderUsageDescription</key>
+	<string>Un agent lancé depuis le cockpit lit ou écrit des fichiers dans Documents.</string>
+	<key>NSDownloadsFolderUsageDescription</key>
+	<string>Un agent lancé depuis le cockpit lit ou écrit des fichiers dans Téléchargements.</string>
+	<key>NSPhotoLibraryUsageDescription</key>
+	<string>Un agent lancé depuis le cockpit travaille sur des images de la photothèque.</string>
+	<key>NSAppleMusicUsageDescription</key>
+	<string>Un agent lancé depuis le cockpit travaille sur des fichiers de la bibliothèque musicale.</string>
+	<key>NSRemovableVolumesUsageDescription</key>
+	<string>Un agent lancé depuis le cockpit lit ou écrit sur un volume externe.</string>
+	<key>NSNetworkVolumesUsageDescription</key>
+	<string>Un agent lancé depuis le cockpit lit ou écrit sur un volume réseau.</string>
+	<key>NSMicrophoneUsageDescription</key>
+	<string>L'assistant vocal du cockpit t'écoute quand tu maintiens le raccourci, pour faire ce que tu lui demandes.</string>
+	<key>NSAppleEventsUsageDescription</key>
+	<string>Le cockpit et ses agents pilotent d'autres applications — ouvrir un éditeur, révéler un fichier dans le Finder.</string>
+</dict>
+</plist>

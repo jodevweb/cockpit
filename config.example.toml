@@ -1,0 +1,287 @@
+# Configuration du Cockpit — à copier dans ~/.config/cockpit/config.toml
+#
+# Tout est éditable depuis l'écran Réglages de l'app ; ce fichier sert de
+# référence et permet de garder la config sous la main (ou dans un gestionnaire
+# de secrets). Chaque jeton peut aussi venir d'une variable d'environnement,
+# qui prime alors sur la valeur écrite ici :
+#   COCKPIT_GITHUB_TOKEN, COCKPIT_SENTRY_TOKEN, COCKPIT_LINEAR_TOKEN,
+#   COCKPIT_TRIGGER_TOKEN, COCKPIT_RAILWAY_TOKEN, COCKPIT_BETTERSTACK_TOKEN,
+#   COCKPIT_STRIPE_TOKEN
+
+[general]
+projects_root = "/Users/moi/Sites"
+main_repo = "/Users/moi/Code/monorepo"
+editor = "zed" # zed · cursor · code
+
+[github]
+repo = "acme/monorepo"
+# Vide = le cockpit utilise la session `gh` déjà authentifiée sur le poste.
+token = ""
+
+[sentry]
+# Vide = déduit du token quand il ne donne accès qu'à une organisation.
+org = ""
+# Slugs de projets à surveiller ; liste vide = toute l'organisation.
+# L'écran Réglages propose la liste en cases à cocher.
+projects = ["acme-api", "acme-web"]
+token = ""
+
+[linear]
+team_key = "NW"
+token = ""
+
+# GitLab, hébergé chez eux ou sur votre instance. Le suivi de tâches se déduit de
+# ce qui est renseigné : Linear s'il a un jeton, sinon GitLab dès que son projet
+# et son jeton sont là, sinon les issues du dépôt GitHub.
+[gitlab]
+# Chemin du projet avec son groupe — c'est ce qu'on lit dans l'URL.
+project = "groupe/produit"
+# Vide = gitlab.com. Sinon la racine de votre instance, sans barre finale.
+host = "https://gitlab.com"
+# Jeton personnel de portée `api` : `read_api` suffit à lire, pas à changer
+# l'état d'un ticket.
+token = ""
+
+[trigger]
+project_ref = "proj_xxxxxxxxxxxxxxxxxxxx"
+# Secret key d'environnement (tr_prod_… / tr_dev_…) pour la Management API.
+# Un Personal Access Token `tr_pat_…` est refusé par `/api/v1/runs`.
+token = ""
+api_url = "https://api.trigger.dev"
+
+# Une clé ne vaut que pour un projet ET un environnement : en déclarer
+# plusieurs donne un onglet par environnement dans l'écran Delivery.
+# `project_ref` vide reprend celui ci-dessus ; le renseigner permet de suivre
+# plusieurs projets Trigger à la fois.
+# [[trigger.environments]]
+# name = "Production"
+# token = "tr_prod_…"
+# project_ref = "proj_xxxxxxxxxxxxxxxxxxxx"
+# [[trigger.environments]]
+# name = "Staging"
+# token = "tr_dev_…"
+# [[trigger.environments]]
+# name = "Render farm · prod"
+# token = "tr_prod_…"
+# project_ref = "proj_yyyyyyyyyyyyyyyyyyyy"
+
+[railway]
+# Visible dans l'URL du dashboard : railway.com/project/<project_id>.
+# Vide = déduit du token quand celui-ci sait énumérer les projets.
+project_id = ""
+token = ""
+
+[betterstack]
+# Token API Uptime (monitors + incidents).
+token = ""
+# Token Telemetry pour les KPI. Prendre un « Global API token » (Better Stack →
+# API tokens → Global API tokens) : un token d'équipe liste les dashboards mais
+# ne peut pas ouvrir l'accès aux données, et les valeurs restent vides.
+# Le cockpit demande alors lui-même une connexion ClickHouse en lecture et la
+# garde dans ~/.config/cockpit/betterstack-connection.json.
+telemetry_token = ""
+# Facultatif : identifiants SQL API déjà créés à la main, si on préfère ne pas
+# donner de token global au cockpit.
+# clickhouse_host = ""
+# clickhouse_username = ""
+# clickhouse_password = ""
+
+[stripe]
+# Clé restreinte en lecture seule `rk_…` (Développeurs → Clés API → Clés
+# restreintes). Une clé publiable `pk_…` est rejetée par l'API serveur.
+token = ""
+
+# Équipe du daily. Aucune équipe par défaut : tant que ce bloc est vide, les
+# écrans qui en dépendent le disent plutôt que d'afficher celle de quelqu'un
+# d'autre. Un exécutable distribué ne porte ni nom, ni adresse, ni identifiant
+# de l'équipe qui l'a compilé.
+# [team]
+# linear_team_id = "00000000-0000-0000-0000-000000000000"
+# [[team.members]]
+# name = "Alice"
+# role = "dev"             # dev · product
+# role_label = "Dev"
+# linear_id = "11111111-1111-1111-1111-111111111111"
+# github = "alex-dev"
+# github_aliases = []
+# sentry_emails = ["prenom@exemple.com"]
+
+# Lecture des changements en vol — l'écran Impact.
+#
+# Le cockpit y recense tout ce qui bouge (pull requests GitHub, merge requests
+# GitLab, branches locales en avance sur leur base) et confie à la demande
+# chaque changement à un agent qui ne peut rien écrire. Ce qu'il en comprend est
+# gardé jusqu'à ce que la branche bouge.
+#
+# `brief` est le seul réglage qui change vraiment ce qui sort. Un agent qui ne
+# sait pas ce que fait le produit ne peut parler que du code : il rend une revue
+# technique, exactement ce que cet écran cherche à ne pas être. Deux ou trois
+# phrases suffisent — et comme il vit dans la configuration d'un projet, chaque
+# produit décrit le sien.
+#
+# [impact]
+# brief = """
+# Outil de planification de publications pour des équipes marketing.
+# Ce qui compte : qu'un post programmé parte à l'heure, et que la
+# prévisualisation soit fidèle au rendu final.
+# """
+# engine = ""                    # moteur ; vide = le premier déclaré
+# model = ""                     # vide = le réglage du poste
+# depth = "deep"                 # fast · normal · deep — voir `depth_*` du moteur
+# includeLocalBranches = true    # le travail parti sans demande de fusion
+
+# Les commandes maison de ce projet : celles qu'on ne retape pas de mémoire,
+# à options ou à drapeaux. Elles s'affichent dans l'écran Scripts et dans le
+# menu des terminaux. Les scripts bruts du dépôt, eux, apparaissent déjà sans
+# être déclarés — inutile de les recopier ici.
+#
+# Rien n'est fourni par défaut : ces commandes décrivent un outillage, et celui
+# du cockpit n'est pas le tien. Le bouton « Détecter depuis le dépôt » lit les
+# scripts et propose de les ajouter.
+#
+# [[projects.commands]]
+# id = "worktree-create"
+# group = "Worktrees"
+# label = "Créer un worktree"
+# description = "Sort la branche et prépare son environnement."
+# base = "pnpm worktree:create"
+# scoped = false                 # false = joué dans le dépôt principal
+# danger = false                 # true = l'écran prévient avant le clic
+#
+#   [projects.commands.positional]
+#   label = "Branche"
+#   placeholder = "feat/ma-feature"
+#   required = true
+#   hint = ""
+#
+#   [[projects.commands.options]]
+#   id = "from"
+#   flag = "--from"
+#   label = "Partir de"
+#   kind = "text"                # boolean · text · number · select
+#   hint = ""
+#   placeholder = "dev"
+#   choices = []                 # pour un select
+#   default_value = ""
+
+# Ce qu'un agent reçoit en plus de la consigne, au lancement.
+#
+# Le cockpit sait des choses que l'agent ignore : le ticket derrière la branche,
+# les retours déposés sur la demande de fusion, ce qui a déjà été tenté dans ce
+# dossier. Il les rassemble et les montre au-dessus du champ de saisie — rien ne
+# part sans être passé sous les yeux, et chaque source se retire d'un clic.
+#
+# Les sources absentes ne s'affichent pas : sans suivi de tâches déclaré, il n'y
+# a pas de section ticket, et rien à désactiver. `off` sert à écarter par défaut
+# une source qui existe mais qu'on ne veut pas joindre à chaque fois.
+#
+# [brief]
+# enabled = true                 # faux = le champ de saisie redevient nu
+# off = ["attempts"]             # product · place · ticket · review · attempts
+
+# Façon de travailler de l'équipe. `prCommand` est la commande du dépôt qui ouvre
+# une pull request : renseignée, l'agent maître la joue lui-même à la fin d'une
+# mission — gabarit, labels, envoi des captures de recette — et rend l'adresse
+# obtenue. Vide, le cockpit ouvre la pull request par la forge. Mêmes
+# substitutions que les commandes de rôle.
+#
+# [workflow]
+# prCommand = "/pull-request-creation"
+#
+# Le cycle de vie d'un worktree, tel que cette équipe le pratique. Une équipe
+# clone une base et réserve un espace de stockage, une autre se contente d'un
+# dossier : le cockpit ne peut pas le deviner, et ne suppose donc rien.
+#
+# Vide, il s'en tient à `git worktree add` et `git worktree remove --force`, qui
+# marchent dans n'importe quel dépôt. Une commande commençant par « / » est une
+# commande du dépôt : elle est jouée par un agent, comme `prCommand`. Toute
+# autre est une ligne de shell, lancée comme un script.
+#
+# Substitutions : {branch} {path} {folder}
+#
+# worktreeCommand = "/create-worktree {branch}"
+# worktreeRemoveCommand = "pnpm worktree:remove {folder} --force"
+# Vide : le bouton « Dev » ne s'affiche pas, plutôt que d'ouvrir un terminal
+# sur une commande qui n'existe pas ici.
+# devCommand = "pnpm dev"
+
+# Moteurs d'agents : le programme qui fait tourner un agent, pas un fournisseur
+# de modèles. Une clé d'API ne lit ni n'écrit de fichiers — c'est le programme qui
+# l'exécute. Vide = un seul moteur, `claude`, cherché sur le poste.
+#
+# `env` est le levier pour utiliser autre chose : une passerelle qui expose un
+# autre fournisseur derrière une API compatible se déclare en trois champs, et ses
+# modèles apparaissent dans les sélecteurs comme les autres. `protocol` reste
+# `claude-stream-json`, le seul implémenté ; un binaire qui ne le parle pas est
+# refusé au lancement, avec le motif.
+#
+# [[engines]]
+# id = "claude"
+# label = "Claude Code"
+# command = ""                                   # vide = cherché sur le poste
+# protocol = "claude-stream-json"
+# models = ["opus", "sonnet"]
+#
+# [[engines]]
+# id = "passerelle"
+# label = "Passerelle maison"
+# command = ""
+# models = ["gpt-5", "mistral-large"]
+# extraArgs = ""
+#   [[engines.env]]
+#   name = "ANTHROPIC_BASE_URL"
+#   value = "https://passerelle.exemple.com"
+#   [[engines.env]]
+#   name = "ANTHROPIC_AUTH_TOKEN"
+#   value = "sk-…"
+
+# Comptes : l'identité sous laquelle les agents travaillent, distincte du moteur
+# qui est le programme. Le même `claude` sert deux projets sous deux identités —
+# un compte d'entreprise pour le produit de l'employeur, un compte personnel pour
+# ce qu'on écrit le soir.
+#
+# Tout tient dans `dir` : Claude Code lit son dossier de configuration dans
+# `CLAUDE_CONFIG_DIR` et y range aussi bien ses jetons que ses conversations.
+# Déclarer deux dossiers sépare donc deux comptes de bout en bout — agents,
+# terminaux, plafonds d'abonnement, historique — sans que le cockpit ne détienne
+# ni ne lise le moindre jeton : la connexion se fait dans un terminal, par le CLI
+# lui-même (`claude auth login`).
+#
+# Le compte du poste — celui de `~/.claude` — existe toujours et ne se déclare
+# pas. Un projet qui ne désigne rien travaille sous lui.
+#
+# [[accounts]]
+# id = "travail"
+# label = "Compte entreprise"
+# dir = "~/.claude-travail"
+
+# Rôles des agents de mission. Vide = le catalogue intégré (master, backend,
+# frontend, qa, review). En déclarer un seul remplace tout le catalogue : il
+# faut alors les lister tous. `engine` choisit le moteur du rôle — vide = le
+# premier déclaré.
+#
+# `command` appelle une commande du dépôt avant la consigne — c'est ainsi qu'une
+# équipe branche sa méthode sans la recopier ici. Ce qui suit y est remplacé au
+# lancement : {ticket} {ticketUrl} {branch} {mission} {task} {brief}.
+#
+# [[roles]]
+# id = "master"                                  # clé réservée : pilote la mission
+# label = "Agent maître"
+# command = "/linear-story-implementer {ticketUrl}"
+# prompt = ""                                    # s'ajoute aux consignes du cockpit
+# model = ""                                     # vide = modèle du poste
+# permissionMode = "bypassPermissions"
+#
+# [[roles]]
+# id = "backend"
+# label = "Développement back-end"
+# command = ""
+# prompt = "Tu implémentes la partie serveur…"
+# model = ""
+# permissionMode = "bypassPermissions"
+# scope = ["apps/api/**"]                        # écriture refusée ailleurs
+#
+# [[roles]]
+# id = "qa"
+# label = "Tests et recette"
+# verifies = true                                # attend que l'implémentation ait livré

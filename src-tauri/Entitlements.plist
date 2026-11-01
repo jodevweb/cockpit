@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+	Ce que le cockpit demande à pouvoir faire une fois signé.
+
+	Signer avec une identité fait activer à Tauri le « hardened runtime », qui
+	refuse par défaut toute bibliothèque signée par quelqu'un d'autre. Or le
+	binaire est lié à la libssl de Homebrew — `webauthn-rs`, sur lequel repose
+	l'accès distant, dépend d'OpenSSL. L'application se terminait donc au
+	lancement, avant même son premier écran :
+
+	    Library not loaded: /opt/homebrew/*/libssl.3.dylib
+	    mapping process and mapped file (non-platform) have different Team IDs
+
+	Cette exception rétablit le chargement. Elle ne rend rien au système de ce
+	qu'il protège ailleurs : ni le sandbox, ni la validation de la signature de
+	l'application elle-même.
+
+	La dépendance à une bibliothèque installée par Homebrew reste, elle, un
+	point faible : le cockpit ne démarre que sur un poste qui l'a au même
+	endroit. La lier en statique (`openssl` en `vendored`) l'effacerait.
+-->
+<plist version="1.0">
+<dict>
+	<key>com.apple.security.cs.disable-library-validation</key>
+	<true/>
+	<!-- Le runtime durci refuse le micro sans cette déclaration, même quand
+	     Info.plist en donne le motif : l'assistant vocal resterait sourd. -->
+	<key>com.apple.security.device.audio-input</key>
+	<true/>
+</dict>
+</plist>

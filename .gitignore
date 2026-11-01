@@ -1,0 +1,19 @@
+# Dépendances et compilation
+node_modules/
+dist/
+src-tauri/target/
+
+# Poste
+.DS_Store
+*.local
+
+# Configuration et secrets : jamais versionnés
+cockpit.config.toml
+.env
+.env.*
+*.key
+*.pem
+*.p12
+
+# Réglages locaux des agents
+.claude/

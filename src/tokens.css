@@ -1,0 +1,141 @@
+/* ── Jetons de direction artistique ────────────────────────────────────────
+   Source unique de la palette, partagée par les deux interfaces : l'app du
+   poste la reçoit par `styles.css`, qui la traduit en thème Tailwind, et la
+   page mobile la charge depuis le serveur du cockpit (`/tokens.css`).
+
+   Elles vivaient auparavant recopiées de part et d'autre. Rien ne signalait
+   qu'une teinte changée d'un côté laissait l'autre en arrière : la divergence
+   ne se voyait qu'en posant les deux écrans côte à côte.
+
+   Ce fichier ne contient que des valeurs. Tout ce qui est propre à une
+   surface — zones sûres de l'iPhone, densités, espacements — reste chez elle.
+   ────────────────────────────────────────────────────────────────────────── */
+
+/* ── Direction « Atelier » (0.66) ──────────────────────────────────────────
+   Clair par défaut, aéré, des cartes posées par des ombres douces plutôt que
+   par des traits, un vert profond pour seul accent. L'outil ne sert plus
+   seulement aux développeurs : il doit accueillir aussi ceux qui suivent le
+   travail sans l'écrire.
+
+   Le sombre n'est pas l'inverse du clair : même hiérarchie, mêmes rôles,
+   retendus pour un fond ardoise. L'accent y remonte en luminance, ce qui
+   interdit d'écrire en blanc dessus — d'où `--accent-ink`, la couleur du texte
+   posé sur l'accent, qui change avec le thème.
+   ────────────────────────────────────────────────────────────────────────── */
+
+:root {
+	/* Fonds, du plus profond au plus proche. */
+	--void: #0f1315;
+	--base: #13181b;
+	--surface: #192023;
+	--raised: #212a2e;
+	--hover: #283236;
+
+	/* Séparations : `line` se voit, `line-soft` se devine. */
+	--line: #313b40;
+	--line-soft: #242d31;
+
+	/* Voile des fenêtres modales, posé avec une opacité par l'appelant. */
+	--overlay: #06090a;
+
+	/* Texte, du plus lisible au plus discret. */
+	--ink: #eef3f4;
+	--ink-muted: #aab6ba;
+	--ink-faint: #76858b;
+
+	/* Accent unique : ce qui est vivant, ce qui attend une décision. */
+	--accent: #2bb3a3;
+	--accent-soft: #62d6c6;
+	--accent-dim: #12383a;
+	--accent-ink: #03211e;
+
+	/* Couleurs sémantiques : réservées aux états, jamais décoratives. */
+	--critical: #ff6f66;
+	--warning: #f5b04f;
+	--success: #4ade80;
+	--info: #6ea2ff;
+
+	/* Ce qui pose une carte sur son fond. En sombre, l'ombre ne se voit plus :
+	   un liseré clair en haut prend le relais. */
+	--shadow-card: 0 0 0 1px rgba(255, 255, 255, 0.04), 0 1px 0 rgba(255, 255, 255, 0.04) inset,
+		0 10px 24px -14px rgba(0, 0, 0, 0.6);
+	--shadow-pop: 0 0 0 1px rgba(255, 255, 255, 0.06), 0 18px 40px -16px rgba(0, 0, 0, 0.7);
+
+	/* Le code qu'on relit : six teintes, pas plus — au-delà, la couleur ne
+	   dit plus rien. Le commentaire s'efface, le reste se distingue. */
+	--syntax-keyword: #b79cf5;
+	--syntax-string: #86d3a4;
+	--syntax-number: #eda968;
+	--syntax-function: #7db7f5;
+	--syntax-type: #ee9ac4;
+	--syntax-property: #9ccdf0;
+	--syntax-comment: #6f7b85;
+
+	/* Identité des agents sur une carte : de quoi distinguer six agents d'un
+	   même chantier sans emprunter une couleur d'état (le rouge dit une
+	   collision, l'ambre une lecture périmée). */
+	--agent-1: #8b7bff;
+	--agent-2: #e26fb4;
+	--agent-3: #45b6e8;
+	--agent-4: #9cc05a;
+	--agent-5: #d39a62;
+	--agent-6: #7f9cff;
+
+	--font-sans: "Instrument Sans Variable", "Instrument Sans", -apple-system, "SF Pro Text",
+		system-ui, sans-serif;
+	--font-mono: "Geist Mono", ui-monospace, "SF Mono", "Menlo", monospace;
+
+	--radius-panel: 16px;
+	--ease-out-quart: cubic-bezier(0.25, 1, 0.5, 1);
+}
+
+/* ── Thème clair : le visage par défaut d'Atelier ──────────────────────────
+   Fond gris très légèrement bleuté, cartes blanches, texte presque noir.
+   Les cartes se détachent par l'ombre : une bordure par carte, sur un écran
+   qui en compte trente, faisait un quadrillage.
+   ────────────────────────────────────────────────────────────────────────── */
+:root[data-theme="light"] {
+	--void: #eceff2;
+	--base: #f4f6f8;
+	--surface: #ffffff;
+	--raised: #f1f3f6;
+	--hover: #e9ecf0;
+
+	--line: #d9dee4;
+	--line-soft: #e7eaee;
+
+	--overlay: #1d2a2c;
+
+	--ink: #141a20;
+	--ink-muted: #525b69;
+	--ink-faint: #858d9b;
+
+	--accent: #0f766e;
+	--accent-soft: #108377;
+	--accent-dim: #dcf1ed;
+	--accent-ink: #ffffff;
+
+	--critical: #cf3f35;
+	--warning: #a96300;
+	--success: #16874f;
+	--info: #2f6fdb;
+
+	--syntax-keyword: #7b3fd0;
+	--syntax-string: #12704a;
+	--syntax-number: #ad5a00;
+	--syntax-function: #1f5fc4;
+	--syntax-type: #a8327c;
+	--syntax-property: #0a5a94;
+	--syntax-comment: #8892a0;
+
+	--agent-1: #6a55e8;
+	--agent-2: #c2418c;
+	--agent-3: #0e84bd;
+	--agent-4: #5f8a1e;
+	--agent-5: #a8662a;
+	--agent-6: #4462d8;
+
+	--shadow-card: 0 0 0 1px rgba(20, 30, 40, 0.05), 0 1px 2px rgba(20, 30, 40, 0.05),
+		0 8px 22px -14px rgba(20, 30, 40, 0.22);
+	--shadow-pop: 0 0 0 1px rgba(20, 30, 40, 0.06), 0 20px 44px -18px rgba(20, 30, 40, 0.35);
+}
