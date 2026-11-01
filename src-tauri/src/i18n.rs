@@ -45,6 +45,9 @@ macro_rules! catalogs {
 				($lang, include_str!(concat!("../locales/", $lang, "/agents.json"))),
 				($lang, include_str!(concat!("../locales/", $lang, "/missions.json"))),
 				($lang, include_str!(concat!("../locales/", $lang, "/mobile.json"))),
+				($lang, include_str!(concat!("../locales/", $lang, "/processes.json"))),
+				($lang, include_str!(concat!("../locales/", $lang, "/tools.json"))),
+				($lang, include_str!(concat!("../locales/", $lang, "/desktop.json"))),
 			)*]
 		}
 	};
