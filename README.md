@@ -6,7 +6,8 @@ ils ont besoin de toi, et on relit ce qu'ils livrent, dans une seule fenêtre
 native.
 
 *A native macOS cockpit to run, watch and steer coding agents (Claude Code,
-Codex, Gemini) across git worktrees. The UI and docs are in French.*
+Codex, Gemini) across git worktrees. Available in 10 languages; the docs are in
+French.*
 
 [![Licence MIT](https://img.shields.io/badge/licence-MIT-blue.svg)](LICENSE)
 ![macOS 13+](https://img.shields.io/badge/macOS-13%2B-lightgrey.svg)
@@ -366,6 +367,29 @@ forme vérifiée — et le relevé le dit plutôt que de le combler.
   CLI de test qui en imite le comportement. Gemini avec moins de certitude que
   Codex : sa documentation était contradictoire d'une page à l'autre au
   moment où ceci a été écrit. Voir « Moteurs d'agents » ci-dessus.
+
+## Langues
+
+L'interface, la page mobile et les messages du cockpit existent en anglais,
+français, espagnol, allemand, portugais (Brésil), chinois simplifié, japonais,
+coréen, russe et italien. Par défaut, Cockpit suit la langue du système ; on la
+change dans **Réglages → Poste → Langue**. Les agents répondent dans la langue
+choisie : leurs consignes sont écrites en anglais, avec une instruction de
+langue.
+
+L'anglais est la référence. Les catalogues vivent dans `src/locales/<langue>/`
+(interface, via i18next) et `src-tauri/locales/<langue>/` (textes produits par
+le Rust et la page mobile). Pour corriger une traduction ou ajouter une langue :
+copier les fichiers `en`, traduire les valeurs sans toucher aux clés ni aux
+`{{variables}}`, déclarer la langue dans `src/i18n/index.ts` et
+`src-tauri/src/i18n.rs`, puis vérifier :
+
+```bash
+node scripts/i18n-check.mjs <langue>
+```
+
+Les traductions ont été produites avec l'aide d'un modèle de langue : les
+relectures par des locuteurs natifs sont les bienvenues.
 
 ## Contribuer
 

@@ -181,7 +181,8 @@
 	"footprint": {
 		"deleted_other": "{{count}} 件削除",
 		"created_other": "{{count}} 件作成",
-		"modified_other": "{{count}} 件変更"
+		"modified_other": "{{count}} 件変更",
+		"elsewhere": "その他"
 	},
 	"chantier": {
 		"slices": {

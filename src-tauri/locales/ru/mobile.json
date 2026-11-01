@@ -24,7 +24,7 @@
 			"failed": "Ключ доступа: {{error}}"
 		},
 		"state": {
-			"toDecide_one": "ждёт вас",
+			"toDecide_one": "{{count}} ждёт решения",
 			"toDecide_few": "{{count}} ждут решения",
 			"toDecide_many": "{{count}} ждут решения",
 			"toDecide_other": "{{count}} ждут решения",

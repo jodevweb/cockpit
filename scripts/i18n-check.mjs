@@ -29,6 +29,8 @@ function flatten(value, prefix = "", out = {}) {
 
 const vars = (text) => [...text.matchAll(/\{\{\s*([\w.]+)[^}]*\}\}/g)].map((m) => m[1]).sort().join(",");
 const stem = (key) => key.replace(PLURAL, "");
+const sansCount = (list) => list.split(",").filter((name) => name && name !== "count").join(",");
+let PLURAL_STEMS = new Set();
 
 let problems = 0;
 for (const base of bases) {
@@ -37,6 +39,7 @@ for (const base of bases) {
 	for (const file of fs.readdirSync(path.join(base, "en")).filter((name) => name.endsWith(".json"))) {
 		const reference = flatten(JSON.parse(fs.readFileSync(path.join(base, "en", file), "utf8")));
 		const referenceStems = new Map();
+		PLURAL_STEMS = new Set(Object.keys(reference).filter((key) => PLURAL.test(key)).map(stem));
 		for (const [key, text] of Object.entries(reference)) {
 			if (!referenceStems.has(stem(key))) referenceStems.set(stem(key), vars(text));
 		}
@@ -73,7 +76,9 @@ for (const base of bases) {
 				if (!stems.has(s)) {
 					console.log(`✗ ${label} : clé manquante « ${s} »`);
 					problems++;
-				} else if (stems.get(s) !== expected) {
+				} else if (stems.get(s) !== expected && !(PLURAL_STEMS.has(s) && sansCount(stems.get(s)) === sansCount(expected))) {
+					// Un pluriel peut ajouter ou omettre `{{count}}` : en russe, la forme
+					// `_one` sert aussi à 21, 31… et doit donc porter le nombre.
 					console.log(`✗ ${label} : variables « ${s} » : attendu [${expected}], trouvé [${stems.get(s)}]`);
 					problems++;
 				}

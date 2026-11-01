@@ -44,7 +44,6 @@ export interface Footprint {
 const MAX_ZONES = 4;
 // Les fichiers posés à la racine du dépôt : `./` se lit dans toutes les langues.
 const ROOT = "./";
-const ELSEWHERE = "ailleurs";
 
 function fateOf(state: string): Fate {
 	if (state === "deleted") return "deleted";
@@ -101,7 +100,7 @@ export function footprint(changes: TourChanges): Footprint | null {
 	const rest = ranked.slice(kept.length);
 	if (rest.length > 0) {
 		kept.push({
-			name: ELSEWHERE,
+			name: t("lib:footprint.elsewhere"),
 			tiles: rest.flatMap((zone) => zone.tiles),
 			added: rest.reduce((sum, zone) => sum + zone.added, 0),
 			removed: rest.reduce((sum, zone) => sum + zone.removed, 0),

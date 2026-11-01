@@ -181,7 +181,8 @@
 	"footprint": {
 		"deleted_other": "{{count}}개 삭제",
 		"created_other": "{{count}}개 생성",
-		"modified_other": "{{count}}개 수정"
+		"modified_other": "{{count}}개 수정",
+		"elsewhere": "기타"
 	},
 	"chantier": {
 		"slices": {

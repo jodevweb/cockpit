@@ -181,7 +181,8 @@
 	"footprint": {
 		"deleted_other": "已删除 {{count}} 个",
 		"created_other": "已创建 {{count}} 个",
-		"modified_other": "已修改 {{count}} 个"
+		"modified_other": "已修改 {{count}} 个",
+		"elsewhere": "其他"
 	},
 	"chantier": {
 		"slices": {

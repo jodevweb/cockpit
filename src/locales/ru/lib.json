@@ -193,7 +193,8 @@
 		"modified_one": "{{count}} изменён",
 		"modified_few": "{{count}} изменено",
 		"modified_many": "{{count}} изменено",
-		"modified_other": "{{count}} изменено"
+		"modified_other": "{{count}} изменено",
+		"elsewhere": "прочее"
 	},
 	"chantier": {
 		"slices": {

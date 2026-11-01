@@ -185,7 +185,8 @@
 		"created_one": "{{count}} créé",
 		"created_other": "{{count}} créés",
 		"modified_one": "{{count}} modifié",
-		"modified_other": "{{count}} modifiés"
+		"modified_other": "{{count}} modifiés",
+		"elsewhere": "ailleurs"
 	},
 	"chantier": {
 		"slices": {
