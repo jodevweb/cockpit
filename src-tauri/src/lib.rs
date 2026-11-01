@@ -14,6 +14,7 @@ pub mod files;
 pub mod gemini;
 pub mod git;
 pub mod i18n;
+pub mod platform;
 pub mod impact;
 pub mod integrations;
 pub mod journal;

@@ -77,20 +77,7 @@ fn current() -> &'static RwLock<Option<String>> {
 /// La langue du système, ramenée à une langue livrée. `AppleLanguages` donne
 /// l'ordre de préférence de l'utilisateur (`fr-FR`, `pt-BR`, `zh-Hans-CN`…).
 pub fn system_language() -> &'static str {
-	let listed = std::process::Command::new("defaults")
-		.args(["read", "-g", "AppleLanguages"])
-		.output()
-		.ok()
-		.map(|output| String::from_utf8_lossy(&output.stdout).to_string())
-		.unwrap_or_default();
-	let first = listed
-		.split(|c: char| c == '"' || c == '\n' || c == ',' || c == '(' || c == ')')
-		.map(str::trim)
-		.find(|item| !item.is_empty())
-		.map(str::to_string)
-		.or_else(|| std::env::var("LANG").ok())
-		.unwrap_or_default();
-	normalize(&first)
+	normalize(&crate::platform::system_language())
 }
 
 /// Un code de langue quelconque, ramené à une langue livrée (l'anglais à défaut).
