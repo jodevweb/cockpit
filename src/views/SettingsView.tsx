@@ -3,6 +3,9 @@ import { AssistantSettings } from "@/components/Assistant";
 import { VoiceSettings } from "@/components/NarrationToggle";
 import { Check, ExternalLink, FolderOpen, KeyRound, Plus, Save } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
+import { useTranslation } from "react-i18next";
+import { toast } from "sonner";
+import { LANGUAGES } from "@/i18n";
 import {
 	Badge,
 	Button,
@@ -837,6 +840,10 @@ export function SettingsView() {
 
 					{tab === "workstation" ? (
 					<>
+					<Section title="Langue">
+						<LanguageSetting />
+					</Section>
+
 					<Section title="Apparence">
 						<ThemeSetting />
 					</Section>
@@ -1152,6 +1159,50 @@ function ThemeSetting() {
 				« Enregistrer la configuration », qui ne concerne que les réglages du projet. Les
 				terminaux ouverts se repeignent avec le reste.
 			</p>
+		</div>
+	);
+}
+
+/**
+ * La langue de l'interface, et celle dans laquelle les agents répondent.
+ *
+ * Réglée côté Rust : les messages qu'il produit et les prompts des agents la
+ * suivent aussi. Le changement recharge la fenêtre — des textes calculés hors
+ * des composants ne se retraduiraient pas autrement.
+ */
+function LanguageSetting() {
+	const { t } = useTranslation("common");
+	const current = useAsync(() => api.language.get(), []);
+	const [saving, setSaving] = useState(false);
+	const choice = current.data?.choice ?? "";
+
+	const choose = async (next: string) => {
+		setSaving(true);
+		try {
+			await api.language.set(next);
+			window.location.reload();
+		} catch (error) {
+			setSaving(false);
+			toast.error(String(error));
+		}
+	};
+
+	return (
+		<div className="panel flex flex-col gap-2.5 p-3.5">
+			<select
+				className="focus-ring w-64 rounded-lg border border-line bg-surface px-2 py-1.5 text-[12px] text-ink"
+				value={choice}
+				disabled={saving || current.loading}
+				onChange={(event) => void choose(event.target.value)}
+			>
+				<option value="">{t("language.system")}</option>
+				{LANGUAGES.map((language) => (
+					<option key={language.code} value={language.code}>
+						{language.label}
+					</option>
+				))}
+			</select>
+			<p className="text-[10px] leading-relaxed text-ink-faint">{t("language.hint")}</p>
 		</div>
 	);
 }

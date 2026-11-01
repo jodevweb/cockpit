@@ -473,6 +473,13 @@ export const api = {
 		recent: (hours = 12) => call<Execution[]>("executions_recent", { hours }),
 	},
 
+	/** La langue de l'interface et des agents. `""` = suivre le système. */
+	language: {
+		get: () => call<{ choice: string; resolved: string; supported: string[] }>("language_get"),
+		set: (choice: string) =>
+			call<{ choice: string; resolved: string; supported: string[] }>("language_set", { choice }),
+	},
+
 	/** Les serveurs MCP du dépôt, et ce qu'un agent en verra. */
 	mcp: {
 		servers: (cwd?: string) => call<McpServer[]>("mcp_servers", { cwd: cwd ?? null }),

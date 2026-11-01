@@ -1931,6 +1931,8 @@ const REPONSES: Record<string, unknown> = {
 	// Les outils que le dépôt d'exemple déclare : deux qui répondent, un qui ne
 	// peut pas — c'est le cas qu'on veut voir rendu, puisque c'est celui qui
 	// coûte des heures quand rien ne le dit.
+	language_get: { choice: "", resolved: "en", supported: ["en", "fr", "es", "de", "pt-BR", "zh-CN", "ja", "ko", "ru", "it"] },
+	language_set: { choice: "", resolved: "en", supported: ["en", "fr", "es", "de", "pt-BR", "zh-CN", "ja", "ko", "ru", "it"] },
 	mcp_approval: { approved: false, changed: false },
 	mcp_approve: { approved: true, changed: false },
 	mcp_revoke: { approved: false, changed: false },

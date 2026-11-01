@@ -23,6 +23,10 @@ pub struct GeneralConfig {
 	/// Commande d'ouverture d'un dossier dans l'éditeur (`zed`, `cursor`, `code`).
 	#[serde(default)]
 	pub editor: String,
+	/// Langue de l'interface et des agents (`en`, `fr`, `pt-BR`…). Vide = celle
+	/// du système. Voir `i18n.rs`.
+	#[serde(default)]
+	pub language: String,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize, Default)]

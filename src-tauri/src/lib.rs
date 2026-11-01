@@ -13,6 +13,7 @@ pub mod executions;
 pub mod files;
 pub mod gemini;
 pub mod git;
+pub mod i18n;
 pub mod impact;
 pub mod integrations;
 pub mod journal;
@@ -1134,6 +1135,35 @@ fn mcp_servers(cwd: Option<String>) -> Result<Vec<mcp::Server>> {
 		None => main_repo()?.to_string_lossy().to_string(),
 	};
 	Ok(mcp::inspect(&cwd, config.sandbox.enabled))
+}
+
+/// La langue réglée (vide = celle du système) et celle qui s'applique.
+#[derive(serde::Serialize)]
+#[serde(rename_all = "camelCase")]
+struct LanguageView {
+	choice: String,
+	resolved: String,
+	supported: Vec<&'static str>,
+}
+
+#[tauri::command]
+fn language_get() -> LanguageView {
+	LanguageView {
+		choice: config::Config::load().general.language,
+		resolved: i18n::lang(),
+		supported: i18n::SUPPORTED.to_vec(),
+	}
+}
+
+/// Change la langue de l'interface et des agents. `""` = suivre le système.
+#[tauri::command]
+fn language_set(choice: String) -> Result<LanguageView> {
+	let choice = if choice.trim().is_empty() { String::new() } else { i18n::normalize(&choice).to_string() };
+	let mut config = config::Config::load();
+	config.general.language = choice;
+	config.save()?;
+	i18n::invalidate();
+	Ok(language_get())
 }
 
 fn mcp_cwd(cwd: Option<String>) -> Result<String> {
@@ -5583,6 +5613,8 @@ pub fn run() {
 			journal_list,
 			mcp_servers,
 			mcp_approval,
+			language_get,
+			language_set,
 			mcp_approve,
 			mcp_revoke,
 			executions_list,
