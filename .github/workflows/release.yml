@@ -246,6 +246,20 @@ jobs:
           args: --target ${{ matrix.cible }} --bundles ${{ matrix.bundles }} --config '{"bundle":{"createUpdaterArtifacts":true}}'
           retryAttempts: 1
 
+      # Garde-fou : une app Mac qui dépend d'une bibliothèque hors du système
+      # (OpenSSL de Homebrew, en 0.85.0) ne démarre que sur la machine qui l'a
+      # compilée. Le job échoue alors, et la publication avec lui.
+      - name: Aucune bibliothèque hors système (macOS)
+        if: runner.os == 'macOS'
+        run: |
+          app=$(ls -d src-tauri/target/${{ matrix.cible }}/release/bundle/macos/*.app | head -1)
+          bin="$app/Contents/MacOS/$(defaults read "$PWD/$app/Contents/Info" CFBundleExecutable)"
+          otool -L "$bin"
+          if otool -L "$bin" | tail -n +2 | grep -v -E '^[[:space:]]+(/System/|/usr/lib/)'; then
+            echo "::error::L'app dépend d'une bibliothèque hors du système : elle ne démarrerait pas ailleurs."
+            exit 1
+          fi
+
   publier:
     needs: [preparer, compiler]
     runs-on: ubuntu-latest

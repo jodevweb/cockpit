@@ -51,6 +51,12 @@ cpal = "0.15"
 hound = "3"
 tauri-plugin-global-shortcut = "~2.3"
 tokio-tungstenite = "0.29.0"
+# `webauthn-rs` (passkeys de l'accès mobile) a besoin d'OpenSSL. Compilée avec
+# l'app, partout : liée dynamiquement, elle désignait l'OpenSSL de Homebrew de
+# la machine qui compile (`/opt/homebrew/opt/openssl@4/…`), absente des Mac des
+# utilisateurs — l'app ne démarrait plus. Sous Windows, il n'y en a de toute
+# façon pas.
+openssl = { version = "0.10", features = ["vendored"] }
 
 [profile.release]
 codegen-units = 1
@@ -67,8 +73,5 @@ strip = true
 [profile.release.build-override]
 strip = false
 
-# Sous Windows, pas d'OpenSSL système : `webauthn-rs` (passkeys de l'accès
-# mobile) en a besoin, on la compile donc avec l'app.
 [target.'cfg(windows)'.dependencies]
-openssl = { version = "0.10", features = ["vendored"] }
 windows-sys = { version = "0.59", features = ["Win32_Foundation", "Win32_System_Threading", "Win32_Globalization", "Win32_Security_Credentials", "Win32_NetworkManagement_IpHelper", "Win32_System_Diagnostics_ToolHelp", "Win32_System_ProcessStatus", "Wdk_System_Threading", "Win32_System_Diagnostics_Debug", "Win32_System_Memory", "Win32_System_SystemInformation"] }
