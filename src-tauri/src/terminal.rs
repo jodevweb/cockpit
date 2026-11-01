@@ -150,7 +150,7 @@ pub fn open(
 	account: Option<String>,
 ) -> Result<TerminalInfo> {
 	if !std::path::Path::new(&cwd).is_dir() {
-		return Err(CockpitError::msg(format!("Dossier introuvable : {cwd}")));
+		return Err(CockpitError::msg(crate::i18n::tf("terminal.folderNotFound", &[("path", &cwd)])));
 	}
 
 	let id = format!("term-{}", TERMINAL_SEQUENCE.fetch_add(1, Ordering::SeqCst));
@@ -163,7 +163,7 @@ pub fn open(
 
 	let pair = native_pty_system()
 		.openpty(size)
-		.map_err(|e| CockpitError::msg(format!("Ouverture du terminal : {e}")))?;
+		.map_err(|e| CockpitError::msg(crate::i18n::tf("terminal.open", &[("error", &e)])))?;
 
 	let shell = login_shell();
 	let mut builder = CommandBuilder::new(&shell);
@@ -190,7 +190,7 @@ pub fn open(
 	let child = pair
 		.slave
 		.spawn_command(builder)
-		.map_err(|e| CockpitError::msg(format!("Lancement du shell {shell} : {e}")))?;
+		.map_err(|e| CockpitError::msg(crate::i18n::tf("terminal.shellLaunch", &[("shell", &shell), ("error", &e)])))?;
 	// L'esclave n'a plus lieu d'être ouvert ici : le garder empêcherait la
 	// lecture de voir la fin de flux quand le shell se termine.
 	drop(pair.slave);
@@ -198,11 +198,11 @@ pub fn open(
 	let reader = pair
 		.master
 		.try_clone_reader()
-		.map_err(|e| CockpitError::msg(format!("Lecture du terminal : {e}")))?;
+		.map_err(|e| CockpitError::msg(crate::i18n::tf("terminal.read", &[("error", &e)])))?;
 	let writer = pair
 		.master
 		.take_writer()
-		.map_err(|e| CockpitError::msg(format!("Écriture du terminal : {e}")))?;
+		.map_err(|e| CockpitError::msg(crate::i18n::tf("terminal.writeSetup", &[("error", &e)])))?;
 	let killer = child.clone_killer();
 	// Relevé maintenant : une fois le processus terminé, `portable-pty` ne le
 	// donne plus, et c'est justement ce qui tourne encore qu'on veut mesurer.
@@ -279,12 +279,12 @@ pub fn write(terminals: &SharedTerminals, id: &str, data: &str) -> Result<()> {
 	let mut sessions = terminals.sessions.lock().unwrap();
 	let running = sessions
 		.get_mut(id)
-		.ok_or_else(|| CockpitError::msg("Ce terminal n'est plus actif."))?;
+		.ok_or_else(|| CockpitError::msg(crate::i18n::t("terminal.inactive")))?;
 	running
 		.writer
 		.write_all(data.as_bytes())
 		.and_then(|_| running.writer.flush())
-		.map_err(|e| CockpitError::msg(format!("Écriture dans le terminal : {e}")))
+		.map_err(|e| CockpitError::msg(crate::i18n::tf("terminal.write", &[("error", &e)])))
 }
 
 /// Aligne le PTY sur la taille réellement affichée.
@@ -306,7 +306,7 @@ pub fn resize(terminals: &SharedTerminals, id: &str, cols: u16, rows: u16) -> Re
 			pixel_width: 0,
 			pixel_height: 0,
 		})
-		.map_err(|e| CockpitError::msg(format!("Redimensionnement : {e}")))
+		.map_err(|e| CockpitError::msg(crate::i18n::tf("terminal.resize", &[("error", &e)])))
 }
 
 /// Coupe le shell, puis ce qu'il a lâché derrière lui.

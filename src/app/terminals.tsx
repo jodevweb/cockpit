@@ -14,6 +14,7 @@ import {
 import { api, events } from "@/lib/ipc";
 import { useCockpit } from "./store";
 import { useWorkspace } from "./workspace";
+import { t } from "@/i18n";
 
 /**
  * Terminaux intégrés du panneau de travail.
@@ -242,8 +243,10 @@ export function TerminalsProvider({ children }: { children: ReactNode }) {
 			// Le shell est parti mais l'onglet reste : on garde ce qui a défilé,
 			// sinon fermer par erreur effacerait la trace de ce qui s'est passé.
 			instance?.term.write(
-				`\r\n\x1b[38;5;244m— shell terminé${
-					exit.code !== null && exit.code !== 0 ? ` (code ${exit.code})` : ""
+				`\r\n\x1b[38;5;244m— ${
+					exit.code !== null && exit.code !== 0
+						? t("app:terminals.exitedWithCode", { code: exit.code })
+						: t("app:terminals.exited")
 				}\x1b[0m\r\n`,
 			);
 			setTabs((current) =>
@@ -434,7 +437,7 @@ export function TerminalsProvider({ children }: { children: ReactNode }) {
 export function useTerminalActions(): TerminalActions {
 	const store = useContext(ActionsContext);
 	if (!store)
-		throw new Error("useTerminalActions doit être utilisé dans TerminalsProvider");
+		throw new Error("useTerminalActions must be used inside TerminalsProvider");
 	return store;
 }
 
@@ -442,7 +445,7 @@ export function useTerminals(): TerminalsStore {
 	const tabs = useContext(TabsContext);
 	const actions = useContext(ActionsContext);
 	if (!tabs || !actions) {
-		throw new Error("useTerminals doit être utilisé dans TerminalsProvider");
+		throw new Error("useTerminals must be used inside TerminalsProvider");
 	}
 	return useMemo(() => ({ ...actions, tabs }), [actions, tabs]);
 }

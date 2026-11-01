@@ -186,10 +186,7 @@ pub fn provider(config: &Config) -> Result<Box<dyn Provider>> {
             config: config.clone(),
         }));
     }
-    Err(CockpitError::msg(
-        "Aucun suivi de tâches configuré : renseigne un jeton Linear, un projet GitLab, \
-         ou un dépôt GitHub.",
-    ))
+    Err(CockpitError::msg(crate::i18n::t("tickets.noTracker")))
 }
 
 // ──────────────────────────────── Linear ────────────────────────────────
@@ -253,11 +250,7 @@ impl Provider for Linear {
     async fn cycle(&self) -> Result<Option<TrackerCycle>> {
         let team = self.config.team.linear_team_id.trim();
         if team.is_empty() {
-            return Err(CockpitError::msg(
-                "L'identifiant de l'équipe Linear manque : renseigne-le dans Réglages → \
-                 Équipe. C'est l'UUID lisible dans l'URL de ses réglages, pas la clé qui \
-                 préfixe les tickets.",
-            ));
+            return Err(CockpitError::msg(crate::i18n::t("tickets.linearTeamMissing")));
         }
         crate::team::fetch_current_cycle(&self.config.linear.token, team).await
     }

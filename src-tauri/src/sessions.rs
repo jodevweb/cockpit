@@ -227,7 +227,7 @@ fn describe_tool(name: &str, input: &Value) -> String {
 		"Glob" | "Grep" => format!("{} {}", get("pattern"), get("path")).trim().to_string(),
 		"Task" | "Agent" => format!("{} · {}", get("subagent_type"), truncate(get("description"), 80)),
 		"WebFetch" | "WebSearch" => format!("{}{}", get("url"), get("query")),
-		"TodoWrite" => "mise à jour des tâches".into(),
+		"TodoWrite" => crate::i18n::t("sessions.todoUpdate"),
 		_ => truncate(&input.to_string(), 180),
 	}
 }
@@ -399,7 +399,7 @@ fn finalize(mut acc: Accumulator) -> SessionSummary {
 			.first_user_prompt
 			.clone()
 			.map(|p| truncate(&p, 110))
-			.unwrap_or_else(|| "Session sans prompt".into());
+			.unwrap_or_else(|| crate::i18n::t("sessions.noPrompt"));
 	}
 	if acc.summary.last_prompt.is_none() {
 		acc.summary.last_prompt = acc.first_user_prompt.clone();
@@ -623,9 +623,9 @@ pub fn scan_all(limit_per_project: usize) -> Result<Vec<ProjectSessions>> {
 /// reviens sur un worktree laissé en plan.
 pub fn read_timeline(file: &Path, max_events: usize) -> Result<Vec<SessionEvent>> {
 	if !file.exists() {
-		return Err(CockpitError::msg(format!(
-			"Session introuvable : {}",
-			file.display()
+		return Err(CockpitError::msg(crate::i18n::tf(
+			"sessions.notFound",
+			&[("path", &file.display())],
 		)));
 	}
 
@@ -1008,7 +1008,7 @@ pub fn read_subagents(session_file: &Path) -> Result<Vec<SubagentRun>> {
 			status: {
 				let value = get("status");
 				if value.is_empty() {
-					"inconnu".into()
+					crate::i18n::t("sessions.unknownStatus")
 				} else {
 					value
 				}

@@ -1,4 +1,5 @@
 import { useSyncExternalStore } from "react";
+import { t } from "@/i18n";
 
 /**
  * Ce que le cockpit est en train de faire pour toi, en arrière-plan.
@@ -80,7 +81,7 @@ const DONE_LINGER_MS = 12_000;
 
 function clean(message: unknown): string {
 	const text = message instanceof Error ? message.message : String(message);
-	return text.replace(/^(Ipc)?Error:\s*/, "").trim() || "Échec sans explication.";
+	return text.replace(/^(Ipc)?Error:\s*/, "").trim() || t("lib:activity.unexplainedFailure");
 }
 
 export function startActivity(title: string, firstStep?: string): ActivityHandle {

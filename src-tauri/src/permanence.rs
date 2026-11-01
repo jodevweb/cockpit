@@ -90,17 +90,16 @@ pub enum Closed {
 
 impl Closed {
 	/// Dit à l'écran, tel quel.
-	pub fn reason(self) -> &'static str {
-		match self {
-			Closed::Disabled => "Désactivée dans les réglages.",
-			Closed::Suspended => "Suspendue. Les engagements en cours vont au bout ; aucun nouveau ne démarre.",
-			Closed::OffHours => "Hors des heures de service déclarées.",
-			Closed::Capped => "Plafond du jour atteint. Elle repartira demain.",
-			Closed::Quota => "Quota partagé sous le plancher : elle te laisse la place.",
-			Closed::Tripped => {
-				"Coupe-circuit : trop d'échecs d'affilée. Elle s'est arrêtée d'elle-même."
-			}
-		}
+	pub fn reason(self) -> String {
+		let key = match self {
+			Closed::Disabled => "disabled",
+			Closed::Suspended => "suspended",
+			Closed::OffHours => "offHours",
+			Closed::Capped => "capped",
+			Closed::Quota => "quota",
+			Closed::Tripped => "tripped",
+		};
+		crate::i18n::t(&format!("permanence.closed.{key}"))
 	}
 }
 
@@ -164,15 +163,16 @@ impl Verdict {
 		matches!(self, Verdict::Missed | Verdict::Undecided)
 	}
 
-	pub fn label(self) -> &'static str {
-		match self {
-			Verdict::Pending => "en cours",
-			Verdict::Reached => "atteint",
-			Verdict::Missed => "manqué",
-			Verdict::OffTopic => "hors sujet",
-			Verdict::Undecided => "indécidable",
-			Verdict::Rehearsed => "à blanc",
-		}
+	pub fn label(self) -> String {
+		let key = match self {
+			Verdict::Pending => "pending",
+			Verdict::Reached => "reached",
+			Verdict::Missed => "missed",
+			Verdict::OffTopic => "offTopic",
+			Verdict::Undecided => "undecided",
+			Verdict::Rehearsed => "rehearsed",
+		};
+		crate::i18n::t(&format!("permanence.verdict.{key}"))
 	}
 }
 
@@ -304,13 +304,13 @@ const TOOLS = [
   {
     name: "signal",
     description:
-      "Retiens ce signal : il correspond à une règle active et mérite un engagement. N'appelle cet outil que si une règle s'applique vraiment — retenir à tort coûte un agent, une branche et du quota.",
+      "Keep this signal: it matches an active rule and deserves an engagement. Only call this tool if a rule truly applies — keeping one wrongly costs an agent, a branch and quota.",
     inputSchema: {
       type: "object",
       properties: {
-        key: { type: "string", description: "La clé du signal, telle qu'elle t'a été donnée." },
-        rule: { type: "string", description: "Identifiant de la règle qui s'applique." },
-        why: { type: "string", description: "En une phrase : pourquoi cette règle s'applique ici." },
+        key: { type: "string", description: "The signal key, exactly as it was given to you." },
+        rule: { type: "string", description: "Identifier of the rule that applies." },
+        why: { type: "string", description: "In one sentence: why this rule applies here." },
       },
       required: ["key", "rule", "why"],
     },
@@ -318,23 +318,23 @@ const TOOLS = [
   {
     name: "intend",
     description:
-      "Déclare ce que tu comptes faire, avant de le faire. L'objectif en une phrase lisible par un humain, puis les gestes prévus dans l'ordre. Appelle cet outil une seule fois, et n'agis pas avant : c'est ce qui permet de juger ton plan sans avoir à le subir.",
+      "Declare what you intend to do, before doing it. The goal in one sentence a human can read, then the planned actions in order. Call this tool only once, and do not act before: that is what lets your plan be judged without having to suffer it.",
     inputSchema: {
       type: "object",
       properties: {
         goal: {
           type: "string",
           description:
-            "Une phrase, à la première personne, qui dit ce que tu vas obtenir — pas comment.",
+            "One sentence, in the first person, saying what you will achieve — not how.",
         },
         plan: {
           type: "array",
-          description: "Les gestes prévus, dans l'ordre.",
+          description: "The planned actions, in order.",
           items: {
             type: "object",
             properties: {
-              what: { type: "string", description: "Le geste, en clair." },
-              why: { type: "string", description: "Pourquoi il est nécessaire." },
+              what: { type: "string", description: "The action, in plain words." },
+              why: { type: "string", description: "Why it is needed." },
             },
             required: ["what"],
           },
@@ -342,24 +342,24 @@ const TOOLS = [
         mission: {
           type: "boolean",
           description:
-            "Vrai s'il faut écrire du code : le cockpit ouvrira une mission plutôt que de te laisser agir seul. Faux pour un geste simple — relancer, étiqueter, rendre compte.",
+            "True if code must be written: the cockpit will open a mission rather than let you act alone. False for a simple action — rerun, label, report.",
         },
         acts: {
           type: "array",
           description:
-            "Les gestes à poser, dans l'ordre. Tu ne les exécutes pas toi-même : le cockpit les jouera après avoir vérifié qu'ils sont autorisés. N'en demande aucun si aucun n'est nécessaire.",
+            "The actions to take, in order. You do not execute them yourself: the cockpit will play them after checking they are allowed. Request none if none is needed.",
           items: {
             type: "object",
             properties: {
               tool: {
                 type: "string",
                 description:
-                  "rerun_pipeline · set_label · run_command · comment. Rien d'autre n'existe.",
+                  "rerun_pipeline · set_label · run_command · comment. Nothing else exists.",
               },
               value: {
                 type: "string",
                 description:
-                  "Ce sur quoi porte le geste : le nom du label, l'identifiant de la commande, le texte du commentaire. Vide quand le geste n'en a pas besoin.",
+                  "What the action applies to: the label name, the command identifier, the comment text. Empty when the action does not need it.",
               },
             },
             required: ["tool"],
@@ -372,12 +372,12 @@ const TOOLS = [
   {
     name: "silence",
     description:
-      "Écarte ce signal. C'est la réponse attendue la plupart du temps, et elle ne coûte rien : dis simplement pourquoi aucune règle ne s'applique.",
+      "Dismiss this signal. It is the expected answer most of the time, and it costs nothing: just say why no rule applies.",
     inputSchema: {
       type: "object",
       properties: {
-        key: { type: "string", description: "La clé du signal, telle qu'elle t'a été donnée." },
-        why: { type: "string", description: "En quelques mots : pourquoi il ne se passe rien." },
+        key: { type: "string", description: "The signal key, exactly as it was given to you." },
+        why: { type: "string", description: "In a few words: why nothing happens." },
       },
       required: ["key", "why"],
     },
@@ -423,14 +423,14 @@ process.stdin.on("data", (chunk) => {
         send({
           jsonrpc: "2.0",
           id: message.id,
-          result: { content: [{ type: "text", text: "noté" }] },
+          result: { content: [{ type: "text", text: "noted" }] },
         });
         continue;
       }
       send({
         jsonrpc: "2.0",
         id: message.id,
-        result: { content: [{ type: "text", text: "outil inconnu" }], isError: true },
+        result: { content: [{ type: "text", text: "unknown tool" }], isError: true },
       });
     }
   }
@@ -516,47 +516,49 @@ fn read_sorted() -> Vec<Sorted> {
 /// ce compte, elle reste à bon droit non vérifiable plutôt que devinée.
 fn triage_prompt(rules: &[&crate::config::PermanenceRule], signals: &[&Signal], me: &str) -> String {
 	let mut out = String::from(
-		"Tu es le tri d'un opérateur autonome. Ton travail : dire lesquels de ces signaux \
-		 correspondent à une règle active, et lesquels ne méritent rien.\n\n\
-		 **La réponse attendue la plupart du temps est « rien ».** Retenir à tort coûte un \
-		 agent, une branche et du quota ; écarter à tort ne coûte qu'un signal qui reviendra \
-		 au prochain changement. Dans le doute, écarte.\n\n\
-		 Tu n'écris pas de texte : tu appelles `signal` ou `silence` **une fois par signal**, \
-		 sans exception. Un signal sans appel est un signal perdu.\n\n",
+		"You are the triage of an autonomous operator. Your job: say which of these signals \
+		 match an active rule, and which deserve nothing.\n\n\
+		 **The expected answer most of the time is \"nothing\".** Keeping one wrongly costs an \
+		 agent, a branch and quota; dismissing one wrongly only costs a signal that will come \
+		 back at the next change. When in doubt, dismiss.\n\n\
+		 You do not write text: you call `signal` or `silence` **once per signal**, without \
+		 exception. A signal without a call is a lost signal.\n\n",
 	);
+	out.push_str(&crate::i18n::reply_directive());
+	out.push_str(" This applies to the `why` fields.\n\n");
 	if !me.is_empty() {
 		out.push_str(&format!(
-			"Compte GitHub sous lequel tu tournes : `{me}`. C'est le « moi » de toute condition \
-			 qui parle à la première personne — assigné, mentionné, reviewer.\n\n"
+			"GitHub account you are running under: `{me}`. It is the \"me\" of any condition \
+			 phrased in the first person — assigned, mentioned, reviewer.\n\n"
 		));
 	}
 
-	out.push_str("## Règles actives\n\n");
+	out.push_str("## Active rules\n\n");
 	for rule in rules {
 		out.push_str(&format!(
-			"- `{}` — {}\n  déclencheur : {}\n",
+			"- `{}` — {}\n  trigger: {}\n",
 			rule.id,
 			if rule.label.trim().is_empty() {
-				"(sans intitulé)"
+				"(untitled)"
 			} else {
 				rule.label.trim()
 			},
 			rule.trigger
 		));
 		if !rule.condition.trim().is_empty() {
-			out.push_str(&format!("  condition : {}\n", rule.condition.trim()));
+			out.push_str(&format!("  condition: {}\n", rule.condition.trim()));
 		}
 	}
 
-	out.push_str("\n## Signaux à trier\n\n");
+	out.push_str("\n## Signals to triage\n\n");
 	for signal in signals {
 		out.push_str(&format!(
-			"- clé `{}`\n  source : {} · {}\n  déclencheur observé : {}\n",
+			"- key `{}`\n  source: {} · {}\n  observed trigger: {}\n",
 			signal.key,
 			signal.source,
 			signal.label,
 			if signal.trigger.is_empty() {
-				"aucun"
+				"none"
 			} else {
 				&signal.trigger
 			},
@@ -567,9 +569,9 @@ fn triage_prompt(rules: &[&crate::config::PermanenceRule], signals: &[&Signal], 
 	}
 
 	out.push_str(
-		"\nUn signal dont le déclencheur observé ne correspond à aucune règle se `silence` \
-		 sans réfléchir davantage. Pour les autres, vérifie que la condition de la règle est \
-		 bien vraie ici avant de le `signal`.\n",
+		"\nA signal whose observed trigger matches no rule gets `silence` without further \
+		 thought. For the others, check that the rule's condition is really true here before \
+		 calling `signal`.\n",
 	);
 	out
 }
@@ -819,16 +821,15 @@ pub fn record_outcome(ok: bool, detail: &str) -> State {
 	state.failures += 1;
 	let limit = Config::active().permanence.breaker();
 	if state.failures >= limit {
-		state.tripped = format!(
-			"{} échecs d'affilée. Dernier : {}",
-			state.failures,
-			detail.trim()
+		state.tripped = crate::i18n::tf(
+			"permanence.tripped",
+			&[("count", &state.failures), ("last", &detail.trim())],
 		);
 		crate::journal::record_as(
 			crate::journal::PERMANENCE,
 			"",
 			"permanence",
-			"Coupe-circuit déclenché",
+			&crate::i18n::t("permanence.journal.breakerTripped"),
 			"",
 			false,
 			&state.tripped,
@@ -876,7 +877,7 @@ pub fn halt(agents: &crate::agent::SharedAgents, reason: &str) -> Halt {
 	// La porte d'abord. Une boucle qui relancerait un engagement pendant qu'on
 	// coupe les précédents transformerait l'arrêt en course.
 	state.tripped = if reason.trim().is_empty() {
-		"Arrêt demandé.".into()
+		crate::i18n::t("permanence.halt.requested")
 	} else {
 		reason.trim().to_string()
 	};
@@ -903,7 +904,10 @@ pub fn halt(agents: &crate::agent::SharedAgents, reason: &str) -> Halt {
 				Ok(_) => stopped.push(format!("mission · {what}")),
 				Err(error) => failed.push(format!("mission · {what} — {error}")),
 			},
-			other => failed.push(format!("{other} · {what} — le cockpit ne sait pas l'arrêter")),
+			other => failed.push(crate::i18n::tf(
+				"permanence.halt.cannotStop",
+				&[("kind", &other), ("what", &what)],
+			)),
 		}
 	}
 
@@ -911,13 +915,12 @@ pub fn halt(agents: &crate::agent::SharedAgents, reason: &str) -> Halt {
 		crate::journal::PERMANENCE,
 		"",
 		"permanence",
-		"Arrêt d'urgence",
+		&crate::i18n::t("permanence.journal.emergencyStop"),
 		"",
 		failed.is_empty(),
-		&format!(
-			"{} arrêté(s), {} en échec",
-			stopped.len(),
-			failed.len()
+		&crate::i18n::tf(
+			"permanence.halt.summary",
+			&[("stopped", &stopped.len()), ("failed", &failed.len())],
 		),
 	);
 
@@ -935,7 +938,7 @@ pub fn halt(agents: &crate::agent::SharedAgents, reason: &str) -> Halt {
 /// faire à la main.
 pub fn undoable(engagement: &Engagement) -> std::result::Result<(), String> {
 	if engagement.produced.is_empty() {
-		return Err("Rien n'a été produit : il n'y a rien à défaire.".into());
+		return Err(crate::i18n::t("permanence.undo.nothingProduced"));
 	}
 	let stuck: Vec<&str> = engagement
 		.produced
@@ -944,10 +947,7 @@ pub fn undoable(engagement: &Engagement) -> std::result::Result<(), String> {
 		.map(|produced| produced.label.as_str())
 		.collect();
 	if !stuck.is_empty() {
-		return Err(format!(
-			"Le cockpit ne sait pas défaire : {}. À reprendre à la main.",
-			stuck.join(", ")
-		));
+		return Err(crate::i18n::tf("permanence.undo.cannotUndo", &[("items", &stuck.join(", "))]));
 	}
 	Ok(())
 }
@@ -968,7 +968,7 @@ pub async fn undo(id: &str) -> Halt {
 		return Halt {
 			state,
 			stopped: Vec::new(),
-			failed: vec!["Cet engagement n'existe plus.".into()],
+			failed: vec![crate::i18n::t("permanence.undo.engagementGone")],
 		};
 	};
 
@@ -979,8 +979,14 @@ pub async fn undo(id: &str) -> Halt {
 	for produced in &engagement.produced {
 		match produced.kind.as_str() {
 			"mission" => match crate::mission::set_paused(&produced.reference, true) {
-				Ok(_) => undone.push(format!("mission « {} » mise en pause", produced.label)),
-				Err(error) => failed.push(format!("mission « {} » — {error}", produced.label)),
+				Ok(_) => undone.push(crate::i18n::tf(
+					"permanence.undo.missionPaused",
+					&[("name", &produced.label)],
+				)),
+				Err(error) => failed.push(crate::i18n::tf(
+					"permanence.undo.missionFailed",
+					&[("name", &produced.label), ("error", &error)],
+				)),
 			},
 			"label" => {
 				let number = pr_number_of(&engagement.key);
@@ -994,27 +1000,39 @@ pub async fn undo(id: &str) -> Halt {
 						.await
 						{
 							Ok(()) => {
-								undone.push(format!("label « {} » retiré", produced.reference))
+								undone.push(crate::i18n::tf(
+									"permanence.undo.labelRemoved",
+									&[("label", &produced.reference)],
+								))
 							}
 							Err(error) => {
-								failed.push(format!("label « {} » — {error}", produced.reference))
+								failed.push(crate::i18n::tf(
+									"permanence.undo.labelFailed",
+									&[("label", &produced.reference), ("error", &error)],
+								))
 							}
 						}
 					}
-					None => failed.push(format!("label « {} » — cible illisible", produced.label)),
+					None => failed.push(crate::i18n::tf(
+						"permanence.undo.labelNoTarget",
+						&[("label", &produced.label)],
+					)),
 				}
 			}
-			other => failed.push(format!(
-				"{other} · {} — le cockpit ne sait pas le défaire",
-				produced.label
+			other => failed.push(crate::i18n::tf(
+				"permanence.undo.cannotUndoKind",
+				&[("kind", &other), ("what", &produced.label)],
 			)),
 		}
 	}
 
 	if let Some(entry) = state.engagements.iter_mut().find(|entry| entry.id == id) {
 		entry.step(
-			"annule ce qui a été fait",
-			&format!("{} défait(s), {} résistant(s)", undone.len(), failed.len()),
+			&crate::i18n::t("permanence.undo.step"),
+			&crate::i18n::tf(
+				"permanence.undo.stepResult",
+				&[("undone", &undone.len()), ("failed", &failed.len())],
+			),
 			failed.is_empty(),
 		);
 		// Ce qui a été défait ne se dit plus « produit » : la liste doit décrire
@@ -1028,10 +1046,13 @@ pub async fn undo(id: &str) -> Halt {
 		crate::journal::PERMANENCE,
 		id,
 		"permanence",
-		"Annulation d'un engagement",
+		&crate::i18n::t("permanence.journal.undo"),
 		&engagement.key,
 		failed.is_empty(),
-		&format!("{} défait(s), {} en échec", undone.len(), failed.len()),
+		&crate::i18n::tf(
+			"permanence.undo.summary",
+			&[("undone", &undone.len()), ("failed", &failed.len())],
+		),
 	);
 
 	Halt {
@@ -1205,14 +1226,20 @@ fn clock_signals(
 				out.push(Signal {
 					key,
 					project: String::new(),
-					source: "Horloge".into(),
-					label: format!(
-						"{} — toutes les {every} h",
-						if rule.label.trim().is_empty() {
-							rule.id.as_str()
-						} else {
-							rule.label.trim()
-						}
+					source: crate::i18n::t("permanence.signals.clock"),
+					label: crate::i18n::tf(
+						"permanence.signals.every",
+						&[
+							(
+								"rule",
+								&if rule.label.trim().is_empty() {
+									rule.id.as_str()
+								} else {
+									rule.label.trim()
+								},
+							),
+							("hours", &every),
+						],
 					),
 					trigger: "schedule".into(),
 					context: String::new(),
@@ -1277,12 +1304,12 @@ fn source_of(change: &crate::monitor::Change) -> String {
 fn signal_context(change: &crate::monitor::Change) -> String {
 	let mut faits = Vec::new();
 	if !change.author.is_empty() {
-		faits.push(format!("auteur : {}", change.author));
+		faits.push(crate::i18n::tf("permanence.signals.author", &[("author", &change.author)]));
 	}
 	if !change.review_requested.is_empty() {
-		faits.push(format!(
-			"revue demandée à : {}",
-			change.review_requested.join(", ")
+		faits.push(crate::i18n::tf(
+			"permanence.signals.reviewRequested",
+			&[("people", &change.review_requested.join(", "))],
 		));
 	}
 	faits.join(" · ")
@@ -1304,9 +1331,9 @@ fn linear_context(issue: &crate::integrations::FeedItem) -> String {
 	let priority = issue
 		.tags
 		.first()
-		.map(|tag| tag.label.as_str())
-		.unwrap_or("sans priorité");
-	format!("assigné à moi · priorité : {priority}")
+		.map(|tag| tag.label.clone())
+		.unwrap_or_else(|| crate::i18n::t("permanence.signals.noPriority"));
+	crate::i18n::tf("permanence.signals.assignedToMe", &[("priority", &priority)])
 }
 
 /// Un regard. C'est tout ce que la boucle sait faire pour l'instant.
@@ -1382,7 +1409,7 @@ pub async fn look(quota_used: Option<u32>, app: Option<tauri::AppHandle>) -> Res
 			// coûter : c'est la majorité du trafic, et faire lire ça à un
 			// modèle serait payer pour apprendre ce qu'on savait déjà.
 			dropped: if trigger.is_empty() {
-				"aucun déclencheur reconnu".into()
+				crate::i18n::t("permanence.dropped.noTrigger")
 			} else {
 				String::new()
 			},
@@ -1410,7 +1437,7 @@ pub async fn look(quota_used: Option<u32>, app: Option<tauri::AppHandle>) -> Res
 			// que Linear n'a pas répondu doit se voir, pas se confondre avec
 			// « aucun ticket urgent ».
 			Err(error) => {
-				linear_blind = Some(format!("Linear : {error}"));
+				linear_blind = Some(crate::i18n::tf("permanence.blind.linear", &[("error", &error)]));
 				Vec::new()
 			}
 		}
@@ -1495,7 +1522,12 @@ pub async fn look(quota_used: Option<u32>, app: Option<tauri::AppHandle>) -> Res
 		blind: scan
 			.notes
 			.iter()
-			.map(|note| format!("{} : {}", note.source, note.message))
+			.map(|note| {
+				crate::i18n::tf(
+					"permanence.blind.source",
+					&[("source", &note.source), ("message", &note.message)],
+				)
+			})
 			.chain(linear_blind)
 			.collect(),
 	});
@@ -1527,7 +1559,7 @@ async fn triage(mut state: State, app: Option<tauri::AppHandle>) -> Result<State
 	let rules = config.permanence.live_rules();
 	if rules.is_empty() {
 		return Ok(settle(state, |_| {
-			(false, String::new(), "aucune règle active".into())
+			(false, String::new(), crate::i18n::t("permanence.dropped.noActiveRule"))
 		}));
 	}
 
@@ -1538,7 +1570,7 @@ async fn triage(mut state: State, app: Option<tauri::AppHandle>) -> Result<State
 			(
 				false,
 				String::new(),
-				"tri indisponible : Node introuvable".into(),
+				crate::i18n::t("permanence.dropped.noNode"),
 			)
 		}));
 	};
@@ -1574,7 +1606,11 @@ async fn triage(mut state: State, app: Option<tauri::AppHandle>) -> Result<State
 		// Confondre les deux ferait passer une panne pour un calme plat, et c'est
 		// le mode de défaillance le plus coûteux du dispositif.
 		return Ok(settle(state, |_| {
-			(false, String::new(), format!("tri sans réponse : {error}"))
+			(
+				false,
+				String::new(),
+				crate::i18n::tf("permanence.dropped.noAnswer", &[("error", &error)]),
+			)
 		}));
 	}
 
@@ -1587,7 +1623,7 @@ async fn triage(mut state: State, app: Option<tauri::AppHandle>) -> Result<State
 			Some(entry) => (false, String::new(), reason_of(&entry.why)),
 			// Un signal que le trieur a sauté n'est pas un signal écarté : rien
 			// n'a été dit dessus, et le prétendre serait inventer un verdict.
-			None => (false, String::new(), "le tri ne s'est pas prononcé".into()),
+			None => (false, String::new(), crate::i18n::t("permanence.dropped.notDecided")),
 		}
 	});
 	// Ce que le tri a retenu part maintenant — un à la fois.
@@ -1603,15 +1639,15 @@ async fn triage(mut state: State, app: Option<tauri::AppHandle>) -> Result<State
 /// Pourquoi un signal retenu n'a pas donné d'engagement.
 fn cannot_open(state: &State, config: &crate::config::PermanenceConfig, key: &str) -> Option<String> {
 	if state.in_flight() as u64 >= config.max_running() {
-		return Some(format!(
-			"un engagement tourne déjà ({} au plus à la fois)",
-			config.max_running()
+		return Some(crate::i18n::tf(
+			"permanence.cannotOpen.running",
+			&[("max", &config.max_running())],
 		));
 	}
 	if state.quarantined(key, now()) {
-		return Some(format!(
-			"cet objet vient d'être traité ; il est laissé tranquille {} h",
-			config.grace_hours()
+		return Some(crate::i18n::tf(
+			"permanence.cannotOpen.quarantined",
+			&[("hours", &config.grace_hours())],
 		));
 	}
 	// Le plafond du jour se compte sur les engagements réellement partis, à
@@ -1624,9 +1660,9 @@ fn cannot_open(state: &State, config: &crate::config::PermanenceConfig, key: &st
 		.filter(|engagement| engagement.started_at >= today)
 		.count() as u64;
 	if done_today >= config.daily_engagements() {
-		return Some(format!(
-			"plafond du jour atteint ({} engagements)",
-			config.daily_engagements()
+		return Some(crate::i18n::tf(
+			"permanence.cannotOpen.dailyCap",
+			&[("max", &config.daily_engagements())],
 		));
 	}
 	None
@@ -1693,7 +1729,7 @@ fn close(state: &mut State, id: &str, verdict: Verdict, why: &str) {
 fn reason_of(why: &str) -> String {
 	let trimmed = why.trim();
 	if trimmed.is_empty() {
-		return "écarté par le tri".into();
+		return crate::i18n::t("permanence.dropped.byTriage");
 	}
 	trimmed.chars().take(160).collect()
 }
@@ -1740,18 +1776,20 @@ fn engagement_prompt(
 	brief: &str,
 ) -> String {
 	let mut out = String::from(
-		"Tu es l'opérateur autonome d'un poste de pilotage. Un signal a été retenu, et \
-		 c'est à toi de dire ce qu'il faut en faire.\n\n\
-		 **Tu ne fais rien tout de suite.** Tu appelles `intend` une seule fois, avec ton \
-		 objectif et les gestes que tu comptes poser. Rien ne partira avant.\n\n",
+		"You are the autonomous operator of a control cockpit. A signal has been kept, and \
+		 it is up to you to say what should be done about it.\n\n\
+		 **You do nothing right away.** You call `intend` only once, with your goal and the \
+		 actions you plan to take. Nothing will go out before.\n\n",
 	);
+	out.push_str(&crate::i18n::reply_directive());
+	out.push_str(" This applies to the goal and the plan you declare.\n\n");
 
 	out.push_str(&format!(
-		"## Le signal\n\n{}\n\ndéclencheur : {}\n\n",
+		"## The signal\n\n{}\n\ntrigger: {}\n\n",
 		engagement.label, engagement.trigger
 	));
 	out.push_str(&format!(
-		"## La règle qui t'autorise\n\n{}\n",
+		"## The rule that authorizes you\n\n{}\n",
 		if rule.label.trim().is_empty() {
 			rule.id.as_str()
 		} else {
@@ -1759,37 +1797,36 @@ fn engagement_prompt(
 		}
 	));
 	if !rule.reaction.trim().is_empty() {
-		out.push_str(&format!("réaction attendue : {}\n", rule.reaction.trim()));
+		out.push_str(&format!("expected reaction: {}\n", rule.reaction.trim()));
 	}
 	out.push_str(&format!(
-		"oracle : {} · {}\n\n",
+		"oracle: {} · {}\n\n",
 		engagement.oracle.kind, engagement.oracle.key
 	));
 
-	out.push_str("## Ce que tu as le droit de demander\n\n");
+	out.push_str("## What you are allowed to request\n\n");
 	if config.powers.is_empty() && !config.comment.enabled {
 		out.push_str(
-			"Rien n'est coché dans la liste blanche. Dis-le dans ton objectif et ne demande \
-			 aucun geste : c'est une information utile, pas un échec.\n\n",
+			"Nothing is checked in the allow list. Say so in your goal and request no action: \
+			 it is useful information, not a failure.\n\n",
 		);
 	} else {
 		for power in &config.powers {
 			out.push_str(&format!("- `{power}`\n"));
 		}
 		if config.comment.enabled {
-			out.push_str("- `comment` — seulement là où une condition déclarée est vraie\n");
+			out.push_str("- `comment` — only where a declared condition is true\n");
 		}
 		out.push_str(
-			"\n**Tu ne poses aucun de ces gestes toi-même.** Tu les demandes dans `acts`, et \
-			 le cockpit les joue après avoir vérifié qu'ils sont autorisés. Tu ne verras pas \
-			 leur résultat : s'il te faut t'adapter en cours de route, c'est qu'il faut une \
-			 mission.\n\n",
+			"\n**You take none of these actions yourself.** You request them in `acts`, and \
+			 the cockpit plays them after checking they are allowed. You will not see their \
+			 result: if you need to adapt along the way, that means a mission is needed.\n\n",
 		);
 	}
 
 	out.push_str(&format!(
-		"## Ce que tu ne feras jamais\n\n{}\n\nCes gestes n'ont pas d'outil. Ils engagent une \
-		 décision, pas un compte rendu.\n\n",
+		"## What you will never do\n\n{}\n\nThese actions have no tool. They commit to a \
+		 decision, not a report.\n\n",
 		crate::config::NEVER
 			.iter()
 			.map(|never| format!("- {never}"))
@@ -1798,16 +1835,16 @@ fn engagement_prompt(
 	));
 
 	if !config.prompt.trim().is_empty() {
-		out.push_str(&format!("## Consigne permanente\n\n{}\n\n", config.prompt.trim()));
+		out.push_str(&format!("## Standing instructions\n\n{}\n\n", config.prompt.trim()));
 	}
 	if !brief.trim().is_empty() {
-		out.push_str(&format!("## Ce que le cockpit sait déjà\n\n{}\n\n", brief.trim()));
+		out.push_str(&format!("## What the cockpit already knows\n\n{}\n\n", brief.trim()));
 	}
 
 	out.push_str(
-		"Enfin : `mission` vaut vrai s'il faut écrire du code. Le cockpit ouvrira alors une \
-		 mission — avec son périmètre, ses verdicts et son intégration vérifiée — plutôt que \
-		 de te laisser faire seul. Pour un geste simple, laisse-le à faux.\n",
+		"Finally: `mission` is true if code must be written. The cockpit will then open a \
+		 mission — with its scope, its verdicts and its verified integration — rather than \
+		 let you do it alone. For a simple action, leave it false.\n",
 	);
 	out
 }
@@ -1868,7 +1905,7 @@ async fn ask_oracle(
 	if !oracle.stated() {
 		return (
 			Verdict::Undecided,
-			"Aucun oracle déclaré : rien ne permet de dire si l'objectif est atteint.".into(),
+			crate::i18n::t("permanence.oracle.none"),
 		);
 	}
 
@@ -1879,7 +1916,7 @@ async fn ask_oracle(
 		"comment" => ask_comment(key, config).await,
 		other => (
 			Verdict::Undecided,
-			format!("Le cockpit ne sait pas interroger un oracle de type « {other} »."),
+			crate::i18n::tf("permanence.oracle.unknownKind", &[("kind", &other)]),
 		),
 	}
 }
@@ -1889,7 +1926,7 @@ async fn ask_command(id: &str, config: &Config) -> (Verdict, String) {
 	let Some(command) = config.commands.iter().find(|entry| entry.id == id) else {
 		return (
 			Verdict::Undecided,
-			format!("La commande « {id} » n'est plus déclarée dans ce dépôt."),
+			crate::i18n::tf("permanence.oracle.commandGone", &[("id", &id)]),
 		);
 	};
 	// Une commande marquée sensible ne sert pas d'oracle : vérifier ne doit
@@ -1898,11 +1935,7 @@ async fn ask_command(id: &str, config: &Config) -> (Verdict, String) {
 	if command.danger {
 		return (
 			Verdict::Undecided,
-			format!(
-				"« {} » est marquée sensible : elle ne peut pas servir de preuve. Vérifier ne \
-				 doit rien changer.",
-				command.label
-			),
+			crate::i18n::tf("permanence.oracle.commandSensitive", &[("name", &command.label)]),
 		);
 	}
 
@@ -1914,7 +1947,7 @@ async fn ask_command(id: &str, config: &Config) -> (Verdict, String) {
 	let Some(cwd) = cwd else {
 		return (
 			Verdict::Undecided,
-			"Aucun dépôt local où lancer la commande.".into(),
+			crate::i18n::t("permanence.oracle.noRepo"),
 		);
 	};
 
@@ -1928,7 +1961,7 @@ async fn ask_command(id: &str, config: &Config) -> (Verdict, String) {
 	match tokio::time::timeout(ORACLE_TIMEOUT, run).await {
 		Ok(Ok(output)) if output.status.success() => (
 			Verdict::Reached,
-			format!("`{line}` est sortie en 0."),
+			crate::i18n::tf("permanence.oracle.commandOk", &[("line", &line)]),
 		),
 		Ok(Ok(output)) => {
 			let stderr = String::from_utf8_lossy(&output.stderr);
@@ -1943,9 +1976,13 @@ async fn ask_command(id: &str, config: &Config) -> (Verdict, String) {
 				.collect();
 			(
 				Verdict::Missed,
-				format!(
-					"`{line}` a échoué ({}). {tail}",
-					output.status.code().unwrap_or(-1)
+				crate::i18n::tf(
+					"permanence.oracle.commandFailed",
+					&[
+						("line", &line),
+						("code", &output.status.code().unwrap_or(-1)),
+						("tail", &tail),
+					],
 				),
 			)
 		}
@@ -1953,11 +1990,11 @@ async fn ask_command(id: &str, config: &Config) -> (Verdict, String) {
 		// échec de la vérification. Les deux ne se traitent pas pareil.
 		Ok(Err(error)) => (
 			Verdict::Undecided,
-			format!("`{line}` n'a pas pu être lancée : {error}"),
+			crate::i18n::tf("permanence.oracle.commandNotLaunched", &[("line", &line), ("error", &error)]),
 		),
 		Err(_) => (
 			Verdict::Undecided,
-			format!("`{line}` n'a rien rendu au bout de dix minutes."),
+			crate::i18n::tf("permanence.oracle.commandTimeout", &[("line", &line)]),
 		),
 	}
 }
@@ -1969,7 +2006,7 @@ async fn ask_ci(key: &str) -> (Verdict, String) {
 		Err(error) => {
 			return (
 				Verdict::Undecided,
-				format!("Les forges n'ont pas répondu : {error}"),
+				crate::i18n::tf("permanence.oracle.forgesSilent", &[("error", &error)]),
 			)
 		}
 	};
@@ -1978,17 +2015,17 @@ async fn ask_ci(key: &str) -> (Verdict, String) {
 		// plus : ce n'est ni un succès ni un échec.
 		return (
 			Verdict::OffTopic,
-			"Ce changement n'existe plus : il a été fusionné ou fermé.".into(),
+			crate::i18n::t("permanence.oracle.changeGone"),
 		);
 	};
 	match change.ci.as_str() {
-		"success" => (Verdict::Reached, "La CI est verte.".into()),
-		"failing" => (Verdict::Missed, "La CI est toujours rouge.".into()),
+		"success" => (Verdict::Reached, crate::i18n::t("permanence.oracle.ciGreen")),
+		"failing" => (Verdict::Missed, crate::i18n::t("permanence.oracle.ciRed")),
 		// En attente : on ne sait pas encore. Attendre serait plus juste, mais
 		// prétendre savoir serait faux.
 		other => (
 			Verdict::Undecided,
-			format!("La CI n'a pas conclu (état : {other})."),
+			crate::i18n::tf("permanence.oracle.ciPending", &[("state", &other)]),
 		),
 	}
 }
@@ -2004,14 +2041,14 @@ async fn ask_comment(key: &str, config: &Config) -> (Verdict, String) {
 	let Some(number) = pr_number_of(key) else {
 		return (
 			Verdict::OffTopic,
-			"Ce changement n'est pas une pull request.".into(),
+			crate::i18n::t("permanence.errors.notPullRequest"),
 		);
 	};
 	let me = crate::integrations::github_login(config).await.to_lowercase();
 	if me.is_empty() {
 		return (
 			Verdict::Undecided,
-			"Le compte GitHub n'a pas pu être établi (`gh` absent ou non connecté).".into(),
+			crate::i18n::t("permanence.oracle.noGithubAccount"),
 		);
 	}
 	match crate::integrations::github_commenters(config, number).await {
@@ -2019,18 +2056,18 @@ async fn ask_comment(key: &str, config: &Config) -> (Verdict, String) {
 			if commenters.iter().any(|login| login.trim().to_lowercase() == me) {
 				(
 					Verdict::Reached,
-					format!("Un commentaire de {me} a été déposé sur #{number}."),
+					crate::i18n::tf("permanence.oracle.commented", &[("me", &me), ("number", &number)]),
 				)
 			} else {
 				(
 					Verdict::Missed,
-					format!("Aucun commentaire de {me} sur #{number}."),
+					crate::i18n::tf("permanence.oracle.notCommented", &[("me", &me), ("number", &number)]),
 				)
 			}
 		}
 		Err(error) => (
 			Verdict::Undecided,
-			format!("GitHub n'a pas répondu : {error}"),
+			crate::i18n::tf("permanence.oracle.githubSilent", &[("error", &error)]),
 		),
 	}
 }
@@ -2039,12 +2076,17 @@ async fn ask_comment(key: &str, config: &Config) -> (Verdict, String) {
 async fn ask_property(id: &str, key: &str) -> (Verdict, String) {
 	let audit = match crate::properties::audit(key.to_string()).await {
 		Ok(audit) => audit,
-		Err(error) => return (Verdict::Undecided, format!("La vérification a échoué : {error}")),
+		Err(error) => {
+			return (
+				Verdict::Undecided,
+				crate::i18n::tf("permanence.oracle.checkFailed", &[("error", &error)]),
+			)
+		}
 	};
 	let Some(check) = audit.checks.iter().find(|check| check.property_id == id) else {
 		return (
 			Verdict::OffTopic,
-			format!("La propriété « {id} » ne s'applique pas à ce changement."),
+			crate::i18n::tf("permanence.oracle.propertyNotApplicable", &[("id", &id)]),
 		);
 	};
 	match check.verdict.as_str() {
@@ -2097,7 +2139,7 @@ async fn engage(mut state: State, app: Option<tauri::AppHandle>) -> Result<State
 		else {
 			if let Some(entry) = state.signals.iter_mut().find(|entry| entry.key == signal.key) {
 				entry.retained = false;
-				entry.dropped = format!("la règle « {} » n'existe plus", signal.rule);
+				entry.dropped = crate::i18n::tf("permanence.dropped.ruleGone", &[("rule", &signal.rule)]);
 			}
 			continue;
 		};
@@ -2135,8 +2177,7 @@ async fn run_engagement(
 			&mut state,
 			&id,
 			Verdict::Undecided,
-			"Node est introuvable : l'agent ne pourrait pas déclarer son intention, et \
-			 un plan lu dans du texte n'est pas un plan.",
+			&crate::i18n::t("permanence.engagement.noNode"),
 		);
 		return store(state);
 	};
@@ -2182,10 +2223,10 @@ async fn run_engagement(
 			&mut state,
 			&id,
 			Verdict::Undecided,
-			&format!("L'agent n'a pas répondu : {error}"),
+			&crate::i18n::tf("permanence.engagement.agentSilent", &[("error", &error)]),
 		);
 		let state = store(state);
-		record_outcome(false, "l'agent n'a pas répondu");
+		record_outcome(false, &crate::i18n::t("permanence.engagement.agentSilentShort"));
 		return state;
 	}
 
@@ -2197,10 +2238,10 @@ async fn run_engagement(
 			&mut state,
 			&id,
 			Verdict::Undecided,
-			"L'agent n'a pas déclaré d'intention. Sans objectif énonçable, rien ne part.",
+			&crate::i18n::t("permanence.engagement.noIntent"),
 		);
 		let state = store(state);
-		record_outcome(false, "aucune intention déclarée");
+		record_outcome(false, &crate::i18n::t("permanence.engagement.noIntentShort"));
 		return state;
 	};
 
@@ -2212,9 +2253,9 @@ async fn run_engagement(
 			let result = if rehearsal {
 				let why = planned.why.trim();
 				if why.is_empty() {
-					"prévu, non exécuté".to_string()
+					crate::i18n::t("permanence.engagement.planned")
 				} else {
-					format!("prévu — {why}")
+					crate::i18n::tf("permanence.engagement.plannedWhy", &[("why", &why)])
 				}
 			} else {
 				String::new()
@@ -2223,8 +2264,8 @@ async fn run_engagement(
 		}
 		if intent.mission {
 			entry.step(
-				"ouvrir une mission",
-				"il faut écrire du code : le travail passera par une mission",
+				&crate::i18n::t("permanence.engagement.openMissionStep"),
+				&crate::i18n::t("permanence.engagement.openMissionWhy"),
 				true,
 			);
 		}
@@ -2237,7 +2278,7 @@ async fn run_engagement(
 			&mut state,
 			&id,
 			Verdict::Rehearsed,
-			"Répétition : le plan est écrit, rien n'a été fait.",
+			&crate::i18n::t("permanence.engagement.rehearsed"),
 		);
 		return store(state);
 	}
@@ -2248,8 +2289,7 @@ async fn run_engagement(
 			&mut state,
 			&id,
 			Verdict::OffTopic,
-			"Il aurait fallu écrire du code, et « ouvrir une mission » n'est pas dans la \
-			 liste blanche. Rien n'a été fait.",
+			&crate::i18n::t("permanence.engagement.missionNotAllowed"),
 		);
 		return store(state);
 	}
@@ -2272,10 +2312,7 @@ async fn run_engagement(
 				&mut state,
 				&id,
 				Verdict::OffTopic,
-				&format!(
-					"La branche d'intégration serait « {branch} », qui est partagée. Rien n'a \
-					 été fait."
-				),
+				&crate::i18n::tf("permanence.engagement.sharedBranch", &[("branch", &branch)]),
 			);
 			return store(state);
 		}
@@ -2285,8 +2322,8 @@ async fn run_engagement(
 					entry.stage = Stage::Running;
 					entry.mission = mission.id.clone();
 					entry.step(
-						"ouvre une mission",
-						&format!("mission « {} »", mission.title),
+						&crate::i18n::t("permanence.engagement.missionOpenedStep"),
+						&crate::i18n::tf("permanence.engagement.missionName", &[("name", &mission.title)]),
 						true,
 					);
 					entry.produced.push(Produced {
@@ -2308,8 +2345,8 @@ async fn run_engagement(
 				if rule.needs_approval {
 					if let Some(entry) = state.engagements.iter_mut().find(|entry| entry.id == id) {
 						entry.step(
-							"attend ton accord",
-							"cette règle redemande la porte humaine : le plan attend",
+							&crate::i18n::t("permanence.engagement.awaitingApprovalStep"),
+							&crate::i18n::t("permanence.engagement.awaitingApprovalWhy"),
 							true,
 						);
 					}
@@ -2325,10 +2362,10 @@ async fn run_engagement(
 					&mut state,
 					&id,
 					Verdict::Undecided,
-					&format!("La mission n'a pas pu être ouverte : {error}"),
+					&crate::i18n::tf("permanence.engagement.missionFailed", &[("error", &error)]),
 				);
 				let state = store(state);
-				record_outcome(false, "mission impossible à ouvrir");
+				record_outcome(false, &crate::i18n::t("permanence.engagement.missionFailedShort"));
 				return state;
 			}
 		}
@@ -2355,7 +2392,7 @@ async fn run_engagement(
 			crate::journal::PERMANENCE,
 			&id,
 			"permanence",
-			&format!("Geste : {}", act.tool.trim()),
+			&crate::i18n::tf("permanence.journal.act", &[("tool", &act.tool.trim())]),
 			&engagement.key,
 			ok,
 			&result,
@@ -2376,12 +2413,15 @@ async fn run_engagement(
 	let posed = intent.acts.len().saturating_sub(refused);
 	let why = match (verdict, intent.acts.is_empty(), posed) {
 		(Verdict::Reached, true, _) => {
-			format!("{why} Aucun geste n'était demandé : la situation s'est résolue sans elle.")
+			crate::i18n::tf("permanence.engagement.resolvedWithoutActs", &[("why", &why)])
 		}
 		(Verdict::Reached, false, 0) => {
-			format!("{why} Aucun geste n'a pu être posé : ce n'est pas elle qui a réglé ça.")
+			crate::i18n::tf("permanence.engagement.resolvedAllRefused", &[("why", &why)])
 		}
-		_ if refused > 0 => format!("{why} {refused} geste(s) refusé(s)."),
+		_ if refused > 0 => crate::i18n::tf(
+			"permanence.engagement.someRefused",
+			&[("why", &why), ("count", &refused)],
+		),
 		_ => why,
 	};
 	close(&mut state, &id, verdict, &why);
@@ -2414,9 +2454,7 @@ async fn perform(
 ) -> std::result::Result<(String, Option<Produced>), String> {
 	let power = act.tool.trim();
 	if !config.permanence.allows(power) {
-		return Err(format!(
-			"« {power} » n'est pas dans la liste blanche : le geste n'a pas été posé."
-		));
+		return Err(crate::i18n::tf("permanence.acts.notAllowed", &[("power", &power)]));
 	}
 
 	// **Aucun geste ne touche une branche partagée.** Vérifié ici, une fois,
@@ -2428,10 +2466,7 @@ async fn perform(
 		&& config.permanence.protected_branch(&branch, &declared)
 		&& writes_to_branch(power)
 	{
-		return Err(format!(
-			"« {branch} » est une branche partagée : la Permanence n'y écrit jamais. Elle ne \
-			 travaille que sur des branches à elle."
-		));
+		return Err(crate::i18n::tf("permanence.acts.sharedBranch", &[("branch", &branch)]));
 	}
 
 	// Le numéro de la PR, quand la clé en porte un. Les gestes GitHub n'ont pas
@@ -2441,27 +2476,30 @@ async fn perform(
 	match power {
 		"rerun_pipeline" => {
 			if branch.is_empty() {
-				return Err("Impossible de retrouver la branche de ce changement.".into());
+				return Err(crate::i18n::t("permanence.acts.noBranch"));
 			}
 			match crate::integrations::github_rerun(config, &branch).await {
-				Ok(id) => Ok((format!("run #{id} relancé"), None)),
+				Ok(id) => Ok((crate::i18n::tf("permanence.acts.rerun", &[("id", &id)]), None)),
 				Err(error) => Err(error.to_string()),
 			}
 		}
 		"set_label" => {
 			let label = act.value.trim();
 			if label.is_empty() {
-				return Err("Aucun label demandé.".into());
+				return Err(crate::i18n::t("permanence.acts.noLabel"));
 			}
 			let Some(number) = number else {
-				return Err("Ce changement n'est pas une pull request.".into());
+				return Err(crate::i18n::t("permanence.errors.notPullRequest"));
 			};
 			match crate::integrations::github_add_label(config, number, label).await {
 				Ok(()) => Ok((
-					format!("label « {label} » posé"),
+					crate::i18n::tf("permanence.acts.labelSet", &[("label", &label)]),
 					Some(Produced {
 						kind: "label".into(),
-						label: format!("{label} sur #{number}"),
+						label: crate::i18n::tf(
+							"permanence.acts.labelOn",
+							&[("label", &label), ("number", &number)],
+						),
 						reference: label.to_string(),
 						url: String::new(),
 						undoable: true,
@@ -2473,15 +2511,15 @@ async fn perform(
 		"run_command" => {
 			let id = act.value.trim();
 			let Some(command) = config.commands.iter().find(|entry| entry.id == id) else {
-				return Err(format!("La commande « {id} » n'est pas déclarée."));
+				return Err(crate::i18n::tf("permanence.acts.commandUnknown", &[("id", &id)]));
 			};
 			// Une commande sensible ne se joue jamais sans quelqu'un devant :
 			// le drapeau vient de l'équipe, et le cocher dans la liste blanche
 			// ne doit pas suffire à l'effacer.
 			if command.danger {
-				return Err(format!(
-					"« {} » est marquée sensible : elle ne se lance pas sans toi.",
-					command.label
+				return Err(crate::i18n::tf(
+					"permanence.acts.commandSensitive",
+					&[("name", &command.label)],
 				));
 			}
 			match ask_command(id, config).await {
@@ -2492,16 +2530,14 @@ async fn perform(
 		"create_branch" => {
 			let name = act.value.trim();
 			if name.is_empty() {
-				return Err("Aucun nom de branche demandé.".into());
+				return Err(crate::i18n::t("permanence.acts.noBranchName"));
 			}
 			// Créer une branche qui porte le nom d'une branche partagée, c'est
 			// se donner le droit d'y écrire au geste suivant.
 			if config.permanence.protected_branch(name, &declared) {
-				return Err(format!(
-					"« {name} » est un nom de branche partagée : elle ne le prendra pas."
-				));
+				return Err(crate::i18n::tf("permanence.acts.sharedBranchName", &[("name", &name)]));
 			}
-			let repo = main_repo(config).ok_or("Aucun dépôt local.")?;
+			let repo = main_repo(config).ok_or_else(|| crate::i18n::t("permanence.acts.noRepo"))?;
 			match crate::git::run_git(
 				std::path::Path::new(&repo),
 				&["branch", name],
@@ -2509,7 +2545,7 @@ async fn perform(
 			.await
 			{
 				Ok(_) => Ok((
-					format!("branche « {name} » créée"),
+					crate::i18n::tf("permanence.acts.branchCreated", &[("name", &name)]),
 					Some(Produced {
 						kind: "branch".into(),
 						label: name.to_string(),
@@ -2524,25 +2560,21 @@ async fn perform(
 		"open_worktree" => {
 			let branch = act.value.trim();
 			if branch.is_empty() {
-				return Err("Aucune branche pour le worktree.".into());
+				return Err(crate::i18n::t("permanence.acts.noWorktreeBranch"));
 			}
 			if config.permanence.protected_branch(branch, &declared) {
-				return Err(format!(
-					"« {branch} » est une branche partagée : elle ne la sort pas en worktree, \
-					 sinon un agent y écrirait au geste suivant."
+				return Err(crate::i18n::tf(
+					"permanence.acts.sharedWorktree",
+					&[("branch", &branch)],
 				));
 			}
-			let repo = main_repo(config).ok_or("Aucun dépôt local.")?;
+			let repo = main_repo(config).ok_or_else(|| crate::i18n::t("permanence.acts.noRepo"))?;
 			// La commande de l'équipe si elle en a une, `git worktree add`
 			// sinon : le cockpit ne réinvente pas la façon de sortir une
 			// branche, il joue celle qui est déclarée.
 			let (line, by_agent) = config.workflow.worktree_creation(branch, "");
 			if by_agent {
-				return Err(
-					"La création de worktree passe par une commande d'agent : elle demande \
-					 quelqu'un devant."
-						.into(),
-				);
+				return Err(crate::i18n::t("permanence.acts.worktreeByAgent"));
 			}
 			match tokio::process::Command::new("zsh")
 				.arg("-lc")
@@ -2552,7 +2584,7 @@ async fn perform(
 				.await
 			{
 				Ok(output) if output.status.success() => Ok((
-					format!("worktree de « {branch} » sorti"),
+					crate::i18n::tf("permanence.acts.worktreeOpened", &[("branch", &branch)]),
 					Some(Produced {
 						kind: "worktree".into(),
 						label: branch.to_string(),
@@ -2561,24 +2593,33 @@ async fn perform(
 						undoable: true,
 					}),
 				)),
-				Ok(output) => Err(format!(
-					"`{line}` a échoué : {}",
-					String::from_utf8_lossy(&output.stderr)
-						.lines()
-						.next()
-						.unwrap_or_default()
-						.chars()
-						.take(160)
-						.collect::<String>()
+				Ok(output) => Err(crate::i18n::tf(
+					"permanence.acts.lineFailed",
+					&[
+						("line", &line),
+						(
+							"error",
+							&String::from_utf8_lossy(&output.stderr)
+								.lines()
+								.next()
+								.unwrap_or_default()
+								.chars()
+								.take(160)
+								.collect::<String>(),
+						),
+					],
 				)),
-				Err(error) => Err(format!("`{line}` n'a pas pu être lancée : {error}")),
+				Err(error) => Err(crate::i18n::tf(
+					"permanence.oracle.commandNotLaunched",
+					&[("line", &line), ("error", &error)],
+				)),
 			}
 		}
 		"open_draft_pr" => {
 			if branch.is_empty() {
-				return Err("Impossible de retrouver la branche de ce changement.".into());
+				return Err(crate::i18n::t("permanence.acts.noBranch"));
 			}
-			let repo = main_repo(config).ok_or("Aucun dépôt local.")?;
+			let repo = main_repo(config).ok_or_else(|| crate::i18n::t("permanence.acts.noRepo"))?;
 			let folder = std::path::Path::new(&repo);
 			let base = crate::git::default_branch(folder).await;
 			let title = if act.value.trim().is_empty() {
@@ -2595,10 +2636,10 @@ async fn perform(
 			.await
 			{
 				Ok(url) => Ok((
-					format!("PR en brouillon ouverte : {url}"),
+					crate::i18n::tf("permanence.acts.draftOpened", &[("url", &url)]),
 					Some(Produced {
 						kind: "pr".into(),
-						label: format!("brouillon · {branch}"),
+						label: crate::i18n::tf("permanence.acts.draftLabel", &[("branch", &branch)]),
 						reference: branch.clone(),
 						url,
 						undoable: false,
@@ -2615,9 +2656,9 @@ async fn perform(
 		// dans ce qu'elle tient pour que « Tout arrêter » le voie.
 		"start_agent" => {
 			if branch.is_empty() {
-				return Err("Impossible de retrouver la branche de ce changement.".into());
+				return Err(crate::i18n::t("permanence.acts.noBranch"));
 			}
-			let repo = main_repo(config).ok_or("Aucun dépôt local.")?;
+			let repo = main_repo(config).ok_or_else(|| crate::i18n::t("permanence.acts.noRepo"))?;
 			// Un agent lancé dans le dépôt principal écrirait sur la branche
 			// courante — celle sur laquelle quelqu'un travaille peut-être en ce
 			// moment. Sans worktree dédié, on refuse.
@@ -2628,26 +2669,20 @@ async fn perform(
 					.flatten()
 					.map(|path| path.to_string_lossy().to_string());
 			let Some(worktree) = worktree else {
-				return Err(format!(
-					"La branche « {branch} » n'est pas sortie en worktree : un agent lancé \
-					 dans le dépôt principal écrirait là où tu travailles."
-				));
+				return Err(crate::i18n::tf("permanence.acts.noWorktree", &[("branch", &branch)]));
 			};
 
 			let Some(app) = app else {
-				return Err(
-					"Le lancement d'agent demande l'application : il ne part pas depuis un \
-					 banc d'essai."
-						.into(),
-				);
+				return Err(crate::i18n::t("permanence.acts.needsApp"));
 			};
 
 			let prompt = format!(
-				"{}\n\nObjectif : {}\n\nTu travailles seul, sans personne pour te répondre : \
-				 ne pose pas de question, et signale ce qui te manque plutôt que de l'inventer. \
-				 Commite ce que tu produis — ce qui n'est pas commité n'existe pas.",
+				"{}\n\nGoal: {}\n\nYou are working alone, with nobody to answer you: do not ask \
+				 questions, and report what you are missing rather than inventing it. Commit what \
+				 you produce — what is not committed does not exist.\n\n{}",
 				act.value.trim(),
-				engagement.goal
+				engagement.goal,
+				crate::i18n::reply_directive()
 			);
 			let agents = <tauri::AppHandle as tauri::Manager<tauri::Wry>>::state::<
 				crate::agent::SharedAgents,
@@ -2668,12 +2703,13 @@ async fn perform(
 				Ok(session) => {
 					// Inscrit sur-le-champ : « Tout arrêter » ne coupe que ce
 					// qu'elle tient, et un agent lancé sans l'être survivrait.
-					hold("agent", &session, &format!("agent sur {branch}"));
+					let label = crate::i18n::tf("permanence.acts.agentOn", &[("branch", &branch)]);
+					hold("agent", &session, &label);
 					Ok((
-						format!("agent lancé dans {worktree}"),
+						crate::i18n::tf("permanence.acts.agentStarted", &[("worktree", &worktree)]),
 						Some(Produced {
 							kind: "agent".into(),
-							label: format!("agent sur {branch}"),
+							label,
 							reference: session,
 							url: String::new(),
 							undoable: true,
@@ -2685,21 +2721,21 @@ async fn perform(
 		}
 		"comment" => {
 			let Some(number) = number else {
-				return Err("Ce changement n'est pas une pull request.".into());
+				return Err(crate::i18n::t("permanence.errors.notPullRequest"));
 			};
 			let body = act.value.trim();
 			if body.is_empty() {
-				return Err("Aucun texte à écrire.".into());
+				return Err(crate::i18n::t("permanence.acts.noText"));
 			}
 			if let Err(refus) = may_comment(config, number).await {
 				return Err(refus);
 			}
 			match crate::integrations::github_comment(config, number, body).await {
 				Ok(url) => Ok((
-					"commentaire déposé, signé".into(),
+					crate::i18n::t("permanence.acts.commented"),
 					Some(Produced {
 						kind: "comment".into(),
-						label: format!("commentaire sur #{number}"),
+						label: crate::i18n::tf("permanence.acts.commentOn", &[("number", &number)]),
 						reference: number.to_string(),
 						url,
 						// Un commentaire se supprime sur GitHub, mais il a été lu :
@@ -2710,7 +2746,7 @@ async fn perform(
 				Err(error) => Err(error.to_string()),
 			}
 		}
-		other => Err(format!("Le cockpit ne sait pas poser « {other} ».")),
+		other => Err(crate::i18n::tf("permanence.acts.unknown", &[("tool", &other)])),
 	}
 }
 
@@ -2769,13 +2805,10 @@ async fn branch_of(key: &str, _config: &Config) -> String {
 async fn may_comment(config: &Config, number: u64) -> std::result::Result<(), String> {
 	let comment = &config.permanence.comment;
 	if !comment.enabled {
-		return Err("Le pouvoir de commenter n'est pas activé.".into());
+		return Err(crate::i18n::t("permanence.comment.disabled"));
 	}
 	if comment.scopes.is_empty() {
-		return Err(
-			"Aucune condition n'est cochée : elle ne commente nulle part, par construction."
-				.into(),
-		);
+		return Err(crate::i18n::t("permanence.comment.noScopes"));
 	}
 
 	let me = crate::integrations::github_login(config).await.to_lowercase();
@@ -2815,9 +2848,7 @@ async fn may_comment(config: &Config, number: u64) -> std::result::Result<(), St
 		}
 	}
 
-	Err(format!(
-		"Aucune condition n'est vraie sur #{number} : elle n'a pas le droit d'y écrire."
-	))
+	Err(crate::i18n::tf("permanence.comment.noCondition", &[("number", &number)]))
 }
 
 /// Interroge l'oracle des engagements dont le travail vient de s'achever.
@@ -2841,10 +2872,10 @@ async fn ripen(mut state: State) -> Result<State> {
 				&mut state,
 				&id,
 				Verdict::Undecided,
-				"La mission a disparu : impossible de dire ce qu'il en est advenu.",
+				&crate::i18n::t("permanence.engagement.missionGone"),
 			);
 			state = store(state);
-			record_outcome(false, "mission disparue");
+			record_outcome(false, &crate::i18n::t("permanence.engagement.missionGoneShort"));
 			continue;
 		};
 
@@ -2868,14 +2899,14 @@ async fn ripen(mut state: State) -> Result<State> {
 			// que le travail n'a pas eu lieu.
 			(
 				Verdict::Missed,
-				format!("La mission a échoué. {}", mission.note),
+				crate::i18n::tf("permanence.engagement.missionFailedNote", &[("note", &mission.note)]),
 			)
 		} else {
 			ask_oracle(&oracle, &key, &config).await
 		};
 
 		if let Some(engagement) = state.engagements.iter_mut().find(|entry| entry.id == id) {
-			engagement.step("interroge l'oracle", &why, !verdict.failed());
+			engagement.step(&crate::i18n::t("permanence.engagement.askOracle"), &why, !verdict.failed());
 			if !mission.pr_url.is_empty() {
 				engagement.produced.push(Produced {
 					kind: "pr".into(),
@@ -2925,18 +2956,14 @@ fn delegate(
 		crate::journal::PERMANENCE,
 		&engagement.id,
 		"mission",
-		"Mission ouverte par la Permanence",
+		&crate::i18n::t("permanence.journal.missionOpened"),
 		&mission.title,
 		true,
-		&format!(
-			"règle « {} »{}",
-			engagement.rule,
-			if rule.needs_approval {
-				" — le plan attend ton accord"
-			} else {
-				""
-			}
-		),
+		&if rule.needs_approval {
+			crate::i18n::tf("permanence.journal.ruleAwaiting", &[("rule", &engagement.rule)])
+		} else {
+			crate::i18n::tf("permanence.journal.rule", &[("rule", &engagement.rule)])
+		},
 	);
 	Ok(mission)
 }
@@ -3049,8 +3076,8 @@ mod tests {
 			..change("k", "success", "changes_requested")
 		};
 		let contexte = signal_context(&demande);
-		assert!(contexte.contains("revue demandée à : octocat, autre"));
-		assert!(contexte.contains("auteur : moi"));
+		assert!(contexte.contains("review requested from: octocat, autre"));
+		assert!(contexte.contains("author: moi"));
 	}
 
 	#[test]
@@ -3100,14 +3127,14 @@ mod tests {
 	#[test]
 	fn le_contexte_linear_dit_l_assignation_et_la_priorite() {
 		let contexte = linear_context(&linear_issue("Urgent"));
-		assert!(contexte.contains("assigné à moi"));
+		assert!(contexte.contains("assigned to me"));
 		assert!(contexte.contains("Urgent"));
 	}
 
 	#[test]
 	fn un_ticket_sans_priorite_ne_fait_pas_planter_le_contexte() {
 		assert_eq!(linear_fingerprint(&linear_issue("")), "");
-		assert!(linear_context(&linear_issue("")).contains("sans priorité"));
+		assert!(linear_context(&linear_issue("")).contains("no priority"));
 	}
 
 	/// Les portes se ferment dans l'ordre où elles coûtent : un service
@@ -3214,8 +3241,8 @@ mod tests {
 	/// distinguerait pas d'un signal qu'on n'a pas regardé.
 	#[test]
 	fn une_raison_vide_est_remplacee() {
-		assert_eq!(reason_of(""), "écarté par le tri");
-		assert_eq!(reason_of("   "), "écarté par le tri");
+		assert_eq!(reason_of(""), "dismissed by triage");
+		assert_eq!(reason_of("   "), "dismissed by triage");
 		assert_eq!(reason_of("  la CI est déjà repartie  "), "la CI est déjà repartie");
 		assert_eq!(reason_of(&"x".repeat(400)).chars().count(), 160);
 	}
@@ -3240,7 +3267,7 @@ mod tests {
 		assert!(prompt.contains("github:acme/produit#412"));
 		assert!(prompt.contains("octocat"), "le compte GitHub est donné au tri");
 		assert!(
-			prompt.contains("Dans le doute, écarte"),
+			prompt.contains("When in doubt, dismiss"),
 			"le biais doit être dit : retenir à tort coûte, écarter à tort ne coûte rien"
 		);
 	}
@@ -3437,7 +3464,7 @@ mod tests {
 			..Default::default()
 		};
 		let refus = cannot_open(&occupee, &config, "k").expect("refusé");
-		assert!(refus.contains("tourne déjà"), "{refus}");
+		assert!(refus.contains("already running"), "{refus}");
 
 		// Un engagement terminé ne bloque plus la place.
 		let finie = State {
@@ -3457,7 +3484,7 @@ mod tests {
 		let mut state = State::default();
 		state.quarantine_for("k", 6, now());
 		let refus = cannot_open(&state, &config, "k").expect("refusé");
-		assert!(refus.contains("laissé tranquille"), "{refus}");
+		assert!(refus.contains("left alone"), "{refus}");
 		assert!(cannot_open(&state, &config, "autre").is_none());
 	}
 
@@ -3478,7 +3505,7 @@ mod tests {
 			state.engagements.push(done);
 		}
 		let refus = cannot_open(&state, &config, "neuf").expect("refusé");
-		assert!(refus.contains("plafond du jour"), "{refus}");
+		assert!(refus.contains("daily cap"), "{refus}");
 	}
 
 	/// Fermer met l'objet en quarantaine, y compris après une répétition :
@@ -3529,7 +3556,7 @@ mod tests {
 		)
 		.await;
 		assert_eq!(verdict, Verdict::Undecided);
-		assert!(why.contains("Aucun oracle"), "{why}");
+		assert!(why.contains("No oracle"), "{why}");
 	}
 
 	/// Un type d'oracle que le cockpit ne sait pas interroger est indécidable,
@@ -3555,7 +3582,7 @@ mod tests {
 	async fn une_commande_absente_est_indecidable() {
 		let (verdict, why) = ask_command("build", &Config::default()).await;
 		assert_eq!(verdict, Verdict::Undecided);
-		assert!(why.contains("n'est plus déclarée"), "{why}");
+		assert!(why.contains("no longer declared"), "{why}");
 	}
 
 	/// Vérifier ne doit rien changer : une commande marquée sensible ne peut
@@ -3575,7 +3602,7 @@ mod tests {
 		};
 		let (verdict, why) = ask_command("deploy", &config).await;
 		assert_eq!(verdict, Verdict::Undecided);
-		assert!(why.contains("sensible"), "{why}");
+		assert!(why.contains("sensitive"), "{why}");
 	}
 
 	/// Un vrai regard, sur la vraie configuration du poste.
@@ -3778,7 +3805,7 @@ mod tests {
 		let refus = perform(&act, &engagement("e1", "github:acme/p#12", Stage::Running), &config, None)
 			.await
 			.expect_err("refusé");
-		assert!(refus.contains("liste blanche"), "{refus}");
+		assert!(refus.contains("allow list"), "{refus}");
 	}
 
 	/// Un geste inconnu est refusé plutôt qu'ignoré : le silence laisserait
@@ -3799,7 +3826,7 @@ mod tests {
 		let refus = perform(&act, &engagement("e1", "k", Stage::Running), &config, None)
 			.await
 			.expect_err("refusé");
-		assert!(refus.contains("ne sait pas poser"), "{refus}");
+		assert!(refus.contains("does not know how to perform"), "{refus}");
 	}
 
 	/// Cocher `run_command` dans la liste blanche n'efface pas le drapeau
@@ -3827,7 +3854,7 @@ mod tests {
 		let refus = perform(&act, &engagement("e1", "k", Stage::Running), &config, None)
 			.await
 			.expect_err("refusé");
-		assert!(refus.contains("sensible"), "{refus}");
+		assert!(refus.contains("sensitive"), "{refus}");
 	}
 
 	/// Le pouvoir de commenter ne s'active pas, il se borne : allumé sans
@@ -3846,13 +3873,13 @@ mod tests {
 			..Default::default()
 		};
 		let refus = may_comment(&config, 412).await.expect_err("refusé");
-		assert!(refus.contains("par construction"), "{refus}");
+		assert!(refus.contains("by design"), "{refus}");
 
 		// Éteint, c'est refusé aussi, mais pour une autre raison — et les deux
 		// se corrigent à des endroits différents.
 		let eteint = Config::default();
 		let refus = may_comment(&eteint, 412).await.expect_err("refusé");
-		assert!(refus.contains("n'est pas activé"), "{refus}");
+		assert!(refus.contains("not enabled"), "{refus}");
 	}
 
 	/// Une PR nommément autorisée passe. C'est la trace du « oui, ici ».
@@ -3908,12 +3935,12 @@ mod tests {
 			assert!(prompt.contains(never), "« {never} » doit être dit");
 		}
 		assert!(
-			prompt.contains("Tu ne fais rien tout de suite"),
+			prompt.contains("You do nothing right away"),
 			"le plan précède l'action"
 		);
 		// Liste blanche vide : on le dit, plutôt que de laisser l'agent
 		// supposer qu'il peut tout.
-		assert!(prompt.contains("Rien n'est coché"));
+		assert!(prompt.contains("Nothing is checked"));
 	}
 
 	/// L'arrêt d'urgence ne vaut que ce que vaut la liste de ce qu'elle tient :

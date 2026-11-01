@@ -4,6 +4,7 @@ import { memo, useEffect, useState } from "react";
 import { openLightbox } from "@/components/Lightbox";
 import { MediaThumb } from "@/components/MediaThumb";
 import { clock, PHASE_LABELS, type Film as FilmData, type Frame, type Phase } from "@/lib/film";
+import { useTranslation } from "react-i18next";
 
 /**
  * Le film d'un épisode, dessiné : chaque image est un geste de l'agent, mis
@@ -28,6 +29,7 @@ const PHASE_COLORS: Record<Phase, string> = {
 const FRAME_SECONDS = 2.4;
 
 export function FrameArt({ frame, large }: { frame: Frame; large?: boolean }) {
+	const { t } = useTranslation("components1");
 	const size = large ? "text-[13px]" : "text-[10px]";
 	switch (frame.kind) {
 		case "read":
@@ -62,7 +64,7 @@ export function FrameArt({ frame, large }: { frame: Frame; large?: boolean }) {
 							large ? "text-[15px]" : "line-clamp-4 text-[11px]",
 						)}
 					>
-						« {frame.quote} »
+						{t("film.quote", { quote: frame.quote })}
 					</p>
 				</div>
 			);
@@ -116,13 +118,14 @@ export const FilmStrip = memo(function FilmStrip({
 	/** Ouvre la salle sur cette image. */
 	onOpen?: (index: number) => void;
 }) {
+	const { t } = useTranslation("components1");
 	if (film.frames.length < 2) return null;
 	return (
 		<div className="flex flex-col gap-1.5">
 			<div className="flex items-baseline gap-2">
-				<span className="text-[10.5px] font-semibold tracking-[0.05em] text-ink-muted uppercase">Le film du tour</span>
+				<span className="text-[10.5px] font-semibold tracking-[0.05em] text-ink-muted uppercase">{t("film.title")}</span>
 				<span className="text-[10.5px] text-ink-faint">
-					{film.calls} appel{film.calls > 1 ? "s" : ""}
+					{t("film.calls", { count: film.calls })}
 					{film.duration ? ` · ${clock(film.duration)}` : ""}
 				</span>
 			</div>
@@ -193,6 +196,7 @@ export function PhaseBar({ film, playhead }: { film: FilmData; playhead?: number
  * chaque image se dessine de ce que le cockpit a déjà sous la main.
  */
 export function FilmTheater({ film, start = 0 }: { film: FilmData; start?: number }) {
+	const { t } = useTranslation("components1");
 	const [index, setIndex] = useState(start);
 	const [playing, setPlaying] = useState(true);
 	const count = film.frames.length;
@@ -207,7 +211,7 @@ export function FilmTheater({ film, start = 0 }: { film: FilmData; start?: numbe
 	if (count === 0) {
 		return (
 			<p className="px-4 py-10 text-center text-[12px] text-ink-faint">
-				Rien à filmer pour l'instant : le film se fabrique à partir des gestes de l'agent.
+				{t("film.empty")}
 			</p>
 		);
 	}
@@ -226,7 +230,7 @@ export function FilmTheater({ film, start = 0 }: { film: FilmData; start?: numbe
 				<div className="flex items-center gap-3 px-4 py-2.5">
 					<button
 						type="button"
-						aria-label={playing ? "Mettre en pause" : "Lire"}
+						aria-label={playing ? t("film.pause") : t("film.play")}
 						onClick={() => setPlaying((value) => !value)}
 						className="focus-ring grid size-8 place-items-center rounded-full bg-accent text-accent-ink"
 					>
@@ -237,7 +241,7 @@ export function FilmTheater({ film, start = 0 }: { film: FilmData; start?: numbe
 							<button
 								key={entry.key}
 								type="button"
-								aria-label={`Image ${position + 1} : ${entry.caption}`}
+								aria-label={t("film.frame", { position: position + 1, caption: entry.caption })}
 								onClick={() => {
 									setIndex(position);
 									setPlaying(false);

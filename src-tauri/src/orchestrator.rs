@@ -85,22 +85,22 @@ async function call(tool, input) {
     }
     await new Promise((resolve) => setTimeout(resolve, 200));
   }
-  return { ok: false, error: "Le cockpit n'a pas répondu." };
+  return { ok: false, error: "Cockpit did not answer." };
 }
 
 const TOOLS = [
   {
     name: "understand",
     description:
-      "Mission guidée, première étape : soumet ce que tu as compris du ticket. 10 lignes au plus, écrites pour un développeur qui découvre le ticket — ce qu'on demande, pourquoi, ce qui est hors périmètre. Pas de plan, pas de découpage. Ce que tu n'as pas su trancher va dans `questions`. L'utilisateur valide ou corrige : attends sa réponse.",
+      "Guided mission, first step: submit what you understood of the ticket. 10 lines at most, written for a developer discovering the ticket — what is asked, why, what is out of scope. No plan, no breakdown. Whatever you could not settle goes in `questions`. The user approves or corrects: wait for their answer.",
     inputSchema: {
       type: "object",
       properties: {
-        summary: { type: "string", description: "La synthèse, une idée par ligne, 10 lignes au plus." },
+        summary: { type: "string", description: "The summary, one idea per line, 10 lines at most." },
         questions: {
           type: "array",
           items: { type: "string" },
-          description: "Les ambiguïtés qui changent vraiment le travail, 5 au plus. Vide si tout est clair.",
+          description: "The ambiguities that really change the work, 5 at most. Empty if everything is clear.",
         },
       },
       required: ["summary"],
@@ -109,15 +109,15 @@ const TOOLS = [
   {
     name: "approach",
     description:
-      "Mission guidée, deuxième étape, une fois ta compréhension validée : soumet comment tu comptes t'y prendre. Des étapes lisibles par un humain (quoi, où dans le code, dans quel ordre, quels risques), 15 lignes au plus — sans encore répartir entre exécutants. L'utilisateur valide ou corrige : attends sa réponse avant `plan`.",
+      "Guided mission, second step, once your understanding is approved: submit how you intend to go about it. Steps a human can read (what, where in the code, in which order, which risks), 15 lines at most — without splitting between workers yet. The user approves or corrects: wait for their answer before `plan`.",
     inputSchema: {
       type: "object",
       properties: {
-        summary: { type: "string", description: "L'approche, 15 lignes au plus." },
+        summary: { type: "string", description: "The approach, 15 lines at most." },
         questions: {
           type: "array",
           items: { type: "string" },
-          description: "Les choix que tu préfères faire valider, 5 au plus.",
+          description: "The choices you would rather have approved, 5 at most.",
         },
       },
       required: ["summary"],
@@ -126,26 +126,26 @@ const TOOLS = [
   {
     name: "plan",
     description:
-      "Soumet le découpage de la mission. Les tâches attendent ensuite l'accord de l'utilisateur : rien ne démarre avant.",
+      "Submit the mission breakdown. The tasks then wait for the user's approval: nothing starts before that.",
     inputSchema: {
       type: "object",
       properties: {
-        summary: { type: "string", description: "Le plan en quelques phrases." },
+        summary: { type: "string", description: "The plan in a few sentences." },
         tasks: {
           type: "array",
-          description: "Une entrée par exécutant.",
+          description: "One entry per worker.",
           items: {
             type: "object",
             properties: {
-              role: { type: "string", description: "Rôle du catalogue : backend, frontend, qa, review." },
+              role: { type: "string", description: "Catalog role: backend, frontend, qa, review." },
               title: { type: "string" },
-              brief: { type: "string", description: "Consigne complète, contrats compris." },
+              brief: { type: "string", description: "Complete instructions, contracts included." },
               scope: {
                 type: "array",
                 items: { type: "string" },
-                description: "Chemins où cette tâche peut écrire. Toute écriture ailleurs sera refusée.",
+                description: "Paths this task may write to. Any write elsewhere will be refused.",
               },
-              base: { type: "string", description: "Branche de départ ; vide = branche d'intégration." },
+              base: { type: "string", description: "Starting branch; empty = integration branch." },
               branch: { type: "string" },
             },
             required: ["role", "title"],
@@ -157,13 +157,13 @@ const TOOLS = [
   },
   {
     name: "status",
-    description: "État de la mission et de chacune de ses tâches.",
+    description: "State of the mission and of each of its tasks.",
     inputSchema: { type: "object", properties: {} },
   },
   {
     name: "spawn",
     description:
-      "Crée la branche et le worktree d'une tâche approuvée, puis lance son exécutant. Refusé tant que le plan n'est pas approuvé.",
+      "Creates the branch and worktree of an approved task, then launches its worker. Refused until the plan is approved.",
     inputSchema: {
       type: "object",
       properties: { taskId: { type: "string" } },
@@ -173,7 +173,7 @@ const TOOLS = [
   {
     name: "rework",
     description:
-      "Renvoie une tâche en correction avec ce qu'on lui reproche. À appeler quand une recette ou une relecture refuse : la tâche repart dans son worktree, son travail intact, et les vérifications rejugeront ensuite. C'est ainsi qu'un verdict redescend jusqu'à celui qui doit corriger.",
+      "Sends a task back for rework with what is wrong with it. Call it when QA or a review rejects: the task restarts in its worktree, its work intact, and the checks will judge again afterwards. This is how a verdict travels down to whoever must fix it.",
     inputSchema: {
       type: "object",
       properties: {
@@ -181,7 +181,7 @@ const TOOLS = [
         reason: {
           type: "string",
           description:
-            "Ce qui doit être corrigé, précisément : ce texte s'ajoute à la consigne de l'exécutant, qui n'aura pas lu le rapport.",
+            "What must be fixed, precisely: this text is appended to the worker's instructions, and the worker will not have read the report.",
         },
       },
       required: ["taskId", "reason"],
@@ -189,7 +189,7 @@ const TOOLS = [
   },
   {
     name: "collect",
-    description: "Ce qu'une tâche a produit : commits et fichiers touchés.",
+    description: "What a task produced: commits and files touched.",
     inputSchema: {
       type: "object",
       properties: { taskId: { type: "string" } },
@@ -199,14 +199,14 @@ const TOOLS = [
   {
     name: "report",
     description:
-      "Enregistre le compte rendu de la mission : ce qui a été fait, comment ça marche, où regarder, comment le vérifier. À écrire pour quelqu'un qui n'a pas suivi le travail.",
+      "Records the mission report: what was done, how it works, where to look, how to verify it. Write it for someone who did not follow the work.",
     inputSchema: {
       type: "object",
       properties: {
         summary: {
           type: "string",
           description:
-            "En markdown, court et concret : ce qui change pour l'utilisateur, les points d'entrée du code, les contrats entre les parties, ce qu'il faut savoir pour reprendre.",
+            "In Markdown, short and concrete: what changes for the user, the entry points in the code, the contracts between the parts, what one needs to know to pick it up.",
         },
       },
       required: ["summary"],
@@ -215,21 +215,21 @@ const TOOLS = [
   {
     name: "pr",
     description:
-      "Ouvre la pull request de la branche d'intégration, clôt la mission et range les worktrees. À n'appeler qu'une fois tout intégré et validé. Si l'équipe ouvre ses PR avec une commande du dépôt, l'outil te la rend au premier appel : joue-la, puis rappelle `pr` avec `url`.",
+      "Opens the pull request of the integration branch, closes the mission and cleans up the worktrees. Only call it once everything is integrated and approved. If the team opens its PRs with a repository command, the tool gives it back to you on the first call: run it, then call `pr` again with `url`.",
     inputSchema: {
       type: "object",
       properties: {
         title: { type: "string" },
-        body: { type: "string", description: "Ce que la mission change, et comment le vérifier." },
+        body: { type: "string", description: "What the mission changes, and how to verify it." },
         base: {
           type: "string",
           description:
-            "Branche sur laquelle greffer la PR. À ne renseigner que si la mission prolonge un travail en cours : la PR s'empile alors dessus et ne montre que ce que la mission ajoute. Vide = branche par défaut du dépôt.",
+            "Branch to base the PR on. Only fill it in if the mission extends work in progress: the PR then stacks on top of it and only shows what the mission adds. Empty = the repository's default branch.",
         },
         url: {
           type: "string",
           description:
-            "Adresse d'une pull request déjà ouverte — celle que la commande d'équipe vient de produire. Renseignée, le cockpit n'ouvre rien : il clôt la mission sur cette PR.",
+            "URL of a pull request that is already open — the one the team command just produced. When set, Cockpit opens nothing: it closes the mission on this PR.",
         },
       },
     },
@@ -237,7 +237,7 @@ const TOOLS = [
   {
     name: "integrate",
     description:
-      "Fusionne les branches livrées dans la branche d'intégration. Rend les conflits à résoudre, sans rien forcer.",
+      "Merges the delivered branches into the integration branch. Returns the conflicts to resolve, without forcing anything.",
     inputSchema: { type: "object", properties: {} },
   },
 ];
@@ -410,9 +410,9 @@ async fn run(app: &tauri::AppHandle, call: &Call) -> Result<Value> {
 			Ok(json!({
 				"state": step.awaiting(),
 				"message": format!(
-					"Ta {} est soumise. L'utilisateur la relit : arrête-toi là, sa réponse te \
-					 parviendra par message.",
-					step.label()
+					"Your {} has been submitted. The user is reviewing it: stop here, their answer \
+					 will reach you as a message.",
+					step.protocol_label()
 				),
 			}))
 		}
@@ -425,15 +425,15 @@ async fn run(app: &tauri::AppHandle, call: &Call) -> Result<Value> {
 				.unwrap_or_default();
 			let tasks = read_tasks(&call.input, &mission.branch)?;
 			if tasks.is_empty() {
-				return Err(CockpitError::msg("Un plan sans tâche n'engage personne."));
+				return Err(CockpitError::msg("A plan without tasks commits no one."));
 			}
 			let count = tasks.len();
 			mission::submit_plan(&mission.id, summary, tasks)?;
 			Ok(json!({
 				"state": "awaitingApproval",
 				"tasks": count,
-				"message": "Plan enregistré. Il attend l'accord de l'utilisateur : \
-				            n'appelle `spawn` qu'une fois la mission passée en `running`.",
+				"message": "Plan recorded. It is waiting for the user's approval: \
+				            only call `spawn` once the mission has moved to `running`.",
 			}))
 		}
 
@@ -466,7 +466,7 @@ async fn run(app: &tauri::AppHandle, call: &Call) -> Result<Value> {
 		"spawn" => {
 			if !mission.can_launch() {
 				return Err(CockpitError::msg(
-					"Le découpage n'a pas encore l'accord de l'utilisateur. Rien ne peut démarrer avant.",
+					"The breakdown does not have the user's approval yet. Nothing can start before that.",
 				));
 			}
 			let running = mission
@@ -476,7 +476,7 @@ async fn run(app: &tauri::AppHandle, call: &Call) -> Result<Value> {
 				.count();
 			if running >= MAX_RUNNING {
 				return Err(CockpitError::msg(format!(
-					"{running} exécutants tournent déjà : attends-en un avant d'en lancer un autre."
+					"{running} workers are already running: wait for one before launching another."
 				)));
 			}
 
@@ -491,10 +491,10 @@ async fn run(app: &tauri::AppHandle, call: &Call) -> Result<Value> {
 				.iter()
 				.find(|task| task.id == task_id)
 				.cloned()
-				.ok_or_else(|| CockpitError::msg("Tâche inconnue."))?;
+				.ok_or_else(|| CockpitError::msg("Unknown task."))?;
 			if task.state != TaskState::Planned {
 				return Err(CockpitError::msg(format!(
-					"Cette tâche est déjà {:?}.",
+					"This task is already {:?}.",
 					task.state
 				)));
 			}
@@ -516,7 +516,7 @@ async fn run(app: &tauri::AppHandle, call: &Call) -> Result<Value> {
 				"sessionId": session,
 				"worktree": worktree,
 				"branch": task.branch,
-				"message": "Exécutant lancé. Ses écritures hors périmètre seront refusées.",
+				"message": "Worker launched. Its writes outside its scope will be refused.",
 			}))
 		}
 
@@ -569,8 +569,8 @@ async fn run(app: &tauri::AppHandle, call: &Call) -> Result<Value> {
 				"attempts": task.map(|task| task.attempts).unwrap_or(0),
 				"remaining": mission::MAX_ATTEMPTS
 					.saturating_sub(task.map(|task| task.attempts).unwrap_or(0)),
-				"message": "Tâche renvoyée en correction. Elle repart d'elle-même, et les \
-				            vérifications rejugeront une fois qu'elle aura livré.",
+				"message": "Task sent back for rework. It restarts on its own, and the \
+				            checks will judge again once it has delivered.",
 			}))
 		}
 		"collect" => {
@@ -583,9 +583,9 @@ async fn run(app: &tauri::AppHandle, call: &Call) -> Result<Value> {
 				.tasks
 				.iter()
 				.find(|task| task.id == task_id)
-				.ok_or_else(|| CockpitError::msg("Tâche inconnue."))?;
+				.ok_or_else(|| CockpitError::msg("Unknown task."))?;
 			if task.worktree.trim().is_empty() {
-				return Err(CockpitError::msg("Cette tâche n'a pas de worktree."));
+				return Err(CockpitError::msg("This task has no worktree."));
 			}
 			let path = std::path::Path::new(&task.worktree);
 			let base = if task.base.is_empty() {
@@ -622,10 +622,10 @@ async fn run(app: &tauri::AppHandle, call: &Call) -> Result<Value> {
 			let head = crate::git::current_branch(cwd).await.unwrap_or_default();
 			if head.trim() != mission.branch.trim() {
 				return Err(CockpitError::msg(format!(
-					"`{worktree}` n'est pas sur `{}` mais sur `{}`. Remets-le sur la \
-					 branche d'intégration avant de fusionner.",
+					"`{worktree}` is not on `{}` but on `{}`. Put it back on the \
+					 integration branch before merging.",
 					mission.branch,
-					if head.trim().is_empty() { "HEAD détachée" } else { head.trim() },
+					if head.trim().is_empty() { "detached HEAD" } else { head.trim() },
 				)));
 			}
 
@@ -739,7 +739,7 @@ async fn run(app: &tauri::AppHandle, call: &Call) -> Result<Value> {
 							.iter()
 							.filter_map(|entry| {
 								Some(format!(
-									"« {} » sur `{}` ({} commit(s))",
+									"\"{}\" on `{}` ({} commit(s))",
 									entry.get("task")?.as_str()?,
 									entry.get("branch")?.as_str()?,
 									entry.get("commits")?.as_u64()?,
@@ -748,30 +748,30 @@ async fn run(app: &tauri::AppHandle, call: &Call) -> Result<Value> {
 							.collect::<Vec<_>>()
 							.join(", ");
 						format!(
-							" Attention : {liste} — ces tâches ont été abandonnées mais ont \
-							 produit du code, qu'aucune branche intégrée ne porte. Intègre-le \
-							 s'il vaut quelque chose, ou dis explicitement qu'on y renonce \
-							 avant d'ouvrir la pull request."
+							" Warning: {liste} — these tasks were abandoned but \
+							 produced code that no integrated branch carries. Integrate it \
+							 if it is worth anything, or say explicitly that it is dropped \
+							 before opening the pull request."
 						)
 					};
 					let alerte = if recettes_muettes.is_empty() {
 						String::new()
 					} else {
 						format!(
-							" Attention : {} a rendu son verdict sans déposer la moindre \
-							 preuve d'exécution. Demande-lui de quoi la vérifier avant \
-							 d'ouvrir la pull request.",
+							" Warning: {} gave its verdict without leaving any \
+							 evidence of execution. Ask it for something to verify it with before \
+							 opening the pull request.",
 							recettes_muettes.join(", "),
 						)
 					};
 					format!(
-						"Branches fusionnées dans `{worktree}`. À toi de valider l'ensemble \
-						 avant la pull request.{alerte}{perdu}"
+						"Branches merged into `{worktree}`. It is up to you to validate the whole \
+						 before the pull request.{alerte}{perdu}"
 					)
 				} else {
 					format!(
-						"Des conflits restent : résous-les dans `{worktree}`, puis rappelle \
-						 `integrate`."
+						"Conflicts remain: resolve them in `{worktree}`, then call \
+						 `integrate` again."
 					)
 				},
 			}))
@@ -784,10 +784,10 @@ async fn run(app: &tauri::AppHandle, call: &Call) -> Result<Value> {
 				.and_then(|value| value.as_str())
 				.unwrap_or_default();
 			if summary.trim().is_empty() {
-				return Err(CockpitError::msg("Un compte rendu vide n'aide personne."));
+				return Err(CockpitError::msg("An empty report helps no one."));
 			}
 			mission::set_summary(&mission.id, summary)?;
-			Ok(json!({ "message": "Compte rendu enregistré." }))
+			Ok(json!({ "message": "Report recorded." }))
 		}
 
 		"pr" => {
@@ -815,7 +815,7 @@ async fn run(app: &tauri::AppHandle, call: &Call) -> Result<Value> {
 				.collect();
 			if !pending.is_empty() {
 				return Err(CockpitError::msg(format!(
-					"Ces tâches sont livrées mais pas intégrées : {}. Appelle `integrate` d'abord.",
+					"These tasks are delivered but not integrated: {}. Call `integrate` first.",
 					pending.join(", ")
 				)));
 			}
@@ -860,7 +860,7 @@ async fn run(app: &tauri::AppHandle, call: &Call) -> Result<Value> {
 				(Some(url), _) => {
 					if !url.starts_with("http") {
 						return Err(CockpitError::msg(
-							"`url` attend l'adresse de la pull request ouverte.",
+							"`url` expects the URL of the opened pull request.",
 						));
 					}
 					url
@@ -878,12 +878,12 @@ async fn run(app: &tauri::AppHandle, call: &Call) -> Result<Value> {
 						"worktree": worktree,
 						"evidence": evidence,
 						"message": format!(
-							"Cette équipe ouvre ses pull requests avec `{command}`. Joue-la dans \
-							 `{worktree}`, puis rappelle `pr` avec `url` — l'adresse qu'elle a \
-							 produite. La mission se clôra à ce moment-là. Les preuves de recette \
-							 des exécutants y ont été rassemblées ({} fichier(s) sous \
-							 `.claude/work/`) : git les ignore, elles ne partiront pas avec la \
-							 branche.",
+							"This team opens its pull requests with `{command}`. Run it in \
+							 `{worktree}`, then call `pr` again with `url` — the URL it \
+							 produced. The mission will close at that point. The workers' QA \
+							 evidence has been gathered there ({} file(s) under \
+							 `.claude/work/`): git ignores it, it will not leave with the \
+							 branch.",
 							evidence.len()
 						),
 					}));
@@ -909,11 +909,11 @@ async fn run(app: &tauri::AppHandle, call: &Call) -> Result<Value> {
 			Ok(json!({
 				"url": url,
 				"cleaned": removed,
-				"message": "Mission close, worktrees des tâches intégrées rangés.",
+				"message": "Mission closed, worktrees of the integrated tasks cleaned up.",
 			}))
 		}
 
-		other => Err(CockpitError::msg(format!("Outil inconnu : {other}"))),
+		other => Err(CockpitError::msg(format!("Unknown tool: {other}"))),
 	}
 }
 
@@ -922,7 +922,7 @@ fn read_tasks(input: &Value, integration: &str) -> Result<Vec<Task>> {
 	let entries = input
 		.get("tasks")
 		.and_then(|value| value.as_array())
-		.ok_or_else(|| CockpitError::msg("Le plan doit porter une liste de tâches."))?;
+		.ok_or_else(|| CockpitError::msg("The plan must carry a list of tasks."))?;
 
 	Ok(entries
 		.iter()
@@ -997,9 +997,9 @@ fn read_tasks(input: &Value, integration: &str) -> Result<Vec<Task>> {
 pub async fn prepare_worktree(mission: &mission::Mission, task: &Task) -> Result<String> {
 	let repo = std::path::Path::new(&mission.cwd);
 	if !repo.join(".git").exists() {
-		return Err(CockpitError::msg(format!(
-			"`{}` n'est pas un dépôt git.",
-			mission.cwd
+		return Err(CockpitError::msg(crate::i18n::tf(
+			"orchestrator.notAGitRepo",
+			&[("path", &mission.cwd)],
 		)));
 	}
 
@@ -1015,11 +1015,9 @@ pub async fn prepare_worktree(mission: &mission::Mission, task: &Task) -> Result
 			.map(|path| path.to_string_lossy().to_string())
 			.unwrap_or_default();
 		if same_dir(&deja, &mission.cwd) || same_dir(&deja, &principal) {
-			return Err(CockpitError::msg(format!(
-				"`{}` est extraite dans le dépôt principal (`{deja}`). Le cockpit n'y écrit \
-				 jamais : bascule ce dépôt sur une autre branche, et la mission reprendra \
-				 dans son propre worktree.",
-				task.branch
+			return Err(CockpitError::msg(crate::i18n::tf(
+				"orchestrator.branchInMainRepo",
+				&[("branch", &task.branch), ("path", &deja)],
 			)));
 		}
 		return Ok(deja);
@@ -1039,16 +1037,14 @@ pub async fn prepare_worktree(mission: &mission::Mission, task: &Task) -> Result
 		if dessus.trim() == task.branch.trim() {
 			return Ok(chemin);
 		}
-		return Err(CockpitError::msg(format!(
-			"`{chemin}` existe déjà mais est sur `{}`, pas sur `{}`. Range ce dossier \
-			 ou remets-le sur la bonne branche : le cockpit n'y lancera rien tant \
-			 qu'il ne porte pas la branche de la tâche.",
-			if dessus.trim().is_empty() {
-				"aucune branche"
-			} else {
-				dessus.trim()
-			},
-			task.branch,
+		let actuelle = if dessus.trim().is_empty() {
+			crate::i18n::t("orchestrator.noBranch")
+		} else {
+			dessus.trim().to_string()
+		};
+		return Err(CockpitError::msg(crate::i18n::tf(
+			"orchestrator.folderOnOtherBranch",
+			&[("path", &chemin), ("current", &actuelle), ("branch", &task.branch)],
 		)));
 	}
 
@@ -1184,9 +1180,9 @@ fn gather_evidence(mission: &mission::Mission, into: &str) -> Vec<String> {
 /// fusionné. Il est créé s'il manque, et jamais remplacé par le dépôt principal.
 pub async fn integration_worktree(mission: &mission::Mission) -> Result<String> {
 	if mission.branch.trim().is_empty() {
-		return Err(CockpitError::msg(
-			"La mission n'a pas de branche d'intégration.",
-		));
+		return Err(CockpitError::msg(crate::i18n::t(
+			"orchestrator.noIntegrationBranch",
+		)));
 	}
 	let task = Task {
 		id: String::new(),

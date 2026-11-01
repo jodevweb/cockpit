@@ -1,6 +1,7 @@
 import clsx from "clsx";
 import { AlertOctagon, Check, Play, Square, Terminal, Trash2 } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { LogView } from "@/components/LogView";
 import {
 	Badge,
@@ -36,6 +37,7 @@ function CommandForm({
 	cwd: string;
 	onRun: (label: string, line: string) => void;
 }) {
+	const { t } = useTranslation("views");
 	const [positional, setPositional] = useState("");
 	const [values, setValues] = useState<Record<string, string | boolean>>({});
 
@@ -63,7 +65,7 @@ function CommandForm({
 			<div>
 				<div className="flex items-center gap-2">
 					<h3 className="text-[13px] font-semibold text-ink">{command.label}</h3>
-					{command.danger ? <Badge tone="critical">sensible</Badge> : null}
+					{command.danger ? <Badge tone="critical">{t("scripts.sensitive")}</Badge> : null}
 				</div>
 				<p className="mt-0.5 text-[11px] leading-relaxed text-ink-faint">
 					{command.description}
@@ -82,7 +84,7 @@ function CommandForm({
 			) : null}
 
 			{command.options.length > 0 ? (
-				<Section title="Options">
+				<Section title={t("scripts.options")}>
 					<div className="flex flex-col gap-2">
 						{command.options.map((option) => {
 							if (option.kind === "boolean") {
@@ -141,7 +143,7 @@ function CommandForm({
 										>
 											{option.choices.map((choice) => (
 												<option key={choice} value={choice}>
-													{choice || "— défaut —"}
+													{choice || t("scripts.defaultChoice")}
 												</option>
 											))}
 										</select>
@@ -168,13 +170,13 @@ function CommandForm({
 
 			<div className="rounded-lg border border-line-soft bg-void p-2.5">
 				<div className="mb-1 text-[10px] tracking-[0.07em] text-ink-faint uppercase">
-					Commande
+					{t("scripts.command")}
 				</div>
 				<code className="text-selectable block font-mono text-[11px] break-all text-accent-soft">
 					{line}
 				</code>
 				<div className="mt-1 truncate font-mono text-[10px] text-ink-faint">
-					dans {shortPath(cwd, 2)}
+					{t("scripts.in", { path: shortPath(cwd, 2) })}
 				</div>
 			</div>
 
@@ -186,13 +188,13 @@ function CommandForm({
 					className="h-8 flex-1 justify-center"
 					onClick={() => onRun(command.label, line)}
 				>
-					Exécuter
+					{t("scripts.run")}
 				</Button>
 				<Button
 					variant="outline"
 					icon={Terminal}
 					className="h-8 justify-center"
-					title="Ouvrir dans Terminal.app plutôt que dans le cockpit"
+					title={t("scripts.openInTerminal")}
 					onClick={() => {
 						void api.system.openTerminal(cwd, line).catch(() => undefined);
 					}}
@@ -201,7 +203,7 @@ function CommandForm({
 			{missing ? (
 				<p className="flex items-center gap-1.5 text-[11px] text-warning">
 					<AlertOctagon size={11} />
-					{command.positional?.label} est requis.
+					{t("scripts.required", { label: command.positional?.label })}
 				</p>
 			) : null}
 		</div>
@@ -209,6 +211,7 @@ function CommandForm({
 }
 
 export function ScriptsView() {
+	const { t } = useTranslation("views");
 	const { config, worktrees, jobs, jobLines, runJob, killJob, clearJobLines, notify } =
 		useCockpit();
 	const mainRepo = config?.mainRepo ?? "";
@@ -280,14 +283,14 @@ export function ScriptsView() {
 	return (
 		<>
 			<ViewHeader
-				title="Scripts"
-				subtitle="Commandes maison paramétrables et scripts du dépôt, exécutés avec sortie live."
+				title={t("scripts.title")}
+				subtitle={t("scripts.subtitle")}
 				actions={
 					<select
 						value={targetPath}
 						onChange={(event) => setTargetPath(event.target.value)}
 						className="focus-ring h-7 max-w-64 rounded-lg border border-line-soft bg-raised px-2 text-[11px] text-ink-muted"
-						title="Worktree cible"
+						title={t("scripts.targetWorktree")}
 					>
 						{worktrees.map((tree) => (
 							<option key={tree.path} value={tree.path}>
@@ -301,7 +304,7 @@ export function ScriptsView() {
 			<div className="flex min-h-0 flex-1">
 				<div className="hairline-r flex w-64 shrink-0 flex-col bg-base">
 					<div className="p-2.5">
-						<SearchField value={query} onChange={setQuery} placeholder="Chercher…" />
+						<SearchField value={query} onChange={setQuery} placeholder={t("scripts.search")} />
 					</div>
 					<div className="min-h-0 flex-1 overflow-y-auto px-1.5 pb-3">
 						{groupedCatalog.map(([group, entries]) => (
@@ -372,8 +375,8 @@ export function ScriptsView() {
 						// un formulaire vide qu'on croirait cassé.
 						<Empty
 							icon={Terminal}
-							message="Aucune commande déclarée pour ce projet."
-							hint="Réglages → Agents → Commandes du dépôt : le cockpit peut les détecter depuis les scripts du dépôt, ou tu les écris."
+							message={t("scripts.noCommands")}
+							hint={t("scripts.noCommandsHint")}
 						/>
 					)}
 				</div>
@@ -382,7 +385,7 @@ export function ScriptsView() {
 					<div className="hairline-b flex h-10 shrink-0 items-center gap-1.5 overflow-x-auto px-2">
 						{jobs.length === 0 ? (
 							<span className="px-2 text-[11px] text-ink-faint">
-								Aucune exécution pour l'instant.
+								{t("scripts.noRuns")}
 							</span>
 						) : (
 							jobs.slice(0, 12).map((job) => (
@@ -409,12 +412,12 @@ export function ScriptsView() {
 							<div className="hairline-b flex items-center gap-2 px-3 py-2">
 								<Badge tone={jobTone(activeJob)}>
 									{activeJob.state === "running"
-										? "en cours"
+										? t("scripts.state.running")
 										: activeJob.state === "succeeded"
-											? "terminé"
+											? t("scripts.state.succeeded")
 											: activeJob.state === "cancelled"
-												? "annulé"
-												: `échec ${activeJob.exitCode ?? ""}`}
+												? t("scripts.state.cancelled")
+												: t("scripts.state.failed", { code: activeJob.exitCode ?? "" }).trim()}
 								</Badge>
 								<code className="text-selectable min-w-0 flex-1 truncate font-mono text-[11px] text-ink-muted">
 									{activeJob.command}
@@ -431,20 +434,20 @@ export function ScriptsView() {
 										icon={Square}
 										onClick={() => killJob(activeJob.jobId)}
 									>
-										Stop
+										{t("scripts.stop")}
 									</Button>
 								) : (
 									<Button
 										size="sm"
 										icon={Trash2}
-										title="Vider la sortie"
+										title={t("scripts.clearOutput")}
 										onClick={() => clearJobLines(activeJob.jobId)}
 									/>
 								)}
 								<Button
 									size="sm"
 									icon={Terminal}
-									title="Rejouer dans Terminal.app"
+									title={t("scripts.replayInTerminal")}
 									onClick={() => {
 										void api.system
 											.openTerminal(activeJob.cwd, activeJob.command)
@@ -457,8 +460,8 @@ export function ScriptsView() {
 					) : (
 						<Empty
 							icon={Play}
-							message="Lance une commande"
-							hint="La sortie s'affiche ici en direct, avec les couleurs du terminal."
+							message={t("scripts.launchPrompt")}
+							hint={t("scripts.launchHint")}
 						/>
 					)}
 				</div>

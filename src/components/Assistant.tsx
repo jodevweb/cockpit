@@ -2,6 +2,7 @@ import clsx from "clsx";
 import { AudioLines, CornerDownLeft, Loader2, Mic, Sparkles, X } from "lucide-react";
 import { AnimatePresence, motion } from "motion/react";
 import { useCallback, useEffect, useRef, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { useAgentActions, useAgentRuns } from "@/app/agents";
 import { useCockpit, type ViewId } from "@/app/store";
 import { useWorkspace } from "@/app/workspace";
@@ -45,24 +46,25 @@ function useShortcut(): ShortcutStatus | null {
 	return status;
 }
 
+// Décrit les écrans au modèle : fait partie du prompt, donc en anglais en dur.
 const VIEWS: Array<{ id: ViewId; label: string }> = [
-	{ id: "map", label: "Carte — tous les projets et le travail en cours" },
-	{ id: "today", label: "Aujourd'hui" },
-	{ id: "overview", label: "Vue d'ensemble" },
-	{ id: "team", label: "Daily de l'équipe" },
+	{ id: "map", label: "Map — every project and the work in progress" },
+	{ id: "today", label: "Today" },
+	{ id: "overview", label: "Overview" },
+	{ id: "team", label: "Team daily" },
 	{ id: "missions", label: "Missions" },
-	{ id: "workspace", label: "Workspaces, agents et terminaux ouverts" },
-	{ id: "agents", label: "Agents IA, historique des sessions" },
+	{ id: "workspace", label: "Workspaces, open agents and terminals" },
+	{ id: "agents", label: "AI agents, session history" },
 	{ id: "worktrees", label: "Worktrees" },
 	{ id: "git", label: "Git, branches" },
-	{ id: "delivery", label: "Flux : Linear, PR, CI, déploiements" },
+	{ id: "delivery", label: "Flow: Linear, PRs, CI, deployments" },
 	{ id: "impact", label: "Impact" },
-	{ id: "observability", label: "Observabilité" },
+	{ id: "observability", label: "Observability" },
 	{ id: "docs", label: "Documents" },
 	{ id: "scripts", label: "Scripts" },
-	{ id: "infra", label: "Serveurs et conteneurs" },
+	{ id: "infra", label: "Servers and containers" },
 	{ id: "permanence", label: "Permanence" },
-	{ id: "settings", label: "Réglages" },
+	{ id: "settings", label: "Settings" },
 ];
 
 type Phase = "idle" | "listening" | "transcribing" | "thinking" | "done" | "answered" | "error";
@@ -72,6 +74,7 @@ function folderOf(path: string): string {
 }
 
 export function Assistant() {
+	const { t } = useTranslation("components2");
 	const { go, view, worktrees, projectList, activeProject, switchProject, runJob, config } = useCockpit();
 	const { runs } = useAgentRuns();
 	const { open: openAgent, send: sendAgent, show: showAgent } = useAgentActions();
@@ -91,11 +94,11 @@ export function Assistant() {
 	useEffect(() => {
 		if (!shortcut || shortcut.registered || warned.current || !hasTauri()) return;
 		warned.current = true;
-		notify(`${shortcutLabel(shortcut.accelerator)} est déjà pris : l'assistant vocal ne t'entendra pas`, {
-			label: "Choisir un raccourci",
+		notify(t("assistant.shortcutTaken", { shortcut: shortcutLabel(shortcut.accelerator) }), {
+			label: t("assistant.chooseShortcut"),
 			onClick: () => go("settings", { settingsTab: "voice" }),
 		});
-	}, [shortcut, notify, go]);
+	}, [shortcut, notify, go, t]);
 	const [phase, setPhase] = useState<Phase>("idle");
 	const [heard, setHeard] = useState("");
 	const [reply, setReply] = useState("");
@@ -166,7 +169,7 @@ export function Assistant() {
 							? {
 									id: front.id,
 									label: front.label,
-									state: front.thinking ? "travaille" : front.running ? "attend" : "arrêté",
+									state: front.thinking ? "working" : front.running ? "waiting" : "stopped",
 								}
 							: null,
 						pr: pr ? { number: pr.number, title: pr.title } : null,
@@ -188,7 +191,7 @@ export function Assistant() {
 				id: run.id,
 				label: run.label,
 				folder: folderOf(run.cwd),
-				state: run.thinking ? "travaille" : run.running ? "attend" : "arrêté",
+				state: run.thinking ? "working" : run.running ? "waiting" : "stopped",
 			})),
 			missions: missions.slice(0, 30).map((mission) => ({
 				id: mission.id,
@@ -207,12 +210,12 @@ export function Assistant() {
 			const p = decision.params;
 			const tree = (folder?: string) => {
 				const found = resolve(folder, now.worktrees, (entry) => [entry.folderName, entry.branch ?? ""]);
-				if (!found) throw new Error(`Je ne trouve pas le worktree « ${folder ?? ""} ».`);
+				if (!found) throw new Error(t("assistant.errors.worktreeNotFound", { name: folder ?? "" }));
 				return found;
 			};
 			const agent = (id?: string) => {
 				const found = resolve(id, now.runs, (run) => [run.id, run.label, folderOf(run.cwd)]);
-				if (!found) throw new Error(`Je ne trouve pas l'agent « ${id ?? ""} ».`);
+				if (!found) throw new Error(t("assistant.errors.agentNotFound", { name: id ?? "" }));
 				return found;
 			};
 			const mainRepo = now.config?.mainRepo ?? "";
@@ -220,20 +223,20 @@ export function Assistant() {
 			switch (decision.action) {
 				case "go_to": {
 					const target = resolve(p.view, VIEWS, (entry) => [entry.id, entry.label]);
-					if (!target) throw new Error(`Je ne connais pas l'écran « ${p.view ?? ""} ».`);
+					if (!target) throw new Error(t("assistant.errors.viewUnknown", { name: p.view ?? "" }));
 					go(target.id);
 					break;
 				}
 				case "switch_project": {
 					const project = resolve(p.project, now.projectList, (entry) => [entry.name, entry.id]);
-					if (!project) throw new Error(`Je ne trouve pas le projet « ${p.project ?? ""} ».`);
+					if (!project) throw new Error(t("assistant.errors.projectNotFound", { name: p.project ?? "" }));
 					switchProject(project.id);
 					break;
 				}
 				case "open_workspace": {
 					const cwds = [...new Set([...now.runs.map((run) => run.cwd), ...now.worktrees.map((entry) => entry.path)])];
 					const cwd = resolve(p.folder, cwds, (path) => [folderOf(path)]);
-					if (!cwd) throw new Error(`Je ne trouve pas le workspace « ${p.folder ?? ""} ».`);
+					if (!cwd) throw new Error(t("assistant.errors.workspaceNotFound", { name: p.folder ?? "" }));
 					showGroup(cwd);
 					go("workspace");
 					break;
@@ -242,33 +245,40 @@ export function Assistant() {
 					go("worktrees", { worktreePath: tree(p.folder).path });
 					break;
 				case "start_mission": {
-					if (!p.ticket?.trim()) throw new Error("De quel ticket veux-tu partir ?");
+					if (!p.ticket?.trim()) throw new Error(t("assistant.errors.whichTicket"));
 					const ticket = p.ticket.trim();
-					const result = await withActivity(`Mission depuis ${ticket}`, () => api.missions.startFromTicket(ticket), {
-						firstStep: "Je lis le ticket et je lance l'agent maître…",
-						result: (value) => (value.started ? `Mission lancée : ${value.mission.title}.` : "La mission existait déjà."),
-						action: (value) => ({ label: "Voir", run: () => go("missions", { missionId: value.mission.id }) }),
+					const result = await withActivity(t("assistant.mission.activity", { ticket }), () => api.missions.startFromTicket(ticket), {
+						firstStep: t("assistant.mission.firstStep"),
+						result: (value) =>
+							value.started ? t("assistant.mission.started", { title: value.mission.title }) : t("assistant.mission.existed"),
+						action: (value) => ({ label: t("assistant.see"), run: () => go("missions", { missionId: value.mission.id }) }),
 					});
 					go("missions", { missionId: result.mission.id });
-					return result.started ? decision.say || result.message : `La mission existait déjà : ${result.mission.title}. Je te l'ouvre.`;
+					return result.started
+						? decision.say || result.message
+						: t("assistant.mission.existedOpening", { title: result.mission.title });
 				}
 				case "open_mission": {
 					const mission = resolve(p.mission, ctx.missions, (entry) => [entry.id, entry.ticket, entry.title]);
-					if (!mission) throw new Error(`Je ne trouve pas la mission « ${p.mission ?? ""} ».`);
+					if (!mission) throw new Error(t("assistant.errors.missionNotFound", { name: p.mission ?? "" }));
 					go("missions", { missionId: mission.id });
 					break;
 				}
 				case "create_branch": {
-					if (!mainRepo) throw new Error("Aucun dépôt principal n'est réglé pour ce projet.");
-					const message = await withActivity(`Branche ${p.name ?? ""}`, () => api.git.createBranch(mainRepo, p.name ?? "", p.base || undefined), {
-						firstStep: "Je crée la branche…",
-						result: (value) => value,
-					});
+					if (!mainRepo) throw new Error(t("assistant.errors.noMainRepo"));
+					const message = await withActivity(
+						t("assistant.branch.activity", { name: p.name ?? "" }),
+						() => api.git.createBranch(mainRepo, p.name ?? "", p.base || undefined),
+						{
+							firstStep: t("assistant.branch.firstStep"),
+							result: (value) => value,
+						},
+					);
 					return decision.say || message;
 				}
 				case "create_worktree": {
-					if (!mainRepo) throw new Error("Aucun dépôt principal n'est réglé pour ce projet.");
-					if (!p.branch?.trim()) throw new Error("Pour quelle branche ?");
+					if (!mainRepo) throw new Error(t("assistant.errors.noMainRepo"));
+					if (!p.branch?.trim()) throw new Error(t("assistant.errors.whichBranch"));
 					// Créer ne suffisait pas : rien n'attendait le worktree, et son
 					// workspace ne s'ouvrait jamais. La création suivie l'annonce, puis
 					// ouvre le workspace quand il est prêt. On répond sans l'attendre.
@@ -289,7 +299,7 @@ export function Assistant() {
 				case "review_pr":
 				case "recheck_pr": {
 					const number = Number.parseInt((p.pr ?? "").replace(/[^0-9]/g, ""), 10) || herePr.current;
-					if (!number) throw new Error("Quelle PR veux-tu que je relise ?");
+					if (!number) throw new Error(t("assistant.errors.whichPr"));
 					// Le geste prend du temps (branche, worktree) : on ne l'attend pas
 					// pour répondre, ses étapes s'annoncent d'elles-mêmes.
 					void startReview(number, decision.action === "recheck_pr" ? "verification" : "revue").catch((error) =>
@@ -298,17 +308,17 @@ export function Assistant() {
 					break;
 				}
 				case "tell_agent": {
-					if (!p.prompt?.trim()) throw new Error("Que dois-je lui demander ?");
+					if (!p.prompt?.trim()) throw new Error(t("assistant.errors.whatToAsk"));
 					// L'agent nommé, sinon celui d'Ici.
 					const target = p.agent?.trim()
 						? agent(p.agent)
 						: (now.runs.find((run) => run.id === here.current?.runId) ?? null);
 					const cwd = target?.cwd ?? here.current?.cwd ?? null;
-					if (!cwd) throw new Error("Aucun workspace n'est ouvert : dis-moi dans quel dossier travailler.");
-					startActivity(`Consigne pour ${target?.label ?? folderOf(cwd)}`).done(
-						target?.running && target.sessionId ? "Consigne envoyée : l'agent s'y met." : "Nouvel agent lancé avec la consigne.",
+					if (!cwd) throw new Error(t("assistant.errors.noWorkspace"));
+					startActivity(t("assistant.tell.activity", { name: target?.label ?? folderOf(cwd) })).done(
+						target?.running && target.sessionId ? t("assistant.tell.sent") : t("assistant.tell.launched"),
 						{
-							label: "Voir",
+							label: t("assistant.see"),
 							run: () => {
 								showGroup(cwd);
 								go("workspace");
@@ -333,7 +343,7 @@ export function Assistant() {
 					const path = p.folder?.trim()
 						? resolve(p.folder, places.current, (candidate) => [folderOf(candidate), candidate])
 						: (here.current?.cwd ?? null);
-					if (!path) throw new Error(`Je ne trouve pas le dossier « ${p.folder ?? ""} ».`);
+					if (!path) throw new Error(t("assistant.errors.folderNotFound", { name: p.folder ?? "" }));
 					openAgent(path, p.prompt || undefined, undefined, undefined, true);
 					rememberFolder(path);
 					showGroup(path);
@@ -343,16 +353,16 @@ export function Assistant() {
 				case "git_pull": {
 					const target = tree(p.folder);
 					await withActivity(`Pull · ${target.branch ?? target.folderName}`, () => api.git.pull(target.path), {
-						firstStep: "Je récupère les derniers commits…",
-						result: () => "Branche à jour.",
+						firstStep: t("assistant.git.pullStep"),
+						result: () => t("assistant.git.pulled"),
 					});
 					break;
 				}
 				case "git_push": {
 					const target = tree(p.folder);
 					await withActivity(`Push · ${target.branch ?? target.folderName}`, () => api.git.push(target.path), {
-						firstStep: "Je pousse la branche…",
-						result: () => "Branche poussée.",
+						firstStep: t("assistant.git.pushStep"),
+						result: () => t("assistant.git.pushed"),
 					});
 					break;
 				}
@@ -370,7 +380,7 @@ export function Assistant() {
 			}
 			return decision.say;
 		},
-		[go, switchProject, showGroup, openAgent, sendAgent, showAgent, runJob, tour, startReview, settle],
+		[go, switchProject, showGroup, openAgent, sendAgent, showAgent, runJob, tour, startReview, settle, t],
 	);
 
 	/** Une phrase, entendue ou tapée : la comprendre et agir. */
@@ -388,10 +398,10 @@ export function Assistant() {
 				const ctx = await context();
 				const answer = await api.assistant.ask(SYSTEM, buildPrompt(text, ctx));
 				const decision = parseDecision(answer);
-				if (!decision) throw new Error("Je n'ai pas compris ta demande.");
+				if (!decision) throw new Error(t("assistant.errors.notUnderstood"));
 				const said = await perform(decision, ctx);
 				// Sans action, il a répondu ou posé une question : rien n'est « fait ».
-				settle(decision.action ? "done" : "answered", said || "C'est fait.");
+				settle(decision.action ? "done" : "answered", said || t("assistant.doneSentence"));
 			} catch (error) {
 				settle("error", error instanceof Error ? error.message : String(error).replace(/^(Ipc)?Error:\s*/, ""));
 			}
@@ -399,7 +409,7 @@ export function Assistant() {
 			// agent) : la phrase suivante partait chez lui.
 			requestAnimationFrame(() => field.current?.focus());
 		},
-		[context, perform, settle],
+		[context, perform, settle, t],
 	);
 
 	// L'oreille, côté Rust : le raccourci maintenu ouvre et referme le micro.
@@ -473,20 +483,22 @@ export function Assistant() {
 							<div className="min-w-0 flex-1">
 								<div className="text-[12.5px] font-semibold text-ink">
 									{phase === "listening"
-										? `J'écoute… relâche ${talk} quand tu as fini`
+										? t("assistant.phase.listening", { shortcut: talk })
 										: phase === "transcribing"
-											? "Je transcris…"
+											? t("assistant.phase.transcribing")
 											: phase === "thinking"
-												? "Je réfléchis…"
+												? t("assistant.phase.thinking")
 												: phase === "error"
-													? "Je n'ai pas pu"
+													? t("assistant.phase.error")
 													: phase === "done"
-														? "C'est fait"
+														? t("assistant.phase.done")
 														: phase === "answered"
-															? "Cockpit te répond"
-															: "Demande à Cockpit"}
+															? t("assistant.phase.answered")
+															: t("assistant.phase.idle")}
 								</div>
-								{heard ? <div className="truncate text-[11.5px] text-ink-muted">« {heard} »</div> : null}
+								{heard ? (
+									<div className="truncate text-[11.5px] text-ink-muted">{t("assistant.quoted", { text: heard })}</div>
+								) : null}
 							</div>
 							<button
 								type="button"
@@ -495,7 +507,7 @@ export function Assistant() {
 									setPhase("idle");
 								}}
 								className="grid size-6 place-items-center rounded-md text-ink-faint hover:bg-hover hover:text-ink"
-								aria-label="Fermer"
+								aria-label={t("assistant.close")}
 							>
 								<X size={13} />
 							</button>
@@ -523,13 +535,13 @@ export function Assistant() {
 									ref={field}
 									value={draft}
 									onChange={(event) => setDraft(event.target.value)}
-									placeholder="Ouvre le workspace du panier, crée une mission depuis NW-3050…"
+									placeholder={t("assistant.placeholder")}
 									className="min-w-0 flex-1 bg-transparent text-[12.5px] text-ink outline-none placeholder:text-ink-faint"
 								/>
 								<CornerDownLeft size={12} className="shrink-0 text-ink-faint" />
 							</form>
 						) : phase === "idle" ? null : (
-							<p className="text-[10.5px] text-ink-faint">{talk} maintenu pour parler · ⌘J pour écrire</p>
+							<p className="text-[10.5px] text-ink-faint">{t("assistant.hint", { shortcut: talk })}</p>
 						)}
 					</div>
 				</motion.div>
@@ -544,6 +556,7 @@ export function Assistant() {
  * répond pas, c'est la première chose à savoir.
  */
 export function AssistantSettings() {
+	const { t } = useTranslation("components2");
 	const shortcut = useShortcut();
 	const [hasKey, setHasKey] = useState<boolean | null>(null);
 	const [test, setTest] = useState<{ state: "idle" | "listening" | "transcribing" | "done" | "error"; text: string }>({
@@ -563,7 +576,7 @@ export function AssistantSettings() {
 			await new Promise((resolve) => setTimeout(resolve, 4000));
 			setTest({ state: "transcribing", text: "" });
 			const text = await api.assistant.heard();
-			setTest({ state: "done", text: text || "(rien entendu — parle plus près du micro)" });
+			setTest({ state: "done", text: text || t("assistant.settings.nothingHeard") });
 		} catch (error) {
 			setTest({ state: "error", text: String(error).replace(/^(Ipc)?Error:\s*/, "") });
 		}
@@ -577,23 +590,20 @@ export function AssistantSettings() {
 			<div className={row}>
 				<span className={key}>{shortcutLabel(shortcut?.accelerator ?? "alt+Space")}</span>
 				<span>
-					Maintiens, parle, relâche : l'assistant comprend, agit et te répond à voix haute — même quand le
-					cockpit est derrière une autre fenêtre.
+					{t("assistant.settings.hold")}
 				</span>
 			</div>
 			<ShortcutPicker status={shortcut} />
 			<div className={row}>
 				<span className={key}>⌘J</span>
-				<span>La même chose au clavier, cockpit au premier plan.</span>
+				<span>{t("assistant.settings.keyboard")}</span>
 			</div>
 			<p className="text-[11.5px] leading-relaxed text-ink-faint">
-				Ce que tu dis est transcrit par ElevenLabs (la clé de la voix, ci-dessus) puis compris par Claude, sur ton
-				abonnement : quelques secondes de ton forfait ElevenLabs et un peu de ton quota Claude par demande. Les actions
-				s'exécutent directement ; ce qu'il ne trouve pas, il ne le devine pas.
+				{t("assistant.settings.cost")}
 			</p>
 			{native && hasKey === false ? (
 				<p className="rounded-md bg-warning/10 px-2.5 py-1.5 text-[11.5px] text-warning">
-					Sans clé ElevenLabs, l'assistant ne t'entend pas — ⌘J reste possible. Range-la dans la section Voix.
+					{t("assistant.settings.noKey")}
 				</p>
 			) : null}
 			<div className="flex items-center gap-2">
@@ -605,23 +615,24 @@ export function AssistantSettings() {
 				>
 					<Mic size={12} className={test.state === "listening" ? "animate-pulse text-accent" : ""} />
 					{test.state === "listening"
-						? "Parle… (4 s)"
+						? t("assistant.settings.speak")
 						: test.state === "transcribing"
-							? "Je transcris…"
-							: "Tester le micro"}
+							? t("assistant.phase.transcribing")
+							: t("assistant.settings.testMic")}
 				</button>
-				{!native ? <span className="text-[11px] text-ink-faint">Dans l'application seulement.</span> : null}
+				{!native ? <span className="text-[11px] text-ink-faint">{t("assistant.settings.appOnly")}</span> : null}
 			</div>
 			{test.state === "done" ? (
 				<p className="text-[12px] text-ink">
-					Entendu : <span className="text-ink-muted">« {test.text} »</span>
+					{t("assistant.settings.heard")}{" "}
+					<span className="text-ink-muted">{t("assistant.quoted", { text: test.text })}</span>
 				</p>
 			) : test.state === "error" ? (
 				<p className="text-[11.5px] leading-relaxed text-critical">
 					{test.text}
 					<br />
 					<span className="text-ink-faint">
-						Si le micro est refusé : Réglages Système → Confidentialité et sécurité → Micro → Cockpit.
+						{t("assistant.settings.micDenied")}
 					</span>
 				</p>
 			) : null}
@@ -641,6 +652,7 @@ const PRESETS = ["alt+Space", "control+alt+Space", "shift+alt+Space", "control+a
  * lui aussi est pris, l'ancien est remis.
  */
 function ShortcutPicker({ status }: { status: ShortcutStatus | null }) {
+	const { t } = useTranslation("components2");
 	const [recording, setRecording] = useState(false);
 	const [error, setError] = useState<string | null>(null);
 
@@ -682,12 +694,16 @@ function ShortcutPicker({ status }: { status: ShortcutStatus | null }) {
 				/>
 				{status?.registered ? (
 					<span className="text-ink">
-						{shortcutLabel(status.accelerator)} est actif, dans toutes les applications.
+						{t("assistant.shortcut.active", { shortcut: shortcutLabel(status.accelerator) })}
 					</span>
 				) : (
 					<span className="text-warning">
-						{shortcutLabel(status?.accelerator ?? "alt+Space")} n'a pas pu s'enregistrer
-						{status?.error ? ` : ${status.error}` : "."} Choisis-en un autre.
+						{status?.error
+							? t("assistant.shortcut.failedWithError", {
+									shortcut: shortcutLabel(status?.accelerator ?? "alt+Space"),
+									error: status.error,
+								})
+							: t("assistant.shortcut.failed", { shortcut: shortcutLabel(status?.accelerator ?? "alt+Space") })}
 					</span>
 				)}
 			</div>
@@ -718,7 +734,7 @@ function ShortcutPicker({ status }: { status: ShortcutStatus | null }) {
 						recording ? "animate-pulse border-accent text-accent" : "border-line-soft text-ink-muted hover:bg-hover hover:text-ink",
 					)}
 				>
-					{recording ? "Tape la combinaison… (Échap pour annuler)" : "Enregistrer un raccourci…"}
+					{recording ? t("assistant.shortcut.recording") : t("assistant.shortcut.record")}
 				</button>
 			</div>
 			{error ? <p className="text-[11px] text-critical">{error}</p> : null}

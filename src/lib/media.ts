@@ -61,11 +61,16 @@ export function mediaOfPath(path: string): Media | null {
  * du texte. Ce qui n'en vient pas est laissé strictement intact : un message
  * qui parle de fichiers ne doit pas se faire réécrire.
  */
+/** L'en-tête du manifeste de pièces jointes, tel que le cockpit l'écrit dans la consigne. */
+export const ATTACHMENTS_HEADER = "Attached files, read them before replying:";
+const ATTACHMENTS_PATTERN = /Attached files?, read (?:them|it) before replying:|Fichiers? joints?, à lire avant de répondre :/;
+
 export function splitAttachments(text: string): { text: string; paths: string[] } {
-	const marque = text.indexOf("Fichier");
-	if (marque === -1 || !/Fichiers? joints?, à lire avant de répondre :/.test(text)) {
-		return { text, paths: [] };
-	}
+	// Le manifeste s'écrit en anglais (`ATTACHMENTS_HEADER`) ; les anciens
+	// messages enregistrés le portent encore en français.
+	const found = ATTACHMENTS_PATTERN.exec(text);
+	if (!found) return { text, paths: [] };
+	const marque = found.index;
 	const lignes = text.slice(marque).split("\n");
 	const paths: string[] = [];
 	let fin = marque;

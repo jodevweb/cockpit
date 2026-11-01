@@ -133,7 +133,7 @@ pub fn setting() -> Setting {
 pub fn save_setting(setting: &Setting) -> Result<()> {
 	std::fs::create_dir_all(config_dir())?;
 	let raw = serde_json::to_string_pretty(setting)
-		.map_err(|e| CockpitError::msg(format!("Réglage illisible : {e}")))?;
+		.map_err(|e| CockpitError::msg(crate::i18n::tf("relay.settingUnreadable", &[("error", &e)])))?;
 	std::fs::write(setting_path(), raw)?;
 	Ok(())
 }
@@ -202,7 +202,7 @@ pub fn spawn_in(
 
 	let dir = base.join(session_id);
 	std::fs::create_dir_all(&dir)
-		.map_err(|e| CockpitError::msg(format!("Dossier du relais : {e}")))?;
+		.map_err(|e| CockpitError::msg(crate::i18n::tf("relay.dir", &[("error", &e)])))?;
 	// Créés d'avance : `tail -f` doit trouver son fichier, et le lecteur le sien,
 	// avant même que le CLI ait écrit quoi que ce soit.
 	for name in ["in.jsonl", "out.jsonl", "err.log"] {
@@ -210,7 +210,7 @@ pub fn spawn_in(
 			.create(true)
 			.append(true)
 			.open(dir.join(name))
-			.map_err(|e| CockpitError::msg(format!("Fichier du relais : {e}")))?;
+			.map_err(|e| CockpitError::msg(crate::i18n::tf("relay.file", &[("error", &e)])))?;
 	}
 
 	let mut launcher = std::process::Command::new("zsh");
@@ -233,7 +233,7 @@ pub fn spawn_in(
 
 	let child = launcher
 		.spawn()
-		.map_err(|e| CockpitError::msg(format!("Lancement de l'agent détaché : {e}")))?;
+		.map_err(|e| CockpitError::msg(crate::i18n::tf("relay.launch", &[("error", &e)])))?;
 	let pgid = child.id() as i32;
 	// On ne l'attend pas, et on ne garde pas son `Child` : c'est tout le
 	// principe. Un fil récupère son code de sortie pour ne pas laisser de

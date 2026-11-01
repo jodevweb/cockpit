@@ -12,7 +12,9 @@ import {
 	X,
 	Zap,
 } from "lucide-react";
+import type { TFunction } from "i18next";
 import { useCallback, useEffect, useMemo, useState } from "react";
+import { Trans, useTranslation } from "react-i18next";
 import { MODELS, modelChoices, PERMISSION_MODES, useAgentRuns } from "@/app/agents";
 import { useCockpit } from "@/app/store";
 import { api } from "@/lib/ipc";
@@ -49,32 +51,25 @@ import { Modal, Spinner } from "./ui";
 
 type Step = 1 | 2 | 3 | 4;
 
-const PLACES: Array<{ id: LibrePlace; label: string; hint: string; icon: typeof Folder }> = [
-	{
-		id: "ici",
-		label: "Sur place, tel quel",
-		hint: "Exactement ton terminal : la branche courante, tes modifications en cours. Rien n'est créé.",
-		icon: SquareTerminal,
-	},
-	{
-		id: "branche",
-		label: "Nouvelle branche",
-		hint: "Même dossier, mais l'agent part sur sa branche. Ton travail en cours le suit.",
-		icon: GitBranch,
-	},
-	{
-		id: "worktree",
-		label: "Worktree isolé",
-		hint: "Une copie à part, à côté du dépôt, sur une branche neuve. Ton dossier n'est pas touché.",
-		icon: GitFork,
-	},
+const PLACE_ICONS: Array<{ id: LibrePlace; icon: typeof Folder }> = [
+	{ id: "ici", icon: SquareTerminal },
+	{ id: "branche", icon: GitBranch },
+	{ id: "worktree", icon: GitFork },
 ];
 
-const DEPTHS = [
-	{ id: "", label: "Celle du moteur" },
-	{ id: "fast", label: "Rapide" },
-	{ id: "normal", label: "Normale" },
-	{ id: "deep", label: "Profonde" },
+const places = (t: TFunction): Array<{ id: LibrePlace; label: string; hint: string; icon: typeof Folder }> =>
+	PLACE_ICONS.map(({ id, icon }) => ({
+		id,
+		icon,
+		label: t(`libreLauncher.places.${id}.label`),
+		hint: t(`libreLauncher.places.${id}.hint`),
+	}));
+
+const depths = (t: TFunction) => [
+	{ id: "", label: t("libreLauncher.depths.engine") },
+	{ id: "fast", label: t("libreLauncher.depths.fast") },
+	{ id: "normal", label: t("libreLauncher.depths.normal") },
+	{ id: "deep", label: t("libreLauncher.depths.deep") },
 ];
 
 /** Le dossier personnel, deviné d'un chemin absolu : de quoi écrire `~` comme un terminal. */
@@ -103,6 +98,7 @@ function worktreeFor(root: string, branch: string): string {
 export function useLibreLaunch() {
 	const { go, notify } = useCockpit();
 	const { open } = useAgentRuns();
+	const { t } = useTranslation("components1");
 	return useCallback(
 		async (request: {
 			folder: string;
@@ -147,17 +143,20 @@ export function useLibreLaunch() {
 				go("libres");
 				return true;
 			} catch (error) {
-				notify(`L'agent n'a pas pu partir : ${String(error)}`);
+				notify(t("libreLauncher.launchFailed", { error: String(error) }));
 				return false;
 			}
 		},
-		[go, notify, open],
+		[go, notify, open, t],
 	);
 }
 
 export function LibreLauncher({ initialFolder }: { initialFolder: string }) {
 	const { config, projectList, go } = useCockpit();
 	const { runs } = useAgentRuns();
+	const { t } = useTranslation("components1");
+	const PLACES = places(t);
+	const DEPTHS = depths(t);
 	const engine = config?.engines?.[0];
 
 	// ── Le dossier ──────────────────────────────────────────────────────
@@ -170,10 +169,10 @@ export function LibreLauncher({ initialFolder }: { initialFolder: string }) {
 			seen.add(clean);
 			list.push({ path: clean, note });
 		};
-		for (const entry of libreFolders()) push(entry.folder, "agent libre");
-		for (const path of recentFolders()) push(path, "agent récent");
+		for (const entry of libreFolders()) push(entry.folder, t("libreLauncher.folder.noteLibre"));
+		for (const path of recentFolders()) push(path, t("libreLauncher.folder.noteRecent"));
 		return list.slice(0, 6);
-	}, []);
+	}, [t]);
 	const [query, setQuery] = useState(initialFolder || suggestions[0]?.path || config?.mainRepo || "");
 	const [folder, setFolder] = useState(query);
 	useEffect(() => {
@@ -226,7 +225,7 @@ export function LibreLauncher({ initialFolder }: { initialFolder: string }) {
 	const isGit = seen?.isGit ?? false;
 	const place: LibrePlace = isGit ? choices.place : "ici";
 	const worktree = isGit ? worktreeFor(seen?.root ?? path, branch) : "";
-	const accounts = config?.accounts?.length ? config.accounts : [{ id: "poste", label: "Compte du poste", dir: "" }];
+	const accounts = config?.accounts?.length ? config.accounts : [{ id: "poste", label: t("libreLauncher.machineAccount"), dir: "" }];
 	const account = accounts.find((entry) => entry.id === choices.account) ?? accounts[0];
 	const statuses = useAsync(() => api.accounts.status(), []);
 	const models = modelChoices(engine?.models ?? []);
@@ -253,11 +252,18 @@ export function LibreLauncher({ initialFolder }: { initialFolder: string }) {
 	const modeEntry = PERMISSION_MODES.find((entry) => entry.id === choices.mode);
 	const where =
 		place === "ici"
-			? `${show(path)}, tel quel`
+			? t("libreLauncher.summary.whereHere", { folder: show(path) })
 			: place === "branche"
-				? `${show(path)}, sur une nouvelle branche ${branch}`
-				: `une copie isolée de ${basename(seen?.root || path)}, sur ${branch}`;
-	const summary = `${engine?.label ?? "Claude Code"} (${choices.model ? modelName : "modèle du poste"}) s'ouvre dans ${where}, sous le compte ${account?.label ?? "du poste"}, en mode ${modeEntry?.label ?? choices.mode} — ${modeEntry?.hint ?? ""}.`;
+				? t("libreLauncher.summary.whereBranch", { folder: show(path), branch })
+				: t("libreLauncher.summary.whereWorktree", { repo: basename(seen?.root || path), branch });
+	const summary = t("libreLauncher.summary.sentence", {
+		engine: engine?.label ?? "Claude Code",
+		model: choices.model ? modelName : t("libreLauncher.machineModel"),
+		where,
+		account: account?.label ?? t("libreLauncher.machineAccount"),
+		mode: modeEntry?.label ?? choices.mode,
+		hint: modeEntry?.hint ?? "",
+	});
 
 	const ready = Boolean(seen?.exists) && !launching;
 
@@ -295,7 +301,7 @@ export function LibreLauncher({ initialFolder }: { initialFolder: string }) {
 		const chosen = await pickFolder({
 			directory: true,
 			multiple: false,
-			title: "Lancer un agent dans ce dossier",
+			title: t("libreLauncher.browseTitle"),
 			defaultPath: path || config?.projectsRoot || undefined,
 		});
 		if (typeof chosen === "string") {
@@ -304,19 +310,23 @@ export function LibreLauncher({ initialFolder }: { initialFolder: string }) {
 		}
 	};
 
-	const modelShort = choices.model ? modelName : "modèle du poste";
+	const modelShort = choices.model ? modelName : t("libreLauncher.machineModel");
 	const steps: Array<{ n: Step; label: string; value: string }> = [
-		{ n: 1, label: "Dossier", value: seen?.exists ? show(path) : "à choisir" },
-		{ n: 2, label: "Où travailler", value: PLACES.find((entry) => entry.id === place)?.label ?? "" },
-		{ n: 3, label: "Agent", value: `${modelShort} · ${account?.label ?? ""} · ${modeEntry?.label ?? ""}` },
-		{ n: 4, label: "Lancer", value: remember ? "retenu pour ce dossier" : "pour cette fois" },
+		{ n: 1, label: t("libreLauncher.steps.folder"), value: seen?.exists ? show(path) : t("libreLauncher.steps.toPick") },
+		{ n: 2, label: t("libreLauncher.steps.place"), value: PLACES.find((entry) => entry.id === place)?.label ?? "" },
+		{ n: 3, label: t("libreLauncher.steps.agent"), value: `${modelShort} · ${account?.label ?? ""} · ${modeEntry?.label ?? ""}` },
+		{
+			n: 4,
+			label: t("libreLauncher.steps.launch"),
+			value: remember ? t("libreLauncher.steps.remembered") : t("libreLauncher.steps.thisTime"),
+		},
 	];
 
 	return (
 		<Modal onClose={closeLauncher} align="center">
 			<div
 				role="dialog"
-				aria-label="Lancer un agent"
+				aria-label={t("libreLauncher.title")}
 				className="animate-in flex h-[640px] max-h-[calc(100vh-5rem)] w-[900px] max-w-[calc(100vw-5rem)] flex-col overflow-hidden rounded-[18px] bg-surface shadow-[var(--shadow-pop)]"
 			>
 				<header className="hairline-b flex h-14 shrink-0 items-center gap-3 px-5">
@@ -324,12 +334,12 @@ export function LibreLauncher({ initialFolder }: { initialFolder: string }) {
 						<Zap size={16} />
 					</span>
 					<div className="min-w-0 flex-1">
-						<div className="text-[15px] font-semibold text-ink">Lancer un agent</div>
-						<div className="text-[11.5px] text-ink-muted">Un dossier, un agent. Ni chantier ni mission.</div>
+						<div className="text-[15px] font-semibold text-ink">{t("libreLauncher.title")}</div>
+						<div className="text-[11.5px] text-ink-muted">{t("libreLauncher.subtitle")}</div>
 					</div>
 					<button
 						type="button"
-						aria-label="Fermer"
+						aria-label={t("libreLauncher.close")}
 						onClick={closeLauncher}
 						className="focus-ring flex h-8 w-8 items-center justify-center rounded-lg bg-raised text-ink-muted hover:text-ink"
 					>
@@ -338,7 +348,7 @@ export function LibreLauncher({ initialFolder }: { initialFolder: string }) {
 				</header>
 
 				<div className="flex min-h-0 flex-1">
-					<nav aria-label="Étapes" className="hairline-r flex w-60 shrink-0 flex-col gap-1 bg-base p-3">
+					<nav aria-label={t("libreLauncher.steps.label")} className="hairline-r flex w-60 shrink-0 flex-col gap-1 bg-base p-3">
 						{steps.map((entry) => (
 							<button
 								key={entry.n}
@@ -365,18 +375,24 @@ export function LibreLauncher({ initialFolder }: { initialFolder: string }) {
 						))}
 						<div className="flex-1" />
 						<p className="rounded-[10px] bg-surface p-3 text-[11.5px] leading-snug text-ink-muted shadow-card">
-							Tout est déjà rempli. Choisis un dossier, puis <span className="font-semibold text-ink">⌘↵</span> :
-							l'agent part.
+							<Trans
+								t={t}
+								i18nKey="libreLauncher.allSet"
+								components={{ key: <span className="font-semibold text-ink" /> }}
+							/>
 						</p>
 					</nav>
 
 					<div className="min-w-0 flex-1 overflow-y-auto px-6 py-5">
 						{step === 1 ? (
 							<>
-								<h2 className="text-[17px] font-semibold text-ink">Dans quel dossier ?</h2>
+								<h2 className="text-[17px] font-semibold text-ink">{t("libreLauncher.folder.title")}</h2>
 								<p className="mt-1 text-[12.5px] text-ink-muted">
-									C'est le <span className="font-mono">cd</span> : l'agent y travaillera comme si tu l'avais ouvert dans
-									ton terminal.
+									<Trans
+										t={t}
+										i18nKey="libreLauncher.folder.description"
+										components={{ code: <span className="font-mono" /> }}
+									/>
 								</p>
 								<div className="mt-4 flex gap-2">
 									<label
@@ -385,7 +401,7 @@ export function LibreLauncher({ initialFolder }: { initialFolder: string }) {
 											seen && !seen.exists ? "border-critical/60" : "border-accent/60",
 										)}
 									>
-										<span className="sr-only">Chemin du dossier</span>
+										<span className="sr-only">{t("libreLauncher.folder.path")}</span>
 										<Folder size={15} className="shrink-0 text-ink-muted" />
 										<input
 											autoFocus
@@ -399,7 +415,7 @@ export function LibreLauncher({ initialFolder }: { initialFolder: string }) {
 													setStep(2);
 												}
 											}}
-											placeholder="~/Sites/mon-projet"
+											placeholder={t("libreLauncher.folder.placeholder")}
 											className="min-w-0 flex-1 bg-transparent font-mono text-[13px] text-ink outline-none placeholder:text-ink-faint"
 										/>
 										{inspection.loading ? <Spinner /> : null}
@@ -411,24 +427,30 @@ export function LibreLauncher({ initialFolder }: { initialFolder: string }) {
 											className="focus-ring flex h-10 items-center gap-2 rounded-[10px] border border-line px-3.5 text-[12.5px] font-medium text-ink hover:bg-hover"
 										>
 											<FolderOpen size={15} />
-											Choisir dans le Finder…
+											{t("libreLauncher.folder.browse")}
 										</button>
 									) : null}
 								</div>
 								<p className="mt-2 h-4 text-[11.5px] text-ink-muted">
 									{seen
 										? !seen.exists
-											? "Ce dossier n'existe pas."
+											? t("libreLauncher.folder.missing")
 											: seen.isGit
-												? `Dépôt git · ${seen.branch || "HEAD détachée"} · ${seen.dirty === 0 ? "propre" : `${seen.dirty} fichier${seen.dirty > 1 ? "s" : ""} modifié${seen.dirty > 1 ? "s" : ""}`}`
-												: "Pas un dépôt git : l'agent y travaillera sur place."
+												? t("libreLauncher.folder.gitRepo", {
+														branch: seen.branch || t("libreLauncher.folder.detached"),
+														state:
+															seen.dirty === 0
+																? t("libreLauncher.folder.clean")
+																: t("libreLauncher.folder.dirty", { count: seen.dirty }),
+													})
+												: t("libreLauncher.folder.notGit")
 										: ""}
 								</p>
 
 								{suggestions.length > 0 ? (
 									<>
 										<h3 className="mt-4 mb-1.5 text-[10.5px] font-semibold tracking-[0.06em] text-ink-faint uppercase">
-											Récents
+											{t("libreLauncher.folder.recent")}
 										</h3>
 										<div className="flex flex-col gap-1">
 											{suggestions.map((entry) => (
@@ -450,7 +472,7 @@ export function LibreLauncher({ initialFolder }: { initialFolder: string }) {
 								{projectList.length > 0 ? (
 									<>
 										<h3 className="mt-4 mb-2 text-[10.5px] font-semibold tracking-[0.06em] text-ink-faint uppercase">
-											Projets déclarés dans les réglages
+											{t("libreLauncher.folder.projects")}
 										</h3>
 										<div className="flex flex-wrap gap-2">
 											{projectList
@@ -485,9 +507,14 @@ export function LibreLauncher({ initialFolder }: { initialFolder: string }) {
 
 						{step === 2 ? (
 							<>
-								<h2 className="text-[17px] font-semibold text-ink">Où travaille-t-il ?</h2>
+								<h2 className="text-[17px] font-semibold text-ink">{t("libreLauncher.place.title")}</h2>
 								<p className="mt-1 text-[12.5px] text-ink-muted">
-									Dans <span className="font-mono text-ink">{show(path)}</span>
+									<Trans
+										t={t}
+										i18nKey="libreLauncher.place.in"
+										values={{ folder: show(path) }}
+										components={{ code: <span className="font-mono text-ink" /> }}
+									/>
 								</p>
 								<div className="mt-4 grid grid-cols-3 gap-3">
 									{PLACES.map((entry) => {
@@ -516,8 +543,7 @@ export function LibreLauncher({ initialFolder }: { initialFolder: string }) {
 
 								{!isGit ? (
 									<p className="mt-3 rounded-[10px] bg-raised px-3.5 py-3 text-[12.5px] text-ink-muted">
-										Ce dossier n'est pas un dépôt git : l'agent y travaille sur place. Branche et worktree ne s'appliquent
-										pas.
+										{t("libreLauncher.place.notGit")}
 									</p>
 								) : null}
 
@@ -525,15 +551,14 @@ export function LibreLauncher({ initialFolder }: { initialFolder: string }) {
 									<div className="mt-3 flex items-start gap-3 rounded-[10px] bg-warning/10 px-3.5 py-3 text-[12.5px] text-warning">
 										<AlertTriangle size={17} className="mt-px shrink-0" />
 										<span className="flex-1 leading-snug">
-											Un agent travaille déjà dans ce dossier. Deux agents au même endroit écrivent dans les mêmes
-											fichiers.
+											{t("libreLauncher.place.busy")}
 										</span>
 										<button
 											type="button"
 											onClick={() => set("place", "worktree")}
 											className="focus-ring h-7 shrink-0 rounded-lg bg-warning px-2.5 text-[11.5px] font-semibold text-accent-ink"
 										>
-											Prendre un worktree
+											{t("libreLauncher.place.useWorktree")}
 										</button>
 									</div>
 								) : null}
@@ -541,7 +566,7 @@ export function LibreLauncher({ initialFolder }: { initialFolder: string }) {
 								{place !== "ici" ? (
 									<div className="mt-4 grid grid-cols-2 gap-3">
 										<label className="flex flex-col gap-1.5">
-											<span className="text-[11.5px] font-semibold text-ink-muted">Nom de la branche</span>
+											<span className="text-[11.5px] font-semibold text-ink-muted">{t("libreLauncher.place.branchName")}</span>
 											<input
 												value={branch}
 												spellCheck={false}
@@ -549,17 +574,22 @@ export function LibreLauncher({ initialFolder }: { initialFolder: string }) {
 												className="focus-ring h-9 rounded-[10px] border border-line px-3 font-mono text-[12.5px] text-ink"
 											/>
 											<span className="text-[11px] text-ink-muted">
-												{branchEdit === null ? "Tirée de ta première consigne, si tu en donnes une." : " "}
+												{branchEdit === null ? t("libreLauncher.place.branchHint") : " "}
 											</span>
 										</label>
 										<div className="flex flex-col gap-1.5">
-											<span className="text-[11.5px] font-semibold text-ink-muted">À partir de</span>
+											<span className="text-[11.5px] font-semibold text-ink-muted">{t("libreLauncher.place.from")}</span>
 											<span className="flex h-9 items-center rounded-[10px] bg-raised px-3 font-mono text-[12.5px] text-ink">
 												{seen?.branch || "HEAD"}
 											</span>
 											{place === "worktree" ? (
 												<span className="truncate text-[11px] text-ink-muted">
-													Copie créée dans <span className="font-mono text-ink">{show(worktree)}</span>
+													<Trans
+														t={t}
+														i18nKey="libreLauncher.place.copyIn"
+														values={{ path: show(worktree) }}
+														components={{ code: <span className="font-mono text-ink" /> }}
+													/>
 												</span>
 											) : null}
 										</div>
@@ -567,7 +597,7 @@ export function LibreLauncher({ initialFolder }: { initialFolder: string }) {
 								) : null}
 
 								<p className="mt-6 border-t border-line-soft pt-3.5 text-[12.5px] text-ink-muted">
-									Tu veux le parcours complet — chantier, terminaux, navigateur, serveurs ?{" "}
+									{t("libreLauncher.place.fullFlow")}{" "}
 									<button
 										type="button"
 										onClick={() => {
@@ -576,7 +606,7 @@ export function LibreLauncher({ initialFolder }: { initialFolder: string }) {
 										}}
 										className="focus-ring font-medium text-accent hover:underline"
 									>
-										Ouvrir plutôt un workspace →
+										{t("libreLauncher.place.openWorkspace")}
 									</button>
 								</p>
 							</>
@@ -584,20 +614,20 @@ export function LibreLauncher({ initialFolder }: { initialFolder: string }) {
 
 						{step === 3 ? (
 							<>
-								<h2 className="text-[17px] font-semibold text-ink">Quel agent ?</h2>
+								<h2 className="text-[17px] font-semibold text-ink">{t("libreLauncher.agent.title")}</h2>
 								<p className="mt-1 text-[12.5px] text-ink-muted">
-									Moteur, modèles et comptes viennent des réglages. Rien ne se déclare ici.
+									{t("libreLauncher.agent.description")}
 								</p>
 								<div className="mt-5 grid grid-cols-[110px_minmax(0,1fr)] items-center gap-x-4 gap-y-4">
-									<span className="text-[12.5px] font-semibold text-ink-muted">Moteur</span>
+									<span className="text-[12.5px] font-semibold text-ink-muted">{t("libreLauncher.agent.engine")}</span>
 									<span className="text-[12.5px] text-ink">
 										<span className="font-semibold">{engine?.label ?? "Claude Code"}</span>
 										<span className="text-ink-muted">
-											{(config?.engines?.length ?? 1) > 1 ? " — le premier déclaré" : " — le seul moteur déclaré"}
+											{(config?.engines?.length ?? 1) > 1 ? t("libreLauncher.agent.firstEngine") : t("libreLauncher.agent.onlyEngine")}
 										</span>
 									</span>
 
-									<span className="text-[12.5px] font-semibold text-ink-muted">Modèle</span>
+									<span className="text-[12.5px] font-semibold text-ink-muted">{t("libreLauncher.agent.model")}</span>
 									<div className="flex flex-wrap gap-2">
 										{models.map((entry) => (
 											<Chip
@@ -606,12 +636,12 @@ export function LibreLauncher({ initialFolder }: { initialFolder: string }) {
 												title={entry.hint}
 												onClick={() => set("model", entry.id)}
 											>
-												{entry.id ? entry.label : "Réglage du poste"}
+												{entry.id ? entry.label : t("libreLauncher.agent.machineSetting")}
 											</Chip>
 										))}
 									</div>
 
-									<span className="mt-3 self-start text-[12.5px] font-semibold text-ink-muted">Compte</span>
+									<span className="mt-3 self-start text-[12.5px] font-semibold text-ink-muted">{t("libreLauncher.agent.account")}</span>
 									<div className="grid grid-cols-2 gap-2">
 										{accounts.map((entry) => {
 											const status = statuses.data?.find((candidate) => candidate.id === entry.id);
@@ -635,20 +665,20 @@ export function LibreLauncher({ initialFolder }: { initialFolder: string }) {
 																	status.loggedIn ? "bg-success/10 text-success" : "bg-critical/10 text-critical",
 																)}
 															>
-																{status.loggedIn ? "connecté" : "déconnecté"}
+																{status.loggedIn ? t("libreLauncher.agent.loggedIn") : t("libreLauncher.agent.loggedOut")}
 															</span>
 														) : null}
 													</span>
 													<span className="font-mono text-[11.5px] text-ink-muted">{entry.dir || "~/.claude"}</span>
 													<span className="text-[11px] text-ink-muted">
-														{entry.id === projectAccount ? "celui du projet de ce dossier" : status?.email || " "}
+														{entry.id === projectAccount ? t("libreLauncher.agent.projectAccount") : status?.email || " "}
 													</span>
 												</button>
 											);
 										})}
 									</div>
 
-									<span className="text-[12.5px] font-semibold text-ink-muted">Permissions</span>
+									<span className="text-[12.5px] font-semibold text-ink-muted">{t("libreLauncher.agent.permissions")}</span>
 									<div className="flex flex-wrap gap-2">
 										{PERMISSION_MODES.map((entry) => (
 											<Chip
@@ -662,7 +692,7 @@ export function LibreLauncher({ initialFolder }: { initialFolder: string }) {
 										))}
 									</div>
 
-									<span className="text-[12.5px] font-semibold text-ink-muted">Profondeur</span>
+									<span className="text-[12.5px] font-semibold text-ink-muted">{t("libreLauncher.agent.depth")}</span>
 									<div className="flex flex-wrap gap-2">
 										{DEPTHS.map((entry) => (
 											<Chip
@@ -672,7 +702,7 @@ export function LibreLauncher({ initialFolder }: { initialFolder: string }) {
 												title={
 													depthSupported(entry.id)
 														? undefined
-														: "Ce moteur ne dit pas comment l'obtenir — Réglages → Moteurs"
+														: t("libreLauncher.agent.depthUnsupported")
 												}
 												onClick={() => set("depth", entry.id)}
 											>
@@ -686,8 +716,7 @@ export function LibreLauncher({ initialFolder }: { initialFolder: string }) {
 									<div className="mt-5 flex items-center gap-3 rounded-[10px] bg-critical/10 px-3.5 py-3 text-[12.5px] text-critical">
 										<ShieldAlert size={17} className="shrink-0" />
 										<span className="leading-snug">
-											Bypass, sur place, sur ta branche courante : l'agent peut lancer n'importe quelle commande sans te
-											demander. Un worktree limite la casse.
+											{t("libreLauncher.agent.bypassWarning")}
 										</span>
 									</div>
 								) : null}
@@ -696,18 +725,22 @@ export function LibreLauncher({ initialFolder }: { initialFolder: string }) {
 
 						{step === 4 ? (
 							<>
-								<h2 className="text-[17px] font-semibold text-ink">Prêt à partir</h2>
+								<h2 className="text-[17px] font-semibold text-ink">{t("libreLauncher.launch.title")}</h2>
 								<p className="mt-3.5 rounded-[14px] bg-raised px-5 py-4 text-[14.5px] leading-relaxed text-ink">
 									{summary}
 								</p>
 								<label className="mt-5 flex flex-col gap-1.5">
 									<span className="text-[11.5px] font-semibold text-ink-muted">
-										Première consigne <span className="font-normal">— facultatif</span>
+										<Trans
+											t={t}
+											i18nKey="libreLauncher.launch.prompt"
+											components={{ muted: <span className="font-normal" /> }}
+										/>
 									</span>
 									<textarea
 										value={prompt}
 										onChange={(event) => setPrompt(event.target.value)}
-										placeholder="Vide : l'agent attend ta première phrase, comme « claude » tout court."
+										placeholder={t("libreLauncher.launch.placeholder")}
 										className="focus-ring h-24 resize-none rounded-[10px] border border-line p-3 text-[13px] text-ink placeholder:text-ink-faint"
 									/>
 								</label>
@@ -725,8 +758,12 @@ export function LibreLauncher({ initialFolder }: { initialFolder: string }) {
 										{remember ? <Check size={12} strokeWidth={3} /> : null}
 									</span>
 									<span>
-										Retenir ces choix pour <span className="font-mono">{show(path)}</span> — la prochaine fois, ⌘N puis ⌘↵
-										suffit
+										<Trans
+											t={t}
+											i18nKey="libreLauncher.launch.remember"
+											values={{ folder: show(path) }}
+											components={{ code: <span className="font-mono" /> }}
+										/>
 									</span>
 								</button>
 							</>
@@ -737,7 +774,7 @@ export function LibreLauncher({ initialFolder }: { initialFolder: string }) {
 				<footer className="flex shrink-0 border-t border-line-soft items-center gap-3 px-5 py-3.5">
 					<div className="min-w-0 flex-1 rounded-[10px] bg-void px-3.5 py-2.5">
 						<div className="mb-1 text-[9.5px] font-semibold tracking-[0.08em] text-ink-muted uppercase">
-							Ce que tu aurais tapé
+							{t("libreLauncher.command")}
 						</div>
 						{command.map((line) => (
 							<div key={line} className="font-mono text-[11.5px] break-all text-ink">
@@ -752,7 +789,7 @@ export function LibreLauncher({ initialFolder }: { initialFolder: string }) {
 							onClick={() => setStep((step - 1) as Step)}
 							className="focus-ring h-10 rounded-[10px] border border-line px-3.5 text-[12.5px] font-medium text-ink hover:bg-hover"
 						>
-							Retour
+							{t("libreLauncher.back")}
 						</button>
 					) : null}
 					{step < 4 ? (
@@ -761,7 +798,7 @@ export function LibreLauncher({ initialFolder }: { initialFolder: string }) {
 							onClick={() => setStep((step + 1) as Step)}
 							className="focus-ring h-10 rounded-[10px] border border-line px-3.5 text-[12.5px] font-medium text-ink hover:bg-hover"
 						>
-							Régler la suite
+							{t("libreLauncher.next")}
 						</button>
 					) : null}
 					<button
@@ -771,7 +808,7 @@ export function LibreLauncher({ initialFolder }: { initialFolder: string }) {
 						className="focus-ring flex h-10 items-center gap-2 rounded-[10px] bg-accent px-4 text-[13.5px] font-semibold text-accent-ink hover:bg-accent-soft disabled:cursor-not-allowed disabled:opacity-40"
 					>
 						{launching ? <Spinner /> : null}
-						Lancer
+						{t("libreLauncher.launch.button")}
 						<span className="font-mono text-[11px] opacity-80">⌘↵</span>
 					</button>
 				</footer>

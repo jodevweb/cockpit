@@ -65,6 +65,8 @@ import { isQuestion, useAgentActions, useAgentGuard } from "@/app/agents";
 import { useAsync } from "@/lib/useAsync";
 import { useCockpit } from "@/app/store";
 import { useWorkspace } from "@/app/workspace";
+import { useTranslation } from "react-i18next";
+import { t as translate } from "@/i18n";
 
 /**
  * Missions : un ticket, un plan, des exécutants.
@@ -112,15 +114,15 @@ function situation(
 				: known && !master?.running
 					? // Annoncer une rédaction que personne ne mène ferait attendre
 						// une proposition qui ne viendra pas.
-						"Le maître ne tourne pas — ouvre le parcours, il y repart tout seul."
-					: "Le maître rédige sa proposition — suis-le dans le parcours, ticket à côté.",
+						translate("views:missions.situation.masterIdle")
+					: translate("views:missions.situation.masterDrafting"),
 			live: busy && !awaitsHuman(mission),
 		};
 	}
 	if (mission.paused && mission.state !== "failed") {
 		return {
-			label: "En pause",
-			detail: "Rien ne repart tant que tu n'as pas repris la mission.",
+			label: translate("views:missions.situation.paused"),
+			detail: translate("views:missions.situation.pausedDetail"),
 			live: false,
 		};
 	}
@@ -129,17 +131,15 @@ function situation(
 	// seul événement. Cette ligne-ci dit l'étape, pas le détail.
 	if (mission.state === "planning" && busy) {
 		return {
-			label: "Découpage",
-			detail:
-				"Le maître lit le ticket et découpe le travail en tâches. Tu relis son plan avant que le moindre exécutant ne parte.",
+			label: translate("views:missions.situation.splitting"),
+			detail: translate("views:missions.situation.splittingDetail"),
 			live: true,
 		};
 	}
 	if (mission.state === "integrating" && busy) {
 		return {
-			label: "Intégration",
-			detail:
-				"Le maître recompose les branches livrées dans la branche d'intégration, puis ouvrira la pull request.",
+			label: translate("views:missions.situation.integrating"),
+			detail: translate("views:missions.situation.integratingDetail"),
 			live: true,
 		};
 	}
@@ -147,29 +147,16 @@ function situation(
 }
 
 /** Les étapes, dans l'ordre où on les traverse. */
-const STEPS: Array<{ state: MissionState; label: string; waiting: string }> = [
-	{
-		state: "planning",
-		label: "Analyse",
-		waiting: "Lance le maître : il lira le ticket et proposera un découpage.",
-	},
-	{
-		state: "awaitingApproval",
-		label: "Plan",
-		waiting: "Un découpage est proposé. Relis-le : rien ne démarre sans ton accord.",
-	},
-	{
-		state: "running",
-		label: "Exécution",
-		waiting: "Les exécutants partent dès que leur base existe, chacun dans son worktree.",
-	},
-	{
-		state: "integrating",
-		label: "Intégration",
-		waiting: "Tout est livré. Le maître recompose les branches, puis ouvre la PR.",
-	},
-	{ state: "done", label: "Livrée", waiting: "Mission close." },
-];
+const STEP_STATES: MissionState[] = ["planning", "awaitingApproval", "running", "integrating", "done"];
+
+/** Les étapes avec leurs libellés, lus au rendu : la langue n'est pas connue au chargement. */
+function steps(): Array<{ state: MissionState; label: string; waiting: string }> {
+	return STEP_STATES.map((state) => ({
+		state,
+		label: translate(`views:missions.steps.${state}.label`),
+		waiting: translate(`views:missions.steps.${state}.waiting`),
+	}));
+}
 
 /** Rang de l'étape d'exécution : la seule qui dure assez pour se remplir. */
 const STEP_RUNNING = 2;
@@ -178,26 +165,27 @@ const STEP_RUNNING = 2;
 const ONGOING: MissionState[] = ["running", "integrating"];
 
 /** Comment se dit un verdict, et sur quel ton. */
-const VERDICTS: Record<string, { label: string; tone: "critical" | "warning" | "success" }> = {
-	blocking: { label: "refusée", tone: "critical" },
-	reserves: { label: "réserves", tone: "warning" },
-	ok: { label: "vérifiée", tone: "success" },
+const VERDICTS: Record<string, { tone: "critical" | "warning" | "success" }> = {
+	blocking: { tone: "critical" },
+	reserves: { tone: "warning" },
+	ok: { tone: "success" },
 	// Elle a parlé sans conclure. Ni refus ni accord — et surtout pas un blanc,
 	// qui se lirait comme « rien à redire ».
-	undecided: { label: "sans verdict", tone: "warning" },
+	undecided: { tone: "warning" },
 };
 
-const TASK_LABELS: Record<string, { label: string; tone: string }> = {
-	planned: { label: "à lancer", tone: "neutral" },
-	running: { label: "en cours", tone: "info" },
-	delivered: { label: "livrée", tone: "success" },
-	integrated: { label: "intégrée", tone: "accent" },
-	failed: { label: "échouée", tone: "critical" },
+const TASK_LABELS: Record<string, { tone: string }> = {
+	planned: { tone: "neutral" },
+	running: { tone: "info" },
+	delivered: { tone: "success" },
+	integrated: { tone: "accent" },
+	failed: { tone: "critical" },
 };
 
 export function MissionsView() {
 	const { notify, activeProject, hasConnector, connectors, go, focus, clearFocus } =
 		useCockpit();
+	const { t } = useTranslation("views");
 	const { confirm } = useConfirm();
 	const missions = useAsync(() => api.missions.list(), [], { pollMs: 10_000 });
 	// Ce qui déborde, sur toutes les missions à la fois : le repère se calcule
@@ -214,10 +202,9 @@ export function MissionsView() {
 		// La même question qu'au bouton « Lancer en mission » : ce geste démarre
 		// un agent, où qu'on le fasse.
 		const ok = await confirm({
-			title: `Lancer une mission sur ${source} ?`,
-			message:
-				"L'agent maître démarre tout de suite et lit le ticket. Rien d'autre ne part avant ton accord.",
-			confirmLabel: "Lancer la mission",
+			title: t("missions.open.confirmTitle", { source }),
+			message: t("missions.open.confirmMessage"),
+			confirmLabel: t("missions.open.confirmLabel"),
 		});
 		if (!ok) return;
 		setOpening(true);
@@ -226,10 +213,10 @@ export function MissionsView() {
 			// seule, et une mission guidée arrivait sur un parcours qui annonçait
 			// « le maître écrit » au-dessus d'un maître que personne n'avait démarré.
 			const { mission } = await withActivity(
-				`Mission depuis ${source}`,
+				t("missions.open.activity", { source }),
 				() => api.missions.startFromTicket(source),
 				{
-					firstStep: "Je lis le ticket et je lance l'agent maître…",
+					firstStep: t("missions.open.firstStep"),
 					result: (value) => value.message,
 				},
 			);
@@ -269,18 +256,15 @@ export function MissionsView() {
 		// et des worktrees partent avec elle.
 		const worktrees = mission.tasks.filter((task) => task.worktree).length;
 		const ok = await confirm({
-			title: `Tout supprimer pour « ${mission.title} » ?`,
-			message:
-				`Les agents sont coupés, puis ${worktrees} worktree(s), les branches ` +
-				`de la mission — branche d'intégration comprise — et les conversations ` +
-				`des exécutants sont effacés. Le travail non poussé sera perdu.`,
-			confirmLabel: "Tout supprimer",
+			title: t("missions.remove.confirmTitle", { title: mission.title }),
+			message: t("missions.remove.confirmMessage", { count: worktrees }),
+			confirmLabel: t("missions.remove.confirmLabel"),
 			danger: true,
 		});
 		if (!ok) return;
 		try {
 			const done = await api.missions.purge(mission.id);
-			notify(`Mission supprimée — ${done.length} élément(s) effacé(s).`);
+			notify(t("missions.remove.done", { count: done.length }));
 			setOpenId(null);
 		} catch (error) {
 			notify(String(error));
@@ -322,38 +306,31 @@ export function MissionsView() {
 		const tickets = connectors.find((entry) => entry.kind === "tickets");
 		return (
 			<>
-				<ViewHeader title="Missions" subtitle="Un ticket, un plan, des exécutants" />
+				<ViewHeader title={t("missions.title")} subtitle={t("missions.subtitle")} />
 				<div className="flex min-h-0 flex-1 items-center justify-center p-8">
 					<div className="panel flex max-w-lg flex-col gap-3 p-6">
 						<div className="flex items-center gap-2">
 							<ListChecks size={16} className="shrink-0 text-accent-soft" />
 							<h2 className="text-[13px] font-semibold text-ink">
-								Ce que fait une mission
+								{t("missions.intro.title")}
 							</h2>
 						</div>
 						<p className="text-[11.5px] leading-relaxed text-ink-muted">
-							Tu donnes un ticket. Un agent maître le lit, propose un découpage en
-							tâches, et attend ton accord — rien ne part avant. Une fois le plan
-							approuvé, chaque tâche reçoit son exécutant, sa branche et son
-							worktree ; le maître recompose leur travail à la fin et ouvre la pull
-							request.
+							{t("missions.intro.how")}
 						</p>
 						<p className="text-[11.5px] leading-relaxed text-ink-muted">
-							C'est la différence avec un agent lancé à la main : ici le cockpit
-							tient le lien entre le ticket, le plan, les branches et ce qui a été
-							livré — et le retrouve entier même s'il redémarre au milieu.
+							{t("missions.intro.why")}
 						</p>
 						<div className="rounded-lg border border-line-soft bg-surface/60 p-3">
-							<p className="text-[11px] font-medium text-ink">Ce qu'il manque ici</p>
+							<p className="text-[11px] font-medium text-ink">{t("missions.intro.missingTitle")}</p>
 							<p className="mt-1 text-[11px] leading-relaxed text-ink-faint">
-								Un suivi de tâches, pour lire le ticket d'origine :{" "}
-								{tickets?.missing ?? "un jeton Linear, GitLab ou GitHub"}. Les rôles
-								des exécutants ont déjà des valeurs par défaut — tu pourras les
-								ajuster ensuite dans « Rôles des agents ».
+								{t("missions.intro.missing", {
+									missing: tickets?.missing ?? t("missions.intro.missingDefault"),
+								})}
 							</p>
 						</div>
 						<Button variant="solid" className="self-start" onClick={() => go("settings")}>
-							Ouvrir les Réglages
+							{t("missions.intro.openSettings")}
 						</Button>
 					</div>
 				</div>
@@ -364,8 +341,8 @@ export function MissionsView() {
 	return (
 		<>
 			<ViewHeader
-				title="Missions"
-				subtitle="Un ticket, un plan, des exécutants"
+				title={t("missions.title")}
+				subtitle={t("missions.subtitle")}
 				actions={missions.loading ? <Spinner /> : null}
 			/>
 
@@ -381,7 +358,7 @@ export function MissionsView() {
 					    lui interdire ne rendrait service à personne. */}
 					<section className="panel flex flex-col gap-2 p-4">
 						<span className="text-[11px] font-medium text-ink-muted">
-							Ouvrir une mission
+							{t("missions.open.title")}
 						</span>
 						<div className="flex items-center gap-2.5">
 							<TicketPicker onPick={(identifier) => void open(identifier)} />
@@ -389,7 +366,9 @@ export function MissionsView() {
 								<TextInput
 									value={reference}
 									onChange={setReference}
-									placeholder={`ou colle une adresse — ${activeProject?.linearTeamKey || "ABC"}-42, #317…`}
+									placeholder={t("missions.open.placeholder", {
+										key: activeProject?.linearTeamKey || "ABC",
+									})}
 								/>
 							</div>
 							<Button
@@ -398,20 +377,19 @@ export function MissionsView() {
 								disabled={!reference.trim() || opening}
 								onClick={() => void open()}
 							>
-								{opening ? "Lecture du ticket…" : "Ouvrir"}
+								{opening ? t("missions.open.reading") : t("missions.open.submit")}
 							</Button>
 						</div>
 						<span className="text-[10px] leading-relaxed text-ink-faint">
-							Le titre et la branche d'intégration viennent du ticket : rien d'autre à
-							saisir.
+							{t("missions.open.hint")}
 						</span>
 					</section>
 
 					{list.length === 0 && !missions.loading ? (
 						<Empty
 							icon={CircleDot}
-							message="Aucune mission en cours"
-							hint="Choisis un ticket ci-dessus : un agent maître le lit, propose un découpage et attend ton accord avant de lancer quoi que ce soit. Chaque tâche part ensuite sur sa propre branche, et le maître recompose à la fin."
+							message={t("missions.empty.title")}
+							hint={t("missions.empty.hint")}
 						/>
 					) : null}
 
@@ -449,6 +427,7 @@ function MissionCard({
 	onJourney?: () => void;
 }) {
 	const { notify, go, worktrees } = useCockpit();
+	const { t } = useTranslation("views");
 	const { show } = useWorkspace();
 	const [open, setOpen] = useState(mission.state !== "done");
 	const [adding, setAdding] = useState(false);
@@ -459,6 +438,7 @@ function MissionCard({
 		enabled: mission.state !== "done",
 	});
 
+	const STEPS = steps();
 	const stepIndex = Math.max(
 		0,
 		STEPS.findIndex((step) => step.state === mission.state),
@@ -569,7 +549,7 @@ function MissionCard({
 					<div className="mt-1 flex flex-wrap items-center gap-2 font-mono text-[10px] text-ink-faint">
 						<span className="flex items-center gap-1">
 							<GitBranch size={10} />
-							{mission.branch || "sans branche"}
+							{mission.branch || t("missions.card.noBranch")}
 						</span>
 						{/* Le temps depuis l'approbation, pas depuis l'ouverture : c'est
 						    ce que la mission a coûté, non ce qu'elle a attendu. */}
@@ -578,8 +558,11 @@ function MissionCard({
 								className="flex items-center gap-1"
 								title={
 									mission.finishedAt
-										? `Du ${fromIso(mission.startedAt)} au ${fromIso(mission.finishedAt)}`
-										: `Démarrée ${fromIso(mission.startedAt)}`
+										? t("missions.card.fromTo", {
+												from: fromIso(mission.startedAt),
+												to: fromIso(mission.finishedAt),
+											})
+										: t("missions.card.startedAt", { at: fromIso(mission.startedAt) })
 								}
 							>
 								<Clock size={10} />
@@ -606,10 +589,10 @@ function MissionCard({
 						icon={Route}
 						onClick={onJourney}
 					>
-						{awaitsHuman(mission) ? "À toi — ouvrir" : "Parcours"}
+						{awaitsHuman(mission) ? t("missions.card.yourTurn") : t("missions.card.journey")}
 					</Button>
 				) : null}
-				<Button size="sm" icon={Trash2} title="Supprimer" onClick={onRemove} />
+				<Button size="sm" icon={Trash2} title={t("missions.card.remove")} onClick={onRemove} />
 			</div>
 
 			{/* Les étapes disent où l'on en est, un pourcentage ne le dirait pas.
@@ -643,10 +626,9 @@ function MissionCard({
 			)}
 			{delivered.total > 0 && mission.state === "running" ? (
 				<div className="-mt-1.5 text-[10px] text-ink-faint">
-					{delivered.done} tâche{delivered.done > 1 ? "s" : ""} rendue
-					{delivered.done > 1 ? "s" : ""} sur {delivered.total}
+					{t("missions.card.delivered", { count: delivered.done, total: delivered.total })}
 					{delivered.reworked > 0
-						? ` · ${delivered.reworked} passée${delivered.reworked > 1 ? "s" : ""} par une reprise`
+						? t("missions.card.reworked", { count: delivered.reworked })
 						: ""}
 				</div>
 			) : null}
@@ -666,11 +648,11 @@ function MissionCard({
 							void run(
 								"master",
 								() => api.missions.launchMaster(mission.id),
-								"Maître lancé.",
+								t("missions.card.masterLaunched"),
 							)
 						}
 					>
-						{busy === "master" ? "Lancement…" : "Lancer le maître"}
+						{busy === "master" ? t("missions.card.launching") : t("missions.card.launchMaster")}
 					</Button>
 				) : null}
 				{attend && estimate.data && estimate.data.sample > 0 ? (
@@ -679,17 +661,17 @@ function MissionCard({
 					// et rien ne le disait avant de cliquer.
 					<span
 						className="flex items-center gap-1.5 text-[11px] text-ink-faint"
-						title={`Médiane de ${estimate.data.sample} mission${
-							estimate.data.sample > 1 ? "s" : ""
-						} close${estimate.data.sample > 1 ? "s" : ""} de taille voisine`}
+						title={t("missions.card.estimateTitle", { count: estimate.data.sample })}
 					>
 						<Hourglass size={12} className="shrink-0" />
 						<span>
-							≈ {duration(estimate.data.expectedSeconds)} de travail
+							{t("missions.card.estimate", { duration: duration(estimate.data.expectedSeconds) })}
 							{estimate.data.failureRate > 0.25
-								? ` · ${Math.round(estimate.data.failureRate * 100)} % ont échoué`
+								? t("missions.card.estimateFailed", {
+										percent: Math.round(estimate.data.failureRate * 100),
+									})
 								: ""}
-							{estimate.data.thin ? " · estimation peu sûre" : ""}
+							{estimate.data.thin ? t("missions.card.estimateThin") : ""}
 						</span>
 					</span>
 				) : null}
@@ -702,11 +684,11 @@ function MissionCard({
 							void run(
 								"approve",
 								() => api.missions.approve(mission.id),
-								"Plan approuvé — les exécutants partent.",
+								t("missions.card.planApproved"),
 							)
 						}
 					>
-						{busy === "approve" ? "Lancement des exécutants…" : "Approuver le plan"}
+						{busy === "approve" ? t("missions.card.launchingRunners") : t("missions.card.approvePlan")}
 					</Button>
 				) : null}
 				{mission.state === "integrating" ? (
@@ -729,14 +711,14 @@ function MissionCard({
 								)}
 								title={
 									dehors > 0
-										? "La pull request refusera de partir tant que ce travail n'est pas fusionné ou abandonné."
-										: "Tout le travail livré est dans la branche d'intégration."
+										? t("missions.card.outsideTitle")
+										: t("missions.card.allInsideTitle")
 								}
 							>
 								<GitMerge size={12} className="shrink-0" />
 								<span>
-									{dedans}/{mission.tasks.length} intégrées
-									{dehors > 0 ? ` · ${dehors} encore dehors` : ""}
+									{t("missions.card.integrated", { done: dedans, total: mission.tasks.length })}
+									{dehors > 0 ? t("missions.card.outside", { count: dehors }) : ""}
 								</span>
 							</span>
 						);
@@ -748,12 +730,11 @@ function MissionCard({
 				{mission.state === "integrating" && refus.length > 0 ? (
 					<span
 						className="flex items-center gap-1.5 text-[11px] text-critical"
-						title={`${refus.join(", ")} — corrige ce qui est reproché, puis relance la vérification : son nouveau verdict lèvera le refus.`}
+						title={t("missions.card.refusedTitle", { tasks: refus.join(", ") })}
 					>
 						<ShieldAlert size={12} className="shrink-0" />
 						<span>
-							{refus.length} vérification{refus.length > 1 ? "s" : ""} refuse
-							{refus.length > 1 ? "nt" : ""}
+							{t("missions.card.refused", { count: refus.length })}
 						</span>
 					</span>
 				) : null}
@@ -765,10 +746,12 @@ function MissionCard({
 							<span
 								key={task.id}
 								className="flex min-w-0 items-center gap-1.5 text-[11px] text-warning"
-								title="Son rapport ne conclut pas de façon lisible. La relancer lui fait tout relire, et finir par « VERDICT: ok », « réserves » ou « bloquant »."
+								title={t("missions.card.undecidedTitle")}
 							>
 								<ShieldAlert size={12} className="shrink-0" />
-								<span className="min-w-0 truncate">Sans verdict : {task.title}</span>
+								<span className="min-w-0 truncate">
+									{t("missions.card.undecided", { title: task.title })}
+								</span>
 								<Button
 									size="sm"
 									icon={RotateCcw}
@@ -777,11 +760,11 @@ function MissionCard({
 										void run(
 											`rerun:${task.id}`,
 											() => api.missions.rerun(mission.id, task.id),
-											`${task.title} — relancée.`,
+											t("missions.card.rerunDone", { title: task.title }),
 										)
 									}
 								>
-									Relancer
+									{t("missions.rerun")}
 								</Button>
 							</span>
 						))
@@ -794,20 +777,20 @@ function MissionCard({
 						disabled={refus.length > 0 || indécises.length > 0}
 						title={
 							refus.length > 0
-								? "Une vérification refuse encore : lève son verdict avant d'ouvrir la pull request."
+								? t("missions.card.prBlockedRefused")
 								: indécises.length > 0
-									? "Une vérification n'a pas conclu : on ne sait pas si le travail passe. Relance-la avant d'ouvrir la pull request."
+									? t("missions.card.prBlockedUndecided")
 									: undefined
 						}
 						onClick={() =>
 							void run(
 								"pr",
 								() => api.missions.openPr(mission.id),
-								"Pull request ouverte.",
+								t("missions.card.prOpened"),
 							)
 						}
 					>
-						{busy === "pr" ? "Ouverture…" : "Ouvrir la PR"}
+						{busy === "pr" ? t("missions.card.opening") : t("missions.card.openPr")}
 					</Button>
 				) : null}
 				{mission.prUrl ? (
@@ -817,7 +800,7 @@ function MissionCard({
 							void api.system.openUrl(mission.prUrl).catch(() => undefined);
 						}}
 					>
-						Voir la PR
+						{t("missions.card.viewPr")}
 					</Button>
 				) : null}
 
@@ -830,43 +813,43 @@ function MissionCard({
 							variant="solid"
 							icon={PlayCircle}
 							loading={busy === "resume"}
-							title="Relance le maître et tout ce qui doit tourner"
+							title={t("missions.card.resumeTitle")}
 							onClick={() =>
 								void run(
 									"resume",
 									() => api.missions.resume(mission.id),
-									"Mission reprise.",
+									t("missions.card.resumed"),
 								)
 							}
 						>
-							{busy === "resume" ? "Reprise…" : "Reprendre"}
+							{busy === "resume" ? t("missions.card.resuming") : t("missions.card.resume")}
 						</Button>
 					) : (
 						<>
 							<Button
 								icon={PauseCircle}
 								loading={busy === "pause"}
-								title="Coupe les agents et suspend le lanceur — le travail reste en place"
+								title={t("missions.card.pauseTitle")}
 								onClick={() =>
 									void run(
 										"pause",
 										() => api.missions.pause(mission.id),
-										"Mission suspendue.",
+										t("missions.card.paused"),
 									)
 								}
 							>
-								Pause
+								{t("missions.card.pause")}
 							</Button>
 							<Button
 								variant="danger"
 								icon={StopCircle}
 								loading={busy === "stop"}
-								title="Coupe tout et abandonne la mission"
+								title={t("missions.card.stopTitle")}
 								onClick={() =>
-									void run("stop", () => api.missions.stop(mission.id), "Mission arrêtée.")
+									void run("stop", () => api.missions.stop(mission.id), t("missions.card.stopped"))
 								}
 							>
-								Arrêter
+								{t("missions.card.stop")}
 							</Button>
 						</>
 					)
@@ -879,7 +862,7 @@ function MissionCard({
 
 					{master ? (
 						<AgentLine
-							title="Agent maître"
+							title={t("missions.card.master")}
 							activity={master}
 							onOpen={() => {
 								// On ouvre son onglet, pas seulement l'écran : « Suivre »
@@ -897,7 +880,7 @@ function MissionCard({
 							<div className="mb-1.5 flex items-center gap-2">
 								<BookOpen size={12} className="shrink-0 text-success" />
 								<span className="text-[10px] font-semibold tracking-[0.08em] text-success uppercase">
-									Comment ça marche
+									{t("missions.card.summary")}
 								</span>
 								<div className="flex-1" />
 								<Button
@@ -906,13 +889,13 @@ function MissionCard({
 									onClick={() => {
 										void navigator.clipboard
 											.writeText(
-												`# ${mission.title}${mission.ticket ? ` (${mission.ticket})` : ""}\n\n${mission.summary}${mission.prUrl ? `\n\nPull request : ${mission.prUrl}` : ""}`,
+												`# ${mission.title}${mission.ticket ? ` (${mission.ticket})` : ""}\n\n${mission.summary}${mission.prUrl ? `\n\n${t("missions.card.summaryPr", { url: mission.prUrl })}` : ""}`,
 											)
-											.then(() => notify("Compte rendu copié."))
+											.then(() => notify(t("missions.card.summaryCopied")))
 											.catch(() => undefined);
 									}}
 								>
-									Copier
+									{t("missions.card.copy")}
 								</Button>
 							</div>
 							<Markdown source={mission.summary} />
@@ -922,7 +905,7 @@ function MissionCard({
 					{mission.plan ? (
 						<div className="rounded-lg border border-accent/25 bg-accent/[0.06] p-2.5">
 							<div className="mb-1 text-[10px] font-semibold tracking-[0.08em] text-accent-soft uppercase">
-								Plan proposé
+								{t("missions.card.proposedPlan")}
 							</div>
 							<p className="text-selectable text-[11px] leading-relaxed text-ink-muted">
 								{mission.plan}
@@ -964,7 +947,7 @@ function MissionCard({
 					) : mission.state !== "done" && !prelude ? (
 						<div className="flex justify-end">
 							<Button size="sm" icon={Plus} onClick={() => setAdding(true)}>
-								Ajouter une tâche à la main
+								{t("missions.card.addTask")}
 							</Button>
 						</div>
 					) : null}
@@ -1011,6 +994,7 @@ function MissionSpend({ missionId }: { missionId: string }) {
  */
 function MissionBase({ mission, onChange }: { mission: Mission; onChange: () => void }) {
 	const { notify } = useCockpit();
+	const { t } = useTranslation("views");
 	const [editing, setEditing] = useState(false);
 	const [draft, setDraft] = useState(mission.base);
 	const branches = useAsync(() => api.git.branches(), [], { enabled: editing });
@@ -1026,8 +1010,8 @@ function MissionBase({ mission, onChange }: { mission: Mission; onChange: () => 
 			setEditing(false);
 			notify(
 				value.trim()
-					? `La PR se greffera sur ${value.trim()}.`
-					: "La PR visera la branche par défaut.",
+					? t("missions.base.set", { branch: value.trim() })
+					: t("missions.base.cleared"),
 			);
 			onChange();
 		} catch (error) {
@@ -1047,13 +1031,13 @@ function MissionBase({ mission, onChange }: { mission: Mission; onChange: () => 
 					setDraft(mission.base);
 					setEditing(true);
 				}}
-				title="Branche sur laquelle la pull request se greffera"
+				title={t("missions.base.title")}
 				className={clsx(
 					"focus-ring rounded px-1",
 					mission.base ? "text-accent-soft" : "text-ink-faint hover:text-ink-muted",
 				)}
 			>
-				{mission.base ? `→ ${mission.base}` : "→ branche par défaut"}
+				{mission.base ? `→ ${mission.base}` : `→ ${t("missions.base.default")}`}
 			</button>
 		);
 	}
@@ -1067,7 +1051,7 @@ function MissionBase({ mission, onChange }: { mission: Mission; onChange: () => 
 				onBlur={() => setEditing(false)}
 				className="focus-ring h-6 max-w-64 rounded border border-line-soft bg-raised px-1 font-mono text-[10px] text-ink"
 			>
-				<option value="">branche par défaut</option>
+				<option value="">{t("missions.base.default")}</option>
 				{/* Celles qui empilent d'abord, et dites comme telles : le reste
 				    des branches reste accessible, mais sans promettre une pile
 				    qu'elles ne produiront pas. */}
@@ -1083,7 +1067,7 @@ function MissionBase({ mission, onChange }: { mission: Mission; onChange: () => 
 					return (
 						<>
 							{empilables.length > 0 ? (
-								<optgroup label="PR ouvertes — la pile sera reconnue">
+								<optgroup label={t("missions.base.stacking")}>
 									{empilables.map((branch) => (
 										<option key={branch.name} value={branch.name}>
 											{branch.name}
@@ -1091,7 +1075,7 @@ function MissionBase({ mission, onChange }: { mission: Mission; onChange: () => 
 									))}
 								</optgroup>
 							) : null}
-							<optgroup label="Autres branches">
+							<optgroup label={t("missions.base.others")}>
 								{autres.map((branch) => (
 									<option key={branch.name} value={branch.name}>
 										{branch.name}
@@ -1119,6 +1103,7 @@ function MissionBase({ mission, onChange }: { mission: Mission; onChange: () => 
 function Pending({ sessionId }: { sessionId: string | null | undefined }) {
 	const { pendingForSession } = useAgentGuard();
 	const { decide, answer } = useAgentActions();
+	const { t } = useTranslation("views");
 	const requests = pendingForSession(sessionId);
 	if (requests.length === 0) return null;
 
@@ -1134,8 +1119,8 @@ function Pending({ sessionId }: { sessionId: string | null | undefined }) {
 							decide(
 								request.id,
 								false,
-								"L'utilisateur a passé la question : avance avec ce que tu sais, " +
-									"ou demande-lui dans ta réponse.",
+								"The user skipped the question: move on with what you know, " +
+									"or ask them in your reply.",
 							)
 						}
 					/>
@@ -1144,7 +1129,7 @@ function Pending({ sessionId }: { sessionId: string | null | undefined }) {
 						<ShieldQuestion size={12} className="shrink-0 text-warning" />
 						<div className="min-w-0 flex-1">
 							<p className="text-[11px] text-ink">
-								Demande à utiliser{" "}
+								{t("missions.pending.wantsToUse")}{" "}
 								<span className="font-mono font-medium">{request.tool}</span>
 							</p>
 							<p className="truncate font-mono text-[10px] text-ink-faint">
@@ -1152,10 +1137,10 @@ function Pending({ sessionId }: { sessionId: string | null | undefined }) {
 							</p>
 						</div>
 						<Button size="sm" onClick={() => decide(request.id, false)}>
-							Refuser
+							{t("missions.pending.deny")}
 						</Button>
 						<Button size="sm" variant="solid" onClick={() => decide(request.id, true)}>
-							Autoriser
+							{t("missions.pending.allow")}
 						</Button>
 					</div>
 				),
@@ -1180,13 +1165,14 @@ function AgentLine({
 	activity: AgentActivity;
 	onOpen: () => void;
 }) {
+	const { t } = useTranslation("views");
 	const state = activity.waiting
-		? { label: `${activity.waiting} autorisation(s) à donner`, tone: "text-critical" }
+		? { label: t("missions.agent.permissions", { count: activity.waiting }), tone: "text-critical" }
 		: activity.working
-			? { label: "travaille…", tone: "text-accent-soft" }
+			? { label: t("missions.agent.working"), tone: "text-accent-soft" }
 			: activity.running
-				? { label: "en attente", tone: "text-ink-faint" }
-				: { label: "arrêté", tone: "text-ink-faint" };
+				? { label: t("missions.agent.waiting"), tone: "text-ink-faint" }
+				: { label: t("missions.agent.stopped"), tone: "text-ink-faint" };
 
 	return (
 		<div className="flex items-start gap-2 rounded-lg bg-base/60 px-2.5 py-2">
@@ -1206,9 +1192,9 @@ function AgentLine({
 				size="sm"
 				icon={MessageSquare}
 				onClick={onOpen}
-				title="Ouvrir la conversation"
+				title={t("missions.agent.openConversation")}
 			>
-				Suivre
+				{t("missions.follow")}
 			</Button>
 		</div>
 	);
@@ -1233,7 +1219,12 @@ function TaskRow({
 }) {
 	const { notify, go } = useCockpit();
 	const { show } = useWorkspace();
-	const state = TASK_LABELS[task.state] ?? TASK_LABELS.planned;
+	const { t } = useTranslation("views");
+	const stateKey = TASK_LABELS[task.state] ? task.state : "planned";
+	const state = {
+		tone: TASK_LABELS[stateKey].tone,
+		label: t(`missions.taskStates.${stateKey}`),
+	};
 	const [busy, setBusy] = useState(false);
 
 	// Le passage en cours s'ajoute au cumul des précédents : sans lui, une tâche
@@ -1266,9 +1257,9 @@ function TaskRow({
 				{task.scope.length === 0 ? (
 					<span
 						className="shrink-0 text-[10px] text-warning"
-						title="Aucun périmètre : cette tâche peut écrire partout"
+						title={t("missions.task.noScopeTitle")}
 					>
-						sans périmètre
+						{t("missions.task.noScope")}
 					</span>
 				) : null}
 				{/* L'exécutant s'est créé sa propre branche. Son travail existe, mais
@@ -1277,7 +1268,10 @@ function TaskRow({
 				{task.actualBranch ? (
 					<span
 						className="shrink-0 truncate font-mono text-[10px] text-warning"
-						title={`L'exécutant a travaillé sur « ${task.actualBranch} » au lieu de « ${task.branch} ». C'est cette branche que l'intégration fusionnera.`}
+						title={t("missions.task.actualBranchTitle", {
+							actual: task.actualBranch,
+							expected: task.branch,
+						})}
 					>
 						↳ {task.actualBranch}
 					</span>
@@ -1296,10 +1290,13 @@ function TaskRow({
 						)}
 						title={
 							overrun
-								? `Cette tâche tourne depuis ${duration(overrun.seconds)}, là où une tâche en coûte ${duration(overrun.expected)} d'ordinaire. Rien n'est coupé : à toi de juger s'il faut la reprendre, la redécouper, ou l'arrêter.`
+								? t("missions.task.overrunTitle", {
+										spent: duration(overrun.seconds),
+										expected: duration(overrun.expected),
+									})
 								: task.attempts > 0
-									? `Temps de travail cumulé sur ${task.attempts + 1} passages`
-									: "Temps de travail"
+									? t("missions.task.workedAcross", { count: task.attempts + 1 })
+									: t("missions.task.worked")
 						}
 					>
 						{duration(worked)}
@@ -1321,15 +1318,15 @@ function TaskRow({
 						// reprises qui reprochent la même chose ne se voient qu'en
 						// les lisant l'une sous l'autre.
 						title={[
-							`Renvoyée en correction ${task.attempts} fois sur 3 au maximum`,
+							t("missions.task.sentBack", { count: task.attempts }),
 							...(task.reproaches ?? []).map(
 								(motif, rang) => `${rang + 1}. ${motif}`,
 							),
 						].join("\n")}
 					>
 						{task.state === "delivered" || task.state === "integrated"
-							? `${task.attempts} reprise${task.attempts > 1 ? "s" : ""}`
-							: `reprise ${task.attempts}/3`}
+							? t("missions.task.reworks", { count: task.attempts })
+							: t("missions.task.reworkOf", { count: task.attempts })}
 					</span>
 				) : null}
 				{/* Le verdict d'une vérification, lu par le cockpit dans son propre
@@ -1338,11 +1335,11 @@ function TaskRow({
 				    dessus. Un refus se lève en corrigeant, puis en la relançant. */}
 				{VERDICTS[task.verdict] ? (
 					<Badge tone={VERDICTS[task.verdict].tone}>
-						{VERDICTS[task.verdict].label}
+						{t(`missions.verdicts.${task.verdict}`)}
 					</Badge>
 				) : null}
 				<Badge tone={state.tone as "neutral"}>
-					{held && task.state === "planned" ? "attend son tour" : state.label}
+					{held && task.state === "planned" ? t("missions.task.held") : state.label}
 				</Badge>
 				{/* Une tâche planifiée part d'elle-même dès que sa base existe. Le
 				    bouton ne sert plus qu'à forcer la main — quand une dépendance
@@ -1352,15 +1349,15 @@ function TaskRow({
 						size="sm"
 						icon={Play}
 						loading={busy}
-						title="Forcer le lancement sans attendre sa base"
+						title={t("missions.task.forceTitle")}
 						onClick={() =>
 							void act(
 								() => api.missions.launch(mission.id, task.id),
-								`${task.title} — exécutant lancé.`,
+								t("missions.task.runnerLaunched", { title: task.title }),
 							)
 						}
 					>
-						Forcer
+						{t("missions.task.force")}
 					</Button>
 				) : null}
 				{/* Une vérification ne rejuge que ce qui a changé depuis son dernier
@@ -1372,15 +1369,15 @@ function TaskRow({
 						size="sm"
 						icon={RotateCcw}
 						loading={busy}
-						title="Oublier ce qu'elle a déjà validé et tout relire"
+						title={t("missions.task.fullReviewTitle")}
 						onClick={() =>
 							void act(
 								() => api.missions.rerun(mission.id, task.id),
-								`${task.title} — relecture complète lancée.`,
+								t("missions.task.fullReviewLaunched", { title: task.title }),
 							)
 						}
 					>
-						Tout relire
+						{t("missions.task.fullReview")}
 					</Button>
 				) : null}
 				{task.sessionId ? (
@@ -1395,7 +1392,7 @@ function TaskRow({
 							go("workspace");
 						}}
 					>
-						Suivre
+						{t("missions.follow")}
 					</Button>
 				) : null}
 				{/* Une tâche « en cours » sans conversation rattachée n'a rien à
@@ -1407,15 +1404,15 @@ function TaskRow({
 						size="sm"
 						icon={RotateCcw}
 						loading={busy}
-						title="Aucun exécutant ne s'est rattaché à cette tâche : la relancer depuis le début"
+						title={t("missions.task.orphanTitle")}
 						onClick={() =>
 							void act(
 								() => api.missions.rerun(mission.id, task.id),
-								`${task.title} — exécutant relancé.`,
+								t("missions.task.runnerRelaunched", { title: task.title }),
 							)
 						}
 					>
-						Relancer
+						{t("missions.rerun")}
 					</Button>
 				) : null}
 			</div>
@@ -1423,7 +1420,7 @@ function TaskRow({
 				<p className="line-clamp-1 pl-5 text-[10px] text-ink-faint">
 					{activity.waiting > 0 ? (
 						<span className="text-critical">
-							{activity.waiting} autorisation(s) à donner ·{" "}
+							{t("missions.agent.permissions", { count: activity.waiting })} ·{" "}
 						</span>
 					) : null}
 					{activity.last}
@@ -1441,6 +1438,7 @@ function TaskRow({
 /** Ajout manuel : utile pour compléter un plan, jamais le point d'entrée. */
 function TaskForm({ mission, onDone }: { mission: Mission; onDone: () => void }) {
 	const { notify } = useCockpit();
+	const { t } = useTranslation("views");
 	const roles = useAsync(() => api.missions.roles(), []);
 	const [form, setForm] = useState({ role: "backend", title: "", scope: "" });
 
@@ -1480,7 +1478,7 @@ function TaskForm({ mission, onDone }: { mission: Mission; onDone: () => void })
 	return (
 		<div className="flex flex-col gap-3 rounded-xl border border-line-soft bg-base/60 p-3.5">
 			<div className="grid grid-cols-3 gap-3">
-				<Field label="Rôle">
+				<Field label={t("missions.form.role")}>
 					<select
 						value={form.role}
 						onChange={(event) => setForm({ ...form, role: event.target.value })}
@@ -1497,14 +1495,14 @@ function TaskForm({ mission, onDone }: { mission: Mission; onDone: () => void })
 							))}
 					</select>
 				</Field>
-				<Field label="Intitulé">
+				<Field label={t("missions.form.title")}>
 					<TextInput
 						value={form.title}
 						onChange={(title) => setForm({ ...form, title })}
-						placeholder="Points d'entrée de facturation"
+						placeholder={t("missions.form.titlePlaceholder")}
 					/>
 				</Field>
-				<Field label="Périmètre" hint="chemins séparés par des virgules">
+				<Field label={t("missions.form.scope")} hint={t("missions.form.scopeHint")}>
 					<TextInput
 						value={form.scope}
 						onChange={(scope) => setForm({ ...form, scope })}
@@ -1515,7 +1513,7 @@ function TaskForm({ mission, onDone }: { mission: Mission; onDone: () => void })
 			</div>
 			<div className="flex justify-end gap-2">
 				<Button size="sm" onClick={onDone}>
-					Annuler
+					{t("missions.form.cancel")}
 				</Button>
 				<Button
 					size="sm"
@@ -1523,7 +1521,7 @@ function TaskForm({ mission, onDone }: { mission: Mission; onDone: () => void })
 					disabled={!form.title.trim()}
 					onClick={() => void submit()}
 				>
-					Ajouter la tâche
+					{t("missions.form.submit")}
 				</Button>
 			</div>
 		</div>
@@ -1543,6 +1541,7 @@ function TaskForm({ mission, onDone }: { mission: Mission; onDone: () => void })
  * réseau n'ayant pas à partir tant qu'on n'a rien demandé.
  */
 function TicketPicker({ onPick }: { onPick: (identifier: string) => void }) {
+	const { t } = useTranslation("views");
 	const [opened, setOpened] = useState(false);
 	const provider = useAsync(() => api.feeds.ticketProvider().catch(() => null), []);
 	const tickets = useAsync(() => api.feeds.linear(false).catch(() => []), [], {
@@ -1554,8 +1553,8 @@ function TicketPicker({ onPick }: { onPick: (identifier: string) => void }) {
 		// Les siens d'abord : c'est sur son propre travail qu'on ouvre une mission
 		// neuf fois sur dix, et un groupe suffit à les faire remonter.
 		group: ticket.meta.find((field) => field.label === "assigné")?.value
-			? "Assignés"
-			: "Autres",
+			? t("missions.picker.assigned")
+			: t("missions.picker.others"),
 		label: `${ticket.id} ${ticket.title}`,
 		hint: ticket.status,
 		note: ticket.tags?.[0]?.label,
@@ -1568,12 +1567,12 @@ function TicketPicker({ onPick }: { onPick: (identifier: string) => void }) {
 
 	return (
 		<QuickMenu
-			label={provider.data?.label ?? "Tickets"}
+			label={provider.data?.label ?? t("missions.picker.tickets")}
 			icon={Ticket}
-			title="Choisir un ticket du suivi"
+			title={t("missions.picker.title")}
 			actions={actions}
 			loading={tickets.loading}
-			emptyMessage="Aucun ticket ouvert à proposer."
+			emptyMessage={t("missions.picker.empty")}
 			onOpen={() => setOpened(true)}
 			width={460}
 		/>

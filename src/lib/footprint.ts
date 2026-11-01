@@ -1,3 +1,4 @@
+import { t } from "@/i18n";
 import type { FileChange, TourChanges } from "@/lib/types";
 
 /**
@@ -123,8 +124,8 @@ export function footprint(changes: TourChanges): Footprint | null {
 
 /** « 12 supprimés · 1 créé · 3 modifiés » — le plus radical en premier. */
 export function headline(print: Footprint): string {
-	const say = (count: number, word: string) => (count > 0 ? `${count} ${word}${count > 1 ? "s" : ""}` : null);
-	return [say(print.deleted, "supprimé"), say(print.created, "créé"), say(print.modified, "modifié")]
+	const say = (count: number, key: string) => (count > 0 ? t(`lib:footprint.${key}`, { count }) : null);
+	return [say(print.deleted, "deleted"), say(print.created, "created"), say(print.modified, "modified")]
 		.filter(Boolean)
 		.join(" · ");
 }

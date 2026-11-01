@@ -1,6 +1,7 @@
 import clsx from "clsx";
 import { AlertTriangle, Check, KeyRound, Plug, Plus, Route, Trash2, Zap } from "lucide-react";
 import { useEffect, useState } from "react";
+import { Trans, useTranslation } from "react-i18next";
 import { Badge, Button, Field, Spinner, TextInput } from "@/components/ui";
 import { api } from "@/lib/ipc";
 import type { Engine, Role, TeamMember } from "@/lib/types";
@@ -30,6 +31,7 @@ const fromText = (text: string) =>
 
 export function ConnectorsSettings() {
 	const { connectors, go } = useCockpit();
+	const { t } = useTranslation("components3");
 
 	if (connectors.length === 0) {
 		return (
@@ -42,8 +44,7 @@ export function ConnectorsSettings() {
 	return (
 		<div className="flex flex-col gap-1.5">
 			<p className="mb-1 text-[11px] leading-relaxed text-ink-faint">
-				Un écran ne s'affiche que si le service dont il dépend peut répondre. Renseigne une
-				clé et l'entrée réapparaît d'elle-même dans le menu.
+				{t("workflowSettings.connectors.intro")}
 			</p>
 			{connectors.map((connector) => (
 				<div
@@ -65,13 +66,15 @@ export function ConnectorsSettings() {
 					<span className="text-[11px] font-medium text-ink">{connector.label}</span>
 					<Badge>{connector.kind}</Badge>
 					<span className="min-w-0 flex-1 truncate text-[10px] text-ink-faint">
-						{connector.configured ? "prêt" : `manque ${connector.missing}`}
+						{connector.configured
+							? t("workflowSettings.connectors.ready")
+							: t("workflowSettings.connectors.missing", { missing: connector.missing })}
 					</span>
 					{connector.configured ? (
 						<Check size={12} className="shrink-0 text-success" />
 					) : (
 						<Button size="sm" onClick={() => go("settings")}>
-							Renseigner
+							{t("workflowSettings.connectors.fill")}
 						</Button>
 					)}
 				</div>
@@ -82,6 +85,7 @@ export function ConnectorsSettings() {
 
 export function WorkflowSettings() {
 	const { config, reloadConfig, notify } = useCockpit();
+	const { t } = useTranslation("components3");
 	const [draft, setDraft] = useState({
 		activeStates: "",
 		reviewStates: "",
@@ -155,7 +159,7 @@ export function WorkflowSettings() {
 				},
 			});
 			reloadConfig();
-			notify("Flux de travail enregistré.");
+			notify(t("workflowSettings.workflow.saved"));
 		} catch (error) {
 			notify(String(error));
 		} finally {
@@ -171,9 +175,9 @@ export function WorkflowSettings() {
 	// configuration réelle, où la suppression d'un worktree ne faisait jamais rien.
 	const malFormees = (
 		[
-			["Créer un worktree", draft.worktreeCommand],
-			["Supprimer un worktree", draft.worktreeRemoveCommand],
-			["Lancer le serveur de développement", draft.devCommand],
+			[t("workflowSettings.workflow.createWorktree.label"), draft.worktreeCommand],
+			[t("workflowSettings.workflow.removeWorktree.label"), draft.worktreeRemoveCommand],
+			[t("workflowSettings.workflow.devServer.label"), draft.devCommand],
 		] as const
 	)
 		.filter(([, commande]) => /[([]\s*(branch|path|folder)\s*[)\]]/.test(commande))
@@ -182,40 +186,51 @@ export function WorkflowSettings() {
 	return (
 		<div className="flex flex-col gap-3">
 			<p className="text-[11px] leading-relaxed text-ink-faint">
-				Les colonnes de ton suivi de tâches, telles qu'elles s'appellent chez toi. C'est
-				d'elles que dépendent l'avancement d'un ticket et sa place dans le daily.
+				{t("workflowSettings.workflow.intro")}
 			</p>
 
 			<div className="grid grid-cols-3 gap-2">
-				<Field label="En cours" hint="colonnes de travail actif">
+				<Field
+					label={t("workflowSettings.workflow.active.label")}
+					hint={t("workflowSettings.workflow.active.hint")}
+				>
 					<TextInput
 						value={draft.activeStates}
 						onChange={(activeStates) => setDraft({ ...draft, activeStates })}
 						placeholder="In Progress"
 					/>
 				</Field>
-				<Field label="En review" hint="relecture, QA">
+				<Field
+					label={t("workflowSettings.workflow.review.label")}
+					hint={t("workflowSettings.workflow.review.hint")}
+				>
 					<TextInput
 						value={draft.reviewStates}
 						onChange={(reviewStates) => setDraft({ ...draft, reviewStates })}
 						placeholder="In Review"
 					/>
 				</Field>
-				<Field label="Terminé">
+				<Field label={t("workflowSettings.workflow.done.label")}>
 					<TextInput
 						value={draft.doneStates}
 						onChange={(doneStates) => setDraft({ ...draft, doneStates })}
 						placeholder="Done"
 					/>
 				</Field>
-				<Field label="Bloqué" hint="la colonne qui signale un blocage">
+				<Field
+					label={t("workflowSettings.workflow.blocked.label")}
+					hint={t("workflowSettings.workflow.blocked.hint")}
+				>
 					<TextInput
 						value={draft.blockedState}
 						onChange={(blockedState) => setDraft({ ...draft, blockedState })}
 						placeholder="Blocked"
 					/>
 				</Field>
-				<Field label="Branches de base" hint="une PR ailleurs est dite empilée">
+				<Field
+					label={t("workflowSettings.workflow.baseBranches.label")}
+					hint={t("workflowSettings.workflow.baseBranches.hint")}
+				>
 					<TextInput
 						value={draft.baseBranches}
 						onChange={(baseBranches) => setDraft({ ...draft, baseBranches })}
@@ -223,7 +238,10 @@ export function WorkflowSettings() {
 						mono
 					/>
 				</Field>
-				<Field label="Jours de daily" hint="1 = lundi, 5 = vendredi">
+				<Field
+					label={t("workflowSettings.workflow.dailyWeekdays.label")}
+					hint={t("workflowSettings.workflow.dailyWeekdays.hint")}
+				>
 					<TextInput
 						value={draft.dailyWeekdays}
 						onChange={(dailyWeekdays) => setDraft({ ...draft, dailyWeekdays })}
@@ -238,8 +256,8 @@ export function WorkflowSettings() {
 			    de recette. Le cockpit ne saurait pas la refaire, et un autre projet
 			    ne l'a pas — d'où un réglage par projet plutôt qu'un comportement figé. */}
 			<Field
-				label="Commande d'ouverture de PR"
-				hint="jouée par le maître à la fin d'une mission ; vide = le cockpit ouvre la PR lui-même"
+				label={t("workflowSettings.workflow.prCommand.label")}
+				hint={t("workflowSettings.workflow.prCommand.hint")}
 			>
 				<TextInput
 					value={draft.prCommand}
@@ -254,8 +272,8 @@ export function WorkflowSettings() {
 			    contente d'un dossier. Ces commandes vivaient dans le binaire,
 			    écrites pour une seule d'entre elles. */}
 			<Field
-				label="Créer un worktree"
-				hint="vide = `git worktree add`. Une commande commençant par « / » est une commande du dépôt, jouée par un agent."
+				label={t("workflowSettings.workflow.createWorktree.label")}
+				hint={t("workflowSettings.workflow.createWorktree.hint")}
 			>
 				<TextInput
 					value={draft.worktreeCommand}
@@ -265,8 +283,8 @@ export function WorkflowSettings() {
 				/>
 			</Field>
 			<Field
-				label="Supprimer un worktree"
-				hint="vide = `git worktree remove --force`. Prévois de quoi ne pas rester bloqué sur une confirmation : personne ne la lira."
+				label={t("workflowSettings.workflow.removeWorktree.label")}
+				hint={t("workflowSettings.workflow.removeWorktree.hint")}
 			>
 				<TextInput
 					value={draft.worktreeRemoveCommand}
@@ -278,8 +296,8 @@ export function WorkflowSettings() {
 				/>
 			</Field>
 			<Field
-				label="Lancer le serveur de développement"
-				hint="vide = le bouton Dev n'est pas proposé, plutôt que d'ouvrir un terminal sur une commande qui n'existe pas ici"
+				label={t("workflowSettings.workflow.devServer.label")}
+				hint={t("workflowSettings.workflow.devServer.hint")}
 			>
 				<TextInput
 					value={draft.devCommand}
@@ -289,7 +307,7 @@ export function WorkflowSettings() {
 				/>
 			</Field>
 			<p className="-mt-1 text-[10px] leading-relaxed text-ink-faint">
-				Remplacés au lancement :{" "}
+				{t("workflowSettings.replacedAtLaunch")}{" "}
 				<span className="font-mono">
 					{"{branch}"} {"{path}"} {"{folder}"}
 				</span>
@@ -298,16 +316,14 @@ export function WorkflowSettings() {
 				<p className="-mt-0.5 flex items-start gap-1.5 text-[10px] leading-relaxed text-warning">
 					<AlertTriangle size={11} className="mt-px shrink-0" />
 					<span>
-						{malFormees.join(", ")} : une substitution s'écrit entre accolades.
-						Écrite autrement, elle part telle quelle dans le shell — qui refuse
-						la ligne sans que rien ne le dise.
+						{t("workflowSettings.workflow.malformed", { commands: malFormees.join(", ") })}
 					</span>
 				</p>
 			) : null}
 
 			<Field
-				label="Commandes de test"
-				hint="en plus de vitest, jest, pytest, phpunit, php artisan test… — ce qui fait dire à la carte d'un agent « les tests passent »"
+				label={t("workflowSettings.workflow.testCommands.label")}
+				hint={t("workflowSettings.workflow.testCommands.hint")}
 			>
 				<TextInput
 					value={draft.testCommands}
@@ -327,11 +343,11 @@ export function WorkflowSettings() {
 					className="mt-0.5 accent-[var(--color-accent)]"
 				/>
 				<span className="flex flex-col gap-0.5">
-					<span className="text-[12px] font-medium text-ink">Les agents rendent compte en images</span>
+					<span className="text-[12px] font-medium text-ink">
+						{t("workflowSettings.workflow.visualReports.title")}
+					</span>
 					<span className="text-[11px] leading-relaxed text-ink-faint">
-						Coché : chaque agent reçoit la consigne de montrer son travail quand une image en dit plus que le texte — une
-						capture avant/après s'il a changé l'écran et peut le capturer, un schéma s'il a changé une structure, rien
-						pour une simple réponse. Vaut pour les agents lancés ensuite, pas pour ceux qui tournent déjà.
+						{t("workflowSettings.workflow.visualReports.detail")}
 					</span>
 				</span>
 			</label>
@@ -344,17 +360,20 @@ export function WorkflowSettings() {
 					className="mt-0.5 accent-[var(--color-accent)]"
 				/>
 				<span className="flex flex-col gap-0.5">
-					<span className="text-[12px] font-medium text-ink">Les agents pilotent le navigateur de leur workspace</span>
+					<span className="text-[12px] font-medium text-ink">
+						{t("workflowSettings.workflow.agentBrowser.title")}
+					</span>
 					<span className="text-[11px] leading-relaxed text-ink-faint">
-						Coché : chaque agent reçoit de quoi ouvrir une page, cliquer, saisir et capturer l'écran, dans un navigateur à
-						part — sans tes sessions ni tes mots de passe — que tu regardes en direct dans l'onglet « Navigateur ». Il ne
-						démarre qu'à son premier geste. Sans effet dans un conteneur d'isolation. Vaut pour les agents lancés ensuite.
+						{t("workflowSettings.workflow.agentBrowser.detail")}
 					</span>
 				</span>
 			</label>
 			{draft.agentBrowser ? (
 				<>
-					<Field label="Navigateur" hint="vide = le premier trouvé parmi Chrome, Chromium, Edge et Brave">
+					<Field
+						label={t("workflowSettings.workflow.browser.label")}
+						hint={t("workflowSettings.workflow.browser.hint")}
+					>
 						<TextInput
 							value={draft.browserCommand}
 							onChange={(browserCommand) => setDraft({ ...draft, browserCommand })}
@@ -363,8 +382,8 @@ export function WorkflowSettings() {
 						/>
 					</Field>
 					<Field
-						label="Serveur des gestes de navigateur"
-						hint="vide = celui de Playwright ; le tien reçoit --cdp-endpoint <adresse> à la suite"
+						label={t("workflowSettings.workflow.browserServer.label")}
+						hint={t("workflowSettings.workflow.browserServer.hint")}
 					>
 						<TextInput
 							value={draft.browserServer}
@@ -388,11 +407,11 @@ export function WorkflowSettings() {
 					className="mt-0.5 accent-[var(--color-accent)]"
 				/>
 				<span className="flex flex-col gap-0.5">
-					<span className="text-[12px] font-medium text-ink">L'agent de revue est en lecture seule</span>
+					<span className="text-[12px] font-medium text-ink">
+						{t("workflowSettings.workflow.reviewReadOnly.title")}
+					</span>
 					<span className="text-[11px] leading-relaxed text-ink-faint">
-						Coché : pas d'édition, et rien d'autre que des lectures (git diff, git log, gh pr view…) — le reste lui est
-						refusé. Décoché : il peut lancer les tests ou modifier des fichiers ; la consigne lui demande toujours de ne
-						pas corriger la PR, mais rien ne l'en empêche.
+						{t("workflowSettings.workflow.reviewReadOnly.detail")}
 					</span>
 				</span>
 			</label>
@@ -400,11 +419,11 @@ export function WorkflowSettings() {
 			<div className="flex items-center gap-2">
 				<span className="min-w-0 flex-1 text-[10px] text-ink-faint">
 					{themes > 0
-						? `${themes} sujet(s) métier déclaré(s) — ils servent à raconter « il est sur la facturation » plutôt qu'aligner des identifiants. Ils s'éditent dans le fichier de configuration.`
-						: "Aucun sujet métier : la narration du daily s'appuiera sur les titres eux-mêmes."}
+						? t("workflowSettings.workflow.themes", { count: themes })
+						: t("workflowSettings.workflow.noThemes")}
 				</span>
 				<Button variant="solid" icon={Check} disabled={saving} onClick={() => void save()}>
-					{saving ? "Enregistrement…" : "Enregistrer"}
+					{saving ? t("workflowSettings.saving") : t("workflowSettings.save")}
 				</Button>
 			</div>
 		</div>
@@ -420,6 +439,7 @@ export function WorkflowSettings() {
  */
 export function RolesSettings() {
 	const { config, reloadConfig, notify } = useCockpit();
+	const { t } = useTranslation("components3");
 	const [roles, setRoles] = useState<Role[]>([]);
 	const [saving, setSaving] = useState(false);
 
@@ -457,7 +477,7 @@ export function RolesSettings() {
 				})),
 			});
 			reloadConfig();
-			notify("Rôles enregistrés.");
+			notify(t("workflowSettings.roles.saved"));
 		} catch (error) {
 			notify(String(error));
 		} finally {
@@ -488,9 +508,7 @@ export function RolesSettings() {
 	return (
 		<div className="flex flex-col gap-2">
 			<p className="text-[11px] leading-relaxed text-ink-faint">
-				Ce que reçoit un exécutant au lancement : sa consigne permanente, son modèle, et les
-				chemins où il a le droit d'écrire. Le périmètre est appliqué — une écriture en
-				dehors est refusée, pas seulement déconseillée.
+				{t("workflowSettings.roles.intro")}
 			</p>
 
 			{roles.map((role, index) => (
@@ -507,17 +525,17 @@ export function RolesSettings() {
 				>
 					{role.id === "master" ? (
 						<p className="text-[10px] leading-relaxed text-ink-faint">
-							Ce rôle pilote la mission : il lit le ticket, propose le découpage et
-							recompose à la fin. Sa clé est réservée — les étapes et les outils
-							d'orchestration viennent du cockpit, seuls sa commande, sa consigne et
-							son modèle se règlent ici.
+							{t("workflowSettings.roles.masterNote")}
 						</p>
 					) : null}
 					{/* Six colonnes, dont deux pour la profondeur : ses quatre boutons
 					    ne tiennent pas dans un cinquième de la largeur, et débordaient
 					    du cadre par la droite. */}
 					<div className="grid grid-cols-6 gap-2">
-						<Field label="Clé" hint="référencée par les tâches">
+						<Field
+							label={t("workflowSettings.fields.key")}
+							hint={t("workflowSettings.roles.keyHint")}
+						>
 							<TextInput
 								value={role.id}
 								onChange={(id) => update(index, { id })}
@@ -525,13 +543,16 @@ export function RolesSettings() {
 								mono
 							/>
 						</Field>
-						<Field label="Nom affiché">
-							<TextInput
-								value={role.label}
+						<Field label={t("workflowSettings.fields.displayName")}>
+								<TextInput
+									value={role.label}
 								onChange={(label) => update(index, { label })}
 							/>
 						</Field>
-						<Field label="Moteur" hint="le programme qui le fait tourner">
+						<Field
+							label={t("workflowSettings.roles.engine.label")}
+							hint={t("workflowSettings.roles.engine.hint")}
+						>
 							<select
 								value={role.engine}
 								onChange={(event) => update(index, { engine: event.target.value })}
@@ -540,7 +561,7 @@ export function RolesSettings() {
 								{/* Vide plutôt qu'un moteur nommé d'office : un rôle qui ne
 								    choisit pas suit le premier déclaré, et suivra celui qui le
 								    remplacera. */}
-								<option value="">Par défaut</option>
+								<option value="">{t("workflowSettings.roles.engine.default")}</option>
 								{(config?.engines ?? []).map((engine) => (
 									<option key={engine.id} value={engine.id}>
 										{engine.label || engine.id}
@@ -548,7 +569,10 @@ export function RolesSettings() {
 								))}
 							</select>
 						</Field>
-						<Field label="Modèle" hint="vide = celui du poste">
+						<Field
+							label={t("workflowSettings.roles.model.label")}
+							hint={t("workflowSettings.roles.model.hint")}
+						>
 							<TextInput
 								value={role.model}
 								onChange={(model) => update(index, { model })}
@@ -561,16 +585,19 @@ export function RolesSettings() {
 						    mission. Grisé quand le moteur du rôle ne sait pas l'exprimer —
 						    le cockpit n'invente pas de drapeau. */}
 						<div className="col-span-2">
-						<Field label="Profondeur" hint="ce que le rôle a le droit de dépenser">
+						<Field
+							label={t("workflowSettings.roles.depth.label")}
+							hint={t("workflowSettings.roles.depth.hint")}
+						>
 							{/* `flex-wrap` : à fenêtre étroite, deux colonnes ne suffisent
 							    plus non plus — les boutons passent à la ligne au lieu de
 							    sortir du panneau. */}
 							<div className="flex flex-wrap items-center gap-1">
 								{[
-									{ id: "", label: "Moteur" },
-									{ id: "fast", label: "Rapide" },
-									{ id: "normal", label: "Normal" },
-									{ id: "deep", label: "Poussé" },
+									{ id: "", label: t("workflowSettings.roles.depth.engine") },
+									{ id: "fast", label: t("workflowSettings.depth.fast") },
+									{ id: "normal", label: t("workflowSettings.depth.normal") },
+									{ id: "deep", label: t("workflowSettings.depth.deep") },
 								].map((niveau) => (
 									<Button
 										key={niveau.id || "defaut"}
@@ -580,7 +607,7 @@ export function RolesSettings() {
 										title={
 											depthKnown(role.engine)
 												? undefined
-												: "Ce moteur ne déclare aucune profondeur — renseigne-les dans Moteurs."
+												: t("workflowSettings.roles.depth.unsupported")
 										}
 										onClick={() => update(index, { depth: niveau.id })}
 									>
@@ -590,7 +617,10 @@ export function RolesSettings() {
 							</div>
 						</Field>
 						</div>
-						<Field label="Périmètre" hint="chemins, séparés par des virgules">
+						<Field
+							label={t("workflowSettings.roles.scope.label")}
+							hint={t("workflowSettings.roles.scope.hint")}
+						>
 							<TextInput
 								value={toText(role.scope)}
 								onChange={(scope) => update(index, { scope: fromText(scope) })}
@@ -603,8 +633,8 @@ export function RolesSettings() {
 					    prompt recopié : on appelle la commande, et c'est la version
 					    du dépôt qui fait foi. */}
 					<Field
-						label="Commande de démarrage"
-						hint="skill ou commande du dépôt, lancée avant la consigne"
+						label={t("workflowSettings.roles.command.label")}
+						hint={t("workflowSettings.roles.command.hint")}
 					>
 						<TextInput
 							value={role.command}
@@ -614,13 +644,13 @@ export function RolesSettings() {
 						/>
 					</Field>
 					<p className="-mt-1 text-[10px] leading-relaxed text-ink-faint">
-						Remplacés au lancement :{" "}
+						{t("workflowSettings.replacedAtLaunch")}{" "}
 						<span className="font-mono">
 							{"{ticket}"} {"{ticketUrl}"} {"{branch}"} {"{mission}"} {"{task}"}{" "}
 							{"{brief}"}
 						</span>
 					</p>
-					<Field label="Consigne permanente">
+					<Field label={t("workflowSettings.roles.prompt")}>
 						<textarea
 							value={role.prompt}
 							onChange={(event) => update(index, { prompt: event.target.value })}
@@ -638,8 +668,7 @@ export function RolesSettings() {
 								onChange={(event) => update(index, { verifies: event.target.checked })}
 								className="focus-ring accent-accent"
 							/>
-							Vérifie le travail des autres — ne part qu'une fois l'implémentation
-							livrée
+							{t("workflowSettings.roles.verifies")}
 						</label>
 						<Button
 							size="sm"
@@ -649,13 +678,13 @@ export function RolesSettings() {
 								const next = roles.filter((_, position) => position !== index);
 								setRoles(next);
 								void save(next);
-							}}
-						>
-							Retirer
-						</Button>
+								}}
+							>
+								{t("workflowSettings.remove")}
+							</Button>
+						</div>
 					</div>
-				</div>
-			))}
+				))}
 
 			<div className="flex items-center gap-2">
 				<Button
@@ -666,7 +695,7 @@ export function RolesSettings() {
 							...roles,
 							{
 								id: "nouveau",
-								label: "Nouveau rôle",
+								label: t("workflowSettings.roles.newLabel"),
 								prompt: "",
 								model: "",
 								engine: "",
@@ -679,7 +708,7 @@ export function RolesSettings() {
 						])
 					}
 				>
-					Ajouter un rôle
+					{t("workflowSettings.roles.add")}
 				</Button>
 				<div className="flex-1" />
 				<Button
@@ -688,7 +717,7 @@ export function RolesSettings() {
 					disabled={saving}
 					onClick={() => void save(roles)}
 				>
-					{saving ? "Enregistrement…" : "Enregistrer les rôles"}
+					{saving ? t("workflowSettings.saving") : t("workflowSettings.roles.save")}
 				</Button>
 			</div>
 		</div>
@@ -710,6 +739,7 @@ export function RolesSettings() {
  */
 export function TeamSettings() {
 	const { config, reloadConfig, notify, activeProject } = useCockpit();
+	const { t } = useTranslation("components3");
 	const [members, setMembers] = useState<TeamMember[]>([]);
 	const [linearTeamId, setLinearTeamId] = useState("");
 	const [saving, setSaving] = useState(false);
@@ -741,7 +771,7 @@ export function TeamSettings() {
 				},
 			});
 			reloadConfig();
-			notify("Équipe enregistrée.");
+			notify(t("workflowSettings.team.saved"));
 		} catch (error) {
 			notify(String(error));
 		} finally {
@@ -760,9 +790,7 @@ export function TeamSettings() {
 	return (
 		<div className="flex flex-col gap-2">
 			<p className="text-[11px] leading-relaxed text-ink-faint">
-				Qui compose l'équipe, et sous quels comptes on la reconnaît dans chaque outil. Ces
-				correspondances font le daily et le tableau d'équipe : un membre sans son login
-				GitHub n'apparaîtra sur aucune pull request.
+				{t("workflowSettings.team.intro")}
 			</p>
 
 			{/* Un projet déclaré solo n'a pas d'équipe, par choix : ses membres sont
@@ -770,15 +798,17 @@ export function TeamSettings() {
 			    disparaissent au rechargement sans que rien ne l'explique. */}
 			{activeProject?.solo ? (
 				<p className="rounded-lg border border-warning/30 bg-warning/[0.06] px-2.5 py-2 text-[11px] leading-relaxed text-ink-muted">
-					Ce projet est déclaré <strong>solo</strong> : son équipe est ignorée, et le
-					daily reste masqué. Décoche « solo » dans la fiche du projet pour que ce qui
-					suit serve à quelque chose.
+					<Trans
+						t={t}
+						i18nKey="workflowSettings.team.soloWarning"
+						components={{ strong: <strong /> }}
+					/>
 				</p>
 			) : null}
 
 			<Field
-				label="Équipe Linear"
-				hint="UUID de l'équipe dont on lit le cycle en cours — vide = pas de daily"
+				label={t("workflowSettings.team.linearTeam.label")}
+				hint={t("workflowSettings.team.linearTeam.hint")}
 			>
 				<TextInput
 					value={linearTeamId}
@@ -790,8 +820,7 @@ export function TeamSettings() {
 
 			{members.length === 0 ? (
 				<p className="rounded-lg border border-line-soft bg-surface/40 px-2.5 py-2 text-[11px] text-ink-faint">
-					Aucun membre déclaré : le daily et le tableau d'équipe resteront vides. Le
-					cockpit ne propose personne par défaut — une équipe ne se devine pas.
+					{t("workflowSettings.team.empty")}
 				</p>
 			) : null}
 
@@ -801,7 +830,7 @@ export function TeamSettings() {
 					className="flex flex-col gap-2 rounded-xl border border-line-soft bg-surface/40 p-2.5"
 				>
 					<div className="grid grid-cols-4 gap-2">
-						<Field label="Nom">
+						<Field label={t("workflowSettings.team.name")}>
 							<TextInput
 								value={member.name}
 								onChange={(name) => update(index, { name })}
@@ -810,7 +839,10 @@ export function TeamSettings() {
 						</Field>
 						{/* `dev` ou `product` : ce n'est pas décoratif — seuls les devs
 						    sont attendus sur des pull requests, et le daily le sait. */}
-						<Field label="Rôle" hint="dev ou product">
+						<Field
+							label={t("workflowSettings.team.role.label")}
+							hint={t("workflowSettings.team.role.hint")}
+						>
 							<TextInput
 								value={member.role}
 								onChange={(role) => update(index, { role })}
@@ -818,14 +850,17 @@ export function TeamSettings() {
 								mono
 							/>
 						</Field>
-						<Field label="Intitulé affiché" hint="tel qu'on le lit à l'écran">
+						<Field
+							label={t("workflowSettings.team.roleLabel.label")}
+							hint={t("workflowSettings.team.roleLabel.hint")}
+						>
 							<TextInput
 								value={member.roleLabel}
 								onChange={(roleLabel) => update(index, { roleLabel })}
-								placeholder="Développeur back-end"
+								placeholder={t("workflowSettings.team.roleLabel.placeholder")}
 							/>
 						</Field>
-						<Field label="GitHub" hint="login principal">
+						<Field label="GitHub" hint={t("workflowSettings.team.github.hint")}>
 							<TextInput
 								value={member.github}
 								onChange={(github) => update(index, { github })}
@@ -836,8 +871,8 @@ export function TeamSettings() {
 					</div>
 					<div className="grid grid-cols-2 gap-2">
 						<Field
-							label="Identifiant Linear"
-							hint="UUID, lisible dans l'URL de son profil"
+							label={t("workflowSettings.team.linearId.label")}
+							hint={t("workflowSettings.team.linearId.hint")}
 						>
 							<TextInput
 								value={member.linearId}
@@ -849,8 +884,8 @@ export function TeamSettings() {
 						{/* Un compte renommé ou un second login : sans eux, ses anciennes
 						    PR passent pour celles de quelqu'un d'autre. */}
 						<Field
-							label="Autres logins GitHub"
-							hint="anciens comptes, séparés par des virgules"
+							label={t("workflowSettings.team.githubAliases.label")}
+							hint={t("workflowSettings.team.githubAliases.hint")}
 						>
 							<TextInput
 								value={toText(member.githubAliases)}
@@ -858,7 +893,10 @@ export function TeamSettings() {
 								mono
 							/>
 						</Field>
-						<Field label="Emails Sentry" hint="ceux de ses comptes, virgules">
+						<Field
+							label={t("workflowSettings.team.sentryEmails.label")}
+							hint={t("workflowSettings.team.sentryEmails.hint")}
+						>
 							<TextInput
 								value={toText(member.sentryEmails)}
 								onChange={(value) => update(index, { sentryEmails: fromText(value) })}
@@ -866,7 +904,10 @@ export function TeamSettings() {
 								mono
 							/>
 						</Field>
-						<Field label="Noms Sentry" hint="quand l'email manque dans l'événement">
+						<Field
+							label={t("workflowSettings.team.sentryNames.label")}
+							hint={t("workflowSettings.team.sentryNames.hint")}
+						>
 							<TextInput
 								value={toText(member.sentryNames)}
 								onChange={(value) => update(index, { sentryNames: fromText(value) })}
@@ -885,7 +926,7 @@ export function TeamSettings() {
 								void save(next);
 							}}
 						>
-							Retirer
+							{t("workflowSettings.remove")}
 						</Button>
 					</div>
 				</div>
@@ -911,7 +952,7 @@ export function TeamSettings() {
 						])
 					}
 				>
-					Ajouter un membre
+					{t("workflowSettings.team.add")}
 				</Button>
 				<div className="flex-1" />
 				<Button
@@ -920,7 +961,7 @@ export function TeamSettings() {
 					disabled={saving}
 					onClick={() => void save(members)}
 				>
-					{saving ? "Enregistrement…" : "Enregistrer l'équipe"}
+					{saving ? t("workflowSettings.saving") : t("workflowSettings.team.save")}
 				</Button>
 			</div>
 		</div>
@@ -950,6 +991,7 @@ export function TeamSettings() {
  */
 export function EnginesSettings() {
 	const { config, reloadConfig, notify } = useCockpit();
+	const { t } = useTranslation("components3");
 	const [engines, setEngines] = useState<Engine[]>([]);
 	const [saving, setSaving] = useState(false);
 
@@ -977,7 +1019,7 @@ export function EnginesSettings() {
 				})),
 			});
 			reloadConfig();
-			notify("Moteurs enregistrés.");
+			notify(t("workflowSettings.engines.saved"));
 		} catch (error) {
 			notify(String(error));
 		} finally {
@@ -996,10 +1038,7 @@ export function EnginesSettings() {
 	return (
 		<div className="flex flex-col gap-2">
 			<p className="text-[11px] leading-relaxed text-ink-faint">
-				Un moteur, c'est le programme qui fait tourner un agent — pas un fournisseur de
-				modèles. Pour en utiliser un autre, deux voies : un binaire qui parle le même
-				protocole, ou une passerelle compatible désignée par les variables d'environnement
-				ci-dessous. Chaque rôle choisit ensuite son moteur.
+				{t("workflowSettings.engines.intro")}
 			</p>
 
 			{engines.map((engine, index) => (
@@ -1008,7 +1047,10 @@ export function EnginesSettings() {
 					className="flex flex-col gap-2 rounded-xl border border-line-soft bg-surface/40 p-2.5"
 				>
 					<div className="grid grid-cols-4 gap-2">
-						<Field label="Clé" hint="référencée par les rôles">
+						<Field
+							label={t("workflowSettings.fields.key")}
+							hint={t("workflowSettings.engines.keyHint")}
+						>
 							<TextInput
 								value={engine.id}
 								onChange={(id) => update(index, { id })}
@@ -1016,14 +1058,17 @@ export function EnginesSettings() {
 								mono
 							/>
 						</Field>
-						<Field label="Nom affiché">
-							<TextInput
-								value={engine.label}
+						<Field label={t("workflowSettings.fields.displayName")}>
+								<TextInput
+									value={engine.label}
 								onChange={(label) => update(index, { label })}
 								placeholder="Claude Code"
 							/>
 						</Field>
-						<Field label="Binaire" hint="vide = claude, cherché sur le poste">
+						<Field
+							label={t("workflowSettings.engines.binary.label")}
+							hint={t("workflowSettings.engines.binary.hint")}
+						>
 							<TextInput
 								value={engine.command}
 								onChange={(command) => update(index, { command })}
@@ -1031,7 +1076,10 @@ export function EnginesSettings() {
 								mono
 							/>
 						</Field>
-						<Field label="Protocole" hint="claude-stream-json, codex-exec ou gemini-stream-json">
+						<Field
+							label={t("workflowSettings.engines.protocol.label")}
+							hint={t("workflowSettings.engines.protocol.hint")}
+						>
 							<TextInput
 								value={engine.protocol || "claude-stream-json"}
 								onChange={(protocol) => update(index, { protocol })}
@@ -1040,7 +1088,10 @@ export function EnginesSettings() {
 						</Field>
 					</div>
 					<div className="grid grid-cols-2 gap-2">
-						<Field label="Modèles" hint="alias ou identifiants complets (claude-opus-5-5), séparés par des virgules">
+						<Field
+							label={t("workflowSettings.engines.models.label")}
+							hint={t("workflowSettings.engines.models.hint")}
+						>
 							<TextInput
 								value={toText(engine.models)}
 								onChange={(value) => update(index, { models: fromText(value) })}
@@ -1048,7 +1099,10 @@ export function EnginesSettings() {
 								mono
 							/>
 						</Field>
-						<Field label="Arguments" hint="ajoutés à la ligne de commande">
+						<Field
+							label={t("workflowSettings.engines.args.label")}
+							hint={t("workflowSettings.engines.args.hint")}
+						>
 							<TextInput
 								value={engine.extraArgs}
 								onChange={(extraArgs) => update(index, { extraArgs })}
@@ -1064,7 +1118,10 @@ export function EnginesSettings() {
 					    vide — et le jour où un moteur renomme son drapeau, c'est une
 					    ligne de configuration, pas une version du cockpit. */}
 					<div className="grid grid-cols-3 gap-2">
-						<Field label="Rapide" hint="ce qu'on ajoute pour aller vite">
+						<Field
+							label={t("workflowSettings.depth.fast")}
+							hint={t("workflowSettings.engines.depthFastHint")}
+						>
 							<TextInput
 								value={engine.depthFast ?? ""}
 								onChange={(depthFast) => update(index, { depthFast })}
@@ -1072,7 +1129,7 @@ export function EnginesSettings() {
 								mono
 							/>
 						</Field>
-						<Field label="Normal">
+						<Field label={t("workflowSettings.depth.normal")}>
 							<TextInput
 								value={engine.depthNormal ?? ""}
 								onChange={(depthNormal) => update(index, { depthNormal })}
@@ -1080,7 +1137,10 @@ export function EnginesSettings() {
 								mono
 							/>
 						</Field>
-						<Field label="Poussé" hint="pour ce qui mérite d'y passer">
+						<Field
+							label={t("workflowSettings.depth.deep")}
+							hint={t("workflowSettings.engines.depthDeepHint")}
+						>
 							<TextInput
 								value={engine.depthDeep ?? ""}
 								onChange={(depthDeep) => update(index, { depthDeep })}
@@ -1094,8 +1154,8 @@ export function EnginesSettings() {
 					    la variable au lieu d'en poser une chaîne vide, qu'un CLI lirait
 					    comme une adresse invalide. */}
 					<Field
-						label="Environnement"
-						hint="une paire par ligne : NOM=valeur — adresse d'un service, jeton d'accès"
+						label={t("workflowSettings.engines.env.label")}
+						hint={t("workflowSettings.engines.env.hint")}
 					>
 						<textarea
 							value={engine.env.map((entry) => `${entry.name}=${entry.value}`).join("\n")}
@@ -1117,7 +1177,7 @@ export function EnginesSettings() {
 								})
 							}
 							rows={3}
-							placeholder={"ANTHROPIC_BASE_URL=https://passerelle.exemple.com\nANTHROPIC_AUTH_TOKEN=sk-…"}
+							placeholder={t("workflowSettings.engines.env.placeholder")}
 							className="focus-ring text-selectable w-full resize-none rounded-lg border border-line-soft bg-raised px-2.5 py-2 font-mono text-[11px] leading-relaxed text-ink"
 						/>
 					</Field>
@@ -1125,8 +1185,8 @@ export function EnginesSettings() {
 					<div className="flex items-center justify-between gap-3">
 						<span className="text-[10px] text-ink-faint">
 							{engine.env.length > 0
-								? `${engine.env.length} variable(s) — écrites dans le fichier de configuration, en permissions 600.`
-								: "Aucune variable : le moteur utilise l'environnement du poste."}
+								? t("workflowSettings.engines.variables", { count: engine.env.length })
+								: t("workflowSettings.engines.noVariables")}
 						</span>
 						{/* Le dernier moteur ne se retire pas : sans lui, plus rien ne
 						    pourrait lancer d'agent, et l'écran ne dirait pas pourquoi. */}
@@ -1141,7 +1201,7 @@ export function EnginesSettings() {
 									void save(next);
 								}}
 							>
-								Retirer
+								{t("workflowSettings.remove")}
 							</Button>
 						) : null}
 					</div>
@@ -1170,7 +1230,7 @@ export function EnginesSettings() {
 						])
 					}
 				>
-					Ajouter un moteur
+					{t("workflowSettings.engines.add")}
 				</Button>
 				<div className="flex-1" />
 				<Button
@@ -1179,7 +1239,7 @@ export function EnginesSettings() {
 					disabled={saving}
 					onClick={() => void save(engines)}
 				>
-					{saving ? "Enregistrement…" : "Enregistrer les moteurs"}
+					{saving ? t("workflowSettings.saving") : t("workflowSettings.engines.save")}
 				</Button>
 			</div>
 		</div>
@@ -1197,6 +1257,7 @@ export function EnginesSettings() {
  */
 export function MissionModeSettings() {
 	const { config, reloadConfig, notify } = useCockpit();
+	const { t } = useTranslation("components3");
 	const autonomous = config?.missions?.autonomous ?? false;
 
 	const choose = async (next: boolean) => {
@@ -1215,16 +1276,14 @@ export function MissionModeSettings() {
 		{
 			value: false,
 			icon: Route,
-			title: "Guidée",
-			detail:
-				"Tu lis le ticket avec le maître, puis tu valides sa compréhension, son approche et son découpage — trois accords, un à la fois.",
+			title: t("workflowSettings.missionMode.guided.title"),
+			detail: t("workflowSettings.missionMode.guided.detail"),
 		},
 		{
 			value: true,
 			icon: Zap,
-			title: "Autonome",
-			detail:
-				"Le maître lit le ticket et propose directement son découpage. Un seul accord avant que les exécutants partent.",
+			title: t("workflowSettings.missionMode.autonomous.title"),
+			detail: t("workflowSettings.missionMode.autonomous.detail"),
 		},
 	];
 
@@ -1235,7 +1294,7 @@ export function MissionModeSettings() {
 				const Icon = option.icon;
 				return (
 					<button
-						key={option.title}
+						key={String(option.value)}
 						type="button"
 						onClick={() => void choose(option.value)}
 						className={clsx(
@@ -1257,7 +1316,9 @@ export function MissionModeSettings() {
 							<span className="flex items-center gap-2 text-[12px] font-semibold text-ink">
 								{option.title}
 								{option.value === false ? (
-									<span className="text-[10px] font-normal text-ink-faint">par défaut</span>
+									<span className="text-[10px] font-normal text-ink-faint">
+										{t("workflowSettings.missionMode.default")}
+									</span>
 								) : null}
 							</span>
 							<span className="mt-0.5 block text-[11px] leading-relaxed text-ink-muted">
@@ -1284,6 +1345,7 @@ export function MissionModeSettings() {
  */
 export function MissionBudgetSettings() {
 	const { config, reloadConfig, notify } = useCockpit();
+	const { t } = useTranslation("components3");
 	const [draft, setDraft] = useState({
 		tokenBudget: 0,
 		quotaFloorPercent: 0,
@@ -1307,20 +1369,18 @@ export function MissionBudgetSettings() {
 	return (
 		<div className="flex flex-col gap-3">
 			<p className="text-[11px] leading-relaxed text-ink-faint">
-				Trois plafonds, pour trois façons de dépenser plus qu'on ne voulait : une mission
-				qui dérape, une réserve qui s'épuise, une machine qui sature. Aucun ne tue quoi que
-				ce soit — le travail en cours va toujours au bout.
+				{t("workflowSettings.budget.intro")}
 			</p>
 			<div className="grid grid-cols-3 gap-3">
 				<Field
-					label="Plafond par mission"
-					hint="Au-delà, elle se met en pause — branches et travail intacts, reprise d'un clic. Vide = 500 000."
+					label={t("workflowSettings.budget.tokenBudget.label")}
+					hint={t("workflowSettings.budget.tokenBudget.hint")}
 				>
 					<div className="flex items-center gap-1.5">
 						<TextInput
 							value={draft.tokenBudget === 0 ? "" : String(draft.tokenBudget)}
 							mono
-							placeholder="défaut"
+							placeholder={t("workflowSettings.defaultPlaceholder")}
 							onChange={(value) =>
 								setDraft((current) => ({
 									...current,
@@ -1329,18 +1389,20 @@ export function MissionBudgetSettings() {
 							}
 							onBlur={() => void save()}
 						/>
-						<span className="shrink-0 text-[10px] text-ink-faint">jetons</span>
+						<span className="shrink-0 text-[10px] text-ink-faint">
+							{t("workflowSettings.budget.tokenBudget.unit")}
+						</span>
 					</div>
 				</Field>
 				<Field
-					label="Plus de départ sous"
-					hint="Pourcentage de quota d'abonnement restant. Les tâches en cours continuent. Vide = 15 %."
+					label={t("workflowSettings.budget.quotaFloor.label")}
+					hint={t("workflowSettings.budget.quotaFloor.hint")}
 				>
 					<div className="flex items-center gap-1.5">
 						<TextInput
 							value={draft.quotaFloorPercent === 0 ? "" : String(draft.quotaFloorPercent)}
 							mono
-							placeholder="défaut"
+							placeholder={t("workflowSettings.defaultPlaceholder")}
 							onChange={(value) =>
 								setDraft((current) => ({
 									...current,
@@ -1349,12 +1411,14 @@ export function MissionBudgetSettings() {
 							}
 							onBlur={() => void save()}
 						/>
-						<span className="shrink-0 text-[10px] text-ink-faint">% restants</span>
+						<span className="shrink-0 text-[10px] text-ink-faint">
+							{t("workflowSettings.budget.quotaFloor.unit")}
+						</span>
 					</div>
 				</Field>
 				<Field
-					label="Plus de lancement au-delà"
-					hint="Pourcentage de mémoire machine utilisée. Aucun nouvel agent ne démarre — mission, exécutant ou lancement manuel. Vide = 85 %."
+					label={t("workflowSettings.budget.memoryCeiling.label")}
+					hint={t("workflowSettings.budget.memoryCeiling.hint")}
 				>
 					<div className="flex items-center gap-1.5">
 						<TextInput
@@ -1362,7 +1426,7 @@ export function MissionBudgetSettings() {
 								draft.memoryCeilingPercent === 0 ? "" : String(draft.memoryCeilingPercent)
 							}
 							mono
-							placeholder="défaut"
+							placeholder={t("workflowSettings.defaultPlaceholder")}
 							onChange={(value) =>
 								setDraft((current) => ({
 									...current,
@@ -1371,7 +1435,9 @@ export function MissionBudgetSettings() {
 							}
 							onBlur={() => void save()}
 						/>
-						<span className="shrink-0 text-[10px] text-ink-faint">% mémoire</span>
+						<span className="shrink-0 text-[10px] text-ink-faint">
+							{t("workflowSettings.budget.memoryCeiling.unit")}
+						</span>
 					</div>
 				</Field>
 			</div>
@@ -1393,6 +1459,7 @@ export function MissionBudgetSettings() {
  */
 export function SandboxSettings() {
 	const { config, reloadConfig, notify, go } = useCockpit();
+	const { t } = useTranslation("components3");
 	const terminals = useTerminals();
 	const [draft, setDraft] = useState({
 		enabled: false,
@@ -1412,7 +1479,7 @@ export function SandboxSettings() {
 	const connect = async () => {
 		try {
 			const { cwd, command } = await api.sandbox.login();
-			terminals.open(cwd, { command, label: "Connexion agent isolé" });
+			terminals.open(cwd, { command, label: t("workflowSettings.sandbox.terminalLabel") });
 			go("workspace");
 		} catch (error) {
 			notify(String(error));
@@ -1435,9 +1502,7 @@ export function SandboxSettings() {
 	return (
 		<div className="flex flex-col gap-3">
 			<p className="text-[11px] leading-relaxed text-ink-faint">
-				Chaque agent tourne dans un conteneur, avec sa propre mémoire plafonnée par
-				le système plutôt que mesurée après coup. Demande Docker ou OrbStack sur le
-				poste — ni l'un ni l'autre n'est requis tant que c'est éteint.
+				{t("workflowSettings.sandbox.intro")}
 			</p>
 			<label className="flex cursor-pointer items-center gap-2 text-[11px] text-ink-muted">
 				<input
@@ -1450,25 +1515,28 @@ export function SandboxSettings() {
 					}}
 					className="focus-ring accent-accent"
 				/>
-				Isoler chaque agent dans un conteneur
+				{t("workflowSettings.sandbox.enable")}
 			</label>
 			{draft.enabled ? (
 				<div className="grid grid-cols-3 gap-3">
-					<Field label="Runtime" hint="orb ou docker. Vide = détecté sur le poste.">
+					<Field label="Runtime" hint={t("workflowSettings.sandbox.runtime.hint")}>
 						<TextInput
 							value={draft.runtime}
 							mono
-							placeholder="détecté"
+							placeholder={t("workflowSettings.sandbox.runtime.placeholder")}
 							onChange={(value) => setDraft((current) => ({ ...current, runtime: value }))}
 							onBlur={() => void save()}
 						/>
 					</Field>
-					<Field label="Mémoire par agent" hint="Vide = 4096 Mo.">
+					<Field
+						label={t("workflowSettings.sandbox.memory.label")}
+						hint={t("workflowSettings.sandbox.memory.hint")}
+					>
 						<div className="flex items-center gap-1.5">
 							<TextInput
 								value={draft.memoryMb === 0 ? "" : String(draft.memoryMb)}
 								mono
-								placeholder="défaut"
+								placeholder={t("workflowSettings.defaultPlaceholder")}
 								onChange={(value) =>
 									setDraft((current) => ({
 										...current,
@@ -1477,10 +1545,12 @@ export function SandboxSettings() {
 								}
 								onBlur={() => void save()}
 							/>
-							<span className="shrink-0 text-[10px] text-ink-faint">Mo</span>
+							<span className="shrink-0 text-[10px] text-ink-faint">
+								{t("workflowSettings.sandbox.memory.unit")}
+							</span>
 						</div>
 					</Field>
-					<Field label="Image" hint="Vide = l'image par défaut du cockpit.">
+					<Field label="Image" hint={t("workflowSettings.sandbox.image.hint")}>
 						<TextInput
 							value={draft.image}
 							mono
@@ -1494,17 +1564,14 @@ export function SandboxSettings() {
 			{draft.enabled ? (
 				<div className="flex items-start gap-2 rounded-lg bg-raised px-3 py-2.5">
 					<p className="min-w-0 flex-1 text-[11px] leading-relaxed text-ink-faint">
-						Un compte connecté par abonnement range son jeton dans le trousseau du
-						poste, qu'un conteneur ne peut pas lire. Ce bouton lance{" "}
-						<code className="rounded bg-base px-1 py-0.5 text-[10.5px]">
-							claude setup-token
-						</code>{" "}
-						dans un terminal — colle ensuite le jeton qu'il affiche dans Réglages →
-						Jetons d'accès (« Compte isolé »). Un an de validité, à refaire une fois
-						expiré.
+						<Trans
+							t={t}
+							i18nKey="workflowSettings.sandbox.loginNote"
+							components={{ code: <code className="rounded bg-base px-1 py-0.5 text-[10.5px]" /> }}
+						/>
 					</p>
 					<Button size="sm" icon={KeyRound} onClick={() => void connect()}>
-						Connecter le compte isolé
+						{t("workflowSettings.sandbox.connect")}
 					</Button>
 				</div>
 			) : null}

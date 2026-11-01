@@ -10,6 +10,7 @@ import {
 	X,
 } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { LocalImage } from "@/components/LocalImage";
 import { Markdown } from "@/components/Markdown";
 import { Badge, Button, Empty, Spinner } from "@/components/ui";
@@ -27,6 +28,7 @@ import { useCockpit } from "@/app/store";
  * on les parcourt à la flèche comme une pellicule.
  */
 export function QaGallery({ path }: { path: string }) {
+	const { t } = useTranslation("components3");
 	const { notify } = useCockpit();
 	// Un agent en train de travailler dépose ses captures au fil de l'eau : la
 	// galerie doit les voir arriver sans qu'on rouvre l'écran.
@@ -60,8 +62,8 @@ export function QaGallery({ path }: { path: string }) {
 		return (
 			<Empty
 				icon={ImageIcon}
-				message="Aucun livrable de QA"
-				hint="Les captures et comptes rendus déposés dans .claude/work apparaîtront ici."
+				message={t("qaGallery.empty")}
+				hint={t("qaGallery.emptyHint")}
 			/>
 		);
 	}
@@ -73,7 +75,7 @@ export function QaGallery({ path }: { path: string }) {
 					<div key={group}>
 						<div className="mb-1.5 flex items-center gap-1.5">
 							<span className="min-w-0 flex-1 truncate font-mono text-[10px] text-ink-faint">
-								{group || "racine"}
+								{group || t("qaGallery.root")}
 							</span>
 							<span className="shrink-0 font-mono text-[10px] text-ink-faint/70">
 								{entries.length}
@@ -81,7 +83,7 @@ export function QaGallery({ path }: { path: string }) {
 							<Button
 								size="sm"
 								icon={FolderOpen}
-								title="Ouvrir le dossier dans le Finder"
+								title={t("qaGallery.openFolder")}
 								onClick={() => {
 									void api.system
 										.reveal(entries[0].path)
@@ -167,6 +169,7 @@ function Lightbox({
 	onIndex: (index: number) => void;
 	onClose: () => void;
 }) {
+	const { t } = useTranslation("components3");
 	const file = files[index];
 	const { notify } = useCockpit();
 	const text = useAsync(
@@ -200,19 +203,19 @@ function Lightbox({
 				<Button
 					size="sm"
 					icon={FolderOpen}
-					title="Révéler dans le Finder"
+					title={t("qaGallery.reveal")}
 					onClick={() => {
 						void api.system.reveal(file.path).catch((error) => notify(String(error)));
 					}}
 				/>
-				<Button size="sm" icon={X} onClick={onClose} title="Fermer (Échap)" />
+				<Button size="sm" icon={X} onClick={onClose} title={t("qaGallery.close")} />
 			</div>
 
 			<div className="flex min-h-0 flex-1 items-center gap-2 px-2 pb-2">
 				<Button
 					icon={ChevronLeft}
 					onClick={() => onIndex((index - 1 + files.length) % files.length)}
-					title="Précédent (←)"
+					title={t("qaGallery.previous")}
 					className="h-10 shrink-0"
 				/>
 
@@ -249,7 +252,7 @@ function Lightbox({
 				<Button
 					icon={ChevronRight}
 					onClick={() => onIndex((index + 1) % files.length)}
-					title="Suivant (→)"
+					title={t("qaGallery.next")}
 					className="h-10 shrink-0"
 				/>
 			</div>

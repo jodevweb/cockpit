@@ -19,6 +19,7 @@ import { useTerminalActions } from "@/app/terminals";
 import { useConfirm } from "@/components/Confirm";
 import { JobProgress, useJobRunning } from "@/components/JobProgress";
 import { useAllSessions, useCockpit } from "@/app/store";
+import { useTranslation } from "react-i18next";
 
 /** Un jour ouvré de tolérance : un worktree touché hier compte encore. */
 const RECENT_GIT_SECONDS = 24 * 3600;
@@ -56,6 +57,7 @@ function classify(tree: Worktree, agent: SessionSummary | null, now: number): St
 }
 
 function ShipCard({ ship, onOpen }: { ship: Ship; onOpen: () => void }) {
+	const { t } = useTranslation("components1");
 	const { notify } = useCockpit();
 	const { open: openAgent } = useAgentActions();
 	const { open: openTerminal } = useTerminalActions();
@@ -81,17 +83,19 @@ function ShipCard({ ship, onOpen }: { ship: Ship; onOpen: () => void }) {
 						{tree.branch ?? tree.folderName}
 					</span>
 					{live ? <Dot tone="success" pulse /> : null}
-					{tree.isMain ? <Badge tone="accent">principal</Badge> : null}
+					{tree.isMain ? <Badge tone="accent">{t("fleetGrid.main")}</Badge> : null}
 				</div>
 
 				<div className="mt-1 flex items-center gap-2 font-mono text-[10px] text-ink-faint">
 					{ship.dirty > 0 ? (
-						<span className="text-warning">{ship.dirty} modif.</span>
+						<span className="text-warning">{t("fleetGrid.changes", { count: ship.dirty })}</span>
 					) : (
-						<span>propre</span>
+						<span>{t("fleetGrid.clean")}</span>
 					)}
 					{tree.status.conflicted > 0 ? (
-						<span className="text-critical">{tree.status.conflicted} conflits</span>
+						<span className="text-critical">
+							{t("fleetGrid.conflicts", { count: tree.status.conflicted })}
+						</span>
 					) : null}
 					{tree.status.ahead > 0 ? (
 						<span className="text-info">↑{tree.status.ahead}</span>
@@ -119,12 +123,14 @@ function ShipCard({ ship, onOpen }: { ship: Ship; onOpen: () => void }) {
 							</p>
 							<p className="font-mono text-[10px] text-ink-faint">
 								{ship.status === "waiting" ? (
-									<span className="text-critical">attend ta réponse</span>
+									<span className="text-critical">{t("fleetGrid.awaitingReply")}</span>
 								) : (
-									<>{live ? "en cours" : "inactif"}</>
+									<>{live ? t("fleetGrid.running") : t("fleetGrid.idle")}</>
 								)}{" "}
 								· {fromSeconds(agent.idleSeconds)}
-								{agent.subagents > 0 ? ` · ${agent.subagents} sous-agents` : ""}
+								{agent.subagents > 0
+									? ` · ${t("fleetGrid.subagents", { count: agent.subagents })}`
+									: ""}
 							</p>
 						</div>
 					</div>
@@ -136,22 +142,22 @@ function ShipCard({ ship, onOpen }: { ship: Ship; onOpen: () => void }) {
 					size="sm"
 					icon={FolderOpen}
 					onClick={() => guard(api.system.openEditor(tree.path))}
-					title="Ouvrir dans l'éditeur"
+					title={t("fleetGrid.openEditor")}
 				/>
 				<Button
 					size="sm"
 					icon={Terminal}
 					onClick={() => openTerminal(tree.path)}
-					title="Terminal sur ce worktree, dans le cockpit"
+					title={t("fleetGrid.openTerminal")}
 				/>
 				<Button
 					size="sm"
 					icon={Bot}
 					onClick={() => openAgent(tree.path)}
-					title="Lancer un agent ici, dans le cockpit"
+					title={t("fleetGrid.launchAgent")}
 				/>
 				<Button size="sm" className="ml-auto" onClick={onOpen}>
-					Détail
+					{t("fleetGrid.detail")}
 				</Button>
 			</div>
 		</div>
@@ -214,6 +220,7 @@ function RemovableRow({
 	jobId: string | null;
 	onRemove: () => void;
 }) {
+	const { t } = useTranslation("components1");
 	const running = useJobRunning(jobId);
 	return (
 		<div className="flex items-center gap-2 rounded-lg px-1.5 py-1">
@@ -229,13 +236,14 @@ function RemovableRow({
 			)}
 			<JobProgress jobId={jobId} />
 			<Button size="sm" icon={Trash2} disabled={running} onClick={onRemove}>
-				Supprimer
+				{t("fleetGrid.remove")}
 			</Button>
 		</div>
 	);
 }
 
 function Hygiene() {
+	const { t } = useTranslation("components1");
 	const { runJob, config, jobs, reloadWorktrees } = useCockpit();
 	const { confirm } = useConfirm();
 	const [open, setOpen] = useState(false);
@@ -269,10 +277,9 @@ function Hygiene() {
 	const remove = async (entry: WorktreeHygiene) => {
 		const folder = entry.folderName;
 		const ok = await confirm({
-			title: `Supprimer le worktree ${folder} ?`,
-			message:
-				"Le dossier et son infra locale sont retirés — bases, buckets et stack Docker, ce qui prend souvent une à deux minutes. La branche distante, elle, reste en place.",
-			confirmLabel: "Supprimer",
+			title: t("fleetGrid.confirmTitle", { folder }),
+			message: t("fleetGrid.confirmMessage"),
+			confirmLabel: t("fleetGrid.remove"),
 			danger: true,
 		});
 		if (!ok) return;
@@ -297,11 +304,10 @@ function Hygiene() {
 			>
 				<Trash2 size={11} className="shrink-0 text-ink-faint" />
 				<span className="text-[11px] text-ink-muted">
-					{removable.length} worktree{removable.length > 1 ? "s" : ""} sans PR ouverte —
-					supprimable{removable.length > 1 ? "s" : ""}
+					{t("fleetGrid.removable", { count: removable.length })}
 				</span>
 				<span className="ml-auto text-[10px] text-ink-faint">
-					{open ? "masquer" : "voir"}
+					{open ? t("fleetGrid.hide") : t("fleetGrid.show")}
 				</span>
 			</button>
 
@@ -322,6 +328,7 @@ function Hygiene() {
 }
 
 export function FleetGrid({ onOpen }: { onOpen: (path: string) => void }) {
+	const { t } = useTranslation("components1");
 	const { worktrees } = useCockpit();
 	const sessions = useAllSessions();
 	const [showResting, setShowResting] = useState(false);
@@ -363,9 +370,9 @@ export function FleetGrid({ onOpen }: { onOpen: (path: string) => void }) {
 		<div className="min-h-0 flex-1 overflow-y-auto p-4">
 			<div className="mx-auto flex max-w-5xl flex-col gap-5">
 				<Hygiene />
-				<Group title="En attente de toi" tone="critical" ships={waiting} onOpen={onOpen} />
-				<Group title="En vol" tone="success" ships={flight} onOpen={onOpen} />
-				<Group title="Récent" tone="warning" ships={recent} onOpen={onOpen} />
+				<Group title={t("fleetGrid.group.waiting")} tone="critical" ships={waiting} onOpen={onOpen} />
+				<Group title={t("fleetGrid.group.flight")} tone="success" ships={flight} onOpen={onOpen} />
+				<Group title={t("fleetGrid.group.recent")} tone="warning" ships={recent} onOpen={onOpen} />
 
 				{resting.length > 0 ? (
 					<section>
@@ -375,7 +382,7 @@ export function FleetGrid({ onOpen }: { onOpen: (path: string) => void }) {
 							className="flex items-center gap-1.5 text-[10px] font-semibold tracking-[0.09em] text-ink-faint uppercase hover:text-ink-muted"
 						>
 							{showResting ? <ChevronDown size={11} /> : <ChevronRight size={11} />}
-							Au repos
+							{t("fleetGrid.group.resting")}
 							<span className="font-mono normal-case">{resting.length}</span>
 						</button>
 						{showResting ? (
@@ -393,7 +400,7 @@ export function FleetGrid({ onOpen }: { onOpen: (path: string) => void }) {
 				) : null}
 
 				{fleet.length === 0 ? (
-					<p className="py-10 text-center text-[11px] text-ink-faint">Aucun worktree.</p>
+					<p className="py-10 text-center text-[11px] text-ink-faint">{t("fleetGrid.empty")}</p>
 				) : null}
 			</div>
 		</div>

@@ -1,1 +1,183 @@
-{}
+{
+	"orchestrator": {
+		"notAGitRepo": "`{{path}}` is not a git repository.",
+		"branchInMainRepo": "`{{branch}}` is checked out in the main repository (`{{path}}`). Cockpit never writes there: switch that repository to another branch, and the mission will resume in its own worktree.",
+		"folderOnOtherBranch": "`{{path}}` already exists but is on `{{current}}`, not on `{{branch}}`. Move this folder away or put it back on the right branch: Cockpit will not launch anything there until it carries the task's branch.",
+		"noBranch": "no branch",
+		"noIntegrationBranch": "The mission has no integration branch."
+	},
+	"mission": {
+		"step": {
+			"understanding": "understanding",
+			"approach": "approach",
+			"split": "breakdown"
+		},
+		"unknown": "Unknown mission: {{id}}",
+		"unreadable": "Unreadable mission: {{error}}",
+		"folderError": "Missions folder: {{error}}",
+		"writeError": "Writing the mission: {{error}}",
+		"titleRequired": "A mission needs a title.",
+		"deleteFailed": "Could not delete {{path}}: {{error}}",
+		"reworkNeedsReason": "A rework without a reason does not say what to fix.",
+		"unknownTask": "Unknown task: {{id}}",
+		"reworkLimit": "\"{{title}}\" has already been reworked {{count}} times. Take over instead of relaunching it.",
+		"note": {
+			"rework": "Rework {{count}}: {{reason}}",
+			"redoAfterRework": "To redo: a task was reworked.",
+			"workFoundAtStartup": "Work found at startup: its branch carries commits.",
+			"resumedAfterRestart": "Resumed after Cockpit restarted."
+		},
+		"journal": {
+			"taskReworked": "Task sent back for rework",
+			"paused": "Mission paused",
+			"resumed": "Mission resumed",
+			"tasksRecovered": "Tasks recovered",
+			"tasksRecoveredDetail": "{{relaunch}} to relaunch, {{delivered}} already delivered",
+			"planApproved": "Plan approved",
+			"proposal": "Proposal — {{step}}",
+			"stepApproved": "Approved — {{step}}",
+			"stepCorrected": "Corrected — {{step}}",
+			"worktreesCleaned": "Worktrees cleaned up",
+			"worktreesCleanedDetail": "{{count}} folder(s) removed, {{size}} GB freed on disk",
+			"deleted": "Mission deleted",
+			"deletedDetail": "{{count}} item(s) erased",
+			"opened": "Mission opened",
+			"planSubmitted": "Plan submitted",
+			"planSubmittedDetail": "{{count}} task(s)",
+			"closed": "Mission closed"
+		},
+		"nothingAwaitsDecision": "Nothing is waiting for your decision on the {{step}}: the mission is at \"{{state}}\".",
+		"correctionNeedsReason": "Say what is wrong: without a reason, the lead agent would make the same proposal again.",
+		"taskWithoutId": "Task without an identifier: no worker can be attached to it.",
+		"blocked": {
+			"unknownBase": "It starts from `{{base}}`, which is not the branch of any task in this plan. Replan it to start from the integration branch.",
+			"baseExhausted": "The task it starts from (`{{base}}`) has used up its reworks: it will not deliver."
+		}
+	},
+	"panel": {
+		"lens": {
+			"breaks": "What breaks",
+			"deployed": "Once deployed",
+			"users": "Who uses it"
+		},
+		"folderError": "Review panels folder: {{error}}",
+		"unreadable": "Unreadable review panel: {{error}}",
+		"writeError": "Writing the review panel: {{error}}",
+		"alreadyRunning": "A review panel for this change is already running.",
+		"changeGone": "This change no longer exists: the merge request was closed, or the branch is gone.",
+		"noFolder": "No folder to run the agents in.",
+		"silentVoice": "{{lens}}: {{error}}",
+		"noVoice": "No angle answered. {{details}}",
+		"journal": {
+			"title": "Review panel on a change",
+			"detail": "{{verdict}} — {{count}} disagreement(s)"
+		},
+		"mergeFailed": "The synthesis did not complete ({{error}}). The raw opinions remain readable."
+	},
+	"review": {
+		"noReview": "No review for this PR.",
+		"noRepo": "Fill in the project's GitHub repository in Settings.",
+		"prNotFound": "I cannot find PR #{{number}} on {{repo}}.",
+		"noNewCommit": "No commit since round {{round}}: the PR has not moved.",
+		"noPreviousReview": "No previous review: doing a full review.",
+		"noPrNumber": "The review does not say which PR it is reviewing."
+	},
+	"prompts": {
+		"group": {
+			"review": "Review",
+			"visual": "Visual report",
+			"delivery": "Delivery",
+			"fixes": "Fixes",
+			"quality": "Quality",
+			"investigation": "Investigation",
+			"mine": "My prompts"
+		},
+		"label": {
+			"review": "Full code review of a PR",
+			"reviewFollowup": "Check the fixes on a PR",
+			"visual": "Report with images",
+			"ship": "Check, then commit + push",
+			"reviewThenShip": "Review, then commit + push",
+			"openPr": "Open the pull request",
+			"reviewComments": "Address review feedback",
+			"prHealth": "PR health check",
+			"ciRed": "CI is red",
+			"conflicts": "Resolve conflicts with the base",
+			"selfQa": "QA what was done",
+			"conventions": "Check conventions",
+			"tests": "Fill in the tests",
+			"prodError": "Investigate a production error",
+			"ticket": "Implement a ticket"
+		},
+		"configFolderError": "Configuration folder: {{error}}",
+		"serializeError": "Serialization: {{error}}",
+		"writeError": "Writing prompts.toml: {{error}}",
+		"labelAndTextRequired": "A prompt needs a label and a text."
+	},
+	"permissions": {
+		"unreadableAnswer": "Unreadable answer: {{error}}",
+		"writeError": "Writing the answer: {{error}}"
+	},
+	"codex": {
+		"turnFailed": "The turn failed."
+	},
+	"agent": {
+		"notActive": "This agent is no longer active.",
+		"inputUnavailable": "The agent's input is unavailable.",
+		"outputUnavailable": "The agent's output is unavailable.",
+		"emptyMessage": "Empty message.",
+		"claudeNotFound": "The `claude` CLI cannot be found on this machine.",
+		"claudeTimeout": "Claude did not answer within {{seconds}} s.",
+		"claudeLaunchError": "Launching Claude: {{error}}",
+		"claudeError": "Claude: {{error}}",
+		"claudeStopped": "Claude stopped: {{detail}}",
+		"claudeUnreadable": "Unreadable answer from Claude.",
+		"folderNotFound": "Folder not found: {{path}}",
+		"oneShotProtocol": "The engine \"{{engine}}\" declares the `{{protocol}}` protocol: a one-off question can only be asked with the default protocol.",
+		"launchError": "Launching the agent: {{error}}",
+		"agentError": "Agent: {{error}}",
+		"oneShotTimeout": "The agent returned nothing after twenty minutes; the analysis is abandoned.",
+		"agentStopped": "The agent stopped: {{detail}}",
+		"agentUnreadable": "Unreadable answer from the agent: {{output}}",
+		"noReason": "no reason given",
+		"agentFailed": "The agent failed: {{reason}}",
+		"agentWroteNothing": "The agent wrote nothing.",
+		"memoryCeiling": "Machine memory above {{ceiling}} %: no new agent starts until it drops back below. Close what is no longer useful, or raise the ceiling in Settings → Missions.",
+		"memoryCeilingTurn": "Machine memory above {{ceiling}} %: the next turn waits for it to drop back below.",
+		"unknownProtocol": "The engine \"{{engine}}\" declares the `{{protocol}}` protocol, which Cockpit cannot speak yet. Implemented: {{known}}.",
+		"protocolNoMission": "The `{{protocol}}` protocol does not support mission tools yet: this engine cannot be used in a mission yet, as lead or worker.",
+		"claudeNotFoundHint": "The `claude` CLI cannot be found. Install it, or check that it is in ~/.local/bin, ~/.claude/local or /opt/homebrew/bin.",
+		"noBinary": "The engine \"{{engine}}\" declares no binary, and Cockpit can only find `claude` on its own.",
+		"codexNeedsMessage": "`codex-exec` needs a message to start: it cannot open on silence.",
+		"geminiNeedsMessage": "`gemini-stream-json` needs a message to start: it cannot open on silence.",
+		"geminiNoResume": "`gemini-stream-json` cannot resume a conversation: no source documents how. Start a fresh agent.",
+		"bridgeUnavailable": {
+			"title": "Permission bridge unavailable",
+			"subject": "Node not found",
+			"detail": "Agents' permission requests and questions will not reach the interface. Install Node (`brew install node`) to get them back; agents still run, according to their mode."
+		},
+		"sandboxNoRuntimeHint": "Container isolation is enabled, but no runtime (`orb` or `docker`) is installed. Disable it in Settings → Missions, or install one.",
+		"sandboxNoRuntime": "Container isolation is enabled, but no runtime (`orb` or `docker`) is installed.",
+		"sandboxImageFailed": "Container isolation is enabled, but the image could not be prepared: {{error}}",
+		"firstMessageError": "Sending the first message: {{error}}",
+		"silentDeath": "The process stopped without writing any answer, and without leaving anything on its output or its standard error.",
+		"journal": {
+			"diedBeforeFirstAnswer": "Agent stopped before its first answer"
+		},
+		"sendError": "Sending the message: {{error}}",
+		"noThreadYet": "This agent has no conversation identifier yet — its first answer may not have arrived.",
+		"resumeTurnError": "Resuming the turn: {{error}}",
+		"cannotInterrupt": "This engine cannot interrupt a turn without ending it. Use Stop.",
+		"interruptError": "Interrupting: {{error}}",
+		"noControlChannel": "This engine has no control channel.",
+		"step": {
+			"stoppedFromCockpit": "Stopped from Cockpit.",
+			"detached": "Cockpit closed; the agent keeps going without a window.",
+			"cockpitClosed": "Cockpit closed.",
+			"detachedFinished": "The detached agent finished while Cockpit was closed.",
+			"detachedStopped": "The detached agent stopped while Cockpit was closed.",
+			"reattached": "Found alive when Cockpit started.",
+			"lastTurnFailed": "The engine returned its last turn as an error."
+		}
+	}
+}

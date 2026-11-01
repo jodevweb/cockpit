@@ -11,6 +11,7 @@ import {
 	useState,
 	type ReactNode,
 } from "react";
+import { useTranslation } from "react-i18next";
 import { Button } from "@/components/ui";
 import { useCockpit } from "@/app/store";
 
@@ -61,6 +62,7 @@ const Context = createContext<UpdateStore | null>(null);
 const INTERVAL_MS = 20 * 60 * 1000;
 
 export function UpdateProvider({ children }: { children: ReactNode }) {
+	const { t } = useTranslation("components3");
 	const { notify } = useCockpit();
 	const [stage, setStage] = useState<Stage>({ kind: "idle" });
 	const [version, setVersion] = useState<string | null>(null);
@@ -83,19 +85,19 @@ export function UpdateProvider({ children }: { children: ReactNode }) {
 				if (update) {
 					setDismissed(null);
 					setStage({ kind: "available", update });
-					if (announce) notify(`Version ${update.version} disponible.`);
+					if (announce) notify(t("updateBanner.availableNotice", { version: update.version }));
 				} else if (announce) {
-					notify("Cockpit est à jour.");
+					notify(t("updateBanner.upToDate"));
 				}
 			} catch (error) {
 				// Hors ligne, ou dépôt de versions injoignable : on regardera de
 				// nouveau tout à l'heure, sans alerter pour autant.
-				if (announce) notify(`Vérification impossible : ${error}`);
+				if (announce) notify(t("updateBanner.checkFailed", { error: String(error) }));
 			} finally {
 				if (announce) setChecking(false);
 			}
 		},
-		[notify],
+		[notify, t],
 	);
 
 	useEffect(() => {
@@ -128,10 +130,10 @@ export function UpdateProvider({ children }: { children: ReactNode }) {
 				setTimeout(() => void relaunch(), 1200);
 			} catch (error) {
 				setStage({ kind: "failed", message: String(error) });
-				notify(`Mise à jour impossible : ${error}`);
+				notify(t("updateBanner.installFailedNotice", { error: String(error) }));
 			}
 		},
-		[notify],
+		[notify, t],
 	);
 
 	const dismiss = useCallback(() => {
@@ -166,6 +168,7 @@ function useUpdate(): UpdateStore {
 }
 
 export function UpdateBanner() {
+	const { t } = useTranslation("components3");
 	const { stage, install, dismiss } = useUpdate();
 	if (stage.kind === "idle") return null;
 
@@ -178,7 +181,7 @@ export function UpdateBanner() {
 							<Download size={13} className="mt-0.5 shrink-0 text-accent-soft" />
 							<div className="min-w-0 flex-1">
 								<p className="text-[12.5px] font-medium text-ink">
-									Version {stage.update.version} disponible
+									{t("updateBanner.available", { version: stage.update.version })}
 								</p>
 								{stage.update.body ? (
 									<p className="mt-0.5 line-clamp-3 text-[11px] leading-snug text-ink-faint">
@@ -189,7 +192,7 @@ export function UpdateBanner() {
 							<button
 								type="button"
 								onClick={dismiss}
-								title="Plus tard"
+								title={t("updateBanner.later")}
 								className="focus-ring shrink-0 rounded text-ink-faint hover:text-ink"
 							>
 								<X size={12} />
@@ -199,12 +202,11 @@ export function UpdateBanner() {
 						    jour relance l'application, et les agents en cours s'arrêtent
 						    avec elle. */}
 						<p className="text-[10px] leading-snug text-ink-faint">
-							L'installation relance le cockpit — les agents en cours seront
-							arrêtés, et leurs tâches reprises au redémarrage.
+							{t("updateBanner.restartWarning")}
 						</p>
 						<div className="flex justify-end gap-2">
 							<Button size="sm" onClick={dismiss}>
-								Plus tard
+								{t("updateBanner.later")}
 							</Button>
 							<Button
 								size="sm"
@@ -212,7 +214,7 @@ export function UpdateBanner() {
 								icon={Download}
 								onClick={() => void install(stage.update)}
 							>
-								Mettre à jour
+								{t("updateBanner.update")}
 							</Button>
 						</div>
 					</>
@@ -223,7 +225,7 @@ export function UpdateBanner() {
 						<div className="flex items-center gap-2">
 							<RefreshCw size={12} className="shrink-0 animate-spin-slow text-accent-soft" />
 							<span className="text-[11px] text-ink">
-								Téléchargement de la version {stage.update.version}…
+								{t("updateBanner.downloading", { version: stage.update.version })}
 							</span>
 						</div>
 						<div className="h-1 overflow-hidden rounded-full bg-raised">
@@ -238,20 +240,20 @@ export function UpdateBanner() {
 				{stage.kind === "ready" ? (
 					<div className="flex items-center gap-2">
 						<RefreshCw size={12} className="shrink-0 animate-spin-slow text-success" />
-						<span className="text-[11px] text-ink">Installée — redémarrage…</span>
+						<span className="text-[11px] text-ink">{t("updateBanner.installed")}</span>
 					</div>
 				) : null}
 
 				{stage.kind === "failed" ? (
 					<div className="flex items-start gap-2">
 						<div className="min-w-0 flex-1">
-							<p className="text-[11px] text-critical">Mise à jour impossible</p>
+							<p className="text-[11px] text-critical">{t("updateBanner.installFailed")}</p>
 							<p className="mt-0.5 line-clamp-2 text-[10px] text-ink-faint">
 								{stage.message}
 							</p>
 						</div>
 						<Button size="sm" onClick={dismiss}>
-							Fermer
+							{t("updateBanner.close")}
 						</Button>
 					</div>
 				) : null}
@@ -267,12 +269,13 @@ export function UpdateBanner() {
  * — et elle le fait maintenant, puisque les deux partagent le même état.
  */
 export function UpdateCheck() {
+	const { t } = useTranslation("components3");
 	const { version, checking, look, stage, install } = useUpdate();
 
 	return (
 		<div className="flex shrink-0 items-center gap-2">
 			<span className="shrink-0 font-mono text-[11px] text-ink-faint">
-				version {version ?? "…"}
+				{t("updateBanner.version", { version: version ?? "…" })}
 			</span>
 			{/* Quand une version attend, l'installer d'ici évite de la chercher des
 			    yeux à l'autre bout de l'écran. */}
@@ -283,7 +286,7 @@ export function UpdateCheck() {
 					icon={Download}
 					onClick={() => void install(stage.update)}
 				>
-					Installer {stage.update.version}
+					{t("updateBanner.install", { version: stage.update.version })}
 				</Button>
 			) : (
 				<Button
@@ -292,7 +295,7 @@ export function UpdateCheck() {
 					loading={checking}
 					onClick={() => void look(true)}
 				>
-					Chercher une mise à jour
+					{t("updateBanner.check")}
 				</Button>
 			)}
 		</div>

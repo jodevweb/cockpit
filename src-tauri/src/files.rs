@@ -59,9 +59,9 @@ pub struct FileEntry {
 pub fn list(root: String) -> Result<Vec<FileEntry>> {
 	let root = PathBuf::from(&root);
 	if !root.is_dir() {
-		return Err(CockpitError::msg(format!(
-			"Dossier introuvable : {}",
-			root.display()
+		return Err(CockpitError::msg(crate::i18n::tf(
+			"files.folderNotFound",
+			&[("path", &root.display())],
 		)));
 	}
 
@@ -105,16 +105,16 @@ pub fn list(root: String) -> Result<Vec<FileEntry>> {
 pub fn write(path: String, content: String) -> Result<()> {
 	let target = PathBuf::from(&path);
 	let Some(parent) = target.parent() else {
-		return Err(CockpitError::msg("Chemin de fichier invalide."));
+		return Err(CockpitError::msg(crate::i18n::t("files.invalidPath")));
 	};
 	if !parent.is_dir() {
-		return Err(CockpitError::msg(format!(
-			"Dossier inexistant : {}",
-			parent.display()
+		return Err(CockpitError::msg(crate::i18n::tf(
+			"files.folderMissing",
+			&[("path", &parent.display())],
 		)));
 	}
 	if target.is_dir() {
-		return Err(CockpitError::msg("Ce chemin désigne un dossier."));
+		return Err(CockpitError::msg(crate::i18n::t("files.isFolder")));
 	}
 
 	let temporary = temporary_beside(&target);
@@ -134,7 +134,7 @@ pub fn write(path: String, content: String) -> Result<()> {
 			.and_then(|mut file| file.write_all(content.as_bytes()));
 		if let Err(e) = written {
 			let _ = std::fs::remove_file(&temporary);
-			return Err(CockpitError::msg(format!("Écriture de {} : {e}", target.display())));
+			return Err(CockpitError::msg(crate::i18n::tf("files.writeFile", &[("path", &target.display()), ("error", &e)])));
 		}
 	}
 
@@ -156,7 +156,7 @@ pub fn write(path: String, content: String) -> Result<()> {
 
 	std::fs::rename(&temporary, &target).map_err(|e| {
 		let _ = std::fs::remove_file(&temporary);
-		CockpitError::msg(format!("Remplacement de {} : {e}", target.display()))
+		CockpitError::msg(crate::i18n::tf("files.replaceFile", &[("path", &target.display()), ("error", &e)]))
 	})?;
 	Ok(())
 }
@@ -218,7 +218,7 @@ fn sanitize(name: &str) -> String {
 fn attachment_target(session: &str, name: &str) -> Result<PathBuf> {
 	let dir = attachments_dir(session);
 	std::fs::create_dir_all(&dir)
-		.map_err(|e| CockpitError::msg(format!("Dossier des pièces jointes : {e}")))?;
+		.map_err(|e| CockpitError::msg(crate::i18n::tf("files.attachmentsDir", &[("error", &e)])))?;
 
 	let safe = sanitize(name);
 	let candidate = dir.join(&safe);
@@ -241,9 +241,7 @@ fn attachment_target(session: &str, name: &str) -> Result<PathBuf> {
 			return Ok(candidate);
 		}
 	}
-	Err(CockpitError::msg(
-		"Trop de pièces jointes du même nom dans cette conversation.",
-	))
+	Err(CockpitError::msg(crate::i18n::t("files.tooManySameName")))
 }
 
 /// Joint un fichier déjà sur le disque : glissé depuis le Finder, ou choisi.
@@ -254,18 +252,18 @@ fn attachment_target(session: &str, name: &str) -> Result<PathBuf> {
 pub fn attach(session: String, path: String) -> Result<Attachment> {
 	let source = PathBuf::from(&path);
 	let meta = std::fs::metadata(&source)
-		.map_err(|e| CockpitError::msg(format!("Fichier illisible : {e}")))?;
+		.map_err(|e| CockpitError::msg(crate::i18n::tf("files.fileUnreadable", &[("error", &e)])))?;
 	if meta.is_dir() {
-		return Err(CockpitError::msg(
-			"Un dossier ne se joint pas : choisis les fichiers.",
-		));
+		return Err(CockpitError::msg(crate::i18n::t("files.folderNotAttachable")));
 	}
 	if meta.len() > MAX_ATTACHMENT_BYTES {
-		return Err(CockpitError::msg(format!(
-			"{} pèse {} Mo — au-delà de {} Mo, mieux vaut donner son chemin à l'agent.",
-			source.file_name().unwrap_or_default().to_string_lossy(),
-			meta.len() / 1_048_576,
-			MAX_ATTACHMENT_BYTES / 1_048_576,
+		return Err(CockpitError::msg(crate::i18n::tf(
+			"files.fileTooLarge",
+			&[
+				("name", &source.file_name().unwrap_or_default().to_string_lossy()),
+				("size", &(meta.len() / 1_048_576)),
+				("max", &(MAX_ATTACHMENT_BYTES / 1_048_576)),
+			],
 		)));
 	}
 
@@ -275,7 +273,7 @@ pub fn attach(session: String, path: String) -> Result<Attachment> {
 		.unwrap_or_else(|| "fichier".into());
 	let target = attachment_target(&session, &name)?;
 	std::fs::copy(&source, &target)
-		.map_err(|e| CockpitError::msg(format!("Copie de la pièce jointe : {e}")))?;
+		.map_err(|e| CockpitError::msg(crate::i18n::tf("files.copyAttachment", &[("error", &e)])))?;
 
 	Ok(Attachment {
 		path: target.to_string_lossy().to_string(),
@@ -293,21 +291,20 @@ pub fn attach_bytes(session: String, name: String, data: String) -> Result<Attac
 
 	let bytes = base64::engine::general_purpose::STANDARD
 		.decode(data.trim())
-		.map_err(|_| CockpitError::msg("Pièce jointe illisible : encodage inattendu."))?;
+		.map_err(|_| CockpitError::msg(crate::i18n::t("files.badEncoding")))?;
 	if bytes.len() as u64 > MAX_ATTACHMENT_BYTES {
-		return Err(CockpitError::msg(format!(
-			"Cette pièce jointe pèse {} Mo — au-delà de {} Mo, enregistre-la et donne son chemin.",
-			bytes.len() / 1_048_576,
-			MAX_ATTACHMENT_BYTES / 1_048_576,
+		return Err(CockpitError::msg(crate::i18n::tf(
+			"files.attachmentTooLarge",
+			&[("size", &(bytes.len() / 1_048_576)), ("max", &(MAX_ATTACHMENT_BYTES / 1_048_576))],
 		)));
 	}
 	if bytes.is_empty() {
-		return Err(CockpitError::msg("Pièce jointe vide."));
+		return Err(CockpitError::msg(crate::i18n::t("files.emptyAttachment")));
 	}
 
 	let target = attachment_target(&session, &name)?;
 	std::fs::write(&target, &bytes)
-		.map_err(|e| CockpitError::msg(format!("Écriture de la pièce jointe : {e}")))?;
+		.map_err(|e| CockpitError::msg(crate::i18n::tf("files.writeAttachment", &[("error", &e)])))?;
 
 	Ok(Attachment {
 		path: target.to_string_lossy().to_string(),

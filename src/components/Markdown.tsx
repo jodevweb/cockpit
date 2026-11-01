@@ -1,5 +1,6 @@
 import { ImageDown } from "lucide-react";
 import { Fragment, useMemo, useState } from "react";
+import { Trans, useTranslation } from "react-i18next";
 import { Diagram } from "@/components/Diagram";
 import { FileLink, isPath, linkifyPaths, resolvePath } from "@/components/FileLink";
 import { LocalImage } from "@/components/LocalImage";
@@ -178,6 +179,7 @@ const acceptees = new Set<string>();
  * à qui l'image serait demandée ; le clic décide.
  */
 function RemoteImage({ src, alt, className }: { src: string; alt: string; className?: string }) {
+	const { t } = useTranslation("components2");
 	const [loaded, setLoaded] = useState(() => acceptees.has(src));
 	if (loaded) return <img src={src} alt={alt} className={className} />;
 	let hote = src;
@@ -201,13 +203,19 @@ function RemoteImage({ src, alt, className }: { src: string; alt: string; classN
 		>
 			<ImageDown className="h-4 w-4 shrink-0" />
 			<span className="min-w-0 truncate">
-				Charger l'image depuis <span className="font-mono text-ink">{hote}</span>
+				<Trans
+					t={t}
+					i18nKey="markdown.loadImageFrom"
+					values={{ host: hote }}
+					components={{ host: <span className="font-mono text-ink" /> }}
+				/>
 			</span>
 		</button>
 	);
 }
 
 export function Inline({ text, cwd }: { text: string; cwd?: string | null }) {
+	const { t } = useTranslation("components2");
 	// L'image passe avant le lien : sans quoi « ![vue](x.png) » se coupait en un
 	// point d'exclamation suivi d'un lien, et cliquer dessus ne menait nulle part.
 	const parts = text.split(
@@ -236,7 +244,7 @@ export function Inline({ text, cwd }: { text: string; cwd?: string | null }) {
 						<span
 							key={key}
 							role="button"
-							title="Voir en grand"
+							title={t("markdown.enlarge")}
 							onClick={() =>
 								openLightbox([
 									distante

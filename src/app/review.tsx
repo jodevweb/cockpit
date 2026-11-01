@@ -6,6 +6,7 @@ import { startActivity, type ActivityHandle } from "@/lib/activity";
 import { REVIEW_EVENT, useAgentActions } from "./agents";
 import { useCockpit } from "./store";
 import { useWorkspace } from "./workspace";
+import { t } from "@/i18n";
 
 /**
  * Relire une PR, ou vérifier ses corrections : un seul geste.
@@ -35,15 +36,19 @@ if (typeof window !== "undefined") {
 		const round = review.rounds[review.rounds.length - 1];
 		const count = round?.findings.length ?? 0;
 		const verdict =
-			round?.verdict === "merge" ? "tu peux fusionner" : round?.verdict === "bloquant" ? "bloquant" : "corrections attendues";
+			round?.verdict === "merge"
+				? t("app:review.verdict.merge")
+				: round?.verdict === "bloquant"
+					? t("app:review.verdict.blocking")
+					: t("app:review.verdict.changes");
 		// La suite, dite : sans elle, on attendait devant un agent qui avait fini,
 		// sans savoir s'il préparait encore quelque chose.
 		const next =
 			round?.verdict === "merge"
-				? "Rien ne tourne : tu peux fusionner."
-				: "Rien ne tourne maintenant : à toi de poster les points, puis « Revérifier » quand l'auteur aura poussé.";
-		waiting.activity.done(`Revue remise : ${count} point${count > 1 ? "s" : ""} · ${verdict}. ${next}`, {
-			label: "Voir",
+				? t("app:review.next.merge")
+				: t("app:review.next.changes");
+		waiting.activity.done(t("app:review.delivered", { count, verdict, next }), {
+			label: t("app:review.see"),
 			run: waiting.open,
 		});
 	});
@@ -62,23 +67,26 @@ export function useReviewFlow() {
 		 */
 		async (number: number, kind: "revue" | "verification" = "revue", asked?: string) => {
 			const activity = startActivity(
-				kind === "verification" ? `Vérification de la PR #${number}` : `Revue de la PR #${number}`,
-				asked
-					? "Ta consigne demande une revue : je passe par « Relire », pour qu'elle soit remise en carte. Je lis la PR sur GitHub…"
-					: "Je lis la PR sur GitHub et je récupère sa branche…",
+				kind === "verification"
+					? t("app:review.activity.verification", { number })
+					: t("app:review.activity.review", { number }),
+				asked ? t("app:review.activity.askedReview") : t("app:review.activity.reading"),
 			);
 			try {
 				const prepared = await api.reviews.prepare(number, kind);
 				if (prepared.warning) activity.step(prepared.warning);
 				const prompt = asked?.trim()
-					? `${prepared.prompt}\n\n---\nCe que la personne a écrit en demandant cette revue — à suivre pour savoir où porter l'attention, sans sortir du cadre ci-dessus :\n${asked.trim()}`
+					? `${prepared.prompt}\n\n---\nWhat the person wrote when asking for this review — follow it to know where to focus, without leaving the frame above:\n${asked.trim()}`
 					: prepared.prompt;
 
 				const launch = (path: string) => {
-					activity.step("Je lance l'agent de revue — il lit la PR, tu seras prévenu à la remise.");
+					activity.step(t("app:review.activity.launching"));
 					open(path, prompt, undefined, undefined, true, {
 						profile: "review",
-						label: kind === "verification" ? `Vérification #${number}` : `Revue #${number}`,
+						label:
+							kind === "verification"
+								? t("app:review.label.verification", { number })
+								: t("app:review.label.review", { number }),
 					});
 					pending.set(number, {
 						activity,
@@ -93,12 +101,14 @@ export function useReviewFlow() {
 					// La branche telle que l'auteur l'a poussée. Une branche qu'on a
 					// modifiée sur le poste refuse l'avance rapide : on le dit, et on
 					// relit quand même — ce qui est là vaut mieux que rien.
-					activity.step(`Je mets ${prepared.branch} à jour…`);
+					activity.step(t("app:review.activity.updating", { branch: prepared.branch }));
 					try {
 						await api.git.pull(prepared.worktree);
 					} catch (error) {
 						activity.step(
-							`Mise à jour impossible (${String(error).replace(/^(Ipc)?Error:\s*/, "")}) : je relis la version du poste.`,
+							t("app:review.activity.updateFailed", {
+								error: String(error).replace(/^(Ipc)?Error:\s*/, ""),
+							}),
 						);
 					}
 					launch(prepared.worktree);
@@ -106,15 +116,15 @@ export function useReviewFlow() {
 				}
 
 				const mainRepo = config?.mainRepo;
-				if (!mainRepo) throw new Error("Aucun dépôt principal n'est réglé pour ce projet.");
-				activity.step(`Je crée le worktree de ${prepared.branch} — ça peut prendre quelques minutes.`);
+				if (!mainRepo) throw new Error(t("app:review.error.noMainRepo"));
+				activity.step(t("app:review.activity.creatingWorktree", { branch: prepared.branch }));
 				await startWorktreeCreation(prepared.branch, {
 					mainRepo,
 					runJob,
 					openAgent: (cwd, prompt) => open(cwd, prompt, undefined, undefined, true),
 				});
 				const path = await waitForWorktree(prepared.branch);
-				if (!path) throw new Error(`Le worktree de ${prepared.branch} n'est pas apparu après 15 minutes.`);
+				if (!path) throw new Error(t("app:review.error.worktreeTimeout", { branch: prepared.branch }));
 				launch(path);
 			} catch (error) {
 				activity.fail(error);

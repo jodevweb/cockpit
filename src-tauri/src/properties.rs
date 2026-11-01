@@ -144,10 +144,11 @@ pub fn read_calibrations(project: &str) -> Vec<Calibration> {
 
 fn write_json<T: Serialize>(path: &Path, value: &T) -> Result<()> {
 	std::fs::create_dir_all(properties_dir())
-		.map_err(|e| CockpitError::msg(format!("Dossier des propriétés : {e}")))?;
+		.map_err(|e| CockpitError::msg(crate::i18n::tf("properties.errors.folder", &[("error", &e)])))?;
 	let raw = serde_json::to_string_pretty(value)
-		.map_err(|e| CockpitError::msg(format!("Sérialisation : {e}")))?;
-	std::fs::write(path, raw).map_err(|e| CockpitError::msg(format!("Écriture : {e}")))
+		.map_err(|e| CockpitError::msg(crate::i18n::tf("properties.errors.serialize", &[("error", &e)])))?;
+	std::fs::write(path, raw)
+		.map_err(|e| CockpitError::msg(crate::i18n::tf("properties.errors.write", &[("error", &e)])))
 }
 
 fn now() -> u64 {
@@ -170,26 +171,29 @@ fn now() -> u64 {
 /// contient aucune, et ce faux vert compte comme une garantie.
 fn judge_prompt(property: &PropertyConfig, dossier: &str) -> String {
 	format!(
-		"Tu vérifies **une seule** propriété sur un changement de code. Pas une revue, pas un \
-		 avis général : cette propriété, et rien d'autre.\n\n\
-		 ## La propriété\n\n{}\n\n\
-		 ## Ce que tu rends\n\n\
-		 Exactement cette forme, rien avant, rien après :\n\n\
-		 Verdict: tenue | enfreinte | hors sujet | indécis\n\
-		 Preuve: <un ou plusieurs `fichier:ligne`, séparés par des virgules — laisse vide si \
-		 tu n'as rien à montrer>\n\
-		 Note: <une phrase. Si enfreinte : ce qui l'enfreint, concrètement. Si tenue : ce que \
-		 tu as vérifié pour l'affirmer. Si hors sujet : pourquoi ce changement ne touche pas à \
-		 ce que la propriété décrit.>\n\n\
-		 « hors sujet » est la bonne réponse quand le changement ne concerne pas ce dont parle \
-		 la propriété — c'est fréquent, et bien plus utile qu'un « tenue » de complaisance qui \
-		 se lirait comme une garantie.\n\n\
-		 « indécis » est la bonne réponse quand tu ne peux pas trancher sans lire ce que tu n'as \
-		 pas. Dis ce qui te manque.\n\n\
-		 Ne conclus pas sur le seul diff : tu es dans le dépôt, va lire le code autour. Tu ne \
-		 peux rien modifier.\n\n\
-		 ## Le changement\n\n{dossier}",
-		property.text.trim()
+		"You are checking **a single** property on a code change. Not a review, not a general \
+		 opinion: this property, and nothing else.\n\n\
+		 ## The property\n\n{}\n\n\
+		 ## What you return\n\n\
+		 Exactly this form, nothing before, nothing after. Keep the markers `Verdict:`, \
+		 `Evidence:`, `Note:` and the verdict words in English exactly:\n\n\
+		 Verdict: held | broken | off-topic | undecided\n\
+		 Evidence: <one or more `file:line`, separated by commas — leave empty if you have \
+		 nothing to show>\n\
+		 Note: <one sentence. If broken: what breaks it, concretely. If held: what you checked \
+		 to claim it. If off-topic: why this change does not touch what the property \
+		 describes.>\n\n\
+		 \"off-topic\" is the right answer when the change is not about what the property talks \
+		 about — it is common, and far more useful than a complacent \"held\" that would read as \
+		 a guarantee.\n\n\
+		 \"undecided\" is the right answer when you cannot decide without reading what you do \
+		 not have. Say what is missing.\n\n\
+		 Do not conclude from the diff alone: you are in the repository, go read the surrounding \
+		 code. You cannot modify anything.\n\n\
+		 {}\n\n\
+		 ## The change\n\n{dossier}",
+		property.text.trim(),
+		crate::i18n::reply_directive()
 	)
 }
 
@@ -224,7 +228,7 @@ pub async fn audit(key: String) -> Result<Audit> {
 		.changes
 		.into_iter()
 		.find(|change| change.key == key)
-		.ok_or_else(|| CockpitError::msg("Ce changement n'existe plus."))?;
+		.ok_or_else(|| CockpitError::msg(crate::i18n::t("properties.errors.changeGone")))?;
 
 	let base = Config::load();
 	let cloisonne = base.projects.len() > 1;
@@ -234,11 +238,7 @@ pub async fn audit(key: String) -> Result<Audit> {
 	}
 
 	if config.properties.is_empty() {
-		return Err(CockpitError::msg(
-			"Ce projet n'a déclaré aucune propriété. Écris ce qui doit rester vrai dans \
-			 Réglages → Agents, ou demande au cockpit de te le proposer d'après tes propres \
-			 correctifs.",
-		));
+		return Err(CockpitError::msg(crate::i18n::t("properties.errors.noneDeclared")));
 	}
 
 	// Les fichiers du changement décident de ce qui s'applique : juger une
@@ -247,9 +247,7 @@ pub async fn audit(key: String) -> Result<Audit> {
 	let files = changed_files(&change).await;
 	let retained = applicable(&config.properties, &files);
 	if retained.is_empty() {
-		return Err(CockpitError::msg(
-			"Aucune propriété déclarée ne concerne les fichiers de ce changement.",
-		));
+		return Err(CockpitError::msg(crate::i18n::t("properties.errors.noneApplicable")));
 	}
 
 	let dossier = crate::impact::dossier(&change, &config).await?;
@@ -260,7 +258,7 @@ pub async fn audit(key: String) -> Result<Audit> {
 	]
 	.into_iter()
 	.find(|candidate| !candidate.is_empty() && std::path::Path::new(candidate).is_dir())
-	.ok_or_else(|| CockpitError::msg("Aucun dossier où faire travailler les agents."))?;
+	.ok_or_else(|| CockpitError::msg(crate::i18n::t("properties.errors.noWorkdir")))?;
 
 	let settings = config.impact.clone();
 	let verdicts = futures::future::join_all(retained.iter().map(|property| {
@@ -301,7 +299,7 @@ pub async fn audit(key: String) -> Result<Audit> {
 				property_id: property.id.clone(),
 				text: property.text.clone(),
 				verdict: "indécis".into(),
-				note: format!("Le juge n'a pas répondu : {error}"),
+				note: crate::i18n::tf("properties.judgeSilent", &[("error", &error)]),
 				..Default::default()
 			}),
 		}
@@ -318,10 +316,10 @@ pub async fn audit(key: String) -> Result<Audit> {
 	write_json(&audit_path(&key), &audit)?;
 	crate::journal::record(
 		"impact",
-		"Vérification des propriétés",
+		&crate::i18n::t("properties.journal.label"),
 		&format!("{} {}", change.repo, change.reference),
 		true,
-		&format!("{} enfreinte(s)", audit.broken()),
+		&crate::i18n::tf("properties.journal.broken", &[("count", &audit.broken())]),
 	);
 	Ok(audit)
 }
@@ -413,19 +411,22 @@ async fn recent_fixes(repo: &Path, limit: usize) -> Vec<(String, String)> {
 /// savoir qu'un garde-fou sait échouer sans attendre le prochain incident.
 fn calibration_prompt(property: &PropertyConfig, subject: &str, diff: &str) -> String {
 	format!(
-		"Voici une correction réellement apportée à ce dépôt. Le code d'avant était donc \
-		 fautif, et le diff montre en quoi.\n\n\
-		 Ta question : la propriété ci-dessous, appliquée au code **avant** cette correction, \
-		 aurait-elle signalé le problème ?\n\n\
-		 ## La propriété\n\n{}\n\n\
-		 Sois strict. Une propriété qui « aurait peut-être attiré l'attention » n'aurait rien \
-		 attrapé : réponds non. Ne réponds oui que si l'état d'avant enfreint clairement ce que \
-		 la propriété énonce.\n\n\
-		 ## Ce que tu rends\n\n\
-		 Attrapé: oui | non\n\
-		 Note: une phrase disant pourquoi.\n\n\
-		 ## La correction ({subject})\n\n```diff\n{diff}\n```",
-		property.text.trim()
+		"Here is a fix actually made to this repository. The code before it was therefore \
+		 faulty, and the diff shows how.\n\n\
+		 Your question: would the property below, applied to the code **before** this fix, \
+		 have flagged the problem?\n\n\
+		 ## The property\n\n{}\n\n\
+		 Be strict. A property that \"might have drawn attention\" would have caught nothing: \
+		 answer no. Answer yes only if the earlier state clearly breaks what the property \
+		 states.\n\n\
+		 ## What you return\n\n\
+		 Keep the markers `Caught:` and `Note:` and the words yes/no in English exactly.\n\n\
+		 Caught: yes | no\n\
+		 Note: one sentence saying why.\n\n\
+		 {}\n\n\
+		 ## The fix ({subject})\n\n```diff\n{diff}\n```",
+		property.text.trim(),
+		crate::i18n::reply_directive()
 	)
 }
 
@@ -437,22 +438,16 @@ pub async fn calibrate(project: String, property_id: String) -> Result<Calibrati
 		.iter()
 		.find(|entry| entry.id == property_id)
 		.cloned()
-		.ok_or_else(|| CockpitError::msg("Cette propriété n'existe plus."))?;
+		.ok_or_else(|| CockpitError::msg(crate::i18n::t("properties.errors.propertyGone")))?;
 
 	let repo = PathBuf::from(&project);
 	if !repo.is_dir() {
-		return Err(CockpitError::msg(
-			"Le dépôt principal de ce projet est introuvable sur ce poste.",
-		));
+		return Err(CockpitError::msg(crate::i18n::t("properties.errors.repoMissing")));
 	}
 
 	let fixes = recent_fixes(&repo, CALIBRATION_SAMPLES).await;
 	if fixes.is_empty() {
-		return Err(CockpitError::msg(
-			"Aucune correction repérable dans les quatre cents derniers commits. La \
-			 calibration s'appuie sur les commits qui corrigent quelque chose : sans eux, rien \
-			 ne dit si cette propriété sait échouer.",
-		));
+		return Err(CockpitError::msg(crate::i18n::t("properties.errors.noFixesCalibration")));
 	}
 
 	let settings = config.impact.clone();
@@ -521,21 +516,25 @@ pub async fn calibrate(project: String, property_id: String) -> Result<Calibrati
 /// est ce que *ce* dépôt a déjà cassé, parce que c'est ce qu'il cassera encore.
 fn suggest_prompt(fixes: &str) -> String {
 	format!(
-		"Voici les sujets des corrections récentes de ce dépôt : ce qu'il a réellement eu à \
-		 réparer.\n\n{fixes}\n\n\
-		 Tu es dans le dépôt. Va lire ce qu'il faut pour comprendre ce qui revient.\n\n\
-		 Propose trois à cinq **propriétés** : des choses qui doivent rester vraies dans ce \
-		 code, formulées de façon qu'un relecteur puisse dire si un diff les enfreint ou non.\n\n\
-		 Ce qui fait une bonne propriété ici :\n\
-		 - elle vient d'un problème que ce dépôt a déjà eu, pas d'une bonne pratique générale ;\n\
-		 - elle est vérifiable sur un diff, sans exécuter le code ;\n\
-		 - elle n'est pas déjà couverte par les outils du dépôt — ne propose rien qu'un linter, \
-		 un compilateur ou un test existant attrape déjà.\n\n\
-		 Rends une propriété par bloc, exactement dans cette forme, rien d'autre :\n\n\
-		 Propriété: <l'énoncé, une phrase, à l'indicatif>\n\
-		 Portée: <chemins concernés séparés par des virgules, ou « tout »>\n\
-		 Pourquoi: <la correction ou le type d'incident qui la justifie>\n\n\
-		 Tu ne peux rien modifier."
+		"Here are the subjects of this repository's recent fixes: what it actually had to \
+		 repair.\n\n{fixes}\n\n\
+		 You are in the repository. Read what you need to understand what keeps coming back.\n\n\
+		 Propose three to five **properties**: things that must stay true in this code, phrased \
+		 so that a reviewer can tell whether a diff breaks them or not.\n\n\
+		 What makes a good property here:\n\
+		 - it comes from a problem this repository has already had, not from a general best \
+		 practice;\n\
+		 - it can be checked on a diff, without running the code;\n\
+		 - it is not already covered by the repository's tools — propose nothing that a linter, \
+		 a compiler or an existing test already catches.\n\n\
+		 Return one property per block, exactly in this form, nothing else. Keep the markers \
+		 `Property:`, `Scope:`, `Why:` and the word `all` in English exactly:\n\n\
+		 Property: <the statement, one sentence, in the indicative>\n\
+		 Scope: <affected paths separated by commas, or `all`>\n\
+		 Why: <the fix or the kind of incident that justifies it>\n\n\
+		 {directive}\n\n\
+		 You cannot modify anything.",
+		directive = crate::i18n::reply_directive()
 	)
 }
 
@@ -553,16 +552,11 @@ pub struct Suggestion {
 pub async fn suggest(project: String) -> Result<Vec<Suggestion>> {
 	let repo = PathBuf::from(&project);
 	if !repo.is_dir() {
-		return Err(CockpitError::msg(
-			"Le dépôt principal de ce projet est introuvable sur ce poste.",
-		));
+		return Err(CockpitError::msg(crate::i18n::t("properties.errors.repoMissing")));
 	}
 	let fixes = recent_fixes(&repo, 40).await;
 	if fixes.is_empty() {
-		return Err(CockpitError::msg(
-			"Aucune correction repérable dans l'historique récent : rien sur quoi s'appuyer \
-			 pour proposer des propriétés propres à ce dépôt.",
-		));
+		return Err(CockpitError::msg(crate::i18n::t("properties.errors.noFixesSuggest")));
 	}
 
 	let listing = fixes
@@ -585,10 +579,7 @@ pub async fn suggest(project: String) -> Result<Vec<Suggestion>> {
 
 	let found = parse_suggestions(&rendu.text);
 	if found.is_empty() {
-		return Err(CockpitError::msg(
-			"L'agent n'a rien proposé d'exploitable. Réessaie, ou écris la première propriété \
-			 toi-même.",
-		));
+		return Err(CockpitError::msg(crate::i18n::t("properties.errors.nothingUsable")));
 	}
 	Ok(found)
 }
@@ -618,18 +609,29 @@ fn parse_check(text: &str) -> Check {
 		}
 		let lower = line.to_lowercase();
 		if lower.starts_with("verdict") {
-			check.verdict = if lower.contains("enfreinte") || lower.contains("enfreint") {
+			// Les marqueurs anglais d'aujourd'hui, et les français des
+			// réponses plus anciennes. Les valeurs gardées restent celles
+			// d'origine : l'interface les compare.
+			check.verdict = if lower.contains("enfreinte")
+				|| lower.contains("enfreint")
+				|| lower.contains("broken")
+				|| lower.contains("violated")
+			{
 				"enfreinte".into()
-			} else if lower.contains("hors sujet") || lower.contains("hors-sujet") {
+			} else if lower.contains("hors sujet")
+				|| lower.contains("hors-sujet")
+				|| lower.contains("off-topic")
+				|| lower.contains("off topic")
+			{
 				"hors sujet".into()
-			} else if lower.contains("tenue") {
+			} else if lower.contains("tenue") || lower.contains("held") || lower.contains("holds") {
 				"tenue".into()
 			} else {
 				"indécis".into()
 			};
 			continue;
 		}
-		if let Some(rest) = after(line, &["Preuve", "Preuves"]) {
+		if let Some(rest) = after(line, &["Preuves", "Preuve", "Evidence"]) {
 			check.evidence = rest
 				.split(',')
 				.map(|part| part.trim().trim_matches('`').to_string())
@@ -656,10 +658,17 @@ fn parse_calibration(text: &str) -> (bool, String) {
 	for line in text.lines() {
 		let line = line.trim();
 		let lower = line.to_lowercase();
-		if lower.starts_with("attrapé") || lower.starts_with("attrape") {
+		if lower.starts_with("attrapé") || lower.starts_with("attrape") || lower.starts_with("caught") {
 			// « non » d'abord : « oui » se retrouve dans « non, oui aurait… »
-			// bien plus souvent que l'inverse.
-			caught = !lower.contains("non") && lower.contains("oui");
+			// bien plus souvent que l'inverse. Anglais aujourd'hui, français
+			// dans les réponses plus anciennes.
+			let words: Vec<&str> = lower
+				.split(|c: char| !c.is_alphanumeric())
+				.filter(|word| !word.is_empty())
+				.collect();
+			let no = words.iter().any(|word| *word == "non" || *word == "no");
+			let yes = words.iter().any(|word| *word == "oui" || *word == "yes");
+			caught = !no && yes;
 			continue;
 		}
 		if let Some(rest) = after(line, &["Note"]) {
@@ -690,7 +699,9 @@ fn parse_suggestions(text: &str) -> Vec<Suggestion> {
 			continue;
 		};
 		if let Some(rest) = after(line, &["Portée", "Portee", "Scope"]) {
-			if !rest.eq_ignore_ascii_case("tout") {
+			if !rest.eq_ignore_ascii_case("tout")
+				&& !rest.trim_matches('`').eq_ignore_ascii_case("all")
+			{
 				current.scope = rest
 					.split(',')
 					.map(|part| part.trim().trim_matches('`').to_string())
@@ -773,6 +784,45 @@ mod tests {
 	fn le_hors_sujet_ne_se_confond_pas_avec_le_conforme() {
 		let check = parse_check("Verdict: hors sujet\nNote: aucune migration ici.");
 		assert_eq!(check.verdict, "hors sujet");
+	}
+
+	#[test]
+	fn un_verdict_anglais_se_relit_comme_l_ancien_francais() {
+		let check = parse_check(
+			"Verdict: broken\n\
+			 Evidence: apps/api/routes.ts:42\n\
+			 Note: the route accepts an unvalidated body.",
+		);
+		assert_eq!(check.verdict, "enfreinte");
+		assert_eq!(check.evidence, vec!["apps/api/routes.ts:42"]);
+		assert!(check.note.contains("unvalidated"));
+		assert_eq!(parse_check("Verdict: off-topic").verdict, "hors sujet");
+		assert_eq!(parse_check("Verdict: held").verdict, "tenue");
+		assert_eq!(parse_check("Verdict: undecided").verdict, "indécis");
+		assert_eq!(parse_check("Verdict: tenue").verdict, "tenue");
+	}
+
+	#[test]
+	fn une_calibration_anglaise_se_relit() {
+		assert!(parse_calibration("Caught: yes\nNote: no validation on the route.").0);
+		assert!(!parse_calibration("Caught: no\nNote: unrelated.").0);
+		assert_eq!(parse_calibration("Caught: yes\nNote: unrelated.").1, "unrelated.");
+	}
+
+	#[test]
+	fn les_propositions_anglaises_se_relisent() {
+		let found = parse_suggestions(
+			"Property: Every API route validates its body before touching the database.\n\
+			 Scope: apps/api, apps/jobs\n\
+			 Why: three 500 fixes on malformed bodies.\n\n\
+			 Property: Migrations can be rolled back.\n\
+			 Scope: all\n\
+			 Why: an impossible rollback in March.",
+		);
+		assert_eq!(found.len(), 2);
+		assert_eq!(found[0].scope, vec!["apps/api", "apps/jobs"]);
+		assert!(found[1].scope.is_empty());
+		assert!(found[0].why.contains("500"));
 	}
 
 	#[test]

@@ -101,9 +101,9 @@ fn emit_line(app: &AppHandle, job_id: &str, stream: &str, line: String) {
 pub async fn spawn_job(app: AppHandle, jobs: SharedJobs, request: JobRequest) -> Result<JobStatus> {
 	let cwd = std::path::PathBuf::from(&request.cwd);
 	if !cwd.is_dir() {
-		return Err(CockpitError::msg(format!(
-			"Répertoire introuvable : {}",
-			request.cwd
+		return Err(CockpitError::msg(crate::i18n::tf(
+			"runner.dirNotFound",
+			&[("path", &request.cwd)],
 		)));
 	}
 
@@ -126,7 +126,7 @@ pub async fn spawn_job(app: AppHandle, jobs: SharedJobs, request: JobRequest) ->
 		.stdin(Stdio::null())
 		.kill_on_drop(false)
 		.spawn()
-		.map_err(|e| CockpitError::msg(format!("Lancement impossible : {e}")))?;
+		.map_err(|e| CockpitError::msg(crate::i18n::tf("runner.launchFailed", &[("error", &e)])))?;
 
 	let status = JobStatus {
 		job_id: job_id.clone(),
@@ -190,7 +190,7 @@ pub fn kill_job(jobs: &SharedJobs, job_id: &str) -> Result<()> {
 		let registry = jobs.jobs.lock().unwrap();
 		let status = registry
 			.get(job_id)
-			.ok_or_else(|| CockpitError::msg("Job inconnu"))?;
+			.ok_or_else(|| CockpitError::msg(crate::i18n::t("runner.unknownJob")))?;
 		if status.state != "running" {
 			return Ok(());
 		}

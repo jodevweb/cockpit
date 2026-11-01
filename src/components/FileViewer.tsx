@@ -23,6 +23,7 @@ import { FileViewerContext, type FileViewerStore } from "@/lib/fileViewer";
 import { api } from "@/lib/ipc";
 import { localFileUrl } from "@/lib/localFile";
 import { useAsync } from "@/lib/useAsync";
+import { useTranslation } from "react-i18next";
 
 /**
  * Lecture d'un fichier sans quitter le cockpit.
@@ -177,6 +178,7 @@ function extensionOf(path: string): string {
  * l'ouvrir ailleurs en un clic plutôt qu'une erreur d'encodage.
  */
 function Opaque({ path, name, reason }: { path: string; name: string; reason: "unplayable" | "unknown" }) {
+	const { t } = useTranslation("components1");
 	const [error, setError] = useState<string | null>(null);
 	return (
 		<div className="flex h-full flex-col items-center justify-center gap-3 p-8 text-center">
@@ -185,8 +187,8 @@ function Opaque({ path, name, reason }: { path: string; name: string; reason: "u
 			</span>
 			<p className="max-w-sm text-[12.5px] leading-relaxed text-ink-muted">
 				{reason === "unplayable"
-					? "Le cockpit ne sait pas lire ce format. L'application du Mac, elle, le saura sûrement."
-					: `Le cockpit n'affiche pas ce genre de fichier. Ouvre ${name} avec l'application du Mac.`}
+					? t("fileViewer.opaque.unplayable")
+					: t("fileViewer.opaque.unknown", { name })}
 			</p>
 			<div className="flex gap-2">
 				<Button
@@ -197,10 +199,10 @@ function Opaque({ path, name, reason }: { path: string; name: string; reason: "u
 						void api.system.openFile(path).catch((failure) => setError(String(failure)));
 					}}
 				>
-					Ouvrir avec l'app par défaut
+					{t("fileViewer.opaque.openDefault")}
 				</Button>
 				<Button icon={FolderOpen} onClick={() => void api.system.reveal(path).catch(() => undefined)}>
-					Montrer dans le Finder
+					{t("fileViewer.opaque.showInFinder")}
 				</Button>
 			</div>
 			{error ? <p className="max-w-md text-[11px] text-critical">{error}</p> : null}
@@ -229,6 +231,7 @@ function Viewer({
 	target: { path: string; line?: number };
 	onClose: () => void;
 }) {
+	const { t } = useTranslation("components1");
 	const { path, line } = target;
 	const extension = extensionOf(path);
 	const isImage = IMAGE_EXTENSIONS.includes(extension);
@@ -420,7 +423,7 @@ function Viewer({
 							{path}
 						</div>
 					</div>
-					{editing ? <Badge tone="warning">non enregistré</Badge> : null}
+					{editing ? <Badge tone="warning">{t("fileViewer.unsaved")}</Badge> : null}
 					{file.data && !editing ? <Badge mono>{bytes(text.length)}</Badge> : null}
 
 					{editing ? (
@@ -431,9 +434,9 @@ function Viewer({
 								icon={Save}
 								disabled={saving}
 								onClick={() => void save()}
-								title="Enregistrer (⌘S)"
+								title={t("fileViewer.saveTitle")}
 							>
-								Enregistrer
+								{t("fileViewer.save")}
 							</Button>
 							<Button
 								size="sm"
@@ -441,9 +444,9 @@ function Viewer({
 									setDraft(null);
 									setFailure(null);
 								}}
-								title="Abandonner les modifications"
+								title={t("fileViewer.discardTitle")}
 							>
-								Annuler
+								{t("fileViewer.cancel")}
 							</Button>
 						</>
 					) : isBinaryView || tooBig ? null : (
@@ -451,43 +454,43 @@ function Viewer({
 							size="sm"
 							icon={Pencil}
 							onClick={() => setDraft(text)}
-							title="Modifier ce fichier dans le cockpit"
+							title={t("fileViewer.editTitle")}
 						>
-							Modifier
+							{t("fileViewer.edit")}
 						</Button>
 					)}
 					<Button
 						size="sm"
 						icon={Copy}
 						onClick={() => void navigator.clipboard.writeText(path).catch(() => undefined)}
-						title="Copier le chemin"
+						title={t("fileViewer.copyPath")}
 					/>
 					<Button
 						size="sm"
 						icon={FolderOpen}
 						onClick={() => void api.system.reveal(path).catch(() => undefined)}
-						title="Révéler dans le Finder"
+						title={t("fileViewer.reveal")}
 					/>
 					{isBinaryView || notText ? (
 						<Button
 							size="sm"
 							icon={AppWindow}
 							onClick={() => void api.system.openFile(path).catch(() => undefined)}
-							title="Ouvrir avec l'application du Mac"
+							title={t("fileViewer.openWithTitle")}
 						>
-							Ouvrir avec…
+							{t("fileViewer.openWith")}
 						</Button>
 					) : (
 						<Button
 							size="sm"
 							icon={PenLine}
 							onClick={() => void api.system.openEditor(path).catch(() => undefined)}
-							title="Modifier dans l'éditeur externe"
+							title={t("fileViewer.externalEditorTitle")}
 						>
-							Éditeur
+							{t("fileViewer.externalEditor")}
 						</Button>
 					)}
-					<Button size="sm" icon={X} onClick={onClose} title="Fermer (Échap)" />
+					<Button size="sm" icon={X} onClick={onClose} title={t("fileViewer.close")} />
 				</div>
 
 				{isBinaryView ? null : (
@@ -497,7 +500,7 @@ function Viewer({
 							ref={search}
 							value={query}
 							spellCheck={false}
-							placeholder="Chercher dans le fichier… (⌘F)"
+							placeholder={t("fileViewer.searchPlaceholder")}
 							onChange={(event) => setQuery(event.target.value)}
 							onKeyDown={(event) => {
 								if (event.key === "Enter") {
@@ -510,19 +513,19 @@ function Viewer({
 						{query.trim() ? (
 							<>
 								<span className="shrink-0 font-mono text-[10px] text-ink-faint tabular-nums">
-									{matches.length === 0 ? "aucun" : `${hit + 1}/${matches.length}`}
+									{matches.length === 0 ? t("fileViewer.noMatch") : `${hit + 1}/${matches.length}`}
 								</span>
 								<Button
 									size="sm"
 									icon={ChevronUp}
 									onClick={() => step(-1)}
-									title="Occurrence précédente (⇧⏎)"
+									title={t("fileViewer.previousMatch")}
 								/>
 								<Button
 									size="sm"
 									icon={ChevronDown}
 									onClick={() => step(1)}
-									title="Occurrence suivante (⏎)"
+									title={t("fileViewer.nextMatch")}
 								/>
 							</>
 						) : null}
@@ -626,7 +629,7 @@ function Viewer({
 
 					{tooBig ? (
 						<p className="hairline-b border-t px-3 py-2 text-[11px] text-warning">
-							Fichier tronqué à {bytes(MAX_BYTES)} — ouvre-le dans l'éditeur pour la suite.
+							{t("fileViewer.truncated", { size: bytes(MAX_BYTES) })}
 						</p>
 					) : null}
 				</div>

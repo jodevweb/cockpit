@@ -16,6 +16,7 @@ import {
 	Ticket,
 } from "lucide-react";
 import { createContext, useContext, useEffect, useMemo, useRef, useState, type ReactNode } from "react";
+import { useTranslation } from "react-i18next";
 import { movedSince, useReview } from "@/app/review";
 import { useCockpit } from "@/app/store";
 import { BranchBoard, type BoardSection } from "@/components/BranchBoard";
@@ -38,6 +39,7 @@ import { progressOf, type Progress } from "@/lib/progress";
 import { MISSION_STATE_LABELS } from "@/lib/missions";
 import { isPreview, PREVIEW_PAGE } from "@/lib/preview";
 import { useAsync } from "@/lib/useAsync";
+import { t as translate } from "@/i18n";
 import { ticketsIn } from "@/lib/world";
 
 /**
@@ -76,20 +78,32 @@ export function useHasTiles(): boolean {
 	return useContext(Context) !== null;
 }
 
-export const TILE_TITLES: Record<TileId, { eyebrow: string; title: string }> = {
-	progress: { eyebrow: "avancement", title: "Où en est cet agent dans sa consigne" },
-	branch: { eyebrow: "vue", title: "Tout ce qui tient à la branche" },
-	pr: { eyebrow: "pull request", title: "La pull request de cette branche" },
-	mission: { eyebrow: "mission", title: "La mission qui a ouvert ce dossier" },
-	agents: { eyebrow: "agents", title: "Les agents et les terminaux de ce dossier" },
-	commits: { eyebrow: "commits", title: "Les commits, et ce qui n'est pas encore commité" },
-	docs: { eyebrow: "documents", title: "Les documents du worktree" },
-	captures: { eyebrow: "recette", title: "Les captures de recette" },
-	ports: { eyebrow: "serveurs", title: "Ce qui tourne dans ce dossier" },
-	ticket: { eyebrow: "ticket", title: "Le ticket de cette branche" },
-	review: { eyebrow: "revue de code", title: "La revue de la PR" },
-	territory: { eyebrow: "territoire", title: "Les agents du chantier, posés sur le code" },
-	browser: { eyebrow: "navigateur", title: "La page que l'agent pilote, en direct" },
+/** Lu au rendu : la langue n'est pas connue au chargement du module. */
+function tileTitle(id: TileId): { readonly eyebrow: string; readonly title: string } {
+	return {
+		get eyebrow() {
+			return translate(`components2:workspaceTiles.tiles.${id}.eyebrow`);
+		},
+		get title() {
+			return translate(`components2:workspaceTiles.tiles.${id}.title`);
+		},
+	};
+}
+
+export const TILE_TITLES: Record<TileId, { readonly eyebrow: string; readonly title: string }> = {
+	progress: tileTitle("progress"),
+	branch: tileTitle("branch"),
+	pr: tileTitle("pr"),
+	mission: tileTitle("mission"),
+	agents: tileTitle("agents"),
+	commits: tileTitle("commits"),
+	docs: tileTitle("docs"),
+	captures: tileTitle("captures"),
+	ports: tileTitle("ports"),
+	ticket: tileTitle("ticket"),
+	review: tileTitle("review"),
+	territory: tileTitle("territory"),
+	browser: tileTitle("browser"),
 };
 
 /** La place que les tuiles prennent à gauche de la carte, marge comprise. */
@@ -279,6 +293,7 @@ function ProgressTile({
 	selected: boolean;
 	onPick: () => void;
 }) {
+	const { t } = useTranslation("components2");
 	const { run, progress } = useProgress(satellites, runId);
 	const busy = Boolean(run?.thinking);
 	const now = useNow(active && busy);
@@ -291,14 +306,14 @@ function ProgressTile({
 	return (
 		<Tile
 			icon={Gauge}
-			label="Avancement"
+			label={t("workspaceTiles.progress.label")}
 			selected={selected}
 			alert={silent}
 			onPick={onPick}
-			title="Les étapes de l'agent, ses sous-agents, et depuis quand il travaille"
+			title={t("workspaceTiles.progress.title")}
 			aside={
 				silent ? (
-					<span className="text-warning">muet {since(progress.lastAt, now)}</span>
+					<span className="text-warning">{t("workspaceTiles.progress.silent", { duration: since(progress.lastAt, now) })}</span>
 				) : elapsed ? (
 					<>
 						<Dot tone="success" pulse />
@@ -310,23 +325,23 @@ function ProgressTile({
 			{progress.steps.length > 0 ? (
 				<>
 					<span className="text-[12px] font-medium text-ink">
-						{done} / {progress.steps.length} étapes
+						{t("workspaceTiles.progress.steps", { done, count: progress.steps.length })}
 					</span>
 					<StepCells progress={progress} />
 					{current ? <span className="w-full truncate text-[10.5px] text-ink-muted">{current.label}</span> : null}
 				</>
 			) : progress.helpers.length > 0 ? (
 				<span className="text-[12px] font-medium text-ink">
-					{back} / {progress.helpers.length} sous-agents rendus
+					{t("workspaceTiles.progress.helpers", { back, count: progress.helpers.length })}
 				</span>
 			) : (
 				<span className="text-[11px] text-ink-faint">
-					{busy ? "au travail — il ne tient pas de liste d'étapes" : "rien en cours"}
+					{busy ? t("workspaceTiles.progress.busyNoSteps") : t("workspaceTiles.progress.idle")}
 				</span>
 			)}
 			{progress.steps.length > 0 && progress.helpers.length > 0 ? (
 				<span className="text-[10.5px] text-ink-faint">
-					{back} / {progress.helpers.length} sous-agents rendus
+					{t("workspaceTiles.progress.helpers", { back, count: progress.helpers.length })}
 				</span>
 			) : null}
 			{busy && progress.steps.length === 0 && progress.lastAction ? (
@@ -338,6 +353,7 @@ function ProgressTile({
 
 /** L'avancement en entier : la consigne, les étapes, les sous-agents, les signes de vie. */
 function ProgressBoard({ satellites, runId }: { satellites: Satellites; runId: string }) {
+	const { t } = useTranslation("components2");
 	const { run, progress } = useProgress(satellites, runId);
 	const now = useNow(true, 5_000);
 	if (!run || !progress) return null;
@@ -346,17 +362,20 @@ function ProgressBoard({ satellites, runId }: { satellites: Satellites; runId: s
 	const { done, back } = counts(progress);
 	const silent = busy && progress.lastAt !== null && now - progress.lastAt > SILENT_MS;
 	const facts = [
-		{ label: busy ? "au travail depuis" : "consigne lancée il y a", value: since(progress.since, now) ?? "—" },
-		{ label: "dernier geste il y a", value: since(progress.lastAt, now) ?? "—", warn: silent },
-		{ label: "appels d'outils", value: String(progress.calls) },
-		{ label: "fichiers écrits", value: String(progress.written) },
+		{
+			label: busy ? t("workspaceTiles.board.workingFor") : t("workspaceTiles.board.launchedAgo"),
+			value: since(progress.since, now) ?? "—",
+		},
+		{ label: t("workspaceTiles.board.lastActionAgo"), value: since(progress.lastAt, now) ?? "—", warn: silent },
+		{ label: t("workspaceTiles.board.toolCalls"), value: String(progress.calls) },
+		{ label: t("workspaceTiles.board.filesWritten"), value: String(progress.written) },
 	];
 
 	return (
 		<div className="flex flex-col gap-5 p-5">
 			{progress.brief ? (
 				<section>
-					<Heading>La consigne en cours</Heading>
+					<Heading>{t("workspaceTiles.board.brief")}</Heading>
 					<p className="text-selectable line-clamp-4 text-[12.5px] leading-relaxed text-ink-muted">{progress.brief}</p>
 				</section>
 			) : null}
@@ -371,7 +390,7 @@ function ProgressBoard({ satellites, runId }: { satellites: Satellites; runId: s
 			</section>
 
 			<section>
-				<Heading aside={progress.steps.length > 0 ? `${done} / ${progress.steps.length}` : undefined}>Ses étapes</Heading>
+				<Heading aside={progress.steps.length > 0 ? `${done} / ${progress.steps.length}` : undefined}>{t("workspaceTiles.board.steps")}</Heading>
 				{progress.steps.length > 0 ? (
 					<>
 						<StepCells progress={progress} />
@@ -396,22 +415,23 @@ function ProgressBoard({ satellites, runId }: { satellites: Satellites; runId: s
 							))}
 						</ol>
 						<p className="mt-3 text-[10.5px] leading-relaxed text-ink-faint">
-							Un compte, pas un pourcentage : l'agent allonge sa liste quand il découvre du travail.
+							{t("workspaceTiles.board.countNotPercent")}
 						</p>
 					</>
 				) : (
 					// Le dire plutôt que d'afficher une barre vide : sans liste, il n'y a
 					// rien à compter, et une estimation passerait pour une mesure.
 					<p className="rounded-xl border border-line-soft p-3 text-[12px] leading-relaxed text-ink-faint">
-						Cet agent ne tient pas de liste d'étapes : rien ne permet de dire quelle part du travail est faite. Ce qui
-						suit dit seulement qu'il avance.
+						{t("workspaceTiles.board.noSteps")}
 					</p>
 				)}
 			</section>
 
 			{progress.helpers.length > 0 ? (
 				<section>
-					<Heading aside={`${back} / ${progress.helpers.length} rendus`}>Ses sous-agents</Heading>
+					<Heading aside={t("workspaceTiles.board.helpersBack", { back, count: progress.helpers.length })}>
+						{t("workspaceTiles.board.helpers")}
+					</Heading>
 					<ul className="flex flex-col gap-1">
 						{progress.helpers.map((helper, index) => (
 							<li key={index} className="flex items-center gap-2 rounded-lg px-1 py-1 text-[12px]">
@@ -423,12 +443,12 @@ function ProgressBoard({ satellites, runId }: { satellites: Satellites; runId: s
 								{helper.kind ? <span className="font-mono text-[10px] text-ink-faint">{helper.kind}</span> : null}
 								<span className="w-16 shrink-0 text-right font-mono text-[10.5px] text-ink-muted">
 									{helper.state === "running"
-										? (since(helper.startedAt, now) ?? "en cours")
+										? (since(helper.startedAt, now) ?? t("workspaceTiles.board.helperRunning"))
 										: helper.startedAt && helper.endedAt
 											? duration(Math.max(0, (helper.endedAt - helper.startedAt) / 1000))
 											: helper.state === "failed"
-												? "échec"
-												: "rendu"}
+												? t("workspaceTiles.board.helperFailed")
+												: t("workspaceTiles.board.helperDone")}
 								</span>
 							</li>
 						))}
@@ -438,7 +458,7 @@ function ProgressBoard({ satellites, runId }: { satellites: Satellites; runId: s
 
 			{progress.lastAction ? (
 				<section>
-					<Heading>Son dernier geste</Heading>
+					<Heading>{t("workspaceTiles.board.lastAction")}</Heading>
 					<p className="text-selectable truncate font-mono text-[11.5px] text-ink-muted">{progress.lastAction}</p>
 				</section>
 			) : null}
@@ -458,10 +478,10 @@ function Heading({ children, aside }: { children: ReactNode; aside?: string }) {
 // ───────────────────────────── Vue ─────────────────────────────
 
 /** Ce qu'un tour de revue conclut, en deux mots. */
-const VERDICTS: Record<string, { label: string; tone: string }> = {
-	merge: { label: "bonne à fusionner", tone: "text-success" },
-	corrections: { label: "corrections", tone: "text-warning" },
-	bloquant: { label: "bloquant", tone: "text-critical" },
+const VERDICT_TONES: Record<string, string> = {
+	merge: "text-success",
+	corrections: "text-warning",
+	bloquant: "text-critical",
 };
 
 /**
@@ -485,6 +505,7 @@ function BranchTile({
 	/** Ouvre le panneau d'une ligne, ou le referme s'il l'était déjà. */
 	onPick: (tile: TileId) => void;
 }) {
+	const { t } = useTranslation("components2");
 	const selected = open === "branch";
 	const { worktrees, activeProject, missions } = useCockpit();
 	const { group } = satellites;
@@ -516,12 +537,12 @@ function BranchTile({
 	const number = openPr?.number ?? past.data?.number ?? null;
 	const state = openPr
 		? openPr.isDraft
-			? "brouillon"
-			: "ouverte"
+			? t("workspaceTiles.branch.prDraft")
+			: t("workspaceTiles.branch.prOpen")
 		: past.data?.state === "merged"
-			? "fusionnée"
+			? t("workspaceTiles.branch.prMerged")
 			: past.data?.state === "closed"
-				? "fermée"
+				? t("workspaceTiles.branch.prClosed")
 				: null;
 	const failing = openPr?.ciState === "failing";
 	const pending = changes.data?.length ?? 0;
@@ -540,7 +561,11 @@ function BranchTile({
 
 	const { review } = useReview(number);
 	const round = review?.rounds[review.rounds.length - 1] ?? null;
-	const verdict = round ? (VERDICTS[round.verdict] ?? { label: round.verdict, tone: "text-ink-muted" }) : null;
+	const verdict = round
+		? VERDICT_TONES[round.verdict]
+			? { label: t(`workspaceTiles.verdict.${round.verdict}`), tone: VERDICT_TONES[round.verdict] }
+			: { label: round.verdict, tone: "text-ink-muted" }
+		: null;
 	const moved = Boolean(review && openPr && movedSince(review, openPr.headSha));
 
 	const alert = failing || openPr?.reviewDecision === "CHANGES_REQUESTED" || round?.verdict === "bloquant";
@@ -555,58 +580,66 @@ function BranchTile({
 			<button
 				type="button"
 				onClick={() => onPick("branch")}
-				title="La PR, le ticket, la revue, les commits, les documents"
+				title={t("workspaceTiles.branch.headerTitle")}
 				className="focus-ring mb-0.5 flex w-full items-center gap-1.5 rounded text-left"
 			>
 				<LayoutDashboard size={12} className={selected ? "text-accent" : "text-ink-faint"} />
-				<span className="font-mono text-[10px] tracking-[0.08em] text-ink-faint uppercase">Vue</span>
-				<span className="ml-auto truncate text-[10.5px] text-ink-faint">tout voir</span>
+				<span className="font-mono text-[10px] tracking-[0.08em] text-ink-faint uppercase">{t("workspaceTiles.branch.label")}</span>
+				<span className="ml-auto truncate text-[10.5px] text-ink-faint">{t("workspaceTiles.branch.seeAll")}</span>
 			</button>
 			<Line
 				icon={GitPullRequest}
-				title="La pull request de cette branche"
+				title={t("workspaceTiles.tiles.pr.title")}
 				selected={open === "pr"}
 				onPick={() => onPick("pr")}
 				aside={
 					openPr ? (
 						<span className={clsx("flex items-center gap-1", failing && "text-critical")}>
 							<Dot tone={failing ? "critical" : openPr.ciState === "success" ? "success" : "neutral"} />
-							{failing ? "CI rouge" : openPr.ciState === "success" ? "CI verte" : "CI…"}
+							{failing
+								? t("workspaceTiles.branch.ciRed")
+								: openPr.ciState === "success"
+									? t("workspaceTiles.branch.ciGreen")
+									: t("workspaceTiles.branch.ciPending")}
 						</span>
 					) : null
 				}
 			>
 				{prs.initial && active ? (
-					<span className="text-ink-faint">cherche la PR…</span>
+					<span className="text-ink-faint">{t("workspaceTiles.branch.searchingPr")}</span>
 				) : number ? (
 					`#${number} ${state ?? ""}`
 				) : (
-					<span className="text-ink-faint">pas encore de PR</span>
+					<span className="text-ink-faint">{t("workspaceTiles.branch.noPr")}</span>
 				)}
 			</Line>
 			<Line
 				icon={Ticket}
-				title={ticket.data ? ticket.data.title : "Le ticket de cette branche"}
+				title={ticket.data ? ticket.data.title : t("workspaceTiles.tiles.ticket.title")}
 				selected={open === "ticket"}
 				onPick={() => onPick("ticket")}
 				aside={ticket.data?.state ? <span className="truncate">{ticket.data.state.name}</span> : null}
 			>
-				{ticketId ?? <span className="text-ink-faint">pas de ticket</span>}
+				{ticketId ?? <span className="text-ink-faint">{t("workspaceTiles.branch.noTicket")}</span>}
 			</Line>
 			<Line
 				icon={ClipboardCheck}
-				title="La revue de code de la PR"
+				title={t("workspaceTiles.branch.reviewTitle")}
 				selected={open === "review"}
 				onPick={() => onPick("review")}
 				aside={
 					moved ? (
-						<span className="text-warning">à revérifier</span>
+						<span className="text-warning">{t("workspaceTiles.branch.recheck")}</span>
 					) : verdict ? (
 						<span className={verdict.tone}>{verdict.label}</span>
 					) : null
 				}
 			>
-				{round ? `Revue · tour ${round.number}` : <span className="text-ink-faint">pas encore relue</span>}
+				{round ? (
+					t("workspaceTiles.branch.reviewRound", { number: round.number })
+				) : (
+					<span className="text-ink-faint">{t("workspaceTiles.branch.notReviewed")}</span>
+				)}
 			</Line>
 			{mission ? (
 				<Line
@@ -616,47 +649,47 @@ function BranchTile({
 					onPick={() => onPick("mission")}
 					aside={<span className="truncate">{MISSION_STATE_LABELS[mission.state]}</span>}
 				>
-					Mission
+					{t("workspaceTiles.branch.mission")}
 				</Line>
 			) : null}
 			<Line
 				icon={Bot}
-				title="Les agents et les terminaux de ce dossier, avec leur contexte"
+				title={t("workspaceTiles.branch.agentsTitle")}
 				selected={open === "agents"}
 				onPick={() => onPick("agents")}
-				aside={working > 0 ? <span className="text-success">{working} au travail</span> : null}
+				aside={working > 0 ? <span className="text-success">{t("workspaceTiles.branch.working", { count: working })}</span> : null}
 			>
-				{group.runs.length} agent{group.runs.length > 1 ? "s" : ""}
-				{group.terminals.length > 0 ? ` · ${group.terminals.length} terminal${group.terminals.length > 1 ? "s" : ""}` : ""}
+				{t("workspaceTiles.branch.agents", { count: group.runs.length })}
+				{group.terminals.length > 0 ? ` · ${t("workspaceTiles.branch.terminals", { count: group.terminals.length })}` : ""}
 			</Line>
 			<Line
 				icon={GitCommitHorizontal}
-				title="Les commits de la branche, et ce qui n'est pas encore commité"
+				title={t("workspaceTiles.branch.commitsTitle")}
 				selected={open === "commits"}
 				onPick={() => onPick("commits")}
-				aside={pending > 0 ? <span className="text-warning">{pending} non commité{pending > 1 ? "s" : ""}</span> : null}
+				aside={pending > 0 ? <span className="text-warning">{t("workspaceTiles.branch.uncommitted", { count: pending })}</span> : null}
 			>
-				{ahead > 0 ? `${ahead} commit${ahead > 1 ? "s" : ""}` : "Commits"}
+				{ahead > 0 ? t("workspaceTiles.branch.commits", { count: ahead }) : t("workspaceTiles.branch.commitsLabel")}
 			</Line>
 			{(docs.data ?? []).length > 0 ? (
-				<Line icon={FileText} title="Les documents du worktree" selected={open === "docs"} onPick={() => onPick("docs")}>
-					{(docs.data ?? []).length} document{(docs.data ?? []).length > 1 ? "s" : ""}
+				<Line icon={FileText} title={t("workspaceTiles.tiles.docs.title")} selected={open === "docs"} onPick={() => onPick("docs")}>
+					{t("workspaceTiles.branch.documents", { count: (docs.data ?? []).length })}
 				</Line>
 			) : null}
 			{captures > 0 ? (
-				<Line icon={ImageIcon} title="Les captures de recette" selected={open === "captures"} onPick={() => onPick("captures")}>
-					{captures} capture{captures > 1 ? "s" : ""}
+				<Line icon={ImageIcon} title={t("workspaceTiles.tiles.captures.title")} selected={open === "captures"} onPick={() => onPick("captures")}>
+					{t("workspaceTiles.branch.captures", { count: captures })}
 				</Line>
 			) : null}
 			{servers.length > 0 ? (
 				<Line
 					icon={Network}
-					title="Ce qui écoute dans ce dossier"
+					title={t("workspaceTiles.branch.portsTitle")}
 					selected={open === "ports"}
 					onPick={() => onPick("ports")}
 					aside={<span className="font-mono">:{servers[0].port}</span>}
 				>
-					{servers.length} serveur{servers.length > 1 ? "s" : ""}
+					{t("workspaceTiles.branch.servers", { count: servers.length })}
 				</Line>
 			) : null}
 		</div>
@@ -720,6 +753,7 @@ function TerritoryTile({
 	selected: boolean;
 	onPick: () => void;
 }) {
+	const { t } = useTranslation("components2");
 	const { group } = satellites;
 	const index = group.runs.findIndex((run) => run.id === runId);
 	const run = index >= 0 ? group.runs[index] : null;
@@ -776,21 +810,21 @@ function TerritoryTile({
 	return (
 		<Tile
 			icon={LayoutGrid}
-			label="Territoire"
+			label={t("workspaceTiles.territory.label")}
 			selected={selected}
 			alert={clashes > 0 || stale > 0}
 			onPick={onPick}
-			title="Où cet agent a lu et écrit, les collisions et les lectures périmées"
+			title={t("workspaceTiles.territory.title")}
 			aside={
 				clashes > 0 ? (
 					<span className="flex items-center gap-1 text-critical">
 						<AlertTriangle size={11} />
-						{clashes} collision{clashes > 1 ? "s" : ""}
+						{t("workspaceTiles.territory.collisions", { count: clashes })}
 					</span>
 				) : stale > 0 ? (
 					<span className="flex items-center gap-1 text-warning">
 						<AlertTriangle size={11} />
-						{stale} périmé{stale > 1 ? "s" : ""}
+						{t("workspaceTiles.territory.stale", { count: stale })}
 					</span>
 				) : null
 			}
@@ -800,7 +834,7 @@ function TerritoryTile({
 					{zones.map((zone) => (
 						<span
 							key={zone.name}
-							title={`${zone.name} — ${zone.bytes} fichier${zone.bytes > 1 ? "s" : ""}${zone.writes > 0 ? `, ${zone.writes} écrit${zone.writes > 1 ? "s" : ""}` : ""}`}
+							title={`${zone.name} — ${t("workspaceTiles.territory.files", { count: zone.bytes })}${zone.writes > 0 ? `, ${t("workspaceTiles.territory.written", { count: zone.writes })}` : ""}`}
 							className="absolute overflow-hidden rounded-[3px] px-1 font-mono text-[8.5px] leading-[13px] whitespace-nowrap text-ink-muted"
 							style={{
 								left: zone.rect.x + 1,
@@ -818,12 +852,12 @@ function TerritoryTile({
 					))}
 				</span>
 			) : (
-				<span className="text-[11px] text-ink-faint">n'a encore touché à aucun fichier</span>
+				<span className="text-[11px] text-ink-faint">{t("workspaceTiles.territory.untouched")}</span>
 			)}
 			{zones.length > 0 ? (
 				<span className="text-[10.5px] text-ink-faint">
-					{written} écrit{written > 1 ? "s" : ""} · {read} lu{read > 1 ? "s" : ""}
-					{group.runs.length > 1 ? ` · ${group.runs.length} agents ici` : ""}
+					{t("workspaceTiles.territory.written", { count: written })} · {t("workspaceTiles.territory.read", { count: read })}
+					{group.runs.length > 1 ? ` · ${t("workspaceTiles.territory.agentsHere", { count: group.runs.length })}` : ""}
 				</span>
 			) : null}
 		</Tile>
@@ -849,6 +883,7 @@ function BrowserTile({
 	selected: boolean;
 	onPick: () => void;
 }) {
+	const { t } = useTranslation("components2");
 	const { group, driving } = satellites;
 	const cwd = group.cwd;
 	const canvas = useRef<HTMLCanvasElement>(null);
@@ -916,28 +951,28 @@ function BrowserTile({
 	return (
 		<Tile
 			icon={Globe}
-			label="Navigateur"
+			label={t("workspaceTiles.browser.label")}
 			selected={selected}
 			onPick={onPick}
-			title="La page que les agents de ce dossier pilotent — un clic l'ouvre en direct"
+			title={t("workspaceTiles.browser.title")}
 			aside={
 				selected ? (
 					<>
 						<Dot tone="success" pulse />
-						en direct
+						{t("workspaceTiles.browser.live")}
 					</>
 				) : driving ? (
 					<>
 						<Dot tone="info" pulse />
-						{mine ? "il pilote" : `${driving.label} pilote`}
+						{mine ? t("workspaceTiles.browser.drivingSelf") : t("workspaceTiles.browser.drivingOther", { name: driving.label })}
 					</>
 				) : null
 			}
 		>
 			{selected ? (
-				<span className="text-[11px] text-ink-faint">ouverte à droite</span>
+				<span className="text-[11px] text-ink-faint">{t("workspaceTiles.browser.openRight")}</span>
 			) : blank ? (
-				<span className="text-[11px] text-ink-faint">aucune page ouverte — un clic l'ouvre</span>
+				<span className="text-[11px] text-ink-faint">{t("workspaceTiles.browser.blank")}</span>
 			) : null}
 			{/* Toujours monté : l'image s'y dessine avant qu'on sache s'il faut la montrer. */}
 			<canvas

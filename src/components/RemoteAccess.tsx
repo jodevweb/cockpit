@@ -7,6 +7,7 @@ import { fromIso } from "@/lib/format";
 import { api } from "@/lib/ipc";
 import { useAsync } from "@/lib/useAsync";
 import { useCockpit } from "@/app/store";
+import { Trans, useTranslation } from "react-i18next";
 
 /**
  * Répondre à un agent depuis son téléphone.
@@ -17,6 +18,7 @@ import { useCockpit } from "@/app/store";
  * il dit ce que le mobile *ne peut pas* faire, qui est le plus rassurant.
  */
 export function RemoteAccess() {
+	const { t } = useTranslation("components1");
 	const { notify } = useCockpit();
 	const { confirm } = useConfirm();
 	const status = useAsync(() => api.remote.status(), [], { pollMs: 30_000 });
@@ -30,11 +32,9 @@ export function RemoteAccess() {
 	const toggle = async (enabled: boolean) => {
 		if (!enabled) {
 			const ok = await confirm({
-				title: "Couper l'accès mobile ?",
-				message:
-					"Tous les appareils appairés sont révoqués, clés d'accès comprises. " +
-					"Il faudra les appairer à nouveau.",
-				confirmLabel: "Couper",
+				title: t("remoteAccess.disableConfirm.title"),
+				message: t("remoteAccess.disableConfirm.message"),
+				confirmLabel: t("remoteAccess.disable"),
 				danger: true,
 			});
 			if (!ok) return;
@@ -43,7 +43,7 @@ export function RemoteAccess() {
 			await api.remote.enable(enabled);
 			setPairing(null);
 			status.reload();
-			notify(enabled ? "Accès mobile activé." : "Accès mobile coupé.");
+			notify(enabled ? t("remoteAccess.enabled") : t("remoteAccess.disabled"));
 		} catch (error) {
 			notify(String(error));
 		}
@@ -59,9 +59,9 @@ export function RemoteAccess() {
 
 	const revoke = async (id: string, name: string) => {
 		const ok = await confirm({
-			title: `Révoquer ${name} ?`,
-			message: "Cet appareil ne pourra plus rien lire ni décider.",
-			confirmLabel: "Révoquer",
+			title: t("remoteAccess.revokeConfirm.title", { name }),
+			message: t("remoteAccess.revokeConfirm.message"),
+			confirmLabel: t("remoteAccess.revoke"),
 			danger: true,
 		});
 		if (!ok) return;
@@ -90,21 +90,21 @@ export function RemoteAccess() {
 				<Smartphone size={14} className="mt-0.5 shrink-0 text-ink-faint" />
 				<div className="min-w-0 flex-1">
 					<p className="text-[12.5px] text-ink">
-						Répondre aux demandes d'un agent depuis l'iPhone, à travers Tailscale.
+						{t("remoteAccess.intro.title")}
 					</p>
 					<p className="mt-0.5 text-[10px] leading-relaxed text-ink-faint">
-						Le serveur n'écoute que sur la boucle locale ; c'est{" "}
-						<span className="font-mono">tailscale serve</span> qui l'expose au tailnet, avec
-						son certificat. Autoriser un outil demande Face ID. Le mobile ne peut ni changer
-						le mode de permission d'un agent, ni lancer un script, ni toucher à la
-						configuration.
+						<Trans
+							t={t}
+							i18nKey="remoteAccess.intro.detail"
+							components={{ code: <span className="font-mono" /> }}
+						/>
 					</p>
 				</div>
 				<Button
 					variant={data.enabled ? "outline" : "solid"}
 					onClick={() => void toggle(!data.enabled)}
 				>
-					{data.enabled ? "Couper" : "Activer"}
+					{data.enabled ? t("remoteAccess.disable") : t("remoteAccess.enable")}
 				</Button>
 			</div>
 
@@ -114,15 +114,15 @@ export function RemoteAccess() {
 				<Check
 					ok={Boolean(data.host)}
 					label="Tailscale"
-					detail={data.host || "hors ligne — le tailnet fournit l'adresse et le certificat"}
+					detail={data.host || t("remoteAccess.tailscale.offline")}
 				/>
 				<Check
 					ok={!data.funnel}
 					label="Funnel"
 					detail={
 						data.funnel
-							? "actif : le cockpit refuse de démarrer, coupe-le avec `tailscale funnel off`"
-							: "coupé — rien n'est publié sur Internet"
+							? t("remoteAccess.funnel.on", { command: "tailscale funnel off" })
+							: t("remoteAccess.funnel.off")
 					}
 				/>
 			</div>
@@ -131,29 +131,27 @@ export function RemoteAccess() {
 				<>
 					<div className="rounded-xl border border-line-soft bg-surface/40 p-3">
 						<div className="mb-1.5 text-[10px] font-semibold tracking-[0.08em] text-ink-faint uppercase">
-							À faire une fois sur ce Mac
+							{t("remoteAccess.setup.title")}
 						</div>
 						<code className="text-selectable block rounded-lg bg-void px-2.5 py-2 font-mono text-[11px] text-ink-muted">
 							pnpm setup:mobile
 						</code>
 						<p className="mt-1.5 text-[10px] leading-relaxed text-ink-faint">
-							Le script configure le serveur ntfy local, le publie sur le tailnet à côté de
-							cette page, et rend le sujet et le jeton à coller ci-dessous. Le relais Apple
-							ne voit que l'empreinte du sujet ; le contenu vient d'ici.
+							{t("remoteAccess.setup.detail")}
 						</p>
 					</div>
 
 					{/* Trois champs plutôt qu'un réglage caché : c'est ce que le script
 					    vient d'afficher, on le recopie et c'est branché. */}
 					<div className="grid grid-cols-3 gap-2">
-						<Field label="Serveur ntfy" hint="local, jamais exposé">
+						<Field label={t("remoteAccess.ntfy.server")} hint={t("remoteAccess.ntfy.serverHint")}>
 							<TextInput
 								value={ntfy.server ?? data.ntfyServer}
 								onChange={(value) => setNtfy({ ...ntfy, server: value })}
 								placeholder="http://127.0.0.1:2586"
 							/>
 						</Field>
-						<Field label="Sujet" hint="secret : qui le connaît fait sonner">
+						<Field label={t("remoteAccess.ntfy.topic")} hint={t("remoteAccess.ntfy.topicHint")}>
 							<TextInput
 								value={ntfy.topic ?? data.ntfyTopic}
 								onChange={(value) => setNtfy({ ...ntfy, topic: value })}
@@ -164,13 +162,17 @@ export function RemoteAccess() {
 						    navigateur y proposait un identifiant enregistré, qui
 						    remplaçait le vrai jeton sans que rien ne le signale. */}
 						<Field
-							label="Jeton de publication"
-							hint={data.ntfyAuthenticated ? "enregistré — vide = inchangé" : "requis"}
+							label={t("remoteAccess.ntfy.token")}
+							hint={
+								data.ntfyAuthenticated
+									? t("remoteAccess.ntfy.tokenSaved")
+									: t("remoteAccess.ntfy.tokenRequired")
+							}
 						>
 							<TextInput
 								value={ntfy.token ?? ""}
 								onChange={(value) => setNtfy({ ...ntfy, token: value })}
-								placeholder={data.ntfyAuthenticated ? "enregistré" : "tk_…"}
+								placeholder={data.ntfyAuthenticated ? t("remoteAccess.ntfy.saved") : "tk_…"}
 								mono
 							/>
 						</Field>
@@ -184,12 +186,13 @@ export function RemoteAccess() {
 								)}
 								title={data.lastWake.at}
 							>
-								{data.lastWake.ok ? "Dernier réveil : " : "Dernier réveil en échec : "}
-								{data.lastWake.detail}
+								{data.lastWake.ok
+									? t("remoteAccess.wake.last", { detail: data.lastWake.detail })
+									: t("remoteAccess.wake.failed", { detail: data.lastWake.detail })}
 							</span>
 						) : (
 							<span className="min-w-0 flex-1 text-[11px] text-ink-faint">
-								Aucun réveil tenté depuis le démarrage.
+								{t("remoteAccess.wake.none")}
 							</span>
 						)}
 						<Button
@@ -198,7 +201,7 @@ export function RemoteAccess() {
 								void api.remote
 									.test()
 									.then((detail) => {
-										notify(`Relais : ${detail}`);
+										notify(t("remoteAccess.relay.result", { detail }));
 										status.reload();
 									})
 									.catch((error) => {
@@ -207,7 +210,7 @@ export function RemoteAccess() {
 									});
 							}}
 						>
-							Tester le relais
+							{t("remoteAccess.relay.test")}
 						</Button>
 						<Button
 							onClick={() => {
@@ -220,22 +223,22 @@ export function RemoteAccess() {
 									.then(() => {
 										setNtfy({});
 										status.reload();
-										notify("Relais enregistré.");
+										notify(t("remoteAccess.relay.saved"));
 									})
 									.catch((error) => notify(String(error)));
 							}}
 						>
-							Enregistrer le relais
+							{t("remoteAccess.relay.save")}
 						</Button>
 					</div>
 
 					<div className="rounded-xl border border-line-soft bg-surface/40 p-3">
 						<div className="flex items-center gap-2">
 							<span className="min-w-0 flex-1 text-[11px] text-ink">
-								Appareils appairés · {data.devices.length}
+								{t("remoteAccess.devices.title", { count: data.devices.length })}
 							</span>
 							<Button icon={ShieldCheck} onClick={() => void pair()}>
-								Appairer un iPhone
+								{t("remoteAccess.devices.pair")}
 							</Button>
 						</div>
 
@@ -247,8 +250,7 @@ export function RemoteAccess() {
 								/>
 								<div className="min-w-0 flex-1">
 									<p className="text-[11px] text-ink-muted">
-										Scanne le QR pour ouvrir la page, ajoute-la à l'écran d'accueil, puis
-										saisis ce code — valable deux minutes, une seule fois :
+										{t("remoteAccess.devices.pairing")}
 									</p>
 									<p className="text-selectable mt-1.5 font-mono text-[18px] tracking-[0.2em] text-ink">
 										{pairing.code}
@@ -260,7 +262,7 @@ export function RemoteAccess() {
 
 						<div className="mt-2 flex flex-col gap-1">
 							{data.devices.length === 0 ? (
-								<p className="text-[11px] text-ink-faint">Aucun appareil.</p>
+								<p className="text-[11px] text-ink-faint">{t("remoteAccess.devices.empty")}</p>
 							) : null}
 							{data.devices.map((device) => (
 								<div
@@ -272,12 +274,12 @@ export function RemoteAccess() {
 										{device.name}
 									</span>
 									<span className="shrink-0 font-mono text-[10px] text-ink-faint">
-										vu {fromIso(device.lastSeen)}
+										{t("remoteAccess.devices.seen", { when: fromIso(device.lastSeen) })}
 									</span>
 									<Button
 										size="sm"
 										icon={Trash2}
-										title="Révoquer"
+										title={t("remoteAccess.revoke")}
 										onClick={() => void revoke(device.id, device.name)}
 									/>
 								</div>
@@ -291,6 +293,7 @@ export function RemoteAccess() {
 }
 
 function Check({ ok, label, detail }: { ok: boolean; label: string; detail: string }) {
+	const { t } = useTranslation("components1");
 	return (
 		<div
 			className={clsx(
@@ -306,7 +309,7 @@ function Check({ ok, label, detail }: { ok: boolean; label: string; detail: stri
 			<div className="min-w-0">
 				<div className="flex items-center gap-1.5">
 					<span className="text-[11px] font-medium text-ink">{label}</span>
-					<Badge tone={ok ? "success" : "warning"}>{ok ? "ok" : "à régler"}</Badge>
+					<Badge tone={ok ? "success" : "warning"}>{ok ? t("remoteAccess.check.ok") : t("remoteAccess.check.todo")}</Badge>
 				</div>
 				<p className="mt-0.5 text-[10px] leading-snug text-ink-faint">{detail}</p>
 			</div>

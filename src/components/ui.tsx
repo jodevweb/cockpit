@@ -2,6 +2,7 @@ import clsx from "clsx";
 import { AlertTriangle, Loader2, Plug, Search } from "lucide-react";
 import { useEffect, useState, type ReactNode } from "react";
 import { createPortal } from "react-dom";
+import { useTranslation } from "react-i18next";
 import type { Severity } from "@/lib/types";
 
 /* ── Primitives ────────────────────────────────────────────────────────── */
@@ -219,8 +220,9 @@ export function PriorityBadge({
 	label?: string;
 	className?: string;
 }) {
+	const { t } = useTranslation("components3");
 	if (!PRIORITY_TONES[priority]) return null;
-	const text = label && label !== "—" ? label : PRIORITY_LABELS[priority];
+	const text = label && label !== "—" ? label : t(`ui.priority.${PRIORITY_KEYS[priority]}`);
 	return (
 		<Chips
 			items={[{ label: text, tone: PRIORITY_TONES[priority] }]}
@@ -230,11 +232,11 @@ export function PriorityBadge({
 	);
 }
 
-const PRIORITY_LABELS: Record<number, string> = {
-	1: "Urgent",
-	2: "Haute",
-	3: "Moyenne",
-	4: "Basse",
+const PRIORITY_KEYS: Record<number, string> = {
+	1: "urgent",
+	2: "high",
+	3: "medium",
+	4: "low",
 };
 
 export function Dot({ tone, pulse }: { tone: Severity | "neutral"; pulse?: boolean }) {
@@ -272,17 +274,18 @@ export function MissingConnector({
 	missing: string;
 	onConfigure?: () => void;
 }) {
+	const { t } = useTranslation("components3");
 	return (
 		<div className="flex flex-1 items-center justify-center p-8">
 			<div className="panel flex max-w-md flex-col items-center gap-2 p-6 text-center">
 				<Plug size={20} className="text-ink-faint" />
-				<p className="text-[13px] font-medium text-ink">{service} n'est pas connecté</p>
+				<p className="text-[13px] font-medium text-ink">{t("ui.missingConnector.title", { service })}</p>
 				<p className="text-[11px] leading-relaxed text-ink-faint">
-					Il manque {missing}. Cet écran s'affichera dès que ce sera renseigné.
+					{t("ui.missingConnector.hint", { missing })}
 				</p>
 				{onConfigure ? (
 					<Button variant="solid" onClick={onConfigure}>
-						Ouvrir les Réglages
+						{t("ui.missingConnector.openSettings")}
 					</Button>
 				) : null}
 			</div>
@@ -411,6 +414,7 @@ export function Freshness({
 	loading?: boolean;
 	onReload?: () => void;
 }) {
+	const { t } = useTranslation("components3");
 	const [, tick] = useState(0);
 	useEffect(() => {
 		const timer = setInterval(() => tick((value) => value + 1), 10_000);
@@ -418,13 +422,13 @@ export function Freshness({
 	}, []);
 
 	const label = (() => {
-		if (at === null) return "jamais chargé";
+		if (at === null) return t("ui.freshness.never");
 		const seconds = Math.max(0, Math.round((Date.now() - at) / 1000));
-		if (seconds < 10) return "à l'instant";
-		if (seconds < 60) return `il y a ${seconds} s`;
+		if (seconds < 10) return t("ui.freshness.justNow");
+		if (seconds < 60) return t("ui.freshness.seconds", { count: seconds });
 		const minutes = Math.round(seconds / 60);
-		if (minutes < 60) return `il y a ${minutes} min`;
-		return `il y a ${Math.round(minutes / 60)} h`;
+		if (minutes < 60) return t("ui.freshness.minutes", { count: minutes });
+		return t("ui.freshness.hours", { count: Math.round(minutes / 60) });
 	})();
 
 	const content = (
@@ -439,7 +443,7 @@ export function Freshness({
 		<button
 			type="button"
 			onClick={onReload}
-			title="Recharger maintenant"
+			title={t("ui.freshness.reload")}
 			className="focus-ring rounded px-1 py-0.5 hover:bg-hover"
 		>
 			{content}
@@ -448,6 +452,7 @@ export function Freshness({
 }
 
 export function ErrorNote({ error, onRetry }: { error: string; onRetry?: () => void }) {
+	const { t } = useTranslation("components3");
 	return (
 		<div className="animate-in m-3 flex items-start gap-2.5 rounded-xl border border-critical/25 bg-critical/8 p-3">
 			<AlertTriangle size={14} className="mt-0.5 shrink-0 text-critical" />
@@ -458,7 +463,7 @@ export function ErrorNote({ error, onRetry }: { error: string; onRetry?: () => v
 			</div>
 			{onRetry ? (
 				<Button size="sm" onClick={onRetry}>
-					Réessayer
+					{t("ui.errorNote.retry")}
 				</Button>
 			) : null}
 		</div>
@@ -548,7 +553,7 @@ export function LoadingBar({ active }: { active: boolean }) {
 export function SearchField({
 	value,
 	onChange,
-	placeholder = "Filtrer…",
+	placeholder,
 	className,
 }: {
 	value: string;
@@ -556,6 +561,7 @@ export function SearchField({
 	placeholder?: string;
 	className?: string;
 }) {
+	const { t } = useTranslation("components3");
 	return (
 		<div className={clsx("relative", className)}>
 			<Search
@@ -565,7 +571,7 @@ export function SearchField({
 			<input
 				value={value}
 				onChange={(event) => onChange(event.target.value)}
-				placeholder={placeholder}
+				placeholder={placeholder ?? t("ui.searchField.placeholder")}
 				spellCheck={false}
 				className="focus-ring h-7 w-full rounded-lg border border-line-soft bg-raised pr-2 pl-7 text-xs text-ink placeholder:text-ink-faint focus:border-accent/40"
 			/>

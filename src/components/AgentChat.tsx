@@ -27,6 +27,8 @@ import {
 	Route,
 } from "lucide-react";
 import { memo, useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { Trans, useTranslation } from "react-i18next";
+import { locale, t as i18nT } from "@/i18n";
 import { BriefBar } from "@/components/BriefBar";
 import { IMAGE_EXTENSIONS, LocalImage } from "@/components/LocalImage";
 import { Markdown } from "@/components/Markdown";
@@ -48,7 +50,7 @@ import { filmOf } from "@/lib/film";
 import { FilmTheater } from "@/components/Film";
 import { Planche, plancheOf } from "@/components/Planche";
 import { ATTACH_EVENT, type AttachDetail } from "@/components/BrowserAnnotator";
-import { splitAttachments } from "@/lib/media";
+import { splitAttachments, ATTACHMENTS_HEADER } from "@/lib/media";
 import { hasWork } from "@/lib/tour";
 import { useChangeTour } from "@/components/ChangeTour";
 import { NarrationToggle, useNarration } from "@/components/NarrationToggle";
@@ -130,25 +132,25 @@ function commandQuery(draft: string, caret: number): CommandDraft | null {
  * elle-même ; une nouvelle s'affiche sans description, ce qui reste utilisable.
  */
 const BUILT_IN: Record<string, string> = {
-	agents: "Gérer les sous-agents disponibles",
-	clear: "Repartir d'une conversation vide",
-	compact: "Résumer le fil pour libérer du contexte",
-	config: "Réglages du CLI",
-	context: "Détail de l'occupation du contexte",
-	doctor: "Diagnostic de l'installation",
-	effort: "Régler l'effort de raisonnement",
-	fast: "Basculer le mode rapide",
-	init: "Créer le CLAUDE.md du dépôt",
-	insights: "Statistiques d'usage",
-	mcp: "État des serveurs MCP",
-	model: "Changer de modèle",
-	recap: "Résumé de ce qui vient d'être fait",
-	"reload-skills": "Relire les skills depuis le disque",
-	rename: "Renommer la conversation",
-	review: "Relire une pull request",
-	"security-review": "Revue de sécurité des changements en cours",
-	usage: "Consommation et limites",
-	"usage-credits": "Crédits restants",
+	agents: "agents",
+	clear: "clear",
+	compact: "compact",
+	config: "config",
+	context: "context",
+	doctor: "doctor",
+	effort: "effort",
+	fast: "fast",
+	init: "init",
+	insights: "insights",
+	mcp: "mcp",
+	model: "model",
+	recap: "recap",
+	"reload-skills": "reloadSkills",
+	rename: "rename",
+	review: "review",
+	"security-review": "securityReview",
+	usage: "usage",
+	"usage-credits": "usageCredits",
 };
 
 /**
@@ -176,7 +178,7 @@ function mergeCommands(scanned: SlashCommand[], announced: string[]): SlashComma
 				(name) =>
 					known.get(name) ?? {
 						name,
-						description: BUILT_IN[name] ?? "",
+						description: BUILT_IN[name] ? i18nT(`components1:agentChat.builtIn.${BUILT_IN[name]}`) : "",
 						argumentHint: null,
 						// Un nom préfixé vient d'un plugin ; les autres sont intégrées
 						// au CLI, ou vivent hors des chemins balayés.
@@ -205,13 +207,6 @@ function filterCommands(commands: SlashCommand[], query: string): SlashCommand[]
 	});
 }
 
-const SCOPE_LABELS: Record<SlashCommand["scope"], string> = {
-	project: "dépôt",
-	user: "perso",
-	plugin: "plugin",
-	cli: "CLI",
-};
-
 /**
  * Les commandes proposées, au-dessus du champ.
  *
@@ -229,6 +224,7 @@ function CommandMenu({
 	loading: boolean;
 	onChoose: (command: SlashCommand) => void;
 }) {
+	const { t } = useTranslation("components1");
 	const list = useRef<HTMLDivElement>(null);
 
 	// La sélection au clavier peut sortir de la partie visible.
@@ -241,14 +237,15 @@ function CommandMenu({
 		return (
 			<div className="panel animate-in absolute right-2.5 bottom-full left-2.5 z-40 mb-1 overflow-hidden px-2.5 py-2 shadow-xl shadow-black/40">
 				<p className="text-[11px] text-ink-muted">
-					{loading ? "Lecture des commandes…" : "Aucune commande sur ce worktree."}
+					{loading ? t("agentChat.commandMenu.loading") : t("agentChat.commandMenu.empty")}
 				</p>
 				{loading ? null : (
 					<p className="mt-0.5 text-[10px] text-ink-faint">
-						Un fichier <span className="font-mono">.claude/commands/revue.md</span> dans le
-						dépôt donne <span className="font-mono">/revue</span> ; dans{" "}
-						<span className="font-mono">~/.claude/commands/</span>, la commande suit
-						partout.
+						<Trans
+							t={t}
+							i18nKey="agentChat.commandMenu.emptyHint"
+							components={{ mono: <span className="font-mono" /> }}
+						/>
 					</p>
 				)}
 			</div>
@@ -285,15 +282,15 @@ function CommandMenu({
 						<span className="min-w-0 flex-1 truncate text-[11px] text-ink-muted">
 							{command.description}
 						</span>
-						<Badge>{SCOPE_LABELS[command.scope]}</Badge>
+						<Badge>{t(`agentChat.scope.${command.scope}`)}</Badge>
 					</button>
 				))}
 			</div>
 			<div className="hairline-b" />
 			<p className="px-2.5 py-1.5 text-[10px] text-ink-faint">
 				{loading
-					? "Lecture des commandes…"
-					: "↑↓ pour choisir · Tab ou ⏎ pour compléter · Échap pour écrire librement"}
+					? t("agentChat.commandMenu.loading")
+					: t("agentChat.commandMenu.help")}
 			</p>
 		</div>
 	);
@@ -488,9 +485,9 @@ function useBrief(run: AgentRun) {
 /** Les pièces jointes, telles que l'agent les lira en tête du message. */
 function manifest(attachments: Attachment[]): string {
 	const lines = attachments.map((file) => `- ${file.path}`).join("\n");
-	return attachments.length === 1
-		? `Fichier joint, à lire avant de répondre :\n${lines}`
-		: `Fichiers joints, à lire avant de répondre :\n${lines}`;
+	// Marqueur de protocole, en anglais fixe : `splitAttachments` le relit pour
+	// replier les pièces jointes dans le fil, quelle que soit la langue.
+	return `${ATTACHMENTS_HEADER}\n${lines}`;
 }
 
 /**
@@ -502,6 +499,7 @@ function manifest(attachments: Attachment[]): string {
  * est là, dans l'éditeur du poste sinon.
  */
 function AttachmentCard({ path }: { path: string }) {
+	const { t } = useTranslation("components1");
 	const viewer = useFileViewer();
 	const { notify } = useCockpit();
 	const name = path.split("/").pop() || path;
@@ -516,7 +514,7 @@ function AttachmentCard({ path }: { path: string }) {
 			<button
 				type="button"
 				onClick={open}
-				title={`${name}\nCliquer pour ouvrir`}
+				title={t("agentChat.attachment.open", { target: name })}
 				className="focus-ring group block overflow-hidden rounded-xl border border-line-soft bg-void transition-colors hover:border-line"
 			>
 				<LocalImage
@@ -535,7 +533,7 @@ function AttachmentCard({ path }: { path: string }) {
 		<button
 			type="button"
 			onClick={open}
-			title={`${path}\nCliquer pour ouvrir`}
+			title={t("agentChat.attachment.open", { target: path })}
 			className="focus-ring flex items-center gap-2 rounded-xl border border-line-soft bg-void px-2.5 py-2 text-left transition-colors hover:border-line"
 		>
 			<Paperclip size={12} className="shrink-0 text-ink-faint" />
@@ -565,6 +563,7 @@ export const AgentChat = memo(function AgentChat({
 }) {
 	const { send, close, changeMode, changeModel, setAutoApprove, decide, answer } =
 		useAgentActions();
+	const { t } = useTranslation("components1");
 	const { notify, config } = useCockpit();
 	const startReview = useReviewFlow();
 	const { autoApprove, pendingFor } = useAgentGuard();
@@ -599,8 +598,8 @@ export const AgentChat = memo(function AgentChat({
 		const ended = wasThinking.current && !run.thinking;
 		wasThinking.current = run.thinking;
 		if (!ended || !canTour || pending.length > 0 || awaitsReply(current)) return;
-		notify(`${run.label} a terminé`, { label: "Visiter les changements", onClick: openTour });
-	}, [run.thinking, run.label, canTour, pending.length, current, notify, openTour]);
+		notify(t("agentChat.finished", { label: run.label }), { label: t("agentChat.tour.visit"), onClick: openTour });
+	}, [run.thinking, run.label, canTour, pending.length, current, notify, openTour, t]);
 	const composer = useRef<HTMLTextAreaElement>(null);
 	const { attachments, setAttachments, attach, attachPaths, dropping, zone } =
 		useAttachments(run.sessionId, active);
@@ -791,8 +790,8 @@ export const AgentChat = memo(function AgentChat({
 									decide(
 										request.id,
 										false,
-										"L'utilisateur a passé la question : avance avec ce que tu sais, " +
-											"ou demande-lui dans ta réponse.",
+										"The user skipped the question: go ahead with what you know, " +
+											"or ask them in your reply.",
 									)
 								}
 							/>
@@ -801,18 +800,22 @@ export const AgentChat = memo(function AgentChat({
 								<ShieldQuestion size={13} className="shrink-0 text-warning" />
 								<div className="min-w-0 flex-1">
 									<p className="text-[11px] text-ink">
-										L'agent demande à utiliser{" "}
-										<span className="font-mono font-medium">{request.tool}</span>
+										<Trans
+											t={t}
+											i18nKey="agentChat.permission.asks"
+											values={{ tool: request.tool }}
+											components={{ tool: <span className="font-mono font-medium" /> }}
+										/>
 									</p>
 									<p className="truncate font-mono text-[10px] text-ink-faint">
 										{JSON.stringify(request.input).slice(0, 140)}
 									</p>
 								</div>
 								<Button size="sm" onClick={() => decide(request.id, false)}>
-									Refuser
+									{t("agentChat.permission.deny")}
 								</Button>
 								<Button size="sm" variant="solid" onClick={() => decide(request.id, true)}>
-									Autoriser
+									{t("agentChat.permission.allow")}
 								</Button>
 								<Button
 									size="sm"
@@ -820,9 +823,9 @@ export const AgentChat = memo(function AgentChat({
 										setAutoApprove(true);
 										decide(request.id, true);
 									}}
-									title="Ne plus demander"
+									title={t("agentChat.permission.allowAllTitle")}
 								>
-									Tout
+									{t("agentChat.permission.allowAll")}
 								</Button>
 							</div>
 						),
@@ -890,16 +893,16 @@ export const AgentChat = memo(function AgentChat({
 						onClick={() => setAutoApprove(!autoApprove)}
 						title={
 							autoApprove
-								? "Tout est autorisé sans demander — cliquer pour redemander"
-								: "Autoriser automatiquement les outils"
+								? t("agentChat.guard.onTitle")
+								: t("agentChat.guard.offTitle")
 						}
 					>
-						{autoApprove ? "Sans garde-fou" : "Demander"}
+						{autoApprove ? t("agentChat.guard.on") : t("agentChat.guard.off")}
 					</Button>
 				)}
 				{canTour && !run.thinking ? (
-					<Button size="sm" icon={Route} onClick={openTour} title="Visiter les changements, fichier par fichier">
-						Visite
+					<Button size="sm" icon={Route} onClick={openTour} title={t("agentChat.tour.title")}>
+						{t("agentChat.tour.label")}
 					</Button>
 				) : null}
 				<Equipement run={run} />
@@ -986,7 +989,7 @@ export const AgentChat = memo(function AgentChat({
 					<div className="animate-in flex items-center gap-2 px-3 py-2.5">
 						<Spinner />
 						<span className="text-[11px] text-ink-faint">
-							{run.activity ? `L'agent utilise ${run.activity}…` : "L'agent réfléchit…"}
+							{run.activity ? t("agentChat.thinking.using", { tool: run.activity }) : t("agentChat.thinking.idle")}
 						</span>
 					</div>
 				) : null}
@@ -1002,11 +1005,11 @@ export const AgentChat = memo(function AgentChat({
 					!run.sessionId ? (
 						<div className="flex items-center justify-center gap-2 py-10">
 							<Spinner />
-							<span className="text-[11px] text-ink-faint">Démarrage de l'agent…</span>
+							<span className="text-[11px] text-ink-faint">{t("agentChat.starting")}</span>
 						</div>
 					) : (
 						<p className="px-4 py-10 text-center text-[11px] leading-relaxed text-ink-faint">
-							Agent prêt. Écris ton message pour continuer.
+							{t("agentChat.ready")}
 						</p>
 					)
 				) : null}
@@ -1020,7 +1023,7 @@ export const AgentChat = memo(function AgentChat({
 							<FilmTheater film={lastFilm} start={filmStart} />
 						) : (
 							<p className="py-10 text-center text-[12px] text-ink-faint">
-								Rien à filmer pour l'instant : le film se fabrique à partir des gestes de l'agent.
+								{t("agentChat.film.empty")}
 							</p>
 						)}
 					</div>
@@ -1081,12 +1084,12 @@ export const AgentChat = memo(function AgentChat({
 									{file.name}
 								</span>
 								<span className="shrink-0 font-mono text-[10px] text-ink-faint">
-									{Math.max(1, Math.round(file.size / 1024))} ko
+									{t("agentChat.attachments.size", { size: Math.max(1, Math.round(file.size / 1024)) })}
 								</span>
 								<button
 									type="button"
 									className="focus-ring shrink-0 rounded text-ink-faint hover:text-critical"
-									title="Retirer"
+									title={t("agentChat.attachments.remove")}
 									onClick={() =>
 										setAttachments((current) =>
 											current.filter((entry) => entry.path !== file.path),
@@ -1103,7 +1106,7 @@ export const AgentChat = memo(function AgentChat({
 				    presse-papier : on va le chercher. */}
 				<Button
 					icon={Paperclip}
-					title="Joindre un fichier — ou glisse-le ici, ou colle-le"
+					title={t("agentChat.attachments.add")}
 					disabled={!run.running || !run.sessionId}
 					onClick={() => {
 						void openDialog({ multiple: true })
@@ -1177,7 +1180,7 @@ export const AgentChat = memo(function AgentChat({
 					}}
 					rows={2}
 					placeholder={
-						run.running ? "Répondre à l'agent — « / » pour les commandes…" : "Agent terminé"
+						run.running ? t("agentChat.composer.placeholder") : t("agentChat.composer.ended")
 					}
 					disabled={!run.running || !run.sessionId}
 					className="focus-ring text-selectable min-h-0 flex-1 resize-none rounded-lg border border-line-soft bg-void px-2.5 py-2 text-[12.5px] leading-relaxed text-ink disabled:opacity-50"
@@ -1207,13 +1210,13 @@ export const AgentChat = memo(function AgentChat({
 									if (dernier?.text && !draft.trim()) {
 										setDraft(splitAttachments(dernier.text).text);
 									}
-									notify("Agent interrompu — corrige et renvoie.");
+									notify(t("agentChat.interrupt.done"));
 								})
 								.catch((error) => notify(String(error)));
 						}}
-						title="Arrêter ce que l'agent est en train de faire, sans fermer la conversation"
+						title={t("agentChat.interrupt.title")}
 					>
-						Arrêter
+						{t("agentChat.interrupt.label")}
 					</Button>
 				) : (
 					<Button
@@ -1228,7 +1231,7 @@ export const AgentChat = memo(function AgentChat({
 						}
 						onClick={() => submit()}
 					>
-						Envoyer
+						{t("agentChat.composer.send")}
 					</Button>
 				)}
 			</div>
@@ -1250,6 +1253,7 @@ function FollowPill({
 	consigne: string | null;
 	onFlip: () => void;
 }) {
+	const { t } = useTranslation("components1");
 	const court = consigne ? consigne.replace(/\s+/g, " ").trim() : "";
 	return (
 		<div className="flex items-center gap-2 border-t border-line-soft px-3 pt-2 text-[11px]">
@@ -1257,23 +1261,23 @@ function FollowPill({
 				{follows ? <CornerDownRight size={12} className="shrink-0" /> : <Plus size={12} className="shrink-0" />}
 				{follows ? (
 					<>
-						<span className="shrink-0">Suite de</span>
+						<span className="shrink-0">{t("agentChat.follow.of")}</span>
 						<span className="min-w-0 truncate text-ink">
-							« {court.length > 60 ? `${court.slice(0, 59)}…` : court || "la consigne en cours"} »
+							{t("agentChat.follow.quoted", { text: court.length > 60 ? `${court.slice(0, 59)}…` : court || t("agentChat.follow.currentFallback") })}
 						</span>
 					</>
 				) : (
-					<span>Nouvelle consigne — une nouvelle ligne sur la carte</span>
+					<span>{t("agentChat.follow.new")}</span>
 				)}
 			</span>
 			<button
 				type="button"
 				onClick={onFlip}
-				title="Changer — ou ⌥Entrée pour envoyer de l'autre côté"
+				title={t("agentChat.follow.flipTitle")}
 				className="focus-ring flex shrink-0 items-center gap-1 rounded-md px-1.5 py-0.5 text-ink-faint hover:bg-hover hover:text-ink"
 			>
 				<ArrowLeftRight size={11} />
-				{follows ? "nouvelle consigne" : "suite"}
+				{follows ? t("agentChat.follow.toNew") : t("agentChat.follow.toFollow")}
 			</button>
 		</div>
 	);
@@ -1301,6 +1305,7 @@ export function QuestionForm({
 	onAnswer: (answers: Array<{ header: string; choice: string }>) => void;
 	onSkip: () => void;
 }) {
+	const { t } = useTranslation("components1");
 	const [picked, setPicked] = useState<Record<number, string[]>>({});
 	const [custom, setCustom] = useState("");
 
@@ -1329,7 +1334,7 @@ export function QuestionForm({
 	const submit = () => {
 		if (!complete) return;
 		const extra = custom.trim();
-		onAnswer(extra ? [...answers, { header: "Précision", choice: extra }] : answers);
+		onAnswer(extra ? [...answers, { header: "Clarification", choice: extra }] : answers);
 	};
 
 	return (
@@ -1397,14 +1402,14 @@ export function QuestionForm({
 							submit();
 						}
 					}}
-					placeholder="Autre réponse, ou précision…"
+					placeholder={t("agentChat.question.placeholder")}
 					className="focus-ring text-selectable min-w-0 flex-1 rounded-lg border border-line-soft bg-void px-2.5 py-1.5 text-[11px] text-ink"
 				/>
-				<Button size="sm" onClick={onSkip} title="L'agent continue sans ta réponse">
-					Passer
+				<Button size="sm" onClick={onSkip} title={t("agentChat.question.skipTitle")}>
+					{t("agentChat.question.skip")}
 				</Button>
 				<Button size="sm" variant="solid" disabled={!complete} onClick={submit}>
-					Répondre
+					{t("agentChat.question.answer")}
 				</Button>
 			</div>
 		</div>
@@ -1413,6 +1418,7 @@ export function QuestionForm({
 
 /** Ce qu'on a demandé, et ce qu'on a joint pour le demander. */
 function UserTurn({ text, context }: { text: string; context?: string }) {
+	const { t } = useTranslation("components1");
 	const { text: dit, paths } = splitAttachments(text);
 	return (
 		<div className="flex max-w-[64rem] flex-col gap-2 rounded-2xl border border-accent/25 bg-accent/[0.06] px-3 py-2">
@@ -1436,7 +1442,7 @@ function UserTurn({ text, context }: { text: string; context?: string }) {
 			{context ? (
 				<p className="flex items-center gap-1.5 border-t border-accent/15 pt-1.5 text-[10px] text-ink-faint">
 					<Layers size={10} className="shrink-0" />
-					<span className="min-w-0 truncate">Contexte joint : {context}</span>
+					<span className="min-w-0 truncate">{t("agentChat.userTurn.context", { context })}</span>
 				</p>
 			) : null}
 		</div>
@@ -1495,10 +1501,11 @@ function LectureToggle({
 	value: Lecture;
 	onChange: (value: Lecture) => void;
 }) {
+	const { t } = useTranslation("components1");
 	const options: Array<[Lecture, string, string]> = [
-		["carte", "Carte", "Ce qui vaut un regard, dessiné : étapes, fichiers, tests, conclusion"],
-		["fil", "Fil", "Le fil complet, chaque conclusion en planche : l'image d'abord, le texte replié"],
-		["film", "Film", "Le dernier tour en images, joué à la suite comme une courte vidéo"],
+		["carte", t("agentChat.lecture.map"), t("agentChat.lecture.mapHint")],
+		["fil", t("agentChat.lecture.thread"), t("agentChat.lecture.threadHint")],
+		["film", t("agentChat.lecture.film"), t("agentChat.lecture.filmHint")],
 	];
 	return (
 		<div className="flex shrink-0 items-center rounded-lg bg-raised p-0.5">
@@ -1542,6 +1549,7 @@ const TurnRow = memo(function TurnRow({
 	/** Le bandeau renvoie ici : l'appel s'ouvre en arrivant. */
 	openOnDemand?: boolean;
 }) {
+	const { t } = useTranslation("components1");
 	return (
 		<div id={turn.toolId ? `appel-${turn.toolId}` : undefined} className="animate-in px-3 py-2.5">
 			{/* Une conversation se lit sur une colonne, pas sur la largeur d'un écran
@@ -1586,7 +1594,7 @@ const TurnRow = memo(function TurnRow({
 				nested ? (
 					<div className="max-w-[64rem] border-l-2 border-ink-faint/30 pl-2">
 						<p className="pb-0.5 text-[10px] tracking-wide text-ink-faint uppercase">
-							Consigne du maître
+							{t("agentChat.turn.leadInstruction")}
 						</p>
 						<p className="text-selectable text-[12px] whitespace-pre-wrap text-ink-muted">
 							{turn.text}
@@ -1630,6 +1638,7 @@ function PromptMenu({
 	onSend: (text: string) => void;
 	canSend: boolean;
 }) {
+	const { t } = useTranslation("components1");
 	const [wanted, setWanted] = useState(false);
 	const prompts = useAsync(() => api.prompts.list(), [], { enabled: wanted });
 
@@ -1637,7 +1646,7 @@ function PromptMenu({
 		() =>
 			(prompts.data ?? []).map((prompt) => ({
 				id: prompt.id,
-				group: prompt.group || "Mes prompts",
+				group: prompt.group || t("agentChat.prompts.group"),
 				label: prompt.label,
 				// Le prompt est un pavé : replié sur une ligne, il sert de rappel du
 				// contenu sans faire dérailler la hauteur du menu.
@@ -1646,29 +1655,31 @@ function PromptMenu({
 				extra: canSend
 					? {
 							icon: CornerDownLeft,
-							title: "Envoyer tout de suite",
+							title: t("agentChat.prompts.sendNow"),
 							run: () => onSend(prompt.text),
 						}
 					: undefined,
 			})),
-		[canSend, onInsert, onSend, prompts.data],
+		[canSend, onInsert, onSend, prompts.data, t],
 	);
 
 	return (
 		<QuickMenu
-			label="Actions"
+			label={t("agentChat.prompts.label")}
 			icon={Wand2}
-			title="Prompts prêts à l'emploi pour cet agent"
+			title={t("agentChat.prompts.title")}
 			actions={actions}
 			loading={prompts.loading}
 			onOpen={() => (wanted ? prompts.reload() : setWanted(true))}
-			emptyMessage={prompts.error ?? "Aucun prompt enregistré."}
+			emptyMessage={prompts.error ?? t("agentChat.prompts.empty")}
 			width={380}
 			footer={
 				<>
-					Le prompt part dans le champ de réponse — ⇧Entrée l'envoie directement.
-					Bibliothèque :{" "}
-					<span className="font-mono">~/.config/cockpit/prompts.toml</span>
+					<Trans
+						t={t}
+						i18nKey="agentChat.prompts.footer"
+						components={{ mono: <span className="font-mono" /> }}
+					/>
 				</>
 			}
 		/>
@@ -1700,6 +1711,7 @@ function ModelSelect({
 	onChange: (model: string) => void;
 }) {
 	const [open, setOpen] = useState(false);
+	const { t } = useTranslation("components1");
 	const [quotas, setQuotas] = useState<UsageLimit[]>([]);
 	const [custom, setCustom] = useState("");
 	const box = useRef<HTMLDivElement>(null);
@@ -1778,8 +1790,8 @@ function ModelSelect({
 				onClick={() => setOpen((value) => !value)}
 				title={
 					running
-						? `Modèle en cours : ${active}\nChanger relance l'agent sur le même fil.`
-						: "Choisir le modèle — l'agent est relancé sur le même fil"
+						? t("agentChat.model.currentTitle", { model: active })
+						: t("agentChat.model.chooseTitle")
 				}
 			>
 				{running ?? modelLabel(model)}
@@ -1821,21 +1833,19 @@ function ModelSelect({
 									choose(custom.trim());
 								}
 							}}
-							placeholder="Autre identifiant — claude-opus-5-5…"
-							title="Un modèle que le moteur connaît mais que la liste ne propose pas encore. Pour le garder, ajoute-le aux modèles du moteur dans les réglages."
+							placeholder={t("agentChat.model.customPlaceholder")}
+							title={t("agentChat.model.customTitle")}
 							className="focus-ring w-full rounded-lg border border-line-soft bg-void px-2 py-1 font-mono text-[10px] text-ink"
 						/>
 					</div>
 					{ecart ? (
 						<p className="border-t border-line-soft px-2 py-1.5 text-[10px] text-warning">
-							Demandé au lancement : {modelLabel(model)} — c'est {shortModel(active)} qui
-							répond. Le choix a pu changer dans la conversation, ou le moteur a
-							basculé de lui-même.
+							{t("agentChat.model.mismatch", { requested: modelLabel(model), answering: shortModel(active) })}
 						</p>
 					) : null}
 					<QuotaFooter quotas={quotas} />
 					<p className="border-t border-line-soft px-2 py-1.5 text-[10px] text-ink-faint">
-						Changer de modèle relance l'agent sur la même session : le fil est conservé.
+						{t("agentChat.model.restartNote")}
 					</p>
 				</div>
 			) : null}
@@ -1855,6 +1865,7 @@ function ModelSelect({
  */
 function ModelCost({ spec, quotas }: { spec: ModelSpec; quotas: UsageLimit[] }) {
 	// « Défaut » ne désigne aucun modèle : on ne peut rien en dire de vrai.
+	const { t } = useTranslation("components1");
 	if (!spec.id) return null;
 	// Seul un compteur dédié se dit ligne par ligne. Répéter « 78 % du quota
 	// commun » sur trois modèles affichait trois alertes pour un seul plafond :
@@ -1865,12 +1876,13 @@ function ModelCost({ spec, quotas }: { spec: ModelSpec; quotas: UsageLimit[] }) 
 		<span className="flex items-center gap-1.5 text-[10px] text-ink-faint">
 			{spec.quota ? (
 				<span className={clsx(dedie && dedie.percent >= 90 && "text-critical")}>
-					compteur dédié{dedie ? ` · ${dedie.percent} %` : ""}
+					{t("agentChat.cost.dedicated")}
+					{dedie ? ` · ${t("agentChat.percent", { value: dedie.percent })}` : ""}
 				</span>
 			) : null}
 			{spec.price ? (
 				<span className="ml-auto shrink-0 tabular-nums">
-					${spec.price.in}/${spec.price.out} par M
+					{t("agentChat.cost.price", { in: spec.price.in, out: spec.price.out })}
 				</span>
 			) : null}
 		</span>
@@ -1886,6 +1898,7 @@ function ModelCost({ spec, quotas }: { spec: ModelSpec; quotas: UsageLimit[] }) 
  * tant qu'il reste du quota, et Fable a le sien ».
  */
 function QuotaFooter({ quotas }: { quotas: UsageLimit[] }) {
+	const { t } = useTranslation("components1");
 	const commun = quotas.find(
 		(entry) => entry.label.startsWith("Cette semaine") && !entry.label.includes("("),
 	);
@@ -1894,26 +1907,27 @@ function QuotaFooter({ quotas }: { quotas: UsageLimit[] }) {
 		<p className="border-t border-line-soft px-2 py-1.5 text-[10px] leading-snug text-ink-faint">
 			{commun ? (
 				<>
-					Compteur hebdomadaire commun :{" "}
-					<span
-						className={clsx(
-							commun.percent >= 90
-								? "text-critical"
-								: commun.percent >= 75
-									? "text-warning"
-									: "text-ink-muted",
-						)}
-					>
-						{commun.percent} % utilisé
-					</span>
-					. Sur un abonnement rien n'est débité — c'est ce quota qui décide. Les tarifs
-					affichés ne valent que pour un moteur branché sur une clé d'API.
+					<Trans
+						t={t}
+						i18nKey="agentChat.quota.common"
+						values={{ percent: commun.percent }}
+						components={{
+							tone: (
+								<span
+									className={clsx(
+										commun.percent >= 90
+											? "text-critical"
+											: commun.percent >= 75
+												? "text-warning"
+												: "text-ink-muted",
+									)}
+								/>
+							),
+						}}
+					/>
 				</>
 			) : (
-				<>
-					Quotas jamais relevés sur ce poste — le panneau des ressources sait les lire.
-					Les tarifs affichés ne valent que pour un moteur branché sur une clé d'API.
-				</>
+				t("agentChat.quota.none")
 			)}
 		</p>
 	);
@@ -1946,6 +1960,7 @@ function SpendGauge({ sessionId }: { sessionId: string | null }) {
 		[sessionId],
 		{ pollMs: 60_000, enabled: Boolean(sessionId) },
 	);
+	const { t } = useTranslation("components1");
 	const data = spend.data;
 	if (!data || data.total === 0) return null;
 
@@ -1957,12 +1972,12 @@ function SpendGauge({ sessionId }: { sessionId: string | null }) {
 		<div
 			className="flex shrink-0 items-center gap-1.5"
 			title={
-				`${data.total.toLocaleString("fr-FR")} jetons consommés par cette conversation ` +
-				`depuis son premier message — soit ${data.share} % de tout ce qui a été ` +
-				"consommé sur les cinq dernières heures, cache compris." +
+				`${t("agentChat.spend.summary", { total: data.total.toLocaleString(locale()), share: data.share })} ` +
 				(left === null
-					? " Le quota d'abonnement n'est pas annoncé par le CLI."
-					: ` Il reste ${left} % sur « ${data.tightest} »${data.resetsAt ? `, qui repart ${data.resetsAt}` : ""}.`)
+					? t("agentChat.spend.noQuota")
+					: data.resetsAt
+						? t("agentChat.spend.leftResets", { left, limit: data.tightest, when: data.resetsAt })
+						: t("agentChat.spend.left", { left, limit: data.tightest }))
 			}
 		>
 			{/* La barre porte la part de cette conversation dans la fenêtre, pas le
@@ -1976,7 +1991,7 @@ function SpendGauge({ sessionId }: { sessionId: string | null }) {
 			</div>
 			<span className="font-mono text-[10px] text-ink-faint tabular-nums">
 				{data.total >= 1_000_000
-					? `${(data.total / 1_000_000).toFixed(1).replace(".", ",")} M`
+					? `${(data.total / 1_000_000).toLocaleString(locale(), { minimumFractionDigits: 1, maximumFractionDigits: 1 })} M`
 					: `${Math.round(data.total / 1000)} k`}
 			</span>
 			<span
@@ -1985,7 +2000,7 @@ function SpendGauge({ sessionId }: { sessionId: string | null }) {
 					tight ? "text-critical" : low ? "text-warning" : "text-ink-faint/60",
 				)}
 			>
-				{left === null ? "— %" : `${left} %`}
+				{t("agentChat.percent", { value: left === null ? "—" : left })}
 			</span>
 		</div>
 	);
@@ -2000,6 +2015,7 @@ function ContextGauge({
 	window: number | null;
 	usage?: ContextUsage;
 }) {
+	const { t } = useTranslation("components1");
 	// La répartition comptée par le CLI, quand elle est revenue : la barre dit
 	// alors de quoi le contexte est fait, pas seulement combien il pèse.
 	if (usage && usage.maxTokens > 0) {
@@ -2010,10 +2026,10 @@ function ContextGauge({
 			<div
 				className="flex shrink-0 items-center gap-1.5"
 				title={
-					`${usage.totalTokens.toLocaleString("fr-FR")} jetons sur ${usage.maxTokens.toLocaleString("fr-FR")}, compté par le CLI :\n` +
-					parts.map((part) => `· ${part.label} : ${part.tokens.toLocaleString("fr-FR")}`).join("\n") +
+					`${t("agentChat.context.breakdown", { used: usage.totalTokens.toLocaleString(locale()), max: usage.maxTokens.toLocaleString(locale()) })}\n` +
+					parts.map((part) => t("agentChat.context.part", { label: part.label, tokens: part.tokens.toLocaleString(locale()) })).join("\n") +
 					(usage.isAutoCompactEnabled && usage.autoCompactThreshold
-						? `\nCompactage automatique à ${Math.round((usage.autoCompactThreshold / usage.maxTokens) * 100)} %.`
+						? `\n${t("agentChat.context.autoCompact", { percent: Math.round((usage.autoCompactThreshold / usage.maxTokens) * 100) })}`
 						: "")
 				}
 			>
@@ -2022,7 +2038,7 @@ function ContextGauge({
 						<div key={part.key} className="h-full" style={{ width: `${(part.tokens / usage.maxTokens) * 100}%`, background: part.color }} />
 					))}
 				</div>
-				<span className={clsx("font-mono text-[10px] tabular-nums", tone)}>{usage.percentage} %</span>
+				<span className={clsx("font-mono text-[10px] tabular-nums", tone)}>{t("agentChat.percent", { value: usage.percentage })}</span>
 			</div>
 		);
 	}
@@ -2037,9 +2053,7 @@ function ContextGauge({
 			<span
 				className="shrink-0 font-mono text-[10px] tabular-nums text-ink-faint"
 				title={
-					`${tokens.toLocaleString("fr-FR")} jetons au dernier tour. La part occupée ` +
-					"s'affichera dès que le moteur aura annoncé la taille de sa fenêtre, " +
-					"à la fin de ce tour."
+					t("agentChat.context.unknownWindow", { tokens: tokens.toLocaleString(locale()) })
 				}
 			>
 				{Math.round(tokens / 1000)} k
@@ -2058,16 +2072,13 @@ function ContextGauge({
 		<div
 			className="flex shrink-0 items-center gap-1.5"
 			title={
-				`${tokens.toLocaleString("fr-FR")} jetons sur ${limit.toLocaleString("fr-FR")} ` +
-				"— tout ce que le modèle a sous les yeux au dernier tour : messages, " +
-				"fichiers lus et sorties d'outils, cache compris. Au-delà, le début de " +
-				"la conversation sort de la fenêtre."
+				t("agentChat.context.window", { tokens: tokens.toLocaleString(locale()), limit: limit.toLocaleString(locale()) })
 			}
 		>
 			<div className="h-1 w-12 overflow-hidden rounded-full bg-raised">
 				<div className={clsx("h-full", bar)} style={{ width: `${percent}%` }} />
 			</div>
-			<span className={clsx("font-mono text-[10px] tabular-nums", tone)}>{percent} %</span>
+			<span className={clsx("font-mono text-[10px] tabular-nums", tone)}>{t("agentChat.percent", { value: percent })}</span>
 		</div>
 	);
 }
@@ -2083,6 +2094,7 @@ function ModeSelect({
 }) {
 	const [open, setOpen] = useState(false);
 	const box = useRef<HTMLDivElement>(null);
+	const { t } = useTranslation("components1");
 	const current = PERMISSION_MODES.find((entry) => entry.id === mode);
 
 	useEffect(() => {
@@ -2149,7 +2161,7 @@ function ModeSelect({
 					))}
 					{running ? (
 						<p className="px-2 py-1.5 text-[10px] leading-snug text-ink-faint">
-							Changer de mode relance l'agent en reprenant la conversation.
+							{t("agentChat.mode.restartNote")}
 						</p>
 					) : null}
 				</div>
@@ -2195,45 +2207,34 @@ interface EtatMcp {
 	aide: string;
 }
 
-const ETATS_MCP: Record<string, EtatMcp> = {
-	connected: {
-		libelle: "connecté",
-		ton: "success",
-		ennui: false,
-		aide: "Ses outils sont disponibles.",
-	},
-	pending: {
-		libelle: "en cours",
-		ton: "success",
-		ennui: false,
-		aide: "La connexion n'a pas encore abouti.",
-	},
-	"needs-auth": {
-		libelle: "à autoriser",
-		ton: "warning",
-		ennui: true,
-		aide: "Le serveur attend une autorisation : aucun de ses outils n'est disponible pour l'agent.",
-	},
-	failed: {
-		libelle: "échec",
-		ton: "critical",
-		ennui: true,
-		aide: "Le serveur n'a pas répondu : aucun de ses outils n'est disponible pour l'agent.",
-	},
+/** Le ton et la gravité de chaque état ; le libellé et l'aide se lisent au rendu. */
+const ETATS_MCP: Record<string, Pick<EtatMcp, "ton" | "ennui"> & { cle: string }> = {
+	connected: { cle: "connected", ton: "success", ennui: false },
+	pending: { cle: "pending", ton: "success", ennui: false },
+	"needs-auth": { cle: "needsAuth", ton: "warning", ennui: true },
+	failed: { cle: "failed", ton: "critical", ennui: true },
 };
 
 function etatMcp(status: string): EtatMcp {
-	return (
-		ETATS_MCP[status] ?? {
+	const connu = ETATS_MCP[status];
+	if (!connu) {
+		return {
 			libelle: status,
 			ton: "critical",
 			ennui: true,
-			aide: "État que le cockpit ne sait pas nommer.",
-		}
-	);
+			aide: i18nT("components1:agentChat.mcpState.unknownHelp"),
+		};
+	}
+	return {
+		libelle: i18nT(`components1:agentChat.mcpState.${connu.cle}`),
+		ton: connu.ton,
+		ennui: connu.ennui,
+		aide: i18nT(`components1:agentChat.mcpState.${connu.cle}Help`),
+	};
 }
 
 function Equipement({ run }: { run: AgentRun }) {
+	const { t } = useTranslation("components1");
 	const [ouvert, setOuvert] = useState(false);
 	const { servers, probed, skills, subagents, plugins } = run.equipment;
 
@@ -2262,7 +2263,7 @@ function Equipement({ run }: { run: AgentRun }) {
 				size="sm"
 				icon={Plug}
 				onClick={() => setOuvert(true)}
-				title={`${connectés} serveur(s) MCP connecté(s)`}
+				title={t("agentChat.equipment.connectedTitle", { count: connectés })}
 			/>
 		) : null;
 	}
@@ -2286,10 +2287,11 @@ function Equipement({ run }: { run: AgentRun }) {
 				onClick={() => setOuvert(!ouvert)}
 				title={
 					fautifs.length > 0
-						? `${fautifs.length} serveur(s) MCP indisponible(s) : ${fautifs
-								.map((serveur) => serveur.name)
-								.join(", ")}`
-						: "Ce dont cet agent dispose"
+						? t("agentChat.equipment.unavailableTitle", {
+								count: fautifs.length,
+								names: fautifs.map((serveur) => serveur.name).join(", "),
+							})
+						: t("agentChat.equipment.title")
 				}
 			>
 				{fautifs.length > 0 ? String(fautifs.length) : undefined}
@@ -2301,23 +2303,23 @@ function Equipement({ run }: { run: AgentRun }) {
 					    l'attention qu'on porte au reste. */}
 					<button
 						type="button"
-						aria-label="Fermer"
+						aria-label={t("agentChat.equipment.close")}
 						onClick={() => setOuvert(false)}
 						className="fixed inset-0 z-40 cursor-default"
 					/>
 					<div className="animate-in absolute top-full left-0 z-50 mt-1 w-80 rounded-xl border border-line bg-raised p-2 shadow-lg">
 						<div className="flex items-baseline justify-between px-1 pb-1">
-							<span className="text-[11px] font-semibold text-ink">Serveurs MCP</span>
+							<span className="text-[11px] font-semibold text-ink">{t("agentChat.equipment.servers")}</span>
 							<span className="font-mono text-[10px] text-ink-faint">
-								{probed ? `${connectés}/${servers.length} connectés` : "…"}
+								{probed ? t("agentChat.equipment.connectedCount", { connected: connectés, total: servers.length }) : "…"}
 							</span>
 						</div>
 
 						{servers.length === 0 ? (
 							<p className="px-1 pb-1 text-[11px] text-ink-faint">
 								{probed
-									? "Aucun serveur déclaré pour ce dossier."
-									: "État demandé à la session…"}
+									? t("agentChat.equipment.noServers")
+									: t("agentChat.equipment.probing")}
 							</p>
 						) : (
 							<ul className="max-h-56 overflow-y-auto">
@@ -2358,7 +2360,7 @@ function Equipement({ run }: { run: AgentRun }) {
 													<Button
 														size="sm"
 														icon={RotateCw}
-														title={`Reconnecter ${serveur.name}`}
+														title={t("agentChat.equipment.reconnect", { name: serveur.name })}
 														onClick={() =>
 															void api.agents
 																.reconnectMcp(run.sessionId!, serveur.name)
@@ -2386,9 +2388,9 @@ function Equipement({ run }: { run: AgentRun }) {
 						    le compte et les noms — savoir qu'une skill existe ne dit
 						    pas laquelle. */}
 						<div className="mt-1 border-t border-line-soft pt-1.5">
-							<Chargés titre="Skills" entrées={skills} />
-							<Chargés titre="Sous-agents" entrées={subagents} />
-							<Chargés titre="Plugins" entrées={plugins} />
+							<Chargés titre={t("agentChat.equipment.skills")} entrées={skills} />
+							<Chargés titre={t("agentChat.equipment.subagents")} entrées={subagents} />
+							<Chargés titre={t("agentChat.equipment.plugins")} entrées={plugins} />
 						</div>
 					</div>
 				</>
@@ -2418,9 +2420,11 @@ function Chargés({ titre, entrées }: { titre: string; entrées: string[] }) {
 function depuis(at: number | undefined, maintenant: number): string {
 	if (!at) return "";
 	const secondes = Math.max(0, Math.round((maintenant - at) / 1000));
-	if (secondes < 60) return `${secondes} s`;
+	if (secondes < 60) return i18nT("components1:agentChat.duration.seconds", { count: secondes });
 	const minutes = Math.floor(secondes / 60);
-	return minutes < 60 ? `${minutes} min` : `${Math.floor(minutes / 60)} h`;
+	return minutes < 60
+		? i18nT("components1:agentChat.duration.minutes", { count: minutes })
+		: i18nT("components1:agentChat.duration.hours", { count: Math.floor(minutes / 60) });
 }
 
 /**
@@ -2447,6 +2451,7 @@ function SousAgentsEnCours({
 	// qui travaille : c'est le même signal qui fait tourner le sablier sur sa
 	// ligne, et il n'y en a pas de plus fiable — le CLI n'annonce pas la fin
 	// d'un sous-agent autrement que par le résultat de son appel.
+	const { t } = useTranslation("components1");
 	const actifs = turns.filter(
 		(turn) => turn.kind === "tool" && turn.tool === "Task" && turn.output === undefined,
 	);
@@ -2466,7 +2471,7 @@ function SousAgentsEnCours({
 		<div className="hairline-b flex shrink-0 items-center gap-2 overflow-x-auto border-l-2 border-l-info/60 bg-info/[0.07] px-3 py-2">
 			<span className="flex shrink-0 items-center gap-1.5 text-[11px] font-semibold text-info">
 				<Bot size={12} />
-				{actifs.length === 1 ? "1 sous-agent" : `${actifs.length} sous-agents`}
+				{t("agentChat.subagents.count", { count: actifs.length })}
 			</span>
 
 			{actifs.map((turn, index) => {
@@ -2477,7 +2482,7 @@ function SousAgentsEnCours({
 				const dernière = [...(turn.sub ?? [])]
 					.reverse()
 					.find((interne) => interne.kind === "tool");
-				const rôle = String(turn.input?.subagent_type ?? "sous-agent");
+				const rôle = String(turn.input?.subagent_type ?? t("agentChat.subagents.defaultRole"));
 				const mission = String(turn.input?.description ?? turn.text ?? "");
 
 				return (
@@ -2485,7 +2490,7 @@ function SousAgentsEnCours({
 						key={turn.toolId ?? index}
 						type="button"
 						onClick={() => turn.toolId && onOuvrir(turn.toolId)}
-						title={`${rôle} · ${mission}\nCliquer pour voir ce qu'il fait`}
+						title={t("agentChat.subagents.openTitle", { role: rôle, mission })}
 						className="focus-ring flex min-w-0 shrink-0 items-center gap-2 rounded-lg border border-line-soft bg-raised px-2 py-1 text-left transition-colors hover:border-line"
 					>
 						<Spinner />
@@ -2494,7 +2499,7 @@ function SousAgentsEnCours({
 								{mission || rôle}
 							</span>
 							<span className="block max-w-56 truncate font-mono text-[10px] text-ink-faint">
-								{dernière ? actionCourte(dernière) : `${rôle} · démarre`}
+								{dernière ? actionCourte(dernière) : t("agentChat.subagents.starting", { role: rôle })}
 							</span>
 						</span>
 						<span className="shrink-0 text-right font-mono text-[10px] text-ink-faint tabular-nums">
@@ -2503,7 +2508,7 @@ function SousAgentsEnCours({
 							<span className="block">{depuis(turn.at, maintenant)}</span>
 							{étapes > 0 ? (
 								<span className="block">
-									{étapes} étape{étapes > 1 ? "s" : ""}
+									{t("agentChat.subagents.steps", { count: étapes })}
 								</span>
 							) : null}
 						</span>
@@ -2516,7 +2521,8 @@ function SousAgentsEnCours({
 
 /** Badge d'état, partagé par le panneau et le dock. */
 export function RunState({ run }: { run: AgentRun }) {
-	if (!run.running) return <Badge>terminé</Badge>;
-	if (run.thinking) return <Badge tone="info">{run.activity ?? "réfléchit"}</Badge>;
-	return <Badge tone="success">prêt</Badge>;
+	const { t } = useTranslation("components1");
+	if (!run.running) return <Badge>{t("agentChat.runState.done")}</Badge>;
+	if (run.thinking) return <Badge tone="info">{run.activity ?? t("agentChat.runState.thinking")}</Badge>;
+	return <Badge tone="success">{t("agentChat.runState.ready")}</Badge>;
 }

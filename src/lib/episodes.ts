@@ -1,4 +1,5 @@
 import type { Turn } from "@/app/agents";
+import { t } from "@/i18n";
 
 /**
  * Lire le fil d'un agent comme une suite d'épisodes : une consigne, et tout
@@ -88,18 +89,24 @@ export function gestureOf(turn: Turn): string {
 	const input = turn.input ?? {};
 	switch (kindOf(turn)) {
 		case "run":
-			return commandOf(turn) ? `lance ${commandOf(turn).split("\n")[0]}` : `utilise ${turn.tool}`;
+			return commandOf(turn)
+				? t("lib:episodes.gesture.runs", { command: commandOf(turn).split("\n")[0] })
+				: t("lib:episodes.gesture.uses", { tool: turn.tool });
 		case "edit":
-			return file ? `modifie ${file}` : "modifie un fichier";
+			return file ? t("lib:episodes.gesture.edits", { file }) : t("lib:episodes.gesture.editsAFile");
 		case "agent":
-			return text(input.description) ? `a confié « ${text(input.description)} »` : "a lancé un sous-agent";
+			return text(input.description)
+				? t("lib:episodes.gesture.delegated", { description: text(input.description) })
+				: t("lib:episodes.gesture.launchedSubagent");
 		case "read":
-			if (turn.tool === "Read" && file) return `lit ${file}`;
-			if (text(input.pattern)) return `cherche ${text(input.pattern)}`;
-			if (text(input.query)) return `cherche ${text(input.query)}`;
-			return file ? `parcourt ${file}` : `utilise ${turn.tool}`;
+			if (turn.tool === "Read" && file) return t("lib:episodes.gesture.reads", { file });
+			if (text(input.pattern)) return t("lib:episodes.gesture.searches", { query: text(input.pattern) });
+			if (text(input.query)) return t("lib:episodes.gesture.searches", { query: text(input.query) });
+			return file ? t("lib:episodes.gesture.browses", { file }) : t("lib:episodes.gesture.uses", { tool: turn.tool });
 		default:
-			return `utilise ${turn.tool ?? "un outil"}`;
+			return turn.tool
+				? t("lib:episodes.gesture.uses", { tool: turn.tool })
+				: t("lib:episodes.gesture.usesATool");
 	}
 }
 

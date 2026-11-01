@@ -131,7 +131,7 @@ pub fn set_key(key: &str) -> Result<()> {
 		return Ok(());
 	}
 	if !valid_key(key) {
-		return Err(CockpitError::msg("Cette clé n'a pas la forme d'une clé d'API ElevenLabs."));
+		return Err(CockpitError::msg(crate::i18n::t("speech.invalidKey")));
 	}
 	let mut child = Command::new("/usr/bin/security")
 		.arg("-i")
@@ -150,9 +150,9 @@ pub fn set_key(key: &str) -> Result<()> {
 		.wait_with_output()
 		.map_err(|e| CockpitError::msg(format!("security : {e}")))?;
 	if !output.status.success() {
-		return Err(CockpitError::msg(format!(
-			"Le trousseau a refusé la clé : {}",
-			String::from_utf8_lossy(&output.stderr).trim()
+		return Err(CockpitError::msg(crate::i18n::tf(
+			"speech.keychainRefused",
+			&[("error", &String::from_utf8_lossy(&output.stderr).trim())],
 		)));
 	}
 	Ok(())
@@ -205,9 +205,15 @@ fn cloud_voice(raw: &serde_json::Value) -> Option<CloudVoice> {
 	let female = gender == "female";
 	let french = language.contains("fr");
 	let description = [
-		if female { "femme" } else if gender == "male" { "homme" } else { "" },
-		if french { "français" } else { "" },
-		raw.get("category").and_then(|v| v.as_str()).unwrap_or(""),
+		if female {
+			crate::i18n::t("speech.female")
+		} else if gender == "male" {
+			crate::i18n::t("speech.male")
+		} else {
+			String::new()
+		},
+		if french { crate::i18n::t("speech.french") } else { String::new() },
+		raw.get("category").and_then(|v| v.as_str()).unwrap_or("").to_string(),
 	]
 	.iter()
 	.filter(|part| !part.is_empty())
@@ -218,16 +224,16 @@ fn cloud_voice(raw: &serde_json::Value) -> Option<CloudVoice> {
 }
 
 pub async fn cloud_voices() -> Result<Vec<CloudVoice>> {
-	let key = key().ok_or_else(|| CockpitError::msg("Aucune clé ElevenLabs dans le trousseau."))?;
+	let key = key().ok_or_else(|| CockpitError::msg(crate::i18n::t("speech.noKey")))?;
 	let response = reqwest::Client::new()
 		.get(format!("{API}/voices"))
 		.header("xi-api-key", key)
 		.timeout(Duration::from_secs(15))
 		.send()
 		.await
-		.map_err(|e| CockpitError::msg(format!("ElevenLabs injoignable : {e}")))?;
+		.map_err(|e| CockpitError::msg(crate::i18n::tf("speech.unreachable", &[("error", &e)])))?;
 	if !response.status().is_success() {
-		return Err(CockpitError::msg(format!("ElevenLabs a refusé la clé ({}).", response.status())));
+		return Err(CockpitError::msg(crate::i18n::tf("speech.keyRefused", &[("status", &response.status())])));
 	}
 	let body: serde_json::Value = response
 		.json()
@@ -250,7 +256,7 @@ fn speed_of(rate: Option<u32>) -> f32 {
 }
 
 async fn say_cloud(text: &str, voice: Option<&str>, model: Option<&str>, rate: Option<u32>) -> Result<()> {
-	let api_key = key().ok_or_else(|| CockpitError::msg("Aucune clé ElevenLabs dans le trousseau."))?;
+	let api_key = key().ok_or_else(|| CockpitError::msg(crate::i18n::t("speech.noKey")))?;
 	let voice = match voice.filter(|v| !v.trim().is_empty()) {
 		Some(voice) => voice.to_string(),
 		None => cloud_voices()
@@ -258,11 +264,11 @@ async fn say_cloud(text: &str, voice: Option<&str>, model: Option<&str>, rate: O
 			.into_iter()
 			.next()
 			.map(|voice| voice.id)
-			.ok_or_else(|| CockpitError::msg("Aucune voix sur ce compte ElevenLabs."))?,
+			.ok_or_else(|| CockpitError::msg(crate::i18n::t("speech.noVoice")))?,
 	};
 	// L'identifiant devient un segment d'URL : rien qui puisse en sortir.
 	if !voice.chars().all(|c| c.is_ascii_alphanumeric() || c == '-' || c == '_') {
-		return Err(CockpitError::msg(format!("Voix ElevenLabs invalide : {voice}")));
+		return Err(CockpitError::msg(crate::i18n::tf("speech.invalidVoice", &[("voice", &voice)])));
 	}
 	let response = reqwest::Client::new()
 		.post(format!("{API}/text-to-speech/{voice}?output_format=mp3_44100_128"))
@@ -271,7 +277,8 @@ async fn say_cloud(text: &str, voice: Option<&str>, model: Option<&str>, rate: O
 		.json(&serde_json::json!({
 			"text": text,
 			"model_id": model.filter(|m| !m.trim().is_empty()).unwrap_or("eleven_multilingual_v2"),
-			"language_code": "fr",
+			// La langue de l'interface, en code ISO 639-1 (`pt-BR` → `pt`).
+			"language_code": crate::i18n::lang().split('-').next().unwrap_or("en"),
 			"voice_settings": {
 				"stability": 0.5,
 				"similarity_boost": 0.75,
@@ -280,13 +287,13 @@ async fn say_cloud(text: &str, voice: Option<&str>, model: Option<&str>, rate: O
 		}))
 		.send()
 		.await
-		.map_err(|e| CockpitError::msg(format!("ElevenLabs injoignable : {e}")))?;
+		.map_err(|e| CockpitError::msg(crate::i18n::tf("speech.unreachable", &[("error", &e)])))?;
 	if !response.status().is_success() {
 		let status = response.status();
 		let body = response.text().await.unwrap_or_default();
-		return Err(CockpitError::msg(format!(
-			"ElevenLabs a refusé ({status}) : {}",
-			body.chars().take(200).collect::<String>()
+		return Err(CockpitError::msg(crate::i18n::tf(
+			"speech.refused",
+			&[("status", &status), ("body", &body.chars().take(200).collect::<String>())],
 		)));
 	}
 	let audio = response
@@ -295,7 +302,7 @@ async fn say_cloud(text: &str, voice: Option<&str>, model: Option<&str>, rate: O
 		.map_err(|e| CockpitError::msg(format!("ElevenLabs : {e}")))?;
 
 	let path = std::env::temp_dir().join(format!("cockpit-voix-{}.mp3", std::process::id()));
-	std::fs::write(&path, &audio).map_err(|e| CockpitError::msg(format!("Fichier audio : {e}")))?;
+	std::fs::write(&path, &audio).map_err(|e| CockpitError::msg(crate::i18n::tf("speech.audioFile", &[("error", &e)])))?;
 	let child = Command::new("/usr/bin/afplay")
 		.arg(&path)
 		.stdout(Stdio::null())
@@ -375,7 +382,7 @@ mod tests {
 		}))
 		.unwrap();
 		assert!(voice.female && voice.french);
-		assert_eq!(voice.description, "femme · français · premade");
+		assert_eq!(voice.description, "female · French · premade");
 		assert!(super::cloud_voice(&serde_json::json!({ "name": "sans id" })).is_none());
 	}
 }

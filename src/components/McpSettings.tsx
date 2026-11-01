@@ -1,5 +1,6 @@
 import { AlertTriangle, Check, Plug, ShieldAlert, ShieldCheck } from "lucide-react";
 import { useState } from "react";
+import { Trans, useTranslation } from "react-i18next";
 import { toast } from "sonner";
 import { Button, Spinner } from "@/components/ui";
 import { api } from "@/lib/ipc";
@@ -26,6 +27,7 @@ import { useAsync } from "@/lib/useAsync";
  * lancer que le déduire d'un agent qui invente.
  */
 export function McpSettings() {
+	const { t } = useTranslation("components1");
 	const servers = useAsync(() => api.mcp.servers(), [], { pollMs: 0 });
 	const lue = useAsync(() => api.mcp.approval(), [], { pollMs: 0 });
 	// La réponse d'un geste fait foi jusqu'à la relecture suivante.
@@ -47,7 +49,7 @@ export function McpSettings() {
 	if (servers.loading) {
 		return (
 			<div className="flex items-center gap-2 text-[11px] text-ink-faint">
-				<Spinner /> lecture du dépôt…
+				<Spinner /> {t("mcpSettings.loading")}
 			</div>
 		);
 	}
@@ -55,10 +57,11 @@ export function McpSettings() {
 	if (!servers.data?.length) {
 		return (
 			<p className="text-[11px] leading-relaxed text-ink-faint">
-				Ce dépôt ne déclare aucun serveur MCP. Les agents n'auront que les outils
-				de leur compte. Un dépôt qui veut partager les siens les écrit dans un{" "}
-				<span className="font-mono">.mcp.json</span> à sa racine, commité avec le
-				reste — c'est ce fichier que le cockpit joint à chaque agent qu'il lance.
+				<Trans
+					t={t}
+					i18nKey="mcpSettings.empty"
+					components={{ code: <span className="font-mono" /> }}
+				/>
 			</p>
 		);
 	}
@@ -71,12 +74,14 @@ export function McpSettings() {
 				<div className="flex items-start gap-2 rounded-lg border border-success/30 bg-success/5 px-2.5 py-2">
 					<ShieldCheck size={13} className="mt-px shrink-0 text-success" />
 					<p className="flex-1 text-[11px] leading-relaxed text-ink-muted">
-						Approuvés : déclarés par <span className="font-mono">.mcp.json</span> et
-						joints à chaque agent lancé sur ce dépôt, worktrees compris — tant que le
-						fichier ne change pas.
+						<Trans
+							t={t}
+							i18nKey="mcpSettings.approved"
+							components={{ code: <span className="font-mono" /> }}
+						/>
 					</p>
 					<Button size="sm" loading={busy} onClick={() => void decide(false)}>
-						Retirer
+						{t("mcpSettings.revoke")}
 					</Button>
 				</div>
 			) : (
@@ -84,10 +89,9 @@ export function McpSettings() {
 					<ShieldAlert size={13} className="mt-px shrink-0 text-warning" />
 					<p className="flex-1 text-[11px] leading-relaxed text-ink-muted">
 						{approval.data?.changed
-							? "Le .mcp.json a changé depuis ton approbation. "
-							: "Pas encore approuvés. "}
-						Les agents partent sans ces serveurs : ce sont des commandes que le
-						dépôt fait lancer sur ton poste. Relis-les avant d'approuver.
+							? t("mcpSettings.changedSinceApproval")
+							: t("mcpSettings.notApproved")}{" "}
+						{t("mcpSettings.pendingExplanation")}
 					</p>
 					<Button
 						size="sm"
@@ -97,7 +101,7 @@ export function McpSettings() {
 						disabled={approval.loading}
 						onClick={() => void decide(true)}
 					>
-						Approuver
+						{t("mcpSettings.approve")}
 					</Button>
 				</div>
 			)}
@@ -135,11 +139,7 @@ export function McpSettings() {
 				<p className="flex items-start gap-1.5 text-[10px] leading-relaxed text-ink-faint">
 					<Plug size={11} className="mt-px shrink-0" />
 					<span>
-						{bloques.length} serveur{bloques.length > 1 ? "s" : ""} ne répondra
-						{bloques.length > 1 ? "ont" : ""} pas dans les conditions actuelles.
-						L'agent le saura et le dira, plutôt que de faire comme si l'outil
-						existait — mais si tu comptes dessus, éteins l'isolation pour ce
-						travail, ou donne au serveur un jeton qu'il porte lui-même.
+						{t("mcpSettings.unreachable", { count: bloques.length })}
 					</span>
 				</p>
 			) : null}

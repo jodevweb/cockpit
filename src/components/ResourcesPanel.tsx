@@ -1,7 +1,9 @@
 import clsx from "clsx";
 import { Bot, Cpu, Gauge, Terminal, X } from "lucide-react";
 import { useEffect } from "react";
+import { useTranslation } from "react-i18next";
 import { Badge, Button, Spinner } from "@/components/ui";
+import { locale, t as translate } from "@/i18n";
 import { api } from "@/lib/ipc";
 import type { NamedUsage, ResourceReport } from "@/lib/types";
 import { useAsync } from "@/lib/useAsync";
@@ -18,7 +20,11 @@ import { useAsync } from "@/lib/useAsync";
  */
 
 function memory(mb: number): string {
-	return mb >= 1024 ? `${(mb / 1024).toFixed(1)} Go` : `${Math.round(mb)} Mo`;
+	return mb >= 1024
+		? translate("components2:resources.gigabytes", {
+				value: (mb / 1024).toLocaleString(locale(), { minimumFractionDigits: 1, maximumFractionDigits: 1 }),
+			})
+		: translate("components2:resources.megabytes", { value: Math.round(mb) });
 }
 
 function shortCwd(cwd: string): string {
@@ -44,6 +50,7 @@ function Row({
 	total: number;
 	icon: typeof Bot;
 }) {
+	const { t } = useTranslation("components2");
 	return (
 		<div className="flex items-center gap-2 rounded-lg px-2 py-1.5 hover:bg-hover">
 			<Icon size={11} className="shrink-0 text-ink-faint" />
@@ -56,20 +63,20 @@ function Row({
 			{entry.heaviest ? (
 				<span
 					className="shrink-0 font-mono text-[10px] text-warning/80"
-					title={`Le plus gros processus de ce sous-arbre : ${entry.heaviest}`}
+					title={t("resources.heaviest", { name: entry.heaviest })}
 				>
 					{entry.heaviest}
 				</span>
 			) : null}
 			<span className="shrink-0 font-mono text-[10px] text-ink-faint/70 tabular-nums">
-				{entry.usage.processes} proc.
+				{t("resources.processesShort", { count: entry.usage.processes })}
 			</span>
 			<Share value={entry.usage.memoryMb} total={total} />
 			<span className="w-16 shrink-0 text-right font-mono text-[11px] text-ink tabular-nums">
 				{memory(entry.usage.memoryMb)}
 			</span>
 			<span className="w-12 shrink-0 text-right font-mono text-[10px] text-ink-faint tabular-nums">
-				{entry.usage.cpu.toFixed(0)} %
+				{t("resources.percent", { value: entry.usage.cpu.toFixed(0) })}
 			</span>
 		</div>
 	);
@@ -79,6 +86,7 @@ export function ResourcesPanel({ onClose }: { onClose: () => void }) {
 	// Deux secondes : assez court pour voir un agent partir en vrille, assez
 	// long pour que la mesure elle-même ne pèse rien. Le `%` se calcule entre
 	// deux relevés, la première valeur est donc toujours nulle.
+	const { t } = useTranslation("components2");
 	const report = useAsync(() => api.resources.report(), [], { pollMs: 2000 });
 
 	useEffect(() => {
@@ -104,13 +112,13 @@ export function ResourcesPanel({ onClose }: { onClose: () => void }) {
 				<div className="hairline-b flex shrink-0 items-center gap-2 px-3 py-2">
 					<Cpu size={13} className="shrink-0 text-accent-soft" />
 					<div className="min-w-0 flex-1">
-						<div className="text-[12.5px] font-semibold text-ink">Consommation</div>
+						<div className="text-[12.5px] font-semibold text-ink">{t("resources.title")}</div>
 						<div className="text-[10px] text-ink-faint">
-							Le cockpit et tout ce qu'il fait tourner
+							{t("resources.subtitle")}
 						</div>
 					</div>
 					{report.loading ? <Spinner /> : null}
-					<Button size="sm" icon={X} onClick={onClose} title="Fermer (Échap)" />
+					<Button size="sm" icon={X} onClick={onClose} title={t("resources.close")} />
 				</div>
 
 				{!data ? (
@@ -122,21 +130,21 @@ export function ResourcesPanel({ onClose }: { onClose: () => void }) {
 						<div className="grid grid-cols-3 gap-2">
 							{[
 								{
-									label: "Cockpit seul",
+									label: t("resources.appOnly"),
 									value: memory(data.app.memoryMb),
-									hint: `${data.app.cpu.toFixed(0)} % processeur`,
+									hint: t("resources.cpu", { value: data.app.cpu.toFixed(0) }),
 								},
 								{
-									label: "Avec sa descendance",
+									label: t("resources.withChildren"),
 									value: memory(data.total.memoryMb),
-									hint: `${data.total.processes} processus · ${data.total.cpu.toFixed(0)} %`,
+									hint: t("resources.processes", { count: data.total.processes, cpu: data.total.cpu.toFixed(0) }),
 								},
 								{
-									label: "Machine",
+									label: t("resources.machine"),
 									value: `${memory(data.machineUsedMb)} / ${memory(data.machineTotalMb)}`,
 									hint:
 										data.machineTotalMb > 0
-											? `le cockpit en occupe ${((data.total.memoryMb / data.machineTotalMb) * 100).toFixed(0)} %`
+											? t("resources.machineShare", { value: ((data.total.memoryMb / data.machineTotalMb) * 100).toFixed(0) })
 											: "",
 								},
 							].map((card) => (
@@ -157,7 +165,7 @@ export function ResourcesPanel({ onClose }: { onClose: () => void }) {
 							<div className="mt-4">
 								<div className="mb-1 flex items-center gap-2 px-2">
 									<span className="text-[10px] font-semibold tracking-[0.09em] text-ink-faint uppercase">
-										Agents
+										{t("resources.agents")}
 									</span>
 									<Badge mono>{data.agents.length}</Badge>
 								</div>
@@ -171,7 +179,7 @@ export function ResourcesPanel({ onClose }: { onClose: () => void }) {
 							<div className="mt-4">
 								<div className="mb-1 flex items-center gap-2 px-2">
 									<span className="text-[10px] font-semibold tracking-[0.09em] text-ink-faint uppercase">
-										Terminaux
+										{t("resources.terminals")}
 									</span>
 									<Badge mono>{data.terminals.length}</Badge>
 								</div>
@@ -182,10 +190,7 @@ export function ResourcesPanel({ onClose }: { onClose: () => void }) {
 						) : null}
 
 						<p className="mt-4 px-2 text-[10px] leading-relaxed text-ink-faint">
-							Les mémoires s'additionnent sans tenir compte de ce que les processus
-							partagent : le total est donc un plafond, pas une facture exacte. L'interface,
-							elle, tourne dans un processus WebKit que macOS n'attribue à personne sans
-							privilèges — comptez une soixantaine de mégaoctets de plus.
+							{t("resources.footnote")}
 						</p>
 					</div>
 				)}
@@ -217,6 +222,7 @@ export function SpendTicker({ onOpen }: { onOpen: () => void }) {
 	// Trente secondes, et sans rien lancer : cet appel lit les journaux déjà sur
 	// le disque. Le quota, lui, est celui du dernier relevé — on ne démarre pas
 	// un CLI pour rafraîchir un témoin.
+	const { t } = useTranslation("components2");
 	const spend = useAsync(() => api.sessions.spend(), [], { pollMs: 30_000 });
 	const data = spend.data;
 	if (!data) return null;
@@ -231,8 +237,10 @@ export function SpendTicker({ onOpen }: { onOpen: () => void }) {
 			onClick={onOpen}
 			title={
 				left === null
-					? "Jetons consommés aujourd'hui. Le quota n'est pas annoncé par le CLI."
-					: `${left} % restants sur « ${data.tightest} »${data.resetsAt ? `, repart ${data.resetsAt}` : ""}`
+					? t("resources.spendNoQuota")
+					: data.resetsAt
+						? t("resources.spendLeftResets", { left, window: data.tightest, resets: data.resetsAt })
+						: t("resources.spendLeft", { left, window: data.tightest })
 			}
 			className="focus-ring mx-2 flex h-6 items-center gap-2 rounded-lg px-2.5 text-[10px] transition-colors hover:bg-surface"
 		>
@@ -252,15 +260,16 @@ export function SpendTicker({ onOpen }: { onOpen: () => void }) {
 					tight ? "text-critical" : low ? "text-warning" : "text-ink-faint/60",
 				)}
 			>
-				{left === null ? "— %" : `${left} %`}
+				{t("resources.percent", { value: left === null ? "—" : left })}
 			</span>
 		</button>
 	);
 }
 
-/** `1,2 M` plutôt que `1 204 883` : un témoin se lit d'un coup d'œil. */
+/** `1,2 M` plutôt que `1 204 883` : un témoin se lit d'un coup d'œil. Séparateur décimal de la langue. */
 function compact(tokens: number): string {
-	if (tokens >= 1_000_000) return `${(tokens / 1_000_000).toFixed(1).replace(".", ",")} M`;
+	if (tokens >= 1_000_000)
+		return `${(tokens / 1_000_000).toLocaleString(locale(), { minimumFractionDigits: 1, maximumFractionDigits: 1 })} M`;
 	if (tokens >= 1_000) return `${Math.round(tokens / 1000)} k`;
 	return String(tokens);
 }
@@ -268,6 +277,7 @@ function compact(tokens: number): string {
 export function ResourcesTicker({ onOpen }: { onOpen: () => void }) {
 	// Cinq secondes : c'est un témoin, pas un moniteur. Le panneau ouvert, lui,
 	// relève deux fois plus souvent.
+	const { t } = useTranslation("components2");
 	const report = useAsync(() => api.resources.report(), [], { pollMs: 5000 });
 	const data = report.data;
 	if (!data) return null;
@@ -277,7 +287,7 @@ export function ResourcesTicker({ onOpen }: { onOpen: () => void }) {
 		<button
 			type="button"
 			onClick={onOpen}
-			title="Ce que le cockpit fait peser sur la machine"
+			title={t("resources.tickerHint")}
 			className="focus-ring mx-2 flex h-6 items-center gap-2 rounded-lg px-2.5 text-[10px] transition-colors hover:bg-surface"
 		>
 			<Cpu
@@ -293,7 +303,7 @@ export function ResourcesTicker({ onOpen }: { onOpen: () => void }) {
 				{memory(data.total.memoryMb)}
 			</span>
 			<span className="ml-auto font-mono text-ink-faint/60 tabular-nums">
-				{data.total.cpu.toFixed(0)} %
+				{t("resources.percent", { value: data.total.cpu.toFixed(0) })}
 			</span>
 		</button>
 	);

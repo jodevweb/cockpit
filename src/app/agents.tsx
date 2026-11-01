@@ -9,6 +9,7 @@ import {
 	type ReactNode,
 } from "react";
 import { isImagePath } from "@/components/LocalImage";
+import { t } from "@/i18n";
 import { api, events } from "@/lib/ipc";
 import { modelLabel as readableModel } from "@/lib/format";
 import { hasTauri, isPreview } from "@/lib/preview";
@@ -299,7 +300,7 @@ export function hookFeedback(text: string): { hook: string; text: string } | nul
 function hookTurn(feedback: { hook: string; text: string }): Turn {
 	return {
 		kind: "system",
-		text: `Rappel automatique (hook ${feedback.hook}) — pas une consigne de ta part : ${feedback.text}`,
+		text: t("app:agents.turn.hookReminder", { hook: feedback.hook, text: feedback.text }),
 	};
 }
 
@@ -438,20 +439,17 @@ export const PERMISSION_MODES: Array<{
 	id: string;
 	label: string;
 	hint: string;
-}> = [
-	{ id: "plan", label: "Plan", hint: "propose sans rien exécuter" },
-	{ id: "default", label: "Prudent", hint: "demande avant chaque outil" },
-	{
-		id: "acceptEdits",
-		label: "Édition",
-		hint: "modifie les fichiers sans demander",
+}> = ["plan", "default", "acceptEdits", "bypassPermissions"].map((id) => ({
+	id,
+	// Lus à l'affichage, pas au chargement du module : la langue n'y est pas
+	// encore connue.
+	get label() {
+		return t(`app:agents.modes.${id}.label`);
 	},
-	{
-		id: "bypassPermissions",
-		label: "Bypass",
-		hint: "aucune question, aucune limite — à réserver aux worktrees jetables",
+	get hint() {
+		return t(`app:agents.modes.${id}.hint`);
 	},
-];
+}));
 
 export function modeLabel(id: string): string {
 	return PERMISSION_MODES.find((entry) => entry.id === id)?.label ?? id;
@@ -498,15 +496,21 @@ export interface ModelSpec {
 export const MODELS: ModelSpec[] = [
 	{
 		id: "",
-		label: "Défaut",
-		hint: "le modèle réglé sur le poste",
+		get label() {
+			return t("app:agents.models.default.label");
+		},
+		get hint() {
+			return t("app:agents.models.default.hint");
+		},
 		quota: "",
 		price: null,
 	},
 	{
 		id: "fable",
 		label: "Fable",
-		hint: "le plus capable — réflexion toujours active",
+		get hint() {
+			return t("app:agents.models.fable.hint");
+		},
 		// Fable a son propre plafond hebdomadaire, annoncé à part par le CLI :
 		// l'épuiser ne coupe pas les autres modèles, et inversement.
 		quota: "Fable",
@@ -515,21 +519,27 @@ export const MODELS: ModelSpec[] = [
 	{
 		id: "opus",
 		label: "Opus",
-		hint: "le choix courant pour du travail exigeant",
+		get hint() {
+			return t("app:agents.models.opus.hint");
+		},
 		quota: "",
 		price: { in: 5, out: 25 },
 	},
 	{
 		id: "sonnet",
 		label: "Sonnet",
-		hint: "l'équilibre entre capacité et débit",
+		get hint() {
+			return t("app:agents.models.sonnet.hint");
+		},
 		quota: "",
 		price: { in: 3, out: 15 },
 	},
 	{
 		id: "haiku",
 		label: "Haiku",
-		hint: "rapide, pour les tâches simples",
+		get hint() {
+			return t("app:agents.models.haiku.hint");
+		},
 		quota: "",
 		price: { in: 1, out: 5 },
 	},
@@ -589,7 +599,8 @@ export function modelQuota(
 	quotas: Array<{ label: string; percent: number; resetsAt: string }>,
 ): { label: string; percent: number; resetsAt: string } | null {
 	if (!spec.id) return null;
-	const weekly = quotas.filter((entry) => entry.label.startsWith("Cette semaine"));
+	// L'intitulé vient du Rust : l'ancien français et l'anglais sont reconnus.
+	const weekly = quotas.filter((entry) => /^(Cette semaine|This week)/.test(entry.label));
 	if (weekly.length === 0) return null;
 	if (spec.quota) {
 		return weekly.find((entry) => entry.label.includes(`(${spec.quota})`)) ?? null;
@@ -757,7 +768,7 @@ function readEvent(payload: Record<string, unknown>): Incoming {
 	if (type === "cockpit") {
 		const subtype = payload.subtype as string;
 		if (subtype === "ended") {
-			return { turns: [{ kind: "system", text: "Agent terminé." }], results: [] };
+			return { turns: [{ kind: "system", text: t("app:agents.turn.ended") }], results: [] };
 		}
 		if (subtype === "preuve" && typeof payload.path === "string") {
 			const seconds = typeof payload.seconds === "number" ? payload.seconds : 0;
@@ -769,7 +780,7 @@ function readEvent(payload: Record<string, unknown>): Incoming {
 				turns: [
 					{
 						kind: "system",
-						text: `Recette filmée : ${Math.round(seconds)} s dans le navigateur du workspace.`,
+						text: t("app:agents.turn.proofFilmed", { seconds: Math.round(seconds) }),
 						video: { path: payload.path, seconds, chapters },
 						at: Date.now(),
 					},
@@ -790,8 +801,8 @@ function readEvent(payload: Record<string, unknown>): Incoming {
 					kind: "system",
 					text:
 						trigger === "manual"
-							? "Contexte compacté à ta demande."
-							: "Contexte compacté : la conversation a été résumée pour faire de la place.",
+							? t("app:agents.turn.compactedManual")
+							: t("app:agents.turn.compactedAuto"),
 					compact: { trigger, preTokens },
 				},
 			],
@@ -1207,7 +1218,7 @@ function previewRuns(): AgentRun[] {
 			sessionId: "agent-1",
 			claudeSessionId: "sess-9",
 			cwd: "/Users/demo/code/fix-cart-rounding-nw-3044",
-			label: "Maître · Fix cart total rounding",
+			label: "Lead · Fix cart total rounding",
 			contextTokens: 84_000,
 			usage: usage(62_600, [
 				["Read", 900, 31_000],
@@ -1217,12 +1228,12 @@ function previewRuns(): AgentRun[] {
 			]),
 			running: true,
 			thinking: false,
-			activity: "attend ta réponse",
+			activity: "waiting for your reply",
 			turns: [
 				{
 					kind: "user",
-					text: "The cart shows €10.00 but the payment provider charges €9.99. Find where the gap comes from.\n\nFichiers joints, à lire avant de répondre :\n- /Users/demo/Captures/cart-total.png\n- /Users/demo/Notes/rounding-rules.md",
-					context: "La branche · Ticket NW-3044 · Revue #318",
+					text: "The cart shows €10.00 but the payment provider charges €9.99. Find where the gap comes from.\n\nAttached files, read them before replying:\n- /Users/demo/Captures/cart-total.png\n- /Users/demo/Notes/rounding-rules.md",
+					context: "The branch · Ticket NW-3044 · Review #318",
 					at: min(34),
 				},
 				{
@@ -1398,7 +1409,7 @@ function previewRuns(): AgentRun[] {
 				{ kind: "tool", tool: "Read", text: "currencies", toolId: "u2", input: { file_path: "apps/web/src/currencies/index.ts" }, output: "Read 40 lines.", at: min(24), doneAt: min(24) },
 				{
 					kind: "system",
-					text: "Contexte compacté : la conversation a été résumée pour faire de la place.",
+					text: t("app:agents.turn.compactedAuto"),
 					compact: { trigger: "auto", preTokens: 161_000 },
 					at: min(20),
 				},
@@ -1441,9 +1452,9 @@ function previewRuns(): AgentRun[] {
 				{ kind: "tool", tool: "mcp__navigateur__browser_click", text: "Cart", toolId: "p11c", input: { element: "Cart" }, output: "### Ran Playwright code\n```js\nawait page.getByRole('link', { name: 'Cart' }).click();\n```\n### Page\n- Page URL: http://localhost:3000/cart", at: min(6.85), doneAt: min(6.8) },
 				{ kind: "tool", tool: "mcp__navigateur__browser_take_screenshot", text: "capture", toolId: "p11b", input: {}, output: "Screenshot taken.", outputImages: [sketch(false)], at: min(6.7), doneAt: min(6.6) },
 				{ kind: "tool", tool: "Write", text: "after-cart.png", toolId: "p12", input: { file_path: "/Users/demo/code/storefront-staging/.claude/work/rendu/after-cart.png", content: "" }, output: "ok", at: min(6.5), doneAt: min(6.5) },
-				{ kind: "tool", tool: "mcp__cockpit__illustrer", text: "capture", toolId: "p13", input: { genre: "capture", titre: "The cart summary at 390 px wide", source: "capture", image: "/Users/demo/code/storefront-staging/.claude/work/rendu/after-cart.png", reperes: [{ x: 0.3, y: 0.18, texte: "The title wraps onto two lines instead of being cut off." }, { x: 0.82, y: 0.78, texte: "The total stays visible without scrolling." }] }, output: "Illustration notée (capture).", at: min(6), doneAt: min(6) },
-				{ kind: "tool", tool: "mcp__cockpit__illustrer", text: "mesure", toolId: "p14", input: { genre: "mesure", titre: "The cart query", source: "mesure", unite: "ms", commande: "pnpm --filter api bench orders:cart", mesures: [{ label: "GET /api/cart · p95", avant: 1840, apres: 310 }, { label: "Response size", avant: 912, apres: 64, unite: "KB" }] }, output: "Illustration notée (mesure).", at: min(5.5), doneAt: min(5.5) },
-				{ kind: "tool", tool: "mcp__cockpit__illustrer", text: "frise", toolId: "p15", input: { genre: "frise", titre: "Why the cart was slow", source: "depot", etapes: [{ label: "Cart", detail: "lists 40 lines", etat: "neutre" }, { label: "API", detail: "include: images", etat: "casse" }, { label: "Database", detail: "1,200 images read", etat: "neutre" }, { label: "Response", detail: "912 KB", etat: "neutre" }] }, output: "Illustration notée (frise).", at: min(5.2), doneAt: min(5.2) },
+				{ kind: "tool", tool: "mcp__cockpit__illustrer", text: "capture", toolId: "p13", input: { genre: "capture", titre: "The cart summary at 390 px wide", source: "capture", image: "/Users/demo/code/storefront-staging/.claude/work/rendu/after-cart.png", reperes: [{ x: 0.3, y: 0.18, texte: "The title wraps onto two lines instead of being cut off." }, { x: 0.82, y: 0.78, texte: "The total stays visible without scrolling." }] }, output: "Illustration noted (capture).", at: min(6), doneAt: min(6) },
+				{ kind: "tool", tool: "mcp__cockpit__illustrer", text: "mesure", toolId: "p14", input: { genre: "mesure", titre: "The cart query", source: "mesure", unite: "ms", commande: "pnpm --filter api bench orders:cart", mesures: [{ label: "GET /api/cart · p95", avant: 1840, apres: 310 }, { label: "Response size", avant: 912, apres: 64, unite: "KB" }] }, output: "Illustration noted (mesure).", at: min(5.5), doneAt: min(5.5) },
+				{ kind: "tool", tool: "mcp__cockpit__illustrer", text: "frise", toolId: "p15", input: { genre: "frise", titre: "Why the cart was slow", source: "depot", etapes: [{ label: "Cart", detail: "lists 40 lines", etat: "neutre" }, { label: "API", detail: "include: images", etat: "casse" }, { label: "Database", detail: "1,200 images read", etat: "neutre" }, { label: "Response", detail: "912 KB", etat: "neutre" }] }, output: "Illustration noted (frise).", at: min(5.2), doneAt: min(5.2) },
 				{ kind: "tool", tool: "Bash", text: "git commit", toolId: "p16", input: { command: "git commit -am \"fix(cart): readable summary on mobile, cart page 6× faster\"" }, output: "[fix/cart-mobile 4e1c2ab] fix(cart): readable summary on mobile, cart page 6× faster\n 4 files changed, 41 insertions(+), 12 deletions(-)", at: min(4), doneAt: min(4) },
 				{ kind: "tool", tool: "Bash", text: "gh pr create", toolId: "p17", input: { command: "gh pr create --fill" }, output: "https://github.com/northwind/storefront/pull/2074", at: min(3.5), doneAt: min(3.2) },
 				{
@@ -1468,7 +1479,7 @@ function previewRuns(): AgentRun[] {
 			sessionId: "agent-4",
 			claudeSessionId: null,
 			cwd: "/Users/demo/code/fix-cart-rounding-nw-3044",
-			label: "Nouvel agent",
+			label: "New agent",
 			contextTokens: 0,
 			running: true,
 			thinking: false,
@@ -1672,7 +1683,8 @@ export function AgentRunsProvider({ children }: { children: ReactNode }) {
 			void api.agents.probeContext(run.sessionId).catch((error) => {
 				// Seul le refus d'un moteur sans canal de contrôle est définitif ;
 				// un agent qui vient de s'arrêter n'a simplement plus rien à dire.
-				if (String(error).includes("canal de contrôle")) {
+				// Le message a changé de langue : l'ancien texte français et l'anglais.
+				if (/canal de contrôle|control channel/i.test(String(error))) {
 					patch(runId, (current) => ({ ...current, noUsage: true }));
 				}
 			});
@@ -1728,15 +1740,15 @@ export function AgentRunsProvider({ children }: { children: ReactNode }) {
 					.then((review) => {
 						const count = review.rounds[review.rounds.length - 1]?.findings.length ?? 0;
 						window.dispatchEvent(new CustomEvent(REVIEW_EVENT, { detail: review }));
-						notify(`Revue de la PR #${review.number} remise : ${count} point${count > 1 ? "s" : ""}`, {
-							label: "Voir",
+						notify(t("app:agents.review.delivered", { number: review.number, count }), {
+							label: t("app:agents.see"),
 							onClick: () => {
 								go("workspace");
 								showTab(target.cwd, { kind: "board", id: target.cwd });
 							},
 						});
 					})
-					.catch((error) => notify(`La revue n'a pas pu être rangée : ${String(error)}`));
+					.catch((error) => notify(t("app:agents.review.recordFailed", { error: String(error) })));
 			}
 			// Fin de tour ou session tout juste prête : le contexte vient de
 			// changer, ou on ne l'a encore jamais mesuré.
@@ -1748,7 +1760,7 @@ export function AgentRunsProvider({ children }: { children: ReactNode }) {
 				const replied = readEvent(payload).turns.some((turn) => turn.kind === "assistant");
 				if (ended || replied) {
 					void api.system
-						.notify(target.label, ended ? "Agent terminé" : "L'agent a répondu")
+						.notify(target.label, ended ? t("app:agents.notify.ended") : t("app:agents.notify.replied"))
 						.catch(() => undefined);
 				}
 			}
@@ -1936,7 +1948,7 @@ export function AgentRunsProvider({ children }: { children: ReactNode }) {
 							...run,
 							turns: [
 								...history,
-								{ kind: "system" as const, text: "Reprise de la conversation." },
+								{ kind: "system" as const, text: t("app:agents.turn.resumed") },
 								...run.turns,
 							],
 						}));
@@ -1969,16 +1981,13 @@ export function AgentRunsProvider({ children }: { children: ReactNode }) {
 					if (stopped || survivors.length === 0) return;
 					const count = survivors.length;
 					const activity = startActivity(
-						count > 1
-							? `${count} agents ont continué sans toi`
-							: "Un agent a continué sans toi",
-						"Le cockpit était fermé ; ils ont travaillé dans leur relais",
+						t("app:agents.survivors.title", { count }),
+						t("app:agents.survivors.detail", { count }),
 					);
-					activity.done(
-						count > 1
-							? "Ils sont de retour dans leurs workspaces, conversation relue."
-							: "Il est de retour dans son workspace, conversation relue.",
-						{ label: "Voir", run: () => go("workspace") },
+					activity.done(t("app:agents.survivors.done", { count }), {
+						label: t("app:agents.see"),
+						run: () => go("workspace"),
+					},
 					);
 				})
 				.catch(() => undefined);
@@ -2165,8 +2174,8 @@ export function AgentRunsProvider({ children }: { children: ReactNode }) {
 					{
 						kind: "system",
 						text: resume
-							? `Relancé en mode ${modeLabel(mode)} — le fil est conservé.`
-							: `Relancé en mode ${modeLabel(mode)} — conversation neuve, l'agent n'avait pas encore de session.`,
+							? t("app:agents.turn.relaunchedModeKept", { mode: modeLabel(mode) })
+							: t("app:agents.turn.relaunchedModeFresh", { mode: modeLabel(mode) }),
 					},
 				]),
 			}));
@@ -2214,8 +2223,8 @@ export function AgentRunsProvider({ children }: { children: ReactNode }) {
 					{
 						kind: "system",
 						text: resume
-							? `Relancé sur ${modelLabel(model)} — le fil est conservé.`
-							: `Relancé sur ${modelLabel(model)} — conversation neuve.`,
+							? t("app:agents.turn.relaunchedModelKept", { model: modelLabel(model) })
+							: t("app:agents.turn.relaunchedModelFresh", { model: modelLabel(model) }),
 					},
 				]),
 			}));
@@ -2258,13 +2267,13 @@ export function AgentRunsProvider({ children }: { children: ReactNode }) {
 	const answer = useCallback(
 		(id: string, answers: Array<{ header: string; choice: string }>) => {
 			const lines = answers
-				.map((entry) => `- ${entry.header} : ${entry.choice}`)
+				.map((entry) => `- ${entry.header}: ${entry.choice}`)
 				.join("\n");
 			decide(
 				id,
 				false,
-				`Réponses de l'utilisateur, données depuis le cockpit :\n${lines}\n` +
-					"Poursuis avec ces réponses, sans rappeler AskUserQuestion.",
+				`The user's answers, given from the cockpit:\n${lines}\n` +
+					"Continue with these answers, without calling AskUserQuestion again.",
 			);
 		},
 		[decide],
@@ -2295,8 +2304,8 @@ export function AgentRunsProvider({ children }: { children: ReactNode }) {
 				.notify(
 					run?.label ?? "Agent",
 					isQuestion(request)
-						? "L'agent te pose une question"
-						: `Autorisation demandée · ${request.tool}`,
+						? t("app:agents.notify.question")
+						: t("app:agents.notify.permission", { tool: request.tool }),
 				)
 				.catch(() => undefined);
 		}
@@ -2414,7 +2423,7 @@ export function useOpenRunFor(claudeSessionId: string | null | undefined): strin
  */
 export function useAgentActions(): AgentActions {
 	const store = useContext(ActionsContext);
-	if (!store) throw new Error("useAgentActions doit être utilisé dans AgentRunsProvider");
+	if (!store) throw new Error("useAgentActions must be used inside AgentRunsProvider");
 	return store;
 }
 
@@ -2425,7 +2434,7 @@ export function useAgentActions(): AgentActions {
  */
 export function useAgentGuard(): AgentGuard {
 	const store = useContext(GuardContext);
-	if (!store) throw new Error("useAgentGuard doit être utilisé dans AgentRunsProvider");
+	if (!store) throw new Error("useAgentGuard must be used inside AgentRunsProvider");
 	return store;
 }
 
@@ -2433,7 +2442,7 @@ export function useAgentRuns(): AgentRunsStore {
 	const state = useContext(StateContext);
 	const actions = useContext(ActionsContext);
 	if (!state || !actions) {
-		throw new Error("useAgentRuns doit être utilisé dans AgentRunsProvider");
+		throw new Error("useAgentRuns must be used inside AgentRunsProvider");
 	}
 	return useMemo(() => ({ ...actions, ...state }), [actions, state]);
 }

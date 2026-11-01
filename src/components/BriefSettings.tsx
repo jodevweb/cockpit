@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { Button } from "@/components/ui";
 import { api } from "@/lib/ipc";
 import { useAsync } from "@/lib/useAsync";
@@ -17,6 +18,7 @@ import { useCockpit } from "@/app/store";
  * toute façon pas, sans que personne ait à la désactiver.
  */
 export function BriefSettings() {
+	const { t } = useTranslation("components3");
 	const { config, reloadConfig, notify } = useCockpit();
 	const sources = useAsync(() => api.brief.sources(), []);
 	const [enabled, setEnabled] = useState(true);
@@ -34,7 +36,7 @@ export function BriefSettings() {
 		try {
 			await api.config.update({ brief: { enabled, off } });
 			reloadConfig();
-			notify("Contexte des agents enregistré.");
+			notify(t("briefSettings.saved"));
 		} catch (error) {
 			notify(String(error));
 		} finally {
@@ -50,10 +52,7 @@ export function BriefSettings() {
 	return (
 		<div className="flex flex-col gap-3">
 			<p className="text-[11px] leading-relaxed text-ink-faint">
-				Avant qu'un agent ne démarre, le cockpit rassemble ce qu'il sait déjà de la
-				branche : le ticket, les retours de revue, ce qui a été tenté ici. Le dossier
-				s'affiche au-dessus du champ de saisie, et rien ne part sans être passé sous
-				les yeux.
+				{t("briefSettings.intro")}
 			</p>
 
 			<div className="panel flex flex-col gap-3 p-3.5">
@@ -65,10 +64,9 @@ export function BriefSettings() {
 						className="mt-0.5 accent-[var(--color-accent)]"
 					/>
 					<span>
-						Rassembler un contexte au lancement d'un agent
+						{t("briefSettings.enable")}
 						<span className="mt-0.5 block text-[10px] leading-snug text-ink-faint">
-							Décoché, le champ de saisie redevient nu : rien n'est composé, rien n'est
-							demandé aux services branchés.
+							{t("briefSettings.enableHint")}
 						</span>
 					</span>
 				</label>
@@ -76,7 +74,7 @@ export function BriefSettings() {
 				{enabled ? (
 					<div className="flex flex-col gap-2 border-t border-line-soft pt-3">
 						<p className="text-[10px] tracking-wide text-ink-faint uppercase">
-							Sources cochées à l'ouverture
+							{t("briefSettings.sourcesTitle")}
 						</p>
 						{sources.data?.map((source) => (
 							<label
@@ -102,7 +100,7 @@ export function BriefSettings() {
 
 				<div className="flex justify-end">
 					<Button variant="solid" loading={saving} onClick={() => void save()}>
-						Enregistrer
+						{t("briefSettings.save")}
 					</Button>
 				</div>
 			</div>

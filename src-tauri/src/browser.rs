@@ -348,26 +348,26 @@ pub async fn inspect(cwd: &str, x: f64, y: f64) -> Result<serde_json::Value> {
 	let port = std::fs::read_to_string(port_path(cwd))
 		.ok()
 		.and_then(|raw| raw.trim().parse::<u16>().ok())
-		.ok_or_else(|| CockpitError::msg("Le navigateur de ce workspace ne tourne pas."))?;
+		.ok_or_else(|| CockpitError::msg(crate::i18n::t("browser.notRunning")))?;
 	let targets: Vec<serde_json::Value> = reqwest::Client::new()
 		.get(format!("http://127.0.0.1:{port}/json/list"))
 		.timeout(Duration::from_millis(800))
 		.send()
 		.await
-		.map_err(|e| CockpitError::msg(format!("Navigateur injoignable : {e}")))?
+		.map_err(|e| CockpitError::msg(crate::i18n::tf("browser.unreachable", &[("error", &e)])))?
 		.json()
 		.await
-		.map_err(|e| CockpitError::msg(format!("Réponse du navigateur illisible : {e}")))?;
+		.map_err(|e| CockpitError::msg(crate::i18n::tf("browser.unreadable", &[("error", &e)])))?;
 	// La première page de la liste est celle qui a servi en dernier : celle
 	// qu'on regarde.
 	let socket_url = targets
 		.iter()
 		.find(|target| target["type"] == "page")
 		.and_then(|page| page["webSocketDebuggerUrl"].as_str())
-		.ok_or_else(|| CockpitError::msg("Aucune page ouverte."))?;
+		.ok_or_else(|| CockpitError::msg(crate::i18n::t("browser.noPage")))?;
 	let (mut socket, _) = tokio_tungstenite::connect_async(socket_url)
 		.await
-		.map_err(|e| CockpitError::msg(format!("Connexion à la page refusée : {e}")))?;
+		.map_err(|e| CockpitError::msg(crate::i18n::tf("browser.pageConnection", &[("error", &e)])))?;
 	let expression = INSPECT.replace("__X__", &format!("{x:.1}")).replace("__Y__", &format!("{y:.1}"));
 	let ask = serde_json::json!({
 		"id": 1, "method": "Runtime.evaluate",
@@ -376,7 +376,7 @@ pub async fn inspect(cwd: &str, x: f64, y: f64) -> Result<serde_json::Value> {
 	socket
 		.send(Message::text(ask.to_string()))
 		.await
-		.map_err(|e| CockpitError::msg(format!("Question à la page : {e}")))?;
+		.map_err(|e| CockpitError::msg(crate::i18n::tf("browser.pageQuery", &[("error", &e)])))?;
 	let answer = tokio::time::timeout(Duration::from_secs(3), async {
 		while let Some(Ok(message)) = socket.next().await {
 			let Message::Text(raw) = message else { continue };
@@ -390,7 +390,7 @@ pub async fn inspect(cwd: &str, x: f64, y: f64) -> Result<serde_json::Value> {
 	.await
 	.ok()
 	.flatten()
-	.ok_or_else(|| CockpitError::msg("La page n'a pas répondu."))?;
+	.ok_or_else(|| CockpitError::msg(crate::i18n::t("browser.pageNoAnswer")))?;
 	let _ = socket.close(None).await;
 	Ok(answer)
 }
@@ -398,15 +398,12 @@ pub async fn inspect(cwd: &str, x: f64, y: f64) -> Result<serde_json::Value> {
 /// Lance le navigateur s'il ne tourne pas, et rend son port.
 async fn ensure(cwd: &str) -> Result<u16> {
 	let port = port_for(cwd)
-		.ok_or_else(|| CockpitError::msg("Impossible de réserver un port pour le navigateur."))?;
+		.ok_or_else(|| CockpitError::msg(crate::i18n::t("browser.noPort")))?;
 	if alive(port).await {
 		return Ok(port);
 	}
 	let line = launch_line(cwd, port).ok_or_else(|| {
-		CockpitError::msg(
-			"Aucun navigateur trouvé : installe Chrome, Chromium, Edge ou Brave, ou indique le \
-			 tien dans les réglages du flux de travail.",
-		)
+		CockpitError::msg(crate::i18n::t("browser.notFound"))
 	})?;
 	let child = std::process::Command::new(&line[0])
 		.args(&line[1..])
@@ -414,7 +411,7 @@ async fn ensure(cwd: &str) -> Result<u16> {
 		.stdout(std::process::Stdio::null())
 		.stderr(std::process::Stdio::null())
 		.spawn()
-		.map_err(|e| CockpitError::msg(format!("Le navigateur n'a pas démarré : {e}")))?;
+		.map_err(|e| CockpitError::msg(crate::i18n::tf("browser.startFailed", &[("error", &e)])))?;
 	let _ = std::fs::write(pid_path(cwd), child.id().to_string());
 
 	for _ in 0..100 {
@@ -423,7 +420,7 @@ async fn ensure(cwd: &str) -> Result<u16> {
 		}
 		tokio::time::sleep(Duration::from_millis(150)).await;
 	}
-	Err(CockpitError::msg("Le navigateur a démarré mais ne répond pas."))
+	Err(CockpitError::msg(crate::i18n::t("browser.startedNoAnswer")))
 }
 
 /// Ce qu'on fait dans la page depuis l'interface.
@@ -535,18 +532,18 @@ pub async fn watch(shared: SharedBrowsers, cwd: String) -> Result<()> {
 	let port = ensure(&cwd).await?;
 	let version: serde_json::Value = reqwest::get(format!("http://127.0.0.1:{port}/json/version"))
 		.await
-		.map_err(|e| CockpitError::msg(format!("Navigateur injoignable : {e}")))?
+		.map_err(|e| CockpitError::msg(crate::i18n::tf("browser.unreachable", &[("error", &e)])))?
 		.json()
 		.await
-		.map_err(|e| CockpitError::msg(format!("Réponse du navigateur illisible : {e}")))?;
+		.map_err(|e| CockpitError::msg(crate::i18n::tf("browser.unreadable", &[("error", &e)])))?;
 	let endpoint = version
 		.get("webSocketDebuggerUrl")
 		.and_then(|value| value.as_str())
-		.ok_or_else(|| CockpitError::msg("Le navigateur ne donne pas son adresse de débogage."))?
+		.ok_or_else(|| CockpitError::msg(crate::i18n::t("browser.noDebugAddress")))?
 		.to_string();
 	let (socket, _) = tokio_tungstenite::connect_async(&endpoint)
 		.await
-		.map_err(|e| CockpitError::msg(format!("Connexion au navigateur refusée : {e}")))?;
+		.map_err(|e| CockpitError::msg(crate::i18n::tf("browser.connection", &[("error", &e)])))?;
 
 	let (actions, inbox) = mpsc::unbounded_channel();
 	let feed = Arc::new(Feed::default());
@@ -810,7 +807,7 @@ pub async fn frame(shared: &SharedBrowsers, cwd: &str, after: u64) -> Result<Vec
 		.unwrap()
 		.get(cwd)
 		.map(|viewer| viewer.feed.clone())
-		.ok_or_else(|| CockpitError::msg("Ce navigateur n'est pas ouvert."))?;
+		.ok_or_else(|| CockpitError::msg(crate::i18n::t("browser.notOpen")))?;
 	let deadline = Instant::now() + FRAME_WAIT;
 	loop {
 		// L'écoute se prend avant de regarder : une image arrivée entre les deux
@@ -819,7 +816,7 @@ pub async fn frame(shared: &SharedBrowsers, cwd: &str, after: u64) -> Result<Vec
 		{
 			let latest = feed.latest.lock().unwrap();
 			if latest.closed {
-				return Err(CockpitError::msg("Le navigateur s'est fermé."));
+				return Err(CockpitError::msg(crate::i18n::t("browser.closed")));
 			}
 			if latest.shot.seq > after && !latest.jpeg.is_empty() {
 				let header = serde_json::to_vec(&latest.shot).unwrap_or_default();
@@ -842,11 +839,11 @@ pub fn act(shared: &SharedBrowsers, cwd: &str, action: Action) -> Result<()> {
 	let viewers = shared.0.lock().unwrap();
 	let viewer = viewers
 		.get(cwd)
-		.ok_or_else(|| CockpitError::msg("Ce navigateur n'est pas ouvert."))?;
+		.ok_or_else(|| CockpitError::msg(crate::i18n::t("browser.notOpen")))?;
 	viewer
 		.actions
 		.send(action)
-		.map_err(|_| CockpitError::msg("Le navigateur s'est fermé."))
+		.map_err(|_| CockpitError::msg(crate::i18n::t("browser.closed")))
 }
 
 /// Cesse de regarder, sans rien arrêter : l'agent garde son navigateur.

@@ -2,6 +2,7 @@ import clsx from "clsx";
 import { ChevronLeft, ChevronRight, Clapperboard, Pause, Play, Volume2, VolumeX, X } from "lucide-react";
 import { AnimatePresence, motion } from "motion/react";
 import { useEffect, useMemo, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { useAgentActions, useAgentRuns, type AgentRun, type Turn } from "@/app/agents";
 import { useDecisions } from "@/app/decisions";
 import { useCockpit } from "@/app/store";
@@ -18,6 +19,7 @@ import { localFileUrl } from "@/lib/localFile";
 import { say, silence } from "@/lib/narrator";
 import { markRecapSeen } from "@/lib/recapSeen";
 import { usePersistentState } from "@/lib/useAsync";
+import { t } from "@/i18n";
 
 /**
  * La journée en images : ce que chaque agent a fait, à regarder plutôt qu'à
@@ -36,10 +38,10 @@ import { usePersistentState } from "@/lib/useAsync";
 
 type Period = "1h" | "3h" | "day";
 
-const PERIODS: Array<[Period, string, number]> = [
-	["1h", "Depuis 1 h", 3_600_000],
-	["3h", "Depuis 3 h", 3 * 3_600_000],
-	["day", "Aujourd'hui", 0],
+const PERIODS: Array<[Period, number]> = [
+	["1h", 3_600_000],
+	["3h", 3 * 3_600_000],
+	["day", 0],
 ];
 
 function since(period: Period): number {
@@ -48,7 +50,7 @@ function since(period: Period): number {
 		start.setHours(0, 0, 0, 0);
 		return start.getTime();
 	}
-	return Date.now() - (PERIODS.find(([id]) => id === period)?.[2] ?? 0);
+	return Date.now() - (PERIODS.find(([id]) => id === period)?.[1] ?? 0);
 }
 
 /** Une image d'une histoire : un instant du film, ou ce que la planche montre. */
@@ -66,7 +68,7 @@ interface Story {
 	head: string;
 	at: number;
 	duration: number | null;
-	status: { label: string; tone: "success" | "warning" | "neutral" };
+	status: { label: string; tone: "success" | "warning" | "neutral"; pr?: boolean };
 	slides: Slide[];
 }
 
@@ -98,9 +100,9 @@ function storiesOf(runs: AgentRun[], from: number): Story[] {
 			if (data.empty && summary.changes.length === 0) return;
 			const shipped = delivered(episode, answer, run.cwd);
 			const slides: Slide[] = [];
-			if (data.video) slides.push({ kind: "video", key: "video", path: data.video.path, caption: "La recette, filmée par le cockpit." });
-			if (data.apres) slides.push({ kind: "media", key: "apres", media: data.apres, caption: "Après." });
-			if (data.avant) slides.unshift({ kind: "media", key: "avant", media: data.avant, caption: "Avant." });
+			if (data.video) slides.push({ kind: "video", key: "video", path: data.video.path, caption: t("views:recap.caption.video") });
+			if (data.apres) slides.push({ kind: "media", key: "apres", media: data.apres, caption: t("views:recap.caption.after") });
+			if (data.avant) slides.unshift({ kind: "media", key: "avant", media: data.avant, caption: t("views:recap.caption.before") });
 			for (const item of data.illustrations) slides.push({ kind: "illustration", key: item.key, item, caption: item.titre, cwd: run.cwd });
 			// Sept images au plus : une histoire se regarde en une vingtaine de
 			// secondes. Ce qui prouve passe d'abord, puis les moments du film qui
@@ -116,14 +118,14 @@ function storiesOf(runs: AgentRun[], from: number): Story[] {
 			slides.splice(MAX_SLIDES);
 			const review = shipped.reviews.at(-1);
 			const status = summary.asks
-				? { label: "attend ta réponse", tone: "warning" as const }
+				? { label: t("views:recap.status.waiting"), tone: "warning" as const }
 				: review
-					? { label: `PR ${review.label} prête`, tone: "success" as const }
+					? { label: t("views:recap.status.prReady", { label: review.label }), tone: "success" as const, pr: true }
 					: summary.testsFail === false
-						? { label: "tests verts", tone: "success" as const }
+						? { label: t("views:recap.status.testsGreen"), tone: "success" as const }
 						: summary.testsFail
-							? { label: "tests rouges", tone: "warning" as const }
-							: { label: "a rendu la main", tone: "neutral" as const };
+							? { label: t("views:recap.status.testsRed"), tone: "warning" as const }
+							: { label: t("views:recap.status.handedBack"), tone: "neutral" as const };
 			found.push({
 				key: `${run.id}-${index}`,
 				run,
@@ -184,6 +186,7 @@ const TONES = {
 };
 
 export function RecapView() {
+	const { t } = useTranslation("views");
 	const { runs } = useAgentRuns();
 	const decisions = useDecisions();
 	const { go } = useCockpit();
@@ -196,22 +199,26 @@ export function RecapView() {
 		return markRecapSeen;
 	}, []);
 	const agents = new Set(stories.map((story) => story.run.id)).size;
-	const prs = stories.filter((story) => story.status.label.startsWith("PR")).length;
+	const prs = stories.filter((story) => story.status.pr).length;
 
 	return (
 		<div className="flex min-h-0 flex-1 flex-col overflow-y-auto">
 			<header className="flex flex-wrap items-center gap-x-4 gap-y-2 px-6 pt-5 pb-4">
 				<div className="flex min-w-0 flex-col">
-					<h1 className="m-0 text-[20px] font-semibold text-ink">Ce qui s'est passé</h1>
+					<h1 className="m-0 text-[20px] font-semibold text-ink">{t("recap.title")}</h1>
 					<span className="text-[13px] text-ink-muted">
 						{stories.length === 0
-							? "Aucun tour terminé sur la période."
-							: `${stories.length} tour${stories.length > 1 ? "s" : ""} · ${agents} agent${agents > 1 ? "s" : ""}${prs > 0 ? ` · ${prs} PR prête${prs > 1 ? "s" : ""}` : ""}`}
+							? t("recap.noTurns")
+							: [
+									t("recap.turns", { count: stories.length }),
+									t("recap.agents", { count: agents }),
+									...(prs > 0 ? [t("recap.prsReady", { count: prs })] : []),
+								].join(" · ")}
 						{decisions.length > 0 ? (
 							<>
 								{" · "}
 								<button type="button" onClick={() => go("decisions")} className="focus-ring rounded font-semibold text-warning hover:underline">
-									{decisions.length} décision{decisions.length > 1 ? "s" : ""} t'attend{decisions.length > 1 ? "ent" : ""}
+									{t("recap.decisionsWaiting", { count: decisions.length })}
 								</button>
 							</>
 						) : null}
@@ -219,7 +226,7 @@ export function RecapView() {
 				</div>
 				<span className="flex-1" />
 				<div className="flex rounded-lg bg-raised p-0.5">
-					{PERIODS.map(([id, label]) => (
+					{PERIODS.map(([id]) => (
 						<button
 							key={id}
 							type="button"
@@ -229,12 +236,12 @@ export function RecapView() {
 								period === id ? "bg-surface font-medium text-ink shadow-card" : "text-ink-muted hover:text-ink",
 							)}
 						>
-							{label}
+							{t(`recap.period.${id}`)}
 						</button>
 					))}
 				</div>
 				<Button variant="solid" icon={Play} disabled={stories.length === 0} onClick={() => setPlaying(0)}>
-					Tout regarder
+					{t("recap.watchAll")}
 				</Button>
 			</header>
 
@@ -244,8 +251,7 @@ export function RecapView() {
 						<Clapperboard size={20} />
 					</span>
 					<p className="max-w-md text-[13px] leading-relaxed text-ink-muted">
-						Chaque tour qu'un agent termine devient ici une histoire courte : ce qu'il a changé, montré, filmé.
-						Élargis la période, ou reviens après avoir lancé du travail.
+						{t("recap.empty")}
 					</p>
 				</div>
 			) : (
@@ -260,7 +266,7 @@ export function RecapView() {
 							<span className="relative block h-44 overflow-hidden bg-raised">
 								<Cover story={story} />
 								<span className="absolute right-2 bottom-2 flex items-center gap-1 rounded-md bg-[#0f1315]/80 px-2 py-0.5 font-mono text-[11px] text-[#eef3f4]">
-									<Play size={10} /> {story.slides.length} image{story.slides.length > 1 ? "s" : ""}
+									<Play size={10} /> {t("recap.images", { count: story.slides.length })}
 								</span>
 							</span>
 							<span className="flex flex-col gap-1.5 p-3.5">
@@ -294,6 +300,7 @@ const SLIDE_SECONDS = 3.2;
  * une barre par image en haut, la phrase en légende, et la voix si on la veut.
  */
 function Player({ stories, start, onClose }: { stories: Story[]; start: number; onClose: () => void }) {
+	const { t } = useTranslation("views");
 	const { show } = useAgentActions();
 	const [storyIndex, setStoryIndex] = useState(start);
 	const [slideIndex, setSlideIndex] = useState(-1);
@@ -372,12 +379,12 @@ function Player({ stories, start, onClose }: { stories: Story[]; start: number; 
 				</div>
 				<div className="flex items-center gap-2 px-5 pt-3 text-[12.5px] text-[#aab6ba]">
 					<span className="min-w-0 flex-1 truncate">
-						<b className="text-[#eef3f4]">{story.run.label}</b> · histoire {storyIndex + 1} sur {stories.length}
+						<b className="text-[#eef3f4]">{story.run.label}</b> · {t("recap.player.story", { index: storyIndex + 1, total: stories.length })}
 					</span>
 					<button
 						type="button"
-						aria-label={voice ? "Couper la voix" : "Raconter à voix haute"}
-						title={voice ? "Couper la voix" : "Raconter à voix haute"}
+						aria-label={voice ? t("recap.player.voiceOff") : t("recap.player.voiceOn")}
+						title={voice ? t("recap.player.voiceOff") : t("recap.player.voiceOn")}
 						onClick={() => setVoice(!voice)}
 						className="focus-ring grid size-8 place-items-center rounded-full hover:bg-[#283236]"
 					>
@@ -385,13 +392,13 @@ function Player({ stories, start, onClose }: { stories: Story[]; start: number; 
 					</button>
 					<button
 						type="button"
-						aria-label={paused ? "Reprendre" : "Pause"}
+						aria-label={paused ? t("recap.player.resume") : t("recap.player.pause")}
 						onClick={() => setPaused((value) => !value)}
 						className="focus-ring grid size-8 place-items-center rounded-full hover:bg-[#283236]"
 					>
 						{paused ? <Play size={15} /> : <Pause size={15} />}
 					</button>
-					<button type="button" aria-label="Fermer" onClick={onClose} className="focus-ring grid size-8 place-items-center rounded-full hover:bg-[#283236]">
+					<button type="button" aria-label={t("recap.player.close")} onClick={onClose} className="focus-ring grid size-8 place-items-center rounded-full hover:bg-[#283236]">
 						<X size={16} />
 					</button>
 				</div>
@@ -416,14 +423,14 @@ function Player({ stories, start, onClose }: { stories: Story[]; start: number; 
 										{story.status.label}
 									</span>
 									<p className="m-0 max-w-3xl text-[28px] leading-tight font-semibold">{story.head}</p>
-									{story.duration ? <span className="font-mono text-[12px] text-[#aab6ba]">{clock(story.duration)} de travail</span> : null}
+									{story.duration ? <span className="font-mono text-[12px] text-[#aab6ba]">{t("recap.player.workTime", { duration: clock(story.duration) })}</span> : null}
 								</div>
 							)}
 						</motion.div>
 					</AnimatePresence>
 					<button
 						type="button"
-						aria-label="Image précédente"
+						aria-label={t("recap.player.previous")}
 						onClick={previous}
 						className="focus-ring absolute top-1/2 left-1 grid size-9 -translate-y-1/2 place-items-center rounded-full bg-[#283236]/80 hover:bg-[#283236]"
 					>
@@ -431,7 +438,7 @@ function Player({ stories, start, onClose }: { stories: Story[]; start: number; 
 					</button>
 					<button
 						type="button"
-						aria-label="Image suivante"
+						aria-label={t("recap.player.next")}
 						onClick={next}
 						className="focus-ring absolute top-1/2 right-1 grid size-9 -translate-y-1/2 place-items-center rounded-full bg-[#283236]/80 hover:bg-[#283236]"
 					>
@@ -449,7 +456,7 @@ function Player({ stories, start, onClose }: { stories: Story[]; start: number; 
 						}}
 						className="focus-ring rounded-xl bg-[#2bb3a3] px-4 py-2 text-[13px] font-semibold text-[#03211e]"
 					>
-						Ouvrir la conversation
+						{t("recap.player.openConversation")}
 					</button>
 				</div>
 			</div>

@@ -1,0 +1,297 @@
+{
+	"format": {
+		"justNow": "just now",
+		"bytes": "{{value}} B",
+		"kilobytes": "{{value}} KB",
+		"megabytes": "{{value}} MB"
+	},
+	"automations": {
+		"days": {
+			"mon": "Mon",
+			"tue": "Tue",
+			"wed": "Wed",
+			"thu": "Thu",
+			"fri": "Fri",
+			"sat": "Sat",
+			"sun": "Sun"
+		},
+		"stamp": {
+			"today": "today {{time}}",
+			"tomorrow": "tomorrow {{time}}",
+			"yesterday": "yesterday {{time}}"
+		},
+		"rhythm": {
+			"none": "No day selected",
+			"weekdays": "Monday to Friday at {{time}}",
+			"everyDay": "Every day at {{time}}",
+			"days": "{{days}} at {{time}}"
+		},
+		"run": {
+			"running": "Running",
+			"partial": "Partial",
+			"failed": "Failed",
+			"missed": "Missed",
+			"caughtUp": "Caught up",
+			"manual": "Manual",
+			"onTime": "On time"
+		},
+		"source": {
+			"tracker": "Task tracker"
+		},
+		"event": {
+			"merged": "PR merged",
+			"opened": "PR opened",
+			"updated": "PR updated",
+			"reviewed": "PR reviewed",
+			"done": "Ticket done",
+			"started": "Ticket started",
+			"moved": "Ticket moved",
+			"canceled": "Ticket canceled",
+			"agent": "Agents",
+			"git": "Git action",
+			"resolved": "Error resolved",
+			"assigned": "Error assigned"
+		},
+		"markdown": {
+			"silent": "No answer this time: {{sources}}."
+		}
+	},
+	"world": {
+		"regions": {
+			"arrive": {
+				"label": "Incoming",
+				"hint": "to sort"
+			},
+			"encours": {
+				"label": "In progress",
+				"hint": "you keep control or delegate"
+			},
+			"livrer": {
+				"label": "Ship",
+				"hint": "review and merge"
+			},
+			"prod": {
+				"label": "In production",
+				"hint": "what it changes"
+			}
+		}
+	},
+	"missions": {
+		"awaited": {
+			"understanding": "the lead read the ticket · review what it understood",
+			"approach": "an approach is waiting for your approval",
+			"approval_one": "{{count}} task · nothing starts before your approval",
+			"approval_other": "{{count}} tasks · nothing starts before your approval"
+		},
+		"state": {
+			"understanding": "reading the ticket",
+			"awaitingUnderstanding": "understanding to confirm",
+			"approaching": "approach",
+			"awaitingApproach": "approach to confirm",
+			"planning": "breakdown",
+			"awaitingApproval": "waiting for your approval",
+			"running": "in progress",
+			"integrating": "integration",
+			"done": "closed",
+			"failed": "stopped"
+		}
+	},
+	"episodes": {
+		"gesture": {
+			"runs": "runs {{command}}",
+			"uses": "uses {{tool}}",
+			"usesATool": "uses a tool",
+			"edits": "edits {{file}}",
+			"editsAFile": "edits a file",
+			"delegated": "delegated “{{description}}”",
+			"launchedSubagent": "launched a subagent",
+			"reads": "reads {{file}}",
+			"searches": "searches {{query}}",
+			"browses": "browses {{file}}"
+		}
+	},
+	"worktreeFlow": {
+		"title": "Worktree {{branch}}",
+		"creating": "Creating — dependencies, database… this may take a few minutes.",
+		"timeout": "The worktree for {{branch}} didn't appear after 15 minutes.",
+		"ready": "Worktree ready.",
+		"starting": "Starting the worktree creation…",
+		"readyOpen": "Worktree ready, its workspace is open."
+	},
+	"types": {
+		"triggers": {
+			"ci_red": {
+				"label": "CI turns red",
+				"hint": "on a change in flight"
+			},
+			"review_changes_requested": {
+				"label": "A review requests changes",
+				"hint": "on an open PR"
+			},
+			"pr_stale": {
+				"label": "A change has stopped moving",
+				"hint": "past the delay — drafts are ignored"
+			},
+			"schedule": {
+				"label": "At a regular interval",
+				"hint": "no signal, on the clock — the only one that fires without anything happening"
+			},
+			"linear_assigned": {
+				"label": "A Linear ticket is assigned to me",
+				"hint": "fires again if its priority changes later — the condition judges which one"
+			}
+		},
+		"commentScopes": {
+			"i_commented": "I've already commented on this PR",
+			"i_allowed": "I've explicitly allowed this PR",
+			"hers": "the PR was opened by the Permanence",
+			"mine": "the PR is mine"
+		},
+		"powers": {
+			"rerun_pipeline": "Rerun a pipeline",
+			"create_branch": "Create a branch",
+			"open_draft_pr": "Open a draft PR",
+			"set_label": "Add a label",
+			"open_worktree": "Open a worktree",
+			"start_agent": "Launch an agent",
+			"run_command": "Run a repository command",
+			"open_mission": "Open a mission to write code"
+		},
+		"never": {
+			"review": "approve or reject a review",
+			"assign": "assign",
+			"close": "close",
+			"merge": "merge",
+			"deploy": "deploy"
+		}
+	},
+	"proof": {
+		"defaultTitle": "agent's walkthrough"
+	},
+	"remarks": {
+		"about": "About {{anchor}}: {{text}}",
+		"intro": "A few remarks on your work:",
+		"outro": "Keep them in mind from now on; tell me if any of them seems wrong to you."
+	},
+	"activity": {
+		"unexplainedFailure": "Failed with no explanation."
+	},
+	"ipc": {
+		"previewMissing": "Preview: “{{command}}” has no sample response."
+	},
+	"footprint": {
+		"deleted_one": "{{count}} deleted",
+		"deleted_other": "{{count}} deleted",
+		"created_one": "{{count}} created",
+		"created_other": "{{count}} created",
+		"modified_one": "{{count}} modified",
+		"modified_other": "{{count}} modified"
+	},
+	"chantier": {
+		"slices": {
+			"messages": "Conversation",
+			"memory": "Project instructions",
+			"system": "CLI baseline",
+			"other": "Other"
+		}
+	},
+	"illustrations": {
+		"source": {
+			"mesure": "measured",
+			"depot": "found in the repository",
+			"capture": "captured",
+			"agent": "stated by the agent"
+		}
+	},
+	"film": {
+		"caption": {
+			"read_one": "Reads {{count}} file.",
+			"read_other": "Reads {{count}} files.",
+			"think": "What it assumes.",
+			"edit": "Edits {{file}}.",
+			"testsPass": "Tests pass.",
+			"testsFail": "Some tests fail.",
+			"fix": "Fixes {{file}}.",
+			"seeBrowser": "Checks in the browser.",
+			"seeResult": "Looks at the result.",
+			"deliver": "Delivers.",
+			"handBack": "Hands back control."
+		},
+		"deliver": {
+			"pushed": "Pushed: {{branch}}",
+			"branch": "branch {{branch}}"
+		},
+		"phase": {
+			"read": "read",
+			"edit": "edit",
+			"test": "test",
+			"see": "check on screen",
+			"run": "commands",
+			"agent": "subagents"
+		}
+	},
+	"narrator": {
+		"cloudModels": {
+			"natural": "Natural",
+			"fast": "Fast"
+		},
+		"rates": {
+			"calm": "Calm",
+			"normal": "Normal",
+			"fast": "Fast"
+		},
+		"then": "then",
+		"wrapUp": {
+			"handsBack": "It's done, it's handing back to you.",
+			"changed_one": "it changed {{spoken}} file",
+			"changed_other": "it changed {{spoken}} files",
+			"testsFail": "the tests fail",
+			"testsPass": "the tests pass",
+			"doneBut": "It's done: {{changed}}, but {{tests}}.",
+			"doneAnd": "It's done: {{changed}}, and {{tests}}.",
+			"done": "It's done: {{what}}."
+		},
+		"progress": {
+			"changed_one": "Still working. It has changed {{spoken}} file since your instruction.",
+			"changed_other": "Still working. It has changed {{spoken}} files since your instruction.",
+			"exploring": "Still working, exploring the code."
+		},
+		"line": {
+			"subagent": "It's handing part of the work to a subagent.",
+			"error": "It ran into an error.",
+			"testsFail": "The tests fail.",
+			"testsPass": "The tests pass.",
+			"question": "It needs you: it's asking you a question.",
+			"permission": "It's waiting for your permission to continue."
+		}
+	},
+	"assistant": {
+		"keys": {
+			"space": "Space",
+			"arrow": "Arrow {{direction}}"
+		}
+	},
+	"feedMeta": {
+		"type": "type",
+		"level": "level",
+		"project": "project",
+		"author": "author",
+		"assignee": "assignee",
+		"deployment": "deployment",
+		"attempt": "attempt",
+		"version": "version",
+		"run": "run",
+		"task": "task",
+		"environment": "environment",
+		"commit": "commit",
+		"event": "event",
+		"branch": "branch",
+		"labels": "labels",
+		"reviewers": "reviewers",
+		"priority": "priority",
+		"origin": "origin",
+		"url": "url",
+		"occurrences": "occurrences",
+		"users": "users"
+	}
+}

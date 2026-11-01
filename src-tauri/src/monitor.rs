@@ -203,7 +203,7 @@ async fn scan_project(project: &ProjectConfig, config: &Config) -> (Vec<Change>,
 		Err(erreur) => {
 			if let Some(erreur) = erreur {
 				notes.push(ScanNote {
-					source: format!("{label} · dépôt local"),
+					source: crate::i18n::tf("monitor.localRepoSource", &[("label", &label)]),
 					message: erreur.message,
 					fix: erreur.fix,
 				});
@@ -251,20 +251,19 @@ async fn github_changes(project: &ProjectConfig, label: &str, config: &Config) -
 		let devine = crate::git::github_slug(Path::new(&local_repo(config))).await;
 		let (suite, fix) = match &devine {
 			Some(slug) => (
-				format!(" Ici, c'est « {slug} »."),
+				format!(" {}", crate::i18n::tf("monitor.repoHere", &[("slug", &slug)])),
 				Some(ScanFix {
-					label: format!("Écrire « {slug} »"),
+					label: crate::i18n::tf("monitor.repoWrite", &[("slug", &slug)]),
 					project: project.id.clone(),
 					patch: json!({ "github": { "repo": slug } }),
 				}),
 			),
-			None => (" À corriger dans Réglages → Projets.".to_string(), None),
+			None => (format!(" {}", crate::i18n::t("monitor.repoFixInSettings")), None),
 		};
 		return Err(Some(SourceError {
 			message: format!(
-				"Le dépôt GitHub de ce projet est renseigné « {repo} » : il manque le \
-				 propriétaire. Attendu « propriétaire/dépôt », tel qu'on le lit dans l'URL du \
-				 dépôt.{suite}"
+				"{}{suite}",
+				crate::i18n::tf("monitor.repoMissingOwner", &[("repo", &repo)])
 			),
 			fix,
 		}));

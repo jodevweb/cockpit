@@ -60,18 +60,18 @@ pub fn list(project: &str) -> Vec<Task> {
 
 fn write(project: &str, tasks: &[Task]) -> Result<()> {
 	std::fs::create_dir_all(config_dir())
-		.map_err(|e| CockpitError::msg(format!("Dossier de configuration : {e}")))?;
+		.map_err(|e| CockpitError::msg(crate::i18n::tf("tasks.configDir", &[("error", &e)])))?;
 	let raw = serde_json::to_string_pretty(tasks)
-		.map_err(|e| CockpitError::msg(format!("Sérialisation des tâches : {e}")))?;
+		.map_err(|e| CockpitError::msg(crate::i18n::tf("tasks.serialize", &[("error", &e)])))?;
 	std::fs::write(tasks_path(project), raw)
-		.map_err(|e| CockpitError::msg(format!("Écriture des tâches : {e}")))?;
+		.map_err(|e| CockpitError::msg(crate::i18n::tf("tasks.write", &[("error", &e)])))?;
 	Ok(())
 }
 
 pub fn add(project: &str, text: &str, priority: &str) -> Result<Vec<Task>> {
 	let text = text.trim();
 	if text.is_empty() {
-		return Err(CockpitError::msg("Une tâche a besoin d'un intitulé."));
+		return Err(CockpitError::msg(crate::i18n::t("tasks.titleRequired")));
 	}
 	let mut tasks = list(project);
 	tasks.push(Task {

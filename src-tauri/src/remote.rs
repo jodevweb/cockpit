@@ -27,6 +27,7 @@
 //! l'a demandé.
 
 use crate::error::{CockpitError, Result};
+use crate::i18n::{t, tf};
 use axum::{
 	extract::{Path, State},
 	http::{HeaderMap, StatusCode},
@@ -145,9 +146,9 @@ fn save(config: &RemoteConfig) -> Result<()> {
 		let _ = std::fs::create_dir_all(parent);
 	}
 	let raw = serde_json::to_string_pretty(config)
-		.map_err(|e| CockpitError::msg(format!("État mobile illisible : {e}")))?;
+		.map_err(|e| CockpitError::msg(tf("mobile.errors.stateUnreadable", &[("error", &e)])))?;
 	std::fs::write(&path, raw)
-		.map_err(|e| CockpitError::msg(format!("Écriture de l'état mobile : {e}")))?;
+		.map_err(|e| CockpitError::msg(tf("mobile.errors.stateWrite", &[("error", &e)])))?;
 
 	#[cfg(unix)]
 	{
@@ -177,11 +178,11 @@ pub fn set_enabled(enabled: bool) -> Result<()> {
 	save(&config)?;
 	crate::journal::record(
 		"remote",
-		if enabled {
-			"Accès mobile activé"
+		&t(if enabled {
+			"mobile.journal.enabled"
 		} else {
-			"Accès mobile coupé — appareils révoqués"
-		},
+			"mobile.journal.disabled"
+		}),
 		"",
 		true,
 		"",
@@ -202,10 +203,7 @@ pub fn set_ntfy(server: &str, topic: &str, token: &str) -> Result<()> {
 	let token = token.trim();
 	if !token.is_empty() {
 		if !token.starts_with("tk_") {
-			return Err(CockpitError::msg(
-				"Un jeton ntfy commence par « tk_ » : celui-ci n'en est pas un. \
-				 Le champ a peut-être été rempli automatiquement.",
-			));
+			return Err(CockpitError::msg(t("mobile.errors.ntfyTokenFormat")));
 		}
 		config.ntfy_token = token.to_string();
 	}
@@ -247,16 +245,16 @@ fn record_wake(ok: bool, detail: impl Into<String>) {
 pub async fn test_relay() -> Result<String> {
 	let config = load();
 	if !config.enabled {
-		return Err(CockpitError::msg("L'accès mobile est coupé."));
+		return Err(CockpitError::msg(t("mobile.errors.disabled")));
 	}
 	if config.ntfy_topic.is_empty() {
-		return Err(CockpitError::msg("Aucun sujet ntfy configuré."));
+		return Err(CockpitError::msg(t("mobile.errors.noTopic")));
 	}
-	wake("Cockpit", "Test du relais depuis les Réglages.", None).await;
+	wake("Cockpit", &t("mobile.wake.testBody"), None).await;
 	match last_wake() {
 		Some(status) if status.ok => Ok(status.detail),
 		Some(status) => Err(CockpitError::msg(status.detail)),
-		None => Err(CockpitError::msg("Rien n'a été envoyé.")),
+		None => Err(CockpitError::msg(t("mobile.errors.nothingSent"))),
 	}
 }
 
@@ -265,7 +263,7 @@ pub fn revoke(id: &str) -> Result<()> {
 	let before = config.devices.len();
 	config.devices.retain(|device| device.id != id);
 	if config.devices.len() != before {
-		crate::journal::record("remote", "Appareil révoqué", id, true, "");
+		crate::journal::record("remote", &t("mobile.journal.deviceRevoked"), id, true, "");
 	}
 	save(&config)
 }
@@ -275,7 +273,7 @@ pub fn revoke(id: &str) -> Result<()> {
 pub fn qr_svg(url: &str) -> Result<String> {
 	use qrcode::render::svg;
 	let code = qrcode::QrCode::new(url.as_bytes())
-		.map_err(|e| CockpitError::msg(format!("QR : {e}")))?;
+		.map_err(|e| CockpitError::msg(tf("mobile.errors.qr", &[("error", &e)])))?;
 	Ok(code
 		.render::<svg::Color>()
 		.min_dimensions(200, 200)
@@ -465,10 +463,7 @@ pub async fn start(app: AppHandle) -> Result<()> {
 	}
 
 	if funnel_active().await {
-		return Err(CockpitError::msg(
-			"Tailscale Funnel est actif : il exposerait le cockpit sur Internet. \
-			 Coupe-le (`tailscale funnel off`) avant d'activer l'accès mobile.",
-		));
+		return Err(CockpitError::msg(t("mobile.errors.funnelActive")));
 	}
 
 	// Sans Tailscale, le serveur démarre quand même — mais sur la boucle locale
@@ -484,10 +479,10 @@ pub async fn start(app: AppHandle) -> Result<()> {
 	};
 
 	let origin = Url::parse(&base_url)
-		.map_err(|e| CockpitError::msg(format!("Origine invalide : {e}")))?;
+		.map_err(|e| CockpitError::msg(tf("mobile.errors.invalidOrigin", &[("error", &e)])))?;
 	let webauthn = WebauthnBuilder::new(&host, &origin)
 		.and_then(|builder| builder.rp_name("Cockpit").build())
-		.map_err(|e| CockpitError::msg(format!("WebAuthn : {e}")))?;
+		.map_err(|e| CockpitError::msg(tf("mobile.errors.webauthn", &[("error", &e)])))?;
 
 	let inner: Shared = Arc::new(Inner {
 		app,
@@ -525,7 +520,7 @@ pub async fn start(app: AppHandle) -> Result<()> {
 
 	let listener = tokio::net::TcpListener::bind(("127.0.0.1", PORT))
 		.await
-		.map_err(|e| CockpitError::msg(format!("Port {PORT} : {e}")))?;
+		.map_err(|e| CockpitError::msg(tf("mobile.errors.port", &[("port", &PORT), ("error", &e)])))?;
 
 	tokio::spawn(async move {
 		let _ = axum::serve(listener, router).await;
@@ -560,19 +555,22 @@ fn watch_plans() {
 				}
 				let (title, detail) = match mission.state {
 					crate::mission::MissionState::AwaitingUnderstanding => (
-						"Le maître a lu le ticket",
-						format!("{} — sa compréhension attend ta relecture", mission.title),
+						t("mobile.wake.understandingTitle"),
+						tf("mobile.wake.understandingDetail", &[("title", &mission.title)]),
 					),
 					crate::mission::MissionState::AwaitingApproach => (
-						"Une approche attend ton accord",
-						format!("{} — avant tout découpage", mission.title),
+						t("mobile.wake.approachTitle"),
+						tf("mobile.wake.approachDetail", &[("title", &mission.title)]),
 					),
 					_ => (
-						"Un plan attend ton accord",
-						format!("{} — {} tâche(s)", mission.title, mission.tasks.len()),
+						t("mobile.wake.planTitle"),
+						tf(
+							"mobile.wake.planDetail",
+							&[("title", &mission.title), ("count", &mission.tasks.len())],
+						),
 					),
 				};
-				let sent = wake(title, &detail, None).await;
+				let sent = wake(&title, &detail, None).await;
 				if sent {
 					announced.insert(key(mission));
 				}
@@ -609,11 +607,10 @@ fn watch_permissions() {
 				if announced.contains(&request.id) {
 					continue;
 				}
-				let sent = wake(
-					"Un agent attend",
-					&format!("Demande : {}", request.tool),
-					Some(&request.id),
-				)
+				// Rédigés avant l'attente : les arguments de `tf` ne traversent pas un `await`.
+				let title = t("mobile.wake.agentWaiting");
+				let body = tf("mobile.wake.request", &[("tool", &request.tool)]);
+				let sent = wake(&title, &body, Some(&request.id))
 				.await;
 				if sent {
 					announced.insert(request.id.clone());
@@ -626,7 +623,16 @@ fn watch_permissions() {
 
 // ──────────────────────────── Garde d'entrée ────────────────────────────
 
-fn refuse(status: StatusCode, message: &str) -> Response {
+/// Refus dont le motif vient du catalogue (`mobile.errors.<code>`), dans la
+/// langue du poste. Le code voyage avec : la page décide sur lui, jamais sur
+/// le texte, qui change d'une langue à l'autre.
+fn refuse(status: StatusCode, code: &str) -> Response {
+	let message = t(&format!("mobile.errors.{code}"));
+	(status, Json(json!({ "error": message, "code": code }))).into_response()
+}
+
+/// Refus dont le motif est déjà rédigé (une erreur remontée d'ailleurs).
+fn fail(status: StatusCode, message: &str) -> Response {
 	(status, Json(json!({ "error": message }))).into_response()
 }
 
@@ -654,7 +660,7 @@ const CONTENT_POLICY: &str = "default-src 'self'; script-src 'self' 'unsafe-inli
 /// HTML —, pas de référent, et rien de l'API en cache.
 async fn gatekeeper(request: axum::extract::Request, next: axum::middleware::Next) -> Response {
 	if request.headers().contains_key("tailscale-funnel-request") {
-		return refuse(StatusCode::FORBIDDEN, "Accès public refusé.");
+		return refuse(StatusCode::FORBIDDEN, "publicAccessDenied");
 	}
 	let api = request.uri().path().starts_with("/api/");
 	let mut response = next.run(request).await;
@@ -686,7 +692,7 @@ fn guard(inner: &Shared, headers: &HeaderMap) -> std::result::Result<Device, Res
 		|| host == expected_local
 		|| host == format!("localhost:{PORT}");
 	if !known_host {
-		return Err(refuse(StatusCode::MISDIRECTED_REQUEST, "Hôte inattendu."));
+		return Err(refuse(StatusCode::MISDIRECTED_REQUEST, "unexpectedHost"));
 	}
 
 	let token = headers
@@ -695,7 +701,7 @@ fn guard(inner: &Shared, headers: &HeaderMap) -> std::result::Result<Device, Res
 		.and_then(|value| value.strip_prefix("Bearer "))
 		.unwrap_or_default();
 	if token.is_empty() {
-		return Err(refuse(StatusCode::UNAUTHORIZED, "Appareil non appairé."));
+		return Err(refuse(StatusCode::UNAUTHORIZED, "notPaired"));
 	}
 
 	let print = fingerprint(token);
@@ -704,7 +710,7 @@ fn guard(inner: &Shared, headers: &HeaderMap) -> std::result::Result<Device, Res
 		.devices
 		.into_iter()
 		.find(|device| same_secret(&device.token_hash, &print))
-		.ok_or_else(|| refuse(StatusCode::UNAUTHORIZED, "Appareil inconnu ou révoqué."))?;
+		.ok_or_else(|| refuse(StatusCode::UNAUTHORIZED, "unknownDevice"))?;
 
 	let mut hits = inner.hits.lock().unwrap_or_else(|e| e.into_inner());
 	let entry = hits.entry(device.id.clone()).or_insert((0, Instant::now()));
@@ -713,7 +719,7 @@ fn guard(inner: &Shared, headers: &HeaderMap) -> std::result::Result<Device, Res
 	}
 	entry.0 += 1;
 	if entry.0 > RATE_LIMIT {
-		return Err(refuse(StatusCode::TOO_MANY_REQUESTS, "Trop de requêtes."));
+		return Err(refuse(StatusCode::TOO_MANY_REQUESTS, "tooManyRequests"));
 	}
 
 	Ok(device)
@@ -765,22 +771,19 @@ async fn pair(
 	let from_loopback =
 		inner.host == "localhost" && (host == format!("localhost:{PORT}") || host == format!("127.0.0.1:{PORT}"));
 	if !from_tailnet && !from_loopback {
-		return refuse(
-			StatusCode::MISDIRECTED_REQUEST,
-			"L'appairage ne se fait que depuis le tailnet.",
-		);
+		return refuse(StatusCode::MISDIRECTED_REQUEST, "pairingTailnetOnly");
 	}
 
 	let mut slot = pairing_slot().lock().unwrap_or_else(|e| e.into_inner());
 	let Some((expected, opened)) = slot.clone() else {
-		return refuse(StatusCode::FORBIDDEN, "Aucun appairage en cours.");
+		return refuse(StatusCode::FORBIDDEN, "noPairing");
 	};
 	if opened.elapsed() > PAIRING_TTL {
 		*slot = None;
-		return refuse(StatusCode::FORBIDDEN, "Code expiré.");
+		return refuse(StatusCode::FORBIDDEN, "codeExpired");
 	}
 	if !same_secret(&expected, body.code.trim()) {
-		return refuse(StatusCode::FORBIDDEN, "Code invalide.");
+		return refuse(StatusCode::FORBIDDEN, "codeInvalid");
 	}
 	// Un code ne sert qu'une fois, même si l'appairage échoue plus loin.
 	*slot = None;
@@ -809,9 +812,9 @@ async fn pair(
 	let mut config = load();
 	config.devices.push(device.clone());
 	if let Err(error) = save(&config) {
-		return refuse(StatusCode::INTERNAL_SERVER_ERROR, &error.to_string());
+		return fail(StatusCode::INTERNAL_SERVER_ERROR, &error.to_string());
 	}
-	crate::journal::record("remote", "Appareil appairé", &device.name, true, "");
+	crate::journal::record("remote", &t("mobile.journal.devicePaired"), &device.name, true, "");
 
 	Json(json!({ "deviceId": device.id, "token": token, "name": device.name })).into_response()
 }
@@ -828,16 +831,10 @@ async fn register_start(State(inner): State<Shared>, headers: HeaderMap) -> Resp
 	// garde plus rien. Changer de clé, c'est révoquer l'appareil sur le poste
 	// et l'appairer à nouveau — avec un code qui ne s'affiche que là.
 	if device.passkey.is_some() {
-		return refuse(
-			StatusCode::FORBIDDEN,
-			"Cet appareil a déjà une clé d'accès. Révoque-le sur le poste puis appaire-le à nouveau.",
-		);
+		return refuse(StatusCode::FORBIDDEN, "passkeyExists");
 	}
 	if !enroll_open(&device) {
-		return refuse(
-			StatusCode::FORBIDDEN,
-			"Le délai pour activer Face ID est passé. Révoque cet appareil sur le poste puis appaire-le à nouveau.",
-		);
+		return refuse(StatusCode::FORBIDDEN, "enrollExpired");
 	}
 
 	let user = Uuid::from_bytes(random_bytes::<16>());
@@ -850,7 +847,7 @@ async fn register_start(State(inner): State<Shared>, headers: HeaderMap) -> Resp
 			registrations.insert(device.id.clone(), (state, Instant::now()));
 			Json(challenge).into_response()
 		}
-		Err(error) => refuse(StatusCode::INTERNAL_SERVER_ERROR, &error.to_string()),
+		Err(error) => fail(StatusCode::INTERNAL_SERVER_ERROR, &error.to_string()),
 	}
 }
 
@@ -869,31 +866,31 @@ async fn register_finish(
 		registrations.remove(&device.id)
 	};
 	let Some((state, opened)) = state else {
-		return refuse(StatusCode::FORBIDDEN, "Aucun enregistrement en cours.");
+		return refuse(StatusCode::FORBIDDEN, "noRegistration");
 	};
 	if opened.elapsed() > CHALLENGE_TTL {
-		return refuse(StatusCode::FORBIDDEN, "Défi expiré.");
+		return refuse(StatusCode::FORBIDDEN, "challengeExpired");
 	}
 
 	match inner.webauthn.finish_passkey_registration(&credential, &state) {
 		Ok(passkey) => {
 			let mut config = load();
 			let Some(entry) = config.devices.iter_mut().find(|entry| entry.id == device.id) else {
-				return refuse(StatusCode::UNAUTHORIZED, "Appareil inconnu ou révoqué.");
+				return refuse(StatusCode::UNAUTHORIZED, "unknownDevice");
 			};
 			// Relu sur le disque : deux enregistrements menés en parallèle ne
 			// doivent pas laisser le second écraser la clé du premier.
 			if entry.passkey.is_some() {
-				return refuse(StatusCode::FORBIDDEN, "Cet appareil a déjà une clé d'accès.");
+				return refuse(StatusCode::FORBIDDEN, "passkeyAlreadySet");
 			}
 			entry.passkey = Some(passkey);
 			if let Err(error) = save(&config) {
-				return refuse(StatusCode::INTERNAL_SERVER_ERROR, &error.to_string());
+				return fail(StatusCode::INTERNAL_SERVER_ERROR, &error.to_string());
 			}
-			crate::journal::record("remote", "Clé d'accès enregistrée", &device.name, true, "");
+			crate::journal::record("remote", &t("mobile.journal.passkeyRegistered"), &device.name, true, "");
 			Json(json!({ "ok": true })).into_response()
 		}
-		Err(error) => refuse(StatusCode::FORBIDDEN, &error.to_string()),
+		Err(error) => fail(StatusCode::FORBIDDEN, &error.to_string()),
 	}
 }
 
@@ -1084,7 +1081,7 @@ async fn transcript(
 		.into_iter()
 		.find(|status| status.session_id == session);
 	let Some(status) = status else {
-		return refuse(StatusCode::NOT_FOUND, "Cet agent n'est plus actif.");
+		return refuse(StatusCode::NOT_FOUND, "agentGone");
 	};
 
 	let file = status.claude_session_id.as_deref().and_then(session_file);
@@ -1137,7 +1134,7 @@ async fn changes(
 		return response;
 	}
 	let Some(cwd) = agent_cwd(&inner, &session) else {
-		return refuse(StatusCode::NOT_FOUND, "Cet agent n'est plus actif.");
+		return refuse(StatusCode::NOT_FOUND, "agentGone");
 	};
 	match crate::tour::changes(std::path::Path::new(&cwd), None).await {
 		Ok(found) => Json(json!({
@@ -1170,7 +1167,7 @@ async fn media(
 		return response;
 	}
 	let Some(cwd) = agent_cwd(&inner, &session) else {
-		return refuse(StatusCode::NOT_FOUND, "Cet agent n'est plus actif.");
+		return refuse(StatusCode::NOT_FOUND, "agentGone");
 	};
 	let kind = match std::path::Path::new(&query.path)
 		.extension()
@@ -1181,24 +1178,24 @@ async fn media(
 		Some("jpg") | Some("jpeg") => "image/jpeg",
 		Some("gif") => "image/gif",
 		Some("webp") => "image/webp",
-		_ => return refuse(StatusCode::FORBIDDEN, "Seules les images se lisent d'ici."),
+		_ => return refuse(StatusCode::FORBIDDEN, "imagesOnly"),
 	};
 	let root = std::path::Path::new(&cwd);
 	let asked = std::path::Path::new(&query.path);
 	let target = if asked.is_absolute() { asked.to_path_buf() } else { root.join(asked) };
 	let (Ok(root), Ok(target)) = (root.canonicalize(), target.canonicalize()) else {
-		return refuse(StatusCode::NOT_FOUND, "Image introuvable.");
+		return refuse(StatusCode::NOT_FOUND, "imageNotFound");
 	};
 	if !target.starts_with(&root) {
-		return refuse(StatusCode::FORBIDDEN, "Hors du dossier de cet agent.");
+		return refuse(StatusCode::FORBIDDEN, "outsideFolder");
 	}
 	match std::fs::metadata(&target) {
 		Ok(meta) if meta.len() <= 12 * 1_048_576 => {}
-		_ => return refuse(StatusCode::NOT_FOUND, "Image introuvable ou trop lourde."),
+		_ => return refuse(StatusCode::NOT_FOUND, "imageTooLarge"),
 	}
 	match std::fs::read(&target) {
 		Ok(bytes) => ([("content-type", kind), ("cache-control", "private, max-age=300")], bytes).into_response(),
-		Err(_) => refuse(StatusCode::NOT_FOUND, "Image introuvable."),
+		Err(_) => refuse(StatusCode::NOT_FOUND, "imageNotFound"),
 	}
 }
 
@@ -1213,7 +1210,7 @@ async fn screen(
 		return response;
 	}
 	let Some(cwd) = agent_cwd(&inner, &session) else {
-		return refuse(StatusCode::NOT_FOUND, "Cet agent n'est plus actif.");
+		return refuse(StatusCode::NOT_FOUND, "agentGone");
 	};
 	match crate::browser::snapshot(&cwd).await {
 		Some((bytes, url)) => {
@@ -1221,7 +1218,7 @@ async fn screen(
 			let url = urlencoding::encode(&url).into_owned();
 			([("content-type", "image/jpeg".to_string()), ("x-page-url", url)], bytes).into_response()
 		}
-		None => refuse(StatusCode::NOT_FOUND, "Son navigateur ne tourne pas."),
+		None => refuse(StatusCode::NOT_FOUND, "browserNotRunning"),
 	}
 }
 
@@ -1245,12 +1242,12 @@ async fn deny(
 		Ok(device) => device,
 		Err(response) => return response,
 	};
-	match crate::permissions::answer(&body.id, false, Some("Refusé depuis le mobile.".into())) {
+	match crate::permissions::answer(&body.id, false, Some("Denied from mobile.".into())) {
 		Ok(()) => {
-			crate::journal::record("remote", "Outil refusé", &body.id, true, &device.name);
+			crate::journal::record("remote", &t("mobile.journal.toolDenied"), &body.id, true, &device.name);
 			Json(json!({ "ok": true })).into_response()
 		}
-		Err(error) => refuse(StatusCode::BAD_REQUEST, &error.to_string()),
+		Err(error) => fail(StatusCode::BAD_REQUEST, &error.to_string()),
 	}
 }
 
@@ -1263,14 +1260,14 @@ async fn quick_deny(State(inner): State<Shared>, Path(nonce): Path<String>) -> R
 		nonces.remove(&nonce)
 	};
 	let Some((id, _)) = target else {
-		return refuse(StatusCode::FORBIDDEN, "Lien de refus expiré.");
+		return refuse(StatusCode::FORBIDDEN, "denyLinkExpired");
 	};
-	match crate::permissions::answer(&id, false, Some("Refusé depuis la notification.".into())) {
+	match crate::permissions::answer(&id, false, Some("Denied from the notification.".into())) {
 		Ok(()) => {
-			crate::journal::record("remote", "Outil refusé", &id, true, "notification");
-			Html("<p>Refusé.</p>").into_response()
+			crate::journal::record("remote", &t("mobile.journal.toolDenied"), &id, true, "notification");
+			Html(format!("<p>{}</p>", t("mobile.remote.quickDenied"))).into_response()
 		}
-		Err(error) => refuse(StatusCode::BAD_REQUEST, &error.to_string()),
+		Err(error) => fail(StatusCode::BAD_REQUEST, &error.to_string()),
 	}
 }
 
@@ -1292,10 +1289,7 @@ async fn challenge(
 		Err(response) => return response,
 	};
 	let Some(passkey) = device.passkey.clone() else {
-		return refuse(
-			StatusCode::FORBIDDEN,
-			"Cet appareil n'a pas de clé d'accès : il ne peut que lire et refuser.",
-		);
+		return refuse(StatusCode::FORBIDDEN, "noPasskey");
 	};
 
 	match inner.webauthn.start_passkey_authentication(&[passkey]) {
@@ -1314,7 +1308,7 @@ async fn challenge(
 			);
 			Json(json!({ "actionId": id, "options": request })).into_response()
 		}
-		Err(error) => refuse(StatusCode::INTERNAL_SERVER_ERROR, &error.to_string()),
+		Err(error) => fail(StatusCode::INTERNAL_SERVER_ERROR, &error.to_string()),
 	}
 }
 
@@ -1341,31 +1335,31 @@ async fn execute(
 		challenges.remove(&body.action_id)
 	};
 	let Some(pending) = pending else {
-		return refuse(StatusCode::FORBIDDEN, "Défi inconnu ou déjà consommé.");
+		return refuse(StatusCode::FORBIDDEN, "challengeUnknown");
 	};
 	if pending.device != device.id {
-		return refuse(StatusCode::FORBIDDEN, "Défi ouvert par un autre appareil.");
+		return refuse(StatusCode::FORBIDDEN, "challengeOtherDevice");
 	}
 	if pending.at.elapsed() > CHALLENGE_TTL {
-		return refuse(StatusCode::FORBIDDEN, "Défi expiré.");
+		return refuse(StatusCode::FORBIDDEN, "challengeExpired");
 	}
 	if inner
 		.webauthn
 		.finish_passkey_authentication(&body.credential, &pending.state)
 		.is_err()
 	{
-		crate::journal::record("remote", "Signature refusée", &device.name, false, "");
-		return refuse(StatusCode::FORBIDDEN, "Signature invalide.");
+		crate::journal::record("remote", &t("mobile.journal.signatureRejected"), &device.name, false, "");
+		return refuse(StatusCode::FORBIDDEN, "invalidSignature");
 	}
 
 	match pending.action {
 		Action::AllowTool { id } => {
-			match crate::permissions::answer(&id, true, Some("Autorisé depuis le mobile.".into())) {
+			match crate::permissions::answer(&id, true, Some("Allowed from mobile.".into())) {
 				Ok(()) => {
-					crate::journal::record("remote", "Outil autorisé", &id, true, &device.name);
+					crate::journal::record("remote", &t("mobile.journal.toolAllowed"), &id, true, &device.name);
 					Json(json!({ "ok": true })).into_response()
 				}
-				Err(error) => refuse(StatusCode::BAD_REQUEST, &error.to_string()),
+				Err(error) => fail(StatusCode::BAD_REQUEST, &error.to_string()),
 			}
 		}
 		// Approuver un plan libère les exécutants : c'est une décision, elle
@@ -1374,14 +1368,14 @@ async fn execute(
 			Ok(mission) => {
 				crate::journal::record(
 					"mission",
-					"Plan approuvé depuis le mobile",
+					&t("mobile.journal.planApproved"),
 					&mission.title,
 					true,
 					&device.name,
 				);
 				Json(json!({ "ok": true, "tasks": mission.tasks.len() })).into_response()
 			}
-			Err(error) => refuse(StatusCode::BAD_REQUEST, &error.to_string()),
+			Err(error) => fail(StatusCode::BAD_REQUEST, &error.to_string()),
 		},
 		// Suspendre et arrêter coupent des agents : ce sont des décisions, elles
 		// passent par la même signature que les autres.
@@ -1391,14 +1385,14 @@ async fn execute(
 				Ok(mission) => {
 					crate::journal::record(
 						"mission",
-						"Mission suspendue depuis le mobile",
+						&t("mobile.journal.missionPaused"),
 						&mission.title,
 						true,
 						&device.name,
 					);
 					Json(json!({ "ok": true, "stopped": stopped })).into_response()
 				}
-				Err(error) => refuse(StatusCode::BAD_REQUEST, &error.to_string()),
+				Err(error) => fail(StatusCode::BAD_REQUEST, &error.to_string()),
 			}
 		}
 		Action::StopMission { id } => {
@@ -1407,55 +1401,58 @@ async fn execute(
 			match crate::mission::set_state(
 				&id,
 				crate::mission::MissionState::Failed,
-				"Mission arrêtée depuis le mobile. Branches et worktrees sont conservés.",
+				&t("mobile.remote.missionStoppedNote"),
 			) {
 				Ok(mission) => {
 					crate::journal::record(
 						"mission",
-						"Mission arrêtée depuis le mobile",
+						&t("mobile.journal.missionStopped"),
 						&mission.title,
 						true,
 						&device.name,
 					);
 					Json(json!({ "ok": true, "stopped": stopped })).into_response()
 				}
-				Err(error) => refuse(StatusCode::BAD_REQUEST, &error.to_string()),
+				Err(error) => fail(StatusCode::BAD_REQUEST, &error.to_string()),
 			}
 		}
 		Action::AnswerQuestion { id, answers } => {
 			let lines = answers
 				.iter()
-				.map(|answer| format!("- {} : {}", answer.header, answer.choice))
+				.map(|answer| format!("- {}: {}", answer.header, answer.choice))
 				.collect::<Vec<_>>()
 				.join("\n");
+			// Le motif part vers l'agent : c'est une consigne, donc en anglais,
+			// avec la directive de langue pour la suite de la conversation.
 			let reason = format!(
-				"Réponses de l'utilisateur, données depuis le mobile :\n{lines}\n\
-				 Poursuis avec ces réponses, sans rappeler AskUserQuestion."
+				"The user's answers, given from mobile:\n{lines}\n\
+				 Continue with these answers, without calling AskUserQuestion again. {}",
+				crate::i18n::reply_directive()
 			);
 			match crate::permissions::answer(&id, false, Some(reason)) {
 				Ok(()) => {
-					crate::journal::record("remote", "Question répondue", &id, true, &device.name);
+					crate::journal::record("remote", &t("mobile.journal.questionAnswered"), &id, true, &device.name);
 					Json(json!({ "ok": true })).into_response()
 				}
-				Err(error) => refuse(StatusCode::BAD_REQUEST, &error.to_string()),
+				Err(error) => fail(StatusCode::BAD_REQUEST, &error.to_string()),
 			}
 		}
 		Action::Message { session_id, text } => {
 			let Some(agents) = inner.app.try_state::<crate::agent::SharedAgents>() else {
-				return refuse(StatusCode::SERVICE_UNAVAILABLE, "Aucun agent en cours.");
+				return refuse(StatusCode::SERVICE_UNAVAILABLE, "noAgents");
 			};
 			match crate::agent::send(&inner.app, &agents, &session_id, &text).await {
 				Ok(()) => {
 					crate::journal::record(
 						"remote",
-						"Message envoyé à un agent",
+						&t("mobile.journal.messageSent"),
 						&session_id,
 						true,
 						&device.name,
 					);
 					Json(json!({ "ok": true })).into_response()
 				}
-				Err(error) => refuse(StatusCode::BAD_REQUEST, &error.to_string()),
+				Err(error) => fail(StatusCode::BAD_REQUEST, &error.to_string()),
 			}
 		}
 	}
@@ -1463,8 +1460,28 @@ async fn execute(
 
 // ──────────────────────────────── La page ────────────────────────────────
 
-async fn page() -> Html<&'static str> {
-	Html(include_str!("mobile.html"))
+async fn page() -> Html<String> {
+	Html(render_page(&crate::i18n::lang()))
+}
+
+/// La page, dans une langue : son attribut `lang` (qui règle aussi les
+/// pluriels et les dates côté page) et son catalogue, fusionné sur l'anglais,
+/// posé en tête avant tout autre script.
+///
+/// Le JSON vit dans une balise `<script>` : une traduction qui contiendrait
+/// `</script>` la fermerait. D'où `<\/`, que JSON lit comme `</`.
+fn render_page(lang: &str) -> String {
+	let catalog = crate::i18n::namespace_for(lang, "mobile");
+	let json = serde_json::to_string(&catalog)
+		.unwrap_or_else(|_| "{}".into())
+		.replace("</", "<\\/");
+	include_str!("mobile.html")
+		.replacen(r#"<html lang="en">"#, &format!(r#"<html lang="{lang}">"#), 1)
+		.replacen(
+			"<head>",
+			&format!("<head>\n\t\t<script>window.I18N = {json};</script>"),
+			1,
+		)
 }
 
 /// La palette, telle que l'app du poste l'utilise.
@@ -1533,10 +1550,15 @@ pub async fn wake(title: &str, body: &str, permission_id: Option<&str>) -> bool 
 			let mut nonces = handle.deny_nonces.lock().unwrap_or_else(|e| e.into_inner());
 			nonces.insert(nonce.clone(), (id.to_string(), Instant::now()));
 			actions.push(format!(
-				"http, Refuser, {}/api/quick-deny/{nonce}, method=GET, clear=true",
+				"http, {}, {}/api/quick-deny/{nonce}, method=GET, clear=true",
+				action_label("mobile.wake.deny"),
 				handle.base_url
 			));
-			actions.push(format!("view, Ouvrir, {}/, clear=true", handle.base_url));
+			actions.push(format!(
+				"view, {}, {}/, clear=true",
+				action_label("mobile.wake.open"),
+				handle.base_url
+			));
 		}
 	}
 
@@ -1557,7 +1579,7 @@ pub async fn wake(title: &str, body: &str, permission_id: Option<&str>) -> bool 
 	// jamais sonné.
 	match request.send().await {
 		Ok(response) if response.status().is_success() => {
-			record_wake(true, format!("Publié ({}).", response.status()));
+			record_wake(true, tf("mobile.wake.published", &[("status", &response.status())]));
 			true
 		}
 		Ok(response) => {
@@ -1565,18 +1587,25 @@ pub async fn wake(title: &str, body: &str, permission_id: Option<&str>) -> bool 
 			record_wake(
 				false,
 				match status.as_u16() {
-					401 | 403 => format!("Refusé ({status}) — jeton de publication invalide."),
-					429 => format!("Refusé ({status}) — trop de tentatives, le serveur temporise."),
-					_ => format!("Refusé ({status})."),
+					401 | 403 => tf("mobile.wake.rejectedToken", &[("status", &status)]),
+					429 => tf("mobile.wake.rejectedRate", &[("status", &status)]),
+					_ => tf("mobile.wake.rejected", &[("status", &status)]),
 				},
 			);
 			false
 		}
 		Err(error) => {
-			record_wake(false, format!("Serveur ntfy injoignable : {error}"));
+			record_wake(false, tf("mobile.wake.unreachable", &[("error", &error)]));
 			false
 		}
 	}
+}
+
+/// Libellé d'un bouton de notification. L'en-tête `Actions` de ntfy sépare ses
+/// champs par des virgules et ses actions par des points-virgules : une
+/// traduction qui en contiendrait casserait le bouton.
+fn action_label(key: &str) -> String {
+	t(key).replace([',', ';'], " ")
 }
 
 /// Poignée du serveur en cours, pour les fonctions appelées hors requête.
@@ -1617,6 +1646,47 @@ mod tests {
 			}
 			other => panic!("variante inattendue : {other:?}"),
 		}
+	}
+
+	/// La page part avec sa langue et son catalogue, posé avant tout script, et
+	/// aucune traduction ne peut fermer la balise qui le porte.
+	#[test]
+	fn la_page_porte_sa_langue() {
+		let page = render_page("fr");
+		assert!(page.contains(r#"<html lang="fr">"#));
+		let start = page.find("window.I18N = ").expect("catalogue absent");
+		assert!(start < page.find("prefers-color-scheme").unwrap());
+		let end = start + page[start..].find("</script>").unwrap();
+		let json = &page[start + "window.I18N = ".len()..end].trim_end_matches(';');
+		let catalog: Value = serde_json::from_str(json).expect("catalogue illisible");
+		assert_eq!(catalog.pointer("/common/connecting").and_then(Value::as_str), Some("Connexion…"));
+	}
+
+	/// Chaque clé lue en dur par la page existe en anglais : une clé oubliée
+	/// s'afficherait telle quelle sur le téléphone.
+	#[test]
+	fn les_cles_de_la_page_existent() {
+		let page = include_str!("mobile.html");
+		let catalog = crate::i18n::namespace_for("en", "mobile");
+		let has = |key: &str| {
+			let pointer = |k: &str| format!("/{}", k.replace('.', "/"));
+			catalog.pointer(&pointer(key)).is_some()
+				|| catalog.pointer(&pointer(&format!("{key}_other"))).is_some()
+		};
+		let mut checked = 0;
+		for opener in ["t(\"", "th(\"", "data-i18n=\"", "data-i18n-placeholder=\"", "data-i18n-aria-label=\""] {
+			for (index, _) in page.match_indices(opener) {
+				// `t(` au milieu d'un mot (`set(`, `split(`…) n'est pas une traduction.
+				if index > 0 && page.as_bytes()[index - 1].is_ascii_alphanumeric() {
+					continue;
+				}
+				let rest = &page[index + opener.len()..];
+				let key = &rest[..rest.find('"').unwrap()];
+				assert!(has(key), "clé absente du catalogue anglais : {key}");
+				checked += 1;
+			}
+		}
+		assert!(checked > 50, "trop peu de clés trouvées : {checked}");
 	}
 
 	/// Deux empreintes de longueurs différentes ne doivent jamais se confondre,

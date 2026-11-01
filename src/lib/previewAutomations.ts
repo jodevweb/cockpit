@@ -36,7 +36,7 @@ function occurrences(days: number[], time: string, from: Date, count: number, di
 
 const daily: Automation = {
 	id: "auto-daily",
-	name: "Mon daily",
+	name: "My daily",
 	template: "daily",
 	days: [1, 3, 5],
 	time: "14:00",
@@ -44,12 +44,12 @@ const daily: Automation = {
 	window: "since",
 	sources: { github: true, tracker: true, cockpit: true, sentry: true },
 	prompt:
-		"Résume ce que j'ai fait sur la période, pour le daily de l'équipe. Quatre parties : Livré, En cours, Bloqué, Ensuite. Une ligne par sujet ; regroupe une PR et le ticket qu'elle traite. Pas de jargon interne au code : l'équipe produit écoute aussi.",
+		"Summarize what I did over the period, for the team daily. Four parts: Shipped, In progress, Blocked, Next. One line per topic; group a PR with the ticket it addresses. No code-internal jargon: the product team is listening too.",
 	catchUp: true,
 	notify: true,
 	enabled: true,
 	createdAt: "2026-09-01T08:00:00Z",
-	corrections: [{ at: "2026-10-21T12:10:00Z", text: "Ne cite pas les PR de dépendances." }],
+	corrections: [{ at: "2026-10-21T12:10:00Z", text: "Don't mention dependency PRs." }],
 	pdf: true,
 	slackWebhook: "••••••••",
 };
@@ -57,7 +57,7 @@ const daily: Automation = {
 const morning: Automation = {
 	...daily,
 	id: "auto-revue",
-	name: "Revue du matin",
+	name: "Morning review",
 	template: "blank",
 	days: [1, 2, 3, 4, 5],
 	time: "09:00",
@@ -66,44 +66,44 @@ const morning: Automation = {
 	corrections: [],
 	pdf: false,
 	slackWebhook: "",
-	prompt: "Les PR qui attendent ma relecture, de la plus ancienne à la plus récente, avec ce qui a bougé cette nuit.",
+	prompt: "PRs waiting for my review, oldest first, with what moved overnight.",
 };
 
 const ITEMS: AutomationItem[] = [
 	{ id: "gh:northwind/storefront#412", source: "github", title: "Catalog: add a product and its product page", url: "https://github.com/northwind/storefront/pull/412", event: "merged", detail: "northwind/storefront · PR #412 · closed", at: "" },
-	{ id: "tk:NW-3514", source: "tracker", title: "Catalog: adding a product and its product page", url: "https://linear.app/northwind/issue/NW-3514", event: "done", detail: "NW-3514 · En recette · Catalog", at: "" },
+	{ id: "tk:NW-3514", source: "tracker", title: "Catalog: adding a product and its product page", url: "https://linear.app/northwind/issue/NW-3514", event: "done", detail: "NW-3514 · In QA · Catalog", at: "" },
 	{ id: "gh:northwind/storefront#418", source: "github", title: "Loyalty: rebase onto main", url: "https://github.com/northwind/storefront/pull/418", event: "updated", detail: "northwind/storefront · PR #418 · open", at: "" },
-	{ id: "ck:storefront-loyalty", source: "cockpit", title: "Agents dans storefront-loyalty", url: "", event: "agent", detail: "6 tours · 41 min", at: "" },
+	{ id: "ck:storefront-loyalty", source: "cockpit", title: "Agents in storefront-loyalty", url: "", event: "agent", detail: "6 turns · 41 min", at: "" },
 	{ id: "gh:northwind/storefront#421", source: "github", title: "Product search filters", url: "https://github.com/northwind/storefront/pull/421", event: "opened", detail: "northwind/storefront · PR #421 · open", at: "" },
-	{ id: "tk:NW-3530", source: "tracker", title: "Loyalty points ledger: schema", url: "https://linear.app/northwind/issue/NW-3530", event: "moved", detail: "NW-3530 · Bloqué · Loyalty", at: "" },
+	{ id: "tk:NW-3530", source: "tracker", title: "Loyalty points ledger: schema", url: "https://linear.app/northwind/issue/NW-3530", event: "moved", detail: "NW-3530 · Blocked · Loyalty", at: "" },
 	{ id: "gh:northwind/storefront#409", source: "github", title: "Dependency bump", url: "https://github.com/northwind/storefront/pull/409", event: "reviewed", detail: "northwind/storefront · PR #409 · open", at: "" },
-	{ id: "tk:NW-3541", source: "tracker", title: "Checkout v2: QA", url: "https://linear.app/northwind/issue/NW-3541", event: "started", detail: "NW-3541 · En cours · Checkout", at: "" },
+	{ id: "tk:NW-3541", source: "tracker", title: "Checkout v2: QA", url: "https://linear.app/northwind/issue/NW-3541", event: "started", detail: "NW-3541 · In progress · Checkout", at: "" },
 ];
 
 const PARTS: AutomationPart[] = [
 	{
-		title: "Livré",
+		title: "Shipped",
 		lines: [
 			{ id: "p0l0", title: "Catalog: adding a product and its product page", detail: "Merged, the ticket moved to QA.", refs: ["gh:northwind/storefront#412", "tk:NW-3514"], unsourced: false },
 			{ id: "p0l1", title: "Loyalty: branch up to date with main", detail: "Conflicts resolved by an agent, CI back to green.", refs: ["gh:northwind/storefront#418", "ck:storefront-loyalty"], unsourced: false },
 		],
 	},
 	{
-		title: "En cours",
+		title: "In progress",
 		lines: [
 			{ id: "p1l0", title: "Product search filters", detail: "PR open, one review requested.", refs: ["gh:northwind/storefront#421"], unsourced: false },
 			{ id: "p1l1", title: "Checkout v2", detail: "QA on staging still to do.", refs: ["tk:NW-3541"], unsourced: false },
 		],
 	},
 	{
-		title: "Bloqué",
+		title: "Blocked",
 		lines: [
 			{ id: "p2l0", title: "Loyalty points ledger: the schema", detail: "Question asked Thursday in the ticket, no answer yet.", refs: ["tk:NW-3530"], unsourced: false },
 			{ id: "p2l1", title: "Dependency bump", detail: "Reviewed, nothing to tell the team.", refs: ["gh:northwind/storefront#409"], unsourced: false },
 		],
 	},
 	{
-		title: "Ensuite",
+		title: "Next",
 		lines: [
 			{ id: "p3l0", title: "Checkout QA, then merge", detail: "By Wednesday.", refs: ["tk:NW-3541"], unsourced: false },
 			{ id: "p3l1", title: "Sync with the product team on the points ledger", detail: "Proposed, not scheduled yet.", refs: [], unsourced: true },
@@ -138,10 +138,10 @@ function run(
 			? [
 					{ source: "github", state: "read", count: 5, note: "" },
 					state === "partial"
-						? { source: "tracker", state: "silent", count: 0, note: "Linear 401 : jeton expiré" }
+						? { source: "tracker", state: "silent", count: 0, note: "Linear 401: token expired" }
 						: { source: "tracker", state: "read", count: 3, note: "" },
 					{ source: "cockpit", state: "read", count: 1, note: "" },
-					{ source: "sentry", state: "unconfigured", count: 0, note: "aucun jeton Sentry dans les réglages" },
+					{ source: "sentry", state: "unconfigured", count: 0, note: "no Sentry token in settings" },
 				]
 			: [],
 		headline: finished ? "A week focused on the catalog and loyalty points; the points ledger is waiting on a decision." : "",
@@ -155,9 +155,9 @@ function run(
 		postedAt: "",
 		reason:
 			state === "missed"
-				? "Le cockpit était fermé jusqu'après le rendez-vous."
+				? "The cockpit was closed until after the meeting."
 				: state === "failed"
-					? "Claude n'a pas répondu en 300 s."
+					? "Claude didn't answer within 300 s."
 					: "",
 		...extra,
 	};

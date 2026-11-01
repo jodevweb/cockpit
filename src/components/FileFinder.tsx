@@ -1,11 +1,13 @@
 import clsx from "clsx";
 import { FileText, Search } from "lucide-react";
 import { useEffect, useMemo, useRef, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { useCockpit } from "@/app/store";
 import { Button, Spinner } from "@/components/ui";
 import type { WorkGroup } from "@/components/WorkspacePanel";
 import { relativeTo, touchesOf } from "@/lib/chantier";
 import { useFileViewer } from "@/lib/fileViewer";
+import { locale } from "@/i18n";
 import { fuzzy } from "@/lib/fuzzy";
 import { api } from "@/lib/ipc";
 import { useAsync, usePersistentState } from "@/lib/useAsync";
@@ -43,6 +45,7 @@ interface Section {
 }
 
 export function FileFinder({ group }: { group: WorkGroup }) {
+	const { t } = useTranslation("components2");
 	const { activeProject } = useCockpit();
 	const viewer = useFileViewer();
 	const cwd = group.cwd;
@@ -94,9 +97,9 @@ export function FileFinder({ group }: { group: WorkGroup }) {
 					.slice(0, limit)
 					.map((relative) => row(relative, why));
 			return [
-				{ title: "Ouverts récemment", rows: take(recent, 8) },
-				{ title: "Écrits par les agents", rows: take(written, 14, "agent") },
-				{ title: "Modifiés, pas encore commités", rows: take(changed, 14, "changed") },
+				{ title: t("fileFinder.recent"), rows: take(recent, 8) },
+				{ title: t("fileFinder.writtenByAgents"), rows: take(written, 14, "agent") },
+				{ title: t("fileFinder.uncommitted"), rows: take(changed, 14, "changed") },
 			].filter((section) => section.rows.length > 0);
 		}
 		const boost = new Map<string, number>();
@@ -116,9 +119,9 @@ export function FileFinder({ group }: { group: WorkGroup }) {
 			});
 		}
 		found.sort((a, b) => b.score - a.score || a.relative.length - b.relative.length);
-		return found.length > 0 ? [{ title: `${found.length} fichier${found.length > 1 ? "s" : ""}`, rows: found.slice(0, SHOWN) }] : [];
+		return found.length > 0 ? [{ title: t("fileFinder.files", { count: found.length }), rows: found.slice(0, SHOWN) }] : [];
 		// eslint-disable-next-line react-hooks/exhaustive-deps
-	}, [query, index, known, recent, written, changed, cwd]);
+	}, [query, index, known, recent, written, changed, cwd, t]);
 
 	const flat = useMemo(() => sections.flatMap((section) => section.rows), [sections]);
 	useEffect(() => setCursor(0), [query]);
@@ -185,11 +188,11 @@ export function FileFinder({ group }: { group: WorkGroup }) {
 			<Button
 				size="sm"
 				icon={FileText}
-				title="Ouvrir un fichier de ce worktree par son nom (⌘P)"
+				title={t("fileFinder.buttonHint")}
 				onClick={() => (open ? setOpen(false) : show())}
 				active={open}
 			>
-				Fichiers
+				{t("fileFinder.button")}
 			</Button>
 
 			{open ? (
@@ -200,7 +203,7 @@ export function FileFinder({ group }: { group: WorkGroup }) {
 							ref={field}
 							value={query}
 							spellCheck={false}
-							placeholder="Un nom de fichier — « agentmap », « panel work », « apps/web env »"
+							placeholder={t("fileFinder.placeholder")}
 							onChange={(event) => setQuery(event.target.value)}
 							onKeyDown={onKeyDown}
 							className="focus-ring h-8 w-full rounded-lg bg-raised pr-2 pl-8 text-[12.5px] text-ink placeholder:text-ink-faint"
@@ -212,9 +215,9 @@ export function FileFinder({ group }: { group: WorkGroup }) {
 							<p className="px-3 py-8 text-center text-[12px] text-ink-faint">
 								{query.trim()
 									? files.initial || (files.loading && total === 0)
-										? "Je parcours le dépôt…"
-										: "Aucun fichier à ce nom."
-									: "Tape un bout de nom pour chercher dans tout le dépôt."}
+										? t("fileFinder.scanning")
+										: t("fileFinder.noMatch")
+									: t("fileFinder.typeToSearch")}
 							</p>
 						) : (
 							sections.map((section) => (
@@ -243,8 +246,12 @@ export function FileFinder({ group }: { group: WorkGroup }) {
 
 					<div className="flex shrink-0 items-center gap-3 border-t border-line-soft px-3 py-1.5 text-[10.5px] text-ink-faint">
 						{files.loading ? <Spinner size={10} /> : null}
-						<span>{total > 0 ? `${total.toLocaleString("fr-FR")} fichiers` : files.loading ? "parcours du dépôt…" : ""}</span>
-						<span className="ml-auto">↑↓ pour choisir · Entrée pour ouvrir · ⌘P</span>
+						<span>{total > 0
+								? t("fileFinder.total", { count: total, formatted: total.toLocaleString(locale()) })
+								: files.loading
+									? t("fileFinder.scanningShort")
+									: ""}</span>
+						<span className="ml-auto">{t("fileFinder.keys")}</span>
 					</div>
 				</div>
 			) : null}
@@ -265,6 +272,7 @@ function FileRow({
 	onHover: () => void;
 	onPick: () => void;
 }) {
+	const { t } = useTranslation("components2");
 	const cut = row.relative.lastIndexOf("/") + 1;
 	const hits = useMemo(() => new Set(row.hits ?? []), [row.hits]);
 	// Les lettres trouvées, en gras : on voit pourquoi ce fichier répond.
@@ -299,7 +307,7 @@ function FileRow({
 			<span className="min-w-0 flex-1 truncate font-mono text-[10.5px] text-ink-faint">{paint(0, Math.max(0, cut - 1))}</span>
 			{row.why ? (
 				<span className={clsx("shrink-0 text-[10.5px]", row.why === "agent" ? "text-accent" : "text-warning")}>
-					{row.why === "agent" ? "écrit par un agent" : "modifié"}
+					{row.why === "agent" ? t("fileFinder.whyAgent") : t("fileFinder.whyChanged")}
 				</span>
 			) : null}
 		</button>

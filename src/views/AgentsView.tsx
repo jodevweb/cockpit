@@ -18,6 +18,8 @@ import {
 	Wrench,
 } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
+import { useTranslation } from "react-i18next";
+import { t as translate } from "@/i18n";
 import { Markdown } from "@/components/Markdown";
 import { NotebookPanel } from "@/components/NotebookPanel";
 import { ReliabilityPanel } from "@/components/ReliabilityPanel";
@@ -54,10 +56,10 @@ import { useAllSessions, useCockpit } from "@/app/store";
 
 /** Un agent est « vivant » si son journal a bougé dans les 3 dernières minutes. */
 function activityTone(idleSeconds: number) {
-	if (idleSeconds < 180) return { tone: "success" as const, label: "actif", pulse: true };
+	if (idleSeconds < 180) return { tone: "success" as const, label: translate("views:agents.activity.active"), pulse: true };
 	if (idleSeconds < 3600)
-		return { tone: "warning" as const, label: "récent", pulse: false };
-	return { tone: "neutral" as const, label: "dormant", pulse: false };
+		return { tone: "warning" as const, label: translate("views:agents.activity.recent"), pulse: false };
+	return { tone: "neutral" as const, label: translate("views:agents.activity.dormant"), pulse: false };
 }
 
 function SessionRow({
@@ -69,6 +71,7 @@ function SessionRow({
 	selected: boolean;
 	onSelect: () => void;
 }) {
+	const { t } = useTranslation("views");
 	const activity = activityTone(session.idleSeconds);
 	const tokens = session.usage.input + session.usage.output + session.usage.cacheWrite;
 
@@ -80,9 +83,9 @@ function SessionRow({
 					{session.title}
 				</span>
 				{session.awaitingInput && session.idleSeconds < 3600 ? (
-					<Badge tone="critical">attend</Badge>
+					<Badge tone="critical">{t("agents.row.waiting")}</Badge>
 				) : null}
-				{session.hasError ? <Badge tone="critical">err</Badge> : null}
+				{session.hasError ? <Badge tone="critical">{t("agents.row.error")}</Badge> : null}
 			</div>
 			<div className="mt-1 flex items-center gap-2 pl-3.5 text-[10px] text-ink-faint">
 				<span className="truncate font-mono">
@@ -93,16 +96,18 @@ function SessionRow({
 				</span>
 			</div>
 			<div className="mt-1 flex items-center gap-2.5 pl-3.5 font-mono text-[10px] text-ink-faint/70">
-				<span title="échanges">
+				<span title={t("agents.row.exchanges")}>
 					{session.userMessages}↔{session.assistantMessages}
 				</span>
-				<span title="appels d'outils">{session.toolCalls} outils</span>
+				<span title={t("agents.row.toolCallsHint")}>
+					{t("agents.row.tools", { count: session.toolCalls })}
+				</span>
 				{session.subagents > 0 ? (
-					<span className="text-accent-soft/80" title="sous-agents">
-						{session.subagents} agents
+					<span className="text-accent-soft/80" title={t("agents.row.subagentsHint")}>
+						{t("agents.row.subagents", { count: session.subagents })}
 					</span>
 				) : null}
-				<span className="ml-auto" title="tokens (entrée + sortie + écriture cache)">
+				<span className="ml-auto" title={t("agents.row.tokensHint")}>
 					{compactNumber(tokens)} tk
 				</span>
 			</div>
@@ -115,18 +120,20 @@ const EVENT_STYLES: Record<
 	{
 		icon: React.ComponentType<{ size?: number; className?: string }>;
 		accent: string;
+		/** Clé du libellé dans l'espace `views`. */
 		label: string;
 	}
 > = {
-	user: { icon: User, accent: "text-accent-soft", label: "Toi" },
-	assistant: { icon: Bot, accent: "text-ink", label: "Agent" },
-	thinking: { icon: Brain, accent: "text-ink-faint", label: "Réflexion" },
-	tool: { icon: Wrench, accent: "text-info", label: "Outil" },
-	"tool-result": { icon: ChevronRight, accent: "text-ink-faint", label: "Retour" },
-	"tool-error": { icon: ChevronRight, accent: "text-critical", label: "Erreur" },
+	user: { icon: User, accent: "text-accent-soft", label: "agents.event.user" },
+	assistant: { icon: Bot, accent: "text-ink", label: "agents.event.assistant" },
+	thinking: { icon: Brain, accent: "text-ink-faint", label: "agents.event.thinking" },
+	tool: { icon: Wrench, accent: "text-info", label: "agents.event.tool" },
+	"tool-result": { icon: ChevronRight, accent: "text-ink-faint", label: "agents.event.toolResult" },
+	"tool-error": { icon: ChevronRight, accent: "text-critical", label: "agents.event.toolError" },
 };
 
 function TimelineEntry({ event, cwd }: { event: SessionEvent; cwd: string }) {
+	const { t } = useTranslation("views");
 	const [expanded, setExpanded] = useState(false);
 	const style = EVENT_STYLES[event.kind] ?? EVENT_STYLES.assistant;
 	const long = event.text.length > 700;
@@ -196,7 +203,7 @@ function TimelineEntry({ event, cwd }: { event: SessionEvent; cwd: string }) {
 					className="flex items-center gap-2 text-[11px] text-ink-faint italic hover:text-ink-muted"
 				>
 					<Brain size={11} />
-					Réflexion interne
+					{t("agents.event.thinkingInternal")}
 					<ChevronRight
 						size={11}
 						className={clsx("transition-transform", expanded && "rotate-90")}
@@ -221,7 +228,7 @@ function TimelineEntry({ event, cwd }: { event: SessionEvent; cwd: string }) {
 			<div className="mb-1 flex items-center gap-2">
 				<style.icon size={12} className={style.accent} />
 				<span className="text-[10px] font-semibold tracking-[0.06em] text-ink-faint uppercase">
-					{style.label}
+					{t(style.label)}
 				</span>
 				{event.model ? (
 					<span className="font-mono text-[10px] text-ink-faint/60">
@@ -245,7 +252,7 @@ function TimelineEntry({ event, cwd }: { event: SessionEvent; cwd: string }) {
 					onClick={() => setExpanded((open) => !open)}
 					className="mt-1 text-[11px] text-accent-soft hover:underline"
 				>
-					{expanded ? "Réduire" : "Tout afficher"}
+					{expanded ? t("agents.event.collapse") : t("agents.event.expand")}
 				</button>
 			) : null}
 		</div>
@@ -262,6 +269,7 @@ function SessionContext({
 	live: boolean;
 	onResumeHere: () => void;
 }) {
+	const { t } = useTranslation("views");
 	const { notify } = useCockpit();
 	const subagents = useAsync(() => api.sessions.subagents(session.file), [session.file]);
 	const usage = session.usage;
@@ -286,19 +294,19 @@ function SessionContext({
 					className="h-8 w-full justify-center"
 					title={
 						live
-							? "Cette conversation tourne déjà — aller la voir dans son workspace"
-							: "Rouvre la conversation dans un workspace du cockpit"
+							? t("agents.context.goHint")
+							: t("agents.context.resumeHint")
 					}
 				>
-					{live ? "Aller à la conversation" : "Reprendre la conversation"}
+					{live ? t("agents.goToConversation") : t("agents.context.resume")}
 				</Button>
 				<Button
 					icon={PlayCircle}
 					onClick={resume}
 					className="h-8 w-full justify-center"
-					title="Rouvre la conversation dans Terminal.app"
+					title={t("agents.context.resumeTerminalHint")}
 				>
-					Reprendre dans Terminal
+					{t("agents.context.resumeTerminal")}
 				</Button>
 				<div className="grid grid-cols-2 gap-2">
 					<Button
@@ -311,7 +319,7 @@ function SessionContext({
 								.catch((error) => notify(String(error)));
 						}}
 					>
-						Éditeur
+						{t("agents.context.editor")}
 					</Button>
 					<Button
 						variant="outline"
@@ -323,22 +331,22 @@ function SessionContext({
 								.catch((error) => notify(String(error)));
 						}}
 					>
-						Terminal
+						{t("agents.context.terminal")}
 					</Button>
 				</div>
 			</div>
 
 			<div className="flex flex-col gap-3 px-3 pb-4">
-				<Section title="Contexte">
+				<Section title={t("agents.context.title")}>
 					<dl className="flex flex-col gap-1.5 text-[11px]">
 						{[
-							["Répertoire", shortPath(session.cwd, 2)],
-							["Branche", session.gitBranch ?? "—"],
-							["Modèles", session.models.map(modelLabel).join(", ") || "—"],
-							["Démarrée", fromIso(session.startedAt)],
-							["Dernière écriture", fromSeconds(session.idleSeconds)],
-							["Version CLI", session.cliVersion ?? "—"],
-							["Identifiant", session.id.slice(0, 8)],
+							[t("agents.context.directory"), shortPath(session.cwd, 2)],
+							[t("agents.context.branch"), session.gitBranch ?? "—"],
+							[t("agents.context.models"), session.models.map(modelLabel).join(", ") || "—"],
+							[t("agents.context.started"), fromIso(session.startedAt)],
+							[t("agents.context.lastWrite"), fromSeconds(session.idleSeconds)],
+							[t("agents.context.cliVersion"), session.cliVersion ?? "—"],
+							[t("agents.context.id"), session.id.slice(0, 8)],
 						].map(([label, value]) => (
 							<div key={label} className="flex items-baseline justify-between gap-3">
 								<dt className="shrink-0 text-ink-faint">{label}</dt>
@@ -350,13 +358,13 @@ function SessionContext({
 					</dl>
 				</Section>
 
-				<Section title="Consommation">
+				<Section title={t("agents.usage.title")}>
 					<div className="grid grid-cols-2 gap-1.5">
 						{[
-							["entrée", usage.input],
-							["sortie", usage.output],
-							["cache lu", usage.cacheRead],
-							["cache écrit", usage.cacheWrite],
+							[t("agents.usage.input"), usage.input],
+							[t("agents.usage.output"), usage.output],
+							[t("agents.usage.cacheRead"), usage.cacheRead],
+							[t("agents.usage.cacheWrite"), usage.cacheWrite],
 						].map(([label, value]) => (
 							<div
 								key={label as string}
@@ -370,12 +378,12 @@ function SessionContext({
 						))}
 					</div>
 					<p className="mt-1.5 text-[10px] text-ink-faint">
-						{compactNumber(total)} tokens facturables cumulés (hors cache lu).
+						{t("agents.usage.total", { total: compactNumber(total) })}
 					</p>
 				</Section>
 
 				{session.topTools.length > 0 ? (
-					<Section title="Outils">
+					<Section title={t("agents.context.tools")}>
 						<div className="flex flex-wrap gap-1">
 							{session.topTools.map((tool) => (
 								<span
@@ -391,7 +399,7 @@ function SessionContext({
 				) : null}
 
 				{(subagents.data ?? []).length > 0 ? (
-					<Section title="Sous-agents" count={subagents.data?.length}>
+					<Section title={t("agents.context.subagents")} count={subagents.data?.length}>
 						<div className="flex flex-col gap-1">
 							{subagents.data?.map((run) => (
 								<div
@@ -401,7 +409,7 @@ function SessionContext({
 									<div className="flex items-center gap-1.5">
 										<Bot size={11} className="text-accent-soft" />
 										<span className="truncate text-[11px] font-medium text-ink-muted">
-											{run.name || "agent"}
+											{run.name || t("agents.context.agentFallback")}
 										</span>
 										<Badge tone={run.status === "completed" ? "success" : "neutral"}>
 											{run.status}
@@ -419,7 +427,7 @@ function SessionContext({
 				) : null}
 
 				{session.filesTouched.length > 0 ? (
-					<Section title="Fichiers écrits" count={session.filesTouched.length}>
+					<Section title={t("agents.context.filesWritten")} count={session.filesTouched.length}>
 						<div className="flex flex-col gap-0.5">
 							{session.filesTouched.slice(0, 40).map((file) => (
 								<button
@@ -458,19 +466,20 @@ function LiveElsewhere({
 	onGo: () => void;
 	onReadArchive: () => void;
 }) {
+	const { t } = useTranslation("views");
 	return (
 		<div className="flex min-h-0 flex-1 flex-col items-center justify-center gap-3 px-6">
 			<Empty
 				icon={MessageSquare}
-				message="Conversation ouverte dans son workspace"
-				hint="C'est là qu'elle se poursuit, en direct. Ici, on ne lirait que son journal — figé à la dernière écriture, et sans pouvoir répondre."
+				message={t("agents.liveElsewhere.message")}
+				hint={t("agents.liveElsewhere.hint")}
 			/>
 			<div className="flex items-center gap-2">
 				<Button variant="solid" icon={PanelsTopLeft} onClick={onGo}>
-					Aller à la conversation
+					{t("agents.goToConversation")}
 				</Button>
 				<Button variant="outline" onClick={onReadArchive}>
-					Lire le journal
+					{t("agents.liveElsewhere.readLog")}
 				</Button>
 			</div>
 		</div>
@@ -478,6 +487,7 @@ function LiveElsewhere({
 }
 
 export function AgentsView() {
+	const { t } = useTranslation("views");
 	const { sessionsError, sessionsLoading, reloadSessions, focus, clearFocus, activeProject } =
 		useCockpit();
 	const { open: openAgent, show: showAgent } = useAgentActions();
@@ -573,18 +583,18 @@ export function AgentsView() {
 	return (
 		<>
 			<ViewHeader
-				title="Agents IA"
+				title={t("agents.title")}
 				subtitle={
 					<span className="flex items-center gap-2">
 						{live > 0 ? (
 							<span className="flex items-center gap-1.5 text-success">
-								<Dot tone="success" pulse /> {live} agent{live > 1 ? "s" : ""} en activité
+								<Dot tone="success" pulse /> {t("agents.liveCount", { count: live })}
 							</span>
 						) : (
-							<span>Aucun agent actif</span>
+							<span>{t("agents.noneActive")}</span>
 						)}
 						<span className="text-ink-faint/60">·</span>
-						<span>{sessions.length} sessions indexées</span>
+						<span>{t("agents.indexed", { count: sessions.length })}</span>
 					</span>
 				}
 				actions={
@@ -593,17 +603,17 @@ export function AgentsView() {
 							size="sm"
 							active={showTools}
 							onClick={() => setShowTools(!showTools)}
-							title="Afficher les appels d'outils"
+							title={t("agents.toolbar.toolsHint")}
 						>
-							Outils
+							{t("agents.toolbar.tools")}
 						</Button>
 						<Button
 							size="sm"
 							active={showThinking}
 							onClick={() => setShowThinking(!showThinking)}
-							title="Afficher la réflexion interne"
+							title={t("agents.toolbar.thinkingHint")}
 						>
-							Réflexion
+							{t("agents.toolbar.thinking")}
 						</Button>
 						{/* Le carnet vit ici : c'est l'écran des agents, et ce qu'il
 						    contient part avec eux. */}
@@ -611,9 +621,9 @@ export function AgentsView() {
 							size="sm"
 							icon={BookMarked}
 							onClick={() => setShowNotebook(true)}
-							title="Ce que ce dépôt a déjà eu à corriger derrière un agent"
+							title={t("agents.toolbar.notebookHint")}
 						>
-							Carnet
+							{t("agents.toolbar.notebook")}
 						</Button>
 						{/* La mesure à côté du carnet : les deux disent si la boucle
 						    tient, l'un par ce qu'on a corrigé, l'autre par ce que les
@@ -622,20 +632,20 @@ export function AgentsView() {
 							size="sm"
 							icon={Activity}
 							onClick={() => setShowReliability(true)}
-							title="Ce que les agents rendent, ce qu'il faut reprendre, ce que les garde-fous attrapent"
+							title={t("agents.toolbar.loopHint")}
 						>
-							Boucle
+							{t("agents.toolbar.loop")}
 						</Button>
 						<Button
 							size="sm"
 							icon={Gauge}
 							onClick={() => setShowUsage(true)}
-							title="Consommation en jetons — volumes, pas quota"
+							title={t("agents.toolbar.usageHint")}
 						>
-							Conso
+							{t("agents.toolbar.usage")}
 						</Button>
 						{sessionsLoading ? <Spinner /> : null}
-						<Button size="sm" icon={RefreshCw} onClick={reloadSessions} title="Rescanner" />
+						<Button size="sm" icon={RefreshCw} onClick={reloadSessions} title={t("agents.toolbar.rescan")} />
 					</>
 				}
 			/>
@@ -648,14 +658,14 @@ export function AgentsView() {
 						<SearchField
 							value={query}
 							onChange={setQuery}
-							placeholder="Filtrer les sessions…"
+							placeholder={t("agents.filterPlaceholder")}
 						/>
 						<div className="flex items-center gap-1">
 							{(
 								[
-									["live", "En cours"],
-									["recent", "Récentes"],
-									["all", "Toutes"],
+									["live", t("agents.scope.live")],
+									["recent", t("agents.scope.recent")],
+									["all", t("agents.scope.all")],
 								] as Array<["live" | "recent" | "all", string]>
 							).map(([id, label]) => (
 								<Button
@@ -677,9 +687,7 @@ export function AgentsView() {
 								onClick={() => setScope("all")}
 								className="text-left text-[10px] text-ink-faint hover:text-ink-muted"
 							>
-								{hidden} session{hidden > 1 ? "s" : ""} dormante{hidden > 1 ? "s" : ""}{" "}
-								masquée
-								{hidden > 1 ? "s" : ""} — tout afficher
+								{t("agents.hiddenDormant", { count: hidden })}
 							</button>
 						) : null}
 					</div>
@@ -687,8 +695,8 @@ export function AgentsView() {
 						{filtered.length === 0 ? (
 							<Empty
 								icon={Bot}
-								message="Aucune session"
-								hint="Les sessions apparaissent dès qu'un agent Claude Code écrit dans ~/.claude/projects."
+								message={t("agents.empty.message")}
+								hint={t("agents.empty.hint")}
 							/>
 						) : (
 							filtered.map((session) => (
@@ -714,9 +722,9 @@ export function AgentsView() {
 									size="sm"
 									icon={Wand2}
 									onClick={() => setLauncherCwd(selected.cwd)}
-									title="Lancer un agent sur ce dossier avec un prompt tout prêt"
+									title={t("agents.actionsHint")}
 								>
-									Actions
+									{t("agents.actions")}
 								</Button>
 								{showTimeline && !bottom.stuck ? (
 									<Button
@@ -726,15 +734,15 @@ export function AgentsView() {
 											const node = bottom.ref.current;
 											if (node) node.scrollTop = node.scrollHeight;
 										}}
-										title="Revenir aux derniers événements"
+										title={t("agents.toBottomHint")}
 									>
-										En bas
+										{t("agents.toBottom")}
 									</Button>
 								) : null}
 								{showTimeline ? (
-									<Badge mono>{events.length} événements</Badge>
+									<Badge mono>{t("agents.eventCount", { count: events.length })}</Badge>
 								) : (
-									<Badge tone="success">en cours</Badge>
+									<Badge tone="success">{t("agents.running")}</Badge>
 								)}
 							</div>
 							{showTimeline ? (
@@ -757,7 +765,7 @@ export function AgentsView() {
 										/>
 									))}
 									{!timeline.loading && events.length === 0 ? (
-										<Empty message="Rien à afficher avec ces filtres." />
+										<Empty message={t("agents.nothingWithFilters")} />
 									) : null}
 								</div>
 							) : (
@@ -767,8 +775,8 @@ export function AgentsView() {
 					) : (
 						<Empty
 							icon={Bot}
-							message="Sélectionne une session"
-							hint="Chaque session correspond à un agent lancé dans un worktree."
+							message={t("agents.select.message")}
+							hint={t("agents.select.hint")}
 						/>
 					)}
 				</div>

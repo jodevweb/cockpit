@@ -1,4 +1,5 @@
 import { AlertTriangle } from "lucide-react";
+import { useTranslation } from "react-i18next";
 import { Spinner } from "@/components/ui";
 import { useCockpit } from "@/app/store";
 
@@ -24,6 +25,7 @@ import { useCockpit } from "@/app/store";
  * voit sans qu'on l'écrive.
  */
 export function JobProgress({ jobId }: { jobId: string | null }) {
+	const { t } = useTranslation("components3");
 	const { jobs, jobLines } = useCockpit();
 	if (!jobId) return null;
 
@@ -43,7 +45,7 @@ export function JobProgress({ jobId }: { jobId: string | null }) {
 			<div className="flex min-w-0 items-center gap-1.5">
 				<Spinner />
 				<span className="min-w-0 truncate font-mono text-[10px] text-ink-faint">
-					{derniere() ?? "démarrage…"}
+					{derniere() ?? t("jobProgress.starting")}
 				</span>
 			</div>
 		);
@@ -58,14 +60,14 @@ export function JobProgress({ jobId }: { jobId: string | null }) {
 		derniere("stderr") ??
 		derniere("stdout") ??
 		(job.exitCode === null
-			? "la commande s'est arrêtée sans rien dire"
-			: `code de sortie ${job.exitCode}`);
+			? t("jobProgress.silentStop")
+			: t("jobProgress.exitCode", { code: job.exitCode }));
 
 	return (
 		<div className="flex min-w-0 items-center gap-1.5" title={motif}>
 			<AlertTriangle size={11} className="shrink-0 text-critical" />
 			<span className="min-w-0 truncate font-mono text-[10px] text-critical">
-				{job.state === "cancelled" ? "annulé" : "échec"} — {motif}
+				{t(job.state === "cancelled" ? "jobProgress.cancelled" : "jobProgress.failed", { reason: motif })}
 			</span>
 		</div>
 	);

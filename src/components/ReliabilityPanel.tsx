@@ -4,6 +4,7 @@ import { Badge, Button, Empty, Spinner } from "@/components/ui";
 import { api } from "@/lib/ipc";
 import type { HandbackSide } from "@/lib/types";
 import { useAsync } from "@/lib/useAsync";
+import { useTranslation } from "react-i18next";
 
 /**
  * L'état de la boucle : ce qui a été livré, repris, attrapé.
@@ -23,6 +24,7 @@ export function ReliabilityPanel({
 	project: string;
 	onClose: () => void;
 }) {
+	const { t } = useTranslation("components1");
 	const metrics = useAsync(() => api.metrics.collect(project), [project]);
 	const data = metrics.data;
 
@@ -31,10 +33,10 @@ export function ReliabilityPanel({
 			<div className="panel flex max-h-full w-full max-w-3xl flex-col overflow-hidden shadow-2xl shadow-black/50">
 				<div className="hairline-b flex items-center gap-2 px-4 py-2.5">
 					<Activity size={13} className="shrink-0 text-accent-soft" />
-					<span className="text-[12.5px] font-semibold text-ink">État de la boucle</span>
+					<span className="text-[12.5px] font-semibold text-ink">{t("reliabilityPanel.title")}</span>
 					<span className="min-w-0 flex-1 truncate text-[10px] text-ink-faint">
-						{data ? `sur ${data.windowDays} jours` : "…"} — aucun de ces chiffres n'est un
-						objectif
+						{data ? t("reliabilityPanel.window", { count: data.windowDays }) : "…"} —{" "}
+						{t("reliabilityPanel.notGoals")}
 					</span>
 					{metrics.loading ? <Spinner /> : null}
 					<Button size="sm" icon={RefreshCw} onClick={metrics.reload} />
@@ -65,26 +67,25 @@ export function ReliabilityPanel({
 								<p className="flex items-start gap-2 rounded-[var(--radius-panel)] border border-line-soft bg-surface px-2.5 py-2 text-[11.5px] leading-relaxed text-ink-muted">
 									<Eye size={12} className="mt-0.5 shrink-0 text-ink-faint" />
 									<span>
-										Rien à signaler. Ce n'est pas un satisfecit : c'est l'absence de
-										signal, et l'absence de signal se vérifie de temps en temps.
+										{t("reliabilityPanel.nothing")}
 									</span>
 								</p>
 							)}
 
 							<Block
-								title="Ce que les agents rendent"
-								hint="Un rendu repris à la main est le seul retour qui ne soit ni une note ni une impression."
+								title={t("reliabilityPanel.handbacks.title")}
+								hint={t("reliabilityPanel.handbacks.hint")}
 							>
-								<Tile value={data.handbacks.delivered} label="rendus" />
-								<Tile value={data.handbacks.takenBack} label="repris à la main" />
+								<Tile value={data.handbacks.delivered} label={t("reliabilityPanel.handbacks.delivered")} />
+								<Tile value={data.handbacks.takenBack} label={t("reliabilityPanel.handbacks.takenBack")} />
 								<Tile
-									value={`${data.handbacks.rate} %`}
-									label="taux de reprise"
+									value={t("reliabilityPanel.percent", { value: data.handbacks.rate })}
+									label={t("reliabilityPanel.handbacks.rate")}
 									tone={data.handbacks.rate >= 50 ? "warning" : "neutral"}
 								/>
 								<Tile
 									value={data.handbacks.pending}
-									label="reprises à lire"
+									label={t("reliabilityPanel.handbacks.pending")}
 									tone={data.handbacks.pending > 0 ? "accent" : "neutral"}
 								/>
 							</Block>
@@ -93,18 +94,18 @@ export function ReliabilityPanel({
 							    qu'il joint aux agents change-t-il quelque chose ? */}
 							<section>
 								<h3 className="text-[11px] font-semibold tracking-[0.06em] text-ink-muted uppercase">
-									Le contexte joint change-t-il quelque chose
+									{t("reliabilityPanel.context.title")}
 								</h3>
 								{data.handbacks.comparable ? (
 									<>
 										<div className="mt-2 grid grid-cols-2 gap-2">
 											<Side
-												label="avec contexte"
+												label={t("reliabilityPanel.context.with")}
 												side={data.handbacks.briefed}
 												better={data.handbacks.briefed.rate < data.handbacks.plain.rate}
 											/>
 											<Side
-												label="sans contexte"
+												label={t("reliabilityPanel.context.without")}
 												side={data.handbacks.plain}
 												better={data.handbacks.plain.rate < data.handbacks.briefed.rate}
 											/>
@@ -112,61 +113,58 @@ export function ReliabilityPanel({
 										{/* Sans cette phrase, deux pourcentages côte à côte se
 										    lisent comme une preuve. Ils n'en sont pas une. */}
 										<p className="mt-1.5 text-[10.5px] leading-snug text-ink-faint">
-											Ce n'est pas une expérience : le cockpit joint du contexte quand
-											il y en a, donc les deux colonnes ne décrivent pas le même
-											travail — une branche avec ticket et revue est plus cadrée qu'une
-											branche nue. Un écart net est un signal, un petit écart ne dit
-											rien.
+											{t("reliabilityPanel.context.caveat")}
 										</p>
 									</>
 								) : (
 									<p className="mt-1.5 text-[11px] leading-relaxed text-ink-faint">
-										Pas encore comparable — il faut au moins cinq rendus de chaque côté.
-										Pour l'instant : {data.handbacks.briefed.delivered} avec contexte,{" "}
-										{data.handbacks.plain.delivered} sans.
+										{t("reliabilityPanel.context.notComparable", {
+											briefed: data.handbacks.briefed.delivered,
+											plain: data.handbacks.plain.delivered,
+										})}
 									</p>
 								)}
 							</section>
 
 							<Block
-								title="Combien de fois on s'y reprend"
-								hint="Un agent qu'on relance dix fois est un agent parti sans savoir ce qu'on attendait."
+								title={t("reliabilityPanel.turns.title")}
+								hint={t("reliabilityPanel.turns.hint")}
 							>
-								<Tile value={data.turns.sessions} label="conversations" />
-								<Tile value={data.turns.median} label="relances, en général" />
+								<Tile value={data.turns.sessions} label={t("reliabilityPanel.turns.sessions")} />
+								<Tile value={data.turns.median} label={t("reliabilityPanel.turns.median")} />
 								<Tile
 									value={data.turns.longHaul}
-									label="relancées plus de dix fois"
+									label={t("reliabilityPanel.turns.longHaul")}
 									tone={data.turns.longHaul > 0 ? "warning" : "neutral"}
 								/>
-								<Tile value={data.turns.withError} label="finies sur une erreur" />
+								<Tile value={data.turns.withError} label={t("reliabilityPanel.turns.withError")} />
 							</Block>
 
 							<Block
-								title="Ce que les garde-fous valent"
-								hint="Une propriété qui n'a jamais rien attrapé rassure sans rien garantir."
+								title={t("reliabilityPanel.guardrails.title")}
+								hint={t("reliabilityPanel.guardrails.hint")}
 							>
-								<Tile value={data.guardrails.properties} label="propriétés" />
-								<Tile value={data.guardrails.calibrated} label="éprouvées" />
+								<Tile value={data.guardrails.properties} label={t("reliabilityPanel.guardrails.properties")} />
+								<Tile value={data.guardrails.calibrated} label={t("reliabilityPanel.guardrails.calibrated")} />
 								<Tile
 									value={data.guardrails.decorative}
-									label="décoratives"
+									label={t("reliabilityPanel.guardrails.decorative")}
 									tone={data.guardrails.decorative > 0 ? "warning" : "neutral"}
 								/>
 							</Block>
 
 							<Block
-								title="Ce que le carnet retient"
-								hint="Une leçon qui ne part jamais avec un agent n'a pas de portée juste, ou n'avait pas lieu d'être."
+								title={t("reliabilityPanel.memory.title")}
+								hint={t("reliabilityPanel.memory.hint")}
 							>
-								<Tile value={data.memory.lessons} label="leçons" />
-								<Tile value={data.memory.uses} label="emplois" />
+								<Tile value={data.memory.lessons} label={t("reliabilityPanel.memory.lessons")} />
+								<Tile value={data.memory.uses} label={t("reliabilityPanel.memory.uses")} />
 								<Tile
 									value={data.memory.idle}
-									label="jamais servies"
+									label={t("reliabilityPanel.memory.idle")}
 									tone={data.memory.idle > 0 ? "warning" : "neutral"}
 								/>
-								<Tile value={data.memory.stale} label="dormantes" />
+								<Tile value={data.memory.stale} label={t("reliabilityPanel.memory.stale")} />
 							</Block>
 
 							{/* Le titre se corrige tout seul dès qu'un autre que toi a agi :
@@ -174,11 +172,11 @@ export function ReliabilityPanel({
 							<section>
 								<h3 className="text-[11px] font-semibold tracking-[0.06em] text-ink-muted uppercase">
 									{data.deeds.some((deed) => deed.actor !== "me")
-										? "Ce que le cockpit a fait, et à la demande de qui"
-										: "Ce que le cockpit a fait en ton nom"}
+										? t("reliabilityPanel.deeds.titleMixed")
+										: t("reliabilityPanel.deeds.titleMine")}
 								</h3>
 								{data.deeds.length === 0 ? (
-									<Empty message="Rien de consigné sur la période." />
+									<Empty message={t("reliabilityPanel.deeds.empty")} />
 								) : (
 									<ul className="mt-2 flex flex-col gap-1">
 										{data.deeds.map((deed) => (
@@ -187,13 +185,13 @@ export function ReliabilityPanel({
 												className="flex items-center gap-2 rounded-lg border border-line-soft bg-surface px-2.5 py-1.5"
 											>
 												<span className="font-mono text-[11px] text-ink">{deed.kind}</span>
-												{deed.actor !== "me" ? <Badge>Permanence</Badge> : null}
+												{deed.actor !== "me" ? <Badge>{t("reliabilityPanel.deeds.permanence")}</Badge> : null}
 												<span className="ml-auto font-mono text-[11px] text-ink-muted tabular-nums">
 													{deed.count}
 												</span>
 												{deed.failed > 0 ? (
 													<span className="font-mono text-[10px] text-critical tabular-nums">
-														{deed.failed} en échec
+														{t("reliabilityPanel.deeds.failed", { count: deed.failed })}
 													</span>
 												) : null}
 											</li>
@@ -224,6 +222,7 @@ function Side({
 	side: HandbackSide;
 	better: boolean;
 }) {
+	const { t } = useTranslation("components1");
 	return (
 		<div
 			className={clsx(
@@ -238,10 +237,10 @@ function Side({
 					better ? "text-success" : "text-ink",
 				)}
 			>
-				{side.rate} %
+				{t("reliabilityPanel.percent", { value: side.rate })}
 			</p>
 			<p className="mt-1 text-[10px] leading-snug text-ink-faint">
-				repris — {side.takenBack} sur {side.delivered} rendus
+				{t("reliabilityPanel.context.side", { takenBack: side.takenBack, count: side.delivered })}
 			</p>
 		</div>
 	);

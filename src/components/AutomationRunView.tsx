@@ -9,6 +9,8 @@ import { longDay, runLabel, runMarkdown, shortStamp, SOURCE_COLOR, SOURCE_LABEL,
 import { requestDailyPresentation } from "@/lib/dailyHandoff";
 import { api } from "@/lib/ipc";
 import type { AutomationItem, AutomationOverview } from "@/lib/types";
+import { locale } from "@/i18n";
+import { useTranslation } from "react-i18next";
 
 /**
  * Le rendu d'une exécution, et d'où vient chacune de ses lignes.
@@ -31,6 +33,7 @@ export function AutomationRunView({
 	onClose: () => void;
 	onChanged: () => void;
 }) {
+	const { t } = useTranslation("components1");
 	const { go } = useCockpit();
 	const { confirm } = useConfirm();
 	const [busy, setBusy] = useState<"" | "pdf" | "slack" | "correct">("");
@@ -47,7 +50,7 @@ export function AutomationRunView({
 
 	if (!run) {
 		return (
-			<div className="flex flex-1 items-center justify-center text-[13px] text-ink-muted">Aucun rendu à montrer.</div>
+			<div className="flex flex-1 items-center justify-center text-[13px] text-ink-muted">{t("automationRunView.empty")}</div>
 		);
 	}
 
@@ -69,13 +72,13 @@ export function AutomationRunView({
 
 	const copy = () => {
 		void navigator.clipboard.writeText(runMarkdown(automation.name, { ...run, dropped: [...dropped] }));
-		toast.success("Copié en Markdown");
+		toast.success(t("automationRunView.copied"));
 	};
 
 	const rerun = async () => {
 		try {
 			await api.automations.runNow(automation.id);
-			toast.success("Relancée", { description: "La nouvelle exécution apparaîtra dans l'historique." });
+			toast.success(t("automationRunView.rerun"), { description: t("automationRunView.rerunDescription") });
 			onChanged();
 			onClose();
 		} catch (error) {
@@ -97,15 +100,15 @@ export function AutomationRunView({
 
 	const postSlack = async () => {
 		const ok = await confirm({
-			title: "Publier ce rendu sur Slack ?",
-			message: `${kept} ligne${kept > 1 ? "s" : ""} partiront dans le canal du webhook, visibles de toute l'équipe. Les lignes écartées restent ici.`,
-			confirmLabel: "Publier",
+			title: t("automationRunView.slackConfirmTitle"),
+			message: t("automationRunView.slackConfirmMessage", { count: kept }),
+			confirmLabel: t("automationRunView.publish"),
 		});
 		if (!ok) return;
 		setBusy("slack");
 		try {
 			await api.automations.postSlack(automation.id, run.id);
-			toast.success("Publié sur Slack");
+			toast.success(t("automationRunView.postedSlack"));
 			onChanged();
 		} catch (error) {
 			toast.error(String(error));
@@ -120,7 +123,7 @@ export function AutomationRunView({
 		try {
 			await api.automations.correct(automation.id, correction);
 			setCorrection("");
-			toast.success("Correction ajoutée", { description: "La prochaine exécution en tiendra compte." });
+			toast.success(t("automationRunView.correctionAdded"), { description: t("automationRunView.correctionAddedDescription") });
 			onChanged();
 		} catch (error) {
 			toast.error(String(error));
@@ -140,9 +143,9 @@ export function AutomationRunView({
 			<div className="mx-auto flex max-w-[1320px] flex-col gap-4">
 				<div className="flex flex-wrap items-end justify-between gap-4 px-1 pt-1">
 					<div className="flex flex-col gap-1.5">
-						<nav aria-label="Fil" className="flex flex-wrap gap-1.5 text-[12.5px] font-semibold">
+						<nav aria-label={t("automationRunView.breadcrumb")} className="flex flex-wrap gap-1.5 text-[12.5px] font-semibold">
 							<button type="button" onClick={onClose} className="focus-ring rounded text-accent hover:underline">
-								Automatisations
+								{t("automationRunView.automations")}
 							</button>
 							<span className="text-ink-muted">/</span>
 							<button type="button" onClick={onClose} className="focus-ring rounded text-accent hover:underline">
@@ -152,7 +155,7 @@ export function AutomationRunView({
 						<div className="flex flex-wrap items-center gap-2.5">
 							<button
 								type="button"
-								aria-label="Exécution précédente"
+								aria-label={t("automationRunView.previous")}
 								disabled={index >= openable.length - 1}
 								onClick={() => onPick(openable[index + 1].id)}
 								className="focus-ring flex size-8 items-center justify-center rounded-lg border border-line bg-surface hover:bg-hover disabled:opacity-40"
@@ -164,7 +167,7 @@ export function AutomationRunView({
 							</h1>
 							<button
 								type="button"
-								aria-label="Exécution suivante"
+								aria-label={t("automationRunView.next")}
 								disabled={index <= 0}
 								onClick={() => onPick(openable[index - 1].id)}
 								className="focus-ring flex size-8 items-center justify-center rounded-lg border border-line bg-surface hover:bg-hover disabled:opacity-40"
@@ -174,13 +177,15 @@ export function AutomationRunView({
 							<span className={clsx("inline-flex h-6 items-center rounded-full px-2.5 text-[11.5px] font-semibold", TONE_CLASS[label.tone])}>
 								{label.label}
 								{silent.length > 0
-									? ` · sans ${silent.map((source) => SOURCE_LABEL[source.source] ?? source.source).join(", ")}`
+									? ` · ${t("automationRunView.without", { sources: silent.map((source) => SOURCE_LABEL[source.source] ?? source.source).join(", ") })}`
 									: ""}
 							</span>
 						</div>
 						<span className="font-mono text-[12px] text-ink-muted">
-							couvre {shortStamp(new Date(run.from))} → {shortStamp(new Date(run.to))}
-							{run.endedAt ? ` · prêt à ${new Date(run.endedAt).toLocaleTimeString("fr-FR", { hour: "2-digit", minute: "2-digit" })}` : ""}
+							{t("automationRunView.covers", { from: shortStamp(new Date(run.from)), to: shortStamp(new Date(run.to)) })}
+							{run.endedAt
+								? ` · ${t("automationRunView.readyAt", { time: new Date(run.endedAt).toLocaleTimeString(locale(), { hour: "2-digit", minute: "2-digit" }) })}`
+								: ""}
 						</span>
 					</div>
 					<div className="flex flex-wrap gap-2">
@@ -190,7 +195,7 @@ export function AutomationRunView({
 							disabled={run.state === "failed"}
 							className="focus-ring inline-flex h-9 items-center gap-1.5 rounded-lg border border-line bg-surface px-3 text-[12.5px] font-semibold text-ink hover:bg-hover disabled:opacity-50"
 						>
-							<ClipboardCopy size={14} /> Copier en Markdown
+							<ClipboardCopy size={14} /> {t("automationRunView.copyMarkdown")}
 						</button>
 						{run.state !== "failed" ? (
 							<button
@@ -200,17 +205,17 @@ export function AutomationRunView({
 								className="focus-ring inline-flex h-9 items-center gap-1.5 rounded-lg border border-line bg-surface px-3 text-[12.5px] font-semibold text-ink hover:bg-hover disabled:opacity-50"
 							>
 								{busy === "pdf" ? <Spinner size={13} /> : <FileDown size={14} />}
-								{run.exports.length > 0 ? "Refaire le PDF" : "Exporter en PDF"}
+								{run.exports.length > 0 ? t("automationRunView.redoPdf") : t("automationRunView.exportPdf")}
 							</button>
 						) : null}
 						{run.exports.length > 0 ? (
 							<button
 								type="button"
 								onClick={() => void api.automations.revealExports(automation.id).catch(() => undefined)}
-								title="Le dossier des PDF de cette automatisation"
+								title={t("automationRunView.pdfFolderTitle")}
 								className="focus-ring inline-flex h-9 items-center gap-1.5 rounded-lg border border-line bg-surface px-3 text-[12.5px] font-semibold text-ink hover:bg-hover"
 							>
-								<FolderOpen size={14} /> Dossier
+								<FolderOpen size={14} /> {t("automationRunView.folder")}
 							</button>
 						) : null}
 						{automation.slackWebhook && run.state !== "failed" ? (
@@ -218,11 +223,15 @@ export function AutomationRunView({
 								type="button"
 								onClick={() => void postSlack()}
 								disabled={busy === "slack" || Boolean(run.postedAt)}
-								title={run.postedAt ? `Publié le ${shortStamp(new Date(run.postedAt))}` : "Publier le rendu relu"}
+								title={
+									run.postedAt
+										? t("automationRunView.postedOn", { date: shortStamp(new Date(run.postedAt)) })
+										: t("automationRunView.publishTitle")
+								}
 								className="focus-ring inline-flex h-9 items-center gap-1.5 rounded-lg border border-line bg-surface px-3 text-[12.5px] font-semibold text-ink hover:bg-hover disabled:opacity-60"
 							>
 								{busy === "slack" ? <Spinner size={13} /> : <Send size={14} />}
-								{run.postedAt ? "Publié sur Slack" : "Envoyer sur Slack"}
+								{run.postedAt ? t("automationRunView.postedSlack") : t("automationRunView.sendSlack")}
 							</button>
 						) : null}
 						{automation.template === "daily" && run.state !== "failed" ? (
@@ -234,7 +243,7 @@ export function AutomationRunView({
 								}}
 								className="focus-ring inline-flex h-9 items-center gap-1.5 rounded-lg bg-accent px-3 text-[12.5px] font-semibold text-accent-ink hover:bg-accent-soft"
 							>
-								<MonitorPlay size={14} /> Présenter au daily
+								<MonitorPlay size={14} /> {t("automationRunView.presentDaily")}
 							</button>
 						) : null}
 					</div>
@@ -244,18 +253,18 @@ export function AutomationRunView({
 					<article className="flex min-w-0 flex-[999_1_600px] flex-col gap-5 rounded-2xl bg-surface p-6 shadow-card">
 						{run.state === "failed" ? (
 							<div className="rounded-xl bg-critical/10 p-4 text-[13.5px] text-critical">
-								Cette exécution n'a pas abouti : {run.reason}
+								{t("automationRunView.failed", { reason: run.reason })}
 							</div>
 						) : (
 							<>
 								<div className="flex flex-wrap items-start justify-between gap-3">
 									{run.headline ? <p className="max-w-3xl text-[15px] font-medium text-ink">{run.headline}</p> : <span />}
 									<span className="font-mono text-[12px] text-ink-muted">
-										{kept} / {total} lignes gardées
+										{t("automationRunView.kept", { kept, total })}
 									</span>
 								</div>
 								<p className="-mt-3 text-[12.5px] text-ink-muted">
-									Clique une ligne pour l'écarter de la présentation. Elle reste dans l'exécution, barrée.
+									{t("automationRunView.clickHint")}
 								</p>
 								{run.parts.map((part, partIndex) => (
 									<section key={part.title} className="flex flex-col gap-1">
@@ -266,7 +275,7 @@ export function AutomationRunView({
 												{part.lines.filter((line) => !dropped.has(line.id)).length}
 											</span>
 										</div>
-										{part.lines.length === 0 ? <p className="px-3 text-[13px] text-ink-muted">Rien.</p> : null}
+										{part.lines.length === 0 ? <p className="px-3 text-[13px] text-ink-muted">{t("automationRunView.nothing")}</p> : null}
 										{part.lines.map((line) => {
 											const out = dropped.has(line.id);
 											return (
@@ -279,7 +288,7 @@ export function AutomationRunView({
 														aria-pressed={out}
 														onClick={() => toggle(line.id)}
 														className="focus-ring flex min-w-0 flex-1 flex-col gap-1 rounded text-left"
-														title={out ? "Remettre dans la présentation" : "Écarter de la présentation"}
+														title={out ? t("automationRunView.restore") : t("automationRunView.drop")}
 													>
 														<span className={clsx("text-[14px] font-semibold text-ink", out && "line-through")}>{line.title}</span>
 														{line.detail ? (
@@ -289,14 +298,14 @@ export function AutomationRunView({
 													<span className="flex max-w-[45%] shrink-0 flex-wrap justify-end gap-1.5">
 														{line.unsourced ? (
 															<span className="rounded-md bg-warning/15 px-2 py-0.5 text-[11px] font-semibold text-warning">
-																sans source
+																{t("automationRunView.unsourced")}
 															</span>
 														) : null}
 														{line.refs.map((ref) => (
 															<RefChip key={ref} item={byId.get(ref)} reference={ref} />
 														))}
 														{out ? (
-															<span className="rounded-md bg-raised px-2 py-0.5 text-[11px] font-semibold text-ink-muted">écartée</span>
+															<span className="rounded-md bg-raised px-2 py-0.5 text-[11px] font-semibold text-ink-muted">{t("automationRunView.dropped")}</span>
 														) : null}
 													</span>
 												</div>
@@ -311,10 +320,10 @@ export function AutomationRunView({
 					<aside className="flex min-w-[300px] flex-[1_1_340px] flex-col gap-4 lg:max-w-[420px]">
 						<section className="flex flex-col gap-3 rounded-2xl bg-surface p-5 shadow-card">
 							<span className="text-[11px] font-semibold tracking-[0.06em] text-ink-muted uppercase">
-								D'où viennent les éléments
+								{t("automationRunView.sourcesTitle")}
 							</span>
 							{used > 0 ? (
-								<div className="flex h-3 gap-0.5 overflow-hidden rounded-full" role="img" aria-label="Répartition des éléments par source">
+								<div className="flex h-3 gap-0.5 overflow-hidden rounded-full" role="img" aria-label={t("automationRunView.sourcesChart")}>
 									{counts
 										.filter((entry) => entry.count > 0)
 										.map((entry) => (
@@ -334,67 +343,75 @@ export function AutomationRunView({
 						</section>
 
 						<section className="flex flex-col rounded-2xl bg-surface p-5 shadow-card">
-							<span className="mb-2 text-[11px] font-semibold tracking-[0.06em] text-ink-muted uppercase">La trace</span>
-							<TraceRow ok title="Période calculée" note={`${shortStamp(new Date(run.from))} → ${shortStamp(new Date(run.to))}`} />
+							<span className="mb-2 text-[11px] font-semibold tracking-[0.06em] text-ink-muted uppercase">{t("automationRunView.trace")}</span>
+							<TraceRow ok title={t("automationRunView.period")} note={`${shortStamp(new Date(run.from))} → ${shortStamp(new Date(run.to))}`} />
 							{run.sources.map((source) => (
 								<TraceRow
 									key={source.source}
 									ok={source.state !== "silent"}
 									muted={source.state === "unconfigured"}
-									title={`${SOURCE_LABEL[source.source] ?? source.source} ${
-										source.state === "read" ? "lu" : source.state === "silent" ? "muet" : "non branché"
-									}`}
+									title={t(
+										source.state === "read"
+											? "automationRunView.source.read"
+											: source.state === "silent"
+												? "automationRunView.source.silent"
+												: "automationRunView.source.unconfigured",
+										{ source: SOURCE_LABEL[source.source] ?? source.source },
+									)}
 									note={
 										source.state === "read"
-											? `${source.count} élément${source.count > 1 ? "s" : ""}`
+											? t("automationRunView.source.items", { count: source.count })
 											: source.state === "silent"
-												? `${source.note || "pas de réponse"}. Sa partie manque, et c'est dit en tête.`
-												: `${source.note}. Ce n'est pas une panne : rien à lire.`
+												? t("automationRunView.source.silentNote", {
+														note: source.note || t("automationRunView.source.noAnswer"),
+													})
+												: t("automationRunView.source.unconfiguredNote", { note: source.note })
 									}
 								/>
 							))}
 							{run.state !== "failed" ? (
 								<TraceRow
 									ok
-									title="Rédaction"
+									title={t("automationRunView.writing")}
 									note={
 										run.valuation?.provenance === "none"
-											? "Rien à rédiger : aucun élément sur la période"
-											: `Agent sans outil · ${
-													run.valuation?.usd != null
-														? `valorisé ${run.valuation.usd.toFixed(2)} $ aux tarifs de l'API`
-														: "valorisation inconnue"
-												}`
+											? t("automationRunView.nothingToWrite")
+											: t("automationRunView.toollessAgent", {
+													valuation:
+														run.valuation?.usd != null
+															? t("automationRunView.valued", { cost: run.valuation.usd.toFixed(2) })
+															: t("automationRunView.unknownValuation"),
+												})
 									}
 								/>
 							) : (
-								<TraceRow ok={false} title="Rédaction" note={run.reason} />
+								<TraceRow ok={false} title={t("automationRunView.writing")} note={run.reason} />
 							)}
 							<button
 								type="button"
 								onClick={() => void rerun()}
 								className="focus-ring mt-3 inline-flex h-9 items-center justify-center gap-1.5 rounded-lg border border-line bg-surface px-3 text-[12.5px] font-semibold text-ink hover:bg-hover"
 							>
-								<RotateCw size={14} /> Relancer
+								<RotateCw size={14} /> {t("automationRunView.rerunButton")}
 							</button>
 						</section>
 
 						<section className="flex flex-col gap-2.5 rounded-2xl bg-surface p-5 shadow-card">
 							<span className="text-[11px] font-semibold tracking-[0.06em] text-ink-muted uppercase">
-								Ce rendu ne te va pas ?
+								{t("automationRunView.correctTitle")}
 							</span>
 							<p className="text-[12.5px] text-ink-muted">
-								Dis ce qui cloche : la correction s'ajoute à la consigne, datée, et la prochaine exécution en tient compte.
+								{t("automationRunView.correctHint")}
 							</p>
 							<label className="flex flex-col gap-1.5">
-								<span className="text-[12.5px] font-semibold text-ink">Correction</span>
+								<span className="text-[12.5px] font-semibold text-ink">{t("automationRunView.correction")}</span>
 								<input
 									value={correction}
 									onChange={(event) => setCorrection(event.target.value)}
 									onKeyDown={(event) => {
 										if (event.key === "Enter") void correct();
 									}}
-									placeholder="Ex. : ne cite pas les PR de dépendances"
+									placeholder={t("automationRunView.correctionPlaceholder")}
 									className="focus-ring h-10 rounded-lg border border-line bg-surface px-3 text-[13px] text-ink"
 								/>
 							</label>
@@ -404,11 +421,11 @@ export function AutomationRunView({
 								disabled={!correction.trim() || busy === "correct"}
 								className="focus-ring inline-flex h-9 items-center justify-center rounded-lg bg-accent px-3 text-[12.5px] font-semibold text-accent-ink hover:bg-accent-soft disabled:opacity-50"
 							>
-								Ajouter à la consigne
+								{t("automationRunView.addCorrection")}
 							</button>
 							{automation.corrections.length > 0 ? (
 								<span className="text-[12px] text-ink-muted">
-									{automation.corrections.length} correction{automation.corrections.length > 1 ? "s" : ""} déjà en place
+									{t("automationRunView.correctionsInPlace", { count: automation.corrections.length })}
 								</span>
 							) : null}
 						</section>

@@ -1,0 +1,1036 @@
+{
+	"activityCenter": {
+		"pulse": {
+			"asksQuestion": "is asking you a question",
+			"asksPermission": "is asking for permission · {{tool}}",
+			"tool": "tool",
+			"using": "using {{tool}}",
+			"thinking": "thinking",
+			"replied": "done — nothing is running, waiting for your instructions"
+		},
+		"chip": {
+			"collapse": "Collapse",
+			"hint": "What's running, and what's waiting for you",
+			"working_one": "{{count}} working",
+			"working_other": "{{count}} working",
+			"yours": "Your turn",
+			"done": "Done",
+			"yoursCount_one": "your turn · {{count}}",
+			"yoursCount_other": "your turn · {{count}}"
+		},
+		"panel": {
+			"running": "Running",
+			"yourTurn": "Your turn",
+			"idle": "Nothing running",
+			"collapseHint": "Collapse into the top bar",
+			"collapse": "Minimize",
+			"cockpit": "Cockpit is on it",
+			"working": "Working",
+			"empty": "No agent is working, no action in progress: nothing is happening in the background."
+		},
+		"openAgent": "Open the agent",
+		"row": {
+			"working": "On it…",
+			"failed": "Failed.",
+			"done": "Done.",
+			"hideSteps": "Hide steps",
+			"steps_one": "{{count}} step",
+			"steps_other": "{{count}} steps",
+			"unfollow": "Stop following here (the action continues)",
+			"dismiss": "Dismiss"
+		}
+	},
+	"briefSettings": {
+		"saved": "Agent context saved.",
+		"intro": "Before an agent starts, the cockpit gathers what it already knows about the branch: the ticket, review feedback, what has been tried here. The brief appears above the input field, and nothing is sent without passing before your eyes.",
+		"enable": "Gather context when an agent starts",
+		"enableHint": "Unchecked, the input field goes back to bare: nothing is composed, nothing is requested from connected services.",
+		"sourcesTitle": "Sources checked on open",
+		"save": "Save"
+	},
+	"browserAnnotator": {
+		"tool": {
+			"ellipse": "Circle",
+			"arrow": "Arrow",
+			"text": "Write",
+			"point": "Point at an element: the cockpit tells the agent what it is"
+		},
+		"describe": {
+			"marker": "Marker {{index}}: <{{tag}}>",
+			"markerWithText": "Marker {{index}}: <{{tag}}> “{{text}}”",
+			"component": "component {{name}}",
+			"componentWithSource": "component {{name}} ({{source}})",
+			"selector": "selector `{{selector}}`"
+		},
+		"nothingHere": "Nothing to point at under this spot.",
+		"noImage": "The page has no image to attach yet.",
+		"defaultNote": "Look at the attached screenshot: what I circled needs fixing.",
+		"pageUrl": "Page: {{url}}",
+		"noConversation": "No conversation open in this workspace: start an agent to show it the screen.",
+		"attached": "Screenshot attached to the prompt: complete it and send.",
+		"clear": "Clear all",
+		"notePlaceholder": "What you want it to do with it",
+		"send": "Attach to the agent",
+		"close": "Close annotation",
+		"overlay": "Annotations on the page",
+		"textPlaceholder": "Type, then Enter",
+		"quote": "“{{text}}”"
+	},
+	"browserView": {
+		"gesture": {
+			"navigate": "The agent is navigating",
+			"click": "The agent is clicking",
+			"type": "The agent is typing",
+			"screenshot": "The agent is taking a screenshot",
+			"read": "The agent is reading the page",
+			"wait": "The agent is waiting",
+			"act": "The agent is acting"
+		},
+		"back": "Previous page",
+		"forward": "Next page",
+		"reload": "Reload",
+		"addressPlaceholder": "An address — localhost:3000, or any site",
+		"annotateTitle": "Annotate the page and show it to the agent: circle, draw arrows, point at an element",
+		"annotate": "Annotate",
+		"openExternal": "Open this page in your system browser",
+		"stop": "Stop this browser — the agent will start a new one on its next action",
+		"keyboardInput": "Typing into the page",
+		"starting": "The browser is starting…",
+		"notRunning": "This workspace's browser isn't running. It will start on its own the first time an agent acts in a page — you'll watch it here — or right away if you open it.",
+		"open": "Open the browser",
+		"openingServer": "Opening this workspace's server…",
+		"serverStarting": "The dev server is starting — the page will open as soon as it responds.",
+		"nothingListening": "Nothing is listening in this workspace yet.",
+		"nothingListeningHint": "Nothing is listening in this workspace: type an address, or declare the dev command in the workflow settings."
+	},
+	"changeTour": {
+		"state": {
+			"added": "Added",
+			"untracked": "New",
+			"modified": "Modified",
+			"deleted": "Deleted"
+		},
+		"count": {
+			"added_one": "{{count}} added",
+			"added_other": "{{count}} added",
+			"untracked_one": "{{count}} new",
+			"untracked_other": "{{count}} new",
+			"modified_one": "{{count}} modified",
+			"modified_other": "{{count}} modified",
+			"deleted_one": "{{count}} deleted",
+			"deleted_other": "{{count}} deleted"
+		},
+		"title": "Change tour",
+		"agent": "Agent",
+		"fileCount_one": "{{count}} file",
+		"fileCount_other": "{{count}} files",
+		"tellTitle": "A model writes the story of each file, in the order to read them",
+		"telling": "Writing the story…",
+		"tellAgain": "Tell again",
+		"tell": "Tell the story",
+		"closeEsc": "Close (Esc)",
+		"close": "Close",
+		"stepAria": "Step {{index}}",
+		"start": "Start the tour",
+		"empty": {
+			"title": "Nothing to tour",
+			"body": "No file differs {{base}}. The agent may have undone everything, or worked in another folder."
+		},
+		"nav": {
+			"previous": "Previous",
+			"intro": "Introduction",
+			"end": "End",
+			"fileOf": "File {{step}} of {{total}}",
+			"finish": "Finish",
+			"next": "Next"
+		},
+		"intro": {
+			"heading_one": "{{count}} file to go through",
+			"heading_other": "{{count}} files to go through",
+			"telling": "A model reads the diff and writes the story of each file — about thirty seconds.",
+			"hint": "Each file comes with what the agent said about it while editing it. “Tell the story” writes a real narrative, in the order to read the files."
+		},
+		"file": {
+			"stepOf": "Step {{index}} of {{total}}",
+			"open": "Open file",
+			"story": "The story",
+			"said": "What the agent said about it",
+			"quote": "“{{text}}”",
+			"silent": "The agent said nothing while touching this file: it probably comes from a command (a generated file, a dependency). “Tell the story” will explain it."
+		},
+		"outro": {
+			"title": "Tour complete",
+			"body_one": "You went through the changed file.",
+			"body_other": "You went through the {{count}} changed files.",
+			"restart": "Start over"
+		}
+	},
+	"commandsSettings": {
+		"saved": "Commands saved.",
+		"intro": "The commands you don't retype from memory: the ones with options, the ones whose flags you forget. They appear in the Scripts screen and in the terminal menu. The repository's raw scripts already show up without being declared.",
+		"empty": "No commands declared.",
+		"emptyHint": "The cockpit can read this repository's scripts and offer to add them.",
+		"detectHint": "Read the repository's scripts and offer the missing ones",
+		"detect": "Detect from the repository",
+		"defaultGroup": "Commands",
+		"defaultLabel": "New command",
+		"write": "Write a command",
+		"found": "Found in the repository · {{count}}",
+		"addAll": "Add all",
+		"close": "Close",
+		"nothingNew": "Nothing new: everything this repository declares is already here.",
+		"add": "Add",
+		"unnamed": "— unnamed —",
+		"sensitive": "sensitive",
+		"mainRepo": "main repository",
+		"remove": "Remove",
+		"options_one": "{{count}} option",
+		"options_other": "{{count}} options",
+		"expectsArgument": "argument expected",
+		"requiredArgument": "required argument",
+		"argument": "argument"
+	},
+	"confirm": {
+		"confirm": "Confirm",
+		"validate": "OK",
+		"cancel": "Cancel"
+	},
+	"dailyPresenter": {
+		"status": {
+			"done": "Done",
+			"ongoing": "In progress",
+			"postponed": "Postponed"
+		},
+		"parts": {
+			"nothing": "Nothing.",
+			"shipped": "Shipped",
+			"shippedEmpty": "Nothing merged since the last daily.",
+			"openedSince_one": "{{count}} PR opened since",
+			"openedSince_other": "{{count}} PRs opened since",
+			"ongoing": "In progress",
+			"ongoingEmpty": "No active ticket.",
+			"ticketDetail": "{{id}} · {{progress}}% · {{days}} d",
+			"toHandle": "To handle",
+			"toHandleEmpty": "Nothing stuck."
+		},
+		"recap": {
+			"heading": "# Daily — since {{date}}",
+			"part": "- {{title}}: {{lines}}",
+			"shipped": "- Shipped: {{items}}",
+			"commitment": "- Commitment: {{text}}",
+			"commitmentWithStatus": "- Commitment: {{text}} ({{status}})",
+			"parked": "## Parked topics"
+		},
+		"title": "Daily",
+		"since": "since {{date}}",
+		"total": "total {{time}}",
+		"quit": "Quit (Esc)",
+		"done": {
+			"title": "Daily done",
+			"duration_one": "{{time}} for {{count}} person",
+			"duration_other": "{{time}} for {{count}} people",
+			"parked": "To pick up now · {{count}}",
+			"noParked": "No parked topics.",
+			"copyRecap": "Copy recap",
+			"close": "Close"
+		},
+		"speakers": "Speaking order",
+		"speaker": {
+			"speaking": "speaking",
+			"done": "done",
+			"ready": "ready"
+		},
+		"preparedByAutomation": "Their part · prepared by their automation",
+		"silentSources": "No response this time: {{sources}}.",
+		"timeLeft": "Speaking time left",
+		"pause": "Pause (p)",
+		"partsLabel": "Parts",
+		"nav": {
+			"previous": "Previous",
+			"nextPart": "Next part",
+			"nextSpeaker": "Next speaker",
+			"finish": "Finish"
+		},
+		"sideLabel": "Commitments and topics",
+		"pledge": {
+			"title": "What {{name}} said last time",
+			"status": "Status",
+			"none": "No commitment at the last daily.",
+			"placeholder": "Commitment for the next daily…"
+		},
+		"parked": {
+			"title": "Parked",
+			"placeholder": "Topic to pick up afterwards…",
+			"add": "Park"
+		},
+		"shortcuts": "→ next · ← back · p pause · Esc quit",
+		"noDevelopers": "No developers to present."
+	},
+	"diagram": {
+		"unreadable": "unreadable diagram — here is its text",
+		"caption": "diagram as stated by the agent"
+	},
+	"engagementPanel": {
+		"nothingProduced": "Nothing was produced: there is nothing to undo.",
+		"cannotUndo": "The cockpit can't undo: {{items}}. Handle it by hand.",
+		"undoConfirmTitle": "Undo what was done?",
+		"undoConfirm": "Undo",
+		"undoFailed": "Couldn't be undone: {{items}}",
+		"undone": "Undone: {{items}}",
+		"close": "Close",
+		"trigger": "Trigger",
+		"triggerLine": "{{trigger}} · rule “{{rule}}”",
+		"noTrigger": "no trigger",
+		"oracle": "Oracle",
+		"none": "none",
+		"timeline": "Timeline",
+		"nothingYet": "Nothing yet.",
+		"produced": "Produced",
+		"open": "Open",
+		"cost": "Cost",
+		"costHint": "what this would cost at API rates; on a subscription nothing is charged, it's the window's quota that gets used",
+		"undoHint": "Undo what was produced",
+		"undo": "Undo what was done"
+	},
+	"jobProgress": {
+		"starting": "starting…",
+		"silentStop": "the command stopped without saying anything",
+		"exitCode": "exit code {{code}}",
+		"cancelled": "cancelled — {{reason}}",
+		"failed": "failed — {{reason}}"
+	},
+	"notebookPanel": {
+		"kept": "Lesson kept — it will go out with the next relevant agents.",
+		"title": "Project notebook",
+		"subtitle": "what we had to redo by hand, and what we learned from it",
+		"reload": "Reload",
+		"close": "Close",
+		"pending": "Rework to review · {{count}}",
+		"pendingHint": "Work handed back by an agent was corrected by hand right after. It's the only feedback that is neither a rating nor an impression — the question is whether there's a rule to draw from it, or whether it was specific to this case.",
+		"lessons": "Lessons kept · {{count}}",
+		"write": "Write a lesson",
+		"empty": "The notebook is empty.",
+		"emptyHint": "It fills up on its own as you rework what an agent did — and never without you approving what goes in.",
+		"noBranch": "no branch",
+		"filesReworked_one": "{{count}} file reworked",
+		"filesReworked_other": "{{count}} files reworked",
+		"draftLesson": "Draw a lesson from it",
+		"dismissHandback": "Dismiss: this rework teaches nothing",
+		"collapse": "Collapse",
+		"showPatch": "Show what was corrected",
+		"editLesson": "Edit this lesson",
+		"newLesson": "New lesson",
+		"draftHint": "Written in the imperative, for an agent that hasn't started yet: what to do, not what happened.",
+		"textPlaceholder": "E.g.: go through the shared client rather than calling fetch directly.",
+		"scope": "Scope — empty = whole repository",
+		"cancel": "Cancel",
+		"keep": "Keep",
+		"wholeRepo": "whole repository",
+		"neverUsed": "never used",
+		"uses_one": "{{count}} use",
+		"uses_other": "{{count}} uses",
+		"fromHandback": "drawn from a rework",
+		"stale": "unused for two months — still true?",
+		"correct": "Correct",
+		"edit": "Edit",
+		"forget": "Forget"
+	},
+	"nowFeed": {
+		"state": {
+			"ciFailing": "CI failing",
+			"changesRequested": "changes requested",
+			"stacked": "stacked PR",
+			"ready": "ready to merge",
+			"draft": "draft",
+			"inReview": "in review"
+		},
+		"empty": "Nothing in progress",
+		"emptyHint": "No active ticket or open pull request. What's coming up is listed below.",
+		"noTicket": "no ticket",
+		"lastActivity": "Last activity {{when}}",
+		"today": "today",
+		"yesterday": "yesterday",
+		"days_one": "{{count}} d",
+		"days_other": "{{count}} d"
+	},
+	"permanenceSettings": {
+		"intro": "An operator who keeps the ecosystem running while you do something else. It doesn't decide what to build: it fixes, retries, updates — and it can prove it succeeded, because operations have oracles that the product doesn't. It only runs while the cockpit is open. <strong>Everything applies without a button</strong>: what you change is saved when you leave the field.",
+		"scope": {
+			"station": "this machine",
+			"project": "this project"
+		},
+		"oracle": {
+			"groupCommand": "Repository command",
+			"groupProperty": "Project property",
+			"groupCi": "CI status",
+			"groupGithub": "GitHub",
+			"ciGreen": "CI turns green",
+			"commentPosted": "it posted a comment"
+		},
+		"service": {
+			"title": "Service",
+			"enabled": "Enabled",
+			"disabled": "Disabled",
+			"disabledHint": "When disabled, the entry leaves the rail: a screen that can't do anything doesn't stay on the menu. Turn it back on here. Pausing, on the other hand, is a gesture — do it from the screen, or with <kbd>⇧P</kbd>.",
+			"hours": "Service hours",
+			"hoursHint": "Empty = always. A range that crosses midnight is read as is.",
+			"cadence": "Cadence",
+			"cadenceHint": "Time between two looks. Empty = 2 minutes.",
+			"dailyTokens": "Daily token cap",
+			"dailyTokensHint": "The one it sets for itself. Empty = 200,000.",
+			"dailyEngagements": "Daily engagement cap",
+			"dailyEngagementsHint": "Empty = 20.",
+			"quotaFloor": "It steps aside below",
+			"quotaFloorHint": "Percentage of subscription quota remaining. Empty = 15%. It works in the background, you in the foreground.",
+			"retention": "Keep history",
+			"retentionHint": "Finished engagements. Empty = 14 days.",
+			"catchUp": "On wake-up, catch up on what piled up",
+			"catchUpHint": "Unchecked, it starts from scratch and says what it skipped. Catching up on a whole night of signals at once is the surest way to burn through a cap.",
+			"notifyFailures": "Notify me on failure",
+			"notifyAll": "Notify me on every engagement",
+			"notifyAllHint": "Success is silent, failure speaks: notifying every engagement reopens an inbox, and reading twelve reports is no better than doing the work."
+		},
+		"unit": {
+			"minutes": "min",
+			"percentLeft": "% left",
+			"days": "days",
+			"engagements": "engagements",
+			"hours": "hours",
+			"failures": "failures",
+			"default": "default"
+		},
+		"guards": {
+			"title": "Safeguards",
+			"intro": "Each one answers a specific way things go off the rails, and none replaces the others. They are what makes turning it on bearable.",
+			"maxRunning": "Concurrent engagements",
+			"maxRunningHint": "One by default. An on-call operator doesn't handle eight incidents in parallel — and the daily cap doesn't protect against a burst.",
+			"rehearsal": "Dry run",
+			"rehearsalHint": "It decides, writes what it would have done, and doesn't act. The counter resets as soon as you change its powers. Empty = 10.",
+			"grace": "Per-item quarantine",
+			"graceHint": "After an engagement, the same PR is left alone. That's what keeps it from waking up on its own commit, and from fixating. Empty = 6 h.",
+			"breaker": "Circuit breaker",
+			"breakerHint": "Consecutive failures after which it pauses itself. Re-arming is a gesture: an automatic restart would redo what it exists to prevent. Empty = 3."
+		},
+		"role": {
+			"title": "Role",
+			"intro": "Two models, not one. Triage looks at every delta — that's 95% of calls, on tiny inputs; work only starts when an engagement goes out.",
+			"engine": "Engine",
+			"engineHint": "Empty = the first one declared.",
+			"engineFirst": "The first one declared",
+			"triageModel": "Triage — model",
+			"triageModelHint": "The smallest one that can say “nothing”.",
+			"triageDepth": "Triage — depth",
+			"workModel": "Work — model",
+			"workDepth": "Work — depth",
+			"prompt": "Standing instructions",
+			"promptHint": "Added to the context of every engagement, on top of the repository dossier.",
+			"promptPlaceholder": "What it should know before acting, whatever the engagement."
+		},
+		"rules": {
+			"title": "Rules",
+			"add": "Add",
+			"intro": "Shipped turned off. A rule without a stateable oracle doesn't start, even when on: it's the only stop condition for an agent that has none.",
+			"empty": "No rules. The Permanence won't do anything until you tell it what to watch."
+		},
+		"powers": {
+			"title": "Powers",
+			"enabledCount": "{{count}} / {{total}} enabled",
+			"intro": "An allowlist, empty at first, checked one by one. The test: could anyone other than you notice it?",
+			"notImplemented": "not implemented yet — the gesture will be refused",
+			"neverShared": "<b>Never on a shared branch.</b> Whatever you check, it never writes to {{branches}}, nor to the base branches declared in your workflow. It only works on its own branches — touching a shared branch isn't an operator's gesture, it's a gesture that commits everyone.",
+			"never": "<b>Never:</b> {{list}}. These gestures have no tool — they're the ones that commit to a decision, not a report."
+		},
+		"comment": {
+			"title": "Comment on a pull request",
+			"readByHuman": "read by a human",
+			"intro": "Never a goal: only the report of an engagement that already has its oracle. It says what it did on the branch, it doesn't start a conversation.",
+			"scopesTitle": "It only writes where one of these conditions is true",
+			"noScope": "No condition checked: it won't comment anywhere.",
+			"alwaysTitle": "And in every case",
+			"perDayBefore": "At most",
+			"perDayAfter": "comment(s) per PR per day.",
+			"noMonologue": "Never two in a row without a human reply in between — otherwise it's a monologue.",
+			"signature": "Signed <mono>{{signature}}</mono> at the end of the message. Not editable: on a PR, it's your account your colleagues are reading.",
+			"optOut": "“Stop commenting here” removes a PR in one gesture, without touching the setting."
+		},
+		"rule": {
+			"labelPlaceholder": "What it will do, in one line",
+			"noOracle": "no oracle",
+			"unknownTrigger": "unknown trigger",
+			"remove": "Remove this rule",
+			"trigger": "Trigger",
+			"choose": "Choose…",
+			"oracle": "Oracle",
+			"oracleHint": "The proof it aims for, chosen from what this repository declares.",
+			"oracleNone": "None — the rule won't start",
+			"condition": "Condition",
+			"conditionHint": "In plain language. Judged at triage, before any engagement.",
+			"conditionPlaceholder": "the author of the last commit is me",
+			"reaction": "Reaction",
+			"reactionHint": "What it attempts. The goal itself is written by it.",
+			"reactionPlaceholder": "fix it, open a draft PR",
+			"delay": "Delay",
+			"delayScheduleHint": "Between two runs of this rule. Empty = 24 h.",
+			"delayStaleHint": "Beyond this, a change is considered stale. Empty = 72 h.",
+			"tokenBudget": "Token budget",
+			"tokenBudgetHint": "Per engagement of this rule. Empty = the daily cap.",
+			"perHour": "At most per hour",
+			"perHourHint": "Empty = only the daily cap applies.",
+			"needsApproval": "Ask for my approval before the work starts",
+			"needsApprovalHint": "Without it, it approves the mission plan itself — this rule is the approval. Check it for a high-stakes rule.",
+			"save": "Save this rule"
+		},
+		"depth": {
+			"engine": "The engine's default",
+			"fast": "Fast",
+			"normal": "Normal",
+			"deep": "Deep"
+		}
+	},
+	"planche": {
+		"enlarge": "View larger",
+		"before": "before",
+		"after": "after",
+		"slide": "Slide to compare",
+		"filmed": "filmed by the cockpit · {{seconds}} s",
+		"test": {
+			"title": "The test we derive from it",
+			"steps_one": "{{count}} action replayed",
+			"steps_other": "{{count}} actions replayed",
+			"skipped_one": "{{count}} skipped (screenshots, reads)",
+			"skipped_other": "{{count}} skipped (screenshots, reads)",
+			"copied": "Copied",
+			"copy": "Copy",
+			"ask": "Have the agent add it"
+		},
+		"observed": "Observed",
+		"files_one": "{{count}} file",
+		"files_other": "{{count}} files",
+		"foldDetail": "Collapse the details",
+		"readDetail_one": "Read the details ({{chars}} character)",
+		"readDetail_other": "Read the details ({{chars}} characters)"
+	},
+	"projectGround": {
+		"dirExists": "the folder exists",
+		"dirMissing": "the folder doesn't exist",
+		"isRepo": "it's a git repository",
+		"notRepo": "not a git repository yet",
+		"noRemote": "no remote repository",
+		"createRemote": "Also create the repository on GitHub",
+		"createRemoteHint": "The cockpit creates it and sets it as “origin”. It pushes nothing: the first push stays your call.",
+		"account": "Account",
+		"noGhSession": "no `gh` session",
+		"repo": "Repository",
+		"repoPlaceholder": "my-project",
+		"makePublic": "Make it public",
+		"publicBadge": "visible to everyone",
+		"ready": "Nothing to prepare — the project can be added.",
+		"preparing": "Preparing…",
+		"step": {
+			"createDir": "create the folder",
+			"gitInit": "initialize git",
+			"createRemote": "create the GitHub repository"
+		},
+		"nothingToPrepare": "Nothing to prepare"
+	},
+	"projectsHealth": {
+		"title": "Projects",
+		"openWorktrees": "Open worktrees",
+		"switch": "Switch to this project",
+		"active": "active",
+		"liveAgents": "active agents",
+		"ciFailing": "CI failing",
+		"readyToMerge": "ready to merge",
+		"openPrs": "open PRs",
+		"worktrees": "worktrees",
+		"dirtyHint": "worktrees with uncommitted work",
+		"dirty_one": "{{count}} dirty",
+		"dirty_other": "{{count}} dirty",
+		"unpushed": "worktrees with unpushed commits",
+		"partial": "partial"
+	},
+	"propertiesReport": {
+		"verdict": {
+			"broken": "broken",
+			"held": "holds",
+			"offTopic": "off topic",
+			"undecided": "undecided"
+		},
+		"title": "What must stay true",
+		"allHeld_one": "{{count}} property checked · nothing broken",
+		"allHeld_other": "{{count}} properties checked · nothing broken",
+		"someBroken_one": "{{count}} broken out of {{total}}",
+		"someBroken_other": "{{count}} broken out of {{total}}",
+		"costHint": "What this check would cost at API rates. On a subscription, nothing is charged: it's the window's quota that gets used.",
+		"stale": "The branch has moved since this check.",
+		"quiet": "{{held}} held, {{unrelated}} unrelated to this change."
+	},
+	"propertiesSettings": {
+		"saved": "Properties saved.",
+		"caughtNothing": "This property caught nothing on your own fixes.",
+		"caughtSome": "It would have flagged {{caught}} fix(es) out of {{tried}}.",
+		"intro": "Things that must stay true in this repository, written in plain language. The cockpit has them judged against a change, one by one, with evidence. What can be checked mechanically doesn't belong here — these are the rules no tool states, the ones passed on by word of mouth.",
+		"empty": "No properties declared.",
+		"emptyHint": "The cockpit can suggest some based on what this repository has already had to fix — that's what it will break again.",
+		"proposeHint": "Read the repository's fixes and derive properties from them",
+		"propose": "Suggest from history",
+		"write": "Write a property",
+		"suggestions": "Suggestions · {{count}}",
+		"close": "Close",
+		"comesFrom": "Comes from: {{why}}",
+		"wholeRepo": "whole repository",
+		"keep": "Keep",
+		"textPlaceholder": "E.g.: every route that writes to the database validates its body before calling it.",
+		"remove": "Remove",
+		"scopePlaceholder": "scope — empty = whole repository",
+		"neverTested": "never tested",
+		"decorative_one": "decorative — caught nothing on {{count}} fix",
+		"decorative_other": "decorative — caught nothing on {{count}} fixes",
+		"wouldCatch_one": "would have flagged {{count}} fix out of {{tried}}",
+		"wouldCatch_other": "would have flagged {{count}} fixes out of {{tried}}",
+		"testHint": "Replay this property against the repository's past fixes",
+		"retest": "Test again",
+		"test": "Test",
+		"collapse": "Collapse",
+		"showSamples": "Show replayed fixes"
+	},
+	"pullRequestDetail": {
+		"noWorktree": "No local worktree for this branch.",
+		"promptMissing": "Prompt “{{id}}” not found in the library.",
+		"draft": "draft",
+		"open": "open",
+		"stacked": "stacked",
+		"author": "Author",
+		"files": "Files",
+		"additions": "Additions",
+		"deletions": "Deletions",
+		"reviewers": "To be reviewed by <name>{{names}}</name>",
+		"noReviewer": "No reviewer requested",
+		"assignee": "Assigned to <name>{{name}}</name>",
+		"fixCiHint": "Launch the agent that fixes the CI",
+		"fixCi": "Fix CI",
+		"feedbackHint": "Handle review feedback with an agent",
+		"feedback": "Feedback",
+		"agentHint": "Open an agent on this branch",
+		"agent": "Agent",
+		"worktreeHint": "Open this branch's worktree",
+		"worktree": "Worktree",
+		"mergeTitle": "Merge #{{id}} into {{base}}?",
+		"mergeMessage": "“{{title}}” — irreversible and visible to the whole team.",
+		"merge": "Merge",
+		"merged": "#{{id}} merged.",
+		"noDescription": "No description."
+	},
+	"qaGallery": {
+		"empty": "No QA deliverables",
+		"emptyHint": "Screenshots and reports dropped in .claude/work will appear here.",
+		"root": "root",
+		"openFolder": "Open the folder in Finder",
+		"reveal": "Reveal in Finder",
+		"close": "Close (Esc)",
+		"previous": "Previous (←)",
+		"next": "Next (→)"
+	},
+	"sidePanel": {
+		"resize": "Drag to widen — double-click for the original width",
+		"exitFull": "Back beside the map",
+		"full": "Full frame",
+		"close": "Close"
+	},
+	"ui": {
+		"priority": {
+			"urgent": "Urgent",
+			"high": "High",
+			"medium": "Medium",
+			"low": "Low"
+		},
+		"missingConnector": {
+			"title": "{{service}} is not connected",
+			"hint": "{{missing}} is missing. This screen will appear as soon as it's filled in.",
+			"openSettings": "Open Settings"
+		},
+		"freshness": {
+			"never": "never loaded",
+			"justNow": "just now",
+			"seconds_one": "{{count}} s ago",
+			"seconds_other": "{{count}} s ago",
+			"minutes_one": "{{count}} min ago",
+			"minutes_other": "{{count}} min ago",
+			"hours_one": "{{count}} h ago",
+			"hours_other": "{{count}} h ago",
+			"reload": "Reload now"
+		},
+		"errorNote": {
+			"retry": "Retry"
+		},
+		"searchField": {
+			"placeholder": "Filter…"
+		}
+	},
+	"updateBanner": {
+		"availableNotice": "Version {{version}} available.",
+		"upToDate": "Cockpit is up to date.",
+		"checkFailed": "Couldn't check: {{error}}",
+		"installFailedNotice": "Couldn't update: {{error}}",
+		"available": "Version {{version}} available",
+		"later": "Later",
+		"restartWarning": "Installing restarts the cockpit — running agents will be stopped, and their tasks resumed on restart.",
+		"update": "Update",
+		"downloading": "Downloading version {{version}}…",
+		"installed": "Installed — restarting…",
+		"installFailed": "Update failed",
+		"close": "Close",
+		"version": "version {{version}}",
+		"install": "Install {{version}}",
+		"check": "Check for updates"
+	},
+	"workflowSettings": {
+		"connectors": {
+			"intro": "A screen only appears if the service it relies on can respond. Fill in a key and the entry comes back to the menu on its own.",
+			"ready": "ready",
+			"missing": "missing {{missing}}",
+			"fill": "Fill in"
+		},
+		"workflow": {
+			"saved": "Workflow saved.",
+			"intro": "The columns of your task tracker, named the way your team names them. They decide how far along a ticket is and where it sits in the daily.",
+			"active": {
+				"label": "In progress",
+				"hint": "active work columns"
+			},
+			"review": {
+				"label": "In review",
+				"hint": "review, QA"
+			},
+			"done": {
+				"label": "Done"
+			},
+			"blocked": {
+				"label": "Blocked",
+				"hint": "the column that signals a blocker"
+			},
+			"baseBranches": {
+				"label": "Base branches",
+				"hint": "a PR targeting anything else counts as stacked"
+			},
+			"dailyWeekdays": {
+				"label": "Daily days",
+				"hint": "1 = Monday, 5 = Friday"
+			},
+			"prCommand": {
+				"label": "PR opening command",
+				"hint": "run by the lead at the end of a mission; empty = Cockpit opens the PR itself"
+			},
+			"createWorktree": {
+				"label": "Create a worktree",
+				"hint": "empty = `git worktree add`. A command starting with \"/\" is a repository command, run by an agent."
+			},
+			"removeWorktree": {
+				"label": "Remove a worktree",
+				"hint": "empty = `git worktree remove --force`. Make sure it can't hang on a confirmation prompt: nobody will read it."
+			},
+			"devServer": {
+				"label": "Start the dev server",
+				"hint": "empty = the Dev button isn't offered, rather than opening a terminal on a command that doesn't exist here"
+			},
+			"malformed": "{{commands}}: a placeholder goes between curly braces. Written any other way, it reaches the shell as is — which rejects the line without a word.",
+			"testCommands": {
+				"label": "Test commands",
+				"hint": "on top of vitest, jest, pytest, phpunit, php artisan test… — what lets an agent's card say \"tests pass\""
+			},
+			"visualReports": {
+				"title": "Agents report back with images",
+				"detail": "Checked: every agent is told to show its work when an image says more than text — a before/after screenshot if it changed the screen and can capture it, a diagram if it changed a structure, nothing for a simple answer. Applies to agents launched from now on, not those already running."
+			},
+			"agentBrowser": {
+				"title": "Agents drive their workspace's browser",
+				"detail": "Checked: every agent gets what it needs to open a page, click, type and take screenshots, in a separate browser — without your sessions or passwords — that you watch live in the \"Browser\" tab. It only starts on the first action. No effect inside an isolation container. Applies to agents launched from now on."
+			},
+			"browser": {
+				"label": "Browser",
+				"hint": "empty = the first one found among Chrome, Chromium, Edge and Brave"
+			},
+			"browserServer": {
+				"label": "Browser actions server",
+				"hint": "empty = Playwright's; yours receives --cdp-endpoint <address> appended"
+			},
+			"reviewReadOnly": {
+				"title": "The review agent is read-only",
+				"detail": "Checked: no editing, and nothing but reads (git diff, git log, gh pr view…) — everything else is refused. Unchecked: it can run tests or modify files; its instructions still tell it not to fix the PR, but nothing stops it."
+			},
+			"themes_one": "{{count}} business topic declared — it lets the daily say \"she's on billing\" rather than list identifiers. Topics are edited in the configuration file.",
+			"themes_other": "{{count}} business topics declared — they let the daily say \"she's on billing\" rather than list identifiers. Topics are edited in the configuration file.",
+			"noThemes": "No business topics: the daily narrative will rely on the titles themselves."
+		},
+		"replacedAtLaunch": "Replaced at launch:",
+		"saving": "Saving…",
+		"save": "Save",
+		"remove": "Remove",
+		"defaultPlaceholder": "default",
+		"fields": {
+			"key": "Key",
+			"displayName": "Display name"
+		},
+		"depth": {
+			"fast": "Fast",
+			"normal": "Normal",
+			"deep": "Deep"
+		},
+		"roles": {
+			"saved": "Roles saved.",
+			"intro": "What a worker receives at launch: its standing instructions, its model, and the paths it is allowed to write to. The scope is enforced — a write outside it is refused, not merely discouraged.",
+			"masterNote": "This role leads the mission: it reads the ticket, proposes the breakdown and puts everything back together at the end. Its key is reserved — the steps and orchestration tools come from Cockpit; only its command, instructions and model are set here.",
+			"keyHint": "referenced by tasks",
+			"engine": {
+				"label": "Engine",
+				"hint": "the program that runs it",
+				"default": "Default"
+			},
+			"model": {
+				"label": "Model",
+				"hint": "empty = the machine's default"
+			},
+			"depth": {
+				"label": "Depth",
+				"hint": "how much the role is allowed to spend",
+				"engine": "Engine",
+				"unsupported": "This engine declares no depth — set them under Engines."
+			},
+			"scope": {
+				"label": "Scope",
+				"hint": "paths, comma-separated"
+			},
+			"command": {
+				"label": "Startup command",
+				"hint": "repository skill or command, run before the instructions"
+			},
+			"prompt": "Standing instructions",
+			"verifies": "Checks the others' work — only starts once the implementation is delivered",
+			"newLabel": "New role",
+			"add": "Add a role",
+			"save": "Save roles"
+		},
+		"team": {
+			"saved": "Team saved.",
+			"intro": "Who's on the team, and which accounts identify them in each tool. These mappings drive the daily and the team board: a member without their GitHub login won't show up on any pull request.",
+			"soloWarning": "This project is marked <strong>solo</strong>: its team is ignored and the daily stays hidden. Untick \"solo\" in the project settings for what follows to be of any use.",
+			"linearTeam": {
+				"label": "Linear team",
+				"hint": "UUID of the team whose current cycle is read — empty = no daily"
+			},
+			"empty": "No members declared: the daily and the team board will stay empty. Cockpit suggests no one by default — a team can't be guessed.",
+			"name": "Name",
+			"role": {
+				"label": "Role",
+				"hint": "dev or product"
+			},
+			"roleLabel": {
+				"label": "Displayed title",
+				"hint": "as shown on screen",
+				"placeholder": "Back-end developer"
+			},
+			"github": {
+				"hint": "main login"
+			},
+			"linearId": {
+				"label": "Linear ID",
+				"hint": "UUID, visible in their profile URL"
+			},
+			"githubAliases": {
+				"label": "Other GitHub logins",
+				"hint": "former accounts, comma-separated"
+			},
+			"sentryEmails": {
+				"label": "Sentry emails",
+				"hint": "those of their accounts, comma-separated"
+			},
+			"sentryNames": {
+				"label": "Sentry names",
+				"hint": "when the email is missing from the event"
+			},
+			"add": "Add a member",
+			"save": "Save team"
+		},
+		"engines": {
+			"saved": "Engines saved.",
+			"intro": "An engine is the program that runs an agent — not a model provider. To use another one, there are two ways: a binary that speaks the same protocol, or a compatible gateway designated by the environment variables below. Each role then picks its engine.",
+			"keyHint": "referenced by roles",
+			"binary": {
+				"label": "Binary",
+				"hint": "empty = claude, looked up on the machine"
+			},
+			"protocol": {
+				"label": "Protocol",
+				"hint": "claude-stream-json, codex-exec or gemini-stream-json"
+			},
+			"models": {
+				"label": "Models",
+				"hint": "aliases or full identifiers (claude-opus-5-5), comma-separated"
+			},
+			"args": {
+				"label": "Arguments",
+				"hint": "appended to the command line"
+			},
+			"depthFastHint": "what to add to go fast",
+			"depthDeepHint": "for what deserves the extra effort",
+			"env": {
+				"label": "Environment",
+				"hint": "one pair per line: NAME=value — a service address, an access token",
+				"placeholder": "ANTHROPIC_BASE_URL=https://gateway.example.com\nANTHROPIC_AUTH_TOKEN=sk-…"
+			},
+			"variables_one": "{{count}} variable — written to the configuration file, with 600 permissions.",
+			"variables_other": "{{count}} variables — written to the configuration file, with 600 permissions.",
+			"noVariables": "No variables: the engine uses the machine's environment.",
+			"add": "Add an engine",
+			"save": "Save engines"
+		},
+		"missionMode": {
+			"guided": {
+				"title": "Guided",
+				"detail": "You read the ticket with the lead, then approve its understanding, its approach and its breakdown — three agreements, one at a time."
+			},
+			"autonomous": {
+				"title": "Autonomous",
+				"detail": "The lead reads the ticket and proposes its breakdown right away. A single agreement before the workers set off."
+			},
+			"default": "default"
+		},
+		"budget": {
+			"intro": "Three caps, for three ways of spending more than intended: a mission that runs away, a quota that runs out, a machine that saturates. None of them kills anything — work in progress always runs to completion.",
+			"tokenBudget": {
+				"label": "Cap per mission",
+				"hint": "Beyond it, the mission pauses — branches and work intact, resumed in one click. Empty = 500,000.",
+				"unit": "tokens"
+			},
+			"quotaFloor": {
+				"label": "No new starts below",
+				"hint": "Percentage of subscription quota remaining. Tasks in progress carry on. Empty = 15%.",
+				"unit": "% remaining"
+			},
+			"memoryCeiling": {
+				"label": "No new launches above",
+				"hint": "Percentage of machine memory in use. No new agent starts — mission, worker or manual launch. Empty = 85%.",
+				"unit": "% memory"
+			}
+		},
+		"sandbox": {
+			"terminalLabel": "Isolated agent sign-in",
+			"intro": "Each agent runs in a container, with its own memory capped by the system rather than measured after the fact. Requires Docker or OrbStack on the machine — neither is needed while this is off.",
+			"enable": "Isolate each agent in a container",
+			"runtime": {
+				"hint": "orb or docker. Empty = detected on the machine.",
+				"placeholder": "detected"
+			},
+			"memory": {
+				"label": "Memory per agent",
+				"hint": "Empty = 4096 MB.",
+				"unit": "MB"
+			},
+			"image": {
+				"hint": "Empty = Cockpit's default image."
+			},
+			"loginNote": "An account signed in through a subscription stores its token in the machine's keychain, which a container can't read. This button runs <code>claude setup-token</code> in a terminal — then paste the token it shows into Settings → Access tokens (\"Isolated account\"). Valid for one year; redo it once it expires.",
+			"connect": "Connect the isolated account"
+		}
+	},
+	"workspacePanel": {
+		"masterRole": "lead",
+		"tabs": {
+			"agent": "Agent",
+			"terminal": "Terminal",
+			"board": "View",
+			"boardTitle": "Everything tied to this branch: PR, ticket, review, agents, commits, documents, screenshots",
+			"browser": "Browser",
+			"browserTitle": "This workspace's browser: the one the agent drives to test, live — and where you can click too",
+			"closeAgent": "Close and stop the agent",
+			"closeTerminal": "Close the terminal and whatever it's running"
+		},
+		"closeWorkspace": "Close this workspace — stops everything and forgets it",
+		"rail": {
+			"missionTitle_one": "{{title}}\n{{count}} workspace",
+			"missionTitle_other": "{{title}}\n{{count}} workspaces",
+			"closeMission_one": "Close this mission's {{count}} workspace",
+			"closeMission_other": "Close this mission's {{count}} workspaces",
+			"sleepingTitle": "{{cwd}}\n\n{{state}}\nClick to resume",
+			"forgetSleeping": "Forget this sleeping workspace",
+			"newWorkspace": "+ Workspace",
+			"openMission": "Open the mission \"{{title}}\"",
+			"delivered": "· {{done}}/{{total}} delivered",
+			"closeMissionWorkspace": "Close this mission workspace"
+		},
+		"summary": {
+			"agents_one": "{{count}} agent",
+			"agents_other": "{{count}} agents",
+			"terminals_one": "{{count}} term.",
+			"terminals_other": "{{count}} term."
+		},
+		"sleeping": {
+			"withParts": "Asleep — {{parts}}",
+			"empty": "Asleep"
+		},
+		"menu": {
+			"browseDialog": "Open a folder as a workspace",
+			"browseGroup": "Browse",
+			"browseLabel": "Open a folder…",
+			"browseHint": "anywhere on disk, outside the listed worktrees",
+			"worktreesGroup": "Worktrees",
+			"detachedHead": "detached HEAD",
+			"alreadyOpen": "already open",
+			"openTerminalHere": "Open a terminal here (⇧Enter)",
+			"remoteBranchesGroup": "Branches from elsewhere, never checked out here",
+			"localBranchesGroup": "Branches without a worktree",
+			"remoteBranchHint": "on {{remote}} — check it out here, then work on it",
+			"localBranchHint": "create the worktree, then work on it",
+			"creationNote": "create",
+			"title": "Open a workspace — an existing worktree, or a branch whose worktree is yet to be created",
+			"empty": "No known worktree.",
+			"prGroup": "A pull request",
+			"prHint": "review it read-only — ⇧Enter: just open its branch",
+			"prNote": "review",
+			"prOpenBranch": "Only open its branch's workspace",
+			"newBranchGroup": "This branch isn't here yet",
+			"newBranchHint": "check it out as a worktree, then open its workspace"
+		},
+		"empty": {
+			"message": "No workspace open",
+			"hint": "A workspace is a branch checked out in its own folder, plus everything you put to work there.",
+			"stepBranch": "a branch",
+			"stepFolder": "its folder",
+			"stepAgents": "your agents and terminals",
+			"openBranch": "Open a branch"
+		},
+		"confirm": {
+			"closeTitle": "Close {{label}}?",
+			"message": "{{what}} — everything stops, including whatever is still running.",
+			"closeLabel": "Close the workspace",
+			"closeMissionTitle_one": "Close the {{count}} workspace of \"{{title}}\"?",
+			"closeMissionTitle_other": "Close the {{count}} workspaces of \"{{title}}\"?",
+			"closeAll": "Close all"
+		},
+		"toolbar": {
+			"addAgentTitle": "One more agent on this workspace",
+			"addAgent": "+ Agent",
+			"addTerminalTitle": "One more terminal on this workspace (⌘⇧T)",
+			"addTerminal": "+ Terminal",
+			"stop": "Stop",
+			"interrupt": "Interrupt what's running (⌃C)",
+			"clear": "Clear the screen",
+			"sleep": "Set aside — processes stop, the workspace comes back at next launch",
+			"closeMission": "Close the mission \"{{title}}\" — all its workspaces stop"
+		},
+		"status": {
+			"shell": "shell",
+			"finished": "finished",
+			"shellOpen": "shell open",
+			"asking": "is asking you a question",
+			"permission": "permission?",
+			"thinking": "thinking",
+			"ready": "ready"
+		},
+		"dock": {
+			"openTitle": "{{cwd}} — open in the Workspaces screen",
+			"collapse": "Collapse the list",
+			"expand": "Show the group's details"
+		}
+	}
+}

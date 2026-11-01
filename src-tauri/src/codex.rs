@@ -120,7 +120,7 @@ pub fn to_claude_shaped(payload: &Value) -> Option<Value> {
 		"turn.failed" => Some(json!({
 			"type": "result",
 			"is_error": true,
-			"result": "Le tour a échoué.",
+			"result": crate::i18n::t("codex.turnFailed"),
 		})),
 		_ => None,
 	}

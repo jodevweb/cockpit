@@ -1,7 +1,9 @@
 import clsx from "clsx";
 import { Check, FolderPlus, GitBranch, Github, Loader2 } from "lucide-react";
 import { useEffect, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { Badge, Button, Dot } from "@/components/ui";
+import { t as translate } from "@/i18n";
 import { api } from "@/lib/ipc";
 import type { Ground } from "@/lib/types";
 
@@ -29,6 +31,7 @@ export function ProjectGround({
 	/** Appelé après chaque préparation, avec l'état du terrain. */
 	onReady: (ground: Ground) => void;
 }) {
+	const { t } = useTranslation("components3");
 	const [ground, setGround] = useState<Ground | null>(null);
 	const [busy, setBusy] = useState(false);
 	const [error, setError] = useState("");
@@ -99,16 +102,20 @@ export function ProjectGround({
 			<p className="font-mono text-[10.5px] break-all text-ink-faint">{ground.path}</p>
 
 			<div className="flex flex-col gap-1">
-				<State ok={ground.exists} label="le dossier existe" missing="le dossier n'existe pas" />
+				<State
+					ok={ground.exists}
+					label={t("projectGround.dirExists")}
+					missing={t("projectGround.dirMissing")}
+				/>
 				<State
 					ok={ground.isRepo}
-					label="c'est un dépôt git"
-					missing="pas encore un dépôt git"
+					label={t("projectGround.isRepo")}
+					missing={t("projectGround.notRepo")}
 				/>
 				<State
 					ok={Boolean(ground.remote)}
 					label={ground.slug || ground.remote}
-					missing="aucun dépôt distant"
+					missing={t("projectGround.noRemote")}
 					// Un dépôt sans serveur est un cas parfaitement normal : on le
 					// signale sans le traiter comme un manque.
 					neutral
@@ -130,11 +137,10 @@ export function ProjectGround({
 					/>
 					<span className="min-w-0">
 						<span className="text-[11.5px] text-ink-muted">
-							Créer aussi le dépôt sur GitHub
+							{t("projectGround.createRemote")}
 						</span>
 						<span className="block text-[10px] leading-snug text-ink-faint">
-							Le cockpit le crée et le pose en « origin ». Il ne pousse rien : le premier
-							envoi reste ton geste.
+							{t("projectGround.createRemoteHint")}
 						</span>
 					</span>
 				</label>
@@ -144,14 +150,14 @@ export function ProjectGround({
 				<div className="flex flex-col gap-2 border-l-2 border-line-soft pl-2.5">
 					<div className="grid grid-cols-2 gap-2">
 						<label className="flex flex-col gap-1">
-							<span className="text-[10px] text-ink-faint">Compte</span>
+							<span className="text-[10px] text-ink-faint">{t("projectGround.account")}</span>
 							<select
 								value={account}
 								onChange={(event) => setAccount(event.target.value)}
 								className="focus-ring h-7 w-full rounded-lg border border-line-soft bg-raised px-2 text-[11px] text-ink"
 							>
 								{ground.accounts.length === 0 ? (
-									<option value="">aucune session `gh`</option>
+									<option value="">{t("projectGround.noGhSession")}</option>
 								) : null}
 								{ground.accounts.map((entry) => (
 									<option key={entry} value={entry}>
@@ -161,11 +167,11 @@ export function ProjectGround({
 							</select>
 						</label>
 						<label className="flex flex-col gap-1">
-							<span className="text-[10px] text-ink-faint">Dépôt</span>
+							<span className="text-[10px] text-ink-faint">{t("projectGround.repo")}</span>
 							<input
 								value={repo}
 								onChange={(event) => setRepo(event.target.value)}
-								placeholder={suggestedName || "mon-projet"}
+								placeholder={suggestedName || t("projectGround.repoPlaceholder")}
 								spellCheck={false}
 								className="focus-ring h-7 w-full rounded-lg border border-line-soft bg-raised px-2 font-mono text-[11px] text-ink placeholder:text-ink-faint"
 							/>
@@ -182,8 +188,8 @@ export function ProjectGround({
 								setWanted((current) => ({ ...current, public: event.target.checked }))
 							}
 						/>
-						<span className="text-[11px] text-ink-muted">Le rendre public</span>
-						{wanted.public ? <Badge tone="warning">visible de tous</Badge> : null}
+						<span className="text-[11px] text-ink-muted">{t("projectGround.makePublic")}</span>
+						{wanted.public ? <Badge tone="warning">{t("projectGround.publicBadge")}</Badge> : null}
 					</label>
 				</div>
 			) : null}
@@ -195,7 +201,7 @@ export function ProjectGround({
 			{nothingToDo && !wanted.remote ? (
 				<p className="flex items-center gap-1.5 text-[10.5px] text-ink-faint">
 					<Check size={11} className="text-success" />
-					Rien à préparer — le projet peut être ajouté.
+					{t("projectGround.ready")}
 				</p>
 			) : (
 				<Button
@@ -205,7 +211,7 @@ export function ProjectGround({
 					className="justify-center"
 					onClick={() => void prepare()}
 				>
-					{busy ? "Préparation…" : summarize(ground, wanted.remote)}
+					{busy ? t("projectGround.preparing") : summarize(ground, wanted.remote)}
 				</Button>
 			)}
 		</div>
@@ -215,10 +221,10 @@ export function ProjectGround({
 /** Ce que le bouton va réellement faire, en clair et dans l'ordre. */
 function summarize(ground: Ground, remote: boolean): string {
 	const gestes: string[] = [];
-	if (!ground.exists) gestes.push("créer le dossier");
-	if (!ground.isRepo) gestes.push("initialiser git");
-	if (remote) gestes.push("créer le dépôt GitHub");
-	if (gestes.length === 0) return "Rien à préparer";
+	if (!ground.exists) gestes.push(translate("components3:projectGround.step.createDir"));
+	if (!ground.isRepo) gestes.push(translate("components3:projectGround.step.gitInit"));
+	if (remote) gestes.push(translate("components3:projectGround.step.createRemote"));
+	if (gestes.length === 0) return translate("components3:projectGround.nothingToPrepare");
 	return gestes.join(", ").replace(/^./, (first) => first.toUpperCase());
 }
 

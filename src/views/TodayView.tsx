@@ -10,6 +10,7 @@ import {
 	X,
 } from "lucide-react";
 import { type ReactNode, useMemo, useState } from "react";
+import { useTranslation } from "react-i18next";
 import {
 	Badge,
 	Button,
@@ -59,6 +60,7 @@ const TONES = {
  * un coup d'œil.
  */
 export function TodayView() {
+	const { t } = useTranslation("views");
 	const { go, activeProject, config, worktrees } = useCockpit();
 
 	const tasks = useAsync(() => api.tasks.list(), [activeProject?.id]);
@@ -124,7 +126,7 @@ export function TodayView() {
 	return (
 		<>
 			<ViewHeader
-				title="Aujourd'hui"
+				title={t("today.title")}
 				subtitle={activeProject?.name}
 				actions={
 					<Button
@@ -133,9 +135,9 @@ export function TodayView() {
 						onClick={() => {
 							void api.tasks.clearDone().then(() => tasks.reload());
 						}}
-						title="Retirer les tâches faites"
+						title={t("today.clearDoneHint")}
 					>
-						Nettoyer
+						{t("today.clearDone")}
 					</Button>
 				}
 			/>
@@ -145,8 +147,8 @@ export function TodayView() {
 					{nothing && !tasks.initial ? (
 						<Empty
 							icon={Check}
-							message="Rien ne t'attend"
-							hint="Aucun agent en attente, aucune PR bloquée, rien à ranger."
+							message={t("today.nothing")}
+							hint={t("today.nothingHint")}
 						/>
 					) : null}
 
@@ -168,7 +170,7 @@ export function TodayView() {
 						{/* Ce qui t'est assigné, avec de quoi s'y mettre : c'est ici qu'on
 						    décide de commencer, pas dans un tableau de bord qu'on lit. */}
 						{openTickets.length > 0 ? (
-							<Card title="Mes tickets" count={openTickets.length}>
+							<Card title={t("today.myTickets")} count={openTickets.length}>
 								{openTickets.map((ticket) => (
 										<div
 											key={ticket.id}
@@ -213,13 +215,13 @@ export function TodayView() {
 
 						{/* Les notes viennent après ce qui bloque : elles n'engagent que
 						    toi, et rien ne t'attend dessus. */}
-						<Card title="À faire" count={pending.length}>
+						<Card title={t("today.todo")} count={pending.length}>
 							<TaskList tasks={tasks} pending={pending} done={done} />
 						</Card>
 
 						{readyToMerge.length > 0 ? (
 							<PrCard
-								title="Prêtes à merger"
+								title={t("today.readyToMerge")}
 								tone="success"
 								icon={GitMerge}
 								items={readyToMerge}
@@ -227,13 +229,13 @@ export function TodayView() {
 						) : null}
 
 						{toReview.length > 0 ? (
-							<PrCard title="À relire" tone="info" icon={GitPullRequest} items={toReview} />
+							<PrCard title={t("today.toReview")} tone="info" icon={GitPullRequest} items={toReview} />
 						) : null}
 
 						{/* Ce que le cockpit a fait en ton nom : une app qui pousse et
 						    fusionne doit pouvoir rendre des comptes. */}
 						{(journal.data ?? []).length > 0 ? (
-							<Card title="Activité du cockpit" count={journal.data?.length}>
+							<Card title={t("today.activity")} count={journal.data?.length}>
 								{(journal.data ?? []).map((entry, index) => (
 									<div
 										key={`${entry.at}-${index}`}
@@ -244,7 +246,7 @@ export function TodayView() {
 										{/* Ce que tu n'as pas demandé se distingue de ce que tu as
 										    demandé, ligne par ligne : c'est la seule question à
 										    laquelle ce carnet doit savoir répondre. */}
-										{entry.actor !== "me" ? <Badge>Permanence</Badge> : null}
+										{entry.actor !== "me" ? <Badge>{t("today.permanence")}</Badge> : null}
 										<span className="min-w-0 flex-1 truncate font-mono text-[10px] text-ink-faint">
 											{entry.detail || shortPath(entry.target, 1)}
 										</span>
@@ -257,7 +259,7 @@ export function TodayView() {
 						) : null}
 
 						{removable.length > 0 ? (
-							<Card title="Worktrees à ranger" count={removable.length}>
+							<Card title={t("today.worktreesToClean")} count={removable.length}>
 								<button
 									type="button"
 									onClick={() => go("worktrees")}
@@ -291,6 +293,7 @@ export function TodayView() {
  * lieu de cinq, et le reste de l'écran commence plus haut.
  */
 function Blockers({ items }: { items: Blocker[] }) {
+	const { t } = useTranslation("views");
 	if (items.length === 0) return null;
 	const worst = items.some((item) => item.tone === "critical") ? "critical" : "warning";
 	return (
@@ -298,7 +301,7 @@ function Blockers({ items }: { items: Blocker[] }) {
 			<header className="flex items-center gap-2 border-b border-line-soft px-3 py-2">
 				<Dot tone={worst} pulse />
 				<h2 className="text-[11px] font-semibold tracking-[0.06em] text-ink uppercase">
-					Ça t'attend
+					{t("today.waitingForYou")}
 				</h2>
 				<span className="font-mono text-[10px] text-ink-faint">{items.length}</span>
 			</header>
@@ -351,6 +354,7 @@ function Blockers({ items }: { items: Blocker[] }) {
  * souris.
  */
 function Fix({ item }: { item: Blocker }) {
+	const { t } = useTranslation("views");
 	const { notify } = useCockpit();
 	const [busy, setBusy] = useState(false);
 	if (!item.fix) return null;
@@ -364,7 +368,7 @@ function Fix({ item }: { item: Blocker }) {
 				setBusy(true);
 				void item
 					.fix!.run()
-					.then(() => notify(`${item.fix!.label} — c'est parti.`))
+					.then(() => notify(t("today.fixStarted", { label: item.fix!.label })))
 					.catch((error) => notify(String(error)))
 					.finally(() => setBusy(false));
 			}}
@@ -473,6 +477,7 @@ function TaskList({
 	pending: import("@/lib/types").Task[];
 	done: import("@/lib/types").Task[];
 }) {
+	const { t } = useTranslation("views");
 	const { notify } = useCockpit();
 	const [draft, setDraft] = useState("");
 	const [high, setHigh] = useState(false);
@@ -501,19 +506,19 @@ function TaskList({
 					onKeyDown={(event) => {
 						if (event.key === "Enter") add();
 					}}
-					placeholder="Une tâche à ne pas oublier…"
+					placeholder={t("today.task.placeholder")}
 					className="focus-ring text-selectable min-w-0 flex-1 rounded-lg border border-line-soft bg-void px-2.5 py-1.5 text-[12.5px] text-ink"
 				/>
 				<Button
 					size="sm"
 					active={high}
 					onClick={() => setHigh((value) => !value)}
-					title="Marquer comme urgent"
+					title={t("today.task.markUrgent")}
 				>
-					Urgent
+					{t("today.task.urgent")}
 				</Button>
 				<Button variant="solid" icon={draft.trim() ? CornerDownLeft : Plus} onClick={add}>
-					Ajouter
+					{t("today.task.add")}
 				</Button>
 			</div>
 
@@ -529,7 +534,7 @@ function TaskList({
 						onClick={() => {
 							void api.tasks.toggle(task.id).then(() => tasks.reload());
 						}}
-						title={task.done ? "Rouvrir" : "Terminer"}
+						title={task.done ? t("today.task.reopen") : t("today.task.complete")}
 						className={clsx(
 							"focus-ring flex h-4 w-4 shrink-0 items-center justify-center rounded border transition-colors",
 							task.done
@@ -551,7 +556,7 @@ function TaskList({
 					<Button
 						size="sm"
 						icon={X}
-						title="Supprimer"
+						title={t("today.task.delete")}
 						onClick={() => {
 							void api.tasks.remove(task.id).then(() => tasks.reload());
 						}}

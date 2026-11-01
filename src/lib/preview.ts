@@ -97,7 +97,7 @@ function commit(sha: string, subject: string, author: string, minutes: number) {
 		sha,
 		subject,
 		author,
-		relative: minutes < 60 ? `il y a ${minutes} min` : `il y a ${Math.round(minutes / 60)} h`,
+		relative: minutes < 60 ? `${minutes} min ago` : `${Math.round(minutes / 60)} h ago`,
 		timestamp: Math.round(now / 1000) - minutes * 60,
 	};
 }
@@ -151,7 +151,7 @@ const SESSION_TIMELINE = [
 		kind: "tool-result",
 		text: "apps/web/src/cart.ts:142  const total = Math.round(sum(lines) * 100) / 100;\napps/web/src/cart.ts:31   const CURRENCY_DECIMALS = 2;",
 		tool: "Grep",
-		detail: "2 résultats",
+		detail: "2 results",
 		model: null,
 		tokens: null,
 		minutes: 208,
@@ -422,26 +422,26 @@ function analyse(index: number) {
 		sections: [
 			{
 				id: "produit",
-				title: "En clair",
+				title: "In plain words",
 				body: "Loyalty points are no longer lost when a checkout fails: they return to the customer's account within a minute, without going through support. For the team, it ends manual point restores, which took one to two hours a week and always left a customer unhappy while they waited.",
 				points: [],
 			},
 			{
 				id: "pourquoi",
-				title: "Pourquoi maintenant",
+				title: "Why now",
 				body: "Three customers reported lost points in two weeks, each time after a declined card. Support was restoring them by hand.",
 				points: [],
 			},
 			{
 				id: "choix",
-				title: "Les choix faits",
+				title: "The choices made",
 				body: "Restore through a queue rather than inline: the restore survives a provider outage, at the cost of a one-minute delay. The alternative — restoring right inside the webhook call — was simpler but lost everything that failed during an outage, which is exactly the case we want to handle. The price of this choice is one more table to watch, and an intermediate state that support cannot see anywhere.",
 				points: [],
 			},
-			{ id: "risques", title: "Ce qui peut casser", body: "", points: risques },
+			{ id: "risques", title: "What could break", body: "", points: risques },
 			{
 				id: "verifier",
-				title: "À vérifier avant de fusionner",
+				title: "To check before merging",
 				body: "",
 				points: [
 					{
@@ -456,7 +456,7 @@ function analyse(index: number) {
 			},
 			{
 				id: "mieux",
-				title: "Ce qu'on pourrait faire mieux",
+				title: "What could be done better",
 				body: "The restore log should be visible to support, to avoid the back-and-forth with the engineering team.",
 				points: [],
 			},
@@ -535,7 +535,7 @@ const PERMANENCE = {
 		closed: null,
 		seen: 14,
 		fresh: 3,
-		blind: ["sentry : jeton refusé (401)"],
+		blind: ["sentry: token rejected (401)"],
 	},
 	since: Math.round(now / 1000) - 6 * 3600,
 	cold: false,
@@ -559,7 +559,7 @@ const PERMANENCE = {
 			label: "#418 · chore: bump @tauri-apps/api",
 			trigger: "",
 			at: Math.round(now / 1000) - 900,
-			dropped: "aucun déclencheur reconnu",
+			dropped: "no recognized trigger",
 			rule: "",
 			retained: false,
 			pending: false,
@@ -571,7 +571,7 @@ const PERMANENCE = {
 			label: "feat/theme · Light theme on the order history page",
 			trigger: "review_changes_requested",
 			at: Math.round(now / 1000) - 2400,
-			dropped: "la revue porte sur un autre dépôt que celui de la règle",
+			dropped: "the review is on a different repository than the rule's",
 			rule: "",
 			retained: false,
 			pending: false,
@@ -643,10 +643,10 @@ const PERMANENCE = {
 			oracle: { kind: "command", key: "script-test" },
 			stage: "done",
 			verdict: "rehearsed",
-			why: "Répétition : le plan est écrit, rien n'a été fait.",
+			why: "Rehearsal: the plan is written, nothing was done.",
 			steps: [
-				{ at: Math.round(now / 1000) - 7000, what: "read the run log", result: "prévu — find which test fails before touching the code", ok: true },
-				{ at: Math.round(now / 1000) - 7000, what: "open a mission", result: "prévu — production code needs to change", ok: true },
+				{ at: Math.round(now / 1000) - 7000, what: "read the run log", result: "planned — find which test fails before touching the code", ok: true },
+				{ at: Math.round(now / 1000) - 7000, what: "open a mission", result: "planned — production code needs to change", ok: true },
 			],
 			produced: [],
 			mission: "",
@@ -662,7 +662,7 @@ const PERMANENCE = {
 let previewShortcut: { accelerator: string; registered: boolean; error: string | null } = {
 	accelerator: "alt+Space",
 	registered: false,
-	error: "Déjà pris par une autre application, ou refusé par macOS.",
+	error: "Already taken by another application, or refused by macOS.",
 };
 
 /**
@@ -768,8 +768,8 @@ const REPONSES: Record<string, unknown> = {
 			id: "dep-1",
 			source: "railway",
 			title: "main → staging",
-			subtitle: "storefront-web · il y a 12 min",
-			status: "en ligne",
+			subtitle: "storefront-web · 12 min ago",
+			status: "up",
 			severity: "success",
 			url: "https://railway.app",
 			timestamp: ago(12),
@@ -779,9 +779,9 @@ const REPONSES: Record<string, unknown> = {
 		},
 	],
 	feed_betterstack_monitors: [
-		{ id: "mon-1", source: "betterstack", title: "Public API", subtitle: "99,98 % sur 7 jours", status: "en ligne", severity: "success", url: "https://betterstack.com", timestamp: null, meta: [], tags: [], payload: {} },
-		{ id: "mon-2", source: "betterstack", title: "Inventory webhooks", subtitle: "3 échecs depuis 10 min", status: "dégradé", severity: "warning", url: "https://betterstack.com", timestamp: null, meta: [], tags: [], payload: {} },
-		{ id: "mon-3", source: "betterstack", title: "Storefront web", subtitle: "en ligne depuis 6 j", status: "en ligne", severity: "success", url: "https://betterstack.com", timestamp: null, meta: [], tags: [], payload: {} },
+		{ id: "mon-1", source: "betterstack", title: "Public API", subtitle: "99.98% over 7 days", status: "up", severity: "success", url: "https://betterstack.com", timestamp: null, meta: [], tags: [], payload: {} },
+		{ id: "mon-2", source: "betterstack", title: "Inventory webhooks", subtitle: "3 failures in the last 10 min", status: "degraded", severity: "warning", url: "https://betterstack.com", timestamp: null, meta: [], tags: [], payload: {} },
+		{ id: "mon-3", source: "betterstack", title: "Storefront web", subtitle: "up for 6 d", status: "up", severity: "success", url: "https://betterstack.com", timestamp: null, meta: [], tags: [], payload: {} },
 	],
 	chantier_territory: ({ cwd }: Record<string, unknown>) => ({
 		root: String(cwd),
@@ -874,7 +874,7 @@ const REPONSES: Record<string, unknown> = {
 	},
 	// L'assistant, sans Claude : de quoi voir le bandeau réagir en aperçu.
 	assistant_ask: ({ prompt }: Record<string, unknown>) => {
-		const asked = /Demande : « (.*) »/.exec(String(prompt))?.[1] ?? "";
+		const asked = /Request: "(.*)"|Demande : « (.*) »/.exec(String(prompt))?.slice(1).find(Boolean) ?? "";
 		if (/workspace/i.test(asked)) {
 			return JSON.stringify({ say: "Opening the cart rounding workspace.", action: "open_workspace", params: { folder: "fix-cart-rounding-nw-3044" } });
 		}
@@ -895,16 +895,16 @@ const REPONSES: Record<string, unknown> = {
 		notes: [
 			{
 				source: "Marketing site · GitLab",
-				message: "401 — le jeton n'a pas la portée `api`.",
+				message: "401 — the token doesn't have the `api` scope.",
 			},
 			// Une note que le cockpit sait réparer : c'est le cas qui distingue
 			// « on te dit ce qui ne va pas » de « on te propose de le régler ».
 			{
 				source: "Internal tools · GitHub",
 				message:
-					"Le dépôt GitHub de ce projet est renseigné « internal-tools » : il manque le propriétaire. Attendu « propriétaire/dépôt », tel qu'on le lit dans l'URL du dépôt. Ici, c'est « northwind/internal-tools ».",
+					"This project's GitHub repository is set to “internal-tools”: the owner is missing. Expected “owner/repo”, as read in the repository URL. Here, that's “northwind/internal-tools”.",
 				fix: {
-					label: "Écrire « northwind/internal-tools »",
+					label: "Write “northwind/internal-tools”",
 					project: "internal-tools",
 					patch: { github: { repo: "northwind/internal-tools" } },
 				},
@@ -948,8 +948,8 @@ const REPONSES: Record<string, unknown> = {
 			{ kind: "github", count: 3, failed: 1, actor: "permanence" },
 		],
 		warnings: [
-			"1 propriété(s) n'ont rien attrapé sur de vrais correctifs. Reformule-les ou retire-les : un garde-fou décoratif coûte l'attention qu'on ne porte plus ailleurs.",
-			"2 leçon(s) sur 7 ne sont jamais parties avec un agent. Soit leur portée est trop étroite, soit elles n'avaient pas lieu d'être retenues.",
+			"1 property caught nothing on real fixes. Rephrase or remove it: a decorative guardrail costs attention that is no longer paid elsewhere.",
+			"2 lessons out of 7 never went out with an agent. Either their scope is too narrow, or they didn't need to be kept.",
 		],
 	},
 	// Trois calibrations, dont une décorative : c'est ce cas-là qui donne son
@@ -1045,7 +1045,7 @@ const REPONSES: Record<string, unknown> = {
 		voices: [
 			{
 				lens: "casse",
-				label: "Ce qui casse",
+				label: "What breaks",
 				verdict: "réserves",
 				risk: "moyen",
 				summary: "Shipping fees still use the old rounding, while everything else changed.",
@@ -1057,7 +1057,7 @@ const REPONSES: Record<string, unknown> = {
 			},
 			{
 				lens: "exploitation",
-				label: "Une fois déployé",
+				label: "Once deployed",
 				verdict: "bloquant",
 				risk: "élevé",
 				summary:
@@ -1070,7 +1070,7 @@ const REPONSES: Record<string, unknown> = {
 			},
 			{
 				lens: "usage",
-				label: "Pour qui s'en sert",
+				label: "For the people using it",
 				verdict: "ok",
 				risk: "faible",
 				summary: "The total becomes accurate, and nothing changes in the checkout flow.",
@@ -1081,15 +1081,15 @@ const REPONSES: Record<string, unknown> = {
 		disputes: [
 			{
 				claim: "Subscription orders already scheduled are charged the right amount after release.",
-				heldBy: ["Pour qui s'en sert"],
-				against: ["Une fois déployé", "Ce qui casse"],
+				heldBy: ["For the people using it"],
+				against: ["Once deployed", "What breaks"],
 				why: "If they aren't, customers get charged an amount that differs from their confirmation email, with nobody watching when it happens.",
 				check: "Take a cart saved before this change, at €10.00, and run a scheduled checkout on a copy.",
 			},
 			{
 				claim: "Shipping fees are rounded the way the payment provider does.",
 				heldBy: [],
-				against: ["Ce qui casse"],
+				against: ["What breaks"],
 				why: "A charge that differs from the displayed total is exactly the bug we are fixing.",
 				check: "Build a cart with ten discounted lines and paid shipping, then compare the summary with the sandbox charge.",
 			},
@@ -1302,11 +1302,11 @@ const REPONSES: Record<string, unknown> = {
 			rules: [
 				{
 					id: "ci-red",
-					label: "CI rouge sur une branche par défaut",
+					label: "Red CI on a default branch",
 					enabled: true,
 					trigger: "ci_red",
-					condition: "l'auteur du dernier commit, c'est moi",
-					reaction: "répare, ouvre une PR en brouillon",
+					condition: "I'm the author of the last commit",
+					reaction: "fix it, open a draft PR",
 					oracle: { kind: "command", key: "script-test" },
 					needsApproval: false,
 					everyHours: 0,
@@ -1315,11 +1315,11 @@ const REPONSES: Record<string, unknown> = {
 				},
 				{
 					id: "dependency",
-					label: "Dépendance en retard",
+					label: "Outdated dependency",
 					enabled: false,
 					trigger: "schedule",
 					condition: "",
-					reaction: "met à jour et vérifie",
+					reaction: "update and verify",
 					oracle: { kind: "", key: "" },
 					needsApproval: false,
 					everyHours: 0,
@@ -1335,22 +1335,22 @@ const REPONSES: Record<string, unknown> = {
 			{
 				id: "worktree-create",
 				group: "Worktrees",
-				label: "Créer un worktree",
-				description: "Sort la branche, prépare l'environnement et provisionne l'infra.",
+				label: "Create a worktree",
+				description: "Checks out the branch, prepares the environment and provisions the infra.",
 				base: "pnpm worktree:create",
 				positional: {
-					label: "Branche",
+					label: "Branch",
 					placeholder: "feat/my-feature",
 					required: true,
-					hint: "Le dossier est dérivé du nom de branche.",
+					hint: "The folder is derived from the branch name.",
 				},
 				options: [
 					{
 						id: "from",
 						flag: "--from",
-						label: "Partir de",
+						label: "Start from",
 						kind: "text",
-						hint: "Référence git de départ.",
+						hint: "Starting git reference.",
 						placeholder: "dev",
 						choices: [],
 						defaultValue: "",
@@ -1358,7 +1358,7 @@ const REPONSES: Record<string, unknown> = {
 					{
 						id: "no-setup",
 						flag: "--no-setup",
-						label: "Sans setup",
+						label: "Skip setup",
 						kind: "boolean",
 						hint: "",
 						placeholder: "",
@@ -1382,9 +1382,9 @@ const REPONSES: Record<string, unknown> = {
 			},
 			{
 				id: "db-push",
-				group: "Base de données",
-				label: "Push du schéma",
-				description: "Pousse le schéma sans migration — dev uniquement.",
+				group: "Database",
+				label: "Schema push",
+				description: "Pushes the schema without a migration — dev only.",
 				base: "pnpm db:push",
 				positional: null,
 				options: [],
@@ -1412,7 +1412,7 @@ const REPONSES: Record<string, unknown> = {
 		roles: [
 			{
 				id: "master",
-				label: "Agent maître",
+				label: "Lead agent",
 				prompt: "",
 				model: "",
 				engine: "claude",
@@ -1424,7 +1424,7 @@ const REPONSES: Record<string, unknown> = {
 			},
 			{
 				id: "backend",
-				label: "Développement back-end",
+				label: "Back-end development",
 				prompt: "You implement the server side.",
 				model: "",
 				engine: "claude",
@@ -1462,8 +1462,8 @@ const REPONSES: Record<string, unknown> = {
 			},
 		],
 		accounts: [
-			{ id: "poste", label: "Compte du poste", dir: "" },
-			{ id: "travail", label: "Compte entreprise", dir: "~/.claude-travail" },
+			{ id: "poste", label: "This machine's account", dir: "" },
+			{ id: "travail", label: "Company account", dir: "~/.claude-travail" },
 		],
 		account: "travail",
 		team: {
@@ -1483,7 +1483,7 @@ const REPONSES: Record<string, unknown> = {
 	accounts_status: [
 		{
 			id: "poste",
-			label: "Compte du poste",
+			label: "This machine's account",
 			dir: "",
 			resolvedDir: "/Users/demo/.claude",
 			loggedIn: true,
@@ -1495,7 +1495,7 @@ const REPONSES: Record<string, unknown> = {
 		},
 		{
 			id: "travail",
-			label: "Compte entreprise",
+			label: "Company account",
 			dir: "~/.claude-travail",
 			resolvedDir: "/Users/demo/.claude-travail",
 			loggedIn: true,
@@ -1544,7 +1544,7 @@ const REPONSES: Record<string, unknown> = {
 			sha: "a1b2c3d",
 			subject: "fix(cart): round each line before summing totals",
 			author: "Alice",
-			relative: "il y a 2 h",
+			relative: "2 h ago",
 			timestamp: now / 1000 - 7200,
 		},
 		lastActivity: now / 1000 - 3600 * index,
@@ -1669,7 +1669,7 @@ const REPONSES: Record<string, unknown> = {
 					actualBranch: "",
 					verdict: "",
 					state: "delivered",
-					note: "Exécutant terminé — 3 commits.",
+					note: "Worker finished — 3 commits.",
 					attempts: 0,
 					startedAt: ago(150),
 					finishedAt: ago(40),
@@ -1956,14 +1956,14 @@ const REPONSES: Record<string, unknown> = {
 			kind: "sse",
 			target: "http://127.0.0.1:3845/sse",
 			reachable: false,
-			blocker: "adresse locale : dans un conteneur, cette adresse désigne le conteneur, pas le poste",
+			blocker: "local address: inside a container, this address points to the container, not the machine",
 		},
 	],
 	journal_list: Array.from({ length: 14 }, (_, index) => ({
 		at: Math.round(now / 1000) - index * 900,
 		project: "principal",
 		kind: ["mission", "github", "agent", "git"][index % 4],
-		label: ["Maître lancé", "PR ouverte", "Exécutant lancé", "Branche poussée"][index % 4],
+		label: ["Lead launched", "PR opened", "Worker launched", "Branch pushed"][index % 4],
 		target: [
 			"Fix cart total rounding",
 			`#${1801 + (index % 5)}`,
@@ -2003,19 +2003,19 @@ const REPONSES: Record<string, unknown> = {
 		url: REVUE_2056.url,
 		headSha: "c0ffee2a91",
 		worktree: "/Users/demo/code/fix-cart-rounding-nw-3044",
-		prompt: "Vérifie les corrections de la PR #2056.",
+		prompt: "Check the fixes on PR #2056.",
 		warning: null,
 	}),
-	git_pull: "Déjà à jour.",
+	git_pull: "Already up to date.",
 	review_get: ({ number }: Record<string, unknown>) => (number === 2056 ? REVUE_2056 : null),
 	reviews_list: () => [REVUE_2056],
 	review_posted: () => REVUE_2056,
 	branch_pr: () => null,
 	worktree_commits: [
-		{ sha: "c0ffee2a91", subject: "fix(cart): keep the old cartTotal signature", author: "frank", relative: "il y a 12 min", timestamp: 0 },
-		{ sha: "b7e8f9012a", subject: "fix(cart): apply coupons after summing lines", author: "frank", relative: "il y a 2 h", timestamp: 0 },
-		{ sha: "a1b2c3d4e5", subject: "fix(cart): round each line before summing totals", author: "frank", relative: "hier", timestamp: 0 },
-		{ sha: "9f8e7d6c5b", subject: "test(cart): cover zero-decimal currencies", author: "frank", relative: "hier", timestamp: 0 },
+		{ sha: "c0ffee2a91", subject: "fix(cart): keep the old cartTotal signature", author: "frank", relative: "12 min ago", timestamp: 0 },
+		{ sha: "b7e8f9012a", subject: "fix(cart): apply coupons after summing lines", author: "frank", relative: "2 h ago", timestamp: 0 },
+		{ sha: "a1b2c3d4e5", subject: "fix(cart): round each line before summing totals", author: "frank", relative: "yesterday", timestamp: 0 },
+		{ sha: "9f8e7d6c5b", subject: "test(cart): cover zero-decimal currencies", author: "frank", relative: "yesterday", timestamp: 0 },
 	],
 	worktree_changes: [
 		{ path: "apps/web/src/cart/totals.ts", added: 6, removed: 2, state: "modified" },
@@ -2183,7 +2183,7 @@ const REPONSES: Record<string, unknown> = {
 	// L'aperçu n'a rien à couper : le bouton dit alors qu'il n'y avait rien, ce
 	// qui est exactement ce qu'on veut vérifier.
 	permanence_halt: {
-		state: { ...PERMANENCE, tripped: "Arrêt demandé depuis l'écran.", holds: [] },
+		state: { ...PERMANENCE, tripped: "Stop requested from the screen.", holds: [] },
 		stopped: [],
 		failed: [],
 	},
@@ -2194,27 +2194,27 @@ const REPONSES: Record<string, unknown> = {
 		total: 842_000,
 		share: 34,
 		remaining: 22,
-		tightest: "Semaine",
-		resetsAt: "lundi",
+		tightest: "Week",
+		resetsAt: "Monday",
 	},
 	usage_spend: {
 		today: 1_284_000,
 		window: 312_000,
 		remaining: 22,
-		tightest: "Semaine",
-		resetsAt: "lundi",
+		tightest: "Week",
+		resetsAt: "Monday",
 		quotas: [
-			{ label: "Session en cours", percent: 41, resetsAt: "à 18:00" },
-			{ label: "Cette semaine", percent: 78, resetsAt: "lundi" },
-			{ label: "Cette semaine (Fable)", percent: 12, resetsAt: "" },
+			{ label: "Current session", percent: 41, resetsAt: "at 6:00 PM" },
+			{ label: "This week", percent: 78, resetsAt: "Monday" },
+			{ label: "This week (Fable)", percent: 12, resetsAt: "" },
 		],
 	},
 	usage_limits: {
 		limits: [
-			{ label: "Session", percent: 41, resetsAt: "à 18:00" },
-			{ label: "Semaine", percent: 78, resetsAt: "lundi" },
+			{ label: "Session", percent: 41, resetsAt: "at 6:00 PM" },
+			{ label: "Week", percent: 78, resetsAt: "Monday" },
 		],
-		note: "Ces chiffres ne couvrent que cette machine.",
+		note: "These figures only cover this machine.",
 		checkedAt: new Date(now).toISOString(),
 		error: "",
 	},
@@ -2334,7 +2334,7 @@ const REPONSES: Record<string, unknown> = {
 			engineSession: "", outcome,
 			tally: { turns: 12, inputTokens: 90000, outputTokens: 7000, cacheTokens: 0,
 				cost: { reportedUsd: usd, estimatedUsd: 0, unknownTurns: 0 } },
-			note: outcome === "failed" ? "Le process s'est arrêté sans rendre de réponse." : "",
+			note: outcome === "failed" ? "The process stopped without returning an answer." : "",
 			eventsDropped: 0, steps: [],
 			observability: { reportsCost: true, reportsTokenSplit: true, reportsToolResults: true, reportsThinking: true, resumable: true },
 		});
@@ -2622,28 +2622,28 @@ const REPONSES: Record<string, unknown> = {
 	brief_sources: [
 		{
 			id: "product",
-			label: "Ce que fait le produit",
-			hint: "la phrase déclarée pour la lecture des changements — sans elle, un agent ne parle que du code",
+			label: "What the product does",
+			hint: "the sentence declared for reading changes — without it, an agent only talks about code",
 		},
 		{
 			id: "place",
-			label: "La branche et son état",
-			hint: "base, écart, fichiers non commités, derniers commits — lu dans le dépôt, toujours disponible",
+			label: "The branch and its state",
+			hint: "base, divergence, uncommitted files, latest commits — read from the repository, always available",
 		},
 		{
 			id: "ticket",
-			label: "Le ticket de la branche",
-			hint: "la demande et ses commentaires, chez le suivi déclaré",
+			label: "The branch's ticket",
+			hint: "the request and its comments, in the declared tracker",
 		},
 		{
 			id: "review",
-			label: "Les retours de revue",
-			hint: "description et échanges de la demande de fusion ouverte sur cette branche",
+			label: "Review feedback",
+			hint: "description and discussion of the merge request open on this branch",
 		},
 		{
 			id: "attempts",
-			label: "Ce qui a déjà été tenté",
-			hint: "les conversations passées dans ce dossier, en une ligne chacune",
+			label: "What has already been tried",
+			hint: "past conversations in this folder, one line each",
 		},
 	],
 	// Le dossier de contexte d'un agent qui démarre : quatre sources qui ont
@@ -2652,43 +2652,43 @@ const REPONSES: Record<string, unknown> = {
 	brief_compose: {
 		cwd: "/Users/demo/code/fix-cart-rounding-nw-3044",
 		branch: "fix-cart-rounding-nw-3044",
-		missing: ["ticket NW-3044 illisible (401 — le jeton Linear a expiré)"],
+		missing: ["ticket NW-3044 unreadable (401 — the Linear token has expired)"],
 		sections: [
 			{
 				id: "product",
-				label: "Le produit",
-				detail: "ce que l'équipe a déclaré",
+				label: "The product",
+				detail: "what the team declared",
 				chars: 214,
 				on: true,
 				ids: [],
-				text: "## Ce que fait ce produit\n\nAn online store. Customers browse products, fill a cart and check out. The cart total decides what gets charged: if it is wrong, the customer pays an amount that differs from what they saw.",
+				text: "## What this product does\n\nAn online store. Customers browse products, fill a cart and check out. The cart total decides what gets charged: if it is wrong, the customer pays an amount that differs from what they saw.",
 			},
 			{
 				id: "place",
-				label: "La branche",
-				detail: "état du dépôt",
+				label: "The branch",
+				detail: "repository state",
 				chars: 486,
 				on: true,
 				ids: [],
-				text: "## Où tu travailles\n\n- Dossier : `/Users/demo/code/fix-cart-rounding-nw-3044`\n- Branche : `fix-cart-rounding-nw-3044`\n- Base : `main` — 3 commits en avance, 1 commit en retard\n- Copie de travail : 2 fichiers non commité(s)\n\n### Fichiers déjà modifiés ici\n\n- `apps/web/src/cart.ts` (+24 −6)\n- `apps/web/src/rounding.ts` (nouveau)\n\n### Derniers commits\n\n- `9f2c1ab` Round each cart line before summing (il y a 2 heures)\n- `41ba07d` Move the rounding rule out of the component (il y a 3 heures)",
+				text: "## Where you're working\n\n- Folder: `/Users/demo/code/fix-cart-rounding-nw-3044`\n- Branch: `fix-cart-rounding-nw-3044`\n- Base: `main` — 3 commits ahead, 1 commit behind\n- Working copy: 2 uncommitted files\n\n### Files already changed here\n\n- `apps/web/src/cart.ts` (+24 −6)\n- `apps/web/src/rounding.ts` (new)\n\n### Latest commits\n\n- `9f2c1ab` Round each cart line before summing (2 hours ago)\n- `41ba07d` Move the rounding rule out of the component (3 hours ago)",
 			},
 			{
 				id: "review",
-				label: "Revue #318",
-				detail: "2 retours",
+				label: "Review #318",
+				detail: "2 comments",
 				chars: 402,
 				on: true,
 				ids: [],
-				text: "## Demande de fusion #318 — Fix cart total rounding on multi-currency orders\n\n- État : open\n- Adresse : https://github.com/northwind/storefront/pull/318\n\n### Ce qui a été dit\n\nLes retours ci-dessous n'ont pas forcément été traités. Vérifie dans le code avant de conclure qu'un point est réglé.\n\n- **bob** (revue, changes_requested) : the currency precision is still hard-coded in the component.\n- **dave** (commentaire) : what about currencies with no decimals, like JPY?",
+				text: "## Merge request #318 — Fix cart total rounding on multi-currency orders\n\n- State: open\n- URL: https://github.com/northwind/storefront/pull/318\n\n### What was said\n\nThe comments below have not necessarily been addressed. Check the code before concluding that a point is settled.\n\n- **bob** (review, changes_requested): the currency precision is still hard-coded in the component.\n- **dave** (comment): what about currencies with no decimals, like JPY?",
 			},
 			{
 				id: "attempts",
-				label: "Tentatives",
+				label: "Attempts",
 				detail: "2 conversations",
 				chars: 268,
 				on: false,
 				ids: [],
-				text: "## Ce qui a déjà été tenté dans ce dossier\n\n2 conversation(s) s'y sont déjà tenues. Ce n'est pas forcément lié à ce qu'on te demande — mais si ça l'est, ne recommence pas ce qui a échoué.\n\n- « fix the cart rounding » (14 échanges, s'est terminée sur une erreur)\n- « move the rounding rule out of the component » (6 échanges)",
+				text: "## What has already been tried in this folder\n\n2 conversations have already taken place here. It's not necessarily related to what you're being asked — but if it is, don't repeat what failed.\n\n- “fix the cart rounding” (14 exchanges, ended on an error)\n- “move the rounding rule out of the component” (6 exchanges)",
 			},
 		],
 	},

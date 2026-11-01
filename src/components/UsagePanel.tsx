@@ -5,6 +5,7 @@ import { compactNumber } from "@/lib/format";
 import { api } from "@/lib/ipc";
 import type { UsageBucket, UsageLimit, UsageTotals } from "@/lib/types";
 import { useAsync } from "@/lib/useAsync";
+import { useTranslation } from "react-i18next";
 
 /** Jetons facturés : le cache lu ne compte pas comme du texte produit. */
 function billable(totals: UsageTotals) {
@@ -22,6 +23,7 @@ function billable(totals: UsageTotals) {
 function Limits() {
 	// Même raison qu'ailleurs : chaque lecture lance le CLI. Le panneau se
 	// ferme, on le rouvre — c'est déjà le rythme auquel on veut ce chiffre.
+	const { t } = useTranslation("components1");
 	const limits = useAsync(() => api.sessions.limits(), []);
 	const data = limits.data;
 
@@ -29,7 +31,7 @@ function Limits() {
 		return (
 			<div className="mb-4 rounded-xl border border-line-soft bg-surface/60 p-2.5">
 				<p className="text-[10px] text-ink-faint">
-					Plafonds indisponibles — {data.error}
+					{t("usagePanel.limits.unavailable", { error: data.error })}
 				</p>
 			</div>
 		);
@@ -40,7 +42,7 @@ function Limits() {
 			<div className="mb-4 flex items-center gap-2 rounded-xl border border-line-soft bg-surface/60 p-2.5">
 				{limits.loading ? <Spinner /> : null}
 				<p className="text-[10px] text-ink-faint">
-					{limits.loading ? "Lecture des plafonds…" : "Plafonds non annoncés."}
+					{limits.loading ? t("usagePanel.limits.loading") : t("usagePanel.limits.none")}
 				</p>
 			</div>
 		);
@@ -50,14 +52,14 @@ function Limits() {
 		<div className="mb-4 flex flex-col gap-2.5 rounded-xl border border-line-soft bg-surface/60 p-3">
 			<div className="flex items-center gap-2">
 				<span className="text-[11px] font-semibold tracking-[0.06em] text-ink-muted uppercase">
-					Abonnement
+					{t("usagePanel.limits.title")}
 				</span>
 				<div className="flex-1" />
 				{limits.loading ? <Spinner /> : null}
 				<Button
 					size="sm"
 					icon={RefreshCw}
-					title="Redemander au CLI"
+					title={t("usagePanel.limits.refresh")}
 					onClick={() => void api.sessions.limits(true).then(() => limits.reload())}
 				/>
 			</div>
@@ -79,7 +81,7 @@ function Limits() {
 										: "text-ink",
 							)}
 						>
-							{100 - limit.percent}% restants
+							{t("usagePanel.limits.remaining", { percent: 100 - limit.percent })}
 						</span>
 					</div>
 					<div className="h-1.5 overflow-hidden rounded-full bg-raised">
@@ -97,10 +99,10 @@ function Limits() {
 					</div>
 					{limit.resetsAt ? (
 						<span className="text-[10px] text-ink-faint">
-							{limit.percent}% consommés · repart {limit.resetsAt}
+							{t("usagePanel.limits.usedResets", { percent: limit.percent, resetsAt: limit.resetsAt })}
 						</span>
 					) : (
-						<span className="text-[10px] text-ink-faint">{limit.percent}% consommés</span>
+						<span className="text-[10px] text-ink-faint">{t("usagePanel.limits.used", { percent: limit.percent })}</span>
 					)}
 				</div>
 			))}
@@ -124,6 +126,7 @@ function Stat({
 	totals: UsageTotals;
 	hint?: string;
 }) {
+	const { t } = useTranslation("components1");
 	return (
 		<div className="panel flex flex-col gap-1 p-3">
 			<span className="text-[10px] tracking-[0.06em] text-ink-faint uppercase">
@@ -133,7 +136,7 @@ function Stat({
 				{compactNumber(billable(totals))}
 			</span>
 			<span className="font-mono text-[10px] text-ink-faint">
-				{compactNumber(totals.output)} produits · {totals.messages} réponses
+				{t("usagePanel.stat", { output: compactNumber(totals.output), count: totals.messages })}
 			</span>
 			{hint ? <span className="text-[10px] text-ink-faint">{hint}</span> : null}
 		</div>
@@ -192,6 +195,7 @@ function Section({ title, children }: { title: string; children: React.ReactNode
  * combien il en reste.
  */
 export function UsagePanel({ onClose }: { onClose: () => void }) {
+	const { t } = useTranslation("components1");
 	const usage = useAsync(() => api.sessions.usage(), [], { pollMs: 300_000 });
 	const data = usage.data;
 
@@ -199,9 +203,9 @@ export function UsagePanel({ onClose }: { onClose: () => void }) {
 		<div className="animate-in fixed inset-0 z-40 flex items-start justify-center bg-overlay/70 p-10">
 			<div className="panel flex max-h-full w-full max-w-3xl flex-col overflow-hidden shadow-2xl shadow-black/50">
 				<div className="hairline-b flex items-center gap-2 px-4 py-2.5">
-					<span className="text-[12.5px] font-semibold text-ink">Consommation Claude</span>
+					<span className="text-[12.5px] font-semibold text-ink">{t("usagePanel.title")}</span>
 					<span className="min-w-0 flex-1 truncate text-[10px] text-ink-faint">
-						d'après les journaux de ~/.claude/projects
+						{t("usagePanel.source", { path: "~/.claude/projects" })}
 					</span>
 					{usage.loading ? <Spinner /> : null}
 					<Button size="sm" icon={RefreshCw} onClick={usage.reload} />
@@ -222,10 +226,10 @@ export function UsagePanel({ onClose }: { onClose: () => void }) {
 					{data ? (
 						<div className="flex flex-col gap-4">
 							<div className="grid grid-cols-4 gap-2">
-								<Stat label="5 dernières heures" totals={data.last5h} />
-								<Stat label="Aujourd'hui" totals={data.today} />
-								<Stat label="7 jours" totals={data.last7Days} />
-								<Stat label="30 jours" totals={data.last30Days} />
+								<Stat label={t("usagePanel.periods.last5h")} totals={data.last5h} />
+								<Stat label={t("usagePanel.periods.today")} totals={data.today} />
+								<Stat label={t("usagePanel.periods.last7Days")} totals={data.last7Days} />
+								<Stat label={t("usagePanel.periods.last30Days")} totals={data.last30Days} />
 							</div>
 
 							<div
@@ -236,20 +240,18 @@ export function UsagePanel({ onClose }: { onClose: () => void }) {
 							>
 								<Info size={12} className="mt-0.5 shrink-0 text-ink-faint" />
 								<p className="text-[10px] leading-relaxed text-ink-faint">
-									Volumes mesurés en jetons, à distinguer des plafonds ci-dessus : le
-									total additionne entrée, sortie et écriture de cache ; le cache relu
-									est compté à part car il ne se facture pas comme du texte produit.
+									{t("usagePanel.volumesNote")}
 								</p>
 							</div>
 
-							<Section title="Par jour (30 derniers jours)">
-								<Bars buckets={[...data.byDay].reverse()} empty="Aucune activité." />
+							<Section title={t("usagePanel.byDay.title")}>
+								<Bars buckets={[...data.byDay].reverse()} empty={t("usagePanel.byDay.empty")} />
 							</Section>
 
-							<Section title="Par worktree">
+							<Section title={t("usagePanel.byWorktree.title")}>
 								<Bars
 									buckets={data.byWorktree}
-									empty="Aucun dossier identifié."
+									empty={t("usagePanel.byWorktree.empty")}
 								/>
 							</Section>
 
@@ -257,19 +259,21 @@ export function UsagePanel({ onClose }: { onClose: () => void }) {
 							    agents travaillent dans plusieurs worktrees, et leurs relevés
 							    n'ont de sens qu'additionnés sous son nom. */}
 							{data.byMission.length > 0 ? (
-								<Section title="Par mission">
-									<Bars buckets={data.byMission} empty="Aucune mission mesurée." />
+								<Section title={t("usagePanel.byMission.title")}>
+									<Bars buckets={data.byMission} empty={t("usagePanel.byMission.empty")} />
 								</Section>
 							) : null}
 
-							<Section title="Par modèle">
-								<Bars buckets={data.byModel} empty="Aucun modèle identifié." />
+							<Section title={t("usagePanel.byModel.title")}>
+								<Bars buckets={data.byModel} empty={t("usagePanel.byModel.empty")} />
 							</Section>
 
 							<p className="text-[10px] text-ink-faint">
-								Depuis le début : {compactNumber(billable(data.allTime))} jetons sur{" "}
-								{data.allTime.messages} réponses · cache relu{" "}
-								{compactNumber(data.allTime.cacheRead)}.
+								{t("usagePanel.allTime", {
+									tokens: compactNumber(billable(data.allTime)),
+									count: data.allTime.messages,
+									cacheRead: compactNumber(data.allTime.cacheRead),
+								})}
 							</p>
 						</div>
 					) : null}

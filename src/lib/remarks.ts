@@ -1,4 +1,5 @@
 import { useSyncExternalStore } from "react";
+import { t } from "@/i18n";
 
 /**
  * Des remarques posées sur la carte, envoyées à l'agent d'un seul geste.
@@ -64,8 +65,10 @@ export function useAllRemarks(): Remark[] {
 export function composeRemarks(list: Remark[]): string {
 	if (list.length === 1) {
 		const [only] = list;
-		return `À propos de ${only.anchor} : ${only.text}`;
+		return t("lib:remarks.about", { anchor: only.anchor, text: only.text });
 	}
-	const lines = list.map((remark, index) => `${index + 1}. À propos de ${remark.anchor} : ${remark.text}`);
-	return `Quelques remarques sur ton travail :\n\n${lines.join("\n")}\n\nTiens-en compte pour la suite ; dis-moi si l'une d'elles te paraît fausse.`;
+	const lines = list.map(
+		(remark, index) => `${index + 1}. ${t("lib:remarks.about", { anchor: remark.anchor, text: remark.text })}`,
+	);
+	return `${t("lib:remarks.intro")}\n\n${lines.join("\n")}\n\n${t("lib:remarks.outro")}`;
 }

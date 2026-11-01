@@ -37,6 +37,7 @@ use std::sync::Mutex;
 /// autrement une fois déployé, et changer ce que vit celui qui s'en sert.
 struct Lens {
 	id: &'static str,
+	/// La clé de catalogue du nom affiché.
 	label: &'static str,
 	/// Ce qui distingue cet angle des autres, dit à l'agent.
 	angle: &'static str,
@@ -45,32 +46,37 @@ struct Lens {
 const LENSES: [Lens; 3] = [
 	Lens {
 		id: "casse",
-		label: "Ce qui casse",
-		angle: "Tu cherches ce que ce changement casse. Pas ce qu'il améliore, pas ce qu'il \
-		        vaut : ce qui, à cause de lui, va se comporter autrement que prévu. Cas \
-		        limites, valeurs absentes, entrées inattendues, ordre des opérations, erreurs \
-		        avalées. Un risque que tu ne sais pas déclencher n'est pas un risque : ne \
-		        l'écris pas.",
+		label: "panel.lens.breaks",
+		angle: "You look for what this change breaks. Not what it improves, not what it is \
+		        worth: what, because of it, will behave differently than intended. Edge \
+		        cases, missing values, unexpected inputs, order of operations, swallowed \
+		        errors. A risk you cannot trigger is not a risk: do not write it down.",
 	},
 	Lens {
 		id: "exploitation",
-		label: "Une fois déployé",
-		angle: "Tu regardes ce qui se passe après la mise en service, pas pendant l'écriture. \
-		        Données déjà en place et incompatibles avec le nouveau code, migration qu'on \
-		        ne sait pas défaire, dépendance à un service qui peut tomber, montée en \
-		        charge, retour arrière impossible, comportement au redémarrage. Si rien de \
-		        tout cela n'est en jeu, dis-le franchement plutôt que d'inventer.",
+		label: "panel.lens.deployed",
+		angle: "You look at what happens after it goes live, not while it is being written. \
+		        Existing data incompatible with the new code, a migration that cannot be \
+		        undone, a dependency on a service that can go down, load growth, impossible \
+		        rollback, behaviour on restart. If none of this is at stake, say so plainly \
+		        rather than inventing something.",
 	},
 	Lens {
 		id: "usage",
-		label: "Pour qui s'en sert",
-		angle: "Tu te mets à la place de celui qui utilise ce que ce dépôt produit — une \
-		        interface, une commande, une bibliothèque, une API. Qu'est-ce qui change pour \
-		        lui sans qu'on l'ait prévenu ? Qu'est-ce qui devient impossible, plus lent, \
-		        ou différent de ce qu'il avait appris ? Une rupture de contrat compte même \
-		        quand le code est juste.",
+		label: "panel.lens.users",
+		angle: "You put yourself in the shoes of whoever uses what this repository produces — \
+		        an interface, a command, a library, an API. What changes for them without \
+		        warning? What becomes impossible, slower, or different from what they had \
+		        learned? A broken contract counts even when the code is correct.",
 	},
 ];
+
+impl Lens {
+	/// Le nom de l'angle, tel que l'utilisateur le lit.
+	fn name(&self) -> String {
+		crate::i18n::t(self.label)
+	}
+}
 
 /// Ce qu'une lecture a conclu.
 #[derive(Debug, Clone, Serialize, Deserialize, Default)]
@@ -151,11 +157,11 @@ pub fn forget(key: &str) -> Result<()> {
 
 fn write(panel: &Panel) -> Result<()> {
 	std::fs::create_dir_all(panels_dir())
-		.map_err(|e| CockpitError::msg(format!("Dossier des confrontations : {e}")))?;
+		.map_err(|e| CockpitError::msg(crate::i18n::tf("panel.folderError", &[("error", &e)])))?;
 	let raw = serde_json::to_string_pretty(panel)
-		.map_err(|e| CockpitError::msg(format!("Confrontation illisible : {e}")))?;
+		.map_err(|e| CockpitError::msg(crate::i18n::tf("panel.unreadable", &[("error", &e)])))?;
 	std::fs::write(path_of(&panel.key), raw)
-		.map_err(|e| CockpitError::msg(format!("Écriture de la confrontation : {e}")))
+		.map_err(|e| CockpitError::msg(crate::i18n::tf("panel.writeError", &[("error", &e)])))
 }
 
 /// Les confrontations en cours : quatre agents partent d'un coup, on ne les
@@ -204,35 +210,38 @@ fn now() -> u64 {
 fn lens_prompt(lens: &Lens, product: &str, dossier: &str) -> String {
 	let mut prompt = String::new();
 	prompt.push_str(
-		"Tu lis un changement de code avec un angle précis, et lui seul. D'autres agents \
-		 lisent le même changement sous d'autres angles : ne cherche pas à être complet, \
-		 cherche à être juste sur ta part.\n\n",
+		"You read a code change from one specific angle, and that angle only. Other agents \
+		 read the same change from other angles: do not try to be complete, try to be \
+		 right about your part.\n\n",
 	);
 	prompt.push_str(lens.angle);
 	prompt.push_str(
-		"\n\nTu es dans le dépôt : va lire le code autour du diff plutôt que de conclure sur \
-		 ce que le diff montre. Tu ne peux rien modifier.\n\n\
-		 N'invente pas de risque pour avoir quelque chose à dire. « Rien de repéré sous cet \
-		 angle » est une réponse utile, et une réponse fréquente : c'est même ce qui donne du \
-		 poids aux fois où tu signales quelque chose.\n\n",
+		"\n\nYou are inside the repository: go and read the code around the diff rather than \
+		 concluding from what the diff shows. You cannot modify anything.\n\n\
+		 Do not invent a risk to have something to say. \"Nothing spotted from this angle\" \
+		 is a useful answer, and a frequent one: it is what gives weight to the times you do \
+		 flag something.\n\n",
 	);
 	if !product.trim().is_empty() {
-		prompt.push_str("## Ce que fait ce produit\n\n");
+		prompt.push_str("## What this product does\n\n");
 		prompt.push_str(product.trim());
 		prompt.push_str("\n\n");
 	}
 	prompt.push_str(
-		"## Ce que tu rends\n\n\
-		 Exactement cette forme, rien avant, rien après :\n\n\
-		 Verdict: ok | réserves | bloquant\n\
-		 Risque: faible | moyen | élevé\n\
-		 Résumé: une phrase, deux au plus, disant ce que tu as vu sous ton angle.\n\n\
-		 Puis une liste à puces, trois à cinq au maximum, la plus grave en premier. Chaque \
-		 puce dit une situation concrète et ce qui s'y produit — pas une inquiétude, pas une \
-		 formule de prudence. Si tu n'as rien vu, écris une seule puce : « Rien de repéré \
-		 sous cet angle. » suivie d'une raison en une phrase.\n\n\
-		 ## Le dossier\n\n",
+		"## What you return\n\n\
+		 Exactly this form, nothing before, nothing after. Keep the three markers \
+		 (`Verdict:`, `Risk:`, `Summary:`) and the verdict and risk values in English \
+		 exactly as written:\n\n\
+		 Verdict: ok | concerns | blocking\n\
+		 Risk: low | medium | high\n\
+		 Summary: one sentence, two at most, saying what you saw from your angle.\n\n\
+		 Then a bulleted list, three to five at most, the most serious first. Each bullet \
+		 states a concrete situation and what happens in it — not a worry, not a hedging \
+		 phrase. If you saw nothing, write a single bullet: \"Nothing spotted from this \
+		 angle.\" followed by a one-sentence reason.\n\n",
 	);
+	prompt.push_str(&crate::i18n::reply_directive());
+	prompt.push_str("\n\n## The file\n\n");
 	prompt.push_str(dossier);
 	prompt
 }
@@ -244,30 +253,35 @@ fn lens_prompt(lens: &Lens, product: &str, dossier: &str) -> String {
 /// soit mieux placé qu'elle pour trancher.
 fn merge_prompt(avis: &str) -> String {
 	format!(
-		"Trois agents ont lu le même changement de code, chacun sous un angle différent. \
-		 Leurs avis sont ci-dessous. Ton travail n'est pas de les résumer : c'est de dire où \
-		 ils ne sont pas d'accord.\n\n\
-		 Un désaccord, ce n'est pas seulement « l'un dit oui, l'autre dit non ». C'en est un \
-		 aussi quand l'un signale quelque chose que les autres n'ont pas vu alors qu'ils \
-		 auraient dû le croiser, ou quand deux avis décrivent la même chose avec des \
-		 conséquences incompatibles.\n\n\
-		 N'invente pas de désaccord pour remplir. Trois avis concordants sont un résultat, \
-		 et c'est ce qui rend un désaccord digne d'attention quand il y en a un.\n\n\
-		 Rends exactement cette forme :\n\n\
-		 ## Accord\n\n\
-		 Deux lignes au plus : ce que les trois disent, ensemble. Si même ça ne se dégage \
-		 pas, écris « Aucun point commun. »\n\n\
-		 ## Désaccords\n\n\
-		 Une sous-section par désaccord, dans cette forme exacte :\n\n\
-		 ### <l'affirmation contestée, en une phrase>\n\
-		 - Soutenu par : <noms des angles, séparés par des virgules>\n\
-		 - Contesté par : <noms des angles qui disent le contraire ou ne l'ont pas vu>\n\
-		 - Pourquoi : <ce qui se passe si le camp qui a raison est celui qu'on n'a pas suivi>\n\
-		 - Tranche : <le geste qui règle la question — quoi ouvrir, quoi essayer, quoi \
-		 regarder>\n\n\
-		 S'il n'y a aucun désaccord, écris sous le titre « Aucun désaccord. » et rien \
-		 d'autre.\n\n\
-		 ## Les avis\n\n{avis}"
+		"Three agents read the same code change, each from a different angle. \
+		 Their opinions are below. Your job is not to summarise them: it is to say where \
+		 they disagree.\n\n\
+		 A disagreement is not only \"one says yes, the other says no\". It is one \
+		 too when one flags something the others did not see although they \
+		 should have come across it, or when two opinions describe the same thing with \
+		 incompatible consequences.\n\n\
+		 Do not invent a disagreement to fill space. Three concurring opinions are a result, \
+		 and that is what makes a disagreement worth attention when there is one.\n\n\
+		 Return exactly this form. Keep the section headings (`## Agreement`, \
+		 `## Disagreements`) and the field markers (`Held by:`, `Disputed by:`, `Why:`, \
+		 `Settle:`) in English exactly as written; the angle names are given below and \
+		 must be copied as they are:\n\n\
+		 ## Agreement\n\n\
+		 Two lines at most: what all three say, together. If not even that emerges, \
+		 write \"No common ground.\"\n\n\
+		 ## Disagreements\n\n\
+		 One subsection per disagreement, in this exact form:\n\n\
+		 ### <the disputed claim, in one sentence>\n\
+		 - Held by: <names of the angles, separated by commas>\n\
+		 - Disputed by: <names of the angles that say the opposite or did not see it>\n\
+		 - Why: <what happens if the side that is right is the one we did not follow>\n\
+		 - Settle: <the action that settles the question — what to open, what to try, what \
+		 to look at>\n\n\
+		 If there is no disagreement, write \"No disagreement.\" under the heading and \
+		 nothing else.\n\n\
+		 {directive}\n\n\
+		 ## The opinions\n\n{avis}",
+		directive = crate::i18n::reply_directive(),
 	)
 }
 
@@ -276,9 +290,7 @@ fn merge_prompt(avis: &str) -> String {
 /// Fait lire un changement sous trois angles, et ne garde que le désaccord.
 pub async fn confront(key: String) -> Result<Panel> {
 	if !claim(&key) {
-		return Err(CockpitError::msg(
-			"Une confrontation de ce changement est déjà en cours.",
-		));
+		return Err(CockpitError::msg(crate::i18n::t("panel.alreadyRunning")));
 	}
 	let outcome = confront_inner(&key).await;
 	release(&key);
@@ -297,10 +309,7 @@ async fn confront_inner(key: &str) -> Result<Panel> {
 		.into_iter()
 		.find(|change| change.key == key)
 		.ok_or_else(|| {
-			CockpitError::msg(
-				"Ce changement n'existe plus : la demande de fusion a été fermée, ou la \
-				 branche a disparu.",
-			)
+			CockpitError::msg(crate::i18n::t("panel.changeGone"))
 		})?;
 
 	let base = Config::load();
@@ -318,7 +327,7 @@ async fn confront_inner(key: &str) -> Result<Panel> {
 	]
 	.into_iter()
 	.find(|candidate| !candidate.is_empty() && std::path::Path::new(candidate).is_dir())
-	.ok_or_else(|| CockpitError::msg("Aucun dossier où faire travailler les agents."))?;
+	.ok_or_else(|| CockpitError::msg(crate::i18n::t("panel.noFolder")))?;
 
 	let settings = config.impact.clone();
 	// Les trois angles partent ensemble : ils ne dépendent pas les uns des
@@ -353,19 +362,22 @@ async fn confront_inner(key: &str) -> Result<Panel> {
 		match rendu {
 			Ok(rendu) => {
 				cost += rendu.cost_usd;
-				voices.push(parse_voice(lens.id, lens.label, &rendu.text, rendu.cost_usd));
+				voices.push(parse_voice(lens.id, &lens.name(), &rendu.text, rendu.cost_usd));
 			}
 			// Un angle muet ne fait pas échouer la confrontation : deux avis
 			// valent mieux que rien. Mais il est nommé — un désaccord qu'on n'a
 			// pas cherché ne doit pas passer pour un accord.
-			Err(error) => silent.push(format!("{} : {error}", lens.label)),
+			Err(error) => silent.push(crate::i18n::tf(
+				"panel.silentVoice",
+				&[("lens", &lens.name()), ("error", &error)],
+			)),
 		}
 	}
 
 	if voices.is_empty() {
-		return Err(CockpitError::msg(format!(
-			"Aucun angle n'a répondu. {}",
-			silent.join(" — ")
+		return Err(CockpitError::msg(crate::i18n::tf(
+			"panel.noVoice",
+			&[("details", &silent.join(" — "))],
 		)));
 	}
 
@@ -387,13 +399,12 @@ async fn confront_inner(key: &str) -> Result<Panel> {
 	write(&panel)?;
 	crate::journal::record(
 		"impact",
-		"Confrontation d'un changement",
+		&crate::i18n::t("panel.journal.title"),
 		&format!("{} {}", change.repo, change.reference),
 		true,
-		&format!(
-			"{} — {} désaccord(s)",
-			panel.verdict,
-			panel.disputes.len()
+		&crate::i18n::tf(
+			"panel.journal.detail",
+			&[("verdict", &panel.verdict), ("count", &panel.disputes.len())],
 		),
 	);
 	Ok(panel)
@@ -413,10 +424,10 @@ async fn merge(
 		.iter()
 		.map(|voice| {
 			format!(
-				"### {} (verdict : {}, risque : {})\n\n{}\n\n{}",
+				"### {} (verdict: {}, risk: {})\n\n{}\n\n{}",
 				voice.label,
-				voice.verdict,
-				voice.risk,
+				verdict_marker(&voice.verdict),
+				risk_marker(&voice.risk),
 				voice.summary,
 				voice
 					.points
@@ -445,7 +456,7 @@ async fn merge(
 			(agreed, disputes, rendu.cost_usd)
 		}
 		Err(error) => (
-			format!("La synthèse n'a pas abouti ({error}). Les avis bruts restent lisibles."),
+			crate::i18n::tf("panel.mergeFailed", &[("error", &error)]),
 			Vec::new(),
 			0.0,
 		),
@@ -472,6 +483,25 @@ fn harshest(voices: &[Voice]) -> String {
 }
 
 // ── Relecture de ce que les agents ont écrit ────────────────────────────────
+
+/// Le verdict tel que le prompt le nomme : les valeurs gardées (`réserves`…)
+/// sont celles que l'interface compare, les marqueurs du prompt sont anglais.
+fn verdict_marker(verdict: &str) -> &str {
+	match verdict {
+		"bloquant" => "blocking",
+		"réserves" => "concerns",
+		other => other,
+	}
+}
+
+fn risk_marker(risk: &str) -> &str {
+	match risk {
+		"élevé" => "high",
+		"moyen" => "medium",
+		"faible" => "low",
+		other => other,
+	}
+}
 
 /// Normalise un verdict quelle que soit la façon dont il a été écrit.
 fn verdict_of(line: &str) -> Option<String> {
@@ -537,7 +567,9 @@ fn parse_voice(lens: &str, label: &str, text: &str, cost: f64) -> Voice {
 			continue;
 		}
 		if let Some(rest) = trimmed
-			.strip_prefix("Résumé:")
+			.strip_prefix("Summary:")
+			.or_else(|| trimmed.strip_prefix("Summary :"))
+			.or_else(|| trimmed.strip_prefix("Résumé:"))
 			.or_else(|| trimmed.strip_prefix("Résumé :"))
 			.or_else(|| trimmed.strip_prefix("Resume:"))
 		{
@@ -576,7 +608,9 @@ fn parse_merge(text: &str) -> (String, Vec<Dispute>) {
 		let trimmed = line.trim();
 		if let Some(title) = trimmed.strip_prefix("### ") {
 			let title = title.trim();
-			if !title.is_empty() && !title.to_lowercase().starts_with("aucun") {
+			let bas = title.to_lowercase();
+			let vide = bas.starts_with("aucun") || bas.starts_with("no disagreement") || bas.starts_with("none");
+			if !title.is_empty() && !vide {
 				disputes.push(Dispute {
 					claim: title.to_string(),
 					..Default::default()
@@ -586,11 +620,12 @@ fn parse_merge(text: &str) -> (String, Vec<Dispute>) {
 		}
 		if let Some(title) = trimmed.strip_prefix("## ") {
 			let bas = title.to_lowercase();
-			zone = if bas.contains("accord") && !bas.contains("désaccord") && !bas.contains("desaccord")
-			{
-				"accord"
-			} else if bas.contains("désaccord") || bas.contains("desaccord") {
+			// « Disagreement » contient « agreement » : le désaccord se teste d'abord.
+			let desaccord = bas.contains("désaccord") || bas.contains("desaccord") || bas.contains("disagreement");
+			zone = if desaccord {
 				"désaccords"
+			} else if bas.contains("accord") || bas.contains("agreement") {
+				"accord"
 			} else {
 				""
 			};
@@ -617,13 +652,13 @@ fn parse_merge(text: &str) -> (String, Vec<Dispute>) {
 				.map(|(_, value)| value.trim().trim_start_matches("**").trim().to_string())
 				.unwrap_or_default()
 		};
-		if bas.starts_with("soutenu") {
+		if bas.starts_with("soutenu") || bas.starts_with("held by") {
 			current.held_by = noms(&valeur(champ));
-		} else if bas.starts_with("contesté") || bas.starts_with("conteste") {
+		} else if bas.starts_with("contesté") || bas.starts_with("conteste") || bas.starts_with("disputed by") {
 			current.against = noms(&valeur(champ));
-		} else if bas.starts_with("pourquoi") {
+		} else if bas.starts_with("pourquoi") || bas.starts_with("why") {
 			current.why = valeur(champ);
-		} else if bas.starts_with("tranche") {
+		} else if bas.starts_with("tranche") || bas.starts_with("settle") {
 			current.check = valeur(champ);
 		}
 	}
@@ -642,7 +677,10 @@ fn parse_merge(text: &str) -> (String, Vec<Dispute>) {
 fn noms(raw: &str) -> Vec<String> {
 	raw.split(',')
 		.map(|part| part.trim().trim_matches('*').trim().to_string())
-		.filter(|part| !part.is_empty() && part.to_lowercase() != "aucun")
+		.filter(|part| {
+			let bas = part.to_lowercase();
+			!part.is_empty() && bas != "aucun" && bas != "none"
+		})
 		.collect()
 }
 
@@ -684,6 +722,54 @@ mod tests {
 		assert_eq!(voice.summary, "la reprise rejoue les points de fidélité.");
 		assert_eq!(voice.points.len(), 2);
 		assert_eq!(voice.cost_usd, 0.12);
+	}
+
+	/// Les marqueurs anglais que demande le prompt, et les anciens marqueurs
+	/// français des avis déjà enregistrés : les deux se relisent pareil.
+	#[test]
+	fn un_avis_se_relit_en_anglais_comme_en_francais() {
+		let anglais = "Verdict: concerns\nRisk: high\nSummary: the retry replays loyalty points.\n\n\
+		               - An order retried twice credits the points twice.";
+		let voice = parse_voice("casse", "What breaks", anglais, 0.0);
+		assert_eq!(voice.verdict, "réserves");
+		assert_eq!(voice.risk, "élevé");
+		assert_eq!(voice.summary, "the retry replays loyalty points.");
+		assert_eq!(voice.points.len(), 1);
+
+		let francais = "Verdict: réserves\nRisque: moyen\nRésumé: la reprise rejoue les points.";
+		let voice = parse_voice("casse", "Ce qui casse", francais, 0.0);
+		assert_eq!(voice.verdict, "réserves");
+		assert_eq!(voice.risk, "moyen");
+		assert_eq!(voice.summary, "la reprise rejoue les points.");
+
+		let bloquant = parse_voice("casse", "x", "Verdict: blocking\nRisk: low", 0.0);
+		assert_eq!(bloquant.verdict, "bloquant");
+		assert_eq!(bloquant.risk, "faible");
+	}
+
+	/// La synthèse demandée en anglais se découpe comme l'ancienne, en français.
+	#[test]
+	fn la_synthese_anglaise_se_relit() {
+		let texte = "## Agreement\n\nThe change does what it says.\n\n\
+		             ## Disagreements\n\n\
+		             ### The migration is reversible\n\
+		             - Held by: Once deployed\n\
+		             - Disputed by: What breaks, Who uses it\n\
+		             - Why: a rollback would lose the day's orders\n\
+		             - Settle: replay the down migration on a copy of the database\n";
+		let (agreed, disputes) = parse_merge(texte);
+		assert_eq!(agreed, "The change does what it says.");
+		assert_eq!(disputes.len(), 1);
+		assert_eq!(disputes[0].claim, "The migration is reversible");
+		assert_eq!(disputes[0].held_by, vec!["Once deployed"]);
+		assert_eq!(disputes[0].against.len(), 2);
+		assert!(disputes[0].why.contains("rollback"));
+		assert!(disputes[0].check.contains("copy of the database"));
+
+		let calme = "## Agreement\n\nNothing risky here.\n\n## Disagreements\n\nNo disagreement.\n";
+		let (agreed, disputes) = parse_merge(calme);
+		assert_eq!(agreed, "Nothing risky here.");
+		assert!(disputes.is_empty());
 	}
 
 	/// Un modèle qui ne suit pas la forme ne doit pas coûter l'avis entier.

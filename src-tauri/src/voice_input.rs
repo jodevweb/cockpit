@@ -65,8 +65,8 @@ pub fn start() -> Result<()> {
 		std::thread::spawn(move || {
 			let record = || -> std::result::Result<(), String> {
 				let host = cpal::default_host();
-				let device = host.default_input_device().ok_or("Aucun micro sur ce poste.")?;
-				let config = device.default_input_config().map_err(|e| format!("Micro : {e}"))?;
+				let device = host.default_input_device().ok_or_else(|| crate::i18n::t("voiceInput.noMic"))?;
+				let config = device.default_input_config().map_err(|e| crate::i18n::tf("voiceInput.mic", &[("error", &e)]))?;
 				let channels = config.channels() as usize;
 				if let Ok(mut value) = rate.lock() {
 					*value = config.sample_rate().0;
@@ -94,10 +94,10 @@ pub fn start() -> Result<()> {
 							None,
 						)
 					}
-					other => return Err(format!("Format de micro non pris en charge : {other:?}")),
+					other => return Err(crate::i18n::tf("voiceInput.unsupportedFormat", &[("format", &format!("{other:?}"))])),
 				}
-				.map_err(|e| format!("Micro refusé : {e} — vérifie Réglages Système → Confidentialité → Micro."))?;
-				stream.play().map_err(|e| format!("Micro : {e}"))?;
+				.map_err(|e| crate::i18n::tf("voiceInput.micDenied", &[("error", &e)]))?;
+				stream.play().map_err(|e| crate::i18n::tf("voiceInput.mic", &[("error", &e)]))?;
 				let _ = stopped.recv_timeout(Duration::from_secs(MAX_SECONDS));
 				drop(stream);
 				Ok(())
@@ -121,7 +121,7 @@ pub fn stop() -> Result<Option<Vec<u8>>> {
 		.lock()
 		.map_err(|_| CockpitError::msg("Micro indisponible."))?
 		.take()
-		.ok_or_else(|| CockpitError::msg("Le micro n'était pas ouvert."))?;
+		.ok_or_else(|| CockpitError::msg(crate::i18n::t("voiceInput.notOpen")))?;
 	let _ = recorder.stop.send(());
 	let _ = recorder.thread.join();
 	if let Some(message) = recorder.failure.lock().ok().and_then(|mut slot| slot.take()) {
@@ -164,7 +164,7 @@ fn wav(samples: &[f32], rate: u32) -> Result<Vec<u8>> {
 /// Ce que dit l'enregistrement, en texte, par Scribe.
 pub async fn transcribe(audio: Vec<u8>) -> Result<String> {
 	let key = crate::speech::api_key()
-		.ok_or_else(|| CockpitError::msg("Aucune clé ElevenLabs : range-la dans le menu de la voix."))?;
+		.ok_or_else(|| CockpitError::msg(crate::i18n::t("voiceInput.noKey")))?;
 	let started = Instant::now();
 	let form = |with_language: bool| {
 		let mut form = reqwest::multipart::Form::new().text("model_id", "scribe_v2").part(
@@ -175,7 +175,10 @@ pub async fn transcribe(audio: Vec<u8>) -> Result<String> {
 				.expect("type audio valide"),
 		);
 		if with_language {
-			form = form.text("language_code", "fr");
+			// La langue de l'interface, en code ISO 639-1 (`pt-BR` → `pt`).
+			let lang = crate::i18n::lang();
+			let code = lang.split('-').next().unwrap_or("en").to_string();
+			form = form.text("language_code", code);
 		}
 		form
 	};
@@ -189,26 +192,26 @@ pub async fn transcribe(audio: Vec<u8>) -> Result<String> {
 	};
 	let mut response = send(true)
 		.await
-		.map_err(|e| CockpitError::msg(format!("ElevenLabs injoignable : {e}")))?;
+		.map_err(|e| CockpitError::msg(crate::i18n::tf("voiceInput.unreachable", &[("error", &e)])))?;
 	// Le code de langue attendu n'est pas documenté de façon certaine (« fr »
 	// ou « fra ») : refusé, on laisse Scribe reconnaître la langue lui-même.
 	if response.status().as_u16() == 422 || response.status().as_u16() == 400 {
 		response = send(false)
 			.await
-			.map_err(|e| CockpitError::msg(format!("ElevenLabs injoignable : {e}")))?;
+			.map_err(|e| CockpitError::msg(crate::i18n::tf("voiceInput.unreachable", &[("error", &e)])))?;
 	}
 	if !response.status().is_success() {
 		let status = response.status();
 		let body = response.text().await.unwrap_or_default();
-		return Err(CockpitError::msg(format!(
-			"Transcription refusée ({status}) : {}",
-			body.chars().take(200).collect::<String>()
+		return Err(CockpitError::msg(crate::i18n::tf(
+			"voiceInput.refused",
+			&[("status", &status), ("body", &body.chars().take(200).collect::<String>())],
 		)));
 	}
 	let body: serde_json::Value = response
 		.json()
 		.await
-		.map_err(|e| CockpitError::msg(format!("Transcription illisible : {e}")))?;
+		.map_err(|e| CockpitError::msg(crate::i18n::tf("voiceInput.unreadable", &[("error", &e)])))?;
 	let text = body.get("text").and_then(|v| v.as_str()).unwrap_or("").trim().to_string();
 	eprintln!("assistant : transcription en {} ms", started.elapsed().as_millis());
 	Ok(text)
@@ -254,7 +257,7 @@ pub fn save_shortcut(accelerator: &str) -> Result<()> {
 		let _ = std::fs::create_dir_all(dir);
 	}
 	std::fs::write(&path, serde_json::json!({ "shortcut": accelerator }).to_string())
-		.map_err(|e| CockpitError::msg(format!("Enregistrement du raccourci : {e}")))
+		.map_err(|e| CockpitError::msg(crate::i18n::tf("voiceInput.saveShortcut", &[("error", &e)])))
 }
 
 pub fn set_shortcut_status(status: ShortcutStatus) {

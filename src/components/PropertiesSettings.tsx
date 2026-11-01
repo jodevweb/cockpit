@@ -10,6 +10,7 @@ import {
 	Trash2,
 } from "lucide-react";
 import { useEffect, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { Button, Empty, Spinner } from "@/components/ui";
 import { api } from "@/lib/ipc";
 import type { Calibration, Property, PropertySuggestion } from "@/lib/types";
@@ -29,6 +30,7 @@ import { useCockpit } from "@/app/store";
  * ce qu'il a déjà cassé est ce qu'il cassera encore.
  */
 export function PropertiesSettings() {
+	const { t } = useTranslation("components3");
 	const { config, reloadConfig, notify, activeProject } = useCockpit();
 	const [draft, setDraft] = useState<Property[]>([]);
 	const [saving, setSaving] = useState(false);
@@ -55,7 +57,7 @@ export function PropertiesSettings() {
 		try {
 			await api.config.updateProject({ properties: next });
 			reloadConfig();
-			notify("Propriétés enregistrées.");
+			notify(t("propertiesSettings.saved"));
 		} catch (error) {
 			notify(String(error));
 		} finally {
@@ -93,8 +95,8 @@ export function PropertiesSettings() {
 			setFresh((current) => ({ ...current, [id]: result }));
 			notify(
 				result.caught === 0
-					? "Cette propriété n'a rien attrapé sur tes propres correctifs."
-					: `Elle aurait signalé ${result.caught} correctif(s) sur ${result.tried}.`,
+					? t("propertiesSettings.caughtNothing")
+					: t("propertiesSettings.caughtSome", { caught: result.caught, tried: result.tried }),
 			);
 		} catch (error) {
 			notify(String(error));
@@ -106,18 +108,15 @@ export function PropertiesSettings() {
 	return (
 		<div className="flex flex-col gap-3">
 			<p className="text-[11px] leading-relaxed text-ink-faint">
-				Des choses qui doivent rester vraies dans ce dépôt, écrites en français. Le
-				cockpit les fait juger sur un changement, une par une, avec la preuve. Ce qui se
-				vérifie mécaniquement n'a rien à faire ici — ces règles-là sont celles qu'aucun
-				outil ne dit, et qui se transmettaient de bouche à oreille.
+				{t("propertiesSettings.intro")}
 			</p>
 
 			<div className="panel flex flex-col gap-2.5 p-3.5">
 				{draft.length === 0 ? (
 					<Empty
 						icon={Target}
-						message="Aucune propriété déclarée."
-						hint="Le cockpit peut t'en proposer d'après ce que ce dépôt a déjà eu à corriger — c'est ce qu'il cassera encore."
+						message={t("propertiesSettings.empty")}
+						hint={t("propertiesSettings.emptyHint")}
 					/>
 				) : (
 					draft.map((property) => (
@@ -147,9 +146,9 @@ export function PropertiesSettings() {
 						loading={suggesting}
 						disabled={!project}
 						onClick={() => void propose()}
-						title="Lire les correctifs du dépôt et en tirer des propriétés"
+						title={t("propertiesSettings.proposeHint")}
 					>
-						Proposer d'après l'historique
+						{t("propertiesSettings.propose")}
 					</Button>
 					<Button
 						size="sm"
@@ -158,7 +157,7 @@ export function PropertiesSettings() {
 							add({ id: `p-${Date.now().toString(36)}`, text: "", scope: [] })
 						}
 					>
-						Écrire une propriété
+						{t("propertiesSettings.write")}
 					</Button>
 					{saving ? <Spinner /> : null}
 				</div>
@@ -168,14 +167,14 @@ export function PropertiesSettings() {
 				<div className="panel flex flex-col gap-2 p-3.5">
 					<div className="flex items-center gap-2">
 						<h4 className="text-[11px] font-semibold tracking-[0.06em] text-accent-soft uppercase">
-							Propositions · {suggestions.length}
+							{t("propertiesSettings.suggestions", { count: suggestions.length })}
 						</h4>
 						<Button
 							size="sm"
 							className="ml-auto"
 							onClick={() => setSuggestions(null)}
 						>
-							Fermer
+							{t("propertiesSettings.close")}
 						</Button>
 					</div>
 					{suggestions.map((suggestion, index) => (
@@ -186,14 +185,14 @@ export function PropertiesSettings() {
 							<p className="text-[12px] leading-relaxed text-ink">{suggestion.text}</p>
 							{suggestion.why ? (
 								<p className="mt-1 text-[10.5px] leading-snug text-ink-faint">
-									Vient de : {suggestion.why}
+									{t("propertiesSettings.comesFrom", { why: suggestion.why })}
 								</p>
 							) : null}
 							<div className="mt-1.5 flex items-center gap-2">
 								<span className="font-mono text-[10px] text-ink-faint">
 									{suggestion.scope.length > 0
 										? suggestion.scope.join(" · ")
-										: "tout le dépôt"}
+										: t("propertiesSettings.wholeRepo")}
 								</span>
 								<Button
 									size="sm"
@@ -209,7 +208,7 @@ export function PropertiesSettings() {
 										);
 									}}
 								>
-									Retenir
+									{t("propertiesSettings.keep")}
 								</Button>
 							</div>
 						</article>
@@ -237,6 +236,7 @@ function PropertyRow({
 	onCalibrate: () => void;
 	onRemove: () => void;
 }) {
+	const { t } = useTranslation("components3");
 	const [open, setOpen] = useState(false);
 	const decorative = calibration !== null && calibration.tried > 0 && calibration.caught === 0;
 
@@ -254,10 +254,10 @@ function PropertyRow({
 					onChange={(event) => onChange({ ...property, text: event.target.value })}
 					onBlur={onCommit}
 					rows={2}
-					placeholder="Ex. : toute route qui écrit en base valide son corps avant de l'appeler."
+					placeholder={t("propertiesSettings.textPlaceholder")}
 					className="focus-ring text-selectable min-w-0 flex-1 resize-none rounded-lg border border-line-soft bg-void px-2 py-1.5 text-[12px] leading-relaxed text-ink placeholder:text-ink-faint"
 				/>
-				<Button size="sm" icon={Trash2} variant="danger" onClick={onRemove} title="Retirer" />
+				<Button size="sm" icon={Trash2} variant="danger" onClick={onRemove} title={t("propertiesSettings.remove")} />
 			</div>
 
 			<div className="mt-1.5 flex flex-wrap items-center gap-x-3 gap-y-1 pl-[20px]">
@@ -273,24 +273,26 @@ function PropertyRow({
 						})
 					}
 					onBlur={onCommit}
-					placeholder="portée — vide = tout le dépôt"
+					placeholder={t("propertiesSettings.scopePlaceholder")}
 					className="focus-ring h-6 w-52 rounded-lg border border-line-soft bg-void px-2 font-mono text-[10px] text-ink placeholder:text-ink-faint"
 				/>
 
 				{/* Le verdict qui compte : ce que cette propriété a attrapé sur de
 				    vraies corrections du dépôt. */}
 				{calibration === null ? (
-					<span className="text-[10px] text-ink-faint">jamais éprouvée</span>
+					<span className="text-[10px] text-ink-faint">{t("propertiesSettings.neverTested")}</span>
 				) : decorative ? (
 					<span className="flex items-center gap-1 text-[10px] text-warning">
 						<ShieldAlert size={10} />
-						décorative — n'a rien attrapé sur {calibration.tried} correctifs
+						{t("propertiesSettings.decorative", { count: calibration.tried })}
 					</span>
 				) : (
 					<span className="flex items-center gap-1 text-[10px] text-success">
 						<CheckCheck size={10} />
-						aurait signalé {calibration.caught} correctif
-						{calibration.caught > 1 ? "s" : ""} sur {calibration.tried}
+						{t("propertiesSettings.wouldCatch", {
+							count: calibration.caught,
+							tried: calibration.tried,
+						})}
 					</span>
 				)}
 
@@ -299,9 +301,9 @@ function PropertyRow({
 					className="ml-auto"
 					loading={running}
 					onClick={onCalibrate}
-					title="Rejouer cette propriété sur les corrections passées du dépôt"
+					title={t("propertiesSettings.testHint")}
 				>
-					{calibration ? "Éprouver à nouveau" : "Éprouver"}
+					{calibration ? t("propertiesSettings.retest") : t("propertiesSettings.test")}
 				</Button>
 			</div>
 
@@ -313,7 +315,7 @@ function PropertyRow({
 						className="focus-ring mt-1.5 ml-[20px] flex items-center gap-1 rounded text-[10.5px] text-ink-faint transition-colors hover:text-ink"
 					>
 						{open ? <ChevronDown size={11} /> : <ChevronRight size={11} />}
-						{open ? "Replier" : "Voir les correctifs rejoués"}
+						{open ? t("propertiesSettings.collapse") : t("propertiesSettings.showSamples")}
 					</button>
 					{open ? (
 						<ul className="mt-1.5 ml-[20px] flex flex-col gap-1">

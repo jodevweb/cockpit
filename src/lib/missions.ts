@@ -1,3 +1,5 @@
+import { t } from "@/i18n";
+import { lazyLabels } from "@/lib/language";
 import type { Mission, Worktree } from "@/lib/types";
 
 /**
@@ -31,24 +33,27 @@ export function awaitsHuman(mission: Mission): boolean {
 export function awaitedDecision(mission: Mission): string {
 	switch (mission.state) {
 		case "awaitingUnderstanding":
-			return "le maître a lu le ticket · relis ce qu'il a compris";
+			return t("lib:missions.awaited.understanding");
 		case "awaitingApproach":
-			return "une approche attend ton accord";
+			return t("lib:missions.awaited.approach");
 		default:
-			return `${mission.tasks.length} tâche${mission.tasks.length > 1 ? "s" : ""} · rien ne démarre avant ton accord`;
+			return t("lib:missions.awaited.approval", { count: mission.tasks.length });
 	}
 }
 
 /** L'état d'une mission, dit en deux mots. */
-export const MISSION_STATE_LABELS: Record<Mission["state"], string> = {
-	understanding: "lecture du ticket",
-	awaitingUnderstanding: "compréhension à valider",
-	approaching: "approche",
-	awaitingApproach: "approche à valider",
-	planning: "découpage",
-	awaitingApproval: "attend ton accord",
-	running: "en cours",
-	integrating: "intégration",
-	done: "close",
-	failed: "arrêtée",
-};
+export const MISSION_STATE_LABELS: Record<Mission["state"], string> = lazyLabels(
+	[
+		"understanding",
+		"awaitingUnderstanding",
+		"approaching",
+		"awaitingApproach",
+		"planning",
+		"awaitingApproval",
+		"running",
+		"integrating",
+		"done",
+		"failed",
+	] as const,
+	(state) => t(`lib:missions.state.${state}`),
+);

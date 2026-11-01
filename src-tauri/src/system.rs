@@ -16,16 +16,14 @@ fn escape_applescript(input: &str) -> String {
 pub async fn open_in_editor(editor: &str, path: &str) -> Result<()> {
 	let target = Path::new(path);
 	if !target.exists() {
-		return Err(CockpitError::msg(format!("Chemin introuvable : {path}")));
+		return Err(CockpitError::msg(crate::i18n::tf("system.pathNotFound", &[("path", &path)])));
 	}
 	// Aucun éditeur supposé : en lancer un que la personne n'utilise pas — ou
 	// n'a pas installé — échoue plus loin, avec un message qui parle d'un outil
 	// qu'elle n'a jamais demandé.
 	let editor = editor.trim();
 	if editor.is_empty() {
-		return Err(CockpitError::msg(
-			"Aucun éditeur configuré : renseigne-le dans Réglages → Poste de travail.",
-		));
+		return Err(CockpitError::msg(crate::i18n::t("system.noEditor")));
 	}
 
 	let app_name = match editor {
@@ -76,7 +74,7 @@ end tell"#,
 		.map_err(|e| CockpitError::msg(format!("osascript : {e}")))?;
 
 	if !status.success() {
-		return Err(CockpitError::msg("Terminal.app n'a pas pu être piloté."));
+		return Err(CockpitError::msg(crate::i18n::t("system.terminalFailed")));
 	}
 	Ok(())
 }
@@ -89,7 +87,7 @@ end tell"#,
 /// apostrophes et des barres obliques.
 pub async fn launch_agent(cwd: &str, prompt: &str) -> Result<()> {
 	if prompt.trim().is_empty() {
-		return Err(CockpitError::msg("Ce prompt est vide."));
+		return Err(CockpitError::msg(crate::i18n::t("system.emptyPrompt")));
 	}
 	let command = format!("claude {}", shell_quote(prompt.trim()));
 	open_terminal(cwd, Some(command)).await
@@ -110,7 +108,7 @@ fn shell_quote(value: &str) -> String {
 pub async fn open_external(url: &str) -> Result<()> {
 	// Un `-` initial serait pris pour une option d'`open`.
 	if !url.starts_with("http://") && !url.starts_with("https://") {
-		return Err(CockpitError::msg(format!("Lien non ouvrable : {url}")));
+		return Err(CockpitError::msg(crate::i18n::tf("system.linkNotOpenable", &[("url", &url)])));
 	}
 
 	let status = tokio::process::Command::new("/usr/bin/open")
@@ -120,7 +118,7 @@ pub async fn open_external(url: &str) -> Result<()> {
 		.map_err(|e| CockpitError::msg(format!("open : {e}")))?;
 
 	if !status.success() {
-		return Err(CockpitError::msg(format!("Le lien n'a pas pu être ouvert : {url}")));
+		return Err(CockpitError::msg(crate::i18n::tf("system.linkFailed", &[("url", &url)])));
 	}
 	Ok(())
 }
@@ -132,10 +130,10 @@ pub async fn open_external(url: &str) -> Result<()> {
 /// Chemin absolu exigé : un `-` initial serait pris pour une option d'`open`.
 pub async fn open_file(path: &str) -> Result<()> {
 	if !path.starts_with('/') {
-		return Err(CockpitError::msg(format!("Chemin non ouvrable : {path}")));
+		return Err(CockpitError::msg(crate::i18n::tf("system.pathNotOpenable", &[("path", &path)])));
 	}
 	if !std::path::Path::new(path).exists() {
-		return Err(CockpitError::msg(format!("Fichier introuvable : {path}")));
+		return Err(CockpitError::msg(crate::i18n::tf("system.fileNotFound", &[("path", &path)])));
 	}
 	let status = tokio::process::Command::new("/usr/bin/open")
 		.arg(path)
@@ -143,9 +141,7 @@ pub async fn open_file(path: &str) -> Result<()> {
 		.await
 		.map_err(|e| CockpitError::msg(format!("open : {e}")))?;
 	if !status.success() {
-		return Err(CockpitError::msg(format!(
-			"Aucune application ne sait ouvrir ce fichier : {path}"
-		)));
+		return Err(CockpitError::msg(crate::i18n::tf("system.noApp", &[("path", &path)])));
 	}
 	Ok(())
 }
@@ -154,7 +150,7 @@ pub async fn reveal_in_finder(path: &str) -> Result<()> {
 	// Un `-` initial serait pris pour une option d'`open` — le chemin vient
 	// parfois d'une sortie d'agent.
 	if path.trim_start().starts_with('-') {
-		return Err(CockpitError::msg(format!("Chemin non révélable : {path}")));
+		return Err(CockpitError::msg(crate::i18n::tf("system.pathNotRevealable", &[("path", &path)])));
 	}
 	std::process::Command::new("open")
 		.args(["-R", path])
@@ -180,9 +176,9 @@ pub struct PackageScript {
 /// pour que l'UI puisse les classer sans configuration.
 pub fn package_scripts(repo: &Path) -> Result<Vec<PackageScript>> {
 	let raw = std::fs::read_to_string(repo.join("package.json"))
-		.map_err(|_| CockpitError::msg("package.json introuvable dans ce dépôt."))?;
+		.map_err(|_| CockpitError::msg(crate::i18n::t("system.packageJsonMissing")))?;
 	let parsed: Value = serde_json::from_str(&raw)
-		.map_err(|e| CockpitError::msg(format!("package.json illisible : {e}")))?;
+		.map_err(|e| CockpitError::msg(crate::i18n::tf("system.packageJsonUnreadable", &[("error", &e)])))?;
 
 	let Some(scripts) = parsed.get("scripts").and_then(|v| v.as_object()) else {
 		return Ok(Vec::new());
@@ -194,7 +190,7 @@ pub fn package_scripts(repo: &Path) -> Result<Vec<PackageScript>> {
 			let group = name
 				.split_once(':')
 				.map(|(prefix, _)| prefix.to_string())
-				.unwrap_or_else(|| "général".into());
+				.unwrap_or_else(|| crate::i18n::t("system.generalGroup"));
 			PackageScript {
 				name: name.clone(),
 				command: command.as_str().unwrap_or_default().to_string(),
@@ -252,7 +248,7 @@ pub fn has_docker() -> bool {
 pub async fn docker_containers() -> Result<Vec<Container>> {
 	let raw = capture("/", "docker ps -a --format '{{json .}}'")
 		.await
-		.map_err(|_| CockpitError::msg("Docker ne répond pas — le daemon est-il lancé ?"))?;
+		.map_err(|_| CockpitError::msg(crate::i18n::t("system.dockerDown")))?;
 
 	let mut containers = Vec::new();
 	for line in raw.lines().filter(|l| !l.trim().is_empty()) {
@@ -418,7 +414,7 @@ pub async fn listening_ports() -> Result<Vec<ListeningPort>> {
 /// régler.
 pub async fn stop_process(pid: u32) -> Result<()> {
 	if pid == 0 {
-		return Err(CockpitError::msg("Processus inconnu."));
+		return Err(CockpitError::msg(crate::i18n::t("system.unknownProcess")));
 	}
 	capture("/", &format!("kill -TERM {pid} 2>/dev/null || true")).await?;
 	tokio::time::sleep(std::time::Duration::from_millis(1000)).await;

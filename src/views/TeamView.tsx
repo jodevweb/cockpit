@@ -11,6 +11,7 @@ import {
 	Users,
 } from "lucide-react";
 import { useMemo, useState } from "react";
+import { useTranslation } from "react-i18next";
 import {
 	Badge,
 	Button,
@@ -196,13 +197,14 @@ const CI_MARK: Record<string, { label: string; className: string }> = {
 	none: { label: "", className: "" },
 };
 
-const DECISION_LABEL: Record<string, string> = {
-	APPROVED: "approuvée",
-	CHANGES_REQUESTED: "changements demandés",
-	REVIEW_REQUIRED: "à reviewer",
+const DECISION_KEY: Record<string, string> = {
+	APPROVED: "team.decision.approved",
+	CHANGES_REQUESTED: "team.decision.changesRequested",
+	REVIEW_REQUIRED: "team.decision.reviewRequired",
 };
 
 function PrRow({ pr }: { pr: MemberPr }) {
+	const { t } = useTranslation("views");
 	const ci = CI_MARK[pr.ciState] ?? CI_MARK.none;
 	return (
 		<Link
@@ -212,7 +214,7 @@ function PrRow({ pr }: { pr: MemberPr }) {
 			<span className="shrink-0 font-mono text-[10px] text-ink-faint">#{pr.number}</span>
 			<span className="min-w-0 flex-1 truncate text-[11px] text-ink-muted">{pr.title}</span>
 			<PrLabels labels={pr.labels} max={2} />
-			{pr.isDraft ? <Badge>draft</Badge> : null}
+			{pr.isDraft ? <Badge>{t("team.draft")}</Badge> : null}
 			{pr.stacked ? (
 				<span className="shrink-0 text-[10px] text-critical">← {pr.baseRef}</span>
 			) : null}
@@ -221,13 +223,13 @@ function PrRow({ pr }: { pr: MemberPr }) {
 					{ci.label}
 				</span>
 			) : null}
-			{DECISION_LABEL[pr.reviewDecision] ? (
+			{DECISION_KEY[pr.reviewDecision] ? (
 				<span className="shrink-0 text-[10px] text-ink-faint">
-					{DECISION_LABEL[pr.reviewDecision]}
+					{t(DECISION_KEY[pr.reviewDecision])}
 				</span>
 			) : null}
 			<span className="shrink-0 font-mono text-[10px] text-ink-faint tabular-nums">
-				{pr.ageDays}j
+				{t("team.ageDays", { count: pr.ageDays })}
 			</span>
 		</Link>
 	);
@@ -237,6 +239,7 @@ function MemberCard({ member, expanded }: { member: MemberBoard; expanded: boole
 	// La colonne « bloqué » porte le nom que l'équipe lui a donné dans Linear :
 	// « Blocked » chez nous, mais rien ne l'impose ailleurs.
 	const { config } = useCockpit();
+	const { t } = useTranslation("views");
 	const blockedState = config?.workflow.blockedState ?? "";
 	const { metrics } = member;
 	const tickets = [...member.activeTickets, ...member.reviewTickets];
@@ -250,7 +253,7 @@ function MemberCard({ member, expanded }: { member: MemberBoard; expanded: boole
 				<span className="text-[10px] text-ink-faint">{member.roleLabel}</span>
 				{metrics.cycleTotal > 0 ? (
 					<span className="ml-auto shrink-0 font-mono text-[10px] text-ink-faint tabular-nums">
-						cycle {metrics.cycleDone}/{metrics.cycleTotal}
+						{t("team.member.cycle", { done: metrics.cycleDone, total: metrics.cycleTotal })}
 					</span>
 				) : null}
 			</div>
@@ -276,19 +279,19 @@ function MemberCard({ member, expanded }: { member: MemberBoard; expanded: boole
 
 			<div className="flex flex-wrap gap-1.5">
 				<Chip
-					label="WIP"
+					label={t("team.chip.wip")}
 					value={metrics.activeWip}
 					tone={metrics.activeWip >= 4 ? "warning" : undefined}
 				/>
-				<Chip label="review" value={metrics.inReview} />
-				<Chip label="PR" value={metrics.openPrs} />
+				<Chip label={t("team.chip.review")} value={metrics.inReview} />
+				<Chip label={t("team.chip.prs")} value={metrics.openPrs} />
 				<Chip
-					label="à reviewer"
+					label={t("team.chip.toReview")}
 					value={metrics.reviewPending}
 					tone={metrics.reviewPending > 0 ? "info" : undefined}
 				/>
 				<Chip
-					label="mergé"
+					label={t("team.chip.merged")}
 					value={metrics.mergedSinceDaily}
 					tone={metrics.mergedSinceDaily > 0 ? "success" : undefined}
 				/>
@@ -320,13 +323,13 @@ function MemberCard({ member, expanded }: { member: MemberBoard; expanded: boole
 								{ticket.stateName}
 							</span>
 							<span className="shrink-0 font-mono text-[10px] text-ink-faint tabular-nums">
-								{ticket.progress}% · {ticket.ageDays}j
+								{ticket.progress}% · {t("team.ageDays", { count: ticket.ageDays })}
 							</span>
 						</Link>
 					))}
 					{!expanded && tickets.length > shown.length ? (
 						<span className="px-1.5 text-[10px] text-ink-faint">
-							+{tickets.length - shown.length} autres
+							{t("team.member.more", { count: tickets.length - shown.length })}
 						</span>
 					) : null}
 				</div>
@@ -335,7 +338,7 @@ function MemberCard({ member, expanded }: { member: MemberBoard; expanded: boole
 			{expanded ? (
 				<>
 					{member.prs.length > 0 ? (
-						<Section title="Ses PR ouvertes" count={member.prs.length}>
+						<Section title={t("team.member.openPrs")} count={member.prs.length}>
 							<div className="flex flex-col gap-0.5">
 								{member.prs.map((pr) => (
 									<PrRow key={pr.number} pr={pr} />
@@ -345,7 +348,7 @@ function MemberCard({ member, expanded }: { member: MemberBoard; expanded: boole
 					) : null}
 
 					{member.reviewInbox.length > 0 ? (
-						<Section title="À reviewer pour les autres" count={member.reviewInbox.length}>
+						<Section title={t("team.member.reviewInbox")} count={member.reviewInbox.length}>
 							<div className="flex flex-col gap-0.5">
 								{member.reviewInbox.map((item) => (
 									<Link
@@ -361,7 +364,10 @@ function MemberCard({ member, expanded }: { member: MemberBoard; expanded: boole
 										</span>
 										<PrLabels labels={item.labels} max={2} />
 										<span className="shrink-0 text-[10px] text-ink-faint">
-											de {item.author} · {item.ageDays}j
+											{t("team.member.reviewFrom", {
+												author: item.author,
+												age: t("team.ageDays", { count: item.ageDays }),
+											})}
 										</span>
 									</Link>
 								))}
@@ -370,7 +376,7 @@ function MemberCard({ member, expanded }: { member: MemberBoard; expanded: boole
 					) : null}
 
 					{merged.length > 0 ? (
-						<Section title="Livré depuis le dernier daily" count={merged.length}>
+						<Section title={t("team.member.shipped")} count={merged.length}>
 							<div className="flex flex-col gap-0.5">
 								{merged.map((item) => (
 									<Link
@@ -389,7 +395,7 @@ function MemberCard({ member, expanded }: { member: MemberBoard; expanded: boole
 					) : null}
 
 					{member.next.length > 0 ? (
-						<Section title="À démarrer ensuite">
+						<Section title={t("team.member.next")}>
 							<div className="flex flex-col gap-0.5">
 								{member.next.map((ticket) => (
 									<Link
@@ -419,6 +425,7 @@ function MemberCard({ member, expanded }: { member: MemberBoard; expanded: boole
 
 export function TeamView() {
 	const { config, connectors, hasConnector, go } = useCockpit();
+	const { t } = useTranslation("views");
 	const [cycleOnly, setCycleOnly] = usePersistentState("team.cycleOnly", true);
 	const [focused, setFocused] = useState<string | null>(null);
 	const [urgentOnly, setUrgentOnly] = useState(false);
@@ -471,10 +478,10 @@ export function TeamView() {
 		const tickets = connectors.find((entry) => entry.kind === "tickets");
 		return (
 			<>
-				<ViewHeader title="Daily" subtitle="Suivi de tâches non connecté" />
+				<ViewHeader title={t("team.title")} subtitle={t("team.noTracker.subtitle")} />
 				<MissingConnector
-					service={tickets?.label ?? "Le suivi de tâches"}
-					missing={tickets?.missing ?? "un jeton"}
+					service={tickets?.label ?? t("team.noTracker.service")}
+					missing={tickets?.missing ?? t("team.noTracker.token")}
 					onConfigure={() => go("settings")}
 				/>
 			</>
@@ -495,20 +502,20 @@ export function TeamView() {
 	if (team && ((needsTeamId && !team.linearTeamId.trim()) || team.members.length === 0)) {
 		return (
 			<>
-				<ViewHeader title="Daily" subtitle="Équipe non déclarée" />
+				<ViewHeader title={t("team.title")} subtitle={t("team.noTeam.subtitle")} />
 				<div className="p-5">
 					<div className="panel mx-auto flex max-w-xl flex-col gap-2.5 p-4">
 						<p className="text-[12.5px] font-medium text-ink">
-							Le daily a besoin de savoir qui compose l'équipe
+							{t("team.noTeam.title")}
 						</p>
 						<p className="text-[11px] leading-relaxed text-ink-muted">
 							{!team.linearTeamId.trim()
-								? "L'identifiant de l'équipe manque : c'est l'UUID de l'équipe Linear, lisible dans l'URL de ses réglages — pas la clé qui préfixe les tickets."
-								: "Aucun membre n'est déclaré : chacun a besoin de son identifiant Linear pour qu'on lui rattache ses tickets, et de son login GitHub pour ses pull requests."}
+								? t("team.noTeam.missingId")
+								: t("team.noTeam.noMembers")}
 						</p>
 						<div className="flex justify-end">
 							<Button variant="solid" onClick={() => go("settings")}>
-								Ouvrir Réglages → Équipe
+								{t("team.noTeam.open")}
 							</Button>
 						</div>
 					</div>
@@ -531,11 +538,13 @@ export function TeamView() {
 	return (
 		<>
 			<ViewHeader
-				title="Daily"
+				title={t("team.title")}
 				subtitle={
 					data
-						? `${data.cycle ? `Cycle ${data.cycle.number} · ` : ""}depuis le daily du ${data.sinceDaily}`
-						: "Chargement…"
+						? data.cycle
+							? t("team.subtitleCycle", { number: data.cycle.number, since: data.sinceDaily })
+							: t("team.subtitle", { since: data.sinceDaily })
+						: t("team.loading")
 				}
 				actions={
 					<>
@@ -544,12 +553,12 @@ export function TeamView() {
 							icon={Play}
 							onClick={() => setPresenting(true)}
 							disabled={!data}
-							title="Mener le daily en plein écran"
+							title={t("team.present")}
 						>
-							Daily
+							{t("team.title")}
 						</Button>
 						<Button active={cycleOnly} onClick={() => setCycleOnly((value) => !value)}>
-							{cycleOnly ? "Cycle en cours" : "Tout"}
+							{cycleOnly ? t("team.currentCycle") : t("team.all")}
 						</Button>
 						{board.loading ? <Spinner /> : null}
 						<Button size="sm" icon={RefreshCw} onClick={board.reload} />
@@ -562,7 +571,7 @@ export function TeamView() {
 				<div className="mx-3 mt-3 flex items-start gap-2 rounded-xl border border-warning/25 bg-warning/8 p-2.5">
 					<AlertTriangle size={13} className="mt-0.5 shrink-0 text-warning" />
 					<p className="text-selectable text-[11px] leading-relaxed text-ink-muted">
-						Côté GitHub : {data.githubError} — les tickets Linear restent affichés.
+						{t("team.githubError", { error: data.githubError })}
 					</p>
 				</div>
 			) : null}
@@ -578,7 +587,7 @@ export function TeamView() {
 					<div className="flex max-w-7xl flex-col gap-5">
 						<div className="flex flex-wrap items-center gap-1.5">
 							<Button active={focused === null} onClick={() => setFocused(null)}>
-								Toute l'équipe
+								{t("team.wholeTeam")}
 							</Button>
 							{(data.members ?? []).map((member) => {
 								const red = data.flags.filter(
@@ -603,15 +612,15 @@ export function TeamView() {
 
 						<div className="flex flex-wrap gap-1.5">
 							<Chip
-								label="bloquants"
+								label={t("team.chip.blocking")}
 								value={data.totals.redFlags}
 								tone={data.totals.redFlags > 0 ? "critical" : undefined}
 							/>
-							<Chip label="à challenger" value={data.totals.orangeFlags} tone="warning" />
-							<Chip label="WIP" value={data.totals.activeWip} />
-							<Chip label="en review" value={data.totals.inReview} />
+							<Chip label={t("team.chip.toChallenge")} value={data.totals.orangeFlags} tone="warning" />
+							<Chip label={t("team.chip.wip")} value={data.totals.activeWip} />
+							<Chip label={t("team.chip.inReview")} value={data.totals.inReview} />
 							<Chip
-								label="prêt à merger"
+								label={t("team.chip.readyToMerge")}
 								value={data.totals.readyToMerge}
 								tone={data.totals.readyToMerge > 0 ? "success" : undefined}
 							/>
@@ -620,11 +629,11 @@ export function TeamView() {
 								value={data.totals.ciFailing}
 								tone={data.totals.ciFailing > 0 ? "critical" : undefined}
 							/>
-							<Chip label="mergé" value={data.totals.mergedSinceDaily} tone="success" />
+							<Chip label={t("team.chip.merged")} value={data.totals.mergedSinceDaily} tone="success" />
 						</div>
 
 						<Section
-							title="À traiter au daily"
+							title={t("team.flags.title")}
 							count={flags.length}
 							actions={
 								<Button
@@ -632,15 +641,15 @@ export function TeamView() {
 									active={urgentOnly}
 									onClick={() => setUrgentOnly((v) => !v)}
 								>
-									Bloquants seulement
+									{t("team.flags.urgentOnly")}
 								</Button>
 							}
 						>
 							{flags.length === 0 ? (
 								<Empty
 									icon={CircleDot}
-									message="Rien à signaler"
-									hint="Aucune question ouverte sur ce périmètre."
+									message={t("team.flags.empty")}
+									hint={t("team.flags.emptyHint")}
 								/>
 							) : (
 								<div className="flex flex-col gap-1.5">
@@ -655,12 +664,12 @@ export function TeamView() {
 						(flow.readyToMerge.length > 0 ||
 							flow.ciFailing.length > 0 ||
 							flow.stacked.length > 0) ? (
-							<Section title="Flux des PR">
+							<Section title={t("team.flow.title")}>
 								<div className="grid grid-cols-3 gap-3">
 									<div className="panel flex flex-col gap-1 p-2.5">
 										<div className="flex items-center gap-1.5 text-[10px] text-success">
 											<Rocket size={11} />
-											Prêt à merger ({flow.readyToMerge.length})
+											{t("team.flow.ready", { count: flow.readyToMerge.length })}
 										</div>
 										{flow.readyToMerge.map((pr) => (
 											<PrLine key={pr.number} pr={pr} />
@@ -669,7 +678,7 @@ export function TeamView() {
 									<div className="panel flex flex-col gap-1 p-2.5">
 										<div className="flex items-center gap-1.5 text-[10px] text-critical">
 											<AlertTriangle size={11} />
-											CI en échec ({flow.ciFailing.length})
+											{t("team.flow.ciFailing", { count: flow.ciFailing.length })}
 										</div>
 										{flow.ciFailing.map((pr) => (
 											<PrLine key={pr.number} pr={pr} />
@@ -678,13 +687,13 @@ export function TeamView() {
 									<div className="panel flex flex-col gap-1 p-2.5">
 										<div className="flex items-center gap-1.5 text-[10px] text-warning">
 											<Layers size={11} />
-											PR empilées ({flow.stacked.length})
+											{t("team.flow.stacked", { count: flow.stacked.length })}
 										</div>
 										{flow.stacked.map((pr) => (
 											<PrLine
 												key={pr.number}
 												pr={pr}
-												note={pr.blockedBy ? `bloquée par #${pr.blockedBy}` : pr.base}
+												note={pr.blockedBy ? t("team.flow.blockedBy", { number: pr.blockedBy }) : pr.base}
 											/>
 										))}
 									</div>
@@ -695,12 +704,12 @@ export function TeamView() {
 						{/* Qui fait quoi : tickets et PR réunis par personne, avec les
 						    mêmes vues filtrantes que partout ailleurs. La grille reçoit
 						    le tableau déjà chargé et la personne sélectionnée. */}
-						<Section title="Focus équipe" count={devs.length}>
+						<Section title={t("team.focus")} count={devs.length}>
 							<TeamWorkGrid members={devs} focus={focused} onFocus={setFocused} compact />
 						</Section>
 
 						{product.length > 0 ? (
-							<Section title="Produit · suivi Linear" count={product.length}>
+							<Section title={t("team.product")} count={product.length}>
 								<div
 									className={clsx(
 										"grid gap-3",
@@ -721,8 +730,8 @@ export function TeamView() {
 						{data.members.length === 0 ? (
 							<Empty
 								icon={Users}
-								message="Aucun membre"
-								hint="Renseigne `[team]` dans la configuration."
+								message={t("team.noMember")}
+								hint={t("team.noMemberHint")}
 							/>
 						) : null}
 					</div>

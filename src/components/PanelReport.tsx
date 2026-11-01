@@ -8,6 +8,7 @@ import {
 	TriangleAlert,
 } from "lucide-react";
 import { useState } from "react";
+import { useTranslation } from "react-i18next";
 import { Inline } from "@/components/Markdown";
 import { Badge } from "@/components/ui";
 import type { Panel, PanelDispute, PanelVoice, Severity } from "@/lib/types";
@@ -30,7 +31,26 @@ const VERDICT_TONE: Record<string, Severity | "neutral"> = {
 	bloquant: "critical",
 };
 
+/** La clé de catalogue d'un verdict : la valeur reste celle du back, seul son libellé se traduit. */
+const VERDICT_KEY: Record<string, string> = {
+	ok: "ok",
+	réserves: "reserves",
+	bloquant: "blocking",
+};
+
+function useVerdictLabel() {
+	const { t } = useTranslation("components2");
+	return (verdict: string) =>
+		verdict
+			? VERDICT_KEY[verdict]
+				? t(`panelReport.verdict.${VERDICT_KEY[verdict]}`)
+				: verdict
+			: t("panelReport.noVerdict");
+}
+
 export function PanelReport({ panel, stale }: { panel: Panel; stale: boolean }) {
+	const { t } = useTranslation("components2");
+	const verdictLabel = useVerdictLabel();
 	const [open, setOpen] = useState(false);
 
 	return (
@@ -45,16 +65,16 @@ export function PanelReport({ panel, stale }: { panel: Panel; stale: boolean }) 
 			<header className="flex flex-wrap items-center gap-1.5">
 				<Scale size={12} className="shrink-0 text-accent-soft" />
 				<h3 className="text-[11px] font-semibold tracking-[0.05em] text-ink-muted uppercase">
-					Confrontation
+					{t("panelReport.title")}
 				</h3>
 				<Badge tone={VERDICT_TONE[panel.verdict] ?? "neutral"}>
-					{panel.verdict || "sans verdict"}
+					{verdictLabel(panel.verdict)}
 				</Badge>
 				<span className="text-[10px] text-ink-faint">
-					{panel.voices.length} angle{panel.voices.length > 1 ? "s" : ""} ·{" "}
+					{t("panelReport.angles", { count: panel.voices.length })} ·{" "}
 					{panel.disputes.length === 0
-						? "d'accord entre eux"
-						: `${panel.disputes.length} désaccord${panel.disputes.length > 1 ? "s" : ""}`}
+						? t("panelReport.agreed")
+						: t("panelReport.disputes", { count: panel.disputes.length })}
 				</span>
 				{/* Quatre agents pour une confrontation : le prix se voit, sinon on la
 				    relance sans y penser. Même formulation qu'ailleurs — sur un
@@ -64,7 +84,7 @@ export function PanelReport({ panel, stale }: { panel: Panel; stale: boolean }) 
 						<span>{Math.max(1, Math.round(panel.durationSeconds / 60))} min</span>
 					) : null}
 					{panel.costUsd > 0 ? (
-						<span title="Ce que cette confrontation vaudrait aux tarifs de l'API. Sur un abonnement, rien n'est débité : c'est le quota de la fenêtre qui se consomme.">
+						<span title={t("panelReport.costHint")}>
 							≈ {panel.costUsd.toFixed(2)} $
 						</span>
 					) : null}
@@ -75,15 +95,14 @@ export function PanelReport({ panel, stale }: { panel: Panel; stale: boolean }) 
 			    dire, sinon « bloquant » au-dessus de deux « ok » ressemble à un bug. */}
 			{panel.verdict !== "ok" && panel.voices.some((voice) => voice.verdict === "ok") ? (
 				<p className="mt-1.5 text-[10px] leading-snug text-ink-faint">
-					Un seul angle suffit à porter le verdict : deux lectures qui n'ont rien vu ne
-					prouvent pas que la troisième s'est trompée.
+					{t("panelReport.severestWins")}
 				</p>
 			) : null}
 
 			{stale ? (
 				<p className="mt-1.5 flex items-start gap-1.5 text-[10.5px] text-warning">
 					<TriangleAlert size={11} className="mt-px shrink-0" />
-					<span>La branche a bougé depuis cette confrontation.</span>
+					<span>{t("panelReport.stale")}</span>
 				</p>
 			) : null}
 
@@ -108,7 +127,7 @@ export function PanelReport({ panel, stale }: { panel: Panel; stale: boolean }) 
 			    passer pour un accord. */}
 			{panel.silent.length > 0 ? (
 				<p className="mt-2 text-[10px] leading-snug text-warning">
-					Sans réponse : {panel.silent.join(" · ")}
+					{t("panelReport.silent", { names: panel.silent.join(" · ") })}
 				</p>
 			) : null}
 
@@ -118,7 +137,7 @@ export function PanelReport({ panel, stale }: { panel: Panel; stale: boolean }) 
 				className="focus-ring mt-2.5 flex items-center gap-1 rounded text-[10.5px] text-ink-faint transition-colors hover:text-ink"
 			>
 				{open ? <ChevronDown size={11} /> : <ChevronRight size={11} />}
-				{open ? "Replier les avis" : "Lire chaque angle"}
+				{open ? t("panelReport.collapse") : t("panelReport.expand")}
 			</button>
 
 			{open ? (
@@ -133,6 +152,7 @@ export function PanelReport({ panel, stale }: { panel: Panel; stale: boolean }) 
 }
 
 function DisputeCard({ dispute }: { dispute: PanelDispute }) {
+	const { t } = useTranslation("components2");
 	return (
 		<article className="rounded-[var(--radius-panel)] border border-line-soft bg-surface p-2.5">
 			<div className="flex items-start gap-2">
@@ -145,8 +165,8 @@ function DisputeCard({ dispute }: { dispute: PanelDispute }) {
 			{/* La couleur seule ne suffit pas : une carte où un seul camp s'exprime
 			    laisserait deviner s'il soutient ou s'il conteste. */}
 			<div className="mt-1.5 flex flex-wrap items-center gap-x-3 gap-y-1 pl-[19px]">
-				<Camp label="Soutenu par" names={dispute.heldBy} tone="success" />
-				<Camp label="Contesté par" names={dispute.against} tone="critical" />
+				<Camp label={t("panelReport.heldBy")} names={dispute.heldBy} tone="success" />
+				<Camp label={t("panelReport.against")} names={dispute.against} tone="critical" />
 			</div>
 
 			{dispute.why ? (
@@ -197,12 +217,13 @@ function Camp({
 }
 
 function VoiceCard({ voice }: { voice: PanelVoice }) {
+	const verdictLabel = useVerdictLabel();
 	return (
 		<article className="rounded-[var(--radius-panel)] border border-line-soft bg-surface p-2.5">
 			<div className="flex flex-wrap items-center gap-1.5">
 				<span className="text-[11px] font-medium text-ink">{voice.label}</span>
 				<Badge tone={VERDICT_TONE[voice.verdict] ?? "neutral"}>
-					{voice.verdict || "sans verdict"}
+					{verdictLabel(voice.verdict)}
 				</Badge>
 			</div>
 			{voice.summary ? (

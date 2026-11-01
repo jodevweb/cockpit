@@ -12,6 +12,8 @@ import {
 	type LucideIcon,
 } from "lucide-react";
 import { useState } from "react";
+import { useTranslation } from "react-i18next";
+import { locale, t as translate } from "@/i18n";
 import { Markdown } from "@/components/Markdown";
 import { Spinner } from "@/components/ui";
 import type { Brief, BriefSection } from "@/lib/types";
@@ -40,8 +42,10 @@ const ICONS: Record<string, LucideIcon> = {
 
 /** Volume joint, dans l'unité qui parle : des caractères, pas des jetons. */
 function volume(chars: number): string {
-	if (chars < 1000) return `${chars} car.`;
-	return `${(chars / 1000).toFixed(1).replace(".", ",")} k car.`;
+	if (chars < 1000) return translate("components2:briefBar.chars", { value: chars });
+	return translate("components2:briefBar.kchars", {
+		value: (chars / 1000).toLocaleString(locale(), { minimumFractionDigits: 1, maximumFractionDigits: 1 }),
+	});
 }
 
 export function BriefBar({
@@ -55,6 +59,7 @@ export function BriefBar({
 	onToggle: (id: string) => void;
 	onRefresh: () => void;
 }) {
+	const { t } = useTranslation("components2");
 	const [open, setOpen] = useState(false);
 
 	if (loading && !brief) {
@@ -62,7 +67,7 @@ export function BriefBar({
 			<div className="flex items-center gap-2 border-t border-line-soft px-2.5 py-1.5">
 				<Spinner size={11} />
 				<span className="text-[10.5px] text-ink-faint">
-					Le cockpit rassemble ce qu'il sait de cette branche…
+					{t("briefBar.loading")}
 				</span>
 			</div>
 		);
@@ -79,7 +84,7 @@ export function BriefBar({
 		<div className="border-t border-line-soft bg-base/50">
 			<div className="flex flex-wrap items-center gap-1.5 px-2.5 py-1.5">
 				<span className="mr-0.5 text-[10.5px] font-medium tracking-wide text-ink-faint">
-					L'agent saura
+					{t("briefBar.agentWillKnow")}
 				</span>
 
 				{sections.map((section) => (
@@ -88,7 +93,7 @@ export function BriefBar({
 
 				{sections.length === 0 ? (
 					<span className="text-[10.5px] text-ink-faint">
-						rien de plus que ta consigne — aucune source déclarée n'a répondu.
+						{t("briefBar.nothing")}
 					</span>
 				) : null}
 
@@ -98,7 +103,7 @@ export function BriefBar({
 					) : null}
 					<button
 						type="button"
-						title={open ? "Replier" : "Lire ce qui sera joint, mot pour mot"}
+						title={open ? t("briefBar.collapse") : t("briefBar.expand")}
 						disabled={retained.length === 0}
 						onClick={() => setOpen((value) => !value)}
 						className="focus-ring rounded p-1 text-ink-faint transition-colors hover:text-ink disabled:opacity-30"
@@ -107,7 +112,7 @@ export function BriefBar({
 					</button>
 					<button
 						type="button"
-						title="Rassembler à nouveau — la branche a peut-être bougé"
+						title={t("briefBar.refresh")}
 						onClick={onRefresh}
 						className="focus-ring rounded p-1 text-ink-faint transition-colors hover:text-ink"
 					>
@@ -121,7 +126,7 @@ export function BriefBar({
 			{missing.length > 0 ? (
 				<p className="flex items-start gap-1.5 px-2.5 pb-1.5 text-[10.5px] text-warning">
 					<TriangleAlert size={11} className="mt-px shrink-0" />
-					<span>Pas pu lire : {missing.join(" · ")}</span>
+					<span>{t("briefBar.missing", { sources: missing.join(" · ") })}</span>
 				</p>
 			) : null}
 
@@ -135,6 +140,7 @@ export function BriefBar({
 }
 
 function Chip({ section, onToggle }: { section: BriefSection; onToggle: () => void }) {
+	const { t } = useTranslation("components2");
 	const Icon = ICONS[section.id] ?? Boxes;
 	return (
 		<button
@@ -142,8 +148,8 @@ function Chip({ section, onToggle }: { section: BriefSection; onToggle: () => vo
 			onClick={onToggle}
 			title={
 				section.on
-					? `${section.detail} — cliquer pour ne pas le joindre`
-					: `${section.detail} — cliquer pour le joindre`
+					? t("briefBar.clickToDetach", { detail: section.detail })
+					: t("briefBar.clickToAttach", { detail: section.detail })
 			}
 			className={clsx(
 				"focus-ring inline-flex max-w-[16rem] items-center gap-1.5 rounded-full border px-2 py-0.5 transition-colors duration-150",

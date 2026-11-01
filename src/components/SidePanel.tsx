@@ -2,6 +2,7 @@ import clsx from "clsx";
 import { Maximize2, Minimize2, X } from "lucide-react";
 import { motion } from "motion/react";
 import { useEffect, useRef, type ReactNode } from "react";
+import { useTranslation } from "react-i18next";
 import { usePersistentState } from "@/lib/useAsync";
 
 /**
@@ -46,6 +47,7 @@ export function SidePanel({
 	onLayout?: (width: number, frame: number) => void;
 	children: ReactNode;
 }) {
+	const { t } = useTranslation("components3");
 	// `null` : la largeur par défaut, relative à la carte.
 	const [width, setWidth] = usePersistentState<number | null>("agent.panel.width", null);
 	const [full, setFull] = usePersistentState("agent.panel.full", false);
@@ -111,7 +113,7 @@ export function SidePanel({
 				<div
 					onPointerDown={drag}
 					onDoubleClick={() => setWidth(null)}
-					title="Tirer pour élargir — double-clic pour la largeur d'origine"
+					title={t("sidePanel.resize")}
 					className="group absolute inset-y-0 left-0 z-10 w-2 cursor-col-resize"
 				>
 					<span className="absolute inset-y-6 left-0.5 w-0.5 rounded-full bg-accent opacity-0 transition-opacity group-hover:opacity-60" />
@@ -127,8 +129,8 @@ export function SidePanel({
 					type="button"
 					onClick={() => setFull(!full)}
 					className="focus-ring grid size-6 place-items-center rounded-md text-ink-faint hover:bg-hover hover:text-ink"
-					title={full ? "Revenir à côté de la carte" : "Plein cadre"}
-					aria-label={full ? "Revenir à côté de la carte" : "Plein cadre"}
+					title={full ? t("sidePanel.exitFull") : t("sidePanel.full")}
+					aria-label={full ? t("sidePanel.exitFull") : t("sidePanel.full")}
 				>
 					{full ? <Minimize2 size={13} /> : <Maximize2 size={13} />}
 				</button>
@@ -136,7 +138,7 @@ export function SidePanel({
 					type="button"
 					onClick={onClose}
 					className="focus-ring grid size-6 place-items-center rounded-md text-ink-faint hover:bg-hover hover:text-ink"
-					aria-label="Fermer"
+					aria-label={t("sidePanel.close")}
 				>
 					<X size={13} />
 				</button>

@@ -1,5 +1,6 @@
 import { CornerDownLeft, Pencil, SquareTerminal } from "lucide-react";
 import { useLayoutEffect, useMemo, useRef, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { QuickMenu, type QuickAction } from "@/components/QuickMenu";
 import { api } from "@/lib/ipc";
 import { useAsync } from "@/lib/useAsync";
@@ -65,6 +66,7 @@ function ScriptMenu({
 	disabled: boolean;
 	onRun: (line: string, execute: boolean) => void;
 }) {
+	const { t } = useTranslation("components2");
 	const { config } = useCockpit();
 	const [wanted, setWanted] = useState(false);
 	const scripts = useAsync(() => api.scripts.list(cwd), [cwd], { enabled: wanted });
@@ -72,12 +74,12 @@ function ScriptMenu({
 	const actions = useMemo<QuickAction[]>(() => {
 		const typed = (line: string): QuickAction["extra"] => ({
 			icon: Pencil,
-			title: "Écrire sans lancer",
+			title: t("terminalView.typeOnly"),
 			run: () => onRun(line, false),
 		});
 		const launched = (line: string): QuickAction["extra"] => ({
 			icon: CornerDownLeft,
-			title: "Lancer tel quel",
+			title: t("terminalView.runAsIs"),
 			run: () => onRun(line, true),
 		});
 
@@ -110,7 +112,7 @@ function ScriptMenu({
 				note: incomplete
 					? command.positional?.label.toLowerCase()
 					: elsewhere
-						? "dépôt principal"
+						? t("terminalView.mainRepo")
 						: undefined,
 				run: () => onRun(command.base, execute),
 				extra: execute ? typed(command.base) : launched(command.base),
@@ -118,26 +120,21 @@ function ScriptMenu({
 		});
 
 		return [...packaged, ...catalog];
-	}, [config?.commands, onRun, scripts.data]);
+	}, [config?.commands, onRun, scripts.data, t]);
 
 	if (disabled) return null;
 
 	return (
 		<QuickMenu
-			label="Scripts"
+			label={t("terminalView.scripts")}
 			icon={SquareTerminal}
-			title="Scripts du dépôt et commandes maison"
+			title={t("terminalView.scriptsHint")}
 			actions={actions}
 			loading={scripts.loading}
 			onOpen={() => (wanted ? scripts.reload() : setWanted(true))}
-			emptyMessage={scripts.error ?? "Aucun script dans ce dossier."}
+			emptyMessage={scripts.error ?? t("terminalView.noScripts")}
 			width={380}
-			footer={
-				<>
-					La commande est tapée puis lancée dans ce shell — ⇧Entrée fait l'inverse de
-					l'entrée choisie.
-				</>
-			}
+			footer={<>{t("terminalView.footer")}</>}
 		/>
 	);
 }

@@ -1,6 +1,9 @@
+import { locale } from "@/i18n";
 import clsx from "clsx";
 import { ArrowLeft, FlaskConical, Lock, X } from "lucide-react";
+import type { TFunction } from "i18next";
 import { useState } from "react";
+import { Trans, useTranslation } from "react-i18next";
 import { toast } from "sonner";
 import { useConfirm } from "@/components/Confirm";
 import { Modal, Spinner } from "@/components/ui";
@@ -16,75 +19,70 @@ import type { Automation, AutomationRun } from "@/lib/types";
  * voyant, pas en l'imaginant.
  */
 
-const DAILY_PROMPT =
-	"Résume ce que j'ai fait sur la période, pour le daily de l'équipe. Quatre parties : Livré, En cours, Bloqué, Ensuite. Une ligne par sujet ; regroupe une PR et le ticket qu'elle traite. Pas de jargon interne au code : l'équipe produit écoute aussi.";
+type ModelId = "daily" | "revue" | "sprint" | "sentry" | "blank";
 
-const MODELS: Array<{ id: string; name: string; description: string; make: () => Automation }> = [
-	{
-		id: "daily",
-		name: "Mon daily",
-		description: "Ce que j'ai fait depuis le dernier, en quatre parties, placé dans l'écran Daily",
-		make: () => ({
-			...blank(),
-			name: "Mon daily",
-			template: "daily",
-			prompt: DAILY_PROMPT,
-			sources: { github: true, tracker: true, cockpit: true, sentry: true },
-		}),
-	},
-	{
-		id: "revue",
-		name: "Revue du matin",
-		description: "Les PR qui attendent ma relecture, et ce qui a bougé cette nuit",
-		make: () => ({
-			...blank(),
-			name: "Revue du matin",
-			days: [1, 2, 3, 4, 5],
-			time: "09:00",
-			leadMinutes: 15,
-			sources: { github: true, tracker: false, cockpit: false, sentry: false },
-			prompt:
-				"Liste les PR que j'ai relues ou qui ont bougé depuis hier, de la plus ancienne à la plus récente. Deux parties : À relire, Déjà relu. Une ligne par PR, avec ce qui a changé.",
-		}),
-	},
-	{
-		id: "sprint",
-		name: "Bilan de la semaine",
-		description: "Ce que j'ai livré sur la semaine, pour la rétro",
-		make: () => ({
-			...blank(),
-			name: "Bilan de la semaine",
-			days: [5],
-			time: "17:00",
-			leadMinutes: 60,
-			pdf: true,
-			prompt:
-				"Fais le bilan de ma semaine pour la rétro. Trois parties : Livré, Ce qui a ralenti, À reprendre. Regroupe par sujet, pas par outil.",
-		}),
-	},
-	{
-		id: "sentry",
-		name: "Veille des erreurs",
-		description: "Les erreurs qui me sont assignées et ont bougé depuis hier",
-		make: () => ({
-			...blank(),
-			name: "Veille des erreurs",
-			days: [1, 2, 3, 4, 5],
-			time: "10:00",
-			leadMinutes: 0,
-			window: "day",
-			sources: { github: false, tracker: false, cockpit: false, sentry: true },
-			prompt:
-				"Résume les erreurs qui me sont assignées et ont bougé depuis hier. Deux parties : Nouvelles ou en hausse, Résolues. Une ligne par erreur, avec ce qu'elle touche.",
-		}),
-	},
-	{
-		id: "blank",
-		name: "Vierge",
-		description: "Une consigne, un rythme, un rendu",
-		make: () => blank(),
-	},
-];
+function models(t: TFunction): Array<{ id: ModelId; name: string; description: string; make: () => Automation }> {
+	const named = (id: Exclude<ModelId, "blank">) => ({
+		id,
+		name: t(`automationEditor.models.${id}.name`),
+		description: t(`automationEditor.models.${id}.description`),
+	});
+	return [
+		{
+			...named("daily"),
+			make: () => ({
+				...blank(),
+				name: t("automationEditor.models.daily.name"),
+				template: "daily",
+				prompt: t("automationEditor.models.daily.prompt"),
+				sources: { github: true, tracker: true, cockpit: true, sentry: true },
+			}),
+		},
+		{
+			...named("revue"),
+			make: () => ({
+				...blank(),
+				name: t("automationEditor.models.revue.name"),
+				days: [1, 2, 3, 4, 5],
+				time: "09:00",
+				leadMinutes: 15,
+				sources: { github: true, tracker: false, cockpit: false, sentry: false },
+				prompt: t("automationEditor.models.revue.prompt"),
+			}),
+		},
+		{
+			...named("sprint"),
+			make: () => ({
+				...blank(),
+				name: t("automationEditor.models.sprint.name"),
+				days: [5],
+				time: "17:00",
+				leadMinutes: 60,
+				pdf: true,
+				prompt: t("automationEditor.models.sprint.prompt"),
+			}),
+		},
+		{
+			...named("sentry"),
+			make: () => ({
+				...blank(),
+				name: t("automationEditor.models.sentry.name"),
+				days: [1, 2, 3, 4, 5],
+				time: "10:00",
+				leadMinutes: 0,
+				window: "day",
+				sources: { github: false, tracker: false, cockpit: false, sentry: true },
+				prompt: t("automationEditor.models.sentry.prompt"),
+			}),
+		},
+		{
+			id: "blank",
+			name: t("automationEditor.models.blank.name"),
+			description: t("automationEditor.models.blank.description"),
+			make: () => blank(),
+		},
+	];
+}
 
 function blank(): Automation {
 	return {
@@ -107,19 +105,26 @@ function blank(): Automation {
 	};
 }
 
-const LEADS: Array<[number, string]> = [
-	[0, "À l'heure"],
-	[15, "15 min avant"],
-	[30, "30 min avant"],
-	[60, "1 h avant"],
+const leads = (t: TFunction): Array<[number, string]> => [
+	[0, t("automationEditor.leads.onTime")],
+	[15, t("automationEditor.leads.minutes", { count: 15 })],
+	[30, t("automationEditor.leads.minutes", { count: 30 })],
+	[60, t("automationEditor.leads.hour")],
 ];
 
-const SOURCES: Array<{ key: keyof Automation["sources"]; name: string; what: string }> = [
-	{ key: "github", name: "GitHub", what: "Mes PR ouvertes, fusionnées ou mises à jour, et celles que j'ai relues" },
-	{ key: "tracker", name: "Suivi de tâches", what: "Mes tickets qui ont bougé, terminés compris" },
-	{ key: "cockpit", name: "Cockpit", what: "Les tours d'agents terminés, par dossier, et les gestes git du journal" },
-	{ key: "sentry", name: "Sentry", what: "Les erreurs qui me sont assignées et ont bougé sur la période" },
+const SOURCE_KEYS: Array<{ key: keyof Automation["sources"]; brand?: string }> = [
+	{ key: "github", brand: "GitHub" },
+	{ key: "tracker" },
+	{ key: "cockpit", brand: "Cockpit" },
+	{ key: "sentry", brand: "Sentry" },
 ];
+
+const sourceList = (t: TFunction): Array<{ key: keyof Automation["sources"]; name: string; what: string }> =>
+	SOURCE_KEYS.map(({ key, brand }) => ({
+		key,
+		name: brand ?? t(`automationEditor.sources.${key}.name`),
+		what: t(`automationEditor.sources.${key}.what`),
+	}));
 
 export function AutomationEditor({
 	initial,
@@ -132,8 +137,12 @@ export function AutomationEditor({
 	onSaved: (saved: Automation) => void;
 	onRemoved: () => void;
 }) {
+	const { t } = useTranslation("components1");
+	const MODELS = models(t);
+	const LEADS = leads(t);
+	const SOURCES = sourceList(t);
 	const creating = initial === null;
-	const [model, setModel] = useState("daily");
+	const [model, setModel] = useState<string>("daily");
 	const [draft, setDraft] = useState<Automation>(() => initial ?? MODELS[0].make());
 	const [saving, setSaving] = useState(false);
 	const [trial, setTrial] = useState<{ running: boolean; run: AutomationRun | null; error: string }>({
@@ -157,18 +166,27 @@ export function AutomationEditor({
 	const set = <K extends keyof Automation>(key: K, value: Automation[K]) =>
 		setDraft((current) => ({ ...current, [key]: value }));
 	const next = previewSchedule(draft);
-	const picked = DAY_LABELS.filter((_, index) => draft.days.includes(index + 1)).map((day) => day.toLowerCase() + ".");
+	const picked = DAY_LABELS.filter((_, index) => draft.days.includes(index + 1)).map((day) => (locale().startsWith("fr") ? day.toLowerCase() + "." : day));
 	const sources = SOURCES.filter((source) => draft.sources[source.key]).map((source) => source.name);
+	const sentenceValues = {
+		days: picked.join(", "),
+		time: draft.time,
+		sources: sources.length > 0 ? sources.join(", ") : t("automationEditor.sentence.noSource"),
+		output: draft.template === "daily" ? t("automationEditor.sentence.outputDaily") : t("automationEditor.sentence.output"),
+		minutes: draft.leadMinutes,
+	};
 	const sentence =
 		picked.length === 0
-			? "Aucun jour choisi : rien ne tournera."
-			: `Chaque ${picked.join(", ")} à ${draft.time}, Cockpit lit ${sources.length > 0 ? sources.join(", ") : "aucune source"} et te rend ${draft.template === "daily" ? "ta partie du daily" : "un rendu"}${draft.leadMinutes > 0 ? `, ${draft.leadMinutes} min avant` : ", à l'heure"}.`;
+			? t("automationEditor.sentence.noDay")
+			: draft.leadMinutes > 0
+				? t("automationEditor.sentence.ahead", sentenceValues)
+				: t("automationEditor.sentence.onTime", sentenceValues);
 
 	const save = async () => {
 		setSaving(true);
 		try {
 			const saved = await api.automations.save(draft);
-			toast.success(creating ? `${saved.name} est en place` : "Réglage enregistré");
+			toast.success(creating ? t("automationEditor.toast.created", { name: saved.name }) : t("automationEditor.toast.saved"));
 			onSaved(saved);
 		} catch (error) {
 			toast.error(String(error));
@@ -180,9 +198,9 @@ export function AutomationEditor({
 	const remove = async () => {
 		if (!initial) return;
 		const ok = await confirm({
-			title: `Supprimer « ${initial.name} » ?`,
-			message: "Elle ne tournera plus. Ses exécutions passées restent sur le disque.",
-			confirmLabel: "Supprimer",
+			title: t("automationEditor.remove.title", { name: initial.name }),
+			message: t("automationEditor.remove.message"),
+			confirmLabel: t("automationEditor.remove.confirm"),
 			danger: true,
 		});
 		if (!ok) return;
@@ -200,10 +218,10 @@ export function AutomationEditor({
 							onClick={onClose}
 							className="focus-ring inline-flex items-center gap-1 rounded text-[12.5px] font-semibold text-accent hover:underline"
 						>
-							<ArrowLeft size={13} /> Automatisations
+							<ArrowLeft size={13} /> {t("automationEditor.back")}
 						</button>
 						<h1 className="mt-1 text-[22px] font-semibold text-ink">
-							{creating ? "Nouvelle automatisation" : `Régler « ${initial.name} »`}
+							{creating ? t("automationEditor.title.new") : t("automationEditor.title.edit", { name: initial.name })}
 						</h1>
 					</div>
 					<div className="flex gap-2">
@@ -213,7 +231,7 @@ export function AutomationEditor({
 								onClick={() => void remove()}
 								className="focus-ring inline-flex h-9 items-center rounded-lg px-3 text-[12.5px] font-semibold text-critical hover:bg-critical/10"
 							>
-								Supprimer
+								{t("automationEditor.remove.confirm")}
 							</button>
 						) : null}
 						<button
@@ -221,16 +239,16 @@ export function AutomationEditor({
 							onClick={onClose}
 							className="focus-ring inline-flex h-9 items-center rounded-lg border border-line bg-surface px-3 text-[12.5px] font-semibold text-ink hover:bg-hover"
 						>
-							Annuler
+							{t("automationEditor.cancel")}
 						</button>
 						<button
 							type="button"
 							onClick={() => void tryNow()}
 							disabled={trial.running}
-							title="Le même travail qu'une exécution, sur la période qu'elle couvrirait maintenant, sans rien ranger ni prévenir"
+							title={t("automationEditor.trial.hint")}
 							className="focus-ring inline-flex h-9 items-center gap-1.5 rounded-lg border border-line bg-surface px-3 text-[12.5px] font-semibold text-ink hover:bg-hover disabled:opacity-50"
 						>
-							{trial.running ? <Spinner size={13} /> : <FlaskConical size={14} />} Essayer à blanc
+							{trial.running ? <Spinner size={13} /> : <FlaskConical size={14} />} {t("automationEditor.trial.button")}
 						</button>
 						<button
 							type="button"
@@ -238,7 +256,7 @@ export function AutomationEditor({
 							disabled={saving}
 							className="focus-ring inline-flex h-9 items-center rounded-lg bg-accent px-4 text-[12.5px] font-semibold text-accent-ink hover:bg-accent-soft disabled:opacity-50"
 						>
-							{creating ? "Enregistrer et activer" : "Enregistrer"}
+							{creating ? t("automationEditor.saveAndEnable") : t("automationEditor.save")}
 						</button>
 					</div>
 				</div>
@@ -246,7 +264,7 @@ export function AutomationEditor({
 				{creating ? (
 					<section className="rounded-2xl bg-surface p-4 shadow-card">
 						<span className="text-[11px] font-semibold tracking-[0.06em] text-ink-muted uppercase">
-							Partir d'un modèle
+							{t("automationEditor.startFrom")}
 						</span>
 						<div className="mt-2.5 grid gap-2.5 sm:grid-cols-3 xl:grid-cols-5">
 							{MODELS.map((entry) => (
@@ -272,19 +290,19 @@ export function AutomationEditor({
 
 				<div className="flex flex-wrap items-start gap-4">
 					<div className="flex min-w-0 flex-[999_1_560px] flex-col gap-4">
-						<Card step={1} title="Quand">
+						<Card step={1} title={t("automationEditor.when.title")}>
 							<label className="flex flex-col gap-1.5">
-								<span className="text-[13px] font-semibold text-ink">Nom</span>
+								<span className="text-[13px] font-semibold text-ink">{t("automationEditor.when.name")}</span>
 								<input
 									value={draft.name}
 									onChange={(event) => set("name", event.target.value)}
-									placeholder="Mon daily"
+									placeholder={t("automationEditor.models.daily.name")}
 									className="focus-ring h-10 rounded-lg border border-line bg-surface px-3 text-[14px] text-ink"
 								/>
 							</label>
 							<div className="flex flex-col gap-1.5">
-								<span className="text-[13px] font-semibold text-ink">Le rendez-vous a lieu</span>
-								<div role="group" aria-label="Jours" className="flex flex-wrap gap-1.5">
+								<span className="text-[13px] font-semibold text-ink">{t("automationEditor.when.occurs")}</span>
+								<div role="group" aria-label={t("automationEditor.when.days")} className="flex flex-wrap gap-1.5">
 									{DAY_LABELS.map((label, index) => {
 										const day = index + 1;
 										const on = draft.days.includes(day);
@@ -312,7 +330,7 @@ export function AutomationEditor({
 							</div>
 							<div className="flex flex-wrap gap-5">
 								<label className="flex flex-col gap-1.5">
-									<span className="text-[13px] font-semibold text-ink">à</span>
+									<span className="text-[13px] font-semibold text-ink">{t("automationEditor.when.at")}</span>
 									<input
 										type="time"
 										value={draft.time}
@@ -321,8 +339,8 @@ export function AutomationEditor({
 									/>
 								</label>
 								<div className="flex flex-col gap-1.5">
-									<span className="text-[13px] font-semibold text-ink">Rendu prêt</span>
-									<div role="group" aria-label="Avance" className="flex flex-wrap gap-1.5">
+									<span className="text-[13px] font-semibold text-ink">{t("automationEditor.when.ready")}</span>
+									<div role="group" aria-label={t("automationEditor.when.lead")} className="flex flex-wrap gap-1.5">
 										{LEADS.map(([value, label]) => (
 											<button
 												key={value}
@@ -343,12 +361,12 @@ export function AutomationEditor({
 								</div>
 							</div>
 							<div className="flex flex-col gap-1.5">
-								<span className="text-[13px] font-semibold text-ink">Période couverte</span>
+								<span className="text-[13px] font-semibold text-ink">{t("automationEditor.when.window")}</span>
 								<div className="grid gap-2.5 sm:grid-cols-2">
 									{(
 										[
-											["since", "Depuis la dernière exécution", "Le lundi couvre le week-end ; rien ne se perd entre deux rendez-vous, même après un rattrapage."],
-											["day", "Les dernières 24 heures", "Une fenêtre fixe, pour une veille qui revient chaque jour."],
+											["since", t("automationEditor.window.since.name"), t("automationEditor.window.since.description")],
+											["day", t("automationEditor.window.day.name"), t("automationEditor.window.day.description")],
 										] as const
 									).map(([id, name, description]) => (
 										<button
@@ -368,10 +386,9 @@ export function AutomationEditor({
 							</div>
 						</Card>
 
-						<Card step={2} title="Ce qu'elle lit">
+						<Card step={2} title={t("automationEditor.reads.title")}>
 							<p className="text-[13px] text-ink-muted">
-								Les comptes déclarés dans les réglages, filtrés sur toi. Une source qui ne répond pas donne une
-								partie absente et signalée, jamais un échec.
+								{t("automationEditor.reads.description")}
 							</p>
 							<div className="grid gap-2.5 md:grid-cols-2 xl:grid-cols-4">
 								{SOURCES.map((source) => {
@@ -408,25 +425,24 @@ export function AutomationEditor({
 							</div>
 						</Card>
 
-						<Card step={3} title="Ce qu'elle demande">
+						<Card step={3} title={t("automationEditor.asks.title")}>
 							<label className="flex flex-col gap-1.5">
-								<span className="text-[13px] font-semibold text-ink">Consigne</span>
+								<span className="text-[13px] font-semibold text-ink">{t("automationEditor.asks.prompt")}</span>
 								<textarea
 									value={draft.prompt}
 									onChange={(event) => set("prompt", event.target.value)}
 									rows={6}
-									placeholder="Ce que tu attends du rendu, à qui il s'adresse, ce qu'il doit taire."
+									placeholder={t("automationEditor.asks.placeholder")}
 									className="focus-ring resize-y rounded-lg border border-line bg-surface p-3 text-[14px] leading-relaxed text-ink"
 								/>
 							</label>
 							<p className="text-[12.5px] text-ink-muted">
-								L'agent reçoit aussi la période, les éléments lus et le rendu précédent, pour dire ce qui a
-								avancé depuis. Il cite chaque élément qu'il utilise : une référence inventée est écartée.
+								{t("automationEditor.asks.context")}
 							</p>
 							{draft.corrections.length > 0 ? (
 								<div className="flex flex-col gap-1.5">
 									<span className="text-[13px] font-semibold text-ink">
-										Corrections demandées après des rendus · {draft.corrections.length}
+										{t("automationEditor.asks.corrections", { count: draft.corrections.length })}
 									</span>
 									{draft.corrections.map((correction, index) => (
 										<div key={`${correction.at}-${index}`} className="flex items-center gap-2 rounded-lg bg-raised px-3 py-2">
@@ -436,7 +452,7 @@ export function AutomationEditor({
 											</span>
 											<button
 												type="button"
-												aria-label="Retirer cette correction"
+												aria-label={t("automationEditor.asks.removeCorrection")}
 												onClick={() =>
 													set(
 														"corrections",
@@ -453,29 +469,29 @@ export function AutomationEditor({
 							) : null}
 						</Card>
 
-						<Card step={4} title="Où ça arrive">
+						<Card step={4} title={t("automationEditor.delivery.title")}>
 							<div className="grid gap-x-5 gap-y-1 md:grid-cols-2">
 								<Check checked={draft.notify} onChange={(value) => set("notify", value)}>
-									Notification quand c'est prêt
+									{t("automationEditor.delivery.notify")}
 								</Check>
 								<Check checked={draft.catchUp} onChange={(value) => set("catchUp", value)}>
-									Rattraper à l'ouverture si le rendez-vous n'est pas passé
+									{t("automationEditor.delivery.catchUp")}
 								</Check>
 								<Check
 									checked={draft.template === "daily"}
 									onChange={(value) => set("template", value ? "daily" : "blank")}
 								>
-									Placer ma partie dans l'écran Daily
+									{t("automationEditor.delivery.daily")}
 								</Check>
 								<Check checked={draft.pdf} onChange={(value) => set("pdf", value)}>
-									Mettre chaque rendu en PDF
+									{t("automationEditor.delivery.pdf")}
 								</Check>
 								<Check checked={draft.enabled} onChange={(value) => set("enabled", value)}>
-									Active
+									{t("automationEditor.delivery.enabled")}
 								</Check>
 							</div>
 							<label className="flex flex-col gap-1.5">
-								<span className="text-[13px] font-semibold text-ink">Webhook Slack, pour publier un rendu relu</span>
+								<span className="text-[13px] font-semibold text-ink">{t("automationEditor.delivery.slack")}</span>
 								<input
 									type="password"
 									value={draft.slackWebhook}
@@ -485,15 +501,17 @@ export function AutomationEditor({
 									className="focus-ring h-10 rounded-lg border border-line bg-surface px-3 font-mono text-[13px] text-ink"
 								/>
 								<span className="text-[12px] text-ink-muted">
-									Rien n'y part tout seul : le bouton « Envoyer sur Slack » apparaît sur un rendu, après relecture.
-									L'adresse reste dans Cockpit et ne s'affiche plus une fois enregistrée.
+									{t("automationEditor.delivery.slackHint")}
 								</span>
 							</label>
 							<div className="flex items-center gap-2.5 rounded-xl bg-raised px-3 py-2.5">
 								<Lock size={16} className="shrink-0 text-accent" />
 								<span className="text-[12.5px] text-ink-muted">
-									<strong className="text-ink">Lecture seule</strong>, sans réglage pour en sortir : l'agent
-									n'a aucun outil, il ne peut rien pousser, commenter ni déplacer.
+									<Trans
+										t={t}
+										i18nKey="automationEditor.delivery.readOnly"
+										components={{ strong: <strong className="text-ink" /> }}
+									/>
 								</span>
 							</div>
 						</Card>
@@ -502,7 +520,7 @@ export function AutomationEditor({
 					<aside className="flex min-w-[300px] flex-[1_1_340px] flex-col gap-4 lg:sticky lg:top-0 lg:max-w-[420px]">
 						<section className="flex flex-col gap-3 rounded-2xl bg-surface p-5 shadow-card">
 							<span className="text-[11px] font-semibold tracking-[0.06em] text-ink-muted uppercase">
-								Ce qui va se passer
+								{t("automationEditor.preview.title")}
 							</span>
 							<p className="text-[15.5px] leading-snug font-medium text-ink">{sentence}</p>
 							<div className="flex flex-col gap-2">
@@ -512,27 +530,26 @@ export function AutomationEditor({
 											<span className="text-[13px] font-semibold text-ink">
 												{longDay(entry.occurrence)} · {hm(entry.occurrence)}
 											</span>
-											<span className="font-mono text-[11.5px] text-accent">prêt {hm(entry.ready)}</span>
+											<span className="font-mono text-[11.5px] text-accent">{t("automationEditor.preview.ready", { time: hm(entry.ready) })}</span>
 										</span>
 										<span className="font-mono text-[11.5px] text-ink-muted">
-											couvre {shortStamp(entry.from)} → {shortStamp(entry.ready)}
+											{t("automationEditor.covers", { from: shortStamp(entry.from), to: shortStamp(entry.ready) })}
 										</span>
 									</div>
 								))}
-								{picked.length === 0 ? <p className="text-[13px] text-critical">Choisis au moins un jour.</p> : null}
+								{picked.length === 0 ? <p className="text-[13px] text-critical">{t("automationEditor.preview.pickDay")}</p> : null}
 							</div>
 						</section>
 						<section className="flex flex-col gap-1 rounded-2xl bg-surface p-5 shadow-card">
 							<span className="mb-2 text-[11px] font-semibold tracking-[0.06em] text-ink-muted uppercase">
-								À chaque exécution
+								{t("automationEditor.steps.title")}
 							</span>
-							{[
-								["La période se calcule", "De la fin de la précédente réussie à maintenant, notée dans le rendu"],
-								["Cockpit lit les sources", "Lui, pas l'agent : chaque élément garde son lien et son origine"],
-								["Un agent rédige", "Sans aucun outil, avec ta consigne et les éléments, rien d'autre"],
-								["Le rendu se range", "Une exécution de plus dans l'historique, jamais réécrite"],
-								["Tu es prévenu", "Une notification, puis ta partie dans l'écran Daily"],
-							].map(([title, description], index, all) => (
+							{(["period", "read", "write", "store", "notify"] as const)
+								.map((step) => [
+									t(`automationEditor.steps.${step}.title`),
+									t(`automationEditor.steps.${step}.description`),
+								])
+								.map(([title, description], index, all) => (
 								<div key={title} className="flex gap-3">
 									<div className="flex flex-col items-center">
 										<span className="flex size-7 shrink-0 items-center justify-center rounded-full bg-accent-dim font-mono text-[11.5px] font-semibold text-accent">
@@ -563,18 +580,19 @@ function TrialResult({
 	trial: { running: boolean; run: AutomationRun | null; error: string };
 	onClose: () => void;
 }) {
+	const { t } = useTranslation("components1");
 	const run = trial.run;
 	return (
 		<Modal onClose={onClose}>
 			<div className="flex max-h-[80vh] w-full max-w-3xl flex-col gap-4 overflow-y-auto rounded-2xl bg-surface p-6 shadow-card">
 				<div className="flex items-start justify-between gap-3">
 					<div>
-						<h2 className="text-[18px] font-semibold text-ink">Essai à blanc</h2>
-						<p className="text-[12.5px] text-ink-muted">Rien n'a été rangé ni envoyé : c'est ce qu'elle produirait maintenant.</p>
+						<h2 className="text-[18px] font-semibold text-ink">{t("automationEditor.trial.title")}</h2>
+						<p className="text-[12.5px] text-ink-muted">{t("automationEditor.trial.subtitle")}</p>
 					</div>
 					<button
 						type="button"
-						aria-label="Fermer"
+						aria-label={t("automationEditor.close")}
 						onClick={onClose}
 						className="focus-ring flex size-8 items-center justify-center rounded-lg text-ink-muted hover:bg-hover"
 					>
@@ -583,7 +601,7 @@ function TrialResult({
 				</div>
 				{trial.running ? (
 					<div className="flex items-center gap-2.5 py-8 text-[13.5px] text-ink-muted">
-						<Spinner /> Lecture des sources, puis rédaction — une à deux minutes.
+						<Spinner /> {t("automationEditor.trial.running")}
 					</div>
 				) : trial.error ? (
 					<p className="rounded-xl bg-critical/10 p-4 text-[13.5px] text-critical">{trial.error}</p>
@@ -591,10 +609,10 @@ function TrialResult({
 					<>
 						<div className="flex flex-wrap items-center gap-2">
 							<span className={`inline-flex h-6 items-center rounded-full px-2.5 text-[11.5px] font-semibold ${TONE_CLASS[runLabel(run).tone]}`}>
-								{run.state === "partial" ? "Partielle" : "Prête"}
+								{run.state === "partial" ? t("automationEditor.trial.partial") : t("automationEditor.trial.ready")}
 							</span>
 							<span className="font-mono text-[12px] text-ink-muted">
-								couvre {shortStamp(new Date(run.from))} → {shortStamp(new Date(run.to))}
+								{t("automationEditor.covers", { from: shortStamp(new Date(run.from)), to: shortStamp(new Date(run.to)) })}
 							</span>
 							{run.sources.map((source) => (
 								<span
@@ -609,7 +627,11 @@ function TrialResult({
 									title={source.note}
 								>
 									{SOURCE_LABEL[source.source] ?? source.source}{" "}
-									{source.state === "read" ? source.count : source.state === "silent" ? "muet" : "non branché"}
+									{source.state === "read"
+										? source.count
+										: source.state === "silent"
+											? t("automationEditor.trial.silent")
+											: t("automationEditor.trial.unplugged")}
 								</span>
 							))}
 						</div>
@@ -617,13 +639,13 @@ function TrialResult({
 						{run.parts.map((part) => (
 							<section key={part.title} className="flex flex-col gap-1.5">
 								<h3 className="text-[14px] font-semibold text-ink">{part.title}</h3>
-								{part.lines.length === 0 ? <p className="text-[13px] text-ink-muted">Rien.</p> : null}
+								{part.lines.length === 0 ? <p className="text-[13px] text-ink-muted">{t("automationEditor.trial.nothing")}</p> : null}
 								{part.lines.map((line) => (
 									<div key={line.id} className="rounded-lg bg-raised px-3 py-2">
 										<span className="block text-[13.5px] font-semibold text-ink">{line.title}</span>
 										{line.detail ? <span className="block text-[12.5px] text-ink-muted">{line.detail}</span> : null}
 										<span className="mt-1 flex flex-wrap gap-1.5 font-mono text-[11px] text-ink-muted">
-											{line.unsourced ? <span className="text-warning">sans source</span> : null}
+											{line.unsourced ? <span className="text-warning">{t("automationEditor.trial.unsourced")}</span> : null}
 											{line.refs.map((ref) => (
 												<span key={ref}>{ref.replace(/^\w+:/, "")}</span>
 											))}

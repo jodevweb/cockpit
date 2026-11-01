@@ -2,6 +2,7 @@ import clsx from "clsx";
 import { Fragment, type ReactNode } from "react";
 import { useFileViewer } from "@/lib/fileViewer";
 import { api } from "@/lib/ipc";
+import { useTranslation } from "react-i18next";
 
 /**
  * Les chemins de fichiers cités par un agent, rendus ouvrables.
@@ -147,6 +148,7 @@ export function FileLink({
 	className?: string;
 	children?: ReactNode;
 }) {
+	const { t } = useTranslation("components1");
 	const { target, line } = resolvePath(path, cwd);
 	const viewer = useFileViewer();
 
@@ -165,11 +167,7 @@ export function FileLink({
 				event.dataTransfer.setData("text/plain", target);
 				event.dataTransfer.effectAllowed = "copy";
 			}}
-			title={
-				`${target}\n\nClic : lire dans le cockpit` +
-				`\n⌘-clic : ouvrir dans l'éditeur\n⌥-clic : révéler dans le Finder` +
-				`\n⇧-clic : copier le chemin`
-			}
+			title={`${target}\n\n${t("fileLink.hint")}`}
 			onClick={(event) => {
 				event.stopPropagation();
 				// Lire sans quitter l'app est le geste courant ; l'éditeur reste à

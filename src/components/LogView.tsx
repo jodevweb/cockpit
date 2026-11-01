@@ -3,6 +3,7 @@ import clsx from "clsx";
 import { useMemo } from "react";
 import type { JobLine } from "@/lib/types";
 import { useStickToBottom } from "@/lib/useStickToBottom";
+import { useTranslation } from "react-i18next";
 
 /**
  * Console de sortie d'un job. Les codes ANSI sont convertis en segments
@@ -10,6 +11,7 @@ import { useStickToBottom } from "@/lib/useStickToBottom";
  * désactive dès que tu remontes dans l'historique.
  */
 export function LogView({ lines, empty }: { lines: JobLine[]; empty?: string }) {
+	const { t } = useTranslation("components1");
 	const bottom = useStickToBottom<HTMLDivElement>([lines]);
 
 	return (
@@ -20,7 +22,7 @@ export function LogView({ lines, empty }: { lines: JobLine[]; empty?: string }) 
 		>
 			{lines.length === 0 ? (
 				<p className="px-1 py-6 text-center text-ink-faint">
-					{empty ?? "Aucune sortie pour l'instant."}
+					{empty ?? t("logView.empty")}
 				</p>
 			) : (
 				lines.map((line, index) => (
@@ -130,12 +132,13 @@ function parseDiff(diff: string): DiffRow[] {
  * lignes longues et pour un œil qui distingue mal le rouge du vert.
  */
 export function DiffView({ diff }: { diff: string }) {
+	const { t } = useTranslation("components1");
 	const rows = useMemo(() => parseDiff(diff), [diff]);
 
 	if (!diff.trim()) {
 		return (
 			<p className="px-3 py-6 text-center text-[11px] text-ink-faint">
-				Aucune modification à afficher.
+				{t("logView.noDiff")}
 			</p>
 		);
 	}

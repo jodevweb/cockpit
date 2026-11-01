@@ -55,16 +55,18 @@ import { addRemark, composeRemarks, useAllRemarks } from "@/lib/remarks";
 import { Diagram, firstDiagram } from "@/components/Diagram";
 import { Illustration } from "@/components/Illustration";
 import { illustrationsOf, type Illustration as IllustrationItem } from "@/lib/illustrations";
+import { useTranslation } from "react-i18next";
+import { t as translate } from "@/i18n";
+
+/** Les textes de la carte, hors composant : appelé au rendu, jamais au chargement. */
+function tr(key: string, options?: Record<string, unknown>): string {
+	return translate(`components2:agentMap.${key}`, options);
+}
 
 /** Le genre d'une illustration, dit en un mot sur la carte. */
-const GENRE_SHORT: Record<IllustrationItem["genre"], string> = {
-	frise: "frise",
-	avant_apres: "avant/après",
-	mesure: "mesure",
-	table: "table",
-	capture: "capture annotée",
-	matrice: "matrice",
-};
+function genreShort(genre: IllustrationItem["genre"]): string {
+	return tr(`genre.${genre}`);
+}
 import { MediaThumb } from "@/components/MediaThumb";
 import { delivered, isEmpty, type Delivered } from "@/lib/delivered";
 import { useFileViewer } from "@/lib/fileViewer";
@@ -234,13 +236,13 @@ function build(
 				data: {
 					icon: "ask",
 					phase: "done",
-					eyebrow: "ta consigne",
+					eyebrow: tr("eyebrow.ask"),
 					title: clip(said(episode.ask), 120),
 					// Ce que tu as précisé en route reste avec la consigne : on la
 					// relit avec l'échange entier, question comprise.
 					detail:
 						episode.replies.length > 0
-							? `+ ${episode.replies.length} réponse${episode.replies.length > 1 ? "s" : ""} de ta part`
+							? tr("ask.replies", { count: episode.replies.length })
 							: undefined,
 					turns: [
 						episode.ask,
@@ -261,9 +263,9 @@ function build(
 				data: {
 					icon: "explore",
 					phase: "done",
-					eyebrow: "exploration",
-					title: `${files.length || s.reads.length} fichier${(files.length || s.reads.length) > 1 ? "s" : ""} parcouru${(files.length || s.reads.length) > 1 ? "s" : ""}`,
-					detail: searches > 0 ? `${searches} recherche${searches > 1 ? "s" : ""}` : undefined,
+					eyebrow: tr("eyebrow.explore"),
+					title: tr("explore.files", { count: files.length || s.reads.length }),
+					detail: searches > 0 ? tr("explore.searches", { count: searches }) : undefined,
 					took: tookOf(s.reads),
 					dots: s.reads.slice(0, 40).map((turn, index) => ({
 						key: `${turn.toolId ?? index}`,
@@ -290,12 +292,12 @@ function build(
 					data: {
 						icon: "agent",
 						phase: failed ? "failed" : running ? "live" : "done",
-						eyebrow: "sous-agent",
+						eyebrow: tr("eyebrow.subagent"),
 						title: clip(
 							(turn.input?.description as string | undefined) || turn.text,
 							90,
 						),
-						detail: turn.sub ? `${turn.sub.filter((sub) => sub.kind === "tool").length} gestes` : undefined,
+						detail: turn.sub ? tr("agent.gestures", { count: turn.sub.filter((sub) => sub.kind === "tool").length }) : undefined,
 						took: running ? null : ended && turn.at ? ended - turn.at : tookOf([turn]),
 						since: running ? turn.at ?? null : null,
 						turns: [turn, ...(turn.sub ?? [])],
@@ -315,7 +317,7 @@ function build(
 				data: {
 					icon: "change" as const,
 					phase: "done" as Phase,
-					eyebrow: "fichier modifié",
+					eyebrow: tr("eyebrow.changed"),
 					title: basename(change.path),
 					detail: change.path,
 					bars: { added: change.added, removed: change.removed, scale },
@@ -331,8 +333,8 @@ function build(
 							data: {
 								icon: "change" as const,
 								phase: "done" as Phase,
-								eyebrow: "et aussi",
-								title: `${rest.length} autre${rest.length > 1 ? "s" : ""} fichier${rest.length > 1 ? "s" : ""}`,
+								eyebrow: tr("eyebrow.andAlso"),
+								title: tr("change.others", { count: rest.length }),
 								detail: rest.map((change) => basename(change.path)).join(" · "),
 								warn: warnOf(rest.map((change) => loopOn("edits", change.path)).find(Boolean)),
 								turns: rest.flatMap((change) => change.turns),
@@ -353,20 +355,20 @@ function build(
 			data: {
 				icon: "test",
 				phase: lastFailed && !running ? "failed" : "done",
-				eyebrow: "tests",
+				eyebrow: tr("eyebrow.tests"),
 				title: running
-					? "Les tests tournent"
+					? tr("tests.running")
 					: s.testsFail === null
-						? "Tests sans résultat"
+						? tr("tests.noResult")
 						: lastFailed
-							? "Les tests échouent"
-							: "Les tests passent",
+							? tr("tests.failing")
+							: tr("tests.passing"),
 				detail:
 					running && failed > 0
-						? `${failed} échec${failed > 1 ? "s" : ""} jusqu'ici`
+						? tr("tests.failuresSoFar", { count: failed })
 						: failed > 0 && !lastFailed
-						? `${failed} échec${failed > 1 ? "s" : ""} avant de passer`
-						: `${s.tests.length} passage${s.tests.length > 1 ? "s" : ""}`,
+						? tr("tests.failuresBefore", { count: failed })
+						: tr("tests.runs", { count: s.tests.length }),
 				dots: s.tests.map((turn, index) => ({
 					key: `${turn.toolId ?? index}`,
 					label: clip(commandOf(turn), 60),
@@ -385,11 +387,11 @@ function build(
 			data: {
 				icon: "run",
 				phase: failed > 0 ? "failed" : "done",
-				eyebrow: "commandes",
-				title: `${s.commands.length} commande${s.commands.length > 1 ? "s" : ""} lancée${s.commands.length > 1 ? "s" : ""}`,
+				eyebrow: tr("eyebrow.commands"),
+				title: tr("commands.ran", { count: s.commands.length }),
 				detail:
 					failed > 0
-						? `${failed} en erreur`
+						? tr("failedCount", { count: failed })
 						: clip(commandOf(s.commands.at(-1) as Turn), 44),
 				dots: s.commands.map((turn, index) => ({
 					key: `${turn.toolId ?? index}`,
@@ -411,7 +413,7 @@ function build(
 			data: {
 				icon: "visual",
 				phase: "done",
-				eyebrow: "visuels",
+				eyebrow: tr("eyebrow.visuals"),
 				title: countMedia(seen),
 				media: seen,
 				turns: [],
@@ -430,12 +432,16 @@ function build(
 		const findings = Array.isArray(input.findings) ? (input.findings as Array<Record<string, unknown>>) : [];
 		const count = (severity: string) => findings.filter((finding) => finding.severity === severity).length;
 		const parts = [
-			count("bloquant") ? `${count("bloquant")} bloquant${count("bloquant") > 1 ? "s" : ""}` : "",
-			count("important") ? `${count("important")} important${count("important") > 1 ? "s" : ""}` : "",
-			count("suggestion") ? `${count("suggestion")} suggestion${count("suggestion") > 1 ? "s" : ""}` : "",
+			count("bloquant") ? tr("review.blocking", { count: count("bloquant") }) : "",
+			count("important") ? tr("review.important", { count: count("important") }) : "",
+			count("suggestion") ? tr("review.suggestion", { count: count("suggestion") }) : "",
 		].filter(Boolean);
 		const verdict =
-			input.verdict === "merge" ? "Tu peux fusionner" : input.verdict === "bloquant" ? "Bloquant" : "Corrections attendues";
+			input.verdict === "merge"
+				? tr("review.merge")
+				: input.verdict === "bloquant"
+					? tr("review.blockingVerdict")
+					: tr("review.changes");
 		const pr = Number(String(input.pr ?? "").replace(/[^0-9]/g, "")) || undefined;
 		columns.push([
 			{
@@ -443,16 +449,16 @@ function build(
 				data: {
 					icon: "review",
 					phase: input.verdict === "merge" ? "done" : "yours",
-					eyebrow: `revue remise${pr ? ` · PR #${pr}` : ""}`,
+					eyebrow: pr ? tr("eyebrow.reviewPr", { pr }) : tr("eyebrow.review"),
 					// Relue depuis le disque, l'entrée d'un appel peut être tronquée :
 					// on ne prétend pas « rien à relever » faute de l'avoir lue.
 					title: !Array.isArray(input.findings)
-						? "Revue remise"
-						: `${verdict}${parts.length ? ` · ${parts.join(", ")}` : " · rien à relever"}`,
-					detail: "ouvrir la revue point par point",
+						? tr("review.delivered")
+						: `${verdict} · ${parts.length ? parts.join(", ") : tr("review.nothing")}`,
+					detail: tr("review.open"),
 					dots: findings.map((finding, at) => ({
 						key: String(finding.id ?? at),
-						label: `${String(finding.severity ?? "")} · ${String(finding.file ?? "")}`,
+						label: `${severityWord(String(finding.severity ?? ""))} · ${String(finding.file ?? "")}`,
 						tone: finding.severity === "bloquant" || finding.severity === "important" ? ("failed" as const) : undefined,
 					})),
 					turns: [turn],
@@ -487,7 +493,7 @@ function build(
 						data: {
 							icon: "footprint",
 							phase: "done",
-							eyebrow: `constat · ${print.baseLabel}`,
+							eyebrow: tr("eyebrow.footprint", { base: print.baseLabel }),
 							title: headline(print),
 							footprint: print,
 							turns: [],
@@ -505,8 +511,8 @@ function build(
 				data: {
 					icon: "answer",
 					phase: "done",
-					eyebrow: "plus tôt",
-					title: `${older.length} message${older.length > 1 ? "s" : ""} avant`,
+					eyebrow: tr("eyebrow.earlier"),
+					title: tr("said.earlier", { count: older.length }),
 					markdown: older.map((turn) => turn.text).join("\n\n---\n\n"),
 					turns: older,
 				},
@@ -524,7 +530,7 @@ function build(
 				data: {
 					icon: asking ? "question" : "answer",
 					phase: asking ? "yours" : "done",
-					eyebrow: asking ? "il te pose une question" : concluding ? "sa conclusion" : "il a dit",
+					eyebrow: asking ? tr("eyebrow.asking") : concluding ? tr("eyebrow.conclusion") : tr("eyebrow.said"),
 					title: clip(prose(turn.text), 150),
 					markdown: turn.text,
 					diagram: firstDiagram(turn.text) ?? undefined,
@@ -545,9 +551,9 @@ function build(
 				data: {
 					icon: "question",
 					phase: "yours",
-					eyebrow: "à toi",
-					title: "L'agent attend ta réponse",
-					detail: "voir la carte en haut",
+					eyebrow: tr("eyebrow.yours"),
+					title: tr("waiting.title"),
+					detail: tr("waiting.detail"),
 					turns: [],
 				},
 			},
@@ -567,12 +573,12 @@ function build(
 				data: {
 					icon: "live",
 					phase: "live",
-					eyebrow: "en ce moment",
+					eyebrow: tr("eyebrow.now"),
 					title: current
 						? capitalize(gestureOf(current))
 						: activity
-							? `Utilise ${activity}`
-							: "Réfléchit",
+							? tr("live.using", { tool: activity })
+							: tr("live.thinking"),
 					since: current?.at ?? lastSign(episode),
 					turns: current ? [current] : latest ? [latest] : [],
 					shell: inShell
@@ -595,7 +601,7 @@ function build(
 			data: {
 				icon: "run",
 				phase: "failed",
-				eyebrow: "erreur",
+				eyebrow: tr("eyebrow.error"),
 				title: clip(loose.at(-1)?.text ?? "", 90),
 				turns: loose,
 			},
@@ -606,9 +612,9 @@ function build(
 	// les commits, les fichiers produits.
 	if (!isEmpty(shipped)) {
 		const facts = [
-			shipped.reviews.length > 0 ? `PR ${shipped.reviews.map((review) => review.label).join(", ")}` : null,
-			shipped.commits.length > 0 ? `${shipped.commits.length} commit${shipped.commits.length > 1 ? "s" : ""}` : null,
-			shipped.pushed.length > 0 ? `poussé sur ${shipped.pushed.join(", ")}` : null,
+			shipped.reviews.length > 0 ? tr("delivered.pr", { list: shipped.reviews.map((review) => review.label).join(", ") }) : null,
+			shipped.commits.length > 0 ? tr("delivered.commits", { count: shipped.commits.length }) : null,
+			shipped.pushed.length > 0 ? tr("delivered.pushed", { branches: shipped.pushed.join(", ") }) : null,
 			shipped.media.length > 0 ? countMedia(shipped.media) : null,
 		].filter((fact): fact is string => fact !== null);
 		columns.push([
@@ -617,7 +623,7 @@ function build(
 				data: {
 					icon: "delivered",
 					phase: "done",
-					eyebrow: "livré",
+					eyebrow: tr("eyebrow.delivered"),
 					title: facts[0] ?? "",
 					detail: facts.slice(1).join(" · ") || undefined,
 					// Déjà en tête de la conclusion : la mosaïque ne se répète pas ici,
@@ -635,6 +641,18 @@ function build(
 	// ne se distinguait plus de celle qui tourne.
 
 	return columns;
+}
+
+/** La gravité d'un point de revue, dite dans la langue de l'interface. */
+function severityWord(severity: string): string {
+	return severity === "bloquant" || severity === "important" || severity === "suggestion"
+		? tr(`severity.${severity}`)
+		: severity;
+}
+
+/** « avant » / « après » : la valeur reste celle du code, le mot suit la langue. */
+function stageWord(stage: "avant" | "après"): string {
+	return stage === "avant" ? tr("stage.before") : tr("stage.after");
 }
 
 function stageRank(media: Media): number {
@@ -659,9 +677,9 @@ function countMedia(media: Media[]): string {
 	const pdfs = count("pdf");
 	const videos = count("video");
 	return [
-		images > 0 ? `${images} image${images > 1 ? "s" : ""}` : null,
-		pdfs > 0 ? `${pdfs} PDF` : null,
-		videos > 0 ? `${videos} vidéo${videos > 1 ? "s" : ""}` : null,
+		images > 0 ? tr("media.images", { count: images }) : null,
+		pdfs > 0 ? tr("media.pdfs", { count: pdfs }) : null,
+		videos > 0 ? tr("media.videos", { count: videos }) : null,
 	]
 		.filter(Boolean)
 		.join(" · ");
@@ -670,14 +688,18 @@ function countMedia(media: Media[]): string {
 /** Une boucle, dite en quelques mots sur la carte qu'elle concerne. */
 function warnOf(loop: Loop | undefined): string | undefined {
 	if (!loop) return undefined;
-	const during = loop.span ? ` en ${duration(loop.span / 1000)}` : "";
+	const during = loop.span ? duration(loop.span / 1000) : null;
 	switch (loop.kind) {
 		case "edits":
-			return `repris ${loop.count} fois${during}`;
+			return during
+				? tr("warn.editsDuring", { count: loop.count, duration: during })
+				: tr("warn.edits", { count: loop.count });
 		case "tests":
-			return `même échec ${loop.count} fois de suite${during}`;
+			return during
+				? tr("warn.testsDuring", { count: loop.count, duration: during })
+				: tr("warn.tests", { count: loop.count });
 		case "repeat":
-			return `« ${clip(loop.target, 28)} » relancée ${loop.count} fois`;
+			return tr("warn.repeat", { command: clip(loop.target, 28), count: loop.count });
 	}
 }
 
@@ -685,11 +707,11 @@ function warnOf(loop: Loop | undefined): string | undefined {
 function loopSentence(loop: Loop): string {
 	switch (loop.kind) {
 		case "edits":
-			return `${basename(loop.target)} repris ${loop.count} fois`;
+			return tr("loop.edits", { file: basename(loop.target), count: loop.count });
 		case "tests":
-			return `${clip(loop.target, 40)} échoue ${loop.count} fois de suite`;
+			return tr("loop.tests", { target: clip(loop.target, 40), count: loop.count });
 		case "repeat":
-			return `${clip(loop.target, 40)} relancée ${loop.count} fois`;
+			return tr("loop.repeat", { target: clip(loop.target, 40), count: loop.count });
 	}
 }
 
@@ -698,23 +720,23 @@ function folded(episode: Episode): MapNode {
 	const s = summarize(episode);
 	const failed = s.failures.length > 0 || s.testsFail === true;
 	const facts: string[] = [];
-	if (s.changes.length > 0) facts.push(`${s.changes.length} fichier${s.changes.length > 1 ? "s" : ""} modifié${s.changes.length > 1 ? "s" : ""}`);
-	if (s.testsFail !== null) facts.push(s.testsFail ? "tests KO" : "tests OK");
-	if (s.failures.length > 0) facts.push(`${s.failures.length} en erreur`);
+	if (s.changes.length > 0) facts.push(tr("folded.changed", { count: s.changes.length }));
+	if (s.testsFail !== null) facts.push(s.testsFail ? tr("folded.testsKo") : tr("folded.testsOk"));
+	if (s.failures.length > 0) facts.push(tr("failedCount", { count: s.failures.length }));
 	const circling = loops(episode)[0];
 	const started = episode.ask?.at;
 	const ended = lastSign(episode);
-	if (s.changes.length === 0) facts.push("rien modifié");
+	if (s.changes.length === 0) facts.push(tr("folded.nothingChanged"));
 	if (started && ended && ended > started) facts.push(duration((ended - started) / 1000));
 	return {
 		icon: "episode",
 		phase: failed ? "failed" : "done",
-		eyebrow: "consigne passée",
-		title: episode.ask ? clip(said(episode.ask), 90) : "Reprise",
+		eyebrow: tr("eyebrow.pastAsk"),
+		title: episode.ask ? clip(said(episode.ask), 90) : tr("folded.resumed"),
 		detail: facts.join(" · "),
 		turns: [],
 		toggles: "expand",
-		warn: circling ? `a tourné en rond : ${loopSentence(circling)}` : undefined,
+		warn: circling ? tr("folded.circled", { loop: loopSentence(circling) }) : undefined,
 	};
 }
 
@@ -744,7 +766,7 @@ function session(
 		if (index !== last) {
 			// Déplié à la demande : sa consigne le replie.
 			const ask = own[0]?.find((entry) => entry.id === "ask");
-			if (ask) ask.data = { ...ask.data, eyebrow: "consigne passée", toggles: "collapse" };
+			if (ask) ask.data = { ...ask.data, eyebrow: tr("eyebrow.pastAsk"), toggles: "collapse" };
 		}
 		return own.map(tag);
 	});
@@ -778,6 +800,7 @@ export function AgentMap({
 	/** Ouvre la visite des changements, quand il y a de quoi visiter. */
 	onTour?: () => void;
 }) {
+	const { t } = useTranslation("components2");
 	const all = useMemo(() => episodes(turns), [turns]);
 	const compactedAt = useMemo(() => lastCompaction(turns), [turns]);
 	// Une commande de test déclarée dans les réglages change le rangement :
@@ -983,8 +1006,7 @@ export function AgentMap({
 					<Sparkles size={20} />
 				</span>
 				<p className="max-w-sm text-[12.5px] leading-relaxed text-ink-muted">
-					Écris ta consigne : la carte de ce que fait l'agent se dessinera ici, étape par
-					étape, à mesure qu'il avance.
+					{t("agentMap.empty")}
 				</p>
 				{alert ? <div className="w-full max-w-xl">{alert}</div> : null}
 				{tiles}
@@ -1097,7 +1119,7 @@ export function AgentMap({
 						className="focus-ring absolute bottom-4 left-1/2 z-10 flex -translate-x-1/2 items-center gap-1.5 rounded-full bg-surface px-3 py-1.5 text-[11.5px] font-medium text-ink shadow-pop hover:bg-hover"
 					>
 						<LocateFixed size={13} className={thinking ? "text-accent" : "text-ink-muted"} />
-						Revenir au présent
+						{t("agentMap.backToNow")}
 					</button>
 				) : null}
 
@@ -1126,7 +1148,7 @@ export function AgentMap({
 									<span className="grid size-7 place-items-center rounded-lg bg-warning/15 text-warning">
 										<HelpCircle size={15} />
 									</span>
-									<span className="text-[13px] font-semibold text-ink">L'agent a besoin de toi</span>
+									<span className="text-[13px] font-semibold text-ink">{t("agentMap.needsYou")}</span>
 								</div>
 								{alert}
 							</div>
@@ -1139,14 +1161,14 @@ export function AgentMap({
 						<SidePanel
 							panelKey={`step-${selected}`}
 							eyebrow={detail.eyebrow}
-							title={detail.markdown ? "Le texte entier" : detail.shell ? "Son terminal" : detail.title}
+							title={detail.markdown ? t("agentMap.panel.fullText") : detail.shell ? t("agentMap.panel.terminal") : detail.title}
 							flush={Boolean(detail.shell)}
 							onClose={() => setSelected(null)}
 							onLayout={onLayout}
 							banner={
 								gone ? (
 									<div className="border-b border-line-soft bg-raised px-4 py-1.5 text-[11.5px] text-ink-muted">
-										Cette étape n'est plus sur la carte : tu lis sa dernière version.
+										{t("agentMap.panel.gone")}
 									</div>
 								) : null
 							}
@@ -1172,8 +1194,8 @@ export function AgentMap({
 							) : detail.turns.length === 0 ? (
 								<p className="px-4 py-6 text-[12px] text-ink-faint">
 									{detail.phase === "live"
-										? "Il réfléchit : ce qu'il lance s'affichera ici dès qu'il le lance."
-										: "Rien à détailler pour cette étape."}
+										? t("agentMap.panel.thinking")
+										: t("agentMap.panel.nothing")}
 								</p>
 							) : (
 								<div className="divide-y divide-line-soft/60">
@@ -1197,13 +1219,14 @@ export function AgentMap({
  * parle. « Plus tard » la range avec les autres, à envoyer ensemble.
  */
 function StepRemark({ runId, nodeId, node }: { runId: string; nodeId: string; node: MapNode }) {
+	const { t } = useTranslation("components2");
 	const actions = useAgentActions();
 	const [text, setText] = useState("");
 	useEffect(() => setText(""), [nodeId]);
 
 	const files = [...new Set(node.turns.map((turn) => pathOf(turn)).filter(Boolean))].slice(0, 4);
 	const title = node.title.length > 90 ? `${node.title.slice(0, 89)}…` : node.title;
-	const anchor = `l'étape « ${title} »${files.length > 0 ? ` (${files.map((file) => `\`${file}\``).join(", ")})` : ""}`;
+	const anchor = `${t("agentMap.remark.anchor", { title })}${files.length > 0 ? ` (${files.map((file) => `\`${file}\``).join(", ")})` : ""}`;
 
 	const submit = (later: boolean) => {
 		if (!text.trim()) return;
@@ -1221,15 +1244,15 @@ function StepRemark({ runId, nodeId, node }: { runId: string; nodeId: string; no
 					if (event.key === "Enter" && (event.metaKey || event.ctrlKey)) submit(false);
 				}}
 				rows={2}
-				placeholder="Une remarque sur cette étape — l'agent saura de laquelle tu parles."
+				placeholder={t("agentMap.remark.placeholder")}
 				className="focus-ring w-full resize-none rounded-md bg-surface px-2 py-1.5 text-[12px] text-ink placeholder:text-ink-faint"
 			/>
 			<div className="mt-1.5 flex justify-end gap-1">
-				<Button size="sm" onClick={() => submit(true)} disabled={!text.trim()} title="La garder avec les autres, à envoyer ensemble">
-					Plus tard
+				<Button size="sm" onClick={() => submit(true)} disabled={!text.trim()} title={t("agentMap.remark.laterTitle")}>
+					{t("agentMap.remark.later")}
 				</Button>
 				<Button size="sm" variant="solid" icon={Send} onClick={() => submit(false)} disabled={!text.trim()} title="⌘↵">
-					Envoyer
+					{t("agentMap.remark.send")}
 				</Button>
 			</div>
 		</div>
@@ -1238,6 +1261,7 @@ function StepRemark({ runId, nodeId, node }: { runId: string; nodeId: string; no
 
 /** La revue remise, en entier, dans le panneau de détail de la carte. */
 function ReviewDetail({ pr, cwd }: { pr: number; cwd: string }) {
+	const { t } = useTranslation("components2");
 	const { review } = useReview(pr);
 	const start = useReviewFlow();
 	const [busy, setBusy] = useState(false);
@@ -1247,7 +1271,7 @@ function ReviewDetail({ pr, cwd }: { pr: number; cwd: string }) {
 			.catch(() => undefined)
 			.finally(() => setBusy(false));
 	};
-	if (!review) return <p className="px-4 py-3 text-[12px] text-ink-faint">Je relis la revue rangée…</p>;
+	if (!review) return <p className="px-4 py-3 text-[12px] text-ink-faint">{t("agentMap.review.loading")}</p>;
 	return (
 		<div className="p-3">
 			<ReviewPanel
@@ -1276,10 +1300,11 @@ function EpisodeStrip({
 	waiting: boolean;
 	onPick: (index: number) => void;
 }) {
+	const { t } = useTranslation("components2");
 	return (
 		<div className="hairline-b flex items-center gap-1.5 overflow-x-auto px-3 py-2">
 			<span className="shrink-0 pr-1 font-mono text-[10px] tracking-[0.08em] text-ink-faint uppercase">
-				Épisodes
+				{t("agentMap.strip.episodes")}
 			</span>
 			{all.map((episode, index) => {
 				const last = index === all.length - 1;
@@ -1320,7 +1345,7 @@ function EpisodeStrip({
 							)}
 						/>
 						<span className="relative truncate">
-							{episode.ask ? clip(said(episode.ask), 36) : "Reprise"}
+							{episode.ask ? clip(said(episode.ask), 36) : t("agentMap.folded.resumed")}
 						</span>
 					</button>
 				);
@@ -1384,6 +1409,7 @@ function StateBar({
 	/** Le dernier compactage de la conversation : ce qui précède n'est plus qu'un résumé. */
 	compactedAt?: number | null;
 }) {
+	const { t } = useTranslation("components2");
 	const now = useNow(live || waiting ? 1000 : 30_000);
 	if (!episode) return null;
 	const s = summarize(episode);
@@ -1393,7 +1419,7 @@ function StateBar({
 	// Les sous-agents partis en arrière-plan : le maître a pu rendre la main, eux
 	// travaillent encore.
 	const away = backgroundPending(episode.turns).length;
-	const awaySaid = `${away} sous-agent${away > 1 ? "s" : ""}`;
+	const awaySaid = t("agentMap.state.subagents", { count: away });
 
 	let tone: "live" | "yours" | "done" | "failed";
 	let label: string;
@@ -1403,18 +1429,22 @@ function StateBar({
 
 	if (waiting) {
 		tone = "yours";
-		label = "Attend ta réponse";
+		label = t("agentMap.state.waiting");
 		since = sign;
 	} else if (live) {
 		tone = "live";
-		label = "Travaille";
-		what = current ? gestureOf(current) : away > 0 ? `attend ${awaySaid}` : "réfléchit";
+		label = t("agentMap.state.working");
+		what = current
+			? gestureOf(current)
+			: away > 0
+				? t("agentMap.state.awaiting", { agents: awaySaid })
+				: t("agentMap.state.thinking");
 		since = current?.at ?? sign;
 		total = started ? now - started : null;
 	} else {
 		const failed = s.failures.length > 0 || s.testsFail === true;
 		tone = s.asks ? "yours" : failed ? "failed" : "done";
-		label = s.asks ? "Te pose une question" : "Terminé";
+		label = s.asks ? t("agentMap.state.asks") : t("agentMap.state.done");
 		since = sign;
 		total = started && sign ? sign - started : null;
 	}
@@ -1465,7 +1495,7 @@ function StateBar({
 			    ne répond « non » que si aucun sous-agent ne court encore. */}
 			{!live && !waiting ? (
 				<span className="shrink-0 rounded-md bg-raised px-1.5 py-0.5 text-[11px] text-ink-muted">
-					{away > 0 ? `${awaySaid} en arrière-plan` : "rien ne tourne · à toi"}
+					{away > 0 ? t("agentMap.state.background", { agents: awaySaid }) : t("agentMap.state.idle")}
 				</span>
 			) : null}
 			{since !== null ? (
@@ -1474,39 +1504,43 @@ function StateBar({
 						"shrink-0 font-mono text-[11px] tabular-nums",
 						quiet ? "text-warning" : "text-ink-faint",
 					)}
-					title={quiet ? "Rien de neuf depuis un moment : une commande longue, ou un agent bloqué." : undefined}
+					title={quiet ? t("agentMap.state.quietTitle") : undefined}
 				>
 					{live || waiting
-						? `depuis ${duration(Math.max(0, (now - since) / 1000))}`
+						? t("agentMap.state.since", { duration: duration(Math.max(0, (now - since) / 1000)) })
 						: fromSeconds((now - since) / 1000)}
 				</span>
 			) : null}
 			{circling ? (
 				<span
 					className="flex min-w-0 items-center gap-1 truncate rounded-md bg-warning/12 px-1.5 py-0.5 text-[11px] font-medium text-warning"
-					title="Une répétition qui mérite un regard : l'agent n'est pas forcément bloqué, mais il y revient."
+					title={t("agentMap.state.loopTitle")}
 				>
 					<Repeat size={11} className="shrink-0" />
-					<span className="truncate">{live ? "Tourne en rond" : "A tourné en rond"} — {loopSentence(circling)}</span>
+					<span className="truncate">{live ? t("agentMap.state.circling") : t("agentMap.state.circled")} — {loopSentence(circling)}</span>
 				</span>
 			) : null}
 			{compactedAt ? (
 				<span
 					className="flex shrink-0 items-center gap-1 rounded-md bg-raised px-1.5 py-0.5 text-[11px] font-medium text-ink-muted"
-					title="Le CLI a résumé la conversation pour faire de la place. Ce que l'agent avait lu avant, il n'en garde que le résumé : s'il s'appuie sur un détail, qu'il relise."
+					title={t("agentMap.state.compactedTitle")}
 				>
 					<Minimize2 size={11} className="shrink-0" />
-					Mémoire résumée {fromSeconds((now - compactedAt) / 1000)}
+					{t("agentMap.state.compacted", { ago: fromSeconds((now - compactedAt) / 1000) })}
 				</span>
 			) : null}
 			<span className="ml-auto flex shrink-0 items-center gap-2 font-mono text-[10.5px] text-ink-faint tabular-nums">
 				{!live && !waiting && failures > 0 ? (
 					<span className="text-critical">
-						{failures} en erreur
+						{t("agentMap.failedCount", { count: failures })}
 					</span>
 				) : null}
 				{total !== null && total > 0 ? (
-					<span>{live ? `${duration(total / 1000)} depuis ta consigne` : `${duration(total / 1000)} au total`}</span>
+					<span>
+						{live
+							? t("agentMap.state.sinceAsk", { duration: duration(total / 1000) })
+							: t("agentMap.state.total", { duration: duration(total / 1000) })}
+					</span>
 				) : null}
 			</span>
 			{/* Le travail fini se relit : la visite part d'ici. */}
@@ -1517,7 +1551,7 @@ function StateBar({
 					className="focus-ring flex shrink-0 items-center gap-1.5 rounded-lg bg-accent px-2.5 py-1 text-[11.5px] font-semibold text-accent-ink hover:brightness-110"
 				>
 					<Route size={12} />
-					Visiter les changements
+					{t("agentMap.state.tour")}
 				</button>
 			) : null}
 		</div>
@@ -1527,6 +1561,7 @@ function StateBar({
 /* ── Les nœuds ───────────────────────────────────────────────────────── */
 
 function StepNode({ data }: NodeProps<Node<MapNode>>) {
+	const { t } = useTranslation("components2");
 	const Icon = ICONS[data.icon];
 	const live = data.phase === "live";
 	const yours = data.phase === "yours";
@@ -1587,12 +1622,12 @@ function StepNode({ data }: NodeProps<Node<MapNode>>) {
 					<MessageSquareText size={12} className="shrink-0 text-ink-faint" />
 				) : null}
 				{data.remarked ? (
-					<MessageSquarePlus size={12} className="shrink-0 text-accent" aria-label="Une remarque attend d'être envoyée" />
+					<MessageSquarePlus size={12} className="shrink-0 text-accent" aria-label={t("agentMap.node.remarkPending")} />
 				) : null}
 				{data.since ? (
 					<Since at={data.since} />
 				) : data.took ? (
-					<span className="shrink-0 font-mono text-[10px] text-ink-faint tabular-nums" title="Temps passé sur cette étape">
+					<span className="shrink-0 font-mono text-[10px] text-ink-faint tabular-nums" title={t("agentMap.node.took")}>
 						{duration(data.took / 1000)}
 					</span>
 				) : null}
@@ -1600,10 +1635,10 @@ function StepNode({ data }: NodeProps<Node<MapNode>>) {
 					<span
 						data-fold
 						className="flex shrink-0 items-center gap-1 rounded px-1 font-mono text-[10px] text-ink-faint hover:bg-hover hover:text-ink"
-						title={data.toggles === "expand" ? "Déplier cet épisode" : "Replier cet épisode"}
+						title={data.toggles === "expand" ? t("agentMap.node.expandTitle") : t("agentMap.node.collapseTitle")}
 					>
 						{data.toggles === "expand" ? <ChevronsLeftRight size={12} /> : <ChevronsRightLeft size={12} />}
-						{data.toggles === "expand" ? "déplier" : "replier"}
+						{data.toggles === "expand" ? t("agentMap.node.expand") : t("agentMap.node.collapse")}
 					</span>
 				) : null}
 			</div>
@@ -1614,8 +1649,8 @@ function StepNode({ data }: NodeProps<Node<MapNode>>) {
 				<span className="flex items-center gap-1.5 rounded-lg bg-accent-dim/60 px-2 py-1 text-[11px] text-accent">
 					<Images size={12} className="shrink-0" />
 					<span className="min-w-0 truncate">
-						{data.illustrations.length} image{data.illustrations.length > 1 ? "s" : ""} ·{" "}
-						{[...new Set(data.illustrations.map((item) => GENRE_SHORT[item.genre]))].join(", ")}
+						{t("agentMap.media.images", { count: data.illustrations.length })} ·{" "}
+						{[...new Set(data.illustrations.map((item) => genreShort(item.genre)))].join(", ")}
 					</span>
 				</span>
 			) : null}
@@ -1658,7 +1693,7 @@ function StepNode({ data }: NodeProps<Node<MapNode>>) {
 							<span
 								key={media.key}
 								role="button"
-								title="Voir en grand"
+								title={t("agentMap.viewLarge")}
 								onClick={(event) => {
 									if (media.kind === "pdf") return;
 									event.stopPropagation();
@@ -1718,13 +1753,14 @@ function StepNode({ data }: NodeProps<Node<MapNode>>) {
  * pareil : la durée passe à l'orange.
  */
 function Since({ at }: { at: number }) {
+	const { t } = useTranslation("components2");
 	const now = useNow(1000);
 	const elapsed = Math.max(0, now - at);
 	const long = elapsed > QUIET_MS;
 	return (
 		<span
 			className={clsx("shrink-0 font-mono text-[10px] tabular-nums", long ? "font-semibold text-warning" : "text-accent")}
-			title={long ? "Long : une commande qui ne rend pas la main, ou un agent bloqué." : "Depuis le début de cette étape"}
+			title={long ? t("agentMap.since.longTitle") : t("agentMap.since.title")}
 		>
 			{duration(elapsed / 1000)}
 		</span>
@@ -1733,6 +1769,7 @@ function Since({ at }: { at: number }) {
 
 /** Quatre vignettes au plus, la dernière comptant celles qui ne tiennent pas. */
 function Mosaic({ media }: { media: Media[] }) {
+	const { t } = useTranslation("components2");
 	const shown = media.slice(0, 4);
 	const rest = media.length - shown.length;
 	const single = shown.length === 1;
@@ -1744,7 +1781,7 @@ function Mosaic({ media }: { media: Media[] }) {
 				<div
 					key={item.key}
 					role={item.kind === "pdf" ? undefined : "button"}
-					title={item.kind === "pdf" ? undefined : "Voir en grand"}
+					title={item.kind === "pdf" ? undefined : t("agentMap.viewLarge")}
 					onClick={
 						item.kind === "pdf"
 							? undefined
@@ -1768,7 +1805,7 @@ function Mosaic({ media }: { media: Media[] }) {
 					) : null}
 					{stageOf(item) ? (
 						<span className="absolute top-1 left-1 rounded bg-void/80 px-1 font-mono text-[9px] text-ink">
-							{stageOf(item)}
+							{stageWord(stageOf(item) as "avant" | "après")}
 						</span>
 					) : null}
 					{rest > 0 && index === shown.length - 1 ? (
@@ -1788,7 +1825,10 @@ const FATE_TONE: Record<Fate, string> = {
 	modified: "bg-info/50",
 };
 
-const FATE_WORD: Record<Fate, string> = { deleted: "supprimé", created: "créé", modified: "modifié" };
+/** Le sort d'un fichier, en un mot. */
+function fateWord(fate: Fate): string {
+	return tr(`fate.${fate}`);
+}
 
 /**
  * Le constat, en petit : une ligne par zone du dépôt, une tuile par fichier.
@@ -1811,7 +1851,7 @@ function FootprintSketch({ print }: { print: Footprint }) {
 						{zone.tiles.map((tile) => (
 							<span
 								key={tile.path}
-								title={`${tile.path} — ${FATE_WORD[tile.fate]}, +${tile.added} −${tile.removed}`}
+								title={`${tile.path} — ${fateWord(tile.fate)}, +${tile.added} −${tile.removed}`}
 								className={clsx("h-3 rounded-[3px]", FATE_TONE[tile.fate])}
 								style={{ width: tileWidth(tile) }}
 							/>
@@ -1825,6 +1865,7 @@ function FootprintSketch({ print }: { print: Footprint }) {
 
 /** Le constat, en grand : chaque fichier nommé, rangé dans sa zone. */
 function FootprintDetail({ print, onTour }: { print: Footprint; onTour?: () => void }) {
+	const { t } = useTranslation("components2");
 	const viewer = useFileViewer();
 	const scale = Math.max(1, ...print.zones.flatMap((zone) => zone.tiles.map((tile) => tile.added + tile.removed)));
 	const fates: Array<[Fate, number]> = [
@@ -1835,7 +1876,7 @@ function FootprintDetail({ print, onTour }: { print: Footprint; onTour?: () => v
 	return (
 		<div className="pb-3">
 			<p className="px-4 pt-3 text-[11.5px] leading-relaxed text-ink-muted">
-				Lu dans le dépôt, {print.baseLabel} — pas dans ce que l'agent raconte. Compare-le à sa conclusion.
+				{t("agentMap.footprint.lede", { base: print.baseLabel })}
 			</p>
 			<div className="flex flex-wrap items-center gap-x-3 gap-y-1 px-4 pt-2 font-mono text-[10.5px] text-ink-muted">
 				{fates
@@ -1843,8 +1884,7 @@ function FootprintDetail({ print, onTour }: { print: Footprint; onTour?: () => v
 					.map(([fate, count]) => (
 						<span key={fate} className="flex items-center gap-1.5">
 							<span className={clsx("size-2.5 rounded-[3px]", FATE_TONE[fate])} />
-							{count} {FATE_WORD[fate]}
-							{count > 1 ? "s" : ""}
+							{t(`agentMap.fateCount.${fate}`, { count })}
 						</span>
 					))}
 				<span className="ml-auto tabular-nums">
@@ -1859,7 +1899,7 @@ function FootprintDetail({ print, onTour }: { print: Footprint; onTour?: () => v
 						className="focus-ring flex w-full items-center justify-center gap-1.5 rounded-lg bg-accent px-3 py-2 text-[12px] font-semibold text-accent-ink hover:brightness-110"
 					>
 						<Route size={13} />
-						Visiter les changements, fichier par fichier
+						{t("agentMap.tourFiles")}
 					</button>
 				</div>
 			) : null}
@@ -1905,6 +1945,7 @@ function FootprintDetail({ print, onTour }: { print: Footprint; onTour?: () => v
 
 /** Ce qui a été livré, chaque chose là où elle se consulte. */
 function DeliveredDetail({ delivered, onTour }: { delivered: Delivered; onTour?: () => void }) {
+	const { t } = useTranslation("components2");
 	const section = "px-4 pt-3 pb-1 font-mono text-[10px] tracking-[0.08em] text-ink-faint uppercase";
 	return (
 		<div className="pb-3">
@@ -1916,13 +1957,13 @@ function DeliveredDetail({ delivered, onTour }: { delivered: Delivered; onTour?:
 						className="focus-ring flex w-full items-center justify-center gap-1.5 rounded-lg bg-accent px-3 py-2 text-[12px] font-semibold text-accent-ink hover:brightness-110"
 					>
 						<Route size={13} />
-						Visiter les changements, fichier par fichier
+						{t("agentMap.tourFiles")}
 					</button>
 				</div>
 			) : null}
 			{delivered.reviews.length > 0 ? (
 				<>
-					<div className={section}>Demandes de fusion</div>
+					<div className={section}>{t("agentMap.deliveredSections.pullRequests")}</div>
 					{delivered.reviews.map((review) => (
 						<button
 							key={review.url}
@@ -1940,7 +1981,7 @@ function DeliveredDetail({ delivered, onTour }: { delivered: Delivered; onTour?:
 			) : null}
 			{delivered.commits.length > 0 ? (
 				<>
-					<div className={section}>Commits</div>
+					<div className={section}>{t("agentMap.deliveredSections.commits")}</div>
 					{delivered.commits.map((commit) => (
 						<div key={commit.sha} className="flex items-baseline gap-2 px-4 py-1">
 							<GitCommitHorizontal size={12} className="shrink-0 self-center text-ink-faint" />
@@ -1953,7 +1994,7 @@ function DeliveredDetail({ delivered, onTour }: { delivered: Delivered; onTour?:
 			) : null}
 			{delivered.pushed.length > 0 ? (
 				<>
-					<div className={section}>Poussé</div>
+					<div className={section}>{t("agentMap.deliveredSections.pushed")}</div>
 					{delivered.pushed.map((branch) => (
 						<div key={branch} className="flex items-center gap-2 px-4 py-1 font-mono text-[11px] text-ink">
 							<GitBranch size={12} className="shrink-0 text-ink-faint" />
@@ -1964,7 +2005,7 @@ function DeliveredDetail({ delivered, onTour }: { delivered: Delivered; onTour?:
 			) : null}
 			{delivered.media.length > 0 ? (
 				<>
-					<div className={section}>Fichiers produits</div>
+					<div className={section}>{t("agentMap.deliveredSections.files")}</div>
 					<Gallery media={delivered.media} />
 				</>
 			) : null}
@@ -1978,6 +2019,7 @@ function DeliveredDetail({ delivered, onTour }: { delivered: Delivered; onTour?:
  * outil n'existe qu'en mémoire, elle s'agrandit sur place.
  */
 function Gallery({ media }: { media: Media[] }) {
+	const { t } = useTranslation("components2");
 	const viewer = useFileViewer();
 	const [zoomed, setZoomed] = useState<string | null>(null);
 	return (
@@ -1995,7 +2037,7 @@ function Gallery({ media }: { media: Media[] }) {
 							else if (item.path && viewer) viewer.open(item.path);
 							else setZoomed(big ? null : item.key);
 						}}
-						title={item.kind === "pdf" ? (item.path ?? "Agrandir") : "Voir en grand"}
+						title={item.kind === "pdf" ? (item.path ?? t("agentMap.gallery.enlarge")) : t("agentMap.viewLarge")}
 						className={clsx(
 							"focus-ring group flex flex-col overflow-hidden rounded-xl border border-line-soft bg-raised text-left hover:border-line",
 							big && "col-span-2",

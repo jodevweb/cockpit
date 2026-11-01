@@ -1,3 +1,5 @@
+import { locale, t } from "@/i18n";
+import { lazyList } from "@/lib/language";
 import type { Automation, AutomationRun } from "./types";
 
 /**
@@ -6,7 +8,19 @@ import type { Automation, AutomationRun } from "./types";
  * ne sert qu'à prévisualiser un réglage avant qu'il soit enregistré.
  */
 
-export const DAY_LABELS = ["Lun", "Mar", "Mer", "Jeu", "Ven", "Sam", "Dim"];
+const DAY_KEYS = ["mon", "tue", "wed", "thu", "fri", "sat", "sun"];
+
+/** Les jours, du lundi au dimanche, en abrégé dans la langue de l'interface. */
+export function dayLabels(): string[] {
+	return DAY_KEYS.map((key) => t(`lib:automations.days.${key}`));
+}
+
+/**
+ * `dayLabels()` sous la forme d'un tableau, pour les écrans qui l'indexent :
+ * relu à chaque accès, jamais figé au chargement du module, où la langue n'est
+ * pas encore connue.
+ */
+export const DAY_LABELS: readonly string[] = lazyList(dayLabels);
 
 /** `2026-10-26T14:00`, heure locale, comme le rend le backend. */
 export function parseLocal(key: string): Date {
@@ -16,40 +30,58 @@ export function parseLocal(key: string): Date {
 	return new Date(y, m - 1, d, h, min);
 }
 
-const dayFormat = new Intl.DateTimeFormat("fr-FR", { weekday: "long", day: "numeric", month: "long" });
-const shortFormat = new Intl.DateTimeFormat("fr-FR", { weekday: "short", day: "numeric", month: "short" });
-const timeFormat = new Intl.DateTimeFormat("fr-FR", { hour: "2-digit", minute: "2-digit" });
+// Créés à la première demande dans la langue en cours, pas au chargement.
+const formats = new Map<string, Intl.DateTimeFormat>();
+function format(kind: "day" | "short" | "time"): Intl.DateTimeFormat {
+	const key = `${locale()}|${kind}`;
+	let found = formats.get(key);
+	if (!found) {
+		const options: Intl.DateTimeFormatOptions =
+			kind === "day"
+				? { weekday: "long", day: "numeric", month: "long" }
+				: kind === "short"
+					? { weekday: "short", day: "numeric", month: "short" }
+					: { hour: "2-digit", minute: "2-digit" };
+		found = new Intl.DateTimeFormat(locale(), options);
+		formats.set(key, found);
+	}
+	return found;
+}
 
 export function hm(date: Date): string {
-	return timeFormat.format(date);
+	return format("time").format(date);
 }
 
 export function longDay(date: Date): string {
-	const text = dayFormat.format(date);
+	const text = format("day").format(date);
 	return text.charAt(0).toUpperCase() + text.slice(1);
 }
 
 export function shortStamp(date: Date): string {
-	return `${shortFormat.format(date)} ${hm(date)}`;
+	return `${format("short").format(date)} ${hm(date)}`;
 }
 
 /** « Aujourd'hui 13:30 », « Demain 8:50 », « mer. 28 oct. 13:30 ». */
 export function relativeStamp(date: Date, now = new Date()): string {
 	const day = (d: Date) => new Date(d.getFullYear(), d.getMonth(), d.getDate()).getTime();
 	const diff = Math.round((day(date) - day(now)) / 86_400_000);
-	if (diff === 0) return `aujourd'hui ${hm(date)}`;
-	if (diff === 1) return `demain ${hm(date)}`;
-	if (diff === -1) return `hier ${hm(date)}`;
+	if (diff === 0) return t("lib:automations.stamp.today", { time: hm(date) });
+	if (diff === 1) return t("lib:automations.stamp.tomorrow", { time: hm(date) });
+	if (diff === -1) return t("lib:automations.stamp.yesterday", { time: hm(date) });
 	return shortStamp(date);
 }
 
 /** « Lun · Mer · Ven à 14:00 », « Du lundi au vendredi à 9:00 ». */
 export function rhythm(automation: Automation): string {
 	const days = [...automation.days].sort();
-	if (days.length === 0) return "Aucun jour choisi";
-	if (days.join() === "1,2,3,4,5") return `Du lundi au vendredi à ${automation.time}`;
-	if (days.length === 7) return `Tous les jours à ${automation.time}`;
-	return `${days.map((day) => DAY_LABELS[day - 1]).join(" · ")} à ${automation.time}`;
+	if (days.length === 0) return t("lib:automations.rhythm.none");
+	if (days.join() === "1,2,3,4,5") return t("lib:automations.rhythm.weekdays", { time: automation.time });
+	if (days.length === 7) return t("lib:automations.rhythm.everyDay", { time: automation.time });
+	const labels = dayLabels();
+	return t("lib:automations.rhythm.days", {
+		days: days.map((day) => labels[day - 1]).join(" · "),
+		time: automation.time,
+	});
 }
 
 export type Tone = "accent" | "info" | "warning" | "critical" | "neutral";
@@ -57,19 +89,19 @@ export type Tone = "accent" | "info" | "warning" | "critical" | "neutral";
 export function runLabel(run: AutomationRun): { label: string; tone: Tone } {
 	switch (run.state) {
 		case "running":
-			return { label: "En cours", tone: "info" };
+			return { label: t("lib:automations.run.running"), tone: "info" };
 		case "partial":
-			return { label: "Partielle", tone: "warning" };
+			return { label: t("lib:automations.run.partial"), tone: "warning" };
 		case "failed":
-			return { label: "Échec", tone: "critical" };
+			return { label: t("lib:automations.run.failed"), tone: "critical" };
 		case "missed":
-			return { label: "Manquée", tone: "critical" };
+			return { label: t("lib:automations.run.missed"), tone: "critical" };
 		default:
 			return run.trigger === "catchUp"
-				? { label: "Rattrapée", tone: "info" }
+				? { label: t("lib:automations.run.caughtUp"), tone: "info" }
 				: run.trigger === "manual"
-					? { label: "À la main", tone: "neutral" }
-					: { label: "À l'heure", tone: "accent" };
+					? { label: t("lib:automations.run.manual"), tone: "neutral" }
+					: { label: t("lib:automations.run.onTime"), tone: "accent" };
 	}
 }
 
@@ -83,7 +115,10 @@ export const TONE_CLASS: Record<Tone, string> = {
 
 export const SOURCE_LABEL: Record<string, string> = {
 	github: "GitHub",
-	tracker: "Suivi de tâches",
+	// Relu à chaque accès : la langue n'est pas connue au chargement du module.
+	get tracker() {
+		return t("lib:automations.source.tracker");
+	},
 	cockpit: "Cockpit",
 	sentry: "Sentry",
 };
@@ -98,18 +133,42 @@ export const SOURCE_COLOR: Record<string, string> = {
 
 /** Ce qui est arrivé à un élément, dit en clair. */
 export const EVENT_LABEL: Record<string, string> = {
-	merged: "PR fusionnée",
-	opened: "PR ouverte",
-	updated: "PR mise à jour",
-	reviewed: "PR relue",
-	done: "Ticket terminé",
-	started: "Ticket en cours",
-	moved: "Ticket déplacé",
-	canceled: "Ticket annulé",
-	agent: "Agents",
-	git: "Geste git",
-	resolved: "Erreur résolue",
-	assigned: "Erreur assignée",
+	get merged() {
+		return t("lib:automations.event.merged");
+	},
+	get opened() {
+		return t("lib:automations.event.opened");
+	},
+	get updated() {
+		return t("lib:automations.event.updated");
+	},
+	get reviewed() {
+		return t("lib:automations.event.reviewed");
+	},
+	get done() {
+		return t("lib:automations.event.done");
+	},
+	get started() {
+		return t("lib:automations.event.started");
+	},
+	get moved() {
+		return t("lib:automations.event.moved");
+	},
+	get canceled() {
+		return t("lib:automations.event.canceled");
+	},
+	get agent() {
+		return t("lib:automations.event.agent");
+	},
+	get git() {
+		return t("lib:automations.event.git");
+	},
+	get resolved() {
+		return t("lib:automations.event.resolved");
+	},
+	get assigned() {
+		return t("lib:automations.event.assigned");
+	},
 };
 
 /**
@@ -164,7 +223,8 @@ export function runMarkdown(name: string, run: AutomationRun): string {
 	}
 	const silent = run.sources.filter((source) => source.state === "silent");
 	if (silent.length > 0) {
-		lines.push(`_Sans réponse cette fois : ${silent.map((source) => SOURCE_LABEL[source.source] ?? source.source).join(", ")}._`);
+		const sources = silent.map((source) => SOURCE_LABEL[source.source] ?? source.source).join(", ");
+		lines.push(`_${t("lib:automations.markdown.silent", { sources })}_`);
 	}
 	return lines.join("\n");
 }

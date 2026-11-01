@@ -120,7 +120,7 @@ async fn read_status(account: &AccountConfig, projects: Vec<String>) -> AccountS
 	};
 
 	let Some(binary) = crate::agent::claude_binary() else {
-		status.error = "Le CLI `claude` est introuvable sur ce poste.".into();
+		status.error = crate::i18n::t("accounts.claudeNotFound");
 		return status;
 	};
 
@@ -138,11 +138,11 @@ async fn read_status(account: &AccountConfig, projects: Vec<String>) -> AccountS
 	let sortie = match tokio::time::timeout(Duration::from_secs(20), command.output()).await {
 		Ok(Ok(sortie)) => sortie,
 		Ok(Err(error)) => {
-			status.error = format!("Lancement du CLI : {error}");
+			status.error = crate::i18n::tf("accounts.cliLaunch", &[("error", &error)]);
 			return status;
 		}
 		Err(_) => {
-			status.error = "Le CLI n'a pas répondu.".into();
+			status.error = crate::i18n::t("accounts.cliNoAnswer");
 			return status;
 		}
 	};
@@ -155,8 +155,8 @@ async fn read_status(account: &AccountConfig, projects: Vec<String>) -> AccountS
 		status.error = String::from_utf8_lossy(&sortie.stderr)
 			.lines()
 			.next()
-			.unwrap_or("Réponse du CLI illisible.")
-			.to_string();
+			.map(str::to_string)
+			.unwrap_or_else(|| crate::i18n::t("accounts.cliUnreadable"));
 		return status;
 	};
 
@@ -194,14 +194,16 @@ pub fn save(accounts: Vec<AccountConfig>) -> Result<()> {
 			continue;
 		}
 		if propres.iter().any(|autre: &AccountConfig| autre.id == id) {
-			return Err(CockpitError::msg(format!(
-				"Deux comptes portent l'identifiant « {id} » : c'est lui qui les distingue.",
+			return Err(CockpitError::msg(crate::i18n::tf(
+				"accounts.duplicateId",
+				&[("id", &id)],
 			)));
 		}
 		let dir = account.dir.trim().to_string();
 		if dir.is_empty() {
-			return Err(CockpitError::msg(format!(
-				"Le compte « {id} » n'a pas de dossier : c'est ce qui le sépare des autres.",
+			return Err(CockpitError::msg(crate::i18n::tf(
+				"accounts.missingDir",
+				&[("id", &id)],
 			)));
 		}
 
@@ -211,14 +213,15 @@ pub fn save(accounts: Vec<AccountConfig>) -> Result<()> {
 			dir: dir.clone(),
 		});
 		if chemin == config::home_account_dir() {
-			return Err(CockpitError::msg(format!(
-				"Le compte « {id} » pointe le dossier du poste : les deux ne feraient qu'un.",
+			return Err(CockpitError::msg(crate::i18n::tf(
+				"accounts.sameAsHome",
+				&[("id", &id)],
 			)));
 		}
 		std::fs::create_dir_all(&chemin).map_err(|error| {
-			CockpitError::msg(format!(
-				"Création de {} : {error}",
-				chemin.to_string_lossy()
+			CockpitError::msg(crate::i18n::tf(
+				"accounts.createDir",
+				&[("path", &chemin.to_string_lossy()), ("error", &error)],
 			))
 		})?;
 
@@ -249,7 +252,7 @@ pub fn save(accounts: Vec<AccountConfig>) -> Result<()> {
 
 	config.accounts = propres;
 	config.save().map_err(|error| {
-		CockpitError::msg(format!("Enregistrement de la configuration : {error}"))
+		CockpitError::msg(crate::i18n::tf("accounts.saveConfig", &[("error", &error)]))
 	})?;
 	if let Ok(mut store) = cache().lock() {
 		*store = None;

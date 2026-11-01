@@ -295,59 +295,37 @@ fn warnings(metrics: &Metrics) -> Vec<String> {
 	let mut out = Vec::new();
 
 	if metrics.guardrails.properties == 0 {
-		out.push(
-			"Aucune propriété déclarée : rien de ce qui doit rester vrai dans ce dépôt n'est \
-			 vérifié, et une lecture d'impact reste une interprétation."
-				.into(),
-		);
+		out.push(crate::i18n::t("metrics.noProperties"));
 	} else if metrics.guardrails.calibrated == 0 {
-		out.push(
-			"Aucune propriété n'a été éprouvée sur les correctifs du dépôt : rien ne dit \
-			 qu'elles savent échouer, et une propriété qui ne sait pas échouer rassure sans \
-			 rien garantir."
-				.into(),
-		);
+		out.push(crate::i18n::t("metrics.uncalibrated"));
 	}
 
 	if metrics.guardrails.decorative > 0 {
-		out.push(format!(
-			"{} propriété(s) n'ont rien attrapé sur de vrais correctifs. Reformule-les ou \
-			 retire-les : un garde-fou décoratif coûte l'attention qu'on ne porte plus ailleurs.",
-			metrics.guardrails.decorative
+		out.push(crate::i18n::tf(
+			"metrics.decorative",
+			&[("count", &metrics.guardrails.decorative)],
 		));
 	}
 
 	if metrics.memory.idle > 0 && metrics.memory.lessons > 0 {
-		out.push(format!(
-			"{} leçon(s) sur {} ne sont jamais parties avec un agent. Soit leur portée est trop \
-			 étroite, soit elles n'avaient pas lieu d'être retenues.",
-			metrics.memory.idle, metrics.memory.lessons
+		out.push(crate::i18n::tf(
+			"metrics.idleLessons",
+			&[("idle", &metrics.memory.idle), ("total", &metrics.memory.lessons)],
 		));
 	}
 
 	if metrics.handbacks.delivered >= 20 && metrics.handbacks.taken_back == 0 {
-		out.push(
-			"Aucune reprise en main relevée sur des dizaines de rendus. C'est possible — c'est \
-			 surtout le signe qu'on ne relit peut-être plus."
-				.into(),
-		);
+		out.push(crate::i18n::t("metrics.noTakeBack"));
 	}
 
 	if metrics.handbacks.rate >= 50 && metrics.handbacks.delivered >= 10 {
-		out.push(format!(
-			"Un rendu sur deux est repris à la main ({} %). Ce qui manque aux agents se lit dans \
-			 le carnet : c'est là qu'il faut regarder avant d'ajouter des garde-fous.",
-			metrics.handbacks.rate
-		));
+		out.push(crate::i18n::tf("metrics.takeBackRate", &[("rate", &metrics.handbacks.rate)]));
 	}
 
 	if metrics.turns.long_haul > 0 && metrics.turns.sessions > 0 {
 		let part = metrics.turns.long_haul * 100 / metrics.turns.sessions;
 		if part >= 30 {
-			out.push(format!(
-				"{part} % des conversations ont demandé plus de dix relances. Un agent qu'on \
-				 reprend dix fois est un agent qui est parti sans savoir ce qu'on attendait."
-			));
+			out.push(crate::i18n::tf("metrics.longHaul", &[("part", &part)]));
 		}
 	}
 
@@ -403,7 +381,7 @@ mod tests {
 		let mut metrics = base();
 		metrics.guardrails.properties = 0;
 		let found = warnings(&metrics);
-		assert!(found.iter().any(|line| line.contains("Aucune propriété déclarée")));
+		assert!(found.iter().any(|line| line.contains("No property declared")));
 	}
 
 	/// La mise en garde qui compte : un dispositif muet n'est pas un dispositif
@@ -414,7 +392,7 @@ mod tests {
 		metrics.guardrails.calibrated = 0;
 		assert!(warnings(&metrics)
 			.iter()
-			.any(|line| line.contains("savent échouer")));
+			.any(|line| line.contains("can fail")));
 	}
 
 	#[test]
@@ -423,7 +401,7 @@ mod tests {
 		metrics.guardrails.decorative = 2;
 		assert!(warnings(&metrics)
 			.iter()
-			.any(|line| line.contains("2 propriété(s) n'ont rien attrapé")));
+			.any(|line| line.contains("2 property(ies) caught nothing")));
 	}
 
 	/// Zéro reprise sur beaucoup de rendus : le chiffre flatteur qui doit
@@ -435,13 +413,13 @@ mod tests {
 		metrics.handbacks.taken_back = 0;
 		assert!(warnings(&metrics)
 			.iter()
-			.any(|line| line.contains("on ne relit peut-être plus")));
+			.any(|line| line.contains("nobody reviews anymore")));
 
 		// Trois rendus sans reprise ne prouvent rien : on se tait.
 		metrics.handbacks.delivered = 3;
 		assert!(!warnings(&metrics)
 			.iter()
-			.any(|line| line.contains("on ne relit peut-être plus")));
+			.any(|line| line.contains("nobody reviews anymore")));
 	}
 
 	#[test]
@@ -452,7 +430,7 @@ mod tests {
 		metrics.handbacks.rate = 60;
 		assert!(warnings(&metrics)
 			.iter()
-			.any(|line| line.contains("repris à la main")));
+			.any(|line| line.contains("taken back by hand")));
 	}
 
 	#[test]

@@ -388,7 +388,7 @@ pub async fn ask_bare(
 	thinking: bool,
 ) -> Result<OneShot> {
 	let started = std::time::Instant::now();
-	let binary = claude_binary().ok_or_else(|| CockpitError::msg("Le CLI `claude` est introuvable sur ce poste."))?;
+	let binary = claude_binary().ok_or_else(|| CockpitError::msg(crate::i18n::t("agent.claudeNotFound")))?;
 	let config = crate::config::Config::active();
 	// Un dossier sans CLAUDE.md ni réglages de projet : la réponse ne doit
 	// dépendre que de ce qu'on lui donne.
@@ -419,23 +419,26 @@ pub async fn ask_bare(
 	}
 	let mut child = command
 		.spawn()
-		.map_err(|e| CockpitError::msg(format!("Lancement de Claude : {e}")))?;
+		.map_err(|e| CockpitError::msg(crate::i18n::tf("agent.claudeLaunchError", &[("error", &e)])))?;
 	if let Some(mut stdin) = child.stdin.take() {
 		let _ = stdin.write_all(prompt.as_bytes()).await;
 		drop(stdin);
 	}
 	let output = tokio::time::timeout(timeout, child.wait_with_output())
 		.await
-		.map_err(|_| CockpitError::msg(format!("Claude n'a pas répondu en {} s.", timeout.as_secs())))?
-		.map_err(|e| CockpitError::msg(format!("Claude : {e}")))?;
+		.map_err(|_| CockpitError::msg(crate::i18n::tf("agent.claudeTimeout", &[("seconds", &timeout.as_secs())])))?
+		.map_err(|e| CockpitError::msg(crate::i18n::tf("agent.claudeError", &[("error", &e)])))?;
 	let stdout = String::from_utf8_lossy(&output.stdout).to_string();
 	if !output.status.success() {
 		let stderr = String::from_utf8_lossy(&output.stderr).trim().to_string();
 		let detail = if stderr.is_empty() { stdout } else { stderr };
-		return Err(CockpitError::msg(format!("Claude s'est arrêté : {}", detail.chars().take(300).collect::<String>())));
+		return Err(CockpitError::msg(crate::i18n::tf(
+			"agent.claudeStopped",
+			&[("detail", &detail.chars().take(300).collect::<String>())],
+		)));
 	}
 	let value: Value = serde_json::from_str(stdout.trim())
-		.map_err(|_| CockpitError::msg("Réponse de Claude illisible."))?;
+		.map_err(|_| CockpitError::msg(crate::i18n::t("agent.claudeUnreadable")))?;
 	Ok(OneShot {
 		text: value.get("result").and_then(Value::as_str).unwrap_or("").to_string(),
 		duration_ms: started.elapsed().as_millis() as u64,
@@ -490,7 +493,7 @@ pub async fn run_once_with_tools(
 	origin: crate::executions::Origin,
 ) -> Result<OneShot> {
 	if !std::path::Path::new(cwd).is_dir() {
-		return Err(CockpitError::msg(format!("Dossier introuvable : {cwd}")));
+		return Err(CockpitError::msg(crate::i18n::tf("agent.folderNotFound", &[("path", &cwd)])));
 	}
 
 	let config = crate::config::Config::active();
@@ -502,17 +505,15 @@ pub async fn run_once_with_tools(
 	if crate::protocol::Protocol::parse(engine.protocol_or_default())
 		!= Some(crate::protocol::Protocol::Claude)
 	{
-		return Err(CockpitError::msg(format!(
-			"Le moteur « {} » annonce le protocole `{}` : une question ponctuelle ne se pose \
-			 qu'au protocole par défaut.",
-			engine.label,
-			engine.protocol_or_default()
+		return Err(CockpitError::msg(crate::i18n::tf(
+			"agent.oneShotProtocol",
+			&[("engine", &engine.label), ("protocol", &engine.protocol_or_default())],
 		)));
 	}
 
 	let binary = match engine.command.trim() {
 		"" => claude_binary().ok_or_else(|| {
-			CockpitError::msg("Le CLI `claude` est introuvable sur ce poste.")
+			CockpitError::msg(crate::i18n::t("agent.claudeNotFound"))
 		})?,
 		declared => declared.to_string(),
 	};
@@ -585,7 +586,7 @@ pub async fn run_once_with_tools(
 
 	let mut child = launcher
 		.spawn()
-		.map_err(|e| CockpitError::msg(format!("Lancement de l'agent : {e}")))?;
+		.map_err(|e| CockpitError::msg(crate::i18n::tf("agent.launchError", &[("error", &e)])))?;
 
 	// La consigne passe par l'entrée standard : une ligne de commande a une
 	// longueur maximale, et un diff de plusieurs milliers de lignes la dépasse.
@@ -597,11 +598,9 @@ pub async fn run_once_with_tools(
 	}
 
 	let output = match tokio::time::timeout(ONE_SHOT_TIMEOUT, child.wait_with_output()).await {
-		Ok(result) => result.map_err(|e| CockpitError::msg(format!("Agent : {e}")))?,
+		Ok(result) => result.map_err(|e| CockpitError::msg(crate::i18n::tf("agent.agentError", &[("error", &e)])))?,
 		Err(_) => {
-			return Err(CockpitError::msg(
-				"L'agent n'a rien rendu au bout de vingt minutes ; l'analyse est abandonnée.",
-			))
+			return Err(CockpitError::msg(crate::i18n::t("agent.oneShotTimeout")))
 		}
 	};
 
@@ -609,16 +608,16 @@ pub async fn run_once_with_tools(
 	if !output.status.success() {
 		let stderr = String::from_utf8_lossy(&output.stderr).trim().to_string();
 		let detail = if stderr.is_empty() { stdout } else { stderr };
-		return Err(CockpitError::msg(format!(
-			"L'agent s'est arrêté : {}",
-			detail.chars().take(400).collect::<String>()
+		return Err(CockpitError::msg(crate::i18n::tf(
+			"agent.agentStopped",
+			&[("detail", &detail.chars().take(400).collect::<String>())],
 		)));
 	}
 
 	let value: Value = serde_json::from_str(stdout.trim()).map_err(|_| {
-		CockpitError::msg(format!(
-			"Réponse de l'agent illisible : {}",
-			stdout.chars().take(200).collect::<String>()
+		CockpitError::msg(crate::i18n::tf(
+			"agent.agentUnreadable",
+			&[("output", &stdout.chars().take(200).collect::<String>())],
 		))
 	})?;
 
@@ -626,15 +625,17 @@ pub async fn run_once_with_tools(
 	// budget épuisé, outil refusé. Le distinguer d'un plantage évite de faire
 	// passer un message d'erreur du moteur pour une analyse.
 	if value.get("is_error").and_then(|v| v.as_bool()).unwrap_or(false) {
-		return Err(CockpitError::msg(format!(
-			"L'agent a échoué : {}",
-			value
-				.get("result")
-				.and_then(|v| v.as_str())
-				.unwrap_or("sans motif")
-				.chars()
-				.take(300)
-				.collect::<String>()
+		let motif = value
+			.get("result")
+			.and_then(|v| v.as_str())
+			.map(str::to_string)
+			.unwrap_or_else(|| crate::i18n::t("agent.noReason"))
+			.chars()
+			.take(300)
+			.collect::<String>();
+		return Err(CockpitError::msg(crate::i18n::tf(
+			"agent.agentFailed",
+			&[("reason", &motif)],
 		)));
 	}
 
@@ -644,7 +645,7 @@ pub async fn run_once_with_tools(
 		.unwrap_or_default()
 		.to_string();
 	if text.trim().is_empty() {
-		return Err(CockpitError::msg("L'agent n'a rien écrit."));
+		return Err(CockpitError::msg(crate::i18n::t("agent.agentWroteNothing")));
 	}
 
 	let rendu = OneShot {
@@ -823,7 +824,7 @@ async fn start_inner(
 	// agent de revue sans elle garde son outil de remise, rien d'autre.
 	let locked = reviewing && crate::config::Config::active().workflow.review_read_only;
 	if !std::path::Path::new(&cwd).is_dir() {
-		return Err(CockpitError::msg(format!("Dossier introuvable : {cwd}")));
+		return Err(CockpitError::msg(crate::i18n::tf("agent.folderNotFound", &[("path", &cwd)])));
 	}
 
 	let session_id = format!("agent-{}", uuid_like());
@@ -859,10 +860,9 @@ async fn start_inner(
 	// macOS choisir tout seul quoi tuer.
 	let ceiling = config.missions.memory_ceiling();
 	if crate::resources::over_ceiling(ceiling) {
-		return Err(CockpitError::msg(format!(
-			"Mémoire de la machine au-delà de {ceiling} % : aucun nouvel agent ne démarre \
-			 tant qu'elle n'est pas retombée en dessous. Ferme ce qui n'est plus utile, ou \
-			 relève le plafond dans Réglages → Missions."
+		return Err(CockpitError::msg(crate::i18n::tf(
+			"agent.memoryCeiling",
+			&[("ceiling", &ceiling)],
 		)));
 	}
 
@@ -877,12 +877,13 @@ async fn start_inner(
 	// quatrième protocole ajouté un jour ne pourra plus être lu, en silence,
 	// comme s'il parlait la langue du premier.
 	let Some(dialect) = crate::protocol::Protocol::parse(&protocol) else {
-		return Err(CockpitError::msg(format!(
-			"Le moteur « {} » annonce le protocole `{}`, que le cockpit ne sait pas encore \
-			 parler. {} sont implémentés.",
-			engine.label,
-			protocol,
-			crate::protocol::Protocol::known().join(", "),
+		return Err(CockpitError::msg(crate::i18n::tf(
+			"agent.unknownProtocol",
+			&[
+				("engine", &engine.label),
+				("protocol", &protocol),
+				("known", &crate::protocol::Protocol::known().join(", ")),
+			],
 		)));
 	};
 	// Les outils de mission et le pont d'autorisation sont des mécanismes du
@@ -890,9 +891,9 @@ async fn start_inner(
 	// peut ni planifier ni lancer d'exécutant, et un exécutant ne peut pas se
 	// faire relire — voir la doctrine de `PROTOCOL_CODEX_EXEC`.
 	if mission.is_some() && dialect != crate::protocol::Protocol::Claude {
-		return Err(CockpitError::msg(format!(
-			"Le protocole `{protocol}` ne parle pas encore les outils de mission : ce moteur ne \
-			 peut pas encore être utilisé dans une mission, maître ou exécutant."
+		return Err(CockpitError::msg(crate::i18n::tf(
+			"agent.protocolNoMission",
+			&[("protocol", &protocol)],
 		)));
 	}
 
@@ -901,16 +902,12 @@ async fn start_inner(
 	// c'est le seul CLI que le cockpit sache trouver tout seul.
 	let binary = match engine.command.trim() {
 		"" if dialect == crate::protocol::Protocol::Claude => claude_binary().ok_or_else(|| {
-			CockpitError::msg(
-				"Le CLI `claude` est introuvable. Installe-le, ou vérifie qu'il est bien dans \
-				 ~/.local/bin, ~/.claude/local ou /opt/homebrew/bin.",
-			)
+			CockpitError::msg(crate::i18n::t("agent.claudeNotFoundHint"))
 		})?,
 		"" => {
-			return Err(CockpitError::msg(format!(
-				"Le moteur « {} » ne déclare pas de binaire, et le cockpit ne sait chercher que \
-				 `claude` tout seul.",
-				engine.label
+			return Err(CockpitError::msg(crate::i18n::tf(
+				"agent.noBinary",
+				&[("engine", &engine.label)],
 			)));
 		}
 		declared => declared.to_string(),
@@ -933,10 +930,7 @@ async fn start_inner(
 		// `codex exec` prend le message en argument, jamais sur son entrée
 		// standard — voir `codex.rs`. Un message vide n'a rien à ouvrir.
 		if prompt.trim().is_empty() {
-			return Err(CockpitError::msg(
-				"`codex-exec` a besoin d'un message pour démarrer : il ne peut pas s'ouvrir sur \
-				 un silence.",
-			));
+			return Err(CockpitError::msg(crate::i18n::t("agent.codexNeedsMessage")));
 		}
 		let mut built = match resume.filter(|s| !s.trim().is_empty()) {
 			Some(thread) => crate::codex::resume_turn(&binary, &thread, prompt.trim()),
@@ -959,16 +953,10 @@ async fn start_inner(
 		// garde qu'en `codex-exec`, pour la même raison — rien à ouvrir sur un
 		// silence.
 		if prompt.trim().is_empty() {
-			return Err(CockpitError::msg(
-				"`gemini-stream-json` a besoin d'un message pour démarrer : il ne peut pas \
-				 s'ouvrir sur un silence.",
-			));
+			return Err(CockpitError::msg(crate::i18n::t("agent.geminiNeedsMessage")));
 		}
 		if resume.filter(|s| !s.trim().is_empty()).is_some() {
-			return Err(CockpitError::msg(
-				"`gemini-stream-json` ne sait pas reprendre une conversation : aucune source ne \
-				 documente comment. Relance un agent neuf.",
-			));
+			return Err(CockpitError::msg(crate::i18n::t("agent.geminiNoResume")));
 		}
 		let mut built = crate::gemini::first_turn(&binary, prompt.trim());
 		if !depth.trim().is_empty() {
@@ -1086,12 +1074,10 @@ async fn start_inner(
 				ANNONCE.get_or_init(|| {
 					crate::journal::record(
 						"agent",
-						"Pont d'autorisation indisponible",
-						"Node introuvable",
+						&crate::i18n::t("agent.bridgeUnavailable.title"),
+						&crate::i18n::t("agent.bridgeUnavailable.subject"),
 						false,
-						"Les demandes d'autorisation et les questions des agents ne remonteront \
-						 pas dans l'interface. Installe Node (`brew install node`) pour les \
-						 retrouver ; les agents tournent malgré tout, selon leur mode.",
+						&crate::i18n::t("agent.bridgeUnavailable.detail"),
 					);
 				});
 			}
@@ -1129,21 +1115,22 @@ async fn start_inner(
 		// La liste d'étapes s'y joint, dans le même ajout : son outil vit dans
 		// le pont d'autorisation, et la demander sans lui serait une consigne
 		// impossible à suivre.
-		if !reviewing {
-			let consignes: Vec<String> = [
-				steps.then(|| crate::prompts::STEPS_TEMPLATE.to_string()),
-				crate::prompts::visual(),
-			]
-			.into_iter()
-			.flatten()
-			.collect();
-			if !consignes.is_empty() {
-				command.push_str(&format!(
-					" --append-system-prompt {}",
-					shell_quote(&consignes.join("\n\n"))
-				));
-			}
-		}
+		//
+		// La consigne de langue, elle, part pour tout agent, revue comprise : les
+		// prompts sont en anglais, la réponse doit venir dans la langue de
+		// l'utilisateur.
+		let consignes: Vec<String> = [
+			(!reviewing && steps).then(|| crate::prompts::STEPS_TEMPLATE.to_string()),
+			if reviewing { None } else { crate::prompts::visual() },
+			Some(crate::i18n::reply_directive()),
+		]
+		.into_iter()
+		.flatten()
+		.collect();
+		command.push_str(&format!(
+			" --append-system-prompt {}",
+			shell_quote(&consignes.join("\n\n"))
+		));
 		if let Some(session) = resume.filter(|s| !s.trim().is_empty()) {
 			command.push_str(&format!(" --resume {}", shell_quote(&session)));
 		}
@@ -1226,21 +1213,14 @@ async fn start_inner(
 	let sandbox_cfg = &config.sandbox;
 	let runtime = if sandbox_cfg.enabled {
 		let runtime = crate::sandbox::resolve_runtime(&sandbox_cfg.runtime).ok_or_else(|| {
-			CockpitError::msg(
-				"L'isolation par conteneurs est activée, mais aucun runtime (`orb` ou \
-				 `docker`) n'est installé. Désactive-la dans Réglages → Missions, ou \
-				 installe-en un.",
-			)
+			CockpitError::msg(crate::i18n::t("agent.sandboxNoRuntimeHint"))
 		})?;
 		// Manque à l'appel : Cockpit la construit lui-même plutôt que de refuser
 		// en laissant deviner comment la fabriquer — voir `sandbox::ensure_image`.
 		crate::sandbox::ensure_image(&runtime, sandbox_cfg)
 			.await
 			.map_err(|error| {
-				CockpitError::msg(format!(
-					"L'isolation par conteneurs est activée, mais l'image n'a pas pu être \
-					 préparée : {error}"
-				))
+				CockpitError::msg(crate::i18n::tf("agent.sandboxImageFailed", &[("error", &error)]))
 			})?;
 		Some(runtime)
 	} else {
@@ -1310,17 +1290,17 @@ async fn start_inner(
 
 		let mut child = launcher
 			.spawn()
-			.map_err(|e| CockpitError::msg(format!("Lancement de l'agent : {e}")))?;
+			.map_err(|e| CockpitError::msg(crate::i18n::tf("agent.launchError", &[("error", &e)])))?;
 
 		let stdout = child
 			.stdout
 			.take()
-			.ok_or_else(|| CockpitError::msg("Sortie de l'agent indisponible."))?;
+			.ok_or_else(|| CockpitError::msg(crate::i18n::t("agent.outputUnavailable")))?;
 		let stderr = child.stderr.take();
 		let stdin = child
 			.stdin
 			.take()
-			.ok_or_else(|| CockpitError::msg("Entrée de l'agent indisponible."))?;
+			.ok_or_else(|| CockpitError::msg(crate::i18n::t("agent.inputUnavailable")))?;
 		(
 			Some(child),
 			Input::Pipe(stdin),
@@ -1378,7 +1358,7 @@ async fn start_inner(
 		stdin
 			.write(&user_message(prompt.trim()))
 			.await
-			.map_err(|e| CockpitError::msg(format!("Envoi du premier message : {e}")))?;
+			.map_err(|e| CockpitError::msg(crate::i18n::tf("agent.firstMessageError", &[("error", &e)])))?;
 	}
 
 	let per_turn = (!dialect.keeps_process()).then(|| PerTurn {
@@ -1471,9 +1451,7 @@ fn film_the_proof(app: &AppHandle, agents: &SharedAgents, session_id: &str, payl
 fn death_detail(lines: &[String]) -> String {
 	let dit = lines.join("\n");
 	if dit.trim().is_empty() {
-		"Le process s'est arrêté sans écrire la moindre réponse, et sans rien laisser ni sur sa \
-		 sortie ni sur son erreur standard."
-			.to_string()
+		crate::i18n::t("agent.silentDeath")
 	} else {
 		dit.chars().take(2000).collect()
 	}
@@ -1721,7 +1699,7 @@ fn spawn_reader(
 					let detail = death_detail(&stderr_buffer.lock().unwrap());
 					crate::journal::record(
 						"agent",
-						"Agent arrêté avant sa première réponse",
+						&crate::i18n::t("agent.journal.diedBeforeFirstAnswer"),
 						&session_id,
 						false,
 						&detail,
@@ -1735,7 +1713,7 @@ fn spawn_reader(
 					crate::executions::note_step(
 						&execution,
 						crate::executions::Step::Failed,
-						"Le moteur a rendu son dernier tour en erreur.",
+						&crate::i18n::t("agent.step.lastTurnFailed"),
 					);
 				} else {
 					crate::executions::note_step(
@@ -1766,7 +1744,7 @@ fn spawn_reader(
 
 pub async fn send(app: &AppHandle, agents: &SharedAgents, session_id: &str, text: &str) -> Result<()> {
 	if text.trim().is_empty() {
-		return Err(CockpitError::msg("Message vide."));
+		return Err(CockpitError::msg(crate::i18n::t("agent.emptyMessage")));
 	}
 
 	// Avant de relancer l'agent : ce qui a bougé depuis son dernier rendu a été
@@ -1796,7 +1774,7 @@ pub async fn send(app: &AppHandle, agents: &SharedAgents, session_id: &str, text
 	// Un agent par tour (`codex-exec`) n'a plus de process entre deux tours :
 	// rien à écrire dessus, il faut en relancer un — voir `respawn_turn`.
 	if let Some(per_turn) = per_turn {
-		let cwd = cwd.ok_or_else(|| CockpitError::msg("Cet agent n'est plus actif."))?;
+		let cwd = cwd.ok_or_else(|| CockpitError::msg(crate::i18n::t("agent.notActive")))?;
 		return respawn_turn(app, agents, session_id, &cwd, &per_turn, text.trim()).await;
 	}
 
@@ -1805,7 +1783,7 @@ pub async fn send(app: &AppHandle, agents: &SharedAgents, session_id: &str, text
 	let mut sessions = agents.sessions.lock().unwrap();
 	let running = sessions
 		.get_mut(session_id)
-		.ok_or_else(|| CockpitError::msg("Cet agent n'est plus actif."))?;
+		.ok_or_else(|| CockpitError::msg(crate::i18n::t("agent.notActive")))?;
 
 	// Un nouveau message rouvre un tour : ce qui suit n'est plus « terminé ».
 	running.turn_done = false;
@@ -1814,10 +1792,10 @@ pub async fn send(app: &AppHandle, agents: &SharedAgents, session_id: &str, text
 	let stdin = running
 		.stdin
 		.as_mut()
-		.ok_or_else(|| CockpitError::msg("Entrée de l'agent indisponible."))?;
+		.ok_or_else(|| CockpitError::msg(crate::i18n::t("agent.inputUnavailable")))?;
 	stdin
 		.write_blocking(&user_message(text.trim()))
-		.map_err(|e| CockpitError::msg(format!("Envoi du message : {e}")))?;
+		.map_err(|e| CockpitError::msg(crate::i18n::tf("agent.sendError", &[("error", &e)])))?;
 
 	Ok(())
 }
@@ -1840,35 +1818,26 @@ async fn respawn_turn(
 	// Même garde-fou qu'au premier tour : voir `start_with_mission`.
 	let ceiling = config.missions.memory_ceiling();
 	if crate::resources::over_ceiling(ceiling) {
-		return Err(CockpitError::msg(format!(
-			"Mémoire de la machine au-delà de {ceiling} % : le tour suivant attend qu'elle \
-			 retombe en dessous."
+		return Err(CockpitError::msg(crate::i18n::tf(
+			"agent.memoryCeilingTurn",
+			&[("ceiling", &ceiling)],
 		)));
 	}
 
 	let thread = per_turn.thread_id.as_deref().ok_or_else(|| {
-		CockpitError::msg(
-			"Cet agent n'a pas encore d'identifiant de conversation — sa première réponse n'est \
-			 peut-être pas encore arrivée.",
-		)
+		CockpitError::msg(crate::i18n::t("agent.noThreadYet"))
 	})?;
 	let command = crate::codex::resume_turn(&per_turn.binary, thread, text);
 
 	let sandbox_cfg = &config.sandbox;
 	let runtime = if sandbox_cfg.enabled {
 		let runtime = crate::sandbox::resolve_runtime(&sandbox_cfg.runtime).ok_or_else(|| {
-			CockpitError::msg(
-				"L'isolation par conteneurs est activée, mais aucun runtime (`orb` ou \
-				 `docker`) n'est installé.",
-			)
+			CockpitError::msg(crate::i18n::t("agent.sandboxNoRuntime"))
 		})?;
 		crate::sandbox::ensure_image(&runtime, sandbox_cfg)
 			.await
 			.map_err(|error| {
-				CockpitError::msg(format!(
-					"L'isolation par conteneurs est activée, mais l'image n'a pas pu être \
-					 préparée : {error}"
-				))
+				CockpitError::msg(crate::i18n::tf("agent.sandboxImageFailed", &[("error", &error)]))
 			})?;
 		Some(runtime)
 	} else {
@@ -1894,14 +1863,14 @@ async fn respawn_turn(
 
 	let mut child = launcher
 		.spawn()
-		.map_err(|e| CockpitError::msg(format!("Reprise du tour : {e}")))?;
+		.map_err(|e| CockpitError::msg(crate::i18n::tf("agent.resumeTurnError", &[("error", &e)])))?;
 	let container = runtime
 		.as_ref()
 		.map(|runtime| (runtime.clone(), session_id.to_string()));
 	let stdout = child
 		.stdout
 		.take()
-		.ok_or_else(|| CockpitError::msg("Sortie de l'agent indisponible."))?;
+		.ok_or_else(|| CockpitError::msg(crate::i18n::t("agent.outputUnavailable")))?;
 	let stderr = child.stderr.take();
 	let stdin = child.stdin.take();
 
@@ -1913,7 +1882,7 @@ async fn respawn_turn(
 			// qu'on vient de lancer n'a plus personne à qui appartenir.
 			drop(sessions);
 			let _ = child.start_kill();
-			return Err(CockpitError::msg("Cet agent n'est plus actif."));
+			return Err(CockpitError::msg(crate::i18n::t("agent.notActive")));
 		};
 		running.child = Some(child);
 		running.stdin = stdin.map(Input::Pipe);
@@ -1966,7 +1935,7 @@ pub fn interrupt(agents: &SharedAgents, session_id: &str) -> Result<()> {
 	let mut sessions = agents.sessions.lock().unwrap_or_else(|e| e.into_inner());
 	let running = sessions
 		.get_mut(session_id)
-		.ok_or_else(|| CockpitError::msg("Cet agent n'est plus actif."))?;
+		.ok_or_else(|| CockpitError::msg(crate::i18n::t("agent.notActive")))?;
 
 	// Un agent par tour (`codex-exec`) n'a pas de canal de contrôle : le
 	// message ci-dessous est un mécanisme du protocole par défaut, pas du
@@ -1974,9 +1943,7 @@ pub fn interrupt(agents: &SharedAgents, session_id: &str) -> Result<()> {
 	// ce serait `stop`, pas `interrupt`, et l'appelant croit encore pouvoir
 	// continuer la même conversation juste après.
 	let Some(stdin) = running.stdin.as_mut() else {
-		return Err(CockpitError::msg(
-			"Ce moteur ne sait pas interrompre un tour sans y mettre fin. Utilise Arrêter.",
-		));
+		return Err(CockpitError::msg(crate::i18n::t("agent.cannotInterrupt")));
 	};
 
 	// L'identifiant n'a pas à être unique au-delà de ce tour : personne ne
@@ -1989,7 +1956,7 @@ pub fn interrupt(agents: &SharedAgents, session_id: &str) -> Result<()> {
 
 	stdin
 		.write_blocking(&format!("{payload}\n"))
-		.map_err(|e| CockpitError::msg(format!("Interruption : {e}")))?;
+		.map_err(|e| CockpitError::msg(crate::i18n::tf("agent.interruptError", &[("error", &e)])))?;
 
 	Ok(())
 }
@@ -2009,18 +1976,16 @@ fn control(
 	let mut sessions = agents.sessions.lock().unwrap_or_else(|e| e.into_inner());
 	let running = sessions
 		.get_mut(session_id)
-		.ok_or_else(|| CockpitError::msg("Cet agent n'est plus actif."))?;
+		.ok_or_else(|| CockpitError::msg(crate::i18n::t("agent.notActive")))?;
 
 	// Seul Claude Code a un canal de contrôle. Refuser clairement : l'écran
 	// n'affichera pas d'état plutôt que d'en inventer un — et un autre moteur
 	// ne reçoit pas sur son entrée une ligne qu'il ne sait pas lire.
 	if running.protocol != crate::protocol::Protocol::Claude {
-		return Err(CockpitError::msg("Ce moteur n'a pas de canal de contrôle."));
+		return Err(CockpitError::msg(crate::i18n::t("agent.noControlChannel")));
 	}
 	let Some(stdin) = running.stdin.as_mut() else {
-		return Err(CockpitError::msg(
-			"Ce moteur n'a pas de canal de contrôle.",
-		));
+		return Err(CockpitError::msg(crate::i18n::t("agent.noControlChannel")));
 	};
 
 	let payload = json!({
@@ -2118,7 +2083,7 @@ pub fn stop(agents: &SharedAgents, session_id: &str) -> Result<()> {
 	crate::executions::note_step(
 		&running.execution,
 		crate::executions::Step::Stopped,
-		"Arrêté depuis le cockpit.",
+		&crate::i18n::t("agent.step.stoppedFromCockpit"),
 	);
 	// Absent entre deux tours d'un agent par tour (`codex-exec`) qui vient de
 	// rendre sa réponse — rien à tuer, il n'y a simplement plus de process.
@@ -2174,7 +2139,7 @@ pub fn stop_all(agents: &SharedAgents) {
 			crate::executions::note_step(
 				&running.execution,
 				crate::executions::Step::Detached,
-				"Le cockpit s'est fermé ; l'agent continue sans fenêtre.",
+				&crate::i18n::t("agent.step.detached"),
 			);
 			let at = chrono::Utc::now().to_rfc3339();
 			crate::relay::update_meta(&relay.dir, |meta| meta.detached_at = Some(at));
@@ -2187,7 +2152,7 @@ pub fn stop_all(agents: &SharedAgents) {
 		crate::executions::note_step(
 			&running.execution,
 			crate::executions::Step::Stopped,
-			"Le cockpit s'est fermé.",
+			&crate::i18n::t("agent.step.cockpitClosed"),
 		);
 		if let Some(child) = running.child.as_mut() {
 			let _ = child.start_kill();
@@ -2235,14 +2200,14 @@ pub fn adopt_relays(app: &AppHandle, agents: &SharedAgents) -> Adopted {
 			let (step, note) = match code.as_deref() {
 				Some("0") => (
 					crate::executions::Step::Answered,
-					"L'agent détaché a fini pendant que le cockpit était fermé.",
+					"agent.step.detachedFinished",
 				),
 				_ => (
 					crate::executions::Step::Stopped,
-					"L'agent détaché s'est arrêté pendant que le cockpit était fermé.",
+					"agent.step.detachedStopped",
 				),
 			};
-			crate::executions::note_step(&found.meta.execution, step, note);
+			crate::executions::note_step(&found.meta.execution, step, &crate::i18n::t(note));
 		}
 		let _ = std::fs::remove_dir_all(&found.dir);
 	}
@@ -2274,7 +2239,7 @@ pub fn adopt_relays(app: &AppHandle, agents: &SharedAgents) -> Adopted {
 			crate::executions::note_step(
 				&meta.execution,
 				crate::executions::Step::Reattached,
-				"Retrouvé vivant au démarrage du cockpit.",
+				&crate::i18n::t("agent.step.reattached"),
 			);
 		}
 		crate::relay::update_meta(&found.dir, |meta| meta.detached_at = None);
@@ -2338,7 +2303,7 @@ mod death_tests {
 		// Le repli ne doit rester que pour les morts réellement muettes : c'est
 		// désormais une information rare, et non le cas ordinaire.
 		for vide in [vec![], vec![String::new()], vec!["   ".to_string()]] {
-			assert!(death_detail(&vide).contains("sans rien laisser"));
+			assert!(death_detail(&vide).contains("without leaving anything"));
 		}
 	}
 

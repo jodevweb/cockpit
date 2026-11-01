@@ -24,6 +24,7 @@ import {
 	XCircle,
 } from "lucide-react";
 import { useEffect, useMemo, useState, type ReactNode } from "react";
+import { useTranslation } from "react-i18next";
 import { useConfirm } from "@/components/Confirm";
 import { Markdown } from "@/components/Markdown";
 import { MissionGraph } from "@/components/MissionGraph";
@@ -55,7 +56,8 @@ import { useAsync } from "@/lib/useAsync";
 type Phase = "done" | "yours" | "master" | "upcoming" | "failed";
 
 interface JourneyStep {
-	label: string;
+	/** Le nom de l'étape, clé de son libellé dans le catalogue. */
+	id: "understanding" | "approach" | "split" | "execution" | "delivery";
 	icon: React.ComponentType<{ size?: number; className?: string }>;
 	/** Étape validée par un accord — absente pour exécution et livraison. */
 	step?: MissionStep;
@@ -65,57 +67,33 @@ interface JourneyStep {
 
 const JOURNEY: JourneyStep[] = [
 	{
-		label: "Compréhension",
+		id: "understanding",
 		icon: Lightbulb,
 		step: "understanding",
 		working: "understanding",
 		awaiting: "awaitingUnderstanding",
 	},
 	{
-		label: "Approche",
+		id: "approach",
 		icon: Compass,
 		step: "approach",
 		working: "approaching",
 		awaiting: "awaitingApproach",
 	},
 	{
-		label: "Découpage",
+		id: "split",
 		icon: ListTree,
 		step: "split",
 		working: "planning",
 		awaiting: "awaitingApproval",
 	},
-	{ label: "Exécution", icon: Users },
-	{ label: "Livraison", icon: GitPullRequest },
+	{ id: "execution", icon: Users },
+	{ id: "delivery", icon: GitPullRequest },
 ];
 
-/** Ce que dit chaque étape, selon qui a la main. */
-const COPY: Record<
-	MissionStep,
-	{ working: string; workingHint: string; proposal: string; approve: string }
-> = {
-	understanding: {
-		working: "Le maître lit le ticket",
-		workingHint:
-			"Lis-le à gauche en même temps que lui. Dans un instant, il te dira ce qu'il en a compris — dix lignes au plus, et ses questions à part.",
-		proposal: "Ce que le maître a compris",
-		approve: "Valider — passer à l'approche",
-	},
-	approach: {
-		working: "Le maître prépare son approche",
-		workingHint:
-			"Comment il compte s'y prendre : les étapes, les endroits du code, l'ordre, les risques. Pas encore de répartition entre exécutants.",
-		proposal: "L'approche proposée",
-		approve: "Valider — passer au découpage",
-	},
-	split: {
-		working: "Le maître découpe le travail",
-		workingHint:
-			"Qui fait quoi, où, et dans quel ordre — fidèle à l'approche que tu as validée. Rien ne partira avant ton accord.",
-		proposal: "Le découpage proposé",
-		approve: "Valider — lancer les exécutants",
-	},
-};
+/** Ce que dit chaque étape, selon qui a la main : `copy.<étape>.<texte>` dans le catalogue. */
+type CopyKey = "working" | "workingHint" | "proposal" | "approve";
+const copyKey = (step: MissionStep, key: CopyKey) => `missionJourney.copy.${step}.${key}`;
 
 function draftsOf(mission: Mission, step: MissionStep): MissionDraft[] {
 	if (step === "understanding") return mission.understanding ?? [];
@@ -173,6 +151,7 @@ export function MissionJourney({
 	/** La fiche d'exécution, rendue par l'écran des missions. */
 	execution: ReactNode;
 }) {
+	const { t } = useTranslation("components2");
 	const { notify } = useCockpit();
 	const { confirm } = useConfirm();
 	// Plus vif que la liste : on attend ici une réponse du maître, et dix
@@ -223,16 +202,15 @@ export function MissionJourney({
 
 	const stop = async () => {
 		const ok = await confirm({
-			title: `Abandonner « ${mission.title} » ?`,
-			message:
-				"Le maître est coupé et la mission close. Ce qui a été validé reste lisible dans son historique.",
-			confirmLabel: "Abandonner",
+			title: t("missionJourney.stop.title", { title: mission.title }),
+			message: t("missionJourney.stop.message"),
+			confirmLabel: t("missionJourney.stop.confirm"),
 			danger: true,
 		});
 		if (!ok) return;
 		try {
 			await api.missions.stop(mission.id);
-			notify("Mission abandonnée.");
+			notify(t("missionJourney.stop.done"));
 			refresh();
 		} catch (error) {
 			notify(String(error));
@@ -246,7 +224,7 @@ export function MissionJourney({
 			{/* En-tête : d'où l'on vient, sur quoi l'on travaille. */}
 			<header className="hairline-b flex items-center gap-3 px-5 py-3">
 				<Button icon={ArrowLeft} onClick={onBack}>
-					Missions
+					{t("missionJourney.back")}
 				</Button>
 				<div className="h-5 w-px bg-line-soft" />
 				<div className="min-w-0 flex-1">
@@ -256,12 +234,12 @@ export function MissionJourney({
 					</div>
 					<div className="mt-0.5 flex items-center gap-1 font-mono text-[10px] text-ink-faint">
 						<GitBranch size={10} />
-						{mission.branch || "sans branche"}
+						{mission.branch || t("missionJourney.noBranch")}
 					</div>
 				</div>
 				{current < 3 && mission.state !== "failed" ? (
 					<Button variant="danger" icon={StopCircle} onClick={() => void stop()}>
-						Abandonner
+						{t("missionJourney.stop.confirm")}
 					</Button>
 				) : null}
 			</header>
@@ -342,6 +320,7 @@ function Stepper({
 	masterAlive: boolean | null;
 	onPick: (index: number) => void;
 }) {
+	const { t } = useTranslation("components2");
 	// Une étape d'accord sans maître n'avance pas : le fil ne doit pas dire
 	// « le maître écrit » au-dessus d'un panneau qui dit le contraire.
 	const stalled = (index: number, phase: Phase) =>
@@ -353,21 +332,23 @@ function Stepper({
 
 	const sub = (index: number, phase: Phase): string => {
 		const entry = JOURNEY[index];
-		if (phase === "yours") return "à toi";
-		if (phase === "failed") return "arrêtée";
-		if (stalled(index, phase)) return "maître à l'arrêt";
+		if (phase === "yours") return t("missionJourney.stepper.yours");
+		if (phase === "failed") return t("missionJourney.stepper.stopped");
+		if (stalled(index, phase)) return t("missionJourney.stepper.masterStopped");
 		if (phase === "master") {
-			if (index === 3) return `${delivered}/${mission.tasks.length} tâches`;
-			if (index === 4) return mission.state === "integrating" ? "intégration…" : "";
-			return "le maître écrit…";
+			if (index === 3) return t("missionJourney.stepper.tasksProgress", { done: delivered, total: mission.tasks.length });
+			if (index === 4) return mission.state === "integrating" ? t("missionJourney.stepper.integrating") : "";
+			return t("missionJourney.stepper.masterWriting");
 		}
 		if (phase === "done") {
 			if (entry?.step) {
 				const versions = draftsOf(mission, entry.step).length;
-				return versions > 1 ? `validée · v${versions}` : "validée";
+				return versions > 1
+					? t("missionJourney.stepper.approvedVersion", { version: versions })
+					: t("missionJourney.stepper.approved");
 			}
-			if (index === 3) return `${mission.tasks.length} tâches`;
-			return mission.prUrl ? "PR ouverte" : "close";
+			if (index === 3) return t("missionJourney.stepper.tasks", { count: mission.tasks.length });
+			return mission.prUrl ? t("missionJourney.stepper.prOpen") : t("missionJourney.stepper.closed");
 		}
 		return "";
 	};
@@ -381,7 +362,7 @@ function Stepper({
 					const Icon = phase === "done" ? Check : idle ? Hourglass : entry.icon;
 					const reachable = index <= current;
 					return (
-						<li key={entry.label} className="flex flex-1 items-start last:flex-none">
+						<li key={entry.id} className="flex flex-1 items-start last:flex-none">
 							<button
 								type="button"
 								disabled={!reachable}
@@ -418,7 +399,7 @@ function Stepper({
 										phase === "upcoming" ? "text-ink-faint" : "text-ink",
 									)}
 								>
-									{entry.label}
+									{t(`missionJourney.journey.${entry.id}`)}
 								</span>
 								<span
 									className={clsx(
@@ -470,6 +451,7 @@ function StepPanel({
 	autoStarting: boolean;
 	onDone: () => void;
 }) {
+	const { t } = useTranslation("components2");
 	const drafts = draftsOf(mission, step);
 	const last = drafts.at(-1);
 	const earlier = drafts.slice(0, -1);
@@ -496,7 +478,7 @@ function StepPanel({
 	if (!last) {
 		return (
 			<p className="rounded-xl border border-line-soft p-4 text-[12px] text-ink-faint">
-				Rien n'a été proposé à cette étape.
+				{t("missionJourney.nothingProposed")}
 			</p>
 		);
 	}
@@ -505,7 +487,8 @@ function StepPanel({
 		<>
 			{phase === "yours" ? (
 				<div className="rise flex items-center gap-2 text-[11px] font-semibold tracking-[0.08em] text-accent-soft uppercase">
-					<span className="animate-pulse-dot size-1.5 rounded-full bg-accent" />À toi de jouer
+					<span className="animate-pulse-dot size-1.5 rounded-full bg-accent" />
+					{t("missionJourney.yourMove")}
 				</div>
 			) : null}
 
@@ -564,6 +547,7 @@ function Working({
 	correction: MissionDraft["review"];
 	onDone: () => void;
 }) {
+	const { t } = useTranslation("components2");
 	const { notify } = useCockpit();
 	const [busy, setBusy] = useState(false);
 	// Ce qu'il consulte, à mesure : une ligne qui change dit que ça avance, et
@@ -579,7 +563,7 @@ function Working({
 		setBusy(true);
 		try {
 			await api.missions.launchMaster(mission.id);
-			notify("Maître relancé : il repart de ce qui a été validé.");
+			notify(t("missionJourney.working.relaunched"));
 			onDone();
 		} catch (error) {
 			notify(String(error));
@@ -588,7 +572,6 @@ function Working({
 		}
 	};
 
-	const copy = COPY[step];
 	const absent = alive === false;
 	// Le lancement automatique en cours n'est pas une panne : on ne l'habille
 	// pas en alerte.
@@ -613,14 +596,18 @@ function Working({
 					{/* Le titre suit l'état réel : « Le maître lit le ticket » au-dessus
 					    d'un maître absent disait deux choses contraires à la fois. */}
 					<h2 className="text-[14px] font-semibold text-ink">
-						{starting ? "Le maître démarre…" : stopped ? "Le maître est à l'arrêt" : copy.working}
+						{starting
+							? t("missionJourney.working.starting")
+							: stopped
+								? t("missionJourney.working.stopped")
+								: t(copyKey(step, "working"))}
 					</h2>
 					<p className="mt-1 text-[12px] leading-relaxed text-ink-muted">
 						{starting
-							? "Il prend le ticket et repart de ce qui a déjà été validé. Quelques secondes."
+							? t("missionJourney.working.startingHint")
 							: stopped
-								? "Personne ne travaille sur cette étape pour l'instant : aucune proposition n'arrivera tant qu'il n'est pas relancé."
-								: copy.workingHint}
+								? t("missionJourney.working.stoppedHint")
+								: t(copyKey(step, "workingHint"))}
 					</p>
 				</div>
 			</div>
@@ -629,7 +616,7 @@ function Working({
 				<div className="rounded-xl border border-warning/25 bg-warning/[0.06] p-3">
 					<div className="mb-1 flex items-center gap-1.5 text-[10px] font-semibold tracking-[0.08em] text-warning uppercase">
 						<PenLine size={11} />
-						Ta correction, en cours de prise en compte
+						{t("missionJourney.working.correction")}
 					</div>
 					{correction.feedback ? (
 						<p className="text-selectable text-[12px] leading-relaxed text-ink-muted">
@@ -637,7 +624,7 @@ function Working({
 						</p>
 					) : null}
 					{correction.answers.some((answer) => answer.trim()) ? (
-						<p className="mt-1 text-[11px] text-ink-faint">+ tes réponses à ses questions</p>
+						<p className="mt-1 text-[11px] text-ink-faint">{t("missionJourney.working.plusAnswers")}</p>
 					) : null}
 				</div>
 			) : null}
@@ -646,7 +633,7 @@ function Working({
 				<div className="rounded-xl border border-line-soft bg-base/50 p-3">
 					<div className="mb-2 flex items-center gap-1.5 text-[10px] font-semibold tracking-[0.08em] text-ink-faint uppercase">
 						<Eye size={11} />
-						Ce qu'il fait en ce moment
+						{t("missionJourney.working.now")}
 					</div>
 					{trail.length === 0 ? (
 						<div className="flex flex-col gap-1.5">
@@ -683,11 +670,10 @@ function Working({
 				<div className="flex items-center gap-3 rounded-xl border border-warning/30 bg-warning/[0.06] p-3">
 					<Hourglass size={15} className="shrink-0 text-warning" />
 					<p className="min-w-0 flex-1 text-[12px] leading-relaxed text-ink-muted">
-						Le maître ne tourne pas. Relance-le : il repartira de ce qui a déjà été validé, sans te
-						redemander ce que tu as signé.
+						{t("missionJourney.working.notRunning")}
 					</p>
 					<Button variant="solid" icon={RotateCcw} loading={busy} onClick={() => void relaunch()}>
-						Relancer le maître
+						{t("missionJourney.working.relaunch")}
 					</Button>
 				</div>
 			)}
@@ -711,6 +697,7 @@ function Proposal({
 	draft: MissionDraft;
 	version: number;
 }) {
+	const { t } = useTranslation("components2");
 	const lines = draft.text.split("\n").filter((line) => line.trim());
 	const max = step === "understanding" ? 10 : 15;
 	const Icon = step === "understanding" ? Lightbulb : Compass;
@@ -721,13 +708,13 @@ function Proposal({
 				<span className="grid size-7 place-items-center rounded-lg bg-accent-dim text-accent-soft">
 					<Icon size={14} />
 				</span>
-				<h2 className="flex-1 text-[13px] font-semibold text-ink">{COPY[step].proposal}</h2>
+				<h2 className="flex-1 text-[13px] font-semibold text-ink">{t(copyKey(step, "proposal"))}</h2>
 				{version > 1 ? <Badge tone="accent">v{version}</Badge> : null}
 				<span
 					className="font-mono text-[10px] text-ink-faint"
-					title="Le cockpit refuse toute proposition plus longue"
+					title={t("missionJourney.proposal.maxTitle")}
 				>
-					{lines.length}/{max} lignes
+					{t("missionJourney.proposal.lines", { count: lines.length, max })}
 				</span>
 			</div>
 			<ol className="flex flex-col px-4 py-2">
@@ -768,6 +755,7 @@ function SplitProposal({
 	draft: MissionDraft;
 	version: number;
 }) {
+	const { t } = useTranslation("components2");
 	const roles = useAsync(() => api.missions.roles(), []);
 	const estimate = useAsync(
 		() => api.missions.estimate(mission.tasks.length),
@@ -784,10 +772,10 @@ function SplitProposal({
 				<span className="grid size-7 place-items-center rounded-lg bg-accent-dim text-accent-soft">
 					<ListTree size={14} />
 				</span>
-				<h2 className="flex-1 text-[13px] font-semibold text-ink">{COPY.split.proposal}</h2>
+				<h2 className="flex-1 text-[13px] font-semibold text-ink">{t(copyKey("split", "proposal"))}</h2>
 				{version > 1 ? <Badge tone="accent">v{version}</Badge> : null}
 				<Badge>
-					{mission.tasks.length} exécutant{mission.tasks.length > 1 ? "s" : ""}
+					{t("missionJourney.split.executors", { count: mission.tasks.length })}
 				</Badge>
 			</div>
 
@@ -814,11 +802,13 @@ function SplitProposal({
 				// Ce que l'accord engage, avant de le donner : quatre tâches confiées à
 				// des agents, c'est une nuit de machine ou dix minutes.
 				<div className="flex items-center gap-1.5 border-t border-line-soft px-4 py-2.5 text-[11px] text-ink-faint">
-					<Hourglass size={12} className="shrink-0" />≈ {duration(estimate.data.expectedSeconds)} de
-					travail, d'après {estimate.data.sample} mission{estimate.data.sample > 1 ? "s" : ""} de
-					taille voisine
+					<Hourglass size={12} className="shrink-0" />
+					{t("missionJourney.split.estimate", {
+						duration: duration(estimate.data.expectedSeconds),
+						count: estimate.data.sample,
+					})}
 					{estimate.data.failureRate > 0.25
-						? ` · ${Math.round(estimate.data.failureRate * 100)} % ont échoué`
+						? ` · ${t("missionJourney.split.failureRate", { percent: Math.round(estimate.data.failureRate * 100) })}`
 						: ""}
 				</div>
 			) : null}
@@ -839,6 +829,7 @@ function TaskCard({
 	role: string;
 	verifies: boolean;
 }) {
+	const { t } = useTranslation("components2");
 	const [open, setOpen] = useState(false);
 	const after =
 		task.base && task.base !== mission.branch
@@ -857,7 +848,7 @@ function TaskCard({
 						{verifies ? (
 							<span className="flex items-center gap-1 text-[10px] text-info">
 								<ShieldCheck size={11} />
-								juge le travail des autres
+								{t("missionJourney.task.verifies")}
 							</span>
 						) : null}
 					</div>
@@ -878,15 +869,15 @@ function TaskCard({
 							))
 						) : verifies ? (
 							// Une vérification lit tout : son absence de périmètre est la règle.
-							<span>tout le dépôt, en lecture</span>
+							<span>{t("missionJourney.task.wholeRepoRead")}</span>
 						) : (
-							<span className="text-warning">tout le dépôt — aucun périmètre déclaré</span>
+							<span className="text-warning">{t("missionJourney.task.wholeRepoNoScope")}</span>
 						)}
 					</div>
 					{after ? (
 						<div className="mt-1.5 flex items-center gap-1.5 text-[10.5px] text-ink-faint">
 							<GitBranch size={11} className="shrink-0" />
-							part après « {after.title} »
+							{t("missionJourney.task.after", { title: after.title })}
 						</div>
 					) : null}
 
@@ -897,7 +888,7 @@ function TaskCard({
 								onClick={() => setOpen((value) => !value)}
 								className="focus-ring mt-2 rounded text-[10.5px] font-medium text-accent-soft hover:text-accent"
 							>
-								{open ? "Masquer la consigne" : "Lire sa consigne complète"}
+								{open ? t("missionJourney.task.hideBrief") : t("missionJourney.task.readBrief")}
 							</button>
 							{open ? (
 								<div className="mt-2 rounded-lg border border-line-soft bg-base/60 p-3">
@@ -924,6 +915,7 @@ function Decision({
 	draft: MissionDraft;
 	onDone: () => void;
 }) {
+	const { t } = useTranslation("components2");
 	const { notify } = useCockpit();
 	const [answers, setAnswers] = useState<string[]>(() => draft.questions.map(() => ""));
 	const [feedback, setFeedback] = useState("");
@@ -940,9 +932,9 @@ function Decision({
 			notify(
 				approved
 					? step === "split"
-						? "Découpage validé — les exécutants partent."
-						: "Validé — le maître passe à la suite."
-					: "Correction envoyée — le maître reprend sa proposition.",
+						? t("missionJourney.decision.splitApproved")
+						: t("missionJourney.decision.approved")
+					: t("missionJourney.decision.correctionSent"),
 			);
 			onDone();
 		} catch (error) {
@@ -958,8 +950,7 @@ function Decision({
 				<section className="rise rise-1 flex flex-col gap-2">
 					<div className="flex items-center gap-1.5 text-[10px] font-semibold tracking-[0.08em] text-warning uppercase">
 						<HelpCircle size={12} />
-						Il a besoin de toi · {draft.questions.length} question
-						{draft.questions.length > 1 ? "s" : ""}
+						{t("missionJourney.decision.needsYou", { count: draft.questions.length })}
 					</div>
 					{draft.questions.map((question, index) => (
 						<div
@@ -982,7 +973,7 @@ function Decision({
 										current.map((value, at) => (at === index ? event.target.value : value)),
 									)
 								}
-								placeholder="Ta réponse…"
+								placeholder={t("missionJourney.decision.answerPlaceholder")}
 								className="focus-ring w-full resize-y rounded-lg border border-line-soft bg-raised px-2.5 py-1.5 text-[12px] leading-relaxed text-ink placeholder:text-ink-faint focus:border-accent/40"
 							/>
 						</div>
@@ -993,7 +984,7 @@ function Decision({
 			<section className="rise rise-2 sticky bottom-0 flex flex-col gap-2.5 rounded-xl border border-accent/35 bg-surface p-3 shadow-[0_-12px_24px_-12px_rgba(0,0,0,0.35)]">
 				<div className="flex items-center gap-1.5 text-[11px] font-medium text-ink-muted">
 					<MessageSquare size={12} />
-					Une précision, une correction ?
+					{t("missionJourney.decision.feedbackLabel")}
 				</div>
 				<textarea
 					rows={2}
@@ -1001,20 +992,20 @@ function Decision({
 					onChange={(event) => setFeedback(event.target.value)}
 					placeholder={
 						step === "understanding"
-							? "Ex. : ce n'est pas l'écran admin qui est visé, c'est l'espace client."
+							? t("missionJourney.decision.placeholder.understanding")
 							: step === "approach"
-								? "Ex. : réutilise le service d'export existant plutôt qu'en créer un."
-								: "Ex. : fusionne les deux tâches front, elles touchent les mêmes fichiers."
+								? t("missionJourney.decision.placeholder.approach")
+								: t("missionJourney.decision.placeholder.split")
 					}
 					className="focus-ring w-full resize-y rounded-lg border border-line-soft bg-raised px-2.5 py-1.5 text-[12px] leading-relaxed text-ink placeholder:text-ink-faint focus:border-accent/40"
 				/>
 				<div className="flex flex-wrap items-center gap-2">
 					<span className="min-w-0 flex-1 text-[10.5px] leading-snug text-ink-faint">
 						{open > 0
-							? `${open} question${open > 1 ? "s" : ""} sans réponse : en validant, le maître tranchera seul.`
+							? t("missionJourney.decision.unanswered", { count: open })
 							: feedback.trim()
-								? "Valider transmet aussi ta précision."
-								: "Rien ne part sans ton accord."}
+								? t("missionJourney.decision.withFeedback")
+								: t("missionJourney.decision.nothingWithoutYou")}
 					</span>
 					<Button
 						variant="outline"
@@ -1024,11 +1015,11 @@ function Decision({
 						title={
 							canCorrect
 								? undefined
-								: "Écris ce qui ne va pas : sans motif, le maître referait la même proposition."
+								: t("missionJourney.decision.correctTitle")
 						}
 						onClick={() => void send(false)}
 					>
-						Demander une nouvelle version
+						{t("missionJourney.decision.requestVersion")}
 					</Button>
 					<Button
 						variant="solid"
@@ -1037,7 +1028,7 @@ function Decision({
 						disabled={busy !== null}
 						onClick={() => void send(true)}
 					>
-						{COPY[step].approve}
+						{t(copyKey(step, "approve"))}
 					</Button>
 				</div>
 			</section>
@@ -1047,6 +1038,7 @@ function Decision({
 
 /** Ce qui a été décidé sur une étape passée. */
 function Verdict({ draft }: { draft: MissionDraft }) {
+	const { t } = useTranslation("components2");
 	const review = draft.review;
 	if (!review) return null;
 	return (
@@ -1065,7 +1057,8 @@ function Verdict({ draft }: { draft: MissionDraft }) {
 				)}
 			>
 				{review.approved ? <Check size={12} /> : <PenLine size={12} />}
-				{review.approved ? "Validée" : "Corrigée"} · {fromIso(review.at)}
+				{review.approved ? t("missionJourney.verdict.approved") : t("missionJourney.verdict.corrected")} ·{" "}
+				{fromIso(review.at)}
 			</div>
 			<ReviewDetails draft={draft} />
 		</div>
@@ -1073,6 +1066,7 @@ function Verdict({ draft }: { draft: MissionDraft }) {
 }
 
 function ReviewDetails({ draft }: { draft: MissionDraft }) {
+	const { t } = useTranslation("components2");
 	const review = draft.review;
 	if (!review) return null;
 	const pairs = draft.questions
@@ -1091,7 +1085,7 @@ function ReviewDetails({ draft }: { draft: MissionDraft }) {
 			))}
 			{review.feedback ? (
 				<p className="text-selectable text-[11.5px] leading-relaxed text-ink-muted">
-					« {review.feedback} »
+					{t("missionJourney.quoted", { text: review.feedback })}
 				</p>
 			) : null}
 		</>
@@ -1100,6 +1094,7 @@ function ReviewDetails({ draft }: { draft: MissionDraft }) {
 
 /** Les versions précédentes, avec ce qui leur a été reproché : le dialogue entier. */
 function Versions({ drafts, step }: { drafts: MissionDraft[]; step: MissionStep }) {
+	const { t } = useTranslation("components2");
 	const [open, setOpen] = useState(false);
 	if (drafts.length === 0) return null;
 	return (
@@ -1110,7 +1105,9 @@ function Versions({ drafts, step }: { drafts: MissionDraft[]; step: MissionStep 
 				className="focus-ring flex items-center gap-1.5 self-start rounded text-[11px] font-medium text-ink-faint hover:text-ink-muted"
 			>
 				<History size={12} />
-				{open ? "Masquer" : "Voir"} les versions précédentes · {drafts.length}
+				{open
+					? t("missionJourney.versions.hide", { count: drafts.length })
+					: t("missionJourney.versions.show", { count: drafts.length })}
 			</button>
 			{open
 				? drafts.map((draft, index) => (
@@ -1149,6 +1146,7 @@ function Versions({ drafts, step }: { drafts: MissionDraft[]; step: MissionStep 
 /* ── Le ticket, en lecture ─────────────────────────────────────────────── */
 
 function TicketReader({ reference, fallbackTitle }: { reference: string; fallbackTitle: string }) {
+	const { t } = useTranslation("components2");
 	const { notify } = useCockpit();
 	const issue = useAsync(
 		() => (reference ? api.feeds.linearIssue(reference) : Promise.resolve(null)),
@@ -1161,14 +1159,14 @@ function TicketReader({ reference, fallbackTitle }: { reference: string; fallbac
 			<div className="flex items-center gap-2 border-b border-line-soft px-5 py-2.5">
 				<Ticket size={13} className="shrink-0 text-accent-soft" />
 				<span className="text-[10px] font-semibold tracking-[0.08em] text-ink-faint uppercase">
-					Le ticket
+					{t("missionJourney.ticket.title")}
 				</span>
 				<span className="flex-1" />
 				{issue.data?.url ? (
 					<Button
 						size="sm"
 						icon={ExternalLink}
-						title="Ouvrir chez le fournisseur"
+						title={t("missionJourney.ticket.openExternal")}
 						onClick={() => {
 							void api.system
 								.openUrl(issue.data?.url ?? "")
@@ -1180,7 +1178,7 @@ function TicketReader({ reference, fallbackTitle }: { reference: string; fallbac
 			<div className="min-h-0 flex-1 overflow-y-auto px-5 py-4">
 				{!reference ? (
 					<p className="text-[12px] text-ink-faint">
-						Cette mission ne vient pas d'un ticket : « {fallbackTitle} ».
+						{t("missionJourney.ticket.noTicket", { title: fallbackTitle })}
 					</p>
 				) : issue.error ? (
 					<ErrorNote error={issue.error} onRetry={issue.reload} />
@@ -1220,7 +1218,7 @@ function TicketReader({ reference, fallbackTitle }: { reference: string; fallbac
 							</h2>
 							{issue.data.assignee ? (
 								<p className="mt-1 text-[10.5px] text-ink-faint">
-									Assigné à {issue.data.assignee.name}
+									{t("missionJourney.ticket.assignee", { name: issue.data.assignee.name })}
 								</p>
 							) : null}
 						</div>
@@ -1228,14 +1226,14 @@ function TicketReader({ reference, fallbackTitle }: { reference: string; fallbac
 						{issue.data.description ? (
 							<Markdown source={issue.data.description} />
 						) : (
-							<p className="text-[12px] text-ink-faint">Pas de description.</p>
+							<p className="text-[12px] text-ink-faint">{t("missionJourney.ticket.noDescription")}</p>
 						)}
 
 						{comments.length > 0 ? (
 							<div>
 								<div className="mb-2 flex items-center gap-1.5 text-[10px] font-semibold tracking-[0.08em] text-ink-faint uppercase">
 									<MessageSquare size={11} />
-									Commentaires · {comments.length}
+									{t("missionJourney.ticket.comments", { count: comments.length })}
 								</div>
 								<div className="flex flex-col gap-2.5">
 									{comments.map((comment) => (
@@ -1261,6 +1259,7 @@ function TicketReader({ reference, fallbackTitle }: { reference: string; fallbac
 
 /** Un repère discret pour la liste : où en est une mission guidée. */
 export function JourneyDots({ mission }: { mission: Mission }) {
+	const { t } = useTranslation("components2");
 	const current = currentIndex(mission);
 	return (
 		<span className="flex items-center gap-1">
@@ -1268,8 +1267,8 @@ export function JourneyDots({ mission }: { mission: Mission }) {
 				const phase = phaseOf(mission, index, current);
 				return (
 					<span
-						key={entry.label}
-						title={entry.label}
+						key={entry.id}
+						title={t(`missionJourney.journey.${entry.id}`)}
 						className={clsx(
 							"h-1.5 rounded-full transition-all",
 							phase === "yours" ? "w-4 bg-accent" : "w-1.5",

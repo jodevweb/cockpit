@@ -3,6 +3,8 @@ import type { Severity } from "@/lib/types";
 import { Badge, Dot } from "@/components/ui";
 import { fromTimestamp } from "@/lib/format";
 import type { Engagement, PermanenceVerdict } from "@/lib/types";
+import { useTranslation } from "react-i18next";
+import { locale, t as translate } from "@/i18n";
 
 /**
  * Ce que la Permanence a engagé, et ce qu'il en est advenu.
@@ -22,6 +24,7 @@ export function EngagementCard({
 	engagement: Engagement;
 	onOpen?: () => void;
 }) {
+	const { t } = useTranslation("components1");
 	const running = engagement.stage === "planning" || engagement.stage === "running";
 	const tone = verdictTone(engagement.verdict);
 	// Seuls l'échec et l'indécidable teintent la carte. « Hors sujet » et
@@ -49,13 +52,13 @@ export function EngagementCard({
 						{engagement.goal || engagement.label}
 					</p>
 					<p className="truncate text-[10.5px] text-ink-faint">
-						{engagement.trigger || "sans déclencheur"} · {engagement.label}
+						{engagement.trigger || t("engagementCard.noTrigger")} · {engagement.label}
 					</p>
 				</div>
 				{/* Une répétition rend le verdict « à blanc » : afficher les deux
 				    dirait deux fois la même chose. La mention ne reste que tant que
 				    la répétition court. */}
-				{engagement.rehearsal && running ? <Badge tone="accent">à blanc</Badge> : null}
+				{engagement.rehearsal && running ? <Badge tone="accent">{t("engagementCard.verdict.rehearsed")}</Badge> : null}
 				{!running ? <Badge tone={tone}>{verdictLabel(engagement.verdict)}</Badge> : null}
 			</div>
 
@@ -88,12 +91,12 @@ export function EngagementCard({
 			    atteinte. Sans oracle, l'engagement n'aurait pas dû partir. */}
 			<div className="flex items-center gap-2 rounded-lg bg-raised px-2 py-1.5">
 				<span className="shrink-0 text-[9.5px] tracking-[0.07em] text-ink-faint uppercase">
-					Oracle
+					{t("engagementCard.oracle")}
 				</span>
 				<span className="min-w-0 flex-1 truncate font-mono text-[10.5px] text-ink-muted">
 					{engagement.oracle?.kind
 						? `${engagement.oracle.kind} · ${engagement.oracle.key}`
-						: "aucun — n'aurait pas dû partir"}
+						: t("engagementCard.noOracle")}
 				</span>
 			</div>
 
@@ -105,19 +108,24 @@ export function EngagementCard({
 
 			<div className="mt-auto flex items-center gap-2 pt-0.5">
 				<span className="font-mono text-[10px] text-ink-faint">
-					{engagement.steps.length} étape(s)
+					{t("engagementCard.steps", { count: engagement.steps.length })}
 					{engagement.costUsd > 0 ? (
 						<span
-							title="ce que cela vaudrait aux tarifs de l'API ; sur un abonnement rien n'est débité, c'est le quota de la fenêtre qui se consomme"
+							title={t("engagementCard.costHint")}
 						>
 							{" · ≈ "}
-							{engagement.costUsd.toFixed(2).replace(".", ",")} $
+							{t("engagementCard.cost", {
+								amount: engagement.costUsd.toLocaleString(locale(), {
+									minimumFractionDigits: 2,
+									maximumFractionDigits: 2,
+								}),
+							})}
 						</span>
 					) : null}
 				</span>
 				<span className="ml-auto shrink-0 font-mono text-[10px] text-ink-faint">
 					{running
-						? `démarré ${fromTimestamp(engagement.startedAt)}`
+						? t("engagementCard.started", { when: fromTimestamp(engagement.startedAt) })
 						: fromTimestamp(engagement.endedAt || engagement.startedAt)}
 				</span>
 			</div>
@@ -125,17 +133,19 @@ export function EngagementCard({
 	);
 }
 
-const LABELS: Record<PermanenceVerdict, string> = {
-	pending: "en cours",
-	reached: "atteint",
-	missed: "manqué",
-	offTopic: "hors sujet",
-	undecided: "indécidable",
-	rehearsed: "à blanc",
-};
+const VERDICTS: readonly PermanenceVerdict[] = [
+	"pending",
+	"reached",
+	"missed",
+	"offTopic",
+	"undecided",
+	"rehearsed",
+];
 
 export function verdictLabel(verdict: PermanenceVerdict): string {
-	return LABELS[verdict] ?? verdict;
+	return VERDICTS.includes(verdict)
+		? translate(`components1:engagementCard.verdict.${verdict}`)
+		: verdict;
 }
 
 /**

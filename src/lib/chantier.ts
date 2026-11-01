@@ -1,5 +1,6 @@
 import type { AgentRun, Turn } from "@/app/agents";
 import type { ContextUsage } from "@/lib/types";
+import { t } from "@/i18n";
 
 /**
  * Lire un chantier comme un lieu, pas comme une suite de messages.
@@ -288,12 +289,13 @@ const SLICE_OF: Record<string, SliceKey> = {
 };
 
 const SLICE_LOOK: Record<SliceKey, { label: string; color: string }> = {
-	messages: { label: "Conversation", color: "var(--accent)" },
-	memory: { label: "Consignes du projet", color: "var(--agent-3)" },
+	// Libellés lus à l'accès (le `...` du calcul les fige au bon moment).
+	messages: { get label() { return t("lib:chantier.slices.messages"); }, color: "var(--accent)" },
+	memory: { get label() { return t("lib:chantier.slices.memory"); }, color: "var(--agent-3)" },
 	skills: { label: "Skills", color: "var(--agent-4)" },
 	mcp: { label: "MCP", color: "var(--agent-1)" },
-	system: { label: "Socle du CLI", color: "var(--ink-faint)" },
-	other: { label: "Autre", color: "var(--line)" },
+	system: { get label() { return t("lib:chantier.slices.system"); }, color: "var(--ink-faint)" },
+	other: { get label() { return t("lib:chantier.slices.other"); }, color: "var(--line)" },
 };
 
 /**

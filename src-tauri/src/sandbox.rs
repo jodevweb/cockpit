@@ -130,10 +130,10 @@ async fn build_default_image(runtime: &str) -> Result<(), String> {
 	let dir = std::env::temp_dir().join("cockpit-sandbox-build");
 	tokio::fs::create_dir_all(&dir)
 		.await
-		.map_err(|error| format!("dossier de build : {error}"))?;
+		.map_err(|error| crate::i18n::tf("sandbox.buildDir", &[("error", &error)]))?;
 	tokio::fs::write(dir.join("Dockerfile"), DEFAULT_DOCKERFILE)
 		.await
-		.map_err(|error| format!("écriture du Dockerfile : {error}"))?;
+		.map_err(|error| crate::i18n::tf("sandbox.writeDockerfile", &[("error", &error)]))?;
 
 	let output = Command::new(runtime)
 		.arg("build")
@@ -179,11 +179,7 @@ pub async fn ensure_image(runtime: &str, sandbox: &SandboxConfig) -> Result<(), 
 	}
 
 	if !declared.is_empty() {
-		return Err(format!(
-			"l'image « {image} » n'est pas disponible sur ce poste. Construis-la ou \
-			 récupère-la toi-même, ou laisse le champ vide dans Réglages → Missions \
-			 pour utiliser celle que Cockpit sait fabriquer."
-		));
+		return Err(crate::i18n::tf("sandbox.imageMissing", &[("image", &image)]));
 	}
 
 	build_default_image(runtime).await
@@ -645,7 +641,7 @@ fn bridge_files(root: &std::path::Path, cwd: &str) -> Vec<std::path::PathBuf> {
 /// `claude setup-token` tapé à la main.
 pub fn login_command() -> Result<String, String> {
 	let claude = crate::agent::claude_binary()
-		.ok_or_else(|| "Le CLI `claude` est introuvable sur ce poste.".to_string())?;
+		.ok_or_else(|| crate::i18n::t("sandbox.claudeNotFound"))?;
 	let account_dir = sandbox_account_dir();
 	std::fs::create_dir_all(&account_dir).map_err(|error| error.to_string())?;
 

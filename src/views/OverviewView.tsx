@@ -11,6 +11,7 @@ import {
 	Rocket,
 } from "lucide-react";
 import { useMemo, type ReactNode } from "react";
+import { useTranslation } from "react-i18next";
 import { BarList, Gauge, Sparkline, StackedBar } from "@/components/Charts";
 import {
 	Button,
@@ -213,6 +214,7 @@ function Line({
  * les seuls blocages dont on est soi-même la cause.
  */
 export function OverviewView() {
+	const { t } = useTranslation("views");
 	const { worktrees, worktreesLoading, go, notify, missions, missionsLoading } =
 		useCockpit();
 	const sessions = useAllSessions();
@@ -298,13 +300,13 @@ export function OverviewView() {
 		const drafts = list.filter((pr) => pr.isDraft).length;
 		const review = list.length - ready.length - broken.length - stacked.length - drafts;
 		return [
-			{ label: "prêtes", value: ready.length, color: "var(--color-success)" },
-			{ label: "CI ✗", value: broken.length, color: "var(--color-critical)" },
-			{ label: "empilées", value: stacked.length, color: "var(--color-warning)" },
-			{ label: "en review", value: Math.max(0, review), color: "var(--color-ink-faint)" },
-			{ label: "brouillons", value: drafts, color: "var(--color-accent-dim)" },
+			{ label: t("overview.prSegments.ready"), value: ready.length, color: "var(--color-success)" },
+			{ label: t("overview.prSegments.ciFailing"), value: broken.length, color: "var(--color-critical)" },
+			{ label: t("overview.prSegments.stacked"), value: stacked.length, color: "var(--color-warning)" },
+			{ label: t("overview.prSegments.inReview"), value: Math.max(0, review), color: "var(--color-ink-faint)" },
+			{ label: t("overview.prSegments.drafts"), value: drafts, color: "var(--color-accent-dim)" },
 		];
-	}, [prs.data, ready.length, broken.length, stacked.length]);
+	}, [prs.data, ready.length, broken.length, stacked.length, t]);
 
 	const errorsByProject = useMemo(() => {
 		const counts = new Map<string, number>();
@@ -359,19 +361,21 @@ export function OverviewView() {
 	return (
 		<>
 			<ViewHeader
-				title="Vue d'ensemble"
-				subtitle="L'état du produit, de la flotte et des missions"
+				title={t("overview.title")}
+				subtitle={t("overview.subtitle")}
 				actions={
 					<>
 						{/* Un cercle isolé en haut à droite ne disait pas ce qu'il
 						    attendait ; le compte de sources encore en route, si. */}
 						{loading ? (
 							<span className="font-mono text-[10px] text-ink-faint">
-								{[boardLoading, prsLoading, sentryLoading, docsLoading].filter(Boolean)
-									.length || ""}
 								{loading && !tilesLoading && !docsLoading
-									? "actualisation…"
-									: " sources en route…"}
+									? t("overview.refreshing")
+									: t("overview.sourcesLoading", {
+											count: [boardLoading, prsLoading, sentryLoading, docsLoading].filter(
+												Boolean,
+											).length,
+										})}
 							</span>
 						) : null}
 						<Button
@@ -407,8 +411,7 @@ export function OverviewView() {
 						>
 							<Dot tone="critical" pulse />
 							<span className="shrink-0 text-[12.5px] font-medium text-ink">
-								{waiting.length} agent{waiting.length > 1 ? "s" : ""} attend
-								{waiting.length > 1 ? "ent" : ""} ta réponse
+								{t("overview.waitingBanner", { count: waiting.length })}
 							</span>
 							<span className="min-w-0 flex-1 truncate text-[11px] text-ink-faint">
 								{waiting.map((session) => session.gitBranch ?? session.title).join(" · ")}
@@ -427,15 +430,15 @@ export function OverviewView() {
 							: null}
 						{tilesLoading ? null : [
 							{
-								label: "Agents actifs",
+								label: t("overview.tiles.liveAgents"),
 								value: live.length,
 								tone: live.length > 0 ? ("success" as const) : undefined,
-								hint: waiting.length > 0 ? `${waiting.length} en attente` : undefined,
+								hint: waiting.length > 0 ? t("overview.tiles.waiting", { count: waiting.length }) : undefined,
 								view: "agents" as const,
 								always: false,
 							},
 							{
-								label: "Prêtes à merger",
+								label: t("overview.tiles.readyToMerge"),
 								value: ready.length,
 								tone: ready.length > 0 ? ("success" as const) : undefined,
 								hint: undefined,
@@ -443,7 +446,7 @@ export function OverviewView() {
 								always: false,
 							},
 							{
-								label: "CI en échec",
+								label: t("overview.tiles.ciFailing"),
 								value: broken.length,
 								tone: broken.length > 0 ? ("critical" as const) : undefined,
 								hint: undefined,
@@ -451,7 +454,7 @@ export function OverviewView() {
 								always: false,
 							},
 							{
-								label: "Bloquants daily",
+								label: t("overview.tiles.dailyBlockers"),
 								value: redFlags.length,
 								tone: redFlags.length > 0 ? ("critical" as const) : undefined,
 								hint: undefined,
@@ -459,7 +462,7 @@ export function OverviewView() {
 								always: false,
 							},
 							{
-								label: "Erreurs prod",
+								label: t("overview.tiles.prodErrors"),
 								value: critical.length,
 								tone: critical.length > 0 ? ("warning" as const) : undefined,
 								hint: undefined,
@@ -467,10 +470,10 @@ export function OverviewView() {
 								always: false,
 							},
 							{
-								label: "Worktrees actifs",
+								label: t("overview.tiles.activeWorktrees"),
 								value: dirty.length,
 								tone: undefined,
-								hint: `${worktrees.length} au total`,
+								hint: t("overview.tiles.total", { count: worktrees.length }),
 								view: "worktrees" as const,
 								always: true,
 							},
@@ -494,7 +497,7 @@ export function OverviewView() {
 
 					<div className="columns-1 gap-3 lg:columns-2 xl:columns-3 [&>*]:mb-3 [&>*]:break-inside-avoid">
 						<Panel
-							title="Consommation Claude"
+							title={t("overview.usage.title")}
 							icon={Gauge2}
 							loading={usage.initial && usage.loading}
 							rows={4}
@@ -504,34 +507,34 @@ export function OverviewView() {
 									<Sparkline
 										values={usageDays.map((day) => day.value)}
 										labels={usageDays.map(
-											(day) => `${day.key} : ${compactNumber(day.value)} jetons`,
+											(day) => t("overview.usage.dayLabel", { day: day.key, tokens: compactNumber(day.value) }),
 										)}
 									/>
 									<p className="mt-1 text-[10px] text-ink-faint">
-										{compactNumber(
-											(usage.data?.today.input ?? 0) +
-												(usage.data?.today.output ?? 0) +
-												(usage.data?.today.cacheWrite ?? 0),
-										)}{" "}
-										aujourd'hui ·{" "}
-										{compactNumber(
-											(usage.data?.last7Days.input ?? 0) +
-												(usage.data?.last7Days.output ?? 0) +
-												(usage.data?.last7Days.cacheWrite ?? 0),
-										)}{" "}
-										sur 7 jours · 21 derniers jours
+										{t("overview.usage.summary", {
+											today: compactNumber(
+												(usage.data?.today.input ?? 0) +
+													(usage.data?.today.output ?? 0) +
+													(usage.data?.today.cacheWrite ?? 0),
+											),
+											week: compactNumber(
+												(usage.data?.last7Days.input ?? 0) +
+													(usage.data?.last7Days.output ?? 0) +
+													(usage.data?.last7Days.cacheWrite ?? 0),
+											),
+										})}
 									</p>
 								</>
 							) : (
 								<p className="px-1 py-2 text-[11px] text-ink-faint">
-									Pas encore de mesure.
+									{t("overview.usage.none")}
 								</p>
 							)}
 						</Panel>
 
 						{(prs.data ?? []).length > 0 ? (
 							<Panel
-								title="État des PR"
+								title={t("overview.prState")}
 								icon={GitPullRequest}
 								count={prs.data?.length}
 								loading={prsLoading}
@@ -541,21 +544,21 @@ export function OverviewView() {
 							</Panel>
 						) : null}
 
-						<Panel title="Cycle en cours" icon={Rocket} loading={boardLoading} rows={2}>
+						<Panel title={t("overview.cycle.title")} icon={Rocket} loading={boardLoading} rows={2}>
 							{cycle.total > 0 ? (
 								<>
-									<Gauge value={cycle.done} total={cycle.total} label="tickets terminés" />
+									<Gauge value={cycle.done} total={cycle.total} label={t("overview.cycle.ticketsDone")} />
 									{reviewLoad.length > 0 ? (
 										<div className="mt-2.5">
 											<div className="mb-1 text-[10px] tracking-[0.06em] text-ink-faint uppercase">
-												PR à reviewer
+												{t("overview.cycle.reviewLoad")}
 											</div>
 											<BarList rows={reviewLoad} />
 										</div>
 									) : null}
 								</>
 							) : (
-								<p className="px-1 py-2 text-[11px] text-ink-faint">Aucun cycle actif.</p>
+								<p className="px-1 py-2 text-[11px] text-ink-faint">{t("overview.cycle.none")}</p>
 							)}
 						</Panel>
 					</div>
@@ -570,15 +573,14 @@ export function OverviewView() {
 						    missions. C'est pourtant le cœur de l'outil — du travail confié
 						    à des agents, qui avance pendant qu'on regarde ailleurs. */}
 						<Panel
-							title="Missions"
+							title={t("overview.missions.title")}
 							icon={ListChecks}
 							count={liveMissions.length}
 							loading={missionsLoading}
 						>
 							{liveMissions.length === 0 ? (
 								<p className="px-1 py-2 text-[11px] text-ink-faint">
-									Aucune mission en cours. Une mission découpe un ticket en tâches
-									confiées à des agents.
+									{t("overview.missions.none")}
 								</p>
 							) : (
 								<div className="flex flex-col gap-0.5">
@@ -595,9 +597,11 @@ export function OverviewView() {
 												key={mission.id}
 												primary={mission.title}
 												secondary={
-													total > 0 ? `${finies}/${total} livrées` : "en découpage"
+													total > 0
+													? t("overview.missions.delivered", { done: finies, total })
+													: t("overview.missions.splitting")
 												}
-												trailing={actives > 0 ? `${actives} en cours` : undefined}
+												trailing={actives > 0 ? t("overview.missions.running", { count: actives }) : undefined}
 												tone={
 													awaitsHuman(mission) ? "text-accent-soft" : undefined
 												}
@@ -610,14 +614,14 @@ export function OverviewView() {
 						</Panel>
 
 						<Panel
-							title="Production"
+							title={t("overview.production.title")}
 							icon={AlertTriangle}
 							count={critical.length}
 							loading={sentryLoading}
 						>
 							{critical.length === 0 ? (
 								<p className="px-1 py-2 text-[11px] text-ink-faint">
-									Aucune erreur critique sur 14 jours.
+									{t("overview.production.none")}
 								</p>
 							) : (
 								<div className="flex flex-col gap-0.5">
@@ -643,14 +647,14 @@ export function OverviewView() {
 
 						{broken.length + stacked.length > 0 ? (
 						<Panel
-							title="Flux des PR"
+							title={t("overview.prFlow.title")}
 							icon={GitPullRequest}
 							count={prs.data?.length}
 							loading={prsLoading}
 							rows={4}
 							action={
 								<Button size="sm" onClick={() => go("delivery")}>
-									Voir
+									{t("overview.prFlow.see")}
 								</Button>
 							}
 						>
@@ -659,7 +663,7 @@ export function OverviewView() {
 									<Line
 										key={pr.number}
 										primary={`#${pr.number} ${pr.title}`}
-										secondary="CI ✗"
+										secondary={t("overview.prSegments.ciFailing")}
 										chips={prChips(pr.labels)}
 										tone="text-critical"
 										onClick={() => open(pr.url)}
@@ -672,7 +676,7 @@ export function OverviewView() {
 									<Line
 										key={pr.number}
 										primary={`#${pr.number} ${pr.title}`}
-										secondary={`empilée sur ${pr.baseRef}`}
+										secondary={t("overview.prFlow.stackedOn", { base: pr.baseRef })}
 										chips={prChips(pr.labels)}
 										tone="text-warning"
 										onClick={() => open(pr.url)}
@@ -681,8 +685,8 @@ export function OverviewView() {
 								{broken.length === 0 && stacked.length === 0 ? (
 									<p className="px-1 py-2 text-[11px] text-ink-faint">
 										{ready.length > 0
-											? `${ready.length} PR prête${ready.length > 1 ? "s" : ""} à merger, rien de cassé.`
-											: "Aucune PR en échec."}
+											? t("overview.prFlow.ready", { count: ready.length })
+											: t("overview.prFlow.noneFailing")}
 									</p>
 								) : null}
 							</div>
@@ -690,14 +694,14 @@ export function OverviewView() {
 						) : null}
 
 						<Panel
-							title="Flotte"
+							title={t("overview.fleet.title")}
 							icon={Layers}
 							count={dirty.length}
 							loading={worktrees.length === 0 && worktreesLoading}
 						>
 							{dirty.length === 0 ? (
 								<p className="px-1 py-2 text-[11px] text-ink-faint">
-									Tous les arbres sont propres.
+									{t("overview.fleet.allClean")}
 								</p>
 							) : (
 								<div className="flex flex-col gap-0.5">
@@ -705,9 +709,9 @@ export function OverviewView() {
 										<Line
 											key={tree.path}
 											primary={tree.branch ?? tree.folderName}
-											secondary={`${
-												tree.status.modified + tree.status.staged + tree.status.untracked
-											} modif.`}
+											secondary={t("overview.fleet.changes", {
+												count: tree.status.modified + tree.status.staged + tree.status.untracked,
+											})}
 											trailing={fromTimestamp(tree.lastActivity)}
 											onClick={() => go("worktrees", { worktreePath: tree.path })}
 										/>
@@ -718,13 +722,13 @@ export function OverviewView() {
 
 						{redFlags.length > 0 ? (
 							<Panel
-								title="Bloquants du daily"
+								title={t("overview.daily.title")}
 								icon={Rocket}
 								count={redFlags.length}
 								loading={boardLoading}
 								action={
 									<Button size="sm" onClick={() => go("team")}>
-										Daily
+										{t("overview.daily.button")}
 									</Button>
 								}
 							>
@@ -748,14 +752,14 @@ export function OverviewView() {
 
 						{(docs.data ?? []).length > 0 ? (
 						<Panel
-							title="Derniers livrables"
+							title={t("overview.docs.title")}
 							icon={FileText}
 							count={docs.data?.length}
 							loading={docsLoading}
 						>
 							{(docs.data ?? []).length === 0 ? (
 								<p className="px-1 py-2 text-[11px] text-ink-faint">
-									Aucun document récent.
+									{t("overview.docs.none")}
 								</p>
 							) : (
 								<div className="flex flex-col gap-0.5">
@@ -776,15 +780,15 @@ export function OverviewView() {
 
 					{board.data?.githubError ? (
 						<p className="text-center text-[10px] text-ink-faint">
-							GitHub : {board.data.githubError}
+							{t("overview.githubError", { error: board.data.githubError })}
 						</p>
 					) : null}
 
 					{worktrees.length === 0 && sessions.length === 0 && !loading ? (
 						<Empty
 							icon={GitMerge}
-							message="Rien à afficher"
-							hint="Vérifie `general.main_repo` dans Réglages."
+							message={t("overview.empty.message")}
+							hint={t("overview.empty.hint")}
 						/>
 					) : null}
 				</div>

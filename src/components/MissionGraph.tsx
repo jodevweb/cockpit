@@ -26,6 +26,7 @@ import {
 } from "lucide-react";
 import { AnimatePresence, motion } from "motion/react";
 import { useEffect, useMemo, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { Markdown } from "@/components/Markdown";
 import { Badge, Button } from "@/components/ui";
 import { useCockpit } from "@/app/store";
@@ -122,6 +123,7 @@ export function MissionGraph({
 	/** Le nœud du ticket ; inutile quand le ticket est déjà affiché à côté. */
 	withTicket?: boolean;
 }) {
+	const { t } = useTranslation("components2");
 	const roles = useAsync(() => api.missions.roles(), []);
 	const [selected, setSelected] = useState<string | null>(null);
 
@@ -172,8 +174,8 @@ export function MissionGraph({
 			data: {
 				kind: "ticket",
 				phase: "done",
-				eyebrow: "ticket",
-				title: mission.ticket || "Sans ticket",
+				eyebrow: t("missionGraph.ticket.eyebrow"),
+				title: mission.ticket || t("missionGraph.ticket.none"),
 				detail: mission.title,
 			},
 		});
@@ -184,12 +186,12 @@ export function MissionGraph({
 			data: {
 				kind: "master",
 				phase: masterPhase,
-				eyebrow: "maître",
-				title: "Supervise la mission",
+				eyebrow: t("missionGraph.master.eyebrow"),
+				title: t("missionGraph.master.title"),
 				detail:
 					masterPhase === "yours"
-						? "attend ta décision"
-						: activity?.master?.last || (masterBusy ? "travaille…" : "en retrait"),
+						? t("missionGraph.master.awaitingYou")
+						: activity?.master?.last || (masterBusy ? t("missionGraph.working") : t("missionGraph.master.idle")),
 			},
 		});
 		if (withTicket) edges.push(edge("ticket", "master", "done", masterPhase));
@@ -214,17 +216,17 @@ export function MissionGraph({
 						detail:
 							phase === "live" || phase === "yours"
 								? phase === "yours"
-									? "te demande une autorisation"
-									: live?.last || "travaille…"
+									? t("missionGraph.task.asksPermission")
+									: live?.last || t("missionGraph.working")
 								: phase === "done"
 									? task.verdict === "blocking"
-										? "a refusé le travail"
-										: "a rendu sa copie"
+										? t("missionGraph.task.rejected")
+										: t("missionGraph.task.delivered")
 									: phase === "failed"
-										? task.note || "a échoué"
+										? task.note || t("missionGraph.task.failed")
 										: task.scope.length > 0
 											? task.scope.join(" · ")
-											: "attend son tour",
+											: t("missionGraph.task.waiting"),
 						verifies: verifying.has(task.role),
 						attempts: task.attempts,
 						selected: selected === task.id,
@@ -272,14 +274,14 @@ export function MissionGraph({
 				data: {
 					kind: "pr",
 					phase: prPhase,
-					eyebrow: "pull request",
-					title: mission.prUrl ? "Ouverte" : "À ouvrir",
+					eyebrow: t("missionGraph.pr.eyebrow"),
+					title: mission.prUrl ? t("missionGraph.pr.open") : t("missionGraph.pr.toOpen"),
 					detail:
 						prPhase === "live"
-							? "le maître recompose"
+							? t("missionGraph.pr.recomposing")
 							: mission.prUrl
 								? mission.prUrl.replace(/^https?:\/\//, "")
-								: "une fois tout vérifié",
+								: t("missionGraph.pr.onceVerified"),
 				},
 			});
 			const last = verifiers.length > 0 ? verifiers : leaves;
@@ -292,7 +294,7 @@ export function MissionGraph({
 		for (const node of nodes) node.data.vertical = vertical;
 		return { nodes, edges };
 		// eslint-disable-next-line react-hooks/exhaustive-deps
-	}, [mission, activity, verifying, selected, roles.data, vertical, withTicket]);
+	}, [mission, activity, verifying, selected, roles.data, vertical, withTicket, t]);
 
 	// Mis à jour en direct pendant l'exécution : sans les tailles mesurées, une
 	// série de changements laissait les nœuds invisibles (voir `useNodeSizes`).
@@ -403,15 +405,8 @@ function edge(source: string, target: string, from?: Phase, to?: Phase): Edge {
 
 const ICONS = { ticket: Ticket, master: Bot, pr: GitPullRequest, task: FolderTree };
 
-const PHASE_LABEL: Record<Phase, string> = {
-	done: "fait",
-	live: "travaille",
-	wait: "attend",
-	failed: "échec",
-	yours: "à toi",
-};
-
 function CockpitNode({ data }: NodeProps<Node<GraphData>>) {
+	const { t } = useTranslation("components2");
 	const Icon = data.verifies ? ShieldCheck : ICONS[data.kind];
 	const live = data.phase === "live";
 	return (
@@ -456,7 +451,7 @@ function CockpitNode({ data }: NodeProps<Node<GraphData>>) {
 				{data.attempts && data.attempts > 0 ? (
 					<span
 						className="flex items-center gap-0.5 font-mono text-[9.5px] text-warning"
-						title="Renvoyée en correction"
+						title={t("missionGraph.sentBack")}
 					>
 						<RotateCcw size={9} />
 						{data.attempts}
@@ -472,7 +467,7 @@ function CockpitNode({ data }: NodeProps<Node<GraphData>>) {
 						data.phase === "failed" && "bg-critical/12 text-critical",
 					)}
 				>
-					{PHASE_LABEL[data.phase]}
+					{t(`missionGraph.phase.${data.phase}`)}
 				</span>
 			</div>
 			<div className="line-clamp-2 text-[12.5px] leading-snug font-semibold text-ink">
@@ -498,11 +493,12 @@ function CockpitNode({ data }: NodeProps<Node<GraphData>>) {
 const NODE_TYPES = { cockpit: CockpitNode };
 
 function Legend() {
+	const { t } = useTranslation("components2");
 	const items: Array<[string, string]> = [
-		["bg-success", "fait"],
-		["bg-accent", "travaille"],
-		["bg-warning", "à toi"],
-		["bg-line", "attend"],
+		["bg-success", t("missionGraph.phase.done")],
+		["bg-accent", t("missionGraph.phase.live")],
+		["bg-warning", t("missionGraph.phase.yours")],
+		["bg-line", t("missionGraph.phase.wait")],
 	];
 	return (
 		<div className="pointer-events-none absolute top-3 left-3 flex items-center gap-3 rounded-full bg-surface/90 px-3 py-1 text-[10.5px] text-ink-muted shadow-card backdrop-blur">
@@ -530,6 +526,7 @@ function TaskDetail({
 	activity: AgentActivity | null;
 	onClose: () => void;
 }) {
+	const { t } = useTranslation("components2");
 	const { go, worktrees } = useCockpit();
 	const { show } = useWorkspace();
 	return (
@@ -547,12 +544,12 @@ function TaskDetail({
 						{task.title}
 					</h3>
 				</div>
-				<Button size="sm" icon={X} title="Fermer" onClick={onClose} />
+				<Button size="sm" icon={X} title={t("missionGraph.detail.close")} onClick={onClose} />
 			</div>
 
 			{activity?.running ? (
 				<div className="rounded-xl bg-accent-dim px-3 py-2 font-mono text-[11px] text-accent">
-					{activity.last || "travaille…"}
+					{activity.last || t("missionGraph.working")}
 				</div>
 			) : null}
 
@@ -576,7 +573,7 @@ function TaskDetail({
 			{task.reproaches?.length ? (
 				<div className="rounded-xl border border-warning/30 bg-warning/[0.06] p-2.5">
 					<div className="mb-1 text-[10px] font-semibold tracking-[0.08em] text-warning uppercase">
-						Reprises · {task.reproaches.length}
+						{t("missionGraph.detail.reproaches", { count: task.reproaches.length })}
 					</div>
 					<ol className="flex list-decimal flex-col gap-1 pl-4 text-[11.5px] text-ink-muted">
 						{task.reproaches.map((reason, index) => (
@@ -589,7 +586,7 @@ function TaskDetail({
 			{task.brief ? (
 				<details className="text-[12px]">
 					<summary className="cursor-pointer text-[11px] font-medium text-accent">
-						Sa consigne complète
+						{t("missionGraph.detail.fullBrief")}
 					</summary>
 					<div className="mt-2">
 						<Markdown source={task.brief} />
@@ -610,10 +607,10 @@ function TaskDetail({
 							go("workspace");
 						}}
 					>
-						Suivre sa conversation
+						{t("missionGraph.detail.follow")}
 					</Button>
 				) : (
-					<span className="text-[11px] text-ink-faint">Pas encore d'agent sur cette tâche.</span>
+					<span className="text-[11px] text-ink-faint">{t("missionGraph.detail.noAgent")}</span>
 				)}
 			</div>
 		</motion.aside>

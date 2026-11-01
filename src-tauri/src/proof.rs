@@ -239,11 +239,10 @@ fn assemble(recording: Recording) -> Option<Film> {
 		ANNONCE.get_or_init(|| {
 			crate::journal::record(
 				"agent",
-				"Preuve filmée indisponible",
-				"ffmpeg introuvable",
+				&crate::i18n::t("proof.unavailable"),
+				&crate::i18n::t("proof.ffmpegMissing"),
 				false,
-				"Les images de la recette sont gardées, mais aucune vidéo n'en est montée. \
-				 Installe ffmpeg (`brew install ffmpeg`) pour la retrouver sous les conclusions.",
+				&crate::i18n::t("proof.ffmpegHint"),
 			);
 		});
 		return None;

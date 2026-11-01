@@ -145,6 +145,6 @@ export function WorkspaceProvider({ children }: { children: ReactNode }) {
 
 export function useWorkspace(): WorkspaceStore {
 	const store = useContext(Context);
-	if (!store) throw new Error("useWorkspace doit être utilisé dans WorkspaceProvider");
+	if (!store) throw new Error("useWorkspace must be used inside WorkspaceProvider");
 	return store;
 }

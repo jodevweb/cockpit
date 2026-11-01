@@ -1,6 +1,8 @@
 import { LogIn, Plus, RefreshCw, Trash2 } from "lucide-react";
 import { useCallback, useEffect, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { Badge, Button, Dot, Field, Spinner, TextInput } from "@/components/ui";
+import { t as translate } from "@/i18n";
 import { api } from "@/lib/ipc";
 import type { Account, AccountStatus } from "@/lib/types";
 import { useCockpit } from "@/app/store";
@@ -28,9 +30,9 @@ import { useTerminalActions } from "@/app/terminals";
  */
 function identity(status: AccountStatus): string {
 	if (status.error) return status.error;
-	if (!status.loggedIn) return "Pas encore connecté sur ce poste.";
+	if (!status.loggedIn) return translate("components2:accounts.notLoggedIn");
 
-	const parts = [status.email || "connecté"];
+	const parts = [status.email || translate("components2:accounts.loggedIn")];
 	if (status.plan) parts.push(status.plan);
 	if (status.organization && !status.organization.includes(status.email)) {
 		parts.push(status.organization);
@@ -50,6 +52,7 @@ function slugify(label: string): string {
 }
 
 export function AccountsSettings() {
+	const { t } = useTranslation("components2");
 	const { config, reloadConfig, notify } = useCockpit();
 	const { open: openTerminal } = useTerminalActions();
 	const [statuses, setStatuses] = useState<AccountStatus[]>([]);
@@ -102,11 +105,11 @@ export function AccountsSettings() {
 		const label = draft.label.trim();
 		const id = slugify(label);
 		if (!id) {
-			notify("Donne un nom au compte : c'est ce qui le distingue.");
+			notify(t("accounts.nameRequired"));
 			return;
 		}
 		if (statuses.some((status) => status.id === id)) {
-			notify(`Un compte s'appelle déjà « ${label} ».`);
+			notify(t("accounts.nameTaken", { label }));
 			return;
 		}
 		await save([...declared(), { id, label, dir: draft.dir.trim() || `~/.claude-${id}` }]);
@@ -141,7 +144,7 @@ export function AccountsSettings() {
 	const login = (status: AccountStatus) => {
 		openTerminal(status.resolvedDir, {
 			command: "claude auth login",
-			label: `Connexion — ${status.label}`,
+			label: t("accounts.loginTerminal", { label: status.label }),
 			account: status.id,
 		});
 		void api.accounts.refresh();
@@ -150,16 +153,12 @@ export function AccountsSettings() {
 	return (
 		<div className="flex flex-col gap-2">
 			<p className="text-[11px] leading-relaxed text-ink-faint">
-				Un compte, c'est l'identité sous laquelle les agents travaillent — pas le
-				programme qui les fait tourner, c'est le rôle des moteurs. Chacun a son dossier
-				de configuration : le cockpit le désigne, le CLI s'y connecte lui-même, et aucun
-				jeton ne passe par ici. Un projet rattaché à un compte lui envoie tout — ses
-				agents, ses terminaux, ses plafonds.
+				{t("accounts.intro")}
 			</p>
 
 			{loading && statuses.length === 0 ? (
 				<div className="flex items-center gap-2 p-3 text-[11px] text-ink-faint">
-					<Spinner /> On demande à chaque compte qui il est…
+					<Spinner /> {t("accounts.loading")}
 				</div>
 			) : null}
 
@@ -181,7 +180,7 @@ export function AccountsSettings() {
 								</span>
 							</div>
 							{status.loggedIn && status.plan ? <Badge>{status.plan}</Badge> : null}
-							{attached ? <Badge tone="accent">projet ouvert</Badge> : null}
+							{attached ? <Badge tone="accent">{t("accounts.openProject")}</Badge> : null}
 						</div>
 
 						<div className="flex items-center gap-2">
@@ -197,11 +196,11 @@ export function AccountsSettings() {
 
 						<div className="flex items-center gap-2">
 							<Button size="sm" icon={LogIn} onClick={() => login(status)}>
-								{status.loggedIn ? "Reconnecter" : "Se connecter"}
+								{status.loggedIn ? t("accounts.reconnect") : t("accounts.connect")}
 							</Button>
 							{activeProject && !attached ? (
 								<Button size="sm" disabled={busy} onClick={() => void attach(status)}>
-									Rattacher « {activeProject.name} »
+									{t("accounts.attach", { name: activeProject.name })}
 								</Button>
 							) : null}
 							<div className="flex-1" />
@@ -218,7 +217,7 @@ export function AccountsSettings() {
 										void save(declared().filter((entry) => entry.id !== status.id))
 									}
 								>
-									Retirer
+									{t("accounts.remove")}
 								</Button>
 							) : null}
 						</div>
@@ -231,20 +230,20 @@ export function AccountsSettings() {
 			    de la dernière ligne. */}
 			<div className="flex items-end gap-2 rounded-xl bg-void/40 p-2.5">
 				<span className="mb-1.5 shrink-0 text-[10px] font-semibold tracking-[0.06em] text-ink-faint uppercase">
-					Nouveau
+					{t("accounts.new")}
 				</span>
-				<Field label="Nom" hint="celui qu'on lira dans les écrans">
+				<Field label={t("accounts.nameLabel")} hint={t("accounts.nameHint")}>
 					<TextInput
 						value={draft.label}
 						onChange={(label) => setDraft((current) => ({ ...current, label }))}
-						placeholder="Compte entreprise"
+						placeholder={t("accounts.namePlaceholder")}
 					/>
 				</Field>
-				<Field label="Dossier" hint="vide = ~/.claude-<nom>">
+				<Field label={t("accounts.dirLabel")} hint={t("accounts.dirHint")}>
 					<TextInput
 						value={draft.dir}
 						onChange={(dir) => setDraft((current) => ({ ...current, dir }))}
-						placeholder={draft.label ? `~/.claude-${slugify(draft.label)}` : "~/.claude-travail"}
+						placeholder={draft.label ? `~/.claude-${slugify(draft.label)}` : t("accounts.dirPlaceholder")}
 						mono
 					/>
 				</Field>
@@ -254,18 +253,17 @@ export function AccountsSettings() {
 					disabled={busy || !draft.label.trim()}
 					onClick={() => void add()}
 				>
-					Ajouter
+					{t("accounts.add")}
 				</Button>
 			</div>
 
 			<div className="flex items-center gap-2">
 				<span className="text-[10px] text-ink-faint">
-					Le dossier est créé à l'ajout ; la connexion se fait ensuite dans un terminal,
-					comme on la ferait à la main.
+					{t("accounts.footer")}
 				</span>
 				<div className="flex-1" />
 				<Button size="sm" icon={RefreshCw} disabled={loading} onClick={() => void load(true)}>
-					{loading ? "Lecture…" : "Relire les comptes"}
+					{loading ? t("accounts.reading") : t("accounts.reload")}
 				</Button>
 			</div>
 		</div>

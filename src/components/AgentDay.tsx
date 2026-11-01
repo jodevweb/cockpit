@@ -8,6 +8,8 @@ import { duration } from "@/lib/format";
 import { api } from "@/lib/ipc";
 import type { Execution } from "@/lib/types";
 import { useAsync } from "@/lib/useAsync";
+import { useTranslation } from "react-i18next";
+import { locale, t as translate } from "@/i18n";
 
 /**
  * La journée des agents : une ligne par agent, une barre par période de travail.
@@ -51,7 +53,7 @@ function labelOf(run: Execution): { label: string; sub: string } {
 	const folder = run.cwd.split("/").filter(Boolean).pop() ?? run.cwd;
 	const role = run.origin.role && run.origin.role !== "me" ? run.origin.role : "";
 	if (role) return { label: role, sub: folder };
-	return { label: folder, sub: run.origin.actor === "permanence" ? "Permanence" : run.model };
+	return { label: folder, sub: run.origin.actor === "permanence" ? translate("components1:agentDay.permanence") : run.model };
 }
 
 function cost(run: Execution): number {
@@ -59,6 +61,7 @@ function cost(run: Execution): number {
 }
 
 export function AgentDay() {
+	const { t } = useTranslation("components1");
 	const { go } = useCockpit();
 	const { show } = useWorkspace();
 	const runs = useAsync(() => api.executions.recent(12), [], { pollMs: 30_000 });
@@ -105,7 +108,7 @@ export function AgentDay() {
 		const first = new Date(from);
 		first.setMinutes(0, 0, 0);
 		const step = to - from > 8 * 3600_000 ? 2 : 1;
-		for (let t = first.getTime() + 3600_000; t < to; t += step * 3600_000) ticks.push(t);
+		for (let tick = first.getTime() + 3600_000; tick < to; tick += step * 3600_000) ticks.push(tick);
 		return { lanes, from, to, ticks };
 		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, [runs.data]);
@@ -128,27 +131,27 @@ export function AgentDay() {
 					<Activity size={14} />
 				</span>
 				<div className="min-w-0 flex-1">
-					<h2 className="text-[13px] font-semibold text-ink">La journée des agents</h2>
+					<h2 className="text-[13px] font-semibold text-ink">{t("agentDay.title")}</h2>
 					<p className="text-[11px] text-ink-faint">
 						{lanes.length === 0
-							? "Aucun agent n'a tourné ces dernières heures."
+							? t("agentDay.summary.none")
 							: busy > 0
-								? `${busy} au travail en ce moment · ${lanes.length} depuis ce matin`
-								: `${lanes.length} agent${lanes.length > 1 ? "s" : ""} ces dernières heures, aucun au travail`}
+								? t("agentDay.summary.busy", { busy, count: lanes.length })
+								: t("agentDay.summary.idle", { count: lanes.length })}
 					</p>
 				</div>
 				<div className="flex items-center gap-3 text-[10.5px] text-ink-muted">
 					<span className="flex items-center gap-1.5">
 						<span className="size-2 rounded-full bg-accent" />
-						travaille
+						{t("agentDay.legend.working")}
 					</span>
 					<span className="flex items-center gap-1.5">
 						<span className="size-2 rounded-full bg-success/75" />
-						terminé
+						{t("agentDay.legend.done")}
 					</span>
 					<span className="flex items-center gap-1.5">
 						<span className="size-2 rounded-full bg-critical/80" />
-						échec
+						{t("agentDay.legend.failed")}
 					</span>
 				</div>
 			</div>
@@ -164,7 +167,7 @@ export function AgentDay() {
 								className="absolute -translate-x-1/2 font-mono text-[10px] text-ink-faint"
 								style={{ left: x(tick) }}
 							>
-								{new Date(tick).getHours()} h
+								{new Date(tick).toLocaleTimeString(locale(), { hour: "numeric" })}
 							</span>
 						))}
 					</div>
@@ -197,7 +200,7 @@ export function AgentDay() {
 							style={{ left: x(now), height: `${lanes.length * 30 + 12}px` }}
 						>
 							<span className="absolute -top-1 right-1.5 font-mono text-[9.5px] whitespace-nowrap text-ink-muted">
-								maintenant
+								{t("agentDay.now")}
 							</span>
 						</div>
 					</div>
@@ -208,7 +211,7 @@ export function AgentDay() {
 				<div className="flex flex-wrap items-center gap-x-4 gap-y-1 rounded-xl bg-raised px-3 py-2 text-[11.5px] text-ink-muted">
 					<span className="font-semibold text-ink">{hover.lane.label}</span>
 					<span>
-						{new Date(hover.run.startedAt).toLocaleTimeString("fr-FR", {
+						{new Date(hover.run.startedAt).toLocaleTimeString(locale(), {
 							hour: "2-digit",
 							minute: "2-digit",
 						})}{" "}
@@ -221,8 +224,8 @@ export function AgentDay() {
 							),
 						)}
 					</span>
-					<span>{hover.run.tally.turns} tours</span>
-					{cost(hover.run) > 0 ? <span>{cost(hover.run).toFixed(2)} $</span> : null}
+					<span>{t("agentDay.turns", { count: hover.run.tally.turns })}</span>
+					{cost(hover.run) > 0 ? <span>{t("agentDay.cost", { amount: cost(hover.run).toFixed(2) })}</span> : null}
 					{hover.run.note ? <span className="text-ink-faint">{hover.run.note}</span> : null}
 				</div>
 			) : null}
@@ -251,6 +254,7 @@ function LaneRow({
 	onHover: (run: Execution | null) => void;
 	onOpen: () => void;
 }) {
+	const { t } = useTranslation("components1");
 	return (
 		<>
 			<button
@@ -258,7 +262,7 @@ function LaneRow({
 				onClick={onOpen}
 				disabled={!lane.live}
 				className="focus-ring flex h-6 min-w-0 flex-col justify-center rounded text-left disabled:cursor-default"
-				title={lane.live ? "Ouvrir sa conversation" : undefined}
+				title={lane.live ? t("agentDay.openConversation") : undefined}
 			>
 				<span className="flex items-center gap-1.5 truncate text-[12px] font-medium text-ink">
 					{lane.live ? <span className="animate-pulse-dot size-1.5 shrink-0 rounded-full bg-accent" /> : null}

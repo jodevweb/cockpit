@@ -7,11 +7,11 @@ use serde::Serialize;
 pub enum CockpitError {
 	#[error("{0}")]
 	Message(String),
-	#[error("{service} n'est pas configuré — ajoute son token dans Réglages.")]
+	#[error("{}", crate::i18n::tf("error.missingCredential", &[("service", .service)]))]
 	MissingCredential { service: String },
 	#[error("{0}")]
 	Io(#[from] std::io::Error),
-	#[error("Réseau : {0}")]
+	#[error("{}", crate::i18n::tf("error.network", &[("error", .0)]))]
 	Http(#[from] reqwest::Error),
 	#[error("{0}")]
 	Other(#[from] anyhow::Error),

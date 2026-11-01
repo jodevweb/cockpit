@@ -1,0 +1,1048 @@
+{
+	"agentMap": {
+		"genre": {
+			"frise": "frise",
+			"avant_apres": "avant/après",
+			"mesure": "mesure",
+			"table": "table",
+			"capture": "capture annotée",
+			"matrice": "matrice"
+		},
+		"eyebrow": {
+			"ask": "ta consigne",
+			"explore": "exploration",
+			"subagent": "sous-agent",
+			"changed": "fichier modifié",
+			"andAlso": "et aussi",
+			"tests": "tests",
+			"commands": "commandes",
+			"visuals": "visuels",
+			"review": "revue remise",
+			"reviewPr": "revue remise · PR #{{pr}}",
+			"footprint": "constat · {{base}}",
+			"earlier": "plus tôt",
+			"asking": "il te pose une question",
+			"conclusion": "sa conclusion",
+			"said": "il a dit",
+			"yours": "à toi",
+			"now": "en ce moment",
+			"error": "erreur",
+			"delivered": "livré",
+			"pastAsk": "consigne passée"
+		},
+		"ask": {
+			"replies_one": "+ {{count}} réponse de ta part",
+			"replies_other": "+ {{count}} réponses de ta part"
+		},
+		"explore": {
+			"files_one": "{{count}} fichier parcouru",
+			"files_other": "{{count}} fichiers parcourus",
+			"searches_one": "{{count}} recherche",
+			"searches_other": "{{count}} recherches"
+		},
+		"agent": {
+			"gestures": "{{count}} gestes"
+		},
+		"change": {
+			"others_one": "{{count}} autre fichier",
+			"others_other": "{{count}} autres fichiers"
+		},
+		"tests": {
+			"running": "Les tests tournent",
+			"noResult": "Tests sans résultat",
+			"failing": "Les tests échouent",
+			"passing": "Les tests passent",
+			"failuresSoFar_one": "{{count}} échec jusqu'ici",
+			"failuresSoFar_other": "{{count}} échecs jusqu'ici",
+			"failuresBefore_one": "{{count}} échec avant de passer",
+			"failuresBefore_other": "{{count}} échecs avant de passer",
+			"runs_one": "{{count}} passage",
+			"runs_other": "{{count}} passages"
+		},
+		"commands": {
+			"ran_one": "{{count}} commande lancée",
+			"ran_other": "{{count}} commandes lancées"
+		},
+		"failedCount": "{{count}} en erreur",
+		"review": {
+			"blocking_one": "{{count}} bloquant",
+			"blocking_other": "{{count}} bloquants",
+			"important_one": "{{count}} important",
+			"important_other": "{{count}} importants",
+			"suggestion_one": "{{count}} suggestion",
+			"suggestion_other": "{{count}} suggestions",
+			"merge": "Tu peux fusionner",
+			"blockingVerdict": "Bloquant",
+			"changes": "Corrections attendues",
+			"delivered": "Revue remise",
+			"nothing": "rien à relever",
+			"open": "ouvrir la revue point par point",
+			"loading": "Je relis la revue rangée…"
+		},
+		"severity": {
+			"bloquant": "bloquant",
+			"important": "important",
+			"suggestion": "suggestion"
+		},
+		"said": {
+			"earlier_one": "{{count}} message avant",
+			"earlier_other": "{{count}} messages avant"
+		},
+		"waiting": {
+			"title": "L'agent attend ta réponse",
+			"detail": "voir la carte en haut"
+		},
+		"live": {
+			"using": "Utilise {{tool}}",
+			"thinking": "Réfléchit"
+		},
+		"delivered": {
+			"pr": "PR {{list}}",
+			"commits_one": "{{count}} commit",
+			"commits_other": "{{count}} commits",
+			"pushed": "poussé sur {{branches}}"
+		},
+		"media": {
+			"images_one": "{{count}} image",
+			"images_other": "{{count}} images",
+			"pdfs": "{{count}} PDF",
+			"videos_one": "{{count}} vidéo",
+			"videos_other": "{{count}} vidéos"
+		},
+		"warn": {
+			"edits": "repris {{count}} fois",
+			"editsDuring": "repris {{count}} fois en {{duration}}",
+			"tests": "même échec {{count}} fois de suite",
+			"testsDuring": "même échec {{count}} fois de suite en {{duration}}",
+			"repeat": "« {{command}} » relancée {{count}} fois"
+		},
+		"loop": {
+			"edits": "{{file}} repris {{count}} fois",
+			"tests": "{{target}} échoue {{count}} fois de suite",
+			"repeat": "{{target}} relancée {{count}} fois"
+		},
+		"folded": {
+			"changed_one": "{{count}} fichier modifié",
+			"changed_other": "{{count}} fichiers modifiés",
+			"testsKo": "tests KO",
+			"testsOk": "tests OK",
+			"nothingChanged": "rien modifié",
+			"resumed": "Reprise",
+			"circled": "a tourné en rond : {{loop}}"
+		},
+		"empty": "Écris ta consigne : la carte de ce que fait l'agent se dessinera ici, étape par étape, à mesure qu'il avance.",
+		"backToNow": "Revenir au présent",
+		"needsYou": "L'agent a besoin de toi",
+		"panel": {
+			"fullText": "Le texte entier",
+			"terminal": "Son terminal",
+			"gone": "Cette étape n'est plus sur la carte : tu lis sa dernière version.",
+			"thinking": "Il réfléchit : ce qu'il lance s'affichera ici dès qu'il le lance.",
+			"nothing": "Rien à détailler pour cette étape."
+		},
+		"remark": {
+			"anchor": "l'étape « {{title}} »",
+			"placeholder": "Une remarque sur cette étape — l'agent saura de laquelle tu parles.",
+			"later": "Plus tard",
+			"laterTitle": "La garder avec les autres, à envoyer ensemble",
+			"send": "Envoyer"
+		},
+		"strip": {
+			"episodes": "Épisodes"
+		},
+		"state": {
+			"subagents_one": "{{count}} sous-agent",
+			"subagents_other": "{{count}} sous-agents",
+			"waiting": "Attend ta réponse",
+			"working": "Travaille",
+			"awaiting": "attend {{agents}}",
+			"thinking": "réfléchit",
+			"asks": "Te pose une question",
+			"done": "Terminé",
+			"background": "{{agents}} en arrière-plan",
+			"idle": "rien ne tourne · à toi",
+			"quietTitle": "Rien de neuf depuis un moment : une commande longue, ou un agent bloqué.",
+			"since": "depuis {{duration}}",
+			"loopTitle": "Une répétition qui mérite un regard : l'agent n'est pas forcément bloqué, mais il y revient.",
+			"circling": "Tourne en rond",
+			"circled": "A tourné en rond",
+			"compactedTitle": "Le CLI a résumé la conversation pour faire de la place. Ce que l'agent avait lu avant, il n'en garde que le résumé : s'il s'appuie sur un détail, qu'il relise.",
+			"compacted": "Mémoire résumée {{ago}}",
+			"sinceAsk": "{{duration}} depuis ta consigne",
+			"total": "{{duration}} au total",
+			"tour": "Visiter les changements"
+		},
+		"node": {
+			"remarkPending": "Une remarque attend d'être envoyée",
+			"took": "Temps passé sur cette étape",
+			"expandTitle": "Déplier cet épisode",
+			"collapseTitle": "Replier cet épisode",
+			"expand": "déplier",
+			"collapse": "replier"
+		},
+		"viewLarge": "Voir en grand",
+		"since": {
+			"longTitle": "Long : une commande qui ne rend pas la main, ou un agent bloqué.",
+			"title": "Depuis le début de cette étape"
+		},
+		"stage": {
+			"before": "avant",
+			"after": "après"
+		},
+		"fate": {
+			"deleted": "supprimé",
+			"created": "créé",
+			"modified": "modifié"
+		},
+		"fateCount": {
+			"deleted_one": "{{count}} supprimé",
+			"deleted_other": "{{count}} supprimés",
+			"created_one": "{{count}} créé",
+			"created_other": "{{count}} créés",
+			"modified_one": "{{count}} modifié",
+			"modified_other": "{{count}} modifiés"
+		},
+		"footprint": {
+			"lede": "Lu dans le dépôt, {{base}} — pas dans ce que l'agent raconte. Compare-le à sa conclusion."
+		},
+		"tourFiles": "Visiter les changements, fichier par fichier",
+		"deliveredSections": {
+			"pullRequests": "Demandes de fusion",
+			"commits": "Commits",
+			"pushed": "Poussé",
+			"files": "Fichiers produits"
+		},
+		"gallery": {
+			"enlarge": "Agrandir"
+		}
+	},
+	"missionJourney": {
+		"journey": {
+			"understanding": "Compréhension",
+			"approach": "Approche",
+			"split": "Découpage",
+			"execution": "Exécution",
+			"delivery": "Livraison"
+		},
+		"copy": {
+			"understanding": {
+				"working": "Le maître lit le ticket",
+				"workingHint": "Lis-le à gauche en même temps que lui. Dans un instant, il te dira ce qu'il en a compris — dix lignes au plus, et ses questions à part.",
+				"proposal": "Ce que le maître a compris",
+				"approve": "Valider — passer à l'approche"
+			},
+			"approach": {
+				"working": "Le maître prépare son approche",
+				"workingHint": "Comment il compte s'y prendre : les étapes, les endroits du code, l'ordre, les risques. Pas encore de répartition entre exécutants.",
+				"proposal": "L'approche proposée",
+				"approve": "Valider — passer au découpage"
+			},
+			"split": {
+				"working": "Le maître découpe le travail",
+				"workingHint": "Qui fait quoi, où, et dans quel ordre — fidèle à l'approche que tu as validée. Rien ne partira avant ton accord.",
+				"proposal": "Le découpage proposé",
+				"approve": "Valider — lancer les exécutants"
+			}
+		},
+		"stop": {
+			"title": "Abandonner « {{title}} » ?",
+			"message": "Le maître est coupé et la mission close. Ce qui a été validé reste lisible dans son historique.",
+			"confirm": "Abandonner",
+			"done": "Mission abandonnée."
+		},
+		"back": "Missions",
+		"noBranch": "sans branche",
+		"stepper": {
+			"yours": "à toi",
+			"stopped": "arrêtée",
+			"masterStopped": "maître à l'arrêt",
+			"tasksProgress": "{{done}}/{{total}} tâches",
+			"integrating": "intégration…",
+			"masterWriting": "le maître écrit…",
+			"approvedVersion": "validée · v{{version}}",
+			"approved": "validée",
+			"tasks_one": "{{count}} tâche",
+			"tasks_other": "{{count}} tâches",
+			"prOpen": "PR ouverte",
+			"closed": "close"
+		},
+		"nothingProposed": "Rien n'a été proposé à cette étape.",
+		"yourMove": "À toi de jouer",
+		"working": {
+			"relaunched": "Maître relancé : il repart de ce qui a été validé.",
+			"starting": "Le maître démarre…",
+			"stopped": "Le maître est à l'arrêt",
+			"startingHint": "Il prend le ticket et repart de ce qui a déjà été validé. Quelques secondes.",
+			"stoppedHint": "Personne ne travaille sur cette étape pour l'instant : aucune proposition n'arrivera tant qu'il n'est pas relancé.",
+			"correction": "Ta correction, en cours de prise en compte",
+			"plusAnswers": "+ tes réponses à ses questions",
+			"now": "Ce qu'il fait en ce moment",
+			"notRunning": "Le maître ne tourne pas. Relance-le : il repartira de ce qui a déjà été validé, sans te redemander ce que tu as signé.",
+			"relaunch": "Relancer le maître"
+		},
+		"proposal": {
+			"maxTitle": "Le cockpit refuse toute proposition plus longue",
+			"lines": "{{count}}/{{max}} lignes"
+		},
+		"split": {
+			"executors_one": "{{count}} exécutant",
+			"executors_other": "{{count}} exécutants",
+			"estimate_one": "≈ {{duration}} de travail, d'après {{count}} mission de taille voisine",
+			"estimate_other": "≈ {{duration}} de travail, d'après {{count}} missions de taille voisine",
+			"failureRate": "{{percent}} % ont échoué"
+		},
+		"task": {
+			"verifies": "juge le travail des autres",
+			"wholeRepoRead": "tout le dépôt, en lecture",
+			"wholeRepoNoScope": "tout le dépôt — aucun périmètre déclaré",
+			"after": "part après « {{title}} »",
+			"hideBrief": "Masquer la consigne",
+			"readBrief": "Lire sa consigne complète"
+		},
+		"decision": {
+			"splitApproved": "Découpage validé — les exécutants partent.",
+			"approved": "Validé — le maître passe à la suite.",
+			"correctionSent": "Correction envoyée — le maître reprend sa proposition.",
+			"needsYou_one": "Il a besoin de toi · {{count}} question",
+			"needsYou_other": "Il a besoin de toi · {{count}} questions",
+			"answerPlaceholder": "Ta réponse…",
+			"feedbackLabel": "Une précision, une correction ?",
+			"placeholder": {
+				"understanding": "Ex. : ce n'est pas l'écran admin qui est visé, c'est l'espace client.",
+				"approach": "Ex. : réutilise le service d'export existant plutôt qu'en créer un.",
+				"split": "Ex. : fusionne les deux tâches front, elles touchent les mêmes fichiers."
+			},
+			"unanswered_one": "{{count}} question sans réponse : en validant, le maître tranchera seul.",
+			"unanswered_other": "{{count}} questions sans réponse : en validant, le maître tranchera seul.",
+			"withFeedback": "Valider transmet aussi ta précision.",
+			"nothingWithoutYou": "Rien ne part sans ton accord.",
+			"correctTitle": "Écris ce qui ne va pas : sans motif, le maître referait la même proposition.",
+			"requestVersion": "Demander une nouvelle version"
+		},
+		"verdict": {
+			"approved": "Validée",
+			"corrected": "Corrigée"
+		},
+		"quoted": "« {{text}} »",
+		"versions": {
+			"hide": "Masquer les versions précédentes · {{count}}",
+			"show": "Voir les versions précédentes · {{count}}"
+		},
+		"ticket": {
+			"title": "Le ticket",
+			"openExternal": "Ouvrir chez le fournisseur",
+			"noTicket": "Cette mission ne vient pas d'un ticket : « {{title}} ».",
+			"assignee": "Assigné à {{name}}",
+			"noDescription": "Pas de description.",
+			"comments": "Commentaires · {{count}}"
+		}
+	},
+	"workspaceTiles": {
+		"tiles": {
+			"progress": {
+				"eyebrow": "avancement",
+				"title": "Où en est cet agent dans sa consigne"
+			},
+			"branch": {
+				"eyebrow": "vue",
+				"title": "Tout ce qui tient à la branche"
+			},
+			"pr": {
+				"eyebrow": "pull request",
+				"title": "La pull request de cette branche"
+			},
+			"mission": {
+				"eyebrow": "mission",
+				"title": "La mission qui a ouvert ce dossier"
+			},
+			"agents": {
+				"eyebrow": "agents",
+				"title": "Les agents et les terminaux de ce dossier"
+			},
+			"commits": {
+				"eyebrow": "commits",
+				"title": "Les commits, et ce qui n'est pas encore commité"
+			},
+			"docs": {
+				"eyebrow": "documents",
+				"title": "Les documents du worktree"
+			},
+			"captures": {
+				"eyebrow": "recette",
+				"title": "Les captures de recette"
+			},
+			"ports": {
+				"eyebrow": "serveurs",
+				"title": "Ce qui tourne dans ce dossier"
+			},
+			"ticket": {
+				"eyebrow": "ticket",
+				"title": "Le ticket de cette branche"
+			},
+			"review": {
+				"eyebrow": "revue de code",
+				"title": "La revue de la PR"
+			},
+			"territory": {
+				"eyebrow": "territoire",
+				"title": "Les agents du chantier, posés sur le code"
+			},
+			"browser": {
+				"eyebrow": "navigateur",
+				"title": "La page que l'agent pilote, en direct"
+			}
+		},
+		"progress": {
+			"label": "Avancement",
+			"title": "Les étapes de l'agent, ses sous-agents, et depuis quand il travaille",
+			"silent": "muet {{duration}}",
+			"steps_one": "{{done}} / {{count}} étapes",
+			"steps_other": "{{done}} / {{count}} étapes",
+			"helpers_one": "{{back}} / {{count}} sous-agents rendus",
+			"helpers_other": "{{back}} / {{count}} sous-agents rendus",
+			"busyNoSteps": "au travail — il ne tient pas de liste d'étapes",
+			"idle": "rien en cours"
+		},
+		"board": {
+			"workingFor": "au travail depuis",
+			"launchedAgo": "consigne lancée il y a",
+			"lastActionAgo": "dernier geste il y a",
+			"toolCalls": "appels d'outils",
+			"filesWritten": "fichiers écrits",
+			"brief": "La consigne en cours",
+			"steps": "Ses étapes",
+			"countNotPercent": "Un compte, pas un pourcentage : l'agent allonge sa liste quand il découvre du travail.",
+			"noSteps": "Cet agent ne tient pas de liste d'étapes : rien ne permet de dire quelle part du travail est faite. Ce qui suit dit seulement qu'il avance.",
+			"helpers": "Ses sous-agents",
+			"helpersBack_one": "{{back}} / {{count}} rendus",
+			"helpersBack_other": "{{back}} / {{count}} rendus",
+			"helperRunning": "en cours",
+			"helperFailed": "échec",
+			"helperDone": "rendu",
+			"lastAction": "Son dernier geste"
+		},
+		"verdict": {
+			"merge": "bonne à fusionner",
+			"corrections": "corrections",
+			"bloquant": "bloquant"
+		},
+		"branch": {
+			"prDraft": "brouillon",
+			"prOpen": "ouverte",
+			"prMerged": "fusionnée",
+			"prClosed": "fermée",
+			"headerTitle": "La PR, le ticket, la revue, les commits, les documents",
+			"label": "Vue",
+			"seeAll": "tout voir",
+			"ciRed": "CI rouge",
+			"ciGreen": "CI verte",
+			"ciPending": "CI…",
+			"searchingPr": "cherche la PR…",
+			"noPr": "pas encore de PR",
+			"noTicket": "pas de ticket",
+			"reviewTitle": "La revue de code de la PR",
+			"recheck": "à revérifier",
+			"reviewRound": "Revue · tour {{number}}",
+			"notReviewed": "pas encore relue",
+			"mission": "Mission",
+			"agentsTitle": "Les agents et les terminaux de ce dossier, avec leur contexte",
+			"working_one": "{{count}} au travail",
+			"working_other": "{{count}} au travail",
+			"agents_one": "{{count}} agent",
+			"agents_other": "{{count}} agents",
+			"terminals_one": "{{count}} terminal",
+			"terminals_other": "{{count}} terminals",
+			"commitsTitle": "Les commits de la branche, et ce qui n'est pas encore commité",
+			"uncommitted_one": "{{count}} non commité",
+			"uncommitted_other": "{{count}} non commités",
+			"commits_one": "{{count}} commit",
+			"commits_other": "{{count}} commits",
+			"commitsLabel": "Commits",
+			"documents_one": "{{count}} document",
+			"documents_other": "{{count}} documents",
+			"captures_one": "{{count}} capture",
+			"captures_other": "{{count}} captures",
+			"portsTitle": "Ce qui écoute dans ce dossier",
+			"servers_one": "{{count}} serveur",
+			"servers_other": "{{count}} serveurs"
+		},
+		"territory": {
+			"label": "Territoire",
+			"title": "Où cet agent a lu et écrit, les collisions et les lectures périmées",
+			"collisions_one": "{{count}} collision",
+			"collisions_other": "{{count}} collisions",
+			"stale_one": "{{count}} périmé",
+			"stale_other": "{{count}} périmés",
+			"files_one": "{{count}} fichier",
+			"files_other": "{{count}} fichiers",
+			"written_one": "{{count}} écrit",
+			"written_other": "{{count}} écrits",
+			"read_one": "{{count}} lu",
+			"read_other": "{{count}} lus",
+			"untouched": "n'a encore touché à aucun fichier",
+			"agentsHere_one": "{{count}} agents ici",
+			"agentsHere_other": "{{count}} agents ici"
+		},
+		"browser": {
+			"label": "Navigateur",
+			"title": "La page que les agents de ce dossier pilotent — un clic l'ouvre en direct",
+			"live": "en direct",
+			"drivingSelf": "il pilote",
+			"drivingOther": "{{name}} pilote",
+			"openRight": "ouverte à droite",
+			"blank": "aucune page ouverte — un clic l'ouvre"
+		}
+	},
+	"assistant": {
+		"shortcutTaken": "{{shortcut}} est déjà pris : l'assistant vocal ne t'entendra pas",
+		"chooseShortcut": "Choisir un raccourci",
+		"see": "Voir",
+		"doneSentence": "C'est fait.",
+		"quoted": "« {{text}} »",
+		"close": "Fermer",
+		"placeholder": "Ouvre le workspace du panier, crée une mission depuis NW-3050…",
+		"hint": "{{shortcut}} maintenu pour parler · ⌘J pour écrire",
+		"errors": {
+			"worktreeNotFound": "Je ne trouve pas le worktree « {{name}} ».",
+			"agentNotFound": "Je ne trouve pas l'agent « {{name}} ».",
+			"viewUnknown": "Je ne connais pas l'écran « {{name}} ».",
+			"projectNotFound": "Je ne trouve pas le projet « {{name}} ».",
+			"workspaceNotFound": "Je ne trouve pas le workspace « {{name}} ».",
+			"whichTicket": "De quel ticket veux-tu partir ?",
+			"missionNotFound": "Je ne trouve pas la mission « {{name}} ».",
+			"noMainRepo": "Aucun dépôt principal n'est réglé pour ce projet.",
+			"whichBranch": "Pour quelle branche ?",
+			"whichPr": "Quelle PR veux-tu que je relise ?",
+			"whatToAsk": "Que dois-je lui demander ?",
+			"noWorkspace": "Aucun workspace n'est ouvert : dis-moi dans quel dossier travailler.",
+			"folderNotFound": "Je ne trouve pas le dossier « {{name}} ».",
+			"notUnderstood": "Je n'ai pas compris ta demande."
+		},
+		"mission": {
+			"activity": "Mission depuis {{ticket}}",
+			"firstStep": "Je lis le ticket et je lance l'agent maître…",
+			"started": "Mission lancée : {{title}}.",
+			"existed": "La mission existait déjà.",
+			"existedOpening": "La mission existait déjà : {{title}}. Je te l'ouvre."
+		},
+		"branch": {
+			"activity": "Branche {{name}}",
+			"firstStep": "Je crée la branche…"
+		},
+		"tell": {
+			"activity": "Consigne pour {{name}}",
+			"sent": "Consigne envoyée : l'agent s'y met.",
+			"launched": "Nouvel agent lancé avec la consigne."
+		},
+		"git": {
+			"pullStep": "Je récupère les derniers commits…",
+			"pulled": "Branche à jour.",
+			"pushStep": "Je pousse la branche…",
+			"pushed": "Branche poussée."
+		},
+		"phase": {
+			"listening": "J'écoute… relâche {{shortcut}} quand tu as fini",
+			"transcribing": "Je transcris…",
+			"thinking": "Je réfléchis…",
+			"error": "Je n'ai pas pu",
+			"done": "C'est fait",
+			"answered": "Cockpit te répond",
+			"idle": "Demande à Cockpit"
+		},
+		"settings": {
+			"nothingHeard": "(rien entendu — parle plus près du micro)",
+			"hold": "Maintiens, parle, relâche : l'assistant comprend, agit et te répond à voix haute — même quand le cockpit est derrière une autre fenêtre.",
+			"keyboard": "La même chose au clavier, cockpit au premier plan.",
+			"cost": "Ce que tu dis est transcrit par ElevenLabs (la clé de la voix, ci-dessus) puis compris par Claude, sur ton abonnement : quelques secondes de ton forfait ElevenLabs et un peu de ton quota Claude par demande. Les actions s'exécutent directement ; ce qu'il ne trouve pas, il ne le devine pas.",
+			"noKey": "Sans clé ElevenLabs, l'assistant ne t'entend pas — ⌘J reste possible. Range-la dans la section Voix.",
+			"speak": "Parle… (4 s)",
+			"testMic": "Tester le micro",
+			"appOnly": "Dans l'application seulement.",
+			"heard": "Entendu :",
+			"micDenied": "Si le micro est refusé : Réglages Système → Confidentialité et sécurité → Micro → Cockpit."
+		},
+		"shortcut": {
+			"active": "{{shortcut}} est actif, dans toutes les applications.",
+			"failed": "{{shortcut}} n'a pas pu s'enregistrer. Choisis-en un autre.",
+			"failedWithError": "{{shortcut}} n'a pas pu s'enregistrer : {{error}} Choisis-en un autre.",
+			"recording": "Tape la combinaison… (Échap pour annuler)",
+			"record": "Enregistrer un raccourci…"
+		}
+	},
+	"branchBoard": {
+		"gathering": "Je rassemble ce qui tient à {{branch}}…",
+		"new": "nouveau",
+		"pr": {
+			"draft": "brouillon",
+			"open": "ouverte",
+			"merged": "fusionnée",
+			"closed": "fermée",
+			"number": "PR #{{number}}",
+			"title": "Pull request",
+			"ciRed": "CI rouge",
+			"ciGreen": "CI verte",
+			"ciRunning": "CI en cours",
+			"approved": "approuvée",
+			"changesRequested": "changements demandés",
+			"notApproved": "pas encore approuvée",
+			"byAuthor": "de <author>{{author}}</author>",
+			"reviewRequested": "relecture demandée à {{logins}}",
+			"searching": "Je cherche la PR de cette branche…",
+			"none": "Aucune PR pour {{branch}}."
+		},
+		"review": {
+			"notYet": "La PR #{{number}} n'a pas encore été relue.",
+			"noPr": "Pas de PR sur cette branche : rien à relire pour l'instant.",
+			"reviewPr": "Relire la PR",
+			"recheck": "Revérifier les corrections",
+			"reviewThisPr": "Relire cette PR"
+		},
+		"ticket": {
+			"none": "Aucun identifiant de ticket dans la branche ni dans la PR.",
+			"title_one": "Ticket",
+			"title_other": "Tickets",
+			"notFound": "{{id}} : introuvable."
+		},
+		"mission": {
+			"title": "Mission",
+			"tasks_one": "{{count}} tâche",
+			"tasks_other": "{{count}} tâches"
+		},
+		"agents": {
+			"title": "Agents",
+			"none": "Aucun agent sur ce worktree.",
+			"reviewReadOnly": "revue · lecture seule",
+			"review": "revue",
+			"working": "travaille",
+			"waiting": "attend",
+			"stopped": "arrêté",
+			"terminal": "terminal"
+		},
+		"commits": {
+			"title": "Commits",
+			"aheadBehind": "{{ahead}} en avance · {{behind}} en retard",
+			"none": "Aucun commit."
+		},
+		"changes": {
+			"title": "Modifié, pas encore commité",
+			"none": "Rien en attente : tout est commité."
+		},
+		"captures": {
+			"title": "Recette · captures",
+			"none": "Aucune capture de recette dans ce dossier.",
+			"count_one": "{{count}} capture, les plus récentes d'abord",
+			"count_other": "{{count}} captures, les plus récentes d'abord",
+			"more_one": "encore {{count}} capture…",
+			"more_other": "encore {{count}} captures…"
+		},
+		"ports": {
+			"title": "Ce qui tourne",
+			"memory": "{{mb}} Mo"
+		},
+		"docs": {
+			"title_one": "Documents · {{count}}",
+			"title_other": "Documents · {{count}}"
+		}
+	},
+	"missionGraph": {
+		"working": "travaille…",
+		"sentBack": "Renvoyée en correction",
+		"ticket": {
+			"eyebrow": "ticket",
+			"none": "Sans ticket"
+		},
+		"master": {
+			"eyebrow": "maître",
+			"title": "Supervise la mission",
+			"awaitingYou": "attend ta décision",
+			"idle": "en retrait"
+		},
+		"task": {
+			"asksPermission": "te demande une autorisation",
+			"rejected": "a refusé le travail",
+			"delivered": "a rendu sa copie",
+			"failed": "a échoué",
+			"waiting": "attend son tour"
+		},
+		"pr": {
+			"eyebrow": "pull request",
+			"open": "Ouverte",
+			"toOpen": "À ouvrir",
+			"recomposing": "le maître recompose",
+			"onceVerified": "une fois tout vérifié"
+		},
+		"phase": {
+			"done": "fait",
+			"live": "travaille",
+			"wait": "attend",
+			"failed": "échec",
+			"yours": "à toi"
+		},
+		"detail": {
+			"close": "Fermer",
+			"reproaches_one": "Reprises · {{count}}",
+			"reproaches_other": "Reprises · {{count}}",
+			"fullBrief": "Sa consigne complète",
+			"follow": "Suivre sa conversation",
+			"noAgent": "Pas encore d'agent sur cette tâche."
+		}
+	},
+	"actions": {
+		"openTicket": "Ouvrir le ticket dans le navigateur",
+		"openWorktreeNamed": "Ouvrir le worktree {{name}}",
+		"permanenceRevoked": "La Permanence ne commentera plus sur #{{number}}.",
+		"permanenceAllowed": "La Permanence peut rendre compte sur #{{number}}. Un commentaire par jour, signé.",
+		"noPrompt": "Aucun prompt pour ce geste dans la bibliothèque : l'agent part sans consigne.",
+		"openPr": "Ouvrir la pull request #{{number}}",
+		"fixCiHint": "Lancer l'agent qui corrige la CI",
+		"fixCi": "Corriger la CI",
+		"feedbackHint": "Traiter les retours de review avec un agent",
+		"feedback": "Retours",
+		"agentHint": "Ouvrir un agent sur cette branche",
+		"agent": "Agent",
+		"openWorktree": "Ouvrir le worktree de cette branche",
+		"allowedHint": "La Permanence peut rendre compte ici. Cliquer pour le lui retirer.",
+		"allowHint": "Autoriser la Permanence à rendre compte ici, une fois par jour, signé.",
+		"allowed": "Autorisée",
+		"allow": "Autoriser"
+	},
+	"accounts": {
+		"notLoggedIn": "Pas encore connecté sur ce poste.",
+		"loggedIn": "connecté",
+		"nameRequired": "Donne un nom au compte : c'est ce qui le distingue.",
+		"nameTaken": "Un compte s'appelle déjà « {{label}} ».",
+		"loginTerminal": "Connexion — {{label}}",
+		"intro": "Un compte, c'est l'identité sous laquelle les agents travaillent — pas le programme qui les fait tourner, c'est le rôle des moteurs. Chacun a son dossier de configuration : le cockpit le désigne, le CLI s'y connecte lui-même, et aucun jeton ne passe par ici. Un projet rattaché à un compte lui envoie tout — ses agents, ses terminaux, ses plafonds.",
+		"loading": "On demande à chaque compte qui il est…",
+		"openProject": "projet ouvert",
+		"reconnect": "Reconnecter",
+		"connect": "Se connecter",
+		"attach": "Rattacher « {{name}} »",
+		"remove": "Retirer",
+		"new": "Nouveau",
+		"nameLabel": "Nom",
+		"nameHint": "celui qu'on lira dans les écrans",
+		"namePlaceholder": "Compte entreprise",
+		"dirLabel": "Dossier",
+		"dirHint": "vide = ~/.claude-<nom>",
+		"dirPlaceholder": "~/.claude-travail",
+		"add": "Ajouter",
+		"footer": "Le dossier est créé à l'ajout ; la connexion se fait ensuite dans un terminal, comme on la ferait à la main.",
+		"reading": "Lecture…",
+		"reload": "Relire les comptes"
+	},
+	"briefBar": {
+		"chars": "{{value}} car.",
+		"kchars": "{{value}} k car.",
+		"loading": "Le cockpit rassemble ce qu'il sait de cette branche…",
+		"agentWillKnow": "L'agent saura",
+		"nothing": "rien de plus que ta consigne — aucune source déclarée n'a répondu.",
+		"collapse": "Replier",
+		"expand": "Lire ce qui sera joint, mot pour mot",
+		"refresh": "Rassembler à nouveau — la branche a peut-être bougé",
+		"missing": "Pas pu lire : {{sources}}",
+		"clickToDetach": "{{detail}} — cliquer pour ne pas le joindre",
+		"clickToAttach": "{{detail}} — cliquer pour le joindre"
+	},
+	"fileFinder": {
+		"recent": "Ouverts récemment",
+		"writtenByAgents": "Écrits par les agents",
+		"uncommitted": "Modifiés, pas encore commités",
+		"files_one": "{{count}} fichier",
+		"files_other": "{{count}} fichiers",
+		"buttonHint": "Ouvrir un fichier de ce worktree par son nom (⌘P)",
+		"button": "Fichiers",
+		"placeholder": "Un nom de fichier — « agentmap », « panel work », « apps/web env »",
+		"scanning": "Je parcours le dépôt…",
+		"noMatch": "Aucun fichier à ce nom.",
+		"typeToSearch": "Tape un bout de nom pour chercher dans tout le dépôt.",
+		"total_one": "{{formatted}} fichiers",
+		"total_other": "{{formatted}} fichiers",
+		"scanningShort": "parcours du dépôt…",
+		"keys": "↑↓ pour choisir · Entrée pour ouvrir · ⌘P",
+		"whyAgent": "écrit par un agent",
+		"whyChanged": "modifié"
+	},
+	"feedPanel": {
+		"sort": {
+			"recent": "Plus récent",
+			"oldest": "Plus ancien",
+			"severity": "Gravité",
+			"status": "Statut",
+			"title": "Titre"
+		},
+		"severity": {
+			"critical": "Critique",
+			"warning": "Avertissement",
+			"info": "Info",
+			"success": "OK"
+		},
+		"sortHint": "Ordre d'affichage",
+		"filters": "Filtres",
+		"clearAll": "Tout effacer",
+		"empty": "Rien à afficher",
+		"selectItem": "Sélectionne un élément"
+	},
+	"illustration": {
+		"genre": {
+			"frise": "La chaîne d'événements",
+			"avant_apres": "Avant, après",
+			"mesure": "Mesuré",
+			"table": "La table qui change",
+			"capture": "Capture annotée",
+			"matrice": "Les options comparées"
+		},
+		"source": {
+			"mesure": "mesuré",
+			"depot": "constaté dans le dépôt",
+			"capture": "capturé",
+			"agent": "dit par l'agent"
+		},
+		"beforeGraph": "Avant : {{nodes}}",
+		"afterGraph": "Après : {{nodes}}",
+		"before": "Avant",
+		"after": "Après",
+		"beforeShort": "avant",
+		"afterShort": "après",
+		"percent": "{{sign}}{{value}} %",
+		"noCommand": "Aucune commande citée : ces chiffres ne se rejouent pas.",
+		"enlarge": "Voir en grand",
+		"captureLabel": "capture"
+	},
+	"linearIssue": {
+		"state": "État",
+		"priority": "Priorité",
+		"priorities": {
+			"urgent": "Urgent",
+			"high": "Haute",
+			"medium": "Moyenne",
+			"low": "Basse",
+			"none": "—"
+		},
+		"priorityChanged": "priorité {{priority}}",
+		"assignee": "Assigné",
+		"unassigned": "désassigné",
+		"nobody": "personne",
+		"assignedTo": "assigné à {{name}}",
+		"labels": "Labels",
+		"labelRemoved": "label {{name}} retiré",
+		"labelAdded": "label {{name}} ajouté",
+		"noDescription": "Pas de description.",
+		"comments": "Commentaires · {{count}}"
+	},
+	"missionHistory": {
+		"whatHappened": "Ce qui s'est passé",
+		"agents_one": "{{count}} agent",
+		"agents_other": "{{count}} agents",
+		"loading": "relecture…",
+		"empty": "Aucun agent relevé pour cette mission. Le cockpit ne tient ce carnet que depuis la version 0.54 : ce qui a tourné avant n'y figure pas.",
+		"outcome": {
+			"running": "en cours",
+			"answered": "a rendu",
+			"failed": "en erreur",
+			"lostAtLaunch": "perdu au lancement",
+			"stopped": "arrêté",
+			"orphaned": "cockpit fermé"
+		},
+		"actor": {
+			"me": "toi",
+			"master": "le maître",
+			"cockpit": "le cockpit",
+			"permanence": "la Permanence"
+		},
+		"retry": "reprise {{attempt}}",
+		"launchedBy": "{{model}} · lancé par {{who}}",
+		"reportedHint": "Valorisation annoncée par le moteur — pas une dépense.\n{{input}} jetons en entrée, {{output}} en sortie",
+		"unknownHint": "{{engine}} n'annonce pas ce que coûtent ses tours. Ce n'est pas un coût nul : c'est un chiffre qu'on n'a pas.",
+		"unknownCost": "coût non dit",
+		"totalReported": "valorisation annoncée par les moteurs, jamais une dépense",
+		"totalLost": "dont {{amount}} $ sur des agents qui n'ont rien rendu",
+		"totalUnknown_one": "{{count}} tour dont le coût n'est pas annoncé",
+		"totalUnknown_other": "{{count}} tours dont le coût n'est pas annoncé"
+	},
+	"viewBoundary": {
+		"failed": "L'écran « {{view}} » n'a pas pu s'afficher.",
+		"rest": "Le reste du cockpit fonctionne — les autres écrans sont accessibles par le menu, et ce qui tourne continue de tourner.",
+		"retry": "Réessayer"
+	},
+	"lightbox": {
+		"openInViewer": "Ouvrir le fichier dans la visionneuse",
+		"close": "Fermer",
+		"previous": "Image précédente",
+		"next": "Image suivante"
+	},
+	"shellView": {
+		"pondering": "rien ne tourne — il lit la sortie et réfléchit à la suite",
+		"noCommand": "Aucune commande lancée pour cette consigne.",
+		"runningSince": "tourne<elapsed/> — la sortie arrive quand la commande rend la main",
+		"running": "tourne — la sortie arrive quand la commande rend la main",
+		"interrupted": "interrompue avant d'avoir répondu",
+		"linesAbove_one": "… {{count}} lignes plus haut",
+		"linesAbove_other": "… {{count}} lignes plus haut",
+		"noOutput": "(aucune sortie)",
+		"since": "depuis {{duration}}"
+	},
+	"pdfView": {
+		"page": "page {{current}} / {{total}}",
+		"zoomOut": "Réduire",
+		"percent": "{{value}} %",
+		"zoomIn": "Agrandir",
+		"fitWidth": "À la largeur de la fenêtre"
+	},
+	"markdown": {
+		"loadImageFrom": "Charger l'image depuis <host>{{host}}</host>",
+		"enlarge": "Voir en grand"
+	},
+	"charts": {
+		"trend_one": "Tendance sur {{count}} points",
+		"trend_other": "Tendance sur {{count}} points",
+		"segment": "{{label}} : {{value}}"
+	},
+	"narration": {
+		"waitingForYou": "Il attend ta réponse.",
+		"stopped": "Il est à l'arrêt.",
+		"thisAgent": "cet agent",
+		"intro": "Je te raconte ce que fait {{name}}. {{where}}",
+		"mute": "Couper la voix",
+		"listenLive": "Écouter en direct ce que fait l'agent",
+		"listening": "Écoute",
+		"listen": "Écouter",
+		"elevenLabsFailed": "ElevenLabs a échoué, la voix du Mac a pris le relais : {{reason}}",
+		"voiceAndRate": "Voix et débit"
+	},
+	"voiceSettings": {
+		"engine": "Moteur",
+		"macVoice": "Voix du Mac",
+		"elevenLabsHint": "La voix la plus humaine, décomptée des caractères de ton forfait ElevenLabs. Aucun abonnement Claude ni ChatGPT ne fournit de voix à une autre application.",
+		"systemHint": "Gratuite et hors ligne. Nettement meilleure avec une voix Premium.",
+		"elevenLabsKey": "Clé ElevenLabs",
+		"createKey": "Créer une clé",
+		"keyStored": "Rangée dans le trousseau du Mac",
+		"removeKey": "Retirer",
+		"storeKey": "Ranger",
+		"voice": "Voix",
+		"loadingVoices": "Lecture des voix du compte…",
+		"libraryHint": "Les voix de ta bibliothèque ElevenLabs, françaises d'abord. Ajoute-en depuis leur site (Voice Library) pour qu'elles apparaissent ici.",
+		"model": "Modèle",
+		"browserVoice": "Voix du navigateur, en aperçu.",
+		"noPremiumVoice": "Aucune voix Premium installée. Télécharge Audrey (Premium) : Réglages Système → Accessibilité → Contenu énoncé → Voix du système → Gérer les voix → Français.",
+		"rate": "Débit",
+		"fallback": "La voix du Mac a pris le relais : {{reason}}",
+		"sample": "Il a corrigé l'arrondi du panier et relancé les tests. C'est terminé : il a modifié trois fichiers, et les tests passent.",
+		"tryVoice": "Essayer cette voix",
+		"allSettings": "Tous les réglages de la voix et de l'assistant"
+	},
+	"promptLauncher": {
+		"myPrompts": "Mes prompts",
+		"openedInTerminal": "Ouvert dans Terminal : {{label}}",
+		"saved": "Prompt enregistré.",
+		"deleteTitle": "Supprimer « {{label}} » ?",
+		"delete": "Supprimer",
+		"title": "Lancer un agent",
+		"reset": "Restaurer la bibliothèque par défaut",
+		"label": "Libellé",
+		"labelPlaceholder": "Vérifier puis commit + push",
+		"group": "Groupe",
+		"groupHint": "Livraison, Revue, Qualité…",
+		"text": "Prompt envoyé à l'agent",
+		"cancel": "Annuler",
+		"save": "Enregistrer",
+		"openInTerminal": "Ouvrir plutôt dans Terminal.app",
+		"new": "Nouveau prompt",
+		"footer": "Un clic lance l'agent ici, avec la conversation et la zone de réponse dans le cockpit. L'icône de terminal l'ouvre plutôt dans Terminal.app, pour ce qui a besoin d'un vrai TTY. La bibliothèque vit dans <path>{{path}}</path>."
+	},
+	"panelReport": {
+		"verdict": {
+			"ok": "ok",
+			"reserves": "réserves",
+			"blocking": "bloquant"
+		},
+		"noVerdict": "sans verdict",
+		"title": "Confrontation",
+		"angles_one": "{{count}} angle",
+		"angles_other": "{{count}} angles",
+		"agreed": "d'accord entre eux",
+		"disputes_one": "{{count}} désaccord",
+		"disputes_other": "{{count}} désaccords",
+		"costHint": "Ce que cette confrontation vaudrait aux tarifs de l'API. Sur un abonnement, rien n'est débité : c'est le quota de la fenêtre qui se consomme.",
+		"severestWins": "Un seul angle suffit à porter le verdict : deux lectures qui n'ont rien vu ne prouvent pas que la troisième s'est trompée.",
+		"stale": "La branche a bougé depuis cette confrontation.",
+		"silent": "Sans réponse : {{names}}",
+		"collapse": "Replier les avis",
+		"expand": "Lire chaque angle",
+		"heldBy": "Soutenu par",
+		"against": "Contesté par"
+	},
+	"reviewPanel": {
+		"title": "Revue de code",
+		"verdict": {
+			"merge": "Tu peux fusionner",
+			"corrections": "Corrections attendues",
+			"bloquant": "Bloquant"
+		},
+		"severity": {
+			"bloquant": "Bloquant",
+			"important": "Important",
+			"suggestion": "Suggestion"
+		},
+		"check": {
+			"corrige": "corrigé",
+			"partiel": "partiellement",
+			"non_corrige": "pas corrigé"
+		},
+		"round": "Tour {{number}}",
+		"roundVerification": "Tour {{number}} · vérif.",
+		"commit": "commit",
+		"recheck": "Revérifier",
+		"reviewAgainHint": "Une revue complète, à neuf",
+		"reviewAgain": "Relire à nouveau",
+		"pushedSince": "{{author}} a poussé depuis ce tour : la PR n'est plus celle qui a été relue.",
+		"theAuthor": "L'auteur",
+		"understand": "Comprendre la PR",
+		"previousPoints": "Les points d'avant",
+		"earlierPoint": "point d'un tour précédent",
+		"nothing": "Rien à relever à ce tour.",
+		"openFileAtLine": "Ouvrir le fichier à cette ligne",
+		"openOnGitHub": "Ouvrir la PR sur GitHub, à cette ligne, pour y poster le commentaire",
+		"posted": "posté",
+		"fix": "Correction",
+		"quoted": "« {{text}} »",
+		"copyComment": "Copier le commentaire",
+		"copied": "Copié",
+		"copy": "Copier"
+	},
+	"resources": {
+		"gigabytes": "{{value}} Go",
+		"megabytes": "{{value}} Mo",
+		"heaviest": "Le plus gros processus de ce sous-arbre : {{name}}",
+		"processesShort_one": "{{count}} proc.",
+		"processesShort_other": "{{count}} proc.",
+		"percent": "{{value}} %",
+		"title": "Consommation",
+		"subtitle": "Le cockpit et tout ce qu'il fait tourner",
+		"close": "Fermer (Échap)",
+		"appOnly": "Cockpit seul",
+		"cpu": "{{value}} % processeur",
+		"withChildren": "Avec sa descendance",
+		"processes_one": "{{count}} processus · {{cpu}} %",
+		"processes_other": "{{count}} processus · {{cpu}} %",
+		"machine": "Machine",
+		"machineShare": "le cockpit en occupe {{value}} %",
+		"agents": "Agents",
+		"terminals": "Terminaux",
+		"footnote": "Les mémoires s'additionnent sans tenir compte de ce que les processus partagent : le total est donc un plafond, pas une facture exacte. L'interface, elle, tourne dans un processus WebKit que macOS n'attribue à personne sans privilèges — comptez une soixantaine de mégaoctets de plus.",
+		"spendNoQuota": "Jetons consommés aujourd'hui. Le quota n'est pas annoncé par le CLI.",
+		"spendLeft": "{{left}} % restants sur « {{window}} »",
+		"spendLeftResets": "{{left}} % restants sur « {{window}} », repart {{resets}}",
+		"tickerHint": "Ce que le cockpit fait peser sur la machine"
+	},
+	"terminalView": {
+		"typeOnly": "Écrire sans lancer",
+		"runAsIs": "Lancer tel quel",
+		"mainRepo": "dépôt principal",
+		"scripts": "Scripts",
+		"scriptsHint": "Scripts du dépôt et commandes maison",
+		"noScripts": "Aucun script dans ce dossier.",
+		"footer": "La commande est tapée puis lancée dans ce shell — ⇧Entrée fait l'inverse de l'entrée choisie."
+	}
+}

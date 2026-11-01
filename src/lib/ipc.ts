@@ -1,6 +1,7 @@
 import { invoke } from "@tauri-apps/api/core";
 import { isPreview, previewDelay, previewFor } from "@/lib/preview";
 import { listen } from "@tauri-apps/api/event";
+import { t } from "@/i18n";
 import type {
 	Account,
 	Automation,
@@ -114,7 +115,7 @@ async function call<T>(command: string, args?: Record<string, unknown>): Promise
 		const delay = previewDelay(command);
 		if (delay > 0) await new Promise((resolve) => setTimeout(resolve, delay));
 		if (canned !== undefined) return canned as T;
-		throw new IpcError(`Aperçu : « ${command} » n'a pas de réponse d'exemple.`);
+		throw new IpcError(t("lib:ipc.previewMissing", { command }));
 	}
 	try {
 		return await invoke<T>(command, args);

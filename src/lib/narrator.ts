@@ -3,6 +3,8 @@ import type { Turn } from "@/app/agents";
 import { commandOf, episodes, isTestCommand, kindOf, summarize } from "@/lib/episodes";
 import { api } from "@/lib/ipc";
 import { hasTauri } from "@/lib/preview";
+import { locale, normalizeLanguage, t } from "@/i18n";
+import { lazyArray } from "@/lib/language";
 import type { Voice } from "@/lib/types";
 
 /**
@@ -62,21 +64,50 @@ export interface VoiceSettings {
 	cloudModel: string;
 	/** En mots par minute, comme `say`. */
 	rate: number;
+	/**
+	 * La langue de l'interface quand la voix du Mac a été choisie. Une autre
+	 * langue depuis : la voix ne la parle sans doute pas, on en choisit une.
+	 */
+	voiceLanguage?: string;
 }
 
-/** Les modèles ElevenLabs qui parlent français : le plus naturel, et le plus rapide. */
-export const CLOUD_MODELS: Array<[string, string]> = [
-	["Naturelle", "eleven_multilingual_v2"],
-	["Rapide", "eleven_flash_v2_5"],
-];
+/** Les modèles ElevenLabs multilingues : le plus naturel, et le plus rapide. Libellés lus à l'accès. */
+export const CLOUD_MODELS: Array<[string, string]> = lazyArray(() => [
+	[t("lib:narrator.cloudModels.natural"), "eleven_multilingual_v2"],
+	[t("lib:narrator.cloudModels.fast"), "eleven_flash_v2_5"],
+]);
 
-export const RATES: Array<[string, number]> = [
-	["Posé", 165],
-	["Normal", 185],
-	["Rapide", 210],
-];
+export const RATES: Array<[string, number]> = lazyArray(() => [
+	[t("lib:narrator.rates.calm"), 165],
+	[t("lib:narrator.rates.normal"), 185],
+	[t("lib:narrator.rates.fast"), 210],
+]);
 
-/** Les voix du Mac, de la plus naturelle à la plus synthétique. */
+/** La langue de l'interface, ramenée à une langue livrée (`fr`, `pt-BR`…). */
+function language(): string {
+	return normalizeLanguage(locale());
+}
+
+/** Une voix parle-t-elle cette langue ? `fr_FR`, `pt_BR`, `zh_CN`… comparés au code de l'interface. */
+function speaks(voice: Voice, lang: string, exact = false): boolean {
+	const voiceLocale = voice.locale.replace("_", "-").toLowerCase();
+	const wanted = lang.toLowerCase();
+	if (exact || wanted.includes("-")) {
+		if (voiceLocale === wanted || voiceLocale.startsWith(`${wanted}-`)) return true;
+		if (exact) return false;
+	}
+	return voiceLocale.split("-")[0] === wanted.split("-")[0];
+}
+
+/** Le code BCP 47 à donner à la synthèse du navigateur. */
+function speechLang(): string {
+	const lang = language();
+	if (lang === "fr") return "fr-FR";
+	if (lang === "en") return "en-US";
+	return lang;
+}
+
+/** Les voix françaises du Mac, de la plus naturelle à la plus synthétique. */
 const PREFERRED = [
 	/^Audrey \(Premium\)/,
 	/^Thomas \(Premium\)/,
@@ -88,17 +119,31 @@ const PREFERRED = [
 	/^Amélie/,
 ];
 
+/** La meilleure voix du Mac pour la langue de l'interface. */
 export function pickVoice(voices: Voice[]): string | null {
-	for (const pattern of PREFERRED) {
-		const found = voices.find((voice) => pattern.test(voice.name));
-		if (found) return found.name;
+	const lang = language();
+	if (lang === "fr") {
+		for (const pattern of PREFERRED) {
+			const found = voices.find((voice) => pattern.test(voice.name));
+			if (found) return found.name;
+		}
 	}
-	return voices.find((voice) => voice.locale.startsWith("fr"))?.name ?? null;
+	const own = voices.filter((voice) => speaks(voice, lang));
+	// La variante exacte d'abord (pt-BR plutôt que pt-PT), puis les plus naturelles.
+	const exact = own.filter((voice) => speaks(voice, lang, true));
+	const pool = exact.length > 0 ? exact : own;
+	return (
+		pool.find((voice) => /\(Premium\)/.test(voice.name))?.name ??
+		pool.find((voice) => /\(Enhanced\)/.test(voice.name))?.name ??
+		pool[0]?.name ??
+		null
+	);
 }
 
-/** Une voix Premium ou Enhanced : sans elle, le Mac ne fait pas mieux qu'Amélie. */
+/** Une voix Premium ou Enhanced dans la langue de l'interface : sans elle, le Mac fait de la synthèse plate. */
 export function hasGoodSystemVoice(voices: Voice[]): boolean {
-	return voices.some((voice) => voice.locale.startsWith("fr") && /\((Premium|Enhanced)\)/.test(voice.name));
+	const lang = language();
+	return voices.some((voice) => speaks(voice, lang) && /\((Premium|Enhanced)\)/.test(voice.name));
 }
 
 const SETTINGS_KEY = "cockpit.narration";
@@ -129,6 +174,10 @@ export function voiceSettings(): VoiceSettings {
 
 export function updateVoice(patch: Partial<VoiceSettings>): void {
 	settings = { ...settings, ...patch };
+	// Une voix choisie (à la main ou d'office) l'est pour la langue en cours.
+	if (patch.systemVoice !== undefined && patch.voiceLanguage === undefined) {
+		settings.voiceLanguage = language();
+	}
 	try {
 		localStorage.setItem(SETTINGS_KEY, JSON.stringify(settings));
 	} catch {
@@ -149,7 +198,11 @@ export function useFallback(): string | null {
 }
 
 async function ensureSystemVoice(): Promise<void> {
-	if (settings.systemVoice || !hasTauri()) return;
+	if (!hasTauri()) return;
+	// Une voix choisie avant ce réglage de langue reste valable : on ne
+	// rechoisit que si la langue de l'interface a changé depuis.
+	const stale = settings.systemVoice && settings.voiceLanguage && settings.voiceLanguage !== language();
+	if (settings.systemVoice && !stale) return;
 	try {
 		const best = pickVoice(await api.speech.voices());
 		if (best) updateVoice({ systemVoice: best });
@@ -195,7 +248,7 @@ async function utter(text: string): Promise<void> {
 	return new Promise((resolve) => {
 		if (typeof speechSynthesis === "undefined") return resolve();
 		const utterance = new SpeechSynthesisUtterance(text);
-		utterance.lang = "fr-FR";
+		utterance.lang = speechLang();
 		utterance.rate = settings.rate / 185;
 		utterance.onend = () => resolve();
 		utterance.onerror = () => resolve();
@@ -239,9 +292,11 @@ export function silentFor(): number {
 
 /* ── Ce qu'on dit ────────────────────────────────────────────────────── */
 
-const NUMBERS = ["zéro", "un", "deux", "trois", "quatre", "cinq", "six", "sept", "huit", "neuf", "dix"];
+// En toutes lettres pour le français, comme avant ; ailleurs, la synthèse lit
+// très bien les chiffres.
+const FRENCH_NUMBERS = ["zéro", "un", "deux", "trois", "quatre", "cinq", "six", "sept", "huit", "neuf", "dix"];
 function count(value: number): string {
-	return NUMBERS[value] ?? String(value);
+	return language() === "fr" ? (FRENCH_NUMBERS[value] ?? String(value)) : String(value);
 }
 
 /** `points.test.ts` → « points test », `MAX_POINTS` → « max points », `lineTotal` → « line total ». */
@@ -287,7 +342,7 @@ export function humanize(text: string, max = 230): string {
 		.replace(/\b[a-z]+(?:[A-Z][a-z0-9]+)+\b/g, (id) => readable(id))
 		.replace(/\*\*|__/g, "")
 		.replace(/[*>#]/g, "")
-		.replace(/\s*→\s*(?:puis\s+)?/g, ", puis ")
+		.replace(/\s*→\s*(?:(?:puis|then)\s+)?/g, `, ${t("lib:narrator.then")} `)
 		.replace(/\s*·\s*/g, ", ")
 		.replace(/\s+/g, " ")
 		.replace(/\s+([,.;:!?])/g, "$1")
@@ -312,14 +367,25 @@ export function humanize(text: string, max = 230): string {
 /** Le bilan d'une consigne terminée, dit en une phrase. */
 export function wrapUp(turns: Turn[]): string {
 	const current = episodes(turns).at(-1);
-	if (!current) return "C'est terminé, il te rend la main.";
+	if (!current) return t("lib:narrator.wrapUp.handsBack");
 	const s = summarize(current);
 	const changed =
-		s.changes.length > 0 ? `il a modifié ${count(s.changes.length)} fichier${s.changes.length > 1 ? "s" : ""}` : "";
-	const tests = s.testsFail === true ? "les tests échouent" : s.testsFail === false ? "les tests passent" : "";
-	if (changed && tests) return `C'est terminé : ${changed}, ${s.testsFail ? "mais" : "et"} ${tests}.`;
-	if (changed || tests) return `C'est terminé : ${changed || tests}.`;
-	return "C'est terminé, il te rend la main.";
+		s.changes.length > 0
+			? t("lib:narrator.wrapUp.changed", { count: s.changes.length, spoken: count(s.changes.length) })
+			: "";
+	const tests =
+		s.testsFail === true
+			? t("lib:narrator.wrapUp.testsFail")
+			: s.testsFail === false
+				? t("lib:narrator.wrapUp.testsPass")
+				: "";
+	if (changed && tests) {
+		return s.testsFail
+			? t("lib:narrator.wrapUp.doneBut", { changed, tests })
+			: t("lib:narrator.wrapUp.doneAnd", { changed, tests });
+	}
+	if (changed || tests) return t("lib:narrator.wrapUp.done", { what: changed || tests });
+	return t("lib:narrator.wrapUp.handsBack");
 }
 
 /** Où il en est, pour « il travaille toujours ». */
@@ -327,8 +393,8 @@ export function progress(turns: Turn[]): string {
 	const current = episodes(turns).at(-1);
 	const changed = current ? summarize(current).changes.length : 0;
 	return changed > 0
-		? `Il travaille toujours. Il a modifié ${count(changed)} fichier${changed > 1 ? "s" : ""} depuis ta consigne.`
-		: "Il travaille toujours, il explore le code.";
+		? t("lib:narrator.progress.changed", { count: changed, spoken: count(changed) })
+		: t("lib:narrator.progress.exploring");
 }
 
 /** Ce qu'on sait déjà avoir dit, pour ne dire que la suite. */
@@ -362,9 +428,9 @@ export function narrate(heard: Heard, turns: Turn[], thinking: boolean, pending:
 			const said = humanize(turn.text);
 			if (said) lines.push({ text: said, keep: true });
 		} else if (turn.kind === "tool" && kindOf(turn) === "agent") {
-			lines.push({ text: "Il confie une partie du travail à un sous-agent.", keep: false });
+			lines.push({ text: t("lib:narrator.line.subagent"), keep: false });
 		} else if (turn.kind === "error") {
-			lines.push({ text: "Il a rencontré une erreur.", keep: true });
+			lines.push({ text: t("lib:narrator.line.error"), keep: true });
 		}
 	}
 
@@ -380,15 +446,18 @@ export function narrate(heard: Heard, turns: Turn[], thinking: boolean, pending:
 				isTestCommand(commandOf(turn)),
 		)
 		.at(-1);
-	if (verdict) lines.push({ text: verdict.outputError ? "Les tests échouent." : "Les tests passent.", keep: true });
+	if (verdict) lines.push({
+			text: verdict.outputError ? t("lib:narrator.line.testsFail") : t("lib:narrator.line.testsPass"),
+			keep: true,
+		});
 
 	if (pending.length > heard.pending) {
 		const tool = pending.at(-1)?.tool ?? "";
 		lines.push({
 			text:
 				tool === "AskUserQuestion"
-					? "Il a besoin de toi : il te pose une question."
-					: "Il attend ton autorisation pour continuer.",
+					? t("lib:narrator.line.question")
+					: t("lib:narrator.line.permission"),
 			keep: true,
 		});
 	}

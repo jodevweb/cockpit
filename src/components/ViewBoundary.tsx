@@ -1,6 +1,7 @@
 import { AlertTriangle, RefreshCw } from "lucide-react";
 import { Component, type ErrorInfo, type ReactNode } from "react";
 import { Button } from "@/components/ui";
+import { t } from "@/i18n";
 
 /**
  * Un écran qui tombe ne doit pas emporter le cockpit.
@@ -50,11 +51,10 @@ export class ViewBoundary extends Component<
 				<AlertTriangle size={22} className="text-critical" />
 				<div className="max-w-lg">
 					<p className="text-[13px] font-medium text-ink">
-						L'écran « {this.props.view} » n'a pas pu s'afficher.
+						{t("components2:viewBoundary.failed", { view: this.props.view })}
 					</p>
 					<p className="mt-1 text-[11px] leading-relaxed text-ink-muted">
-						Le reste du cockpit fonctionne — les autres écrans sont accessibles par
-						le menu, et ce qui tourne continue de tourner.
+						{t("components2:viewBoundary.rest")}
 					</p>
 					<p className="text-selectable mt-2 rounded-lg border border-line-soft bg-surface px-2.5 py-2 text-left font-mono text-[10px] break-words text-critical">
 						{error.message || String(error)}
@@ -65,7 +65,7 @@ export class ViewBoundary extends Component<
 					icon={RefreshCw}
 					onClick={() => this.setState({ error: null })}
 				>
-					Réessayer
+					{t("components2:viewBoundary.retry")}
 				</Button>
 			</div>
 		);

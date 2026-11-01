@@ -93,8 +93,8 @@ async function ask(toolName, input) {
       return {
         allow: false,
         reason:
-          `Hors de ton périmètre : ${cible}. Tu ne modifies que ${SCOPE.join(", ")}. ` +
-          `Si ce fichier doit changer, signale-le plutôt que de le modifier.`,
+          `Outside your scope: ${cible}. You only modify ${SCOPE.join(", ")}. ` +
+          `If this file needs to change, report it instead of modifying it.`,
       };
     }
   }
@@ -133,7 +133,7 @@ async function ask(toolName, input) {
     }
     await new Promise((resolve) => setTimeout(resolve, 250));
   }
-  return { allow: false, reason: "Pas de réponse du cockpit." };
+  return { allow: false, reason: "No answer from Cockpit." };
 }
 
 let buffer = "";
@@ -169,7 +169,7 @@ process.stdin.on("data", async (chunk) => {
           tools: [
             {
               name: "approve",
-              description: "Demande l'autorisation d'exécuter un outil.",
+              description: "Asks for permission to run a tool.",
               inputSchema: {
                 type: "object",
                 properties: {
@@ -182,9 +182,11 @@ process.stdin.on("data", async (chunk) => {
             {
               name: "etapes",
               description:
-                "Tiens la liste des étapes de ta tâche, pour que l'utilisateur voie où tu en es. " +
-                "Renvoie la liste entière à chaque appel : pose-la avant de commencer, puis rappelle-la " +
-                "chaque fois qu'une étape commence, se termine ou s'ajoute. Une seule étape en cours à la fois.",
+                "Keep the list of your task's steps, so the user can see where you are. " +
+                "Send the whole list on every call: set it before starting, then call it again " +
+                "each time a step starts, ends or is added. Only one step in progress at a time. " +
+                "Write the step titles in the user's language; keep the `etat` values exactly as listed " +
+                "(a_faire = to do, en_cours = in progress, faite = done).",
               inputSchema: {
                 type: "object",
                 properties: {
@@ -193,7 +195,7 @@ process.stdin.on("data", async (chunk) => {
                     items: {
                       type: "object",
                       properties: {
-                        titre: { type: "string", description: "L'étape, en quelques mots." },
+                        titre: { type: "string", description: "The step, in a few words." },
                         etat: { type: "string", enum: ["a_faire", "en_cours", "faite"] },
                       },
                       required: ["titre", "etat"],
@@ -206,31 +208,32 @@ process.stdin.on("data", async (chunk) => {
             {
               name: "illustrer",
               description:
-                "Montre une partie de ton compte rendu en image : tu fournis les données, le cockpit " +
-                "dessine. Un appel par image, juste avant de conclure, seulement quand l'image en dit " +
-                "plus que le texte. Choisis le genre selon ce que tu as fait :\n" +
-                "- frise : un bug, la chaîne d'événements et le maillon qui casse (`etapes`).\n" +
-                "- avant_apres : une refonte, ce qui dépendait de quoi avant et après (`avant`, `apres`).\n" +
-                "- mesure : une optimisation, des chiffres MESURÉS par une commande (`mesures`, `unite`, `commande`).\n" +
-                "- table : une migration ou un schéma qui change (`table`, `colonnes`).\n" +
-                "- capture : une capture d'écran que tu as prise, avec des repères numérotés (`image`, `reperes`).\n" +
-                "- matrice : des options comparées sur quelques critères (`options`, `criteres`).\n" +
-                "N'invente aucun chiffre ni aucun état : `source` dit d'où vient ce que tu montres.",
+                "Shows part of your report as an image: you provide the data, Cockpit " +
+                "draws. One call per image, just before concluding, only when the image says " +
+                "more than the text. Pick the genre according to what you did:\n" +
+                "- frise (timeline): a bug, the chain of events and the link that breaks (`etapes`).\n" +
+                "- avant_apres (before/after): a refactor, what depended on what before and after (`avant`, `apres`).\n" +
+                "- mesure (measurement): an optimisation, numbers MEASURED by a command (`mesures`, `unite`, `commande`).\n" +
+                "- table: a migration or a schema that changes (`table`, `colonnes`).\n" +
+                "- capture (screenshot): a screenshot you took, with numbered markers (`image`, `reperes`).\n" +
+                "- matrice (matrix): options compared on a few criteria (`options`, `criteres`).\n" +
+                "Keep the field names and enum values exactly as written; write the visible texts in the user's language. " +
+                "Invent no number and no state: `source` says where what you show comes from.",
               inputSchema: {
                 type: "object",
                 properties: {
                   genre: { type: "string", enum: GENRES },
-                  titre: { type: "string", description: "Ce que l'image montre, en une phrase courte." },
+                  titre: { type: "string", description: "What the image shows, in one short sentence." },
                   source: {
                     type: "string",
                     enum: ["mesure", "depot", "capture", "agent"],
                     description:
-                      "mesure : sorti d'une commande lancée ; depot : lu dans le code ou git ; " +
-                      "capture : vu à l'écran ; agent : ta lecture, ton raisonnement.",
+                      "mesure: output of a command you ran; depot: read in the code or git; " +
+                      "capture: seen on screen; agent: your reading, your reasoning.",
                   },
                   etapes: {
                     type: "array",
-                    description: "frise : les maillons dans l'ordre.",
+                    description: "frise: the links, in order (etat: ok, casse = broken, neutre = neutral).",
                     items: {
                       type: "object",
                       properties: {
@@ -243,7 +246,7 @@ process.stdin.on("data", async (chunk) => {
                   },
                   avant: {
                     type: "object",
-                    description: "avant_apres : le graphe d'avant.",
+                    description: "avant_apres: the graph before.",
                     properties: {
                       noeuds: { type: "array", items: { type: "string" } },
                       liens: {
@@ -254,7 +257,7 @@ process.stdin.on("data", async (chunk) => {
                   },
                   apres: {
                     type: "object",
-                    description: "avant_apres : le graphe d'après, même forme.",
+                    description: "avant_apres: the graph after, same shape.",
                     properties: {
                       noeuds: { type: "array", items: { type: "string" } },
                       liens: {
@@ -263,8 +266,8 @@ process.stdin.on("data", async (chunk) => {
                       },
                     },
                   },
-                  unite: { type: "string", description: "mesure : ms, Mo, requêtes…" },
-                  commande: { type: "string", description: "mesure : la commande qui a produit les chiffres." },
+                  unite: { type: "string", description: "mesure: ms, MB, requests…" },
+                  commande: { type: "string", description: "mesure: the command that produced the numbers." },
                   mesures: {
                     type: "array",
                     items: {
@@ -273,12 +276,12 @@ process.stdin.on("data", async (chunk) => {
                         label: { type: "string" },
                         avant: { type: "number" },
                         apres: { type: "number" },
-                        unite: { type: "string", description: "Si cette ligne n'a pas l'unité de l'image." },
+                        unite: { type: "string", description: "If this row does not use the image's unit." },
                       },
                       required: ["label", "avant", "apres"],
                     },
                   },
-                  table: { type: "string", description: "table : son nom." },
+                  table: { type: "string", description: "table: its name." },
                   colonnes: {
                     type: "array",
                     items: {
@@ -286,15 +289,15 @@ process.stdin.on("data", async (chunk) => {
                       properties: {
                         nom: { type: "string" },
                         type: { type: "string" },
-                        changement: { type: "string", enum: ["ajout", "retrait", "modif", "garde"] },
+                        changement: { type: "string", enum: ["ajout", "retrait", "modif", "garde"], description: "ajout = added, retrait = removed, modif = modified, garde = kept." },
                       },
                       required: ["nom"],
                     },
                   },
-                  image: { type: "string", description: "capture : chemin absolu de l'image." },
+                  image: { type: "string", description: "capture: absolute path of the image." },
                   reperes: {
                     type: "array",
-                    description: "capture : x et y entre 0 et 1, depuis le coin haut gauche.",
+                    description: "capture: x and y between 0 and 1, from the top-left corner.",
                     items: {
                       type: "object",
                       properties: {
@@ -305,7 +308,7 @@ process.stdin.on("data", async (chunk) => {
                       required: ["x", "y", "texte"],
                     },
                   },
-                  options: { type: "array", items: { type: "string" }, description: "matrice : les colonnes." },
+                  options: { type: "array", items: { type: "string" }, description: "matrice: the columns." },
                   criteres: {
                     type: "array",
                     items: {
@@ -331,26 +334,26 @@ process.stdin.on("data", async (chunk) => {
       // pour que l'agent l'apprenne tant qu'il peut encore corriger.
       const args = message.params?.arguments ?? {};
       const manque = !GENRES.includes(args.genre)
-        ? `genre inconnu (${GENRES.join(", ")})`
+        ? `unknown genre (${GENRES.join(", ")})`
         : args.genre === "frise" && !(args.etapes?.length > 0)
-          ? "une frise sans `etapes`"
+          ? "a frise without `etapes`"
           : args.genre === "avant_apres" && !(args.avant?.noeuds?.length > 0 && args.apres?.noeuds?.length > 0)
-            ? "`avant` et `apres` doivent avoir des `noeuds`"
+            ? "`avant` and `apres` must have `noeuds`"
             : args.genre === "mesure" && !(args.mesures?.length > 0)
-              ? "une mesure sans `mesures`"
+              ? "a mesure without `mesures`"
               : args.genre === "table" && !(args.colonnes?.length > 0)
-                ? "une table sans `colonnes`"
+                ? "a table without `colonnes`"
                 : args.genre === "capture" && !args.image
-                  ? "une capture sans `image`"
+                  ? "a capture without `image`"
                   : args.genre === "matrice" && !(args.options?.length > 0 && args.criteres?.length > 0)
-                    ? "une matrice sans `options` ni `criteres`"
+                    ? "a matrice without `options` or `criteres`"
                     : null;
       send({
         jsonrpc: "2.0",
         id: message.id,
         result: manque
-          ? { isError: true, content: [{ type: "text", text: `Illustration refusée : ${manque}.` }] }
-          : { content: [{ type: "text", text: `Illustration notée (${args.genre}) : le cockpit la dessine sous ta conclusion.` }] },
+          ? { isError: true, content: [{ type: "text", text: `Illustration refused: ${manque}.` }] }
+          : { content: [{ type: "text", text: `Illustration recorded (${args.genre}): Cockpit draws it under your conclusion.` }] },
       });
     } else if (message.method === "tools/call" && message.params?.name === "etapes") {
       // Rien à garder ici : le cockpit lit la liste dans l'appel lui-même, tel
@@ -360,7 +363,7 @@ process.stdin.on("data", async (chunk) => {
       send({
         jsonrpc: "2.0",
         id: message.id,
-        result: { content: [{ type: "text", text: `Liste notée : ${faites}/${etapes.length} faites.` }] },
+        result: { content: [{ type: "text", text: `List recorded: ${faites}/${etapes.length} done.` }] },
       });
     } else if (message.method === "tools/call") {
       const { tool_name: toolName, input } = message.params?.arguments ?? {};
@@ -368,7 +371,7 @@ process.stdin.on("data", async (chunk) => {
       // Forme attendue par --permission-prompt-tool.
       const payload = answer.allow
         ? { behavior: "allow", updatedInput: input }
-        : { behavior: "deny", message: answer.reason ?? "Refusé depuis le cockpit." };
+        : { behavior: "deny", message: answer.reason ?? "Refused from Cockpit." };
       send({
         jsonrpc: "2.0",
         id: message.id,
@@ -500,8 +503,8 @@ pub fn release_orphans(alive: &std::collections::HashSet<String>) {
 			&request.id,
 			false,
 			Some(
-				"Le cockpit a redémarré pendant cette demande : plus personne n'était là pour y \
-				 répondre. Arrête-toi ici et redemande — un cockpit est de nouveau à l'écoute."
+				"Cockpit restarted during this request: no one was left to answer \
+				 it. Stop here and ask again — a Cockpit is listening again."
 					.into(),
 			),
 		);
@@ -554,15 +557,15 @@ pub fn answer(id: &str, allow: bool, reason: Option<String>) -> Result<()> {
 	let dir = permissions_dir();
 	let payload = serde_json::json!({
 		"allow": allow,
-		"reason": reason.unwrap_or_else(|| "Refusé depuis le cockpit.".into()),
+		"reason": reason.unwrap_or_else(|| "Refused from Cockpit.".into()),
 	});
 
 	std::fs::write(
 		dir.join(format!("{id}.response")),
 		serde_json::to_string(&payload)
-			.map_err(|e| CockpitError::msg(format!("Réponse illisible : {e}")))?,
+			.map_err(|e| CockpitError::msg(crate::i18n::tf("permissions.unreadableAnswer", &[("error", &e)])))?,
 	)
-	.map_err(|e| CockpitError::msg(format!("Écriture de la réponse : {e}")))?;
+	.map_err(|e| CockpitError::msg(crate::i18n::tf("permissions.writeError", &[("error", &e)])))?;
 
 	// La demande est traitée : on la retire pour qu'elle sorte de la liste.
 	let _ = std::fs::remove_file(dir.join(format!("{id}.request")));

@@ -1,1 +1,246 @@
-{}
+{
+	"mobile": {
+		"common": {
+			"connecting": "Connecting…",
+			"back": "Back",
+			"thisDevice": "This device",
+			"agent": "Agent",
+			"error": "Error {{status}}"
+		},
+		"tabs": {
+			"you": "For you",
+			"agents": "Agents",
+			"missions": "Missions"
+		},
+		"pairing": {
+			"notPaired": "This device isn't paired yet",
+			"title": "Pair this phone",
+			"help": "On the computer, open Settings → Mobile access, and enter the code shown.",
+			"codePlaceholder": "CODE",
+			"submit": "Pair"
+		},
+		"enroll": {
+			"done": "Face ID enabled.",
+			"failed": "Passkey: {{error}}"
+		},
+		"state": {
+			"toDecide_one": "waiting for you",
+			"toDecide_other": "{{count}} to decide",
+			"working": "working",
+			"idle": "idle",
+			"done": "finished"
+		},
+		"tools": {
+			"bash": "Run a command",
+			"write": "Write a file",
+			"edit": "Edit a file",
+			"webFetch": "Read a web page",
+			"mcp": "Use {{name}} ({{server}})",
+			"other": "Use {{tool}}"
+		},
+		"decision": {
+			"agentAsks": "{{agent}} asks",
+			"anAgentAsks": "An agent asks",
+			"agentQuestion": "{{agent}} has a question for you",
+			"questionWaiting": "A question is waiting for you",
+			"answer": "Answer",
+			"deny": "Deny",
+			"allow": "Allow"
+		},
+		"mission": {
+			"state": {
+				"planning": "Analysis",
+				"awaitingApproval": "Awaiting your approval",
+				"running": "Running",
+				"integrating": "Integrating",
+				"failed": "Failed",
+				"other": "In progress"
+			},
+			"task": {
+				"planned": "to start",
+				"running": "in progress",
+				"delivered": "delivered",
+				"integrated": "integrated",
+				"failed": "failed"
+			},
+			"progress_one": "{{done}} of {{count}} task delivered",
+			"progress_other": "{{done}} of {{count}} tasks delivered",
+			"approve": "Approve the plan",
+			"paused": "Paused — it can be resumed from the computer.",
+			"pause": "Pause",
+			"stopAll": "Stop everything"
+		},
+		"agents": {
+			"browserOpen": "browser open",
+			"emptyTitle": "No agent open",
+			"emptyHelp": "They're launched from the computer."
+		},
+		"missions": {
+			"emptyTitle": "No mission in progress",
+			"emptyHelp": "They're launched from the computer."
+		},
+		"home": {
+			"decisions_one": "{{count}} decision is waiting for you",
+			"decisions_other": "{{count}} decisions are waiting for you",
+			"working_one": "{{count}} agent at work",
+			"working_other": "{{count}} agents at work",
+			"noneWorking": "no agent is working",
+			"noneOpen": "no agent open",
+			"failedSection": "Failed",
+			"emptyTitle": "Nothing's waiting for you",
+			"emptyWorking": "Your agents are moving ahead without you.",
+			"emptyCalm": "All quiet.",
+			"fleet": "The fleet",
+			"unreachable": "The computer isn't responding",
+			"unreachableTitle": "Unreachable"
+		},
+		"faceId": {
+			"off": "Face ID isn't enabled",
+			"offHelp": "Without it, this phone can read and deny, never allow.",
+			"enable": "Enable Face ID",
+			"expired": "The activation window has passed: revoke this phone on the computer, then pair it again."
+		},
+		"toast": {
+			"copied": "Copied.",
+			"denied": "Denied.",
+			"allowed": "Allowed.",
+			"approved": "Plan approved — the workers can start.",
+			"paused": "Mission paused — the workers have been stopped.",
+			"stopped": "Mission stopped. The work produced stays in place.",
+			"answered": "Answered.",
+			"sent": "Sent."
+		},
+		"device": {
+			"label": "Device",
+			"notPaired": "Not paired",
+			"armed": "Face ID is enabled: this phone can allow, answer and put on the brakes.",
+			"unarmed": "Face ID isn't enabled: this phone can read and deny, never allow.",
+			"notifications": "Notifications",
+			"ntfyHelp": "In the ntfy app, subscribe to this topic, on this server.",
+			"copyTopic": "Copy the topic",
+			"copyServer": "Copy the server",
+			"capabilities": "What this phone can do",
+			"canDo": "Read, allow or deny an action, reply to an agent, approve a plan, pause or stop a mission.",
+			"cannotDo": "Launching an agent, resuming a mission and changing a setting are done at the computer."
+		},
+		"agent": {
+			"summary": "Summary",
+			"thread": "Thread",
+			"screen": "Screen",
+			"jump": "↓ new activity",
+			"placeholder": "Reply to the agent…",
+			"send": "Send"
+		},
+		"changes": {
+			"title": "What the repository shows · {{base}}",
+			"help": "Read from the repository, not from what it says.",
+			"root": "root",
+			"deleted_one": "{{count}} deleted",
+			"deleted_other": "{{count}} deleted",
+			"created_one": "{{count}} created",
+			"created_other": "{{count}} created",
+			"modified_one": "{{count}} modified",
+			"modified_other": "{{count}} modified",
+			"moreZones_one": "and {{count}} other area",
+			"moreZones_other": "and {{count}} other areas"
+		},
+		"summary": {
+			"diagram": "A diagram — it's drawn on the computer.",
+			"before": "before",
+			"after": "after",
+			"justSaid": "What it just said",
+			"conclusion": "Its conclusion",
+			"working": "It's working",
+			"nothing": "Nothing to show",
+			"silent": "It hasn't said anything yet.",
+			"yourPrompt": "Your instruction"
+		},
+		"thread": {
+			"actions_one": "{{count}} action",
+			"actions_other": "{{count}} actions",
+			"failed": "{{count}} failed",
+			"empty": "The conversation hasn't started."
+		},
+		"screen": {
+			"live": "live",
+			"help": "The page this agent is looking at, refreshed every two to three seconds. You watch; to click in it, use the computer.",
+			"stopped": "Its browser is no longer running."
+		},
+		"errors": {
+			"publicAccessDenied": "Public access denied.",
+			"unexpectedHost": "Unexpected host.",
+			"notPaired": "Device not paired.",
+			"unknownDevice": "Unknown or revoked device.",
+			"tooManyRequests": "Too many requests.",
+			"pairingTailnetOnly": "Pairing only works from the tailnet.",
+			"noPairing": "No pairing in progress.",
+			"codeExpired": "Code expired.",
+			"codeInvalid": "Invalid code.",
+			"passkeyExists": "This device already has a passkey. Revoke it on the computer, then pair it again.",
+			"passkeyAlreadySet": "This device already has a passkey.",
+			"enrollExpired": "The window to enable Face ID has passed. Revoke this device on the computer, then pair it again.",
+			"noRegistration": "No registration in progress.",
+			"challengeExpired": "Challenge expired.",
+			"agentGone": "This agent is no longer active.",
+			"imagesOnly": "Only images can be read from here.",
+			"imageNotFound": "Image not found.",
+			"outsideFolder": "Outside this agent's folder.",
+			"imageTooLarge": "Image not found or too large.",
+			"browserNotRunning": "Its browser isn't running.",
+			"denyLinkExpired": "Deny link expired.",
+			"noPasskey": "This device has no passkey: it can only read and deny.",
+			"challengeUnknown": "Unknown or already used challenge.",
+			"challengeOtherDevice": "Challenge opened by another device.",
+			"invalidSignature": "Invalid signature.",
+			"noAgents": "No agent running.",
+			"stateUnreadable": "Unreadable mobile state: {{error}}",
+			"stateWrite": "Writing the mobile state: {{error}}",
+			"ntfyTokenFormat": "An ntfy token starts with “tk_”: this one isn't. The field may have been filled in automatically.",
+			"disabled": "Mobile access is turned off.",
+			"noTopic": "No ntfy topic configured.",
+			"nothingSent": "Nothing was sent.",
+			"qr": "QR: {{error}}",
+			"funnelActive": "Tailscale Funnel is active: it would expose the cockpit on the Internet. Turn it off (`tailscale funnel off`) before enabling mobile access.",
+			"invalidOrigin": "Invalid origin: {{error}}",
+			"webauthn": "WebAuthn: {{error}}",
+			"port": "Port {{port}}: {{error}}"
+		},
+		"journal": {
+			"enabled": "Mobile access enabled",
+			"disabled": "Mobile access turned off — devices revoked",
+			"deviceRevoked": "Device revoked",
+			"devicePaired": "Device paired",
+			"passkeyRegistered": "Passkey registered",
+			"toolDenied": "Tool denied",
+			"toolAllowed": "Tool allowed",
+			"signatureRejected": "Signature rejected",
+			"planApproved": "Plan approved from mobile",
+			"missionPaused": "Mission paused from mobile",
+			"missionStopped": "Mission stopped from mobile",
+			"questionAnswered": "Question answered",
+			"messageSent": "Message sent to an agent"
+		},
+		"remote": {
+			"missionStoppedNote": "Mission stopped from mobile. Branches and worktrees are kept.",
+			"quickDenied": "Denied."
+		},
+		"wake": {
+			"understandingTitle": "The lead has read the ticket",
+			"understandingDetail": "{{title}} — its understanding awaits your review",
+			"approachTitle": "An approach awaits your approval",
+			"approachDetail": "{{title}} — before any breakdown",
+			"planTitle": "A plan awaits your approval",
+			"planDetail": "{{title}} — {{count}} task(s)",
+			"agentWaiting": "An agent is waiting",
+			"request": "Request: {{tool}}",
+			"deny": "Deny",
+			"open": "Open",
+			"testBody": "Relay test from Settings.",
+			"published": "Published ({{status}}).",
+			"rejectedToken": "Rejected ({{status}}) — invalid publish token.",
+			"rejectedRate": "Rejected ({{status}}) — too many attempts, the server is throttling.",
+			"rejected": "Rejected ({{status}}).",
+			"unreachable": "ntfy server unreachable: {{error}}"
+		}
+	}
+}

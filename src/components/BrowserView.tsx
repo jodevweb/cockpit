@@ -1,9 +1,11 @@
 import clsx from "clsx";
 import { ArrowLeft, ArrowRight, Bot, ExternalLink, Globe, PenLine, Power, RotateCw } from "lucide-react";
 import { useCallback, useEffect, useRef, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { BrowserAnnotator } from "@/components/BrowserAnnotator";
 import { Button } from "@/components/ui";
 import { useCockpit } from "@/app/store";
+import { t as translate } from "@/i18n";
 import { api } from "@/lib/ipc";
 import { isPreview, PREVIEW_PAGE } from "@/lib/preview";
 import type { BrowserAction, ListeningPort } from "@/lib/types";
@@ -24,18 +26,20 @@ import { useAsync, usePersistentState } from "@/lib/useAsync";
 
 type Status = "idle" | "opening" | "live" | "failed";
 
-/** Ce que fait l'agent dans la page, dit en un mot. */
+/** Ce que fait l'agent dans la page, dit en un mot (clé du catalogue `components3`). */
 const GESTURES: Array<[RegExp, string]> = [
-	[/navigate/, "navigue"],
-	[/click|hover|drag|select/, "clique"],
-	[/type|fill|press_key/, "saisit"],
-	[/screenshot/, "capture l'écran"],
-	[/snapshot|find|console|network/, "lit la page"],
-	[/wait/, "attend"],
+	[/navigate/, "navigate"],
+	[/click|hover|drag|select/, "click"],
+	[/type|fill|press_key/, "type"],
+	[/screenshot/, "screenshot"],
+	[/snapshot|find|console|network/, "read"],
+	[/wait/, "wait"],
 ];
 
+/** La phrase « l'agent navigue », traduite au rendu. */
 export function gestureLabel(tool: string): string {
-	return GESTURES.find(([pattern]) => pattern.test(tool))?.[1] ?? "agit";
+	const gesture = GESTURES.find(([pattern]) => pattern.test(tool))?.[1] ?? "act";
+	return translate(`components3:browserView.gesture.${gesture}`);
 }
 
 /** Les touches de modification, dans l'encodage du protocole de débogage. */
@@ -115,6 +119,7 @@ export function BrowserView({
 	/** Lance le serveur de dev de l'équipe, si elle en a déclaré un. */
 	onStartServer?: () => void;
 }) {
+	const { t } = useTranslation("components3");
 	const { activeProject } = useCockpit();
 	// Le dossier du serveur qu'on a choisi d'ouvrir, par projet.
 	const [home, setHome] = usePersistentState<string | null>(`browser.home.${activeProject?.id ?? "defaut"}`, null);
@@ -451,9 +456,9 @@ export function BrowserView({
 	return (
 		<div className="flex min-h-0 flex-1 flex-col">
 			<div className="flex items-center gap-1 border-b border-line-soft px-3 py-1.5">
-				<Button size="sm" icon={ArrowLeft} disabled={!live} onClick={() => act({ kind: "back" })} title="Page précédente" />
-				<Button size="sm" icon={ArrowRight} disabled={!live} onClick={() => act({ kind: "forward" })} title="Page suivante" />
-				<Button size="sm" icon={RotateCw} disabled={!live} onClick={() => act({ kind: "reload" })} title="Recharger" />
+				<Button size="sm" icon={ArrowLeft} disabled={!live} onClick={() => act({ kind: "back" })} title={t("browserView.back")} />
+				<Button size="sm" icon={ArrowRight} disabled={!live} onClick={() => act({ kind: "forward" })} title={t("browserView.forward")} />
+				<Button size="sm" icon={RotateCw} disabled={!live} onClick={() => act({ kind: "reload" })} title={t("browserView.reload")} />
 				<form
 					className="flex min-w-0 flex-1 items-center gap-2 rounded-lg bg-raised px-2.5 py-1"
 					onSubmit={(event) => {
@@ -466,7 +471,7 @@ export function BrowserView({
 						value={typed ?? (blank ? "" : url)}
 						onChange={(event) => setTyped(event.target.value)}
 						onBlur={() => setTyped(null)}
-						placeholder="Une adresse — localhost:3000, ou n'importe quel site"
+						placeholder={t("browserView.addressPlaceholder")}
 						spellCheck={false}
 						className="min-w-0 flex-1 bg-transparent font-mono text-[11.5px] text-ink outline-none placeholder:text-ink-faint"
 					/>
@@ -499,7 +504,7 @@ export function BrowserView({
 					<span className="flex shrink-0 items-center gap-1.5 rounded-full bg-accent-dim px-2.5 py-1 text-[11px] font-medium text-accent">
 						<span className="animate-pulse-dot size-1.5 rounded-full bg-accent" />
 						<Bot size={12} />
-						L'agent {gestureLabel(driving)}
+						{gestureLabel(driving)}
 					</span>
 				) : null}
 				<Button
@@ -508,16 +513,16 @@ export function BrowserView({
 					variant={annotating ? "solid" : undefined}
 					disabled={!live}
 					onClick={() => setAnnotating((value) => !value)}
-					title="Annoter la page et la montrer à l'agent : entourer, flécher, pointer un élément"
+					title={t("browserView.annotateTitle")}
 				>
-					Annoter
+					{t("browserView.annotate")}
 				</Button>
 				<Button
 					size="sm"
 					icon={ExternalLink}
 					disabled={!live || blank}
 					onClick={() => void api.system.openUrl(url)}
-					title="Ouvrir cette page dans le navigateur du poste"
+					title={t("browserView.openExternal")}
 				/>
 				<Button
 					size="sm"
@@ -531,7 +536,7 @@ export function BrowserView({
 						shown.current = { url: "", title: "" };
 						started.current = false;
 					}}
-					title="Arrêter ce navigateur — l'agent en relancera un à son prochain geste"
+					title={t("browserView.stop")}
 				/>
 			</div>
 
@@ -549,7 +554,7 @@ export function BrowserView({
 			>
 				<textarea
 					ref={keys}
-					aria-label="Saisie dans la page"
+					aria-label={t("browserView.keyboardInput")}
 					autoCapitalize="off"
 					autoComplete="off"
 					autoCorrect="off"
@@ -595,14 +600,14 @@ export function BrowserView({
 						</span>
 						<p className="max-w-md text-[12.5px] leading-relaxed text-ink-muted">
 							{status === "opening"
-								? "Le navigateur démarre…"
+								? t("browserView.starting")
 								: status === "failed"
 									? error
-									: "Le navigateur de ce workspace ne tourne pas. Il démarrera tout seul au premier geste d'un agent dans une page — tu le verras faire ici — ou tout de suite si tu l'ouvres."}
+									: t("browserView.notRunning")}
 						</p>
 						{status !== "opening" ? (
 							<Button variant="solid" icon={Globe} onClick={() => void open()}>
-								Ouvrir le navigateur
+								{t("browserView.open")}
 							</Button>
 						) : null}
 					</div>
@@ -612,12 +617,12 @@ export function BrowserView({
 					<div className="pointer-events-none absolute inset-x-0 top-10 flex justify-center">
 						<span className="rounded-full bg-raised px-3 py-1.5 text-[11.5px] text-ink-muted shadow-pop">
 							{servers.length > 0
-								? "Ouverture du serveur de ce workspace…"
+								? t("browserView.openingServer")
 								: waiting
-									? "Le serveur de dev démarre — la page s'ouvrira dès qu'il répondra."
+									? t("browserView.serverStarting")
 									: onStartServer
-										? "Rien n'écoute dans ce workspace pour l'instant."
-										: "Rien n'écoute dans ce workspace : saisis une adresse, ou déclare la commande de dev dans les réglages du flux de travail."}
+										? t("browserView.nothingListening")
+										: t("browserView.nothingListeningHint")}
 						</span>
 					</div>
 				) : null}

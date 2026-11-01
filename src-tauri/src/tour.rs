@@ -116,7 +116,7 @@ async fn base_of(root: &Path, since: Option<&str>) -> (String, String) {
 		if let Some(base) = pr_base(branch).await {
 			let refs = [format!("origin/{base}"), base.clone()];
 			if let Some((sha, reference)) = closest_base(root, &refs).await {
-				return (sha, format!("depuis {reference}"));
+				return (sha, crate::i18n::tf("tour.since", &[("ref", &reference)]));
 			}
 		}
 		let mut refs: Vec<String> = Vec::new();
@@ -129,7 +129,7 @@ async fn base_of(root: &Path, since: Option<&str>) -> (String, String) {
 			}
 		}
 		if let Some((sha, reference)) = closest_base(root, &refs).await {
-			return (sha, format!("depuis {reference}"));
+			return (sha, crate::i18n::tf("tour.since", &[("ref", &reference)]));
 		}
 	}
 	if let Some(since) = since.map(str::trim).filter(|sha| !sha.is_empty()) {
@@ -137,17 +137,17 @@ async fn base_of(root: &Path, since: Option<&str>) -> (String, String) {
 		let ancestor = run_git(root, &["merge-base", "--is-ancestor", since, "HEAD"]).await.is_ok();
 		if ancestor {
 			if let Ok(raw) = run_git(root, &["rev-parse", "--verify", &parent]).await {
-				return (raw.trim().to_string(), format!("depuis avant {since}"));
+				return (raw.trim().to_string(), crate::i18n::tf("tour.sinceBefore", &[("sha", &since)]));
 			}
 		}
 	}
-	("HEAD".into(), "depuis le dernier commit".into())
+	("HEAD".into(), crate::i18n::t("tour.sinceLastCommit"))
 }
 
 async fn root_of(cwd: &Path) -> Result<PathBuf> {
 	let raw = run_git(cwd, &["rev-parse", "--show-toplevel"])
 		.await
-		.map_err(|_| CockpitError::msg("Ce dossier n'est pas un dépôt git : rien à visiter."))?;
+		.map_err(|_| CockpitError::msg(crate::i18n::t("tour.notGit")))?;
 	Ok(PathBuf::from(raw.trim()))
 }
 
@@ -288,26 +288,29 @@ fn story_prompt(changes: &TourChanges, diff: &str, notes: &[Note], conclusion: &
 		.join("\n");
 	let said = notes
 		.iter()
-		.map(|note| format!("- {} : {}", note.path, note.said.replace('\n', " ")))
+		.map(|note| format!("- {}: {}", note.path, note.said.replace('\n', " ")))
 		.collect::<Vec<_>>()
 		.join("\n");
 	format!(
-		"Tu prépares une visite guidée des changements qu'un agent de code vient de faire, \
-pour la personne qui va les relire. Elle ne connaît pas forcément ce code.\n\n\
-Fichiers changés ({base}) :\n{list}\n\n\
-Ce que l'agent a dit en les modifiant :\n{said}\n\n\
-Sa conclusion :\n{conclusion}\n\n\
-Le diff :\n```diff\n{diff}\n```\n\n\
-Réponds UNIQUEMENT par un objet JSON, sans texte autour :\n\
+		"You are preparing a guided tour of the changes a coding agent just made, \
+for the person who will review them. They do not necessarily know this code.\n\n\
+Changed files ({base}):\n{list}\n\n\
+What the agent said while modifying them:\n{said}\n\n\
+Its conclusion:\n{conclusion}\n\n\
+The diff:\n```diff\n{diff}\n```\n\n\
+Answer ONLY with a JSON object, with no text around it:\n\
 {{\"intro\": \"…\", \"files\": [{{\"path\": \"…\", \"story\": \"…\"}}]}}\n\n\
-- intro : deux ou trois phrases, ce que ce changement fait et pourquoi, vu du produit.\n\
-- files : chaque fichier de la liste, une seule fois, avec son chemin exact, dans l'ordre \
-où il faut les lire pour comprendre — du cœur du changement vers ce qui en découle \
-(tests, configuration, fichiers générés à la fin).\n\
-- story : trois à cinq phrases en français, tutoiement. Ce qui change dans ce fichier, \
-pourquoi, et ce qu'il faut regarder de près en relisant (un risque, un cas limite, \
-un choix discutable). Pas de liste, pas de Markdown, pas de code.",
+- intro: two or three sentences, what this change does and why, from the product's point of view.\n\
+- files: every file in the list, exactly once, with its exact path, in the order \
+in which to read them to understand — from the heart of the change to what follows from it \
+(tests, configuration, generated files last).\n\
+- story: three to five sentences, addressing the reader informally and directly. What changes in this file, \
+why, and what to look at closely while reviewing (a risk, an edge case, \
+a debatable choice). No lists, no Markdown, no code.\n\n\
+Keep the JSON keys (intro, files, path, story) exactly as written.\n\
+{directive}",
 		base = changes.base_label,
+		directive = crate::i18n::reply_directive(),
 	)
 }
 
@@ -320,7 +323,7 @@ fn parse_story(text: &str) -> Option<Story> {
 pub async fn story(cwd: &Path, since: Option<String>, notes: Vec<Note>, conclusion: String) -> Result<Story> {
 	let changes = changes(cwd, since).await?;
 	if changes.files.is_empty() {
-		return Err(CockpitError::msg("Aucun changement à raconter."));
+		return Err(CockpitError::msg(crate::i18n::t("tour.noChanges")));
 	}
 	let root = PathBuf::from(&changes.root);
 	let mut diff = run_git(&root, &["diff", "--no-renames", &changes.base])
@@ -340,7 +343,7 @@ pub async fn story(cwd: &Path, since: Option<String>, notes: Vec<Note>, conclusi
 			cut -= 1;
 		}
 		diff.truncate(cut);
-		diff.push_str("\n… (diff tronqué)");
+		diff.push_str("\n… (diff truncated)");
 	}
 
 	let config = crate::config::Config::for_repo(&changes.root);
@@ -356,7 +359,7 @@ pub async fn story(cwd: &Path, since: Option<String>, notes: Vec<Note>, conclusi
 	.await?;
 
 	let mut story = parse_story(&rendu.text)
-		.ok_or_else(|| CockpitError::msg("Le récit rendu n'est pas lisible — réessaie."))?;
+		.ok_or_else(|| CockpitError::msg(crate::i18n::t("tour.unreadableStory")))?;
 	story.cost_usd = rendu.cost_usd;
 	Ok(story)
 }
@@ -414,7 +417,7 @@ mod tests {
 		std::fs::write(dir.join("new.ts"), "a\nb\n").unwrap();
 
 		let changes = super::changes(&dir, None).await.unwrap();
-		assert_eq!(changes.base_label, "depuis main");
+		assert_eq!(changes.base_label, "since main");
 		let find = |path: &str| changes.files.iter().find(|file| file.path == path).cloned().unwrap();
 		assert_eq!(find("a.ts").state, "modified");
 		assert_eq!(find("a.ts").added, 1);
@@ -453,7 +456,7 @@ mod tests {
 		let changes = super::changes(&dir, None).await.unwrap();
 		let paths: Vec<&str> = changes.files.iter().map(|file| file.path.as_str()).collect();
 		assert_eq!(paths, vec!["cache.ts"], "{}", changes.base_label);
-		assert_eq!(changes.base_label, "depuis origin/dev");
+		assert_eq!(changes.base_label, "since origin/dev");
 		let _ = std::fs::remove_dir_all(&dir);
 	}
 
@@ -474,7 +477,7 @@ mod tests {
 		let without = super::changes(&dir, None).await.unwrap();
 		assert!(without.files.is_empty());
 		let with = super::changes(&dir, Some(sha.clone())).await.unwrap();
-		assert_eq!(with.base_label, format!("depuis avant {sha}"));
+		assert_eq!(with.base_label, format!("since before {sha}"));
 		assert_eq!(with.files.len(), 1);
 		let _ = std::fs::remove_dir_all(&dir);
 	}

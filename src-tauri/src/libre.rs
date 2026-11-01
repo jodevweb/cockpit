@@ -109,14 +109,14 @@ fn worktree_path(root: &Path, branch: &str) -> PathBuf {
 pub async fn prepare(raw: &str, place: &str, branch: &str) -> Result<Prepared> {
 	let found = inspect(raw).await;
 	if !found.exists {
-		return Err(CockpitError::msg(format!("Dossier introuvable : {}", found.path)));
+		return Err(CockpitError::msg(crate::i18n::tf("libre.folderNotFound", &[("path", &found.path)])));
 	}
 	let branch = branch.trim();
 	if place == "ici" || !found.is_git {
 		return Ok(Prepared { cwd: found.path, branch: found.branch, worktree: String::new() });
 	}
 	if branch.is_empty() {
-		return Err(CockpitError::msg("Donne un nom à la branche de l'agent."));
+		return Err(CockpitError::msg(crate::i18n::t("libre.branchNameRequired")));
 	}
 	let path = PathBuf::from(&found.path);
 	match place {
@@ -139,7 +139,7 @@ pub async fn prepare(raw: &str, place: &str, branch: &str) -> Result<Prepared> {
 				worktree: target_str,
 			})
 		}
-		other => Err(CockpitError::msg(format!("Emplacement inconnu : {other}"))),
+		other => Err(CockpitError::msg(crate::i18n::tf("libre.unknownPlace", &[("place", &other)]))),
 	}
 }
 
@@ -161,9 +161,7 @@ pub async fn archive(worktree: &str, branch: &str, action: &str) -> Result<()> {
 	match action {
 		"keep" => {
 			run_git(&main, &["worktree", "remove", worktree]).await.map_err(|error| {
-				CockpitError::msg(format!(
-					"Le worktree a des modifications non commitées : commite-les ou choisis « Tout jeter ». ({error})"
-				))
+				CockpitError::msg(crate::i18n::tf("libre.worktreeDirty", &[("error", &error)]))
 			})?;
 		}
 		"discard" => {

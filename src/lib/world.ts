@@ -8,13 +8,29 @@
  * tout calcul de coordonnées.
  */
 
+import { t } from "@/i18n";
+
 export type RegionId = "arrive" | "encours" | "livrer" | "prod";
 
+/** Libellé et indication se traduisent à la lecture, jamais au chargement du module. */
+function region(id: RegionId, columns: number): { id: RegionId; label: string; hint: string; columns: number } {
+	return {
+		id,
+		columns,
+		get label() {
+			return t(`lib:world.regions.${id}.label`);
+		},
+		get hint() {
+			return t(`lib:world.regions.${id}.hint`);
+		},
+	};
+}
+
 export const REGIONS: Array<{ id: RegionId; label: string; hint: string; columns: number }> = [
-	{ id: "arrive", label: "Arrive", hint: "à trier", columns: 1 },
-	{ id: "encours", label: "En cours", hint: "tu gardes la main ou tu délègues", columns: 2 },
-	{ id: "livrer", label: "Livrer", hint: "relire et fusionner", columns: 1 },
-	{ id: "prod", label: "En prod", hint: "ce que ça change", columns: 1 },
+	region("arrive", 1),
+	region("encours", 2),
+	region("livrer", 1),
+	region("prod", 1),
 ];
 
 export type CardKind =

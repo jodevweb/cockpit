@@ -1,5 +1,6 @@
 import { Rocket } from "lucide-react";
 import { useState } from "react";
+import { useTranslation } from "react-i18next";
 import { useConfirm } from "@/components/Confirm";
 import { Button } from "@/components/ui";
 import { withActivity } from "@/lib/activity";
@@ -32,6 +33,7 @@ export function StartMission({
 	title?: string;
 	size?: "sm" | "md";
 }) {
+	const { t } = useTranslation("components1");
 	const { notify, go, hasConnector, config } = useCockpit();
 	const guided = !config?.missions?.autonomous;
 	const { confirm } = useConfirm();
@@ -44,20 +46,18 @@ export function StartMission({
 
 	const start = async () => {
 		const ok = await confirm({
-			title: `Lancer une mission sur ${reference} ?`,
-			message: `${title ? `« ${title} » — ` : ""}${
-				guided
-					? "l'agent maître lit le ticket avec toi. Tu valides ce qu'il a compris, puis son approche, puis son découpage : rien ne démarre avant."
-					: "l'agent maître lit le ticket, propose un découpage, et rien ne démarre avant ton accord sur son plan."
+			title: t("startMission.confirm.title", { reference }),
+			message: `${title ? t("startMission.confirm.ticketPrefix", { title }) : ""}${
+				guided ? t("startMission.confirm.guided") : t("startMission.confirm.autonomous")
 			}`,
-			confirmLabel: "Lancer la mission",
+			confirmLabel: t("startMission.confirm.action"),
 		});
 		if (!ok) return;
 
 		setBusy(true);
 		try {
-			const result = await withActivity(`Mission depuis ${reference}`, () => api.missions.startFromTicket(reference), {
-				firstStep: "Je lis le ticket et je lance l'agent maître…",
+			const result = await withActivity(t("startMission.activity.title", { reference }), () => api.missions.startFromTicket(reference), {
+				firstStep: t("startMission.activity.firstStep"),
 				result: (value) => value.message,
 			});
 			// On suit le maître : ouvrir la mission sans y aller laisserait croire
@@ -76,10 +76,10 @@ export function StartMission({
 			size={size}
 			icon={Rocket}
 			loading={busy}
-			title="Ouvrir la mission de ce ticket et lancer son agent maître"
+			title={t("startMission.button.title")}
 			onClick={() => void start()}
 		>
-			Lancer en mission
+			{t("startMission.button.label")}
 		</Button>
 	);
 }

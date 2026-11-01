@@ -10,6 +10,7 @@ import {
 	Settings2,
 } from "lucide-react";
 import { useEffect, useState } from "react";
+import { Trans, useTranslation } from "react-i18next";
 import { useConfirm } from "@/components/Confirm";
 import { EngagementCard } from "@/components/EngagementCard";
 import { EngagementPanel } from "@/components/EngagementPanel";
@@ -35,6 +36,7 @@ import { useCockpit } from "@/app/store";
  */
 export function PermanenceView() {
 	const { config, go, notify } = useCockpit();
+	const { t } = useTranslation("views");
 	const { confirm } = useConfirm();
 	const permanence = config?.permanence;
 	const rules = permanence?.rules ?? [];
@@ -96,28 +98,32 @@ export function PermanenceView() {
 		const held = data?.holds ?? [];
 		if (held.length > 0) {
 			const ok = await confirm({
-				title: "Tout arrêter ?",
-				message: `${held.length} chose(s) en cours seront coupées : ${held
-					.map((entry) => entry.label || entry.id)
-					.join(", ")}. Les missions sont mises en pause, leur travail reste là. Elle ne repartira pas tant que tu ne l'auras pas réarmée.`,
-				confirmLabel: "Tout arrêter",
+				title: t("permanence.halt.confirmTitle"),
+				message: t("permanence.halt.confirmMessage", {
+					count: held.length,
+					items: held.map((entry) => entry.label || entry.id).join(", "),
+				}),
+				confirmLabel: t("permanence.halt.button"),
 				danger: true,
 			});
 			if (!ok) return;
 		}
 		setBusy(true);
 		try {
-			const result = await api.permanence.halt("Arrêt demandé depuis l'écran.");
+			const result = await api.permanence.halt(t("permanence.halt.reason"));
 			setFresh(result.state);
 			// Ce qui a été coupé se dit, et ce qui a résisté aussi : croire que
 			// c'est arrêté alors qu'il restait quelque chose est le pire résultat
 			// possible pour ce bouton.
 			notify(
 				result.failed.length > 0
-					? `Arrêté : ${result.stopped.length}. N'a pas pu être coupé : ${result.failed.join(", ")}`
+					? t("permanence.halt.partial", {
+							stopped: result.stopped.length,
+							failed: result.failed.join(", "),
+						})
 					: result.stopped.length > 0
-						? `Tout est arrêté (${result.stopped.join(", ")}).`
-						: "Rien ne tournait. Elle ne repartira pas tant que tu ne l'auras pas réarmée.",
+						? t("permanence.halt.done", { items: result.stopped.join(", ") })
+						: t("permanence.halt.nothing"),
 			);
 		} catch (error) {
 			notify(String(error));
@@ -129,10 +135,9 @@ export function PermanenceView() {
 	/** La lâcher : elle agira pour de vrai dès le prochain engagement. */
 	const releaseRehearsal = async () => {
 		const ok = await confirm({
-			title: "La lâcher ?",
-			message:
-				"Dès le prochain engagement, elle posera pour de vrai les gestes cochés dans les réglages. Elle ne touchera jamais une branche partagée, et « Tout arrêter » reste à portée.",
-			confirmLabel: "La lâcher",
+			title: t("permanence.release.confirmTitle"),
+			message: t("permanence.release.confirmMessage"),
+			confirmLabel: t("permanence.release.button"),
 		});
 		if (!ok) return;
 		try {
@@ -167,7 +172,7 @@ export function PermanenceView() {
 	return (
 		<>
 			<ViewHeader
-				title="Permanence"
+				title={t("permanence.title")}
 				subtitle={<Heartbeat state={data} live={live.length} />}
 				actions={
 					<>
@@ -182,13 +187,13 @@ export function PermanenceView() {
 							loading={busy}
 							onClick={() => void toggle()}
 						>
-							{suspended ? "Reprendre" : "Suspendre"}
+							{suspended ? t("permanence.resume") : t("permanence.suspend")}
 						</Button>
 						)}
 						<Button
 							size="sm"
 							icon={Eye}
-							title="Regarder maintenant, sans attendre la cadence"
+							title={t("permanence.lookNow")}
 							onClick={() =>
 								void api.permanence
 									.look()
@@ -199,7 +204,7 @@ export function PermanenceView() {
 						<Button
 							size="sm"
 							icon={Settings2}
-							title="Réglages de la Permanence"
+							title={t("permanence.settings")}
 							onClick={() => go("settings", { settingsTab: "permanence" })}
 						/>
 						{/* En bout de rangée et en rouge : c'est le geste qu'on cherche
@@ -212,10 +217,10 @@ export function PermanenceView() {
 							icon={OctagonX}
 							variant="danger"
 							loading={busy}
-							title="Ferme les portes et coupe tout ce qu'elle tient"
+							title={t("permanence.halt.hint")}
 							onClick={() => void halt()}
 						>
-							{tripped ? "Couper ce qui reste" : "Tout arrêter"}
+							{tripped ? t("permanence.halt.rest") : t("permanence.halt.button")}
 						</Button>
 						)}
 					</>
@@ -232,13 +237,15 @@ export function PermanenceView() {
 						<Dot tone="critical" />
 						<div className="min-w-0 flex-1">
 							<p className="text-[11.5px] text-ink">
-								Coupe-circuit : elle s'est arrêtée d'elle-même.
+								{t("permanence.tripped.title")}
 							</p>
 							<p className="text-[10px] text-ink-faint">{data.tripped}</p>
 							{data.holds.length > 0 ? (
 								<p className="text-[10px] text-critical">
-									{data.holds.length} chose(s) n'ont pas pu être coupées :{" "}
-									{data.holds.map((entry) => entry.label || entry.id).join(", ")}
+									{t("permanence.tripped.holds", {
+										count: data.holds.length,
+										items: data.holds.map((entry) => entry.label || entry.id).join(", "),
+									})}
 								</p>
 							) : null}
 						</div>
@@ -254,7 +261,7 @@ export function PermanenceView() {
 									.catch((error) => notify(String(error)))
 							}
 						>
-							Réarmer
+							{t("permanence.tripped.rearm")}
 						</Button>
 					</div>
 				) : null}
@@ -266,18 +273,18 @@ export function PermanenceView() {
 						<div className="flex items-center gap-2">
 							<Dot tone="info" />
 							<p className="min-w-0 flex-1 text-[11.5px] text-ink">
-								Rodage — elle décide, elle n'agit pas.{" "}
+								{t("permanence.rehearsal.title")}{" "}
 								<span className="font-mono text-ink-muted">
-									encore {data.rehearsalLeft} engagement(s) à blanc
+									{t("permanence.rehearsal.left", { count: data.rehearsalLeft })}
 								</span>
 							</p>
 							<Button
 								size="sm"
 								variant="outline"
-								title="Elle agira pour de vrai dès le prochain engagement"
+								title={t("permanence.release.hint")}
 								onClick={() => void releaseRehearsal()}
 							>
-								La lâcher
+								{t("permanence.release.button")}
 							</Button>
 						</div>
 						{/* Ce que « à blanc » et « lâcher » veulent dire, en clair. Sans
@@ -286,20 +293,25 @@ export function PermanenceView() {
 						    de faire. */}
 						<ul className="flex flex-col gap-0.5 pl-4 text-[10.5px] leading-relaxed text-ink-faint">
 							<li>
-								<span className="text-ink-muted">Pendant le rodage :</span> elle lit les
-								signaux, écrit son objectif et la liste des gestes qu'elle poserait —
-								puis s'arrête là. Rien n'est touché dans tes dépôts. Ouvre un
-								engagement terminé pour lire ce qu'elle aurait fait.
+								<Trans
+									t={t}
+									i18nKey="permanence.rehearsal.during"
+									components={{ label: <span className="text-ink-muted" /> }}
+								/>
 							</li>
 							<li>
-								<span className="text-ink-muted">La lâcher :</span> dès le prochain
-								engagement, elle posera pour de vrai les gestes que tu as cochés — et
-								seulement ceux-là. Tu peux aussi laisser le compteur s'épuiser.
+								<Trans
+									t={t}
+									i18nKey="permanence.rehearsal.release"
+									components={{ label: <span className="text-ink-muted" /> }}
+								/>
 							</li>
 							<li>
-								<span className="text-ink-muted">Le compteur repart</span> à chaque fois
-								que tu changes ses pouvoirs : élargir ce qu'elle a le droit de faire,
-								c'est un autre dispositif, et il se regarde avant d'être lâché.
+								<Trans
+									t={t}
+									i18nKey="permanence.rehearsal.reset"
+									components={{ label: <span className="text-ink-muted" /> }}
+								/>
 							</li>
 						</ul>
 					</div>
@@ -310,8 +322,7 @@ export function PermanenceView() {
 				{data && data.rehearsalLeft === 0 && data.armedOn !== null && live.length > 0 ? (
 					<p className="flex items-center gap-2 px-1 text-[10.5px] text-ink-faint">
 						<Dot tone="success" />
-						Elle agit pour de vrai. Les gestes cochés dans les réglages sont les seuls
-						qu'elle posera, et jamais sur une branche partagée.
+						{t("permanence.live")}
 					</p>
 				) : null}
 
@@ -320,30 +331,29 @@ export function PermanenceView() {
 				{suspended ? (
 					<p className="flex items-center gap-2 rounded-[var(--radius-panel)] border border-warning/30 bg-warning/[0.06] px-3 py-2 text-[11.5px] text-ink-muted">
 						<Dot tone="warning" />
-						Au repos. Les engagements en cours vont au bout ; aucun nouveau ne démarrera.
+						{t("permanence.suspended.message")}
 						<span className="ml-auto font-mono text-[10px] text-ink-faint">
-							reprend d'un clic ou avec ⌘⇧P
+							{t("permanence.suspended.hint")}
 						</span>
 					</p>
 				) : null}
 
 				<Reserve />
 
-				<Section title="En cours" count={inFlight.length}>
+				<Section title={t("permanence.inFlight.title")} count={inFlight.length}>
 					{live.length === 0 ? (
 						<Empty
 							icon={Radar}
-							message="Aucune règle active."
-							hint="La Permanence ne fera rien tant que tu ne lui auras pas dit quoi surveiller — et elle ne fera que ce que tu auras coché."
+							message={t("permanence.inFlight.noRule")}
+							hint={t("permanence.inFlight.noRuleHint")}
 							action={{
-								label: "Ouvrir les réglages",
+								label: t("permanence.inFlight.openSettings"),
 								onClick: () => go("settings", { settingsTab: "permanence" }),
 							}}
 						/>
 					) : inFlight.length === 0 ? (
 						<p className="rounded-xl border border-dashed border-line-soft px-3 py-6 text-center text-[11px] text-ink-faint">
-							{live.length} règle(s) prête(s) à partir, rien en cours. C'est la réponse
-							attendue la plupart du temps.
+							{t("permanence.inFlight.idle", { count: live.length })}
 						</p>
 					) : (
 						<div className="flex flex-col gap-2">
@@ -361,7 +371,7 @@ export function PermanenceView() {
 				{/* Terminés : les échecs d'abord, teintés ; les succès ensuite, sans
 				    accent. Un succès n'a droit à aucune couleur. */}
 				{finished.length > 0 ? (
-					<Section title="Terminés" count={finished.length}>
+					<Section title={t("permanence.finished")} count={finished.length}>
 						<div className="grid grid-cols-[repeat(auto-fill,minmax(280px,1fr))] gap-2.5">
 							{finished.map((engagement) => (
 								<EngagementCard
@@ -378,7 +388,7 @@ export function PermanenceView() {
 				    garde-fou le plus fort du dispositif — encore faut-il voir ce qu'il
 				    retient, sinon on croit qu'elle n'a rien vu. */}
 				{queued.length > 0 ? (
-					<Section title="En file" count={queued.length}>
+					<Section title={t("permanence.queue.title")} count={queued.length}>
 						<div className="panel flex flex-col divide-y divide-line-soft">
 							{queued.map((signal) => (
 								<div key={signal.key} className="flex items-center gap-2 px-3 py-2">
@@ -386,17 +396,17 @@ export function PermanenceView() {
 									<span className="min-w-0 flex-1 truncate text-[11px] text-ink-muted">
 										{signal.label}
 									</span>
-									<Badge tone="accent">{signal.rule || "règle inconnue"}</Badge>
+									<Badge tone="accent">{signal.rule || t("permanence.queue.unknownRule")}</Badge>
 									<span className="shrink-0 font-mono text-[10px] text-ink-faint">
-										{signal.dropped || `retenu ${fromTimestamp(signal.at)}`}
+										{signal.dropped || t("permanence.queue.retained", { when: fromTimestamp(signal.at) })}
 									</span>
 								</div>
 							))}
 						</div>
 						<p className="px-1 pt-1 text-[10px] text-ink-faint">
 							{running === 1
-								? "Un seul engagement à la fois : ceux-ci attendent leur tour."
-								: `${running} engagements au plus à la fois : ceux-ci attendent leur tour.`}
+								? t("permanence.queue.single")
+								: t("permanence.queue.multiple", { count: running })}
 						</p>
 					</Section>
 				) : null}
@@ -441,13 +451,13 @@ function rank(verdict: string): number {
 
 /* ── Le battement de cœur ───────────────────────────────────────────────── */
 
-const CLOSED_LABEL: Record<PermanenceClosed, string> = {
-	disabled: "désactivée",
-	suspended: "au repos",
-	offHours: "hors des heures de service",
-	capped: "plafond du jour atteint",
-	quota: "quota partagé sous le plancher",
-	tripped: "arrêtée d'elle-même",
+const CLOSED_KEY: Record<PermanenceClosed, string> = {
+	disabled: "permanence.closed.disabled",
+	suspended: "permanence.closed.suspended",
+	offHours: "permanence.closed.offHours",
+	capped: "permanence.closed.capped",
+	quota: "permanence.closed.quota",
+	tripped: "permanence.closed.tripped",
 };
 
 /**
@@ -459,6 +469,7 @@ const CLOSED_LABEL: Record<PermanenceClosed, string> = {
  * mais elle le dit : dormir n'est pas tomber en panne.
  */
 function Heartbeat({ state, live }: { state: PermanenceState | null; live: number }) {
+	const { t } = useTranslation("views");
 	const look = state?.lastLook ?? null;
 	// `tripped` ne passe pas par un regard : elle s'est arrêtée entre deux.
 	// Attendre le prochain pour l'annoncer laisserait l'en-tête dire « dernier
@@ -467,7 +478,7 @@ function Heartbeat({ state, live }: { state: PermanenceState | null; live: numbe
 		return (
 			<span className="flex items-center gap-1.5">
 				<Dot tone="critical" />
-				<span className="text-critical">arrêtée — coupe-circuit</span>
+				<span className="text-critical">{t("permanence.heartbeat.tripped")}</span>
 				<span className="text-ink-faint">·</span>
 				<span>{state.tripped}</span>
 			</span>
@@ -482,26 +493,28 @@ function Heartbeat({ state, live }: { state: PermanenceState | null; live: numbe
 		<span className="flex flex-wrap items-center gap-1.5">
 			<Dot tone={closed ? "warning" : live > 0 ? "success" : "neutral"} />
 			<span>
-				{live > 0 ? `${live} règle(s) prête(s) à partir` : "aucune règle prête à partir"}
+				{live > 0
+					? t("permanence.heartbeat.ready", { count: live })
+					: t("permanence.heartbeat.noneReady")}
 			</span>
 			<span className="text-ink-faint">·</span>
 			{!look ? (
-				<span className="text-warning">jamais regardé</span>
+				<span className="text-warning">{t("permanence.heartbeat.never")}</span>
 			) : closed ? (
-				<span className="text-warning">{CLOSED_LABEL[closed]}</span>
+				<span className="text-warning">{t(CLOSED_KEY[closed])}</span>
 			) : (
 				<span className={clsx("font-mono", stale && "text-warning")}>
-					dernier regard {fromTimestamp(look.at)}
+					{t("permanence.heartbeat.lastLook", { when: fromTimestamp(look.at) })}
 				</span>
 			)}
 			{/* Un regard partiel qui se tait ment plus qu'un regard vide : douze
 			    changements au lieu de quinze, et on croit l'écran complet. */}
 			{look?.blind?.length ? (
 				<span title={look.blind.join("\n")}>
-					<Badge tone="warning">{look.blind.length} source(s) muette(s)</Badge>
+					<Badge tone="warning">{t("permanence.heartbeat.blind", { count: look.blind.length })}</Badge>
 				</span>
 			) : null}
-			{state?.cold ? <Badge>curseur en cours de pose</Badge> : null}
+			{state?.cold ? <Badge>{t("permanence.heartbeat.cold")}</Badge> : null}
 		</span>
 	);
 }
@@ -523,12 +536,13 @@ function Dropped({
 	loading: boolean;
 	onRetry: (key: string, at: number) => void;
 }) {
+	const { t } = useTranslation("views");
 	const [open, setOpen] = useState(false);
 	const signals = (state?.signals ?? []).filter((signal) => !signal.retained);
 	const pending = signals.filter((signal) => signal.pending).length;
 
 	return (
-		<Section title="Écartés" count={signals.length}>
+		<Section title={t("permanence.dropped.title")} count={signals.length}>
 			<div className="panel overflow-hidden">
 				<button
 					type="button"
@@ -546,16 +560,16 @@ function Dropped({
 					<span className="text-[11px] text-ink-muted">
 						{signals.length === 0
 							? state?.cold
-								? "Premier regard : le curseur se pose. Ce qui bougera ensuite sera signalé."
-								: "Rien de nouveau depuis le dernier regard."
+								? t("permanence.dropped.cold")
+								: t("permanence.dropped.nothing")
 							: pending > 0
-								? `${signals.length} signal(aux) vu(s), dont ${pending} en attente de tri.`
-								: `${signals.length} signal(aux) vu(s), aucune règle ne s'applique.`}
+								? t("permanence.dropped.seenPending", { count: signals.length, pending })
+								: t("permanence.dropped.seen", { count: signals.length })}
 					</span>
 					{loading ? <Spinner /> : null}
 					{state?.lastLook && !state.lastLook.closed ? (
 						<span className="ml-auto shrink-0 font-mono text-[10px] text-ink-faint">
-							{state.lastLook.seen} changement(s) comparé(s)
+							{t("permanence.dropped.compared", { count: state.lastLook.seen })}
 						</span>
 					) : null}
 				</button>
@@ -576,7 +590,7 @@ function Dropped({
 								    nommé mais rien ne l'attendait ». */}
 								{signal.trigger ? <Badge tone="accent">{signal.trigger}</Badge> : null}
 								<span className="shrink-0 font-mono text-[10px] text-ink-faint">
-									{signal.pending ? "en attente de tri" : signal.dropped}
+									{signal.pending ? t("permanence.dropped.pending") : signal.dropped}
 								</span>
 								<span className="shrink-0 font-mono text-[10px] text-ink-faint">
 									{fromTimestamp(signal.at)}
@@ -588,7 +602,7 @@ function Dropped({
 									<Button
 										size="sm"
 										icon={RefreshCw}
-										title="Relancer le tri sur ce signal"
+										title={t("permanence.dropped.retry")}
 										onClick={() => onRetry(signal.key, signal.at)}
 									/>
 								) : null}
@@ -596,7 +610,7 @@ function Dropped({
 						))}
 						{signals.length > 40 ? (
 							<p className="px-3 py-1.5 font-mono text-[10px] text-ink-faint">
-								+ {signals.length - 40} autres
+								{t("permanence.dropped.more", { count: signals.length - 40 })}
 							</p>
 						) : null}
 					</div>
@@ -624,6 +638,7 @@ function Dropped({
  */
 function Reserve() {
 	const { config } = useCockpit();
+	const { t } = useTranslation("views");
 	const permanence = config?.permanence;
 	// **Pas de poll.** Lire les plafonds coûte un lancement complet du CLI — une
 	// session `claude -p /usage` qui apparaît dans les journaux, à chaque fois.
@@ -654,15 +669,15 @@ function Reserve() {
 		>
 			<header className="flex items-center gap-2">
 				<h2 className="text-[11px] font-semibold tracking-[0.06em] text-ink-muted uppercase">
-					Réserve
+					{t("permanence.reserve.title")}
 				</h2>
-				{grounded ? <Badge tone="warning">au repos</Badge> : null}
+				{grounded ? <Badge tone="warning">{t("permanence.reserve.grounded")}</Badge> : null}
 				<div className="ml-auto flex items-center gap-2">
 					{limits.loading ? <Spinner /> : null}
 					<Button
 						size="sm"
 						icon={RefreshCw}
-						title="Redemander les plafonds au CLI"
+						title={t("permanence.reserve.refresh")}
 						onClick={() =>
 							void api.sessions
 								.limits(true)
@@ -677,17 +692,22 @@ function Reserve() {
 				{/* Ce qu'elle s'accorde. Le compteur du jour arrivera avec l'état des
 				    engagements : un chiffre inventé serait pire que pas de chiffre. */}
 				<Gauge
-					label="Son plafond du jour"
+					label={t("permanence.reserve.ceiling")}
 					value={`${Math.round(ceiling / 1000)}k`}
-					hint={`jetons max · ${engagements} engagements max`}
+					hint={t("permanence.reserve.ceilingHint", { count: engagements })}
 				/>
 				<Gauge
-					label="Ce que tu partages"
+					label={t("permanence.reserve.shared")}
 					value={remaining === null ? "—" : `${remaining} %`}
 					hint={
 						tightest
-							? `${tightest.label.toLowerCase()}${tightest.resetsAt ? ` · repart ${tightest.resetsAt}` : ""}`
-							: (data?.error ?? "plafonds non annoncés")
+							? tightest.resetsAt
+								? t("permanence.reserve.limitResets", {
+										label: tightest.label.toLowerCase(),
+										when: tightest.resetsAt,
+									})
+								: tightest.label.toLowerCase()
+							: (data?.error ?? t("permanence.reserve.noLimits"))
 					}
 					tone={
 						remaining === null
@@ -699,7 +719,11 @@ function Reserve() {
 									: "neutral"
 					}
 				/>
-				<Gauge label="Elle te laisse la place sous" value={`${floor} %`} hint="de quota restant" />
+				<Gauge
+					label={t("permanence.reserve.floor")}
+					value={`${floor} %`}
+					hint={t("permanence.reserve.floorHint")}
+				/>
 			</div>
 
 			{/* La barre porte le quota partagé, pas le plafond maison : c'est celui
@@ -719,13 +743,13 @@ function Reserve() {
 						<span
 							className="absolute top-0 h-full w-px bg-ink-faint"
 							style={{ left: `${Math.min(100 - floor, 100)}%` }}
-							title={`Elle s'arrête sous ${floor} % restants`}
+							title={t("permanence.reserve.floorMark", { floor })}
 						/>
 					</div>
 					<p className="text-[10px] leading-snug text-ink-faint">
 						{grounded
-							? "Sous le plancher : elle ne démarrera aucun engagement tant que le quota n'aura pas repris."
-							: `Elle s'arrêtera d'elle-même sous ${floor} % restants.`}
+							? t("permanence.reserve.belowFloor")
+							: t("permanence.reserve.willStop", { floor })}
 					</p>
 				</div>
 			) : null}

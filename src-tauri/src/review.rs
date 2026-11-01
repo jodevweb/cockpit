@@ -147,7 +147,7 @@ pub fn list(repo: &str) -> Vec<Review> {
 }
 
 pub fn set_posted(repo: &str, number: i64, finding: &str, posted: bool) -> Result<Review> {
-	let mut review = load(repo, number).ok_or_else(|| CockpitError::msg("Aucune revue pour cette PR."))?;
+	let mut review = load(repo, number).ok_or_else(|| CockpitError::msg(crate::i18n::t("review.noReview")))?;
 	review.posted.retain(|id| id != finding);
 	if posted {
 		review.posted.push(finding.to_string());
@@ -226,13 +226,13 @@ const send = (message) => process.stdout.write(`${JSON.stringify(message)}\n`);
 const FINDING = {
   type: "object",
   properties: {
-    id: { type: "string", description: "Identifiant court et stable, ex. R1, R2… Garde l'identifiant d'un point déjà relevé à un tour précédent." },
-    severity: { type: "string", enum: ["bloquant", "important", "suggestion"] },
-    file: { type: "string", description: "Chemin du fichier, relatif à la racine du dépôt." },
-    lines: { type: "string", description: "Ligne(s) dans la version de la PR : « 42 » ou « 42-57 »." },
-    problem: { type: "string", description: "Le problème, en une ou deux phrases." },
-    fix: { type: "string", description: "La correction que tu ferais, concrète." },
-    comment: { type: "string", description: "Le commentaire, simple et humain, que la personne postera elle-même sur cette ligne de la PR." },
+    id: { type: "string", description: "Short, stable identifier, e.g. R1, R2… Keep the identifier of a point already raised in a previous round." },
+    severity: { type: "string", enum: ["bloquant", "important", "suggestion"], description: "bloquant = blocking. Use these enum values exactly as written." },
+    file: { type: "string", description: "File path, relative to the repository root." },
+    lines: { type: "string", description: "Line(s) in the PR version: \"42\" or \"42-57\"." },
+    problem: { type: "string", description: "The problem, in one or two sentences." },
+    fix: { type: "string", description: "The fix you would make, concretely." },
+    comment: { type: "string", description: "The comment, simple and human, that the person will post themselves on this line of the PR." },
   },
   required: ["id", "severity", "file", "lines", "problem", "fix", "comment"],
 };
@@ -240,18 +240,18 @@ const TOOLS = [
   {
     name: "remettre_revue",
     description:
-      "Remet ta revue au cockpit, qui l'affiche point par point. Appelle-le une fois, à la fin. Tu ne postes rien toi-même sur la PR.",
+      "Hands your review over to Cockpit, which displays it point by point. Call it once, at the end. You post nothing yourself on the PR.",
     inputSchema: {
       type: "object",
       properties: {
-        pr: { type: "number", description: "Le numéro de la PR relue." },
-        kind: { type: "string", enum: ["revue", "verification"] },
-        summary: { type: "string", description: "Ce que fait la PR et comment, pour la comprendre : 10 lignes au plus, sans blabla." },
-        verdict: { type: "string", enum: ["merge", "corrections", "bloquant"], description: "merge : tout est bon, la personne peut fusionner." },
-        findings: { type: "array", items: FINDING, description: "Les points relevés à ce tour : bloquants, importants, suggestions. Vide si rien." },
+        pr: { type: "number", description: "The number of the reviewed PR." },
+        kind: { type: "string", enum: ["revue", "verification"], description: "revue = full review. Use these enum values exactly as written." },
+        summary: { type: "string", description: "What the PR does and how, to understand it: 10 lines at most, no fluff." },
+        verdict: { type: "string", enum: ["merge", "corrections", "bloquant"], description: "merge: all good, the person can merge. corrections: changes needed. bloquant: blocking. Use these enum values exactly as written." },
+        findings: { type: "array", items: FINDING, description: "The points raised in this round: blocking, important, suggestions. Empty if none." },
         checks: {
           type: "array",
-          description: "Pour une vérification : ce qu'est devenu chaque point du tour précédent.",
+          description: "For a verification: what became of each point from the previous round (corrige = fixed, partiel = partly fixed, non_corrige = not fixed).",
           items: {
             type: "object",
             properties: {
@@ -282,7 +282,7 @@ process.stdin.on("data", (chunk) => {
     } else if (message.method === "tools/list") {
       send({ jsonrpc: "2.0", id: message.id, result: { tools: TOOLS } });
     } else if (message.method === "tools/call") {
-      send({ jsonrpc: "2.0", id: message.id, result: { content: [{ type: "text", text: "Revue remise au cockpit. Termine par une phrase de synthèse, sans répéter les points." }] } });
+      send({ jsonrpc: "2.0", id: message.id, result: { content: [{ type: "text", text: "Review handed over to Cockpit. Finish with one summary sentence, without repeating the points." }] } });
     } else if (message.id !== undefined) {
       send({ jsonrpc: "2.0", id: message.id, result: {} });
     }
@@ -307,18 +307,18 @@ pub fn bridge_config(sandboxed: bool) -> Option<String> {
 /// Ta consigne de revue, telle qu'on la retaperait. Remplaçable dans la
 /// bibliothèque de prompts (identifiant `revue`) ; `{pr}`, `{titre}`,
 /// `{auteur}`, `{branche}` et `{base}` y sont remplacés.
-pub const REVIEW_TEMPLATE: &str = "Fais-moi une code review complète de la PR #{pr} (« {titre} », de {auteur}, \
-branche {branche} vers {base}). Renvoie une synthèse uniquement des points bloquants, importants et \
-suggestions, pas de blabla. Pour chaque point : le fichier, la ou les lignes impactées, le problème, la \
-correction que tu ferais, puis un message simple et humain que je pourrai écrire moi-même en commentaire \
-dans les « Files changed » de la PR. Tu ne commentes rien par toi-même : tu me donnes les informations, je \
-fais le reste. J'ai aussi besoin de comprendre la PR et le code.";
+pub const REVIEW_TEMPLATE: &str = "Give me a complete code review of PR #{pr} (\"{titre}\", by {auteur}, \
+branch {branche} into {base}). Return a summary of only the blocking points, important points and \
+suggestions, no fluff. For each point: the file, the affected line(s), the problem, the fix you would \
+make, then a simple, human message I can write myself as a comment in the PR's \"Files changed\". You do \
+not comment anything yourself: you give me the information, I do the rest. I also need to understand the \
+PR and the code.";
 
 /// La consigne d'un tour de vérification (identifiant `revue-suivi`).
-pub const FOLLOWUP_TEMPLATE: &str = "{auteur} a poussé des corrections sur la PR #{pr} (« {titre} ») depuis notre \
-dernière revue. Vérifie chacun des points relevés : corrigé, partiellement, ou pas. Puis refais une code \
-review de ce qui a changé, avec les mêmes exigences : fichier, lignes, problème, correction, et un message \
-simple et humain à poster moi-même. Ou dis-moi si tout est parfait et si je peux merger.";
+pub const FOLLOWUP_TEMPLATE: &str = "{auteur} pushed fixes to PR #{pr} (\"{titre}\") since our last \
+review. Check each of the points raised: fixed, partly, or not. Then do a new code review of what \
+changed, with the same requirements: file, lines, problem, fix, and a simple, human message for me to \
+post myself. Or tell me if everything is perfect and I can merge.";
 
 fn template(id: &str, fallback: &str) -> String {
 	crate::prompts::list()
@@ -359,7 +359,7 @@ pub struct Prepared {
 pub async fn prepare(config: &Config, number: i64, kind: &str) -> Result<Prepared> {
 	let repo = config.github.repo.trim().to_string();
 	if repo.is_empty() {
-		return Err(CockpitError::msg("Renseigne le dépôt GitHub du projet dans Réglages."));
+		return Err(CockpitError::msg(crate::i18n::t("review.noRepo")));
 	}
 	let conversation = crate::integrations::github_pull_conversation(config, &number.to_string()).await?;
 	let detail = &conversation["detail"];
@@ -372,7 +372,10 @@ pub async fn prepare(config: &Config, number: i64, kind: &str) -> Result<Prepare
 	let head_sha = text("/head/sha");
 	let body = text("/body");
 	if branch.is_empty() {
-		return Err(CockpitError::msg(format!("Je ne trouve pas la PR #{number} sur {repo}.")));
+		return Err(CockpitError::msg(crate::i18n::tf(
+			"review.prNotFound",
+			&[("number", &number), ("repo", &repo)],
+		)));
 	}
 
 	// La branche telle qu'elle est sur le dépôt, pas telle qu'on l'a laissée :
@@ -408,12 +411,12 @@ pub async fn prepare(config: &Config, number: i64, kind: &str) -> Result<Prepare
 
 	// Ce que le cockpit sait et que l'agent n'a pas à aller chercher — ni à
 	// pouvoir chercher : il ne lit pas l'API GitHub.
-	prompt.push_str("\n\n---\nCe que le cockpit te donne :\n");
+	prompt.push_str("\n\n---\nWhat Cockpit gives you:\n");
 	prompt.push_str(&format!(
-		"- Base de comparaison : `origin/{base}` (à jour). Le diff de la PR : `git diff origin/{base}...HEAD`.\n"
+		"- Comparison base: `origin/{base}` (up to date). The PR diff: `git diff origin/{base}...HEAD`.\n"
 	));
 	if !body.trim().is_empty() {
-		prompt.push_str(&format!("- Description de la PR :\n{}\n", clip(&body, 2500)));
+		prompt.push_str(&format!("- PR description:\n{}\n", clip(&body, 2500)));
 	}
 	let reviews: Vec<String> = conversation["reviews"]
 		.as_array()
@@ -423,31 +426,31 @@ pub async fn prepare(config: &Config, number: i64, kind: &str) -> Result<Prepare
 			let body = review.get("body").and_then(Value::as_str).unwrap_or_default();
 			let who = review.pointer("/user/login").and_then(Value::as_str).unwrap_or("?");
 			let state = review.get("state").and_then(Value::as_str).unwrap_or_default();
-			(!body.trim().is_empty()).then(|| format!("  · {who} ({state}) : {}", clip(body, 400)))
+			(!body.trim().is_empty()).then(|| format!("  · {who} ({state}): {}", clip(body, 400)))
 		})
 		.collect();
 	if !reviews.is_empty() {
-		prompt.push_str(&format!("- Revues déjà publiées sur la PR :\n{}\n", reviews.join("\n")));
+		prompt.push_str(&format!("- Reviews already published on the PR:\n{}\n", reviews.join("\n")));
 	}
 
 	if kind == "verification" {
 		match previous.as_ref().and_then(|review| review.rounds.last().map(|round| (review, round))) {
 			Some((review, last)) => {
 				if !last.head_sha.is_empty() && last.head_sha == head_sha {
-					warning = Some(format!(
-						"Aucun commit depuis le tour {} : la PR n'a pas bougé.",
-						last.number
+					warning = Some(crate::i18n::tf(
+						"review.noNewCommit",
+						&[("round", &last.number)],
 					));
 				}
 				prompt.push_str(&format!(
-					"- Dernier tour relu : commit `{}`. Ce qui a changé depuis : `git diff {}..HEAD`.\n",
+					"- Last reviewed round: commit `{}`. What changed since: `git diff {}..HEAD`.\n",
 					last.head_sha, last.head_sha
 				));
 				let open = review.open_findings();
 				if open.is_empty() {
-					prompt.push_str("- Aucun point n'était resté ouvert.\n");
+					prompt.push_str("- No point was left open.\n");
 				} else {
-					prompt.push_str("- Les points à vérifier (garde leurs identifiants dans `checks`) :\n");
+					prompt.push_str("- The points to check (keep their identifiers in `checks`):\n");
 					for finding in open {
 						prompt.push_str(&format!(
 							"  · {} [{}] {}:{} — {}\n",
@@ -457,22 +460,24 @@ pub async fn prepare(config: &Config, number: i64, kind: &str) -> Result<Prepare
 				}
 			}
 			None => {
-				warning = Some("Aucune revue précédente : je fais une revue complète.".into());
+				warning = Some(crate::i18n::t("review.noPreviousReview"));
 			}
 		}
 	}
 
 	prompt.push_str(if config.workflow.review_read_only {
-		"\nTu travailles en lecture seule : tu ne modifies aucun fichier, tu ne commites rien, tu ne postes rien sur la PR."
+		"\nYou work read-only: you modify no file, you commit nothing, you post nothing on the PR."
 	} else {
-		"\nTu relis, tu ne corriges pas : tu peux lancer les tests pour étayer un point, mais tu ne modifies pas le code \
-		 de la PR, tu ne commites rien et tu ne postes rien sur la PR."
+		"\nYou review, you do not fix: you may run the tests to back up a point, but you do not modify the PR's \
+		 code, you commit nothing and you post nothing on the PR."
 	});
 	prompt.push_str(&format!(
-		" Quand tu as fini, appelle l'outil `remettre_revue` une seule fois (pr = {number}, kind = « {} »), \
-		 avec ta synthèse, ton verdict et tes points. Numérote les nouveaux points à la suite de ceux déjà relevés.",
+		" When you are done, call the `remettre_revue` tool once (pr = {number}, kind = \"{}\"), \
+		 with your summary, your verdict and your points. Number new points after the ones already raised.",
 		if kind == "verification" && previous.is_some() { "verification" } else { "revue" }
 	));
+	prompt.push_str("\n\n");
+	prompt.push_str(&crate::i18n::reply_directive());
 
 	Ok(Prepared {
 		number,
@@ -499,7 +504,7 @@ pub async fn record(config: &Config, cwd: &str, input: &Value) -> Result<Review>
 	let number = input
 		.get("pr")
 		.and_then(|v| v.as_i64().or_else(|| v.as_str().and_then(|s| s.trim_start_matches('#').parse().ok())))
-		.ok_or_else(|| CockpitError::msg("La revue ne dit pas quelle PR elle relit."))?;
+		.ok_or_else(|| CockpitError::msg(crate::i18n::t("review.noPrNumber")))?;
 	let head_sha = crate::git::run_git(Path::new(cwd), &["rev-parse", "HEAD"])
 		.await
 		.map(|sha| sha.trim().to_string())

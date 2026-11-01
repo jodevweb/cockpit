@@ -1,7 +1,9 @@
 import clsx from "clsx";
 import { Circle, Eraser, MousePointer2, MoveUpRight, Paperclip, Type, X } from "lucide-react";
 import { useCallback, useEffect, useState, type RefObject } from "react";
+import { useTranslation } from "react-i18next";
 import { useCockpit } from "@/app/store";
+import { t as translate } from "@/i18n";
 import { api } from "@/lib/ipc";
 import type { InspectedElement } from "@/lib/types";
 
@@ -41,20 +43,30 @@ export interface AttachDetail {
 const INK = "#cf3f35";
 const MARK = "#6a55e8";
 
+// Le libellé est une clé du catalogue `components3`, traduite au rendu.
 const TOOLS: Array<[Tool, string, typeof Circle]> = [
-	["ellipse", "Entourer", Circle],
-	["arrow", "Flécher", MoveUpRight],
-	["text", "Écrire", Type],
-	["point", "Pointer un élément : le cockpit dit à l'agent ce que c'est", MousePointer2],
+	["ellipse", "browserAnnotator.tool.ellipse", Circle],
+	["arrow", "browserAnnotator.tool.arrow", MoveUpRight],
+	["text", "browserAnnotator.tool.text", Type],
+	["point", "browserAnnotator.tool.point", MousePointer2],
 ];
 
 function describe(element: InspectedElement, index: number): string {
-	const parts = [`Repère ${index} : <${element.tag}>`];
-	if (element.text) parts[0] += ` « ${element.text} »`;
-	if (element.component) parts.push(`composant ${element.component}${element.source ? ` (${element.source})` : ""}`);
+		const parts = [
+		element.text
+			? translate("components3:browserAnnotator.describe.markerWithText", { index, tag: element.tag, text: element.text })
+			: translate("components3:browserAnnotator.describe.marker", { index, tag: element.tag }),
+	];
+	if (element.component) {
+		parts.push(
+			element.source
+				? translate("components3:browserAnnotator.describe.componentWithSource", { name: element.component, source: element.source })
+				: translate("components3:browserAnnotator.describe.component", { name: element.component }),
+		);
+	}
 	if (element.testid) parts.push(`data-testid="${element.testid}"`);
 	if (element.label) parts.push(`aria-label="${element.label}"`);
-	parts.push(`sélecteur \`${element.selector}\``);
+	parts.push(translate("components3:browserAnnotator.describe.selector", { selector: element.selector }));
 	return parts.join(" — ");
 }
 
@@ -73,6 +85,7 @@ export function BrowserAnnotator({
 	size: RefObject<{ width: number; height: number }>;
 	onClose: () => void;
 }) {
+	const { t } = useTranslation("components3");
 	const { notify } = useCockpit();
 	const [tool, setTool] = useState<Tool>("ellipse");
 	const [shapes, setShapes] = useState<Shape[]>([]);
@@ -121,7 +134,7 @@ export function BrowserAnnotator({
 				.inspect(cwd, point.x, point.y)
 				.then((element) => {
 					if (element) setShapes((current) => [...current, { kind: "element", element }]);
-					else notify("Rien de désignable sous ce point.");
+					else notify(t("browserAnnotator.nothingHere"));
 				})
 				.catch((error) => notify(String(error)));
 			return;
@@ -222,13 +235,13 @@ export function BrowserAnnotator({
 		try {
 			const file = await compose();
 			if (!file) {
-				notify("La page n'a pas encore d'image à joindre.");
+				notify(t("browserAnnotator.noImage"));
 				return;
 			}
-			const lines = [note.trim() || "Regarde l'écran joint : ce que j'ai entouré est à corriger."];
+			const lines = [note.trim() || t("browserAnnotator.defaultNote")];
 			elements.forEach((shape, index) => lines.push(describe(shape.element, index + 1)));
 			const url = elements[0]?.element.url;
-			if (url) lines.push(`Page : ${url}`);
+			if (url) lines.push(t("browserAnnotator.pageUrl", { url }));
 			const detail: AttachDetail = { cwd, file, note: lines.join("\n"), pass: "active" };
 			window.dispatchEvent(new CustomEvent<AttachDetail>(ATTACH_EVENT, { detail }));
 			if (!detail.taken) {
@@ -236,10 +249,10 @@ export function BrowserAnnotator({
 				window.dispatchEvent(new CustomEvent<AttachDetail>(ATTACH_EVENT, { detail }));
 			}
 			if (!detail.taken) {
-				notify("Aucune conversation ouverte dans ce workspace : lance un agent pour lui montrer l'écran.");
+				notify(t("browserAnnotator.noConversation"));
 				return;
 			}
-			notify("Écran joint à la consigne : complète-la et envoie.");
+			notify(t("browserAnnotator.attached"));
 			onClose();
 		} finally {
 			setBusy(false);
@@ -256,8 +269,8 @@ export function BrowserAnnotator({
 					<button
 						key={id}
 						type="button"
-						title={label}
-						aria-label={label}
+						title={t(label)}
+						aria-label={t(label)}
 						aria-pressed={tool === id}
 						onClick={() => setTool(id)}
 						className={clsx(
@@ -270,8 +283,8 @@ export function BrowserAnnotator({
 				))}
 				<button
 					type="button"
-					title="Tout effacer"
-					aria-label="Tout effacer"
+					title={t("browserAnnotator.clear")}
+					aria-label={t("browserAnnotator.clear")}
 					onClick={() => setShapes([])}
 					className="focus-ring grid size-8 place-items-center rounded-lg text-ink-muted hover:bg-hover hover:text-ink"
 				>
@@ -281,8 +294,8 @@ export function BrowserAnnotator({
 				<input
 					value={note}
 					onChange={(event) => setNote(event.target.value)}
-					placeholder="Ce que tu veux qu'il en fasse"
-					aria-label="Ce que tu veux qu'il en fasse"
+					placeholder={t("browserAnnotator.notePlaceholder")}
+					aria-label={t("browserAnnotator.notePlaceholder")}
 					className="w-56 min-w-0 flex-1 rounded-lg bg-raised px-2.5 py-1.5 text-[12px] text-ink outline-none placeholder:text-ink-faint"
 				/>
 				<button
@@ -292,12 +305,12 @@ export function BrowserAnnotator({
 					className="focus-ring flex items-center gap-1.5 rounded-lg bg-accent px-3 py-1.5 text-[12px] font-semibold whitespace-nowrap text-accent-ink disabled:opacity-50"
 				>
 					<Paperclip size={13} />
-					Joindre à l'agent
+					{t("browserAnnotator.send")}
 				</button>
 				<button
 					type="button"
-					title="Fermer l'annotation"
-					aria-label="Fermer l'annotation"
+					title={t("browserAnnotator.close")}
+					aria-label={t("browserAnnotator.close")}
 					onClick={onClose}
 					className="focus-ring grid size-8 place-items-center rounded-lg text-ink-muted hover:bg-hover hover:text-ink"
 				>
@@ -308,7 +321,7 @@ export function BrowserAnnotator({
 			{box ? (
 				<svg
 					role="img"
-					aria-label="Annotations posées sur la page"
+					aria-label={t("browserAnnotator.overlay")}
 					viewBox={`0 0 ${page.width} ${page.height}`}
 					preserveAspectRatio="none"
 					className={clsx("absolute z-10", tool === "point" ? "cursor-help" : "cursor-crosshair")}
@@ -389,7 +402,7 @@ export function BrowserAnnotator({
 						if (writing.text.trim()) setShapes((current) => [...current, { kind: "text", x: writing.x, y: writing.y, text: writing.text.trim() }]);
 						setWriting(null);
 					}}
-					placeholder="Écris, puis Entrée"
+					placeholder={t("browserAnnotator.textPlaceholder")}
 					className="absolute z-30 w-56 rounded-md bg-surface px-2 py-1 text-[12px] text-ink shadow-pop outline-none"
 					style={{ left: box.left + (writing.x / page.width) * box.width, top: box.top + (writing.y / page.height) * box.height - 14 }}
 				/>
@@ -404,7 +417,7 @@ export function BrowserAnnotator({
 							</span>
 							<span className="min-w-0">
 								<span className="font-mono text-ink">&lt;{shape.element.tag}&gt;</span>
-								{shape.element.text ? <span className="text-ink"> « {shape.element.text} »</span> : null}
+								{shape.element.text ? <span className="text-ink"> {t("browserAnnotator.quote", { text: shape.element.text })}</span> : null}
 								{shape.element.component ? (
 									<span className="block truncate text-ink-muted">
 										{shape.element.component}

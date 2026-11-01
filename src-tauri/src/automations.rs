@@ -138,9 +138,9 @@ impl Default for Automation {
 }
 
 /// La consigne du modèle « Mon daily ».
-pub const DAILY_PROMPT: &str = "Résume ce que j'ai fait sur la période, pour le daily de l'équipe. \
-Quatre parties : Livré, En cours, Bloqué, Ensuite. Une ligne par sujet ; regroupe une PR et le ticket \
-qu'elle traite. Pas de jargon interne au code : l'équipe produit écoute aussi.";
+pub const DAILY_PROMPT: &str = "Summarize what I did over the period, for the team daily. \
+Four parts: Shipped, In progress, Blocked, Next. One line per topic; group a PR with the ticket \
+it addresses. No code-internal jargon: the product team is listening too.";
 
 fn definitions_path() -> PathBuf {
 	config_dir().join("automations.json")
@@ -165,7 +165,7 @@ fn write_definitions(all: &[Automation]) -> Result<()> {
 		std::fs::create_dir_all(dir)?;
 	}
 	let raw = serde_json::to_string_pretty(all)
-		.map_err(|e| CockpitError::msg(format!("Automatisations : {e}")))?;
+		.map_err(|e| CockpitError::msg(crate::i18n::tf("automations.errors.serialize", &[("error", &e)])))?;
 	// Écrit à côté puis renommé : un cockpit coupé en pleine écriture ne doit
 	// pas laisser un fichier à moitié, qui se relirait comme « aucune ».
 	let temp = path.with_extension("json.tmp");
@@ -186,10 +186,10 @@ fn parse_time(value: &str) -> Option<NaiveTime> {
 pub fn save(mut automation: Automation) -> Result<Automation> {
 	automation.name = automation.name.trim().to_string();
 	if automation.name.is_empty() {
-		return Err(CockpitError::msg("Donne-lui un nom."));
+		return Err(CockpitError::msg(crate::i18n::t("automations.errors.noName")));
 	}
 	if parse_time(&automation.time).is_none() {
-		return Err(CockpitError::msg("L'heure s'écrit HH:MM, par exemple 14:00."));
+		return Err(CockpitError::msg(crate::i18n::t("automations.errors.badTime")));
 	}
 	automation.days.retain(|day| (1..=7).contains(day));
 	automation.days.sort_unstable();
@@ -636,12 +636,12 @@ pub fn decide(
 		}
 		return Decision::Miss {
 			occurrence,
-			reason: "Le cockpit était fermé à l'heure prévue, et le rattrapage est coupé.".into(),
+			reason: crate::i18n::t("automations.missed.closedNoCatchUp"),
 		};
 	}
 	Decision::Miss {
 		occurrence,
-		reason: "Le cockpit était fermé jusqu'après le rendez-vous.".into(),
+		reason: crate::i18n::t("automations.missed.closedUntilAfter"),
 	}
 }
 
@@ -729,7 +729,7 @@ async fn read_github(config: &Config, from: DateTime<Utc>, to: DateTime<Utc>) ->
 			("updated", text(pr, "/updated_at"))
 		};
 		let state = if pr.get("draft").and_then(Value::as_bool).unwrap_or(false) {
-			"brouillon".to_string()
+			crate::i18n::t("automations.items.draft")
 		} else {
 			text(pr, "/state")
 		};
@@ -817,10 +817,14 @@ fn read_cockpit(from: DateTime<Utc>, to: DateTime<Utc>) -> Vec<Item> {
 			Item {
 				id: format!("ck:{name}"),
 				source: "cockpit".into(),
-				title: format!("Agents dans {name}"),
+				title: crate::i18n::tf("automations.items.agentsIn", &[("name", &name)]),
 				url: String::new(),
 				event: "agent".into(),
-				detail: format!("{turns} tour{} · {minutes} min", if turns > 1 { "s" } else { "" }),
+				detail: format!(
+					"{} · {}",
+					crate::brief::counted("automations.items.turns", turns as usize),
+					crate::i18n::tf("automations.items.minutes", &[("count", &minutes)])
+				),
 				at,
 			}
 		})
@@ -910,7 +914,7 @@ async fn collect(automation: &Automation, config: &Config, from: DateTime<Utc>, 
 		reads.push((
 			"tracker",
 			if config.linear.token.trim().is_empty() {
-				Read::Unconfigured("aucun jeton Linear dans les réglages".into())
+				Read::Unconfigured(crate::i18n::t("automations.sources.noLinearToken"))
 			} else {
 				match read_tracker(config, from).await {
 					Ok(found) => Read::Found(found),
@@ -923,7 +927,7 @@ async fn collect(automation: &Automation, config: &Config, from: DateTime<Utc>, 
 		reads.push((
 			"sentry",
 			if config.sentry.token.trim().is_empty() {
-				Read::Unconfigured("aucun jeton Sentry dans les réglages".into())
+				Read::Unconfigured(crate::i18n::t("automations.sources.noSentryToken"))
 			} else {
 				match read_sentry(config, from, to).await {
 					Ok(found) => Read::Found(found),
@@ -952,24 +956,32 @@ async fn collect(automation: &Automation, config: &Config, from: DateTime<Utc>, 
 
 // ───────────────────────────── La rédaction ─────────────────────────────
 
-const SYSTEM: &str = "Tu rédiges un bilan de travail à partir d'éléments fournis, et de rien d'autre. \
-Tu ne disposes d'aucun outil. Tu réponds uniquement par un objet JSON, sans texte autour, de la forme \
-{\"headline\": \"une phrase\", \"parts\": [{\"title\": \"…\", \"lines\": [{\"title\": \"…\", \"detail\": \"…\", \"refs\": [\"gh:…\"]}]}]}. \
-Chaque ligne cite dans refs les identifiants exacts des éléments qui la fondent. N'invente aucun élément, \
-aucun numéro, aucun lien. Une partie sans ligne garde son titre avec une liste vide. Écris en français.";
+/// La consigne système de la rédaction. Les clés du JSON sont un protocole :
+/// elles restent en anglais quelle que soit la langue du texte.
+fn system() -> String {
+	format!(
+		"You write a work summary from the items provided, and from nothing else. \
+		 You have no tools. You answer only with a JSON object, with no text around it, of the form \
+		 {{\"headline\": \"one sentence\", \"parts\": [{{\"title\": \"…\", \"lines\": [{{\"title\": \"…\", \"detail\": \"…\", \"refs\": [\"gh:…\"]}}]}}]}}. \
+		 Keep the JSON keys exactly as shown. Each line cites in refs the exact identifiers of the items it \
+		 is based on. Do not invent any item, any number, any link. A part without lines keeps its title \
+		 with an empty list. {}",
+		crate::i18n::reply_directive()
+	)
+}
 
 fn prompt_for(automation: &Automation, items: &[Item], reports: &[SourceReport], from: DateTime<Utc>, to: DateTime<Utc>, previous: Option<&Run>) -> String {
 	let local = |at: DateTime<Utc>| at.with_timezone(&Local).format("%A %d %B %H:%M").to_string();
 	let mut prompt = String::new();
-	prompt.push_str(&format!("Consigne :\n{}\n\n", automation.prompt.trim()));
+	prompt.push_str(&format!("Instructions:\n{}\n\n", automation.prompt.trim()));
 	if !automation.corrections.is_empty() {
-		prompt.push_str("Corrections demandées après des rendus précédents, à respecter :\n");
+		prompt.push_str("Corrections requested after previous outputs, to be followed:\n");
 		for correction in &automation.corrections {
 			prompt.push_str(&format!("- {}\n", correction.text.trim()));
 		}
 		prompt.push('\n');
 	}
-	prompt.push_str(&format!("Période : de {} à {}.\n\n", local(from), local(to)));
+	prompt.push_str(&format!("Period: from {} to {}.\n\n", local(from), local(to)));
 	let silent: Vec<&str> = reports
 		.iter()
 		.filter(|report| report.state == SourceState::Silent)
@@ -977,12 +989,12 @@ fn prompt_for(automation: &Automation, items: &[Item], reports: &[SourceReport],
 		.collect();
 	if !silent.is_empty() {
 		prompt.push_str(&format!(
-			"Sources muettes cette fois, à ne pas combler : {}.\n\n",
+			"Sources silent this time, do not fill the gap: {}.\n\n",
 			silent.join(", ")
 		));
 	}
 	if let Some(previous) = previous {
-		prompt.push_str("Le bilan précédent, pour dire ce qui a avancé depuis :\n");
+		prompt.push_str("The previous summary, to say what has moved forward since:\n");
 		for part in &previous.parts {
 			for line in &part.lines {
 				prompt.push_str(&format!("- [{}] {}\n", part.title, line.title));
@@ -990,7 +1002,7 @@ fn prompt_for(automation: &Automation, items: &[Item], reports: &[SourceReport],
 		}
 		prompt.push('\n');
 	}
-	prompt.push_str("Éléments (un objet JSON par ligne) :\n");
+	prompt.push_str("Items (one JSON object per line):\n");
 	for item in items {
 		prompt.push_str(
 			&json!({
@@ -1085,7 +1097,7 @@ fn release(id: &str) {
 /// continue en tâche de fond, et s'annonce par `automation://run`.
 pub fn start(app: tauri::AppHandle, automation: Automation, occurrence: String, trigger: Trigger) -> Result<String> {
 	if !claim(&automation.id) {
-		return Err(CockpitError::msg("Elle tourne déjà."));
+		return Err(CockpitError::msg(crate::i18n::t("automations.errors.alreadyRunning")));
 	}
 	let now = Utc::now();
 	let history = runs(&automation.id);
@@ -1134,21 +1146,21 @@ async fn compose(automation: &Automation, from: DateTime<Utc>, to: DateTime<Utc>
 	if collected.items.is_empty() {
 		// Rien à raconter ne demande pas d'agent : la réponse est connue.
 		let answer = (
-			"Rien trouvé sur la période dans les sources lues.".to_string(),
+			crate::i18n::t("automations.nothingFound"),
 			Vec::new(),
 			Valuation { usd: None, provenance: "none".into() },
 		);
 		return (collected, Ok(answer));
 	}
 	let prompt = prompt_for(automation, &collected.items, &collected.reports, from, to, previous);
-	let outcome = match crate::agent::ask_bare(SYSTEM, &prompt, "sonnet", std::time::Duration::from_secs(300), true).await {
+	let outcome = match crate::agent::ask_bare(&system(), &prompt, "sonnet", std::time::Duration::from_secs(300), true).await {
 		Ok(answer) => match read_answer(&answer.text, &collected.items) {
 			Some((headline, parts)) => Ok((
 				headline,
 				parts,
 				Valuation { usd: (answer.cost_usd > 0.0).then_some(answer.cost_usd), provenance: "cli".into() },
 			)),
-			None => Err("La réponse de l'agent n'était pas lisible.".to_string()),
+			None => Err(crate::i18n::t("automations.errors.unreadableAnswer")),
 		},
 		Err(error) => Err(error.to_string()),
 	};
@@ -1207,11 +1219,13 @@ async fn execute(app: &tauri::AppHandle, automation: &Automation, run: &str, fro
 			.filter(|report| report.state == SourceState::Silent)
 			.map(|report| source_label(&report.source))
 			.collect();
-		let mut body = format!("{lines} ligne{} prête{}.", if lines > 1 { "s" } else { "" }, if lines > 1 { "s" } else { "" });
+		let mut body = crate::brief::counted("automations.notify.linesReady", lines);
 		if !silent.is_empty() {
-			body.push_str(&format!(" Sans réponse : {}.", silent.join(", ")));
+			body.push(' ');
+			body.push_str(&crate::i18n::tf("automations.notify.silent", &[("sources", &silent.join(", "))]));
 		}
-		notify(app, &format!("{} est prêt", automation.name), &body).await;
+		let title = crate::i18n::tf("automations.notify.ready", &[("name", &automation.name)]);
+		notify(app, &title, &body).await;
 	}
 }
 
@@ -1255,12 +1269,12 @@ pub async fn try_once(automation: Automation) -> Result<Run> {
 pub fn add_correction(id: &str, text: &str) -> Result<Automation> {
 	let text = text.trim();
 	if text.is_empty() {
-		return Err(CockpitError::msg("La correction est vide."));
+		return Err(CockpitError::msg(crate::i18n::t("automations.errors.emptyCorrection")));
 	}
 	let mut automation = list()
 		.into_iter()
 		.find(|entry| entry.id == id)
-		.ok_or_else(|| CockpitError::msg("Automatisation introuvable."))?;
+		.ok_or_else(|| CockpitError::msg(crate::i18n::t("automations.errors.notFound")))?;
 	automation.corrections.push(Correction { at: Utc::now().to_rfc3339(), text: text.to_string() });
 	save(automation)
 }
@@ -1271,13 +1285,13 @@ fn find_run(id: &str, run: &str) -> Result<(Automation, Run)> {
 	let automation = list()
 		.into_iter()
 		.find(|entry| entry.id == id)
-		.ok_or_else(|| CockpitError::msg("Automatisation introuvable."))?;
+		.ok_or_else(|| CockpitError::msg(crate::i18n::t("automations.errors.notFound")))?;
 	let found = runs(id)
 		.into_iter()
 		.find(|entry| entry.id == run)
-		.ok_or_else(|| CockpitError::msg("Exécution introuvable."))?;
+		.ok_or_else(|| CockpitError::msg(crate::i18n::t("automations.errors.runNotFound")))?;
 	if !matches!(found.state, RunState::Ready | RunState::Partial) {
-		return Err(CockpitError::msg("Cette exécution n'a pas de rendu."));
+		return Err(CockpitError::msg(crate::i18n::t("automations.errors.noOutput")));
 	}
 	Ok((automation, found))
 }
@@ -1335,10 +1349,13 @@ pub fn render_html(automation: &Automation, run: &Run) -> String {
 		.map(|source| source_label(&source.source))
 		.collect();
 	if !silent.is_empty() {
-		body.push_str(&format!("<p class=\"note\">Sans réponse cette fois : {}.</p>", escape(&silent.join(", "))));
+		body.push_str(&format!(
+			"<p class=\"note\">{}</p>",
+			escape(&crate::i18n::tf("automations.render.silent", &[("sources", &silent.join(", "))]))
+		));
 	}
 	format!(
-		r#"<!doctype html><html lang="fr"><head><meta charset="utf-8"><title>{title}</title><style>
+		r#"<!doctype html><html lang="{lang}"><head><meta charset="utf-8"><title>{title}</title><style>
 @page {{ size: A4; margin: 18mm 16mm; }}
 body {{ font: 11pt/1.5 -apple-system, "Helvetica Neue", Arial, sans-serif; color: #141a20; }}
 h1 {{ font-size: 20pt; margin: 0 0 2pt; }}
@@ -1353,10 +1370,13 @@ li strong {{ display: block; }}
 .ref {{ font: 8.5pt ui-monospace, Menlo, monospace; color: #2f6fdb; text-decoration: none; margin-right: 8pt; }}
 .empty {{ color: #858d9b; }}
 .note {{ margin-top: 16pt; color: #a96300; font-size: 9.5pt; }}
-</style></head><body><h1>{title}</h1><p class="period">Du {from} au {to}</p>{body}</body></html>"#,
+</style></head><body><h1>{title}</h1><p class="period">{period}</p>{body}</body></html>"#,
+		lang = crate::i18n::lang(),
 		title = escape(&automation.name),
-		from = local_stamp(&run.from),
-		to = local_stamp(&run.to),
+		period = escape(&crate::i18n::tf(
+			"automations.render.period",
+			&[("from", &local_stamp(&run.from)), ("to", &local_stamp(&run.to))]
+		)),
 	)
 }
 
@@ -1384,7 +1404,7 @@ pub fn exports_dir(id: &str) -> PathBuf {
 pub async fn export_pdf(id: &str, run: &str) -> Result<String> {
 	let (automation, found) = find_run(id, run)?;
 	let browser = chromium().ok_or_else(|| {
-		CockpitError::msg("Il faut Chrome (ou un navigateur Chromium) pour produire le PDF. Le Markdown, lui, se copie toujours.")
+		CockpitError::msg(crate::i18n::t("automations.errors.noChromium"))
 	})?;
 	let dir = exports_dir(id);
 	std::fs::create_dir_all(&dir)?;
@@ -1408,11 +1428,11 @@ pub async fn export_pdf(id: &str, run: &str) -> Result<String> {
 		.output();
 	let output = tokio::time::timeout(std::time::Duration::from_secs(60), output)
 		.await
-		.map_err(|_| CockpitError::msg("Le navigateur n'a pas rendu le PDF en une minute."))??;
+		.map_err(|_| CockpitError::msg(crate::i18n::t("automations.errors.pdfTimeout")))??;
 	let _ = std::fs::remove_file(&html);
 	if !pdf.exists() {
 		let detail = String::from_utf8_lossy(&output.stderr).trim().chars().take(200).collect::<String>();
-		return Err(CockpitError::msg(format!("PDF non produit. {detail}")));
+		return Err(CockpitError::msg(crate::i18n::tf("automations.errors.pdfNotProduced", &[("detail", &detail)])));
 	}
 	let path = pdf.display().to_string();
 	append(id, &Record::Exported { run: run.to_string(), at: Utc::now().to_rfc3339(), path: path.clone() });
@@ -1422,7 +1442,14 @@ pub async fn export_pdf(id: &str, run: &str) -> Result<String> {
 /// Le rendu en texte Slack : gras entre astérisques, liens `<url|libellé>`.
 pub fn render_slack(automation: &Automation, run: &Run) -> String {
 	let items: HashMap<&str, &Item> = run.items.iter().map(|item| (item.id.as_str(), item)).collect();
-	let mut text = format!("*{}* — du {} au {}\n", automation.name, local_stamp(&run.from), local_stamp(&run.to));
+	let mut text = format!(
+		"*{}* — {}\n",
+		automation.name,
+		crate::i18n::tf(
+			"automations.render.slackPeriod",
+			&[("from", &local_stamp(&run.from)), ("to", &local_stamp(&run.to))]
+		)
+	);
 	if !run.headline.is_empty() {
 		text.push_str(&format!("{}\n", run.headline));
 	}
@@ -1456,16 +1483,19 @@ pub async fn post_slack(id: &str, run: &str) -> Result<()> {
 	let (automation, found) = find_run(id, run)?;
 	let webhook = automation.slack_webhook.trim();
 	if !webhook.starts_with("https://hooks.slack.com/") {
-		return Err(CockpitError::msg("Renseigne le webhook Slack de cette automatisation dans son réglage."));
+		return Err(CockpitError::msg(crate::i18n::t("automations.errors.noSlackWebhook")));
 	}
 	let response = reqwest::Client::new()
 		.post(webhook)
 		.json(&json!({ "text": render_slack(&automation, &found) }))
 		.send()
 		.await
-		.map_err(|e| CockpitError::msg(format!("Slack : {e}")))?;
+		.map_err(|e| CockpitError::msg(crate::i18n::tf("automations.errors.slack", &[("error", &e)])))?;
 	if !response.status().is_success() {
-		return Err(CockpitError::msg(format!("Slack a refusé : {}", response.status())));
+		return Err(CockpitError::msg(crate::i18n::tf(
+			"automations.errors.slackRefused",
+			&[("status", &response.status())],
+		)));
 	}
 	append(id, &Record::Posted { run: run.to_string(), at: Utc::now().to_rfc3339() });
 	Ok(())
@@ -1474,7 +1504,7 @@ pub async fn post_slack(id: &str, run: &str) -> Result<()> {
 fn source_label(source: &str) -> String {
 	match source {
 		"github" => "GitHub",
-		"tracker" => "suivi de tâches",
+		"tracker" => return crate::i18n::t("automations.sources.tracker"),
 		"cockpit" => "Cockpit",
 		"sentry" => "Sentry",
 		other => other,
@@ -1489,7 +1519,7 @@ fn fail(app: &tauri::AppHandle, automation: &Automation, run: &str, reason: &str
 	);
 	if automation.notify {
 		let app = app.clone();
-		let title = format!("{} n'a pas abouti", automation.name);
+		let title = crate::i18n::tf("automations.notify.failed", &[("name", &automation.name)]);
 		let body = reason.chars().take(160).collect::<String>();
 		tauri::async_runtime::spawn(async move { notify(&app, &title, &body).await });
 	}

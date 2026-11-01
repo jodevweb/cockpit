@@ -1,6 +1,7 @@
 import { ChevronLeft, ChevronRight, FileSearch, X } from "lucide-react";
 import { AnimatePresence, motion } from "motion/react";
 import { useEffect, useSyncExternalStore } from "react";
+import { useTranslation } from "react-i18next";
 import { LocalImage } from "@/components/LocalImage";
 import { useFileViewer } from "@/lib/fileViewer";
 import { localFileUrl } from "@/lib/localFile";
@@ -47,6 +48,7 @@ function subscribe(listener: () => void) {
 
 export function Lightbox() {
 	const open = useSyncExternalStore(subscribe, () => current);
+	const { t } = useTranslation("components2");
 	const viewer = useFileViewer();
 	const count = open?.media.length ?? 0;
 
@@ -96,7 +98,7 @@ export function Lightbox() {
 									viewer.open(item.path as string);
 									set(null);
 								}}
-								title="Ouvrir le fichier dans la visionneuse"
+								title={t("lightbox.openInViewer")}
 								className="focus-ring grid size-9 place-items-center rounded-full bg-surface text-ink-muted shadow-pop hover:text-ink"
 							>
 								<FileSearch size={15} />
@@ -105,7 +107,7 @@ export function Lightbox() {
 						<button
 							type="button"
 							onClick={() => set(null)}
-							aria-label="Fermer"
+							aria-label={t("lightbox.close")}
 							className="focus-ring grid size-9 place-items-center rounded-full bg-surface text-ink-muted shadow-pop hover:text-ink"
 						>
 							<X size={16} />
@@ -120,7 +122,7 @@ export function Lightbox() {
 									event.stopPropagation();
 									move(-1);
 								}}
-								aria-label="Image précédente"
+								aria-label={t("lightbox.previous")}
 								className="focus-ring absolute left-4 grid size-11 place-items-center rounded-full bg-surface text-ink shadow-pop hover:bg-hover"
 							>
 								<ChevronLeft size={20} />
@@ -131,7 +133,7 @@ export function Lightbox() {
 									event.stopPropagation();
 									move(1);
 								}}
-								aria-label="Image suivante"
+								aria-label={t("lightbox.next")}
 								className="focus-ring absolute right-4 grid size-11 place-items-center rounded-full bg-surface text-ink shadow-pop hover:bg-hover"
 							>
 								<ChevronRight size={20} />

@@ -1,0 +1,309 @@
+{
+	"store": {
+		"job": {
+			"succeeded": "Done",
+			"failed": "Failed",
+			"failedWithCode": "Failed (code {{code}})",
+			"failedToast": "{{label}} — failed. Open Scripts to see the output.",
+			"failedToastWithCode": "{{label}} — failed (code {{code}}). Open Scripts to see the output.",
+			"worktreeDone": "{{label}} — done."
+		},
+		"notify": {
+			"waitingReply": "Waiting for your reply — {{title}}",
+			"ciFailed": "CI failing · #{{number}}",
+			"readyToMerge": "Ready to merge · #{{number}}",
+			"prodError": "Production error · {{project}}"
+		}
+	},
+	"commandPalette": {
+		"views": {
+			"map": "Map",
+			"today": "Today",
+			"decisions": "Decisions · what's waiting for your answer",
+			"recap": "Visual recap · what happened",
+			"automations": "Automations · meetings prepared on their own",
+			"overview": "Overview",
+			"team": "Daily · team",
+			"agents": "AI agents",
+			"workspace": "Workspaces · open agents and terminals",
+			"libres": "Free agents · launched outside a project",
+			"worktrees": "Worktrees",
+			"git": "Git",
+			"scripts": "Scripts",
+			"docs": "Documents",
+			"observability": "Observability",
+			"delivery": "Flow · Linear, PRs, CI, deployments",
+			"infra": "Servers & containers · what's running on this machine",
+			"settings": "Settings"
+		},
+		"hint": {
+			"goTo": "go to"
+		},
+		"group": {
+			"navigation": "Navigation",
+			"libres": "Free agents",
+			"projects": "Projects",
+			"recentFolders": "Recent folders",
+			"identifiers": "Identifiers"
+		},
+		"libre": {
+			"launch": "Launch a free agent…",
+			"launchHint": "⌘N · one folder, one agent",
+			"launchIn": "Launch an agent in {{folder}}",
+			"launchInHint": "the launcher, prefilled with your last choices"
+		},
+		"project": {
+			"label": "Project · {{name}}"
+		},
+		"git": {
+			"behind_one": "{{count}} commit behind",
+			"behind_other": "{{count}} commits behind",
+			"upToDate": "up to date",
+			"pulled": "{{name}} — up to date.",
+			"ahead_one": "{{count}} commit to publish",
+			"ahead_other": "{{count}} commits to publish",
+			"pushed": "{{name}} — pushed."
+		},
+		"worktree": {
+			"openEditor": "Open {{name}} in the editor",
+			"launchAgent": "Launch an agent on {{name}}",
+			"launchAgentHint": "conversation in the cockpit",
+			"terminal": "Terminal on {{name}}",
+			"terminalHint": "shell in the cockpit",
+			"terminalApp": "Open {{name}} in Terminal.app"
+		},
+		"folder": {
+			"newAgent": "New agent in a folder…",
+			"newAgentHint": "any folder, no branch or worktree",
+			"dialogTitle": "Launch an agent in…",
+			"newAgentIn": "New agent in {{folder}}"
+		},
+		"openConfig": "Open the configuration file",
+		"identifiers": {
+			"openPr": "Open PR #{{number}}",
+			"onGithub": "on GitHub",
+			"openTicket": "Open {{ticket}}",
+			"linearTicket": "Linear ticket"
+		},
+		"placeholder": "Worktree, session, script, screen, #PR, ticket…",
+		"noResults": "No results.",
+		"keys": {
+			"navigate": "navigate",
+			"run": "run",
+			"close": "close"
+		}
+	},
+	"review": {
+		"verdict": {
+			"merge": "you can merge",
+			"blocking": "blocking",
+			"changes": "changes expected"
+		},
+		"next": {
+			"merge": "Nothing is running: you can merge.",
+			"changes": "Nothing is running now: it's up to you to post the points, then “Recheck” once the author has pushed."
+		},
+		"delivered_one": "Review delivered: {{count}} point · {{verdict}}. {{next}}",
+		"delivered_other": "Review delivered: {{count}} points · {{verdict}}. {{next}}",
+		"see": "View",
+		"activity": {
+			"verification": "Checking PR #{{number}}",
+			"review": "Reviewing PR #{{number}}",
+			"askedReview": "Your instruction asks for a review: I'm going through “Review” so it gets delivered as a card. Reading the PR on GitHub…",
+			"reading": "Reading the PR on GitHub and fetching its branch…",
+			"launching": "Launching the review agent — it reads the PR, you'll be notified when it's delivered.",
+			"updating": "Updating {{branch}}…",
+			"updateFailed": "Couldn't update ({{error}}): reviewing the local version.",
+			"creatingWorktree": "Creating the worktree for {{branch}} — this may take a few minutes."
+		},
+		"label": {
+			"verification": "Check #{{number}}",
+			"review": "Review #{{number}}"
+		},
+		"error": {
+			"noMainRepo": "No main repository is set for this project.",
+			"worktreeTimeout": "The worktree for {{branch}} didn't appear after 15 minutes."
+		}
+	},
+	"blockers": {
+		"permission": {
+			"title_one": "{{tool}} — {{count}} request",
+			"title_other": "{{tool}} — {{count}} requests",
+			"anAgent": "An agent",
+			"meta": "to decide"
+		},
+		"plan": {
+			"meta": "to review"
+		},
+		"recheck": {
+			"title": "{{author}} pushed to #{{number}}",
+			"theAuthor": "The author",
+			"meta": "to recheck",
+			"fix": "Recheck"
+		},
+		"failedTask": {
+			"noReason": "no reason given",
+			"fix": "Rerun"
+		},
+		"ci": {
+			"meta": "CI red",
+			"fix": "Fix"
+		}
+	},
+	"decisions": {
+		"waited": {
+			"now": "just now",
+			"minutes": "for {{minutes}} min",
+			"hours": "for {{hours}} h {{minutes}}",
+			"days": "for {{days}} d"
+		}
+	},
+	"terminals": {
+		"exited": "shell exited",
+		"exitedWithCode": "shell exited (code {{code}})"
+	},
+	"sidebar": {
+		"views": {
+			"map": "Map",
+			"today": "Today",
+			"decisions": "Decisions",
+			"recap": "Visual recap",
+			"automations": "Automations",
+			"permanence": "Permanence",
+			"overview": "Overview",
+			"team": "Daily",
+			"missions": "Missions",
+			"workspace": "Workspaces",
+			"libres": "Free agents",
+			"agents": "AI agents",
+			"docs": "Documents",
+			"delivery": "Flow",
+			"impact": "Impact",
+			"observability": "Observability",
+			"worktrees": "Worktrees",
+			"git": "Git",
+			"scripts": "Scripts",
+			"infra": "Servers & containers",
+			"settings": "Settings"
+		},
+		"groups": {
+			"pilot": "Steer",
+			"produce": "Produce",
+			"deliver": "Deliver",
+			"tooling": "Tooling"
+		},
+		"project": "Project",
+		"recapFresh_one": "{{count}} new since your last visit",
+		"recapFresh_other": "{{count}} new since your last visit",
+		"automations": {
+			"running": "An automation is preparing its output",
+			"nextToday": "Next output ready today"
+		},
+		"launch": {
+			"placeHere": "in place",
+			"placeBranch": "new branch",
+			"placeWorktree": "new worktree",
+			"defaultModel": "machine's default model",
+			"title": "One folder, one agent — like cd then claude (⌘N)",
+			"button": "Launch an agent",
+			"again": "Relaunch like last time",
+			"noneYet": "Nothing yet: your first launch will be remembered for next time.",
+			"other": "Another folder, other settings…"
+		},
+		"top": {
+			"mapTitle": "The map of all the work (⌘⇧C)",
+			"workspaceTitle": "Open agents and terminals (⌘⇧A)",
+			"libresTitle": "Agents launched outside a project, like in a terminal",
+			"decisionsTitle": "What's waiting for your decision, sorted by what it unblocks (⌘⇧D)",
+			"recapTitle": "What happened, in pictures: one story per agent turn (⌘⇧J)",
+			"recap": "Recap",
+			"automationsTitle": "Meetings that prepare themselves, like the daily (⌘⇧R)"
+		},
+		"search": "Go to, launch, ask…",
+		"atelier": {
+			"title": "All screens, the project, settings",
+			"name": "Workshop",
+			"close": "Close the workshop",
+			"subtitle": "all screens · ⌘K to search"
+		},
+		"live": {
+			"missions_one": "{{count}} mission",
+			"missions_other": "{{count}} missions",
+			"missionsOngoing": "{{missions}} in progress (⌘⇧M)",
+			"missionsWaiting_one": "{{missions}} in progress, {{count}} waiting for your approval (⌘⇧M)",
+			"missionsWaiting_other": "{{missions}} in progress, {{count}} waiting for your approval (⌘⇧M)",
+			"scripts_one": "{{count}} script running",
+			"scripts_other": "{{count}} scripts running"
+		}
+	},
+	"agents": {
+		"turn": {
+			"hookReminder": "Automatic reminder (hook {{hook}}) — not an instruction from you: {{text}}",
+			"ended": "Agent finished.",
+			"proofFilmed": "Acceptance test filmed: {{seconds}} s in the workspace browser.",
+			"compactedManual": "Context compacted at your request.",
+			"compactedAuto": "Context compacted: the conversation was summarized to make room.",
+			"resumed": "Conversation resumed.",
+			"relaunchedModeKept": "Relaunched in {{mode}} mode — the thread is kept.",
+			"relaunchedModeFresh": "Relaunched in {{mode}} mode — new conversation, the agent didn't have a session yet.",
+			"relaunchedModelKept": "Relaunched on {{model}} — the thread is kept.",
+			"relaunchedModelFresh": "Relaunched on {{model}} — new conversation."
+		},
+		"modes": {
+			"plan": {
+				"label": "Plan",
+				"hint": "proposes without executing anything"
+			},
+			"default": {
+				"label": "Careful",
+				"hint": "asks before every tool"
+			},
+			"acceptEdits": {
+				"label": "Edit",
+				"hint": "edits files without asking"
+			},
+			"bypassPermissions": {
+				"label": "Bypass",
+				"hint": "no questions, no limits — keep it for throwaway worktrees"
+			}
+		},
+		"models": {
+			"default": {
+				"label": "Default",
+				"hint": "the model set on this machine"
+			},
+			"fable": {
+				"hint": "the most capable — thinking always on"
+			},
+			"opus": {
+				"hint": "the usual choice for demanding work"
+			},
+			"sonnet": {
+				"hint": "the balance between capability and speed"
+			},
+			"haiku": {
+				"hint": "fast, for simple tasks"
+			}
+		},
+		"review": {
+			"delivered_one": "Review of PR #{{number}} delivered: {{count}} point",
+			"delivered_other": "Review of PR #{{number}} delivered: {{count}} points",
+			"recordFailed": "The review couldn't be saved: {{error}}"
+		},
+		"see": "View",
+		"notify": {
+			"ended": "Agent finished",
+			"replied": "The agent replied",
+			"question": "The agent has a question for you",
+			"permission": "Permission requested · {{tool}}"
+		},
+		"survivors": {
+			"title_one": "An agent kept going without you",
+			"title_other": "{{count}} agents kept going without you",
+			"detail_one": "The cockpit was closed; it worked in its relay",
+			"detail_other": "The cockpit was closed; they worked in their relay",
+			"done_one": "It's back in its workspace, conversation reloaded.",
+			"done_other": "They're back in their workspaces, conversation reloaded."
+		}
+	}
+}

@@ -7,9 +7,11 @@ import { Button, ViewHeader } from "@/components/ui";
 import { api } from "@/lib/ipc";
 import { useAsync } from "@/lib/useAsync";
 import { useCockpit } from "@/app/store";
+import { useTranslation } from "react-i18next";
 
 export function DeliveryView() {
 	const { config, worktrees, notify, go } = useCockpit();
+	const { t } = useTranslation("views");
 	// L'onglet porte le nom du suivi configuré : « Linear » écrit en dur mentait
 	// dès qu'une équipe travaillait ailleurs.
 	const provider = useAsync(() => api.feeds.ticketProvider().catch(() => null), []);
@@ -17,7 +19,7 @@ export function DeliveryView() {
 	const sources: FeedSource[] = [
 		{
 			id: "linear",
-			label: provider.data?.label ?? "Tickets",
+			label: provider.data?.label ?? t("delivery.tickets"),
 			changes: "tickets",
 			load: () => api.feeds.linear(false),
 			detail: (item) => <LinearIssue identifier={item.id} />,
@@ -37,7 +39,7 @@ export function DeliveryView() {
 								icon={GitPullRequest}
 								onClick={() => go("worktrees", { worktreePath: tree.path })}
 							>
-								Voir le worktree
+								{t("delivery.openWorktree")}
 							</Button>
 						) : null}
 						<StartMission reference={item.id} title={item.title} />
@@ -59,7 +61,7 @@ export function DeliveryView() {
 					const local = worktrees.some((tree) => tree.branch === branch);
 					return {
 						...item,
-						meta: [...item.meta, { label: "suivi local", value: local ? "oui" : "non" }],
+						meta: [...item.meta, { label: t("delivery.localTracking"), value: local ? t("delivery.yes") : t("delivery.no") }],
 					};
 				});
 			},
@@ -72,7 +74,7 @@ export function DeliveryView() {
 						if (tree) {
 							go("worktrees", { worktreePath: tree.path });
 						} else {
-							notify("Aucun worktree local pour cette branche.");
+							notify(t("delivery.noLocalWorktree"));
 						}
 					}}
 				>
@@ -100,7 +102,7 @@ export function DeliveryView() {
 	return (
 		<>
 			<ViewHeader
-				title="Flux"
+				title={t("delivery.title")}
 				subtitle={config?.githubRepo || "Linear, GitHub, Trigger.dev, Railway, Stripe"}
 			/>
 			{/* Une seule matière ici : les flux bruts, à plat, avec filtres et
@@ -109,7 +111,7 @@ export function DeliveryView() {
 			<FeedPanel
 				sources={sources}
 				pollMs={120_000}
-				emptyHint="Les tokens manquants sont signalés dans Réglages."
+				emptyHint={t("delivery.emptyHint")}
 			/>
 		</>
 	);

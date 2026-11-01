@@ -12,6 +12,7 @@ import {
 	Zap,
 } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
+import { Trans, useTranslation } from "react-i18next";
 import { AgentChat } from "@/components/AgentChat";
 import { LibreLauncher } from "@/components/LibreLauncher";
 import { Modal, Spinner } from "@/components/ui";
@@ -30,6 +31,7 @@ import {
 	type LibreAgent,
 } from "@/lib/libre";
 import { useAsync } from "@/lib/useAsync";
+import { t } from "@/i18n";
 
 /**
  * L'écran des agents libres.
@@ -49,13 +51,9 @@ interface Entry {
 	line: string;
 }
 
-const STATE_LABEL: Record<Entry["state"], string> = {
-	attend: "attend ta réponse",
-	travaille: "travaille",
-	pret: "à toi",
-	arrete: "arrêté",
-	ferme: "fermé",
-};
+function stateLabel(state: Entry["state"]): string {
+	return t(`views:libres.state.${state}`);
+}
 
 function homeOf(path: string): string {
 	return /^\/Users\/[^/]+/.exec(path)?.[0] ?? "";
@@ -67,11 +65,11 @@ function show(path: string): string {
 
 function ago(at: number): string {
 	const minutes = Math.round((Date.now() - at) / 60_000);
-	if (minutes < 1) return "à l'instant";
-	if (minutes < 60) return `${minutes} min`;
+	if (minutes < 1) return t("views:libres.ago.now");
+	if (minutes < 60) return t("views:libres.ago.minutes", { count: minutes });
 	const hours = Math.round(minutes / 60);
-	if (hours < 24) return `${hours} h`;
-	return `${Math.round(hours / 24)} j`;
+	if (hours < 24) return t("views:libres.ago.hours", { count: hours });
+	return t("views:libres.ago.days", { count: Math.round(hours / 24) });
 }
 
 function lastWords(run: AgentRun): string {
@@ -87,22 +85,23 @@ function useEntries(): Entry[] {
 	const agents = useLibres();
 	const { runs } = useAgentRuns();
 	const { pendingFor } = useAgentGuard();
+	const { t } = useTranslation("views");
 	return useMemo(
 		() =>
 			agents
 				.filter((agent) => !agent.archivedAt)
 				.map((agent): Entry => {
 					const run = runs.find((candidate) => candidate.id === agent.runId) ?? null;
-					if (!run) return { agent, run, state: "ferme", line: "conversation fermée — Reprendre la rouvre" };
+					if (!run) return { agent, run, state: "ferme", line: t("libres.line.closed") };
 					const pending = pendingFor(run.id);
 					if (pending.length > 0) {
-						return { agent, run, state: "attend", line: pending[0].tool === "AskUserQuestion" ? "une question pour toi" : `demande : ${pending[0].tool}` };
+						return { agent, run, state: "attend", line: pending[0].tool === "AskUserQuestion" ? t("libres.line.question") : t("libres.line.asks", { tool: pending[0].tool }) };
 					}
-					if (run.thinking) return { agent, run, state: "travaille", line: run.activity ?? "réfléchit" };
-					if (run.running) return { agent, run, state: "pret", line: lastWords(run) || "attend ta première phrase" };
-					return { agent, run, state: "arrete", line: lastWords(run) || "arrêté" };
+					if (run.thinking) return { agent, run, state: "travaille", line: run.activity ?? t("libres.line.thinking") };
+					if (run.running) return { agent, run, state: "pret", line: lastWords(run) || t("libres.line.firstMessage") };
+					return { agent, run, state: "arrete", line: lastWords(run) || t("libres.state.arrete") };
 				}),
-		[agents, runs, pendingFor],
+		[agents, runs, pendingFor, t],
 	);
 }
 
@@ -143,6 +142,7 @@ export function LibreHost() {
 }
 
 export function LibresView() {
+	const { t } = useTranslation("views");
 	const entries = useEntries();
 	const selected = useSelectedLibre();
 	const [filter, setFilter] = useState<Filter>("tous");
@@ -181,18 +181,18 @@ export function LibresView() {
 		<div className="flex min-h-0 flex-1 gap-4 p-4">
 			<aside className="flex w-[340px] shrink-0 flex-col gap-3">
 				<div className="flex items-baseline gap-2 px-1 pt-1">
-					<h1 className="text-[19px] font-semibold text-ink">Agents libres</h1>
+					<h1 className="text-[19px] font-semibold text-ink">{t("libres.title")}</h1>
 					<span className="font-mono text-[11.5px] text-ink-muted">
-						{entries.length} ouvert{entries.length > 1 ? "s" : ""}
+						{t("libres.open", { count: entries.length })}
 					</span>
 				</div>
 				<div className="flex flex-wrap gap-1.5">
 					{(
 						[
-							["tous", "Tous"],
-							["toi", "À toi"],
-							["cours", "En cours"],
-							["finis", "Finis"],
+							["tous", t("libres.filter.all")],
+							["toi", t("libres.filter.yours")],
+							["cours", t("libres.filter.running")],
+							["finis", t("libres.filter.finished")],
 						] as Array<[Filter, string]>
 					).map(([id, label]) => (
 						<button
@@ -216,7 +216,7 @@ export function LibresView() {
 								<span className="truncate">{show(folder)}</span>
 								<button
 									type="button"
-									title="Un agent de plus dans ce dossier"
+									title={t("libres.oneMore")}
 									onClick={() => openLauncher(folder)}
 									className="focus-ring ml-auto rounded px-1 text-ink-faint hover:text-accent"
 								>
@@ -264,11 +264,11 @@ function Tag({ children }: { children: React.ReactNode }) {
 function placeTag(agent: LibreAgent): string {
 	if (agent.place === "worktree") return `worktree · ${agent.branch}`;
 	if (agent.place === "branche") return agent.branch;
-	return agent.branch ? `sur place · ${agent.branch}` : "sur place";
+	return agent.branch ? `${t("views:libres.inPlace")} · ${agent.branch}` : t("views:libres.inPlace");
 }
 
 function modelTag(agent: LibreAgent): string {
-	return agent.model ? (MODELS.find((entry) => entry.id === agent.model)?.label ?? agent.model) : "modèle du poste";
+	return agent.model ? (MODELS.find((entry) => entry.id === agent.model)?.label ?? agent.model) : t("views:libres.defaultModel");
 }
 
 function AgentCard({ entry, selected }: { entry: Entry; selected: boolean }) {
@@ -294,7 +294,7 @@ function AgentCard({ entry, selected }: { entry: Entry; selected: boolean }) {
 					entry.state === "attend" ? "font-medium text-warning" : entry.state === "travaille" ? "text-success" : "text-ink-muted",
 				)}
 			>
-				{entry.state === "attend" || entry.state === "travaille" ? `${STATE_LABEL[entry.state]} · ` : ""}
+				{entry.state === "attend" || entry.state === "travaille" ? `${stateLabel(entry.state)} · ` : ""}
 				{entry.line}
 			</span>
 			<span className="flex flex-wrap gap-1">
@@ -307,6 +307,7 @@ function AgentCard({ entry, selected }: { entry: Entry; selected: boolean }) {
 }
 
 function AgentDetail({ entry }: { entry: Entry }) {
+	const { t } = useTranslation("views");
 	const { config, notify } = useCockpit();
 	const { stop, open, close } = useAgentRuns();
 	const [tab, setTab] = useState<"chat" | "diff">("chat");
@@ -322,7 +323,7 @@ function AgentDetail({ entry }: { entry: Entry }) {
 
 	const resume = async () => {
 		if (!agent.claudeSessionId) {
-			notify("Cet agent n'a jamais ouvert de session : il n'y a rien à reprendre.");
+			notify(t("libres.detail.nothingToResume"));
 			return;
 		}
 		setResuming(true);
@@ -355,7 +356,7 @@ function AgentDetail({ entry }: { entry: Entry }) {
 					<div className="flex items-center gap-2.5">
 						<h2 className="truncate text-[17px] font-semibold text-ink">{agent.label}</h2>
 						<span className={clsx("shrink-0 rounded-md px-2 py-0.5 text-[11px] font-semibold", badge)}>
-							{STATE_LABEL[entry.state]}
+							{stateLabel(entry.state)}
 						</span>
 					</div>
 					<div className="mt-1.5 flex flex-wrap gap-x-3.5 gap-y-1 text-[12px] text-ink-muted">
@@ -375,36 +376,37 @@ function AgentDetail({ entry }: { entry: Entry }) {
 					</div>
 				</div>
 				<div className="flex shrink-0 gap-1.5">
-					<IconAction label="Ouvrir un terminal ici" onClick={() => void api.system.openTerminal(agent.cwd)}>
+					<IconAction label={t("libres.detail.openTerminal")} onClick={() => void api.system.openTerminal(agent.cwd)}>
 						<SquareTerminal size={15} />
 					</IconAction>
-					<IconAction label="Montrer dans le Finder" onClick={() => void api.system.reveal(agent.cwd)}>
+					<IconAction label={t("libres.detail.reveal")} onClick={() => void api.system.reveal(agent.cwd)}>
 						<FolderOpen size={15} />
 					</IconAction>
 					{run?.running ? (
 						<TextAction onClick={() => stop(run.id)} icon={<Square size={12} />}>
-							Arrêter
+							{t("libres.detail.stop")}
 						</TextAction>
 					) : (
 						<TextAction
 							onClick={() => void resume()}
 							icon={resuming ? <Spinner size={12} /> : <RotateCcw size={12} />}
 						>
-							Reprendre
+							{t("libres.detail.resume")}
 						</TextAction>
 					)}
 					<TextAction onClick={() => setArchiving(true)} icon={<Archive size={12} />}>
-						Archiver
+						{t("libres.detail.archive")}
 					</TextAction>
 				</div>
 			</div>
 
 			<div role="tablist" className="mt-3 flex gap-1 border-b border-line-soft px-5">
 				<TabButton on={tab === "chat"} onClick={() => setTab("chat")}>
-					Conversation
+					{t("libres.detail.conversation")}
 				</TabButton>
 				<TabButton on={tab === "diff"} onClick={() => setTab("diff")}>
-					Modifications{changes.data && changes.data.length > 0 ? ` · ${changes.data.length}` : ""}
+					{t("libres.detail.changes")}
+					{changes.data && changes.data.length > 0 ? ` · ${changes.data.length}` : ""}
 				</TabButton>
 			</div>
 
@@ -416,7 +418,7 @@ function AgentDetail({ entry }: { entry: Entry }) {
 						<div className="flex flex-1 flex-col items-center justify-center gap-3 text-center">
 							<MessageSquare size={22} className="text-ink-faint" />
 							<p className="max-w-sm text-[13px] text-ink-muted">
-								La conversation est fermée. Reprendre la rouvre sur le même fil, sous le même compte.
+								{t("libres.detail.closed")}
 							</p>
 							<button
 								type="button"
@@ -424,7 +426,7 @@ function AgentDetail({ entry }: { entry: Entry }) {
 								className="focus-ring flex h-9 items-center gap-2 rounded-[10px] bg-accent px-3.5 text-[13px] font-semibold text-accent-ink hover:bg-accent-soft"
 							>
 								<RotateCcw size={14} />
-								Reprendre
+								{t("libres.detail.resume")}
 							</button>
 						</div>
 					)
@@ -432,7 +434,7 @@ function AgentDetail({ entry }: { entry: Entry }) {
 					<div className="flex min-h-0 flex-1 flex-col gap-1.5 overflow-y-auto px-5 py-4">
 						{changes.initial && changes.loading ? <Spinner /> : null}
 						{changes.data?.length === 0 ? (
-							<p className="text-[13px] text-ink-muted">Aucune modification dans ce dossier pour l'instant.</p>
+							<p className="text-[13px] text-ink-muted">{t("libres.detail.noChanges")}</p>
 						) : null}
 						{changes.data?.map((change) => (
 							<button
@@ -479,6 +481,7 @@ function ArchiveDialog({
 	onDone: () => void;
 	onError: (message: string) => void;
 }) {
+	const { t } = useTranslation("views");
 	const [choice, setChoice] = useState<"keep" | "leave" | "discard">("keep");
 	const [busy, setBusy] = useState(false);
 	const hasTree = Boolean(agent.worktree);
@@ -495,12 +498,12 @@ function ArchiveDialog({
 	};
 
 	const options: Array<{ id: typeof choice; label: string; hint: string; danger?: boolean }> = [
-		{ id: "keep", label: "Garder la branche, ranger le worktree", hint: "Le travail commité reste dans git, le dossier disparaît." },
-		{ id: "leave", label: "Laisser le worktree en place", hint: "Rien ne bouge sur le disque ; seule la conversation est rangée." },
+		{ id: "keep", label: t("libres.archive.keep"), hint: t("libres.archive.keepHint") },
+		{ id: "leave", label: t("libres.archive.leave"), hint: t("libres.archive.leaveHint") },
 		{
 			id: "discard",
-			label: "Tout jeter",
-			hint: "Worktree et branche supprimés. Ce qui n'a pas été poussé est perdu.",
+			label: t("libres.archive.discard"),
+			hint: t("libres.archive.discardHint"),
 			danger: true,
 		},
 	];
@@ -508,12 +511,16 @@ function ArchiveDialog({
 	return (
 		<Modal onClose={onClose} align="center">
 			<div className="animate-in w-[480px] rounded-2xl bg-surface p-5 shadow-[var(--shadow-pop)]">
-				<h3 className="text-[16px] font-semibold text-ink">Archiver « {agent.label} » ?</h3>
+				<h3 className="text-[16px] font-semibold text-ink">{t("libres.archive.title", { label: agent.label })}</h3>
 				{hasTree ? (
 					<>
 						<p className="mt-1.5 text-[13px] leading-snug text-ink-muted">
-							Il a travaillé dans un worktree, sur <span className="font-mono text-ink">{agent.branch}</span>. Que
-							faire de ce qu'il laisse ?
+							<Trans
+								t={t}
+								i18nKey="libres.archive.worktreeQuestion"
+								values={{ branch: agent.branch }}
+								components={{ branch: <span className="font-mono text-ink" /> }}
+							/>
 						</p>
 						<div className="mt-4 flex flex-col gap-2">
 							{options.map((option) => (
@@ -544,8 +551,7 @@ function ArchiveDialog({
 					</>
 				) : (
 					<p className="mt-1.5 text-[13px] leading-snug text-ink-muted">
-						Il travaillait sur place : rien à ranger sur le disque. L'agent s'arrête et la conversation sort de la
-						liste.
+						{t("libres.archive.inPlace")}
 					</p>
 				)}
 				<div className="mt-5 flex justify-end gap-2">
@@ -554,7 +560,7 @@ function ArchiveDialog({
 						onClick={onClose}
 						className="focus-ring h-9 rounded-[9px] border border-line px-3.5 text-[12.5px] font-medium text-ink hover:bg-hover"
 					>
-						Annuler
+						{t("libres.archive.cancel")}
 					</button>
 					<button
 						type="button"
@@ -566,7 +572,7 @@ function ArchiveDialog({
 						)}
 					>
 						{busy ? <Spinner size={12} /> : null}
-						Archiver
+						{t("libres.archive.confirm")}
 					</button>
 				</div>
 			</div>
@@ -620,27 +626,30 @@ function TabButton({ on, onClick, children }: { on: boolean; onClick: () => void
 
 /** Premier passage : ce que l'écran remplace, et de quoi commencer tout de suite. */
 function LibresEmpty() {
+	const { t } = useTranslation("views");
 	const { projectList } = useCockpit();
 	return (
 		<div className="flex flex-1 items-center justify-center overflow-y-auto p-8">
 			<div className="flex w-[640px] max-w-full flex-col items-center text-center">
 				<div className="w-[440px] max-w-full rounded-[14px] bg-void px-5 py-4 text-left font-mono text-[13px] leading-[1.8] text-ink shadow-card">
 					<div>
-						<span className="text-accent">~ ❯</span> cd ~/Sites/mon-projet
+						<span className="text-accent">~ ❯</span> cd ~/Sites/{t("libres.empty.projectFolder")}
 					</div>
 					<div>
-						<span className="text-accent">~/Sites/mon-projet ❯</span> claude
+						<span className="text-accent">~/Sites/{t("libres.empty.projectFolder")} ❯</span> claude
 					</div>
-					<div className="text-ink-muted">— devient —</div>
+					<div className="text-ink-muted">{t("libres.empty.becomes")}</div>
 					<div>
-						<span className="font-semibold text-warning">⌘N</span>, le dossier,{" "}
-						<span className="font-semibold text-warning">⌘↵</span>
+						<Trans
+							t={t}
+							i18nKey="libres.empty.shortcut"
+							components={{ key: <span className="font-semibold text-warning" /> }}
+						/>
 					</div>
 				</div>
-				<h1 className="mt-8 text-[24px] font-semibold text-ink">Un agent, un dossier, c'est tout.</h1>
+				<h1 className="mt-8 text-[24px] font-semibold text-ink">{t("libres.empty.title")}</h1>
 				<p className="mt-2.5 max-w-[520px] text-[14px] leading-relaxed text-ink-muted">
-					Sans chantier, sans mission, sans branche si tu n'en veux pas. Tes agents libres se rangent ici, par dossier,
-					jusqu'à ce que tu les archives.
+					{t("libres.empty.body")}
 				</p>
 				<button
 					type="button"
@@ -648,13 +657,13 @@ function LibresEmpty() {
 					className="focus-ring mt-6 flex h-10 items-center gap-2 rounded-[10px] bg-accent px-4 text-[13.5px] font-semibold text-accent-ink hover:bg-accent-soft"
 				>
 					<Zap size={15} />
-					Lancer un agent
+					{t("libres.empty.launch")}
 					<span className="font-mono text-[11px] opacity-80">⌘N</span>
 				</button>
 				{projectList.some((project) => project.mainRepo) ? (
 					<div className="mt-8 w-full text-left">
 						<h2 className="mb-2 text-[10.5px] font-semibold tracking-[0.06em] text-ink-faint uppercase">
-							Ou tout de suite, dans un projet déclaré
+							{t("libres.empty.orProject")}
 						</h2>
 						<div className="grid grid-cols-3 gap-2.5">
 							{projectList

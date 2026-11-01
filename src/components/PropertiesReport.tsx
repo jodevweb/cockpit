@@ -1,5 +1,6 @@
 import clsx from "clsx";
 import { CircleHelp, CircleSlash, ShieldCheck, ShieldX, Target, TriangleAlert } from "lucide-react";
+import { useTranslation } from "react-i18next";
 import { Inline } from "@/components/Markdown";
 import type { PropertyAudit, PropertyCheck } from "@/lib/types";
 
@@ -21,6 +22,7 @@ const VERDICTS: Record<
 		icon: React.ComponentType<{ size?: number; className?: string }>;
 		tint: string;
 		border: string;
+		/** Clé du libellé dans `propertiesReport.verdict`. */
 		label: string;
 	}
 > = {
@@ -28,25 +30,25 @@ const VERDICTS: Record<
 		icon: ShieldX,
 		tint: "text-critical",
 		border: "border-l-critical",
-		label: "enfreinte",
+		label: "broken",
 	},
 	tenue: {
 		icon: ShieldCheck,
 		tint: "text-success",
 		border: "border-l-success",
-		label: "tenue",
+		label: "held",
 	},
 	"hors sujet": {
 		icon: CircleSlash,
 		tint: "text-ink-faint",
 		border: "border-l-line",
-		label: "hors sujet",
+		label: "offTopic",
 	},
 	indécis: {
 		icon: CircleHelp,
 		tint: "text-warning",
 		border: "border-l-warning",
-		label: "indécis",
+		label: "undecided",
 	},
 };
 
@@ -57,6 +59,7 @@ export function PropertiesReport({
 	audit: PropertyAudit;
 	stale: boolean;
 }) {
+	const { t } = useTranslation("components3");
 	const broken = audit.checks.filter((check) => check.verdict === "enfreinte");
 	const undecided = audit.checks.filter((check) => check.verdict === "indécis");
 	// Ce qui a été jugé sans rien signaler : compté, jamais détaillé. Trois
@@ -77,7 +80,7 @@ export function PropertiesReport({
 			<header className="flex flex-wrap items-center gap-1.5">
 				<Target size={12} className="shrink-0 text-accent-soft" />
 				<h3 className="text-[11px] font-semibold tracking-[0.05em] text-ink-muted uppercase">
-					Ce qui doit rester vrai
+					{t("propertiesReport.title")}
 				</h3>
 				<span
 					className={clsx(
@@ -86,15 +89,15 @@ export function PropertiesReport({
 					)}
 				>
 					{broken.length === 0
-						? `${audit.checks.length} propriété${audit.checks.length > 1 ? "s" : ""} jugée${audit.checks.length > 1 ? "s" : ""} · rien d'enfreint`
-						: `${broken.length} enfreinte${broken.length > 1 ? "s" : ""} sur ${audit.checks.length}`}
+						? t("propertiesReport.allHeld", { count: audit.checks.length })
+						: t("propertiesReport.someBroken", { count: broken.length, total: audit.checks.length })}
 				</span>
 				<span className="ml-auto flex items-center gap-2 font-mono text-[10px] text-ink-faint">
 					{audit.durationSeconds > 0 ? (
 						<span>{Math.max(1, Math.round(audit.durationSeconds / 60))} min</span>
 					) : null}
 					{audit.costUsd > 0 ? (
-						<span title="Ce que cette vérification vaudrait aux tarifs de l'API. Sur un abonnement, rien n'est débité : c'est le quota de la fenêtre qui se consomme.">
+						<span title={t("propertiesReport.costHint")}>
 							≈ {audit.costUsd.toFixed(2)} $
 						</span>
 					) : null}
@@ -104,7 +107,7 @@ export function PropertiesReport({
 			{stale ? (
 				<p className="mt-1.5 flex items-start gap-1.5 text-[10.5px] text-warning">
 					<TriangleAlert size={11} className="mt-px shrink-0" />
-					<span>La branche a bougé depuis cette vérification.</span>
+					<span>{t("propertiesReport.stale")}</span>
 				</p>
 			) : null}
 
@@ -118,9 +121,10 @@ export function PropertiesReport({
 
 			{quiet.length > 0 ? (
 				<p className="mt-2 text-[10.5px] leading-snug text-ink-faint">
-					{quiet.filter((check) => check.verdict === "tenue").length} tenue(s),{" "}
-					{quiet.filter((check) => check.verdict === "hors sujet").length} sans rapport
-					avec ce changement.
+					{t("propertiesReport.quiet", {
+						held: quiet.filter((check) => check.verdict === "tenue").length,
+						unrelated: quiet.filter((check) => check.verdict === "hors sujet").length,
+					})}
 				</p>
 			) : null}
 		</section>
@@ -128,6 +132,7 @@ export function PropertiesReport({
 }
 
 function CheckCard({ check }: { check: PropertyCheck }) {
+	const { t } = useTranslation("components3");
 	const style = VERDICTS[check.verdict] ?? VERDICTS.indécis;
 	const Icon = style.icon;
 
@@ -159,7 +164,9 @@ function CheckCard({ check }: { check: PropertyCheck }) {
 						</p>
 					) : null}
 				</div>
-				<span className={clsx("shrink-0 text-[10px]", style.tint)}>{style.label}</span>
+				<span className={clsx("shrink-0 text-[10px]", style.tint)}>
+					{t(`propertiesReport.verdict.${style.label}`)}
+				</span>
 			</div>
 		</article>
 	);

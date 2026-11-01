@@ -1,0 +1,1147 @@
+{
+	"agentChat": {
+		"builtIn": {
+			"agents": "Manage available subagents",
+			"clear": "Start over with an empty conversation",
+			"compact": "Summarize the thread to free up context",
+			"config": "CLI settings",
+			"context": "Breakdown of context usage",
+			"doctor": "Check the installation",
+			"effort": "Set the reasoning effort",
+			"fast": "Toggle fast mode",
+			"init": "Create the repository's CLAUDE.md",
+			"insights": "Usage statistics",
+			"mcp": "MCP server status",
+			"model": "Switch model",
+			"recap": "Summary of what was just done",
+			"reloadSkills": "Reload skills from disk",
+			"rename": "Rename the conversation",
+			"review": "Review a pull request",
+			"securityReview": "Security review of pending changes",
+			"usage": "Usage and limits",
+			"usageCredits": "Remaining credits"
+		},
+		"scope": {
+			"project": "repo",
+			"user": "personal",
+			"plugin": "plugin",
+			"cli": "CLI"
+		},
+		"commandMenu": {
+			"loading": "Reading commands…",
+			"empty": "No commands in this worktree.",
+			"emptyHint": "A <mono>.claude/commands/review.md</mono> file in the repo gives you <mono>/review</mono>; in <mono>~/.claude/commands/</mono>, the command follows you everywhere.",
+			"help": "↑↓ to choose · Tab or ⏎ to complete · Esc to type freely"
+		},
+		"attachment": {
+			"open": "{{target}}\nClick to open"
+		},
+		"finished": "{{label}} has finished",
+		"tour": {
+			"visit": "Visit the changes",
+			"title": "Visit the changes, file by file",
+			"label": "Tour"
+		},
+		"permission": {
+			"asks": "The agent wants to use <tool>{{tool}}</tool>",
+			"deny": "Deny",
+			"allow": "Allow",
+			"allowAll": "All",
+			"allowAllTitle": "Don't ask again"
+		},
+		"guard": {
+			"onTitle": "Everything is allowed without asking — click to ask again",
+			"offTitle": "Allow tools automatically",
+			"on": "No safeguard",
+			"off": "Ask"
+		},
+		"thinking": {
+			"using": "The agent is using {{tool}}…",
+			"idle": "The agent is thinking…"
+		},
+		"starting": "Starting the agent…",
+		"ready": "Agent ready. Write your message to continue.",
+		"film": {
+			"empty": "Nothing to film yet: the film is made from the agent's actions."
+		},
+		"attachments": {
+			"size": "{{size}} KB",
+			"remove": "Remove",
+			"add": "Attach a file — or drag it here, or paste it"
+		},
+		"composer": {
+			"placeholder": "Reply to the agent — “/” for commands…",
+			"ended": "Agent finished",
+			"send": "Send"
+		},
+		"interrupt": {
+			"done": "Agent interrupted — fix it and send again.",
+			"title": "Stop what the agent is doing, without closing the conversation",
+			"label": "Stop"
+		},
+		"follow": {
+			"of": "Follow-up to",
+			"quoted": "“{{text}}”",
+			"currentFallback": "the current instruction",
+			"new": "New instruction — a new line on the map",
+			"flipTitle": "Switch — or ⌥Enter to send it the other way",
+			"toNew": "new instruction",
+			"toFollow": "follow-up"
+		},
+		"question": {
+			"placeholder": "Another answer, or a clarification…",
+			"skipTitle": "The agent continues without your answer",
+			"skip": "Skip",
+			"answer": "Answer"
+		},
+		"userTurn": {
+			"context": "Attached context: {{context}}"
+		},
+		"lecture": {
+			"map": "Map",
+			"mapHint": "What deserves a look, drawn: steps, files, tests, conclusion",
+			"thread": "Thread",
+			"threadHint": "The full thread, each conclusion as a board: the image first, the text folded",
+			"film": "Film",
+			"filmHint": "The last turn in images, played in sequence like a short video"
+		},
+		"turn": {
+			"leadInstruction": "Lead agent's instruction"
+		},
+		"prompts": {
+			"group": "My prompts",
+			"sendNow": "Send right away",
+			"label": "Actions",
+			"title": "Ready-made prompts for this agent",
+			"empty": "No saved prompts.",
+			"footer": "The prompt goes into the reply field — ⇧Enter sends it directly. Library: <mono>~/.config/cockpit/prompts.toml</mono>"
+		},
+		"model": {
+			"currentTitle": "Current model: {{model}}\nSwitching restarts the agent on the same thread.",
+			"chooseTitle": "Choose the model — the agent restarts on the same thread",
+			"customPlaceholder": "Other identifier — claude-opus-5-5…",
+			"customTitle": "A model the engine knows but the list doesn't offer yet. To keep it, add it to the engine's models in the settings.",
+			"mismatch": "Requested at launch: {{requested}} — but {{answering}} is the one replying. The choice may have changed during the conversation, or the engine switched on its own.",
+			"restartNote": "Switching model restarts the agent on the same session: the thread is kept."
+		},
+		"cost": {
+			"dedicated": "dedicated counter",
+			"price": "${{in}}/${{out}} per M"
+		},
+		"quota": {
+			"common": "Shared weekly counter: <tone>{{percent}}% used</tone>. On a subscription nothing is charged — this quota is what decides. The prices shown only apply to an engine connected with an API key.",
+			"none": "Quotas never read on this machine — the resources panel can read them. The prices shown only apply to an engine connected with an API key."
+		},
+		"spend": {
+			"summary": "{{total}} tokens consumed by this conversation since its first message — {{share}}% of everything consumed over the last five hours, cache included.",
+			"noQuota": "The subscription quota isn't reported by the CLI.",
+			"left": "{{left}}% left on “{{limit}}”.",
+			"leftResets": "{{left}}% left on “{{limit}}”, which resets {{when}}."
+		},
+		"percent": "{{value}}%",
+		"context": {
+			"breakdown": "{{used}} tokens of {{max}}, counted by the CLI:",
+			"part": "· {{label}}: {{tokens}}",
+			"autoCompact": "Auto-compaction at {{percent}}%.",
+			"unknownWindow": "{{tokens}} tokens on the last turn. The share used will show once the engine has reported its window size, at the end of this turn.",
+			"window": "{{tokens}} tokens of {{limit}} — everything the model had in view on the last turn: messages, files read and tool outputs, cache included. Beyond that, the start of the conversation falls out of the window."
+		},
+		"mode": {
+			"restartNote": "Switching mode restarts the agent, resuming the conversation."
+		},
+		"mcpState": {
+			"connected": "connected",
+			"connectedHelp": "Its tools are available.",
+			"pending": "connecting",
+			"pendingHelp": "The connection hasn't gone through yet.",
+			"needsAuth": "needs authorization",
+			"needsAuthHelp": "The server is waiting for authorization: none of its tools are available to the agent.",
+			"failed": "failed",
+			"failedHelp": "The server didn't respond: none of its tools are available to the agent.",
+			"unknownHelp": "A state Cockpit can't name."
+		},
+		"equipment": {
+			"connectedTitle_one": "{{count}} MCP server connected",
+			"connectedTitle_other": "{{count}} MCP servers connected",
+			"unavailableTitle_one": "{{count}} MCP server unavailable: {{names}}",
+			"unavailableTitle_other": "{{count}} MCP servers unavailable: {{names}}",
+			"title": "What this agent has at hand",
+			"close": "Close",
+			"servers": "MCP servers",
+			"connectedCount": "{{connected}}/{{total}} connected",
+			"noServers": "No server declared for this folder.",
+			"probing": "Asking the session for status…",
+			"reconnect": "Reconnect {{name}}",
+			"skills": "Skills",
+			"subagents": "Subagents",
+			"plugins": "Plugins"
+		},
+		"duration": {
+			"seconds": "{{count}} s",
+			"minutes": "{{count}} min",
+			"hours": "{{count}} h"
+		},
+		"subagents": {
+			"count_one": "{{count}} subagent",
+			"count_other": "{{count}} subagents",
+			"defaultRole": "subagent",
+			"openTitle": "{{role}} · {{mission}}\nClick to see what it's doing",
+			"starting": "{{role}} · starting",
+			"steps_one": "{{count}} step",
+			"steps_other": "{{count}} steps"
+		},
+		"runState": {
+			"done": "finished",
+			"thinking": "thinking",
+			"ready": "ready"
+		}
+	},
+	"agentDay": {
+		"permanence": "Permanence",
+		"title": "The agents' day",
+		"summary": {
+			"none": "No agent has run in the last few hours.",
+			"busy_one": "{{busy}} working right now · {{count}} since this morning",
+			"busy_other": "{{busy}} working right now · {{count}} since this morning",
+			"idle_one": "{{count}} agent in the last few hours, none working",
+			"idle_other": "{{count}} agents in the last few hours, none working"
+		},
+		"legend": {
+			"working": "working",
+			"done": "done",
+			"failed": "failed"
+		},
+		"now": "now",
+		"turns_one": "{{count}} turn",
+		"turns_other": "{{count}} turns",
+		"cost": "${{amount}}",
+		"openConversation": "Open its conversation"
+	},
+	"automationEditor": {
+		"models": {
+			"daily": {
+				"name": "My daily",
+				"description": "What I've done since the last one, in four parts, placed in the Daily screen",
+				"prompt": "Summarize what I did over the period, for the team daily. Four parts: Shipped, In progress, Blocked, Next. One line per topic; group a PR with the ticket it addresses. No code-internal jargon: the product team is listening too."
+			},
+			"revue": {
+				"name": "Morning review",
+				"description": "PRs waiting for my review, and what moved overnight",
+				"prompt": "List the PRs I reviewed or that moved since yesterday, from oldest to newest. Two parts: To review, Already reviewed. One line per PR, with what changed."
+			},
+			"sprint": {
+				"name": "Week in review",
+				"description": "What I shipped this week, for the retro",
+				"prompt": "Review my week for the retro. Three parts: Shipped, What slowed us down, To pick up. Group by topic, not by tool."
+			},
+			"sentry": {
+				"name": "Error watch",
+				"description": "Errors assigned to me that moved since yesterday",
+				"prompt": "Summarize the errors assigned to me that moved since yesterday. Two parts: New or rising, Resolved. One line per error, with what it affects."
+			},
+			"blank": {
+				"name": "Blank",
+				"description": "An instruction, a rhythm, a report"
+			}
+		},
+		"leads": {
+			"onTime": "On time",
+			"minutes_one": "{{count}} min early",
+			"minutes_other": "{{count}} min early",
+			"hour": "1 h early"
+		},
+		"sources": {
+			"github": {
+				"what": "My PRs opened, merged or updated, and the ones I reviewed"
+			},
+			"tracker": {
+				"name": "Issue tracker",
+				"what": "My tickets that moved, completed ones included"
+			},
+			"cockpit": {
+				"what": "Finished agent turns, by folder, and the git actions from the log"
+			},
+			"sentry": {
+				"what": "Errors assigned to me that moved during the period"
+			}
+		},
+		"sentence": {
+			"noDay": "No day selected: nothing will run.",
+			"noSource": "no source",
+			"outputDaily": "your part of the daily",
+			"output": "a report",
+			"ahead": "Every {{days}} at {{time}}, Cockpit reads {{sources}} and gives you {{output}}, {{minutes}} min early.",
+			"onTime": "Every {{days}} at {{time}}, Cockpit reads {{sources}} and gives you {{output}}, on time."
+		},
+		"toast": {
+			"created": "{{name}} is set up",
+			"saved": "Settings saved"
+		},
+		"remove": {
+			"title": "Delete “{{name}}”?",
+			"message": "It will no longer run. Its past runs stay on disk.",
+			"confirm": "Delete"
+		},
+		"back": "Automations",
+		"title": {
+			"new": "New automation",
+			"edit": "Configure “{{name}}”"
+		},
+		"cancel": "Cancel",
+		"close": "Close",
+		"save": "Save",
+		"saveAndEnable": "Save and enable",
+		"startFrom": "Start from a template",
+		"covers": "covers {{from}} → {{to}}",
+		"when": {
+			"title": "When",
+			"name": "Name",
+			"occurs": "It runs on",
+			"days": "Days",
+			"at": "at",
+			"ready": "Report ready",
+			"lead": "Lead time",
+			"window": "Period covered"
+		},
+		"window": {
+			"since": {
+				"name": "Since the last run",
+				"description": "Monday covers the weekend; nothing is lost between two runs, even after a catch-up."
+			},
+			"day": {
+				"name": "The last 24 hours",
+				"description": "A fixed window, for a watch that comes back every day."
+			}
+		},
+		"reads": {
+			"title": "What it reads",
+			"description": "The accounts set up in settings, filtered on you. A source that doesn't respond yields a missing, flagged part — never a failure."
+		},
+		"asks": {
+			"title": "What it asks",
+			"prompt": "Instruction",
+			"placeholder": "What you expect from the report, who it's for, what it should leave out.",
+			"context": "The agent also receives the period, the items read and the previous report, so it can say what has moved since. It cites every item it uses: a made-up reference is discarded.",
+			"corrections_one": "Corrections requested after reports · {{count}}",
+			"corrections_other": "Corrections requested after reports · {{count}}",
+			"removeCorrection": "Remove this correction"
+		},
+		"delivery": {
+			"title": "Where it lands",
+			"notify": "Notify me when it's ready",
+			"catchUp": "Catch up on launch if a run was missed",
+			"daily": "Place my part in the Daily screen",
+			"pdf": "Export each report as PDF",
+			"enabled": "Enabled",
+			"slack": "Slack webhook, to publish a reviewed report",
+			"slackHint": "Nothing is sent on its own: the “Send to Slack” button appears on a report, after review. The address stays in Cockpit and is no longer shown once saved.",
+			"readOnly": "<strong>Read-only</strong>, with no setting to change it: the agent has no tools, it can't push, comment or move anything."
+		},
+		"preview": {
+			"title": "What will happen",
+			"ready": "ready {{time}}",
+			"pickDay": "Pick at least one day."
+		},
+		"steps": {
+			"title": "On every run",
+			"period": {
+				"title": "The period is computed",
+				"description": "From the end of the last successful run until now, noted in the report"
+			},
+			"read": {
+				"title": "Cockpit reads the sources",
+				"description": "Cockpit, not the agent: every item keeps its link and its origin"
+			},
+			"write": {
+				"title": "An agent writes",
+				"description": "Without any tools, with your instruction and the items, nothing else"
+			},
+			"store": {
+				"title": "The report is filed",
+				"description": "One more run in the history, never rewritten"
+			},
+			"notify": {
+				"title": "You're notified",
+				"description": "A notification, then your part in the Daily screen"
+			}
+		},
+		"trial": {
+			"button": "Dry run",
+			"hint": "The same work as a run, over the period it would cover now, without filing or notifying anything",
+			"title": "Dry run",
+			"subtitle": "Nothing was filed or sent: this is what it would produce right now.",
+			"running": "Reading sources, then writing — one to two minutes.",
+			"partial": "Partial",
+			"ready": "Ready",
+			"silent": "silent",
+			"unplugged": "not connected",
+			"nothing": "Nothing.",
+			"unsourced": "no source"
+		}
+	},
+	"automationRunView": {
+		"empty": "Nothing to show.",
+		"copied": "Copied as Markdown",
+		"rerun": "Restarted",
+		"rerunDescription": "The new run will appear in the history.",
+		"slackConfirmTitle": "Post this report to Slack?",
+		"slackConfirmMessage_one": "{{count}} line will go to the webhook's channel, visible to the whole team. Dropped lines stay here.",
+		"slackConfirmMessage_other": "{{count}} lines will go to the webhook's channel, visible to the whole team. Dropped lines stay here.",
+		"publish": "Post",
+		"postedSlack": "Posted to Slack",
+		"correctionAdded": "Correction added",
+		"correctionAddedDescription": "The next run will take it into account.",
+		"breadcrumb": "Breadcrumb",
+		"automations": "Automations",
+		"previous": "Previous run",
+		"next": "Next run",
+		"without": "without {{sources}}",
+		"covers": "covers {{from}} → {{to}}",
+		"readyAt": "ready at {{time}}",
+		"copyMarkdown": "Copy as Markdown",
+		"redoPdf": "Redo the PDF",
+		"exportPdf": "Export as PDF",
+		"pdfFolderTitle": "The folder of this automation's PDFs",
+		"folder": "Folder",
+		"postedOn": "Posted on {{date}}",
+		"publishTitle": "Post the reviewed report",
+		"sendSlack": "Send to Slack",
+		"presentDaily": "Present at the daily",
+		"failed": "This run did not complete: {{reason}}",
+		"kept": "{{kept}} / {{total}} lines kept",
+		"clickHint": "Click a line to drop it from the presentation. It stays in the run, struck through.",
+		"nothing": "Nothing.",
+		"restore": "Put back into the presentation",
+		"drop": "Drop from the presentation",
+		"unsourced": "no source",
+		"dropped": "dropped",
+		"sourcesTitle": "Where the items come from",
+		"sourcesChart": "Breakdown of items by source",
+		"trace": "The trace",
+		"period": "Period computed",
+		"source": {
+			"read": "{{source}} read",
+			"silent": "{{source}} silent",
+			"unconfigured": "{{source}} not connected",
+			"items_one": "{{count}} item",
+			"items_other": "{{count}} items",
+			"noAnswer": "no answer",
+			"silentNote": "{{note}}. Its section is missing, and the header says so.",
+			"unconfiguredNote": "{{note}}. This is not a failure: there is nothing to read."
+		},
+		"writing": "Writing",
+		"nothingToWrite": "Nothing to write: no items over the period",
+		"toollessAgent": "Agent without tools · {{valuation}}",
+		"valued": "valued at ${{cost}} at API rates",
+		"unknownValuation": "valuation unknown",
+		"rerunButton": "Run again",
+		"correctTitle": "Not happy with this report?",
+		"correctHint": "Say what's wrong: the correction is added to the instructions, dated, and the next run takes it into account.",
+		"correction": "Correction",
+		"correctionPlaceholder": "E.g.: don't mention dependency PRs",
+		"addCorrection": "Add to the instructions",
+		"correctionsInPlace_one": "{{count}} correction already in place",
+		"correctionsInPlace_other": "{{count}} corrections already in place"
+	},
+	"chantierMap": {
+		"state": {
+			"stopped": "stopped",
+			"working": "working",
+			"waiting": "waiting"
+		},
+		"files_one": "{{formatted}} file",
+		"files_other": "{{formatted}} files",
+		"truncated": "(repository truncated)",
+		"folderAction": {
+			"hint": "Note or new agent on this folder",
+			"label": "This folder"
+		},
+		"noTerritory": "Nothing to map: {{error}}",
+		"readingRepo": "Reading the repository…",
+		"allClear": "No agent is stepping on another's toes, and none relies on an outdated version of a file.",
+		"agentFallback": "agent",
+		"close": "Close",
+		"send": "Send",
+		"alerts": {
+			"writtenBy": "written by",
+			"and": "and",
+			"warn": "Warn",
+			"warnAgent": "Warn it",
+			"reliesOn_one": "relies on a file that has changed:",
+			"reliesOn_other": "relies on {{count}} files that have changed:"
+		},
+		"legend": {
+			"read": "read",
+			"written": "written",
+			"collision": "collision",
+			"stale": "stale"
+		},
+		"emptyFolder": "Empty folder.",
+		"selection": {
+			"multipleWriters": "Written by several agents.",
+			"openFile": "Open the file",
+			"wrote": "wrote {{ago}}",
+			"read": "read {{ago}}",
+			"summarized": "summarized",
+			"untouched": "No agent has touched it yet.",
+			"stale": "{{agent}} read it {{ago}}; it has changed since.",
+			"staleBy": "{{agent}} read it {{ago}}; it has changed since (by {{by}}).",
+			"for": "For",
+			"newAgent": "A new agent, confined here",
+			"newAgentPlaceholder": "What it should do within this scope…",
+			"remarkPlaceholder": "A note on this file — the agent will know what you mean.",
+			"laterHint": "Add it to this agent's notes, to send together",
+			"later": "Later",
+			"launch": "Launch"
+		},
+		"agent": {
+			"openConversation": "Open its conversation",
+			"known_one": "{{count}} file in mind",
+			"known_other": "{{count}} files in mind",
+			"writes_one": "{{count}} written",
+			"writes_other": "{{count}} written",
+			"stale_one": "A file has changed since it was read",
+			"stale_other": "{{count}} files have changed since they were read",
+			"deleted": "deleted",
+			"outsideAgents": "outside agents"
+		},
+		"remarks": {
+			"pending_one": "{{count}} note to send",
+			"pending_other": "{{count}} notes to send",
+			"remove": "Remove",
+			"discard": "Discard"
+		},
+		"context": {
+			"noDetail": "This engine doesn't break down its context.",
+			"pending": "{{tokens}} tokens — breakdown at the next measurement",
+			"pendingOfWindow": "{{tokens}} tokens / {{window}} — breakdown at the next measurement",
+			"notMeasured": "Context not measured yet.",
+			"detail": "Context breakdown",
+			"partTitle": "{{label}} · {{tokens}} tokens",
+			"ofMax": "/ {{max}} tokens",
+			"percent": "{{percent}}%",
+			"compactedHint": "The CLI summarized the conversation to make room",
+			"compacted": "summarized {{ago}}",
+			"heavy": "What weighs on the conversation: {{list}}",
+			"memory": "Instructions: {{list}}",
+			"mcp": "MCP: {{list}}",
+			"mcpServer": "{{name}} ({{loaded}} loaded, {{deferred}} deferred)",
+			"autoCompact": "Auto-compaction at {{percent}}% — the mark on the bar.",
+			"countedAt": "Counted by the CLI {{ago}}."
+		}
+	},
+	"engagementCard": {
+		"noTrigger": "no trigger",
+		"oracle": "Oracle",
+		"noOracle": "none — should not have started",
+		"steps_one": "{{count}} step",
+		"steps_other": "{{count}} steps",
+		"costHint": "what this would cost at API rates; on a subscription nothing is charged, the window's quota is what gets used",
+		"cost": "${{amount}}",
+		"started": "started {{when}}",
+		"verdict": {
+			"pending": "in progress",
+			"reached": "reached",
+			"missed": "missed",
+			"offTopic": "off topic",
+			"undecided": "undecidable",
+			"rehearsed": "dry run"
+		}
+	},
+	"fileLink": {
+		"hint": "Click: read in Cockpit\n⌘-click: open in the editor\n⌥-click: reveal in Finder\n⇧-click: copy the path"
+	},
+	"fileViewer": {
+		"opaque": {
+			"unplayable": "Cockpit can't play this format. The Mac's own app almost certainly can.",
+			"unknown": "Cockpit doesn't display this kind of file. Open {{name}} with the Mac's app.",
+			"openDefault": "Open with the default app",
+			"showInFinder": "Show in Finder"
+		},
+		"unsaved": "unsaved",
+		"saveTitle": "Save (⌘S)",
+		"save": "Save",
+		"discardTitle": "Discard the changes",
+		"cancel": "Cancel",
+		"editTitle": "Edit this file in Cockpit",
+		"edit": "Edit",
+		"copyPath": "Copy the path",
+		"reveal": "Reveal in Finder",
+		"openWithTitle": "Open with the Mac's app",
+		"openWith": "Open with…",
+		"externalEditorTitle": "Edit in the external editor",
+		"externalEditor": "Editor",
+		"close": "Close (Esc)",
+		"searchPlaceholder": "Search in the file… (⌘F)",
+		"noMatch": "none",
+		"previousMatch": "Previous match (⇧⏎)",
+		"nextMatch": "Next match (⏎)",
+		"truncated": "File truncated at {{size}} — open it in the editor to see the rest."
+	},
+	"film": {
+		"quote": "“{{quote}}”",
+		"title": "The turn's film",
+		"calls_one": "{{count}} call",
+		"calls_other": "{{count}} calls",
+		"empty": "Nothing to film yet: the film is built from the agent's actions.",
+		"pause": "Pause",
+		"play": "Play",
+		"frame": "Frame {{position}}: {{caption}}"
+	},
+	"fleetGrid": {
+		"main": "main",
+		"changes_one": "{{count}} change",
+		"changes_other": "{{count}} changes",
+		"clean": "clean",
+		"conflicts_one": "{{count}} conflict",
+		"conflicts_other": "{{count}} conflicts",
+		"awaitingReply": "waiting for your reply",
+		"running": "running",
+		"idle": "idle",
+		"subagents_one": "{{count}} subagent",
+		"subagents_other": "{{count}} subagents",
+		"openEditor": "Open in the editor",
+		"openTerminal": "Terminal on this worktree, inside Cockpit",
+		"launchAgent": "Launch an agent here, inside Cockpit",
+		"detail": "Details",
+		"remove": "Delete",
+		"confirmTitle": "Delete the worktree {{folder}}?",
+		"confirmMessage": "The folder and its local infrastructure are removed — databases, buckets and Docker stack, which often takes a minute or two. The remote branch stays in place.",
+		"removable_one": "{{count}} worktree with no open PR — can be deleted",
+		"removable_other": "{{count}} worktrees with no open PR — can be deleted",
+		"hide": "hide",
+		"show": "show",
+		"group": {
+			"waiting": "Waiting for you",
+			"flight": "In flight",
+			"recent": "Recent",
+			"resting": "Resting"
+		},
+		"empty": "No worktrees."
+	},
+	"impactReport": {
+		"ago": {
+			"now": "just now",
+			"minutes_one": "{{count}} min ago",
+			"minutes_other": "{{count}} min ago",
+			"hours_one": "{{count}} h ago",
+			"hours_other": "{{count}} h ago",
+			"days_one": "{{count}} d ago",
+			"days_other": "{{count}} d ago"
+		},
+		"noVerdict": "no verdict",
+		"verdict": {
+			"ok": "ok",
+			"reserves": "reservations",
+			"blocking": "blocking"
+		},
+		"risk": "{{level}} risk",
+		"riskLevel": {
+			"low": "low",
+			"medium": "medium",
+			"high": "high",
+			"unknown": "unknown"
+		},
+		"workOnTitle": "Open an agent on this branch, with this reading in hand",
+		"workOn": "Handle",
+		"openForge": "Open on the forge",
+		"stale": "The branch has moved since this reading — it describes a state that no longer exists.",
+		"readingMinutes_one": "{{count}} min of reading",
+		"readingMinutes_other": "{{count}} min of reading",
+		"apiCostTitle": "What this reading would cost at API rates. On a subscription nothing is charged: it uses up the window's quota.",
+		"apiCost": "≈ ${{cost}} at API rates",
+		"briefTitle": "Open the fact file sent to the agent",
+		"brief": "The file",
+		"auditTitle": "Judge this change against the project's declared properties — one by one, with evidence",
+		"audit": "Check",
+		"reaudit": "Check again",
+		"reconfrontTitle": "Have this change read again from three angles — four agents, a few minutes",
+		"confrontTitle": "Have this change read from three independent angles, and keep only where they disagree. Four agents, a few minutes.",
+		"confront": "Confront",
+		"reconfront": "Confront again",
+		"forget": "Forget",
+		"reread": "Read again"
+	},
+	"impactSettings": {
+		"saved": "Change review settings saved.",
+		"intro": "The Impact screen hands each change to an agent that cannot write anything, and keeps what it understood until the branch moves.",
+		"brief": {
+			"label": "What {{name}} does",
+			"labelFallback": "What this product does",
+			"hint": "Two or three sentences: what the product is for, who uses it, what matters to them. Without this, the analysis can only talk about the code.",
+			"placeholder": "E.g.: online store for consumers. What matters: the cart total is right, and a paid order ships the same day."
+		},
+		"engine": {
+			"label": "Engine",
+			"hint": "Empty = the first one declared."
+		},
+		"model": {
+			"label": "Model",
+			"hint": "Empty = this machine's setting."
+		},
+		"depth": {
+			"label": "Depth",
+			"hint": "What the engine can do with it.",
+			"none": "No instruction",
+			"fast": "Fast",
+			"normal": "Normal",
+			"deep": "All out"
+		},
+		"default": "Default",
+		"localBranches": {
+			"label": "Also follow local branches without a merge request",
+			"hint": "Work started three days ago that no forge sees yet."
+		},
+		"save": "Save"
+	},
+	"kpiBoard": {
+		"noSection": "No section",
+		"filter": "Filter indicators…",
+		"dashboards_one": "{{count}} dashboard",
+		"dashboards_other": "{{count}} dashboards",
+		"indicators_one": "{{count}} indicator",
+		"indicators_other": "{{count}} indicators",
+		"empty": {
+			"message": "No dashboards",
+			"hint": "KPI dashboards come from Better Stack Telemetry."
+		},
+		"hide": "hide",
+		"show": "show values",
+		"hours_one": "{{count}} h",
+		"hours_other": "{{count}} h",
+		"days_one": "{{count}} d",
+		"days_other": "{{count}} d",
+		"openExternal": "Open in Better Stack"
+	},
+	"libreLauncher": {
+		"places": {
+			"ici": {
+				"label": "Right here, as is",
+				"hint": "Exactly your terminal: the current branch, your work in progress. Nothing is created."
+			},
+			"branche": {
+				"label": "New branch",
+				"hint": "Same folder, but the agent starts on its own branch. Your work in progress comes along."
+			},
+			"worktree": {
+				"label": "Isolated worktree",
+				"hint": "A separate copy, next to the repository, on a fresh branch. Your folder isn't touched."
+			}
+		},
+		"depths": {
+			"engine": "Engine default",
+			"fast": "Fast",
+			"normal": "Normal",
+			"deep": "Deep"
+		},
+		"launchFailed": "The agent couldn't start: {{error}}",
+		"machineAccount": "This machine's account",
+		"machineModel": "this machine's model",
+		"summary": {
+			"whereHere": "{{folder}}, as is",
+			"whereBranch": "{{folder}}, on a new branch {{branch}}",
+			"whereWorktree": "an isolated copy of {{repo}}, on {{branch}}",
+			"sentence": "{{engine}} ({{model}}) opens in {{where}}, under the account {{account}}, in {{mode}} mode — {{hint}}."
+		},
+		"browseTitle": "Launch an agent in this folder",
+		"steps": {
+			"label": "Steps",
+			"folder": "Folder",
+			"toPick": "to choose",
+			"place": "Where to work",
+			"agent": "Agent",
+			"launch": "Launch",
+			"remembered": "remembered for this folder",
+			"thisTime": "just this once"
+		},
+		"title": "Launch an agent",
+		"subtitle": "One folder, one agent. No project, no mission.",
+		"close": "Close",
+		"allSet": "Everything is already filled in. Pick a folder, then <key>⌘↵</key>: the agent starts.",
+		"folder": {
+			"noteLibre": "free agent",
+			"noteRecent": "recent agent",
+			"title": "Which folder?",
+			"description": "This is the <code>cd</code>: the agent will work there as if you had opened it in your terminal.",
+			"path": "Folder path",
+			"placeholder": "~/Sites/my-project",
+			"browse": "Choose in Finder…",
+			"missing": "This folder doesn't exist.",
+			"gitRepo": "Git repository · {{branch}} · {{state}}",
+			"detached": "detached HEAD",
+			"clean": "clean",
+			"dirty_one": "{{count}} modified file",
+			"dirty_other": "{{count}} modified files",
+			"notGit": "Not a git repository: the agent will work in place.",
+			"recent": "Recent",
+			"projects": "Projects declared in settings"
+		},
+		"place": {
+			"title": "Where does it work?",
+			"in": "In <code>{{folder}}</code>",
+			"notGit": "This folder isn't a git repository: the agent works in place. Branch and worktree don't apply.",
+			"busy": "An agent is already working in this folder. Two agents in the same place write to the same files.",
+			"useWorktree": "Use a worktree",
+			"branchName": "Branch name",
+			"branchHint": "Derived from your first instruction, if you give one.",
+			"from": "Based on",
+			"copyIn": "Copy created in <code>{{path}}</code>",
+			"fullFlow": "Want the full setup — project, terminals, browser, servers?",
+			"openWorkspace": "Open a workspace instead →"
+		},
+		"agent": {
+			"title": "Which agent?",
+			"description": "Engine, models and accounts come from settings. Nothing is declared here.",
+			"engine": "Engine",
+			"firstEngine": " — the first one declared",
+			"onlyEngine": " — the only engine declared",
+			"model": "Model",
+			"machineSetting": "Machine setting",
+			"account": "Account",
+			"loggedIn": "signed in",
+			"loggedOut": "signed out",
+			"projectAccount": "the one for this folder's project",
+			"permissions": "Permissions",
+			"depth": "Depth",
+			"depthUnsupported": "This engine doesn't say how to get it — Settings → Engines",
+			"bypassWarning": "Bypass, in place, on your current branch: the agent can run any command without asking you. A worktree limits the damage."
+		},
+		"launch": {
+			"title": "Ready to go",
+			"prompt": "First instruction <muted>— optional</muted>",
+			"placeholder": "Empty: the agent waits for your first sentence, just like plain “claude”.",
+			"remember": "Remember these choices for <code>{{folder}}</code> — next time, ⌘N then ⌘↵ is enough",
+			"button": "Launch"
+		},
+		"command": "What you would have typed",
+		"back": "Back",
+		"next": "Configure next"
+	},
+	"logView": {
+		"empty": "No output yet.",
+		"noDiff": "No changes to show."
+	},
+	"mcpSettings": {
+		"loading": "reading the repository…",
+		"empty": "This repository declares no MCP server. Agents will only have their account's tools. A repository that wants to share its own writes them in a <code>.mcp.json</code> at its root, committed with the rest — that's the file the cockpit attaches to every agent it launches.",
+		"approved": "Approved: declared by <code>.mcp.json</code> and attached to every agent launched on this repository, worktrees included — as long as the file doesn't change.",
+		"revoke": "Revoke",
+		"changedSinceApproval": "The .mcp.json has changed since you approved it.",
+		"notApproved": "Not approved yet.",
+		"pendingExplanation": "Agents start without these servers: they are commands the repository runs on your machine. Review them before approving.",
+		"approve": "Approve",
+		"unreachable_one": "{{count}} server won't respond under current conditions. The agent will know and say so, rather than pretending the tool exists — but if you rely on it, turn off isolation for this work, or give the server a token it carries itself.",
+		"unreachable_other": "{{count}} servers won't respond under current conditions. The agent will know and say so, rather than pretending the tool exists — but if you rely on it, turn off isolation for this work, or give the server a token it carries itself."
+	},
+	"payloadView": {
+		"yes": "yes",
+		"no": "no",
+		"items_one": "{{count}} item",
+		"items_other": "{{count}} items",
+		"empty": "No usable details.",
+		"raw": "Raw data"
+	},
+	"portsMonitor": {
+		"buttonHint": "What's listening on this worktree — ports, memory, stop",
+		"button": "Monitor",
+		"stopConfirm": {
+			"title": "Stop {{process}} on port {{port}}?",
+			"message": "The process and its children are stopped. Whatever it was serving becomes unreachable until it is restarted.",
+			"confirm": "Stop"
+		},
+		"stopped": "{{process}} stopped (port {{port}}).",
+		"title": "What's listening on {{label}}",
+		"reload": "Reload ports",
+		"empty": {
+			"message": "Nothing is listening on this worktree.",
+			"hint": "Servers started from this folder will show up here, along with the memory they hold."
+		},
+		"memory": "{{mb}} MB",
+		"open": "Open {{url}}",
+		"stop": "Stop this server",
+		"footer": "Only servers started from this worktree are listed. The others — and Docker containers — stay in “Servers & containers”."
+	},
+	"producedFiles": {
+		"count_one": "{{count}} file touched",
+		"count_other": "{{count}} files touched",
+		"reveal": {
+			"title": "Open the worktree in Finder",
+			"label": "The folder"
+		}
+	},
+	"quickMenu": {
+		"search": "Search…",
+		"noMatch": "Nothing by that name.",
+		"extraHint": "{{title}} (⇧Enter)"
+	},
+	"reliabilityPanel": {
+		"title": "State of the loop",
+		"window_one": "over {{count}} day",
+		"window_other": "over {{count}} days",
+		"notGoals": "none of these numbers is a goal",
+		"nothing": "Nothing to report. That is not a pat on the back: it is the absence of a signal, and the absence of a signal needs checking from time to time.",
+		"percent": "{{value}}%",
+		"handbacks": {
+			"title": "What agents hand back",
+			"hint": "A handback reworked by hand is the only feedback that is neither a rating nor an impression.",
+			"delivered": "handed back",
+			"takenBack": "reworked by hand",
+			"rate": "rework rate",
+			"pending": "reworks to read"
+		},
+		"context": {
+			"title": "Does the attached context make a difference",
+			"with": "with context",
+			"without": "without context",
+			"caveat": "This is not an experiment: Cockpit attaches context when there is some, so the two columns do not describe the same work — a branch with a ticket and a review is better framed than a bare branch. A clear gap is a signal; a small gap says nothing.",
+			"notComparable": "Not comparable yet — it takes at least five handbacks on each side. So far: {{briefed}} with context, {{plain}} without.",
+			"side_one": "reworked — {{takenBack}} of {{count}} handback",
+			"side_other": "reworked — {{takenBack}} of {{count}} handbacks"
+		},
+		"turns": {
+			"title": "How many tries it takes",
+			"hint": "An agent you have to restart ten times is an agent that set off without knowing what was expected.",
+			"sessions": "conversations",
+			"median": "follow-ups, typically",
+			"longHaul": "restarted more than ten times",
+			"withError": "ended on an error"
+		},
+		"guardrails": {
+			"title": "What the guardrails are worth",
+			"hint": "A property that has never caught anything reassures without guaranteeing anything.",
+			"properties": "properties",
+			"calibrated": "proven",
+			"decorative": "decorative"
+		},
+		"memory": {
+			"title": "What the notebook keeps",
+			"hint": "A lesson that never goes out with an agent has the wrong scope, or should not have existed.",
+			"lessons": "lessons",
+			"uses": "uses",
+			"idle": "never used",
+			"stale": "dormant"
+		},
+		"deeds": {
+			"titleMixed": "What Cockpit did, and on whose behalf",
+			"titleMine": "What Cockpit did on your behalf",
+			"empty": "Nothing recorded over the period.",
+			"permanence": "Permanence",
+			"failed_one": "{{count}} failed",
+			"failed_other": "{{count}} failed"
+		}
+	},
+	"remoteAccess": {
+		"disableConfirm": {
+			"title": "Turn off mobile access?",
+			"message": "All paired devices are revoked, access keys included. They will have to be paired again."
+		},
+		"disable": "Turn off",
+		"enable": "Turn on",
+		"enabled": "Mobile access turned on.",
+		"disabled": "Mobile access turned off.",
+		"revokeConfirm": {
+			"title": "Revoke {{name}}?",
+			"message": "This device will no longer be able to read or decide anything."
+		},
+		"revoke": "Revoke",
+		"intro": {
+			"title": "Answer an agent's requests from your iPhone, through Tailscale.",
+			"detail": "The server only listens on the loopback interface; <code>tailscale serve</code> is what exposes it to the tailnet, with its certificate. Approving a tool requires Face ID. The phone cannot change an agent's permission mode, run a script, or touch the configuration."
+		},
+		"tailscale": {
+			"offline": "offline — the tailnet provides the address and the certificate"
+		},
+		"funnel": {
+			"on": "on: Cockpit refuses to start, turn it off with `{{command}}`",
+			"off": "off — nothing is published on the Internet"
+		},
+		"setup": {
+			"title": "To do once on this Mac",
+			"detail": "The script sets up the local ntfy server, publishes it on the tailnet next to this page, and prints the topic and token to paste below. Apple's relay only sees a hash of the topic; the content comes from here."
+		},
+		"ntfy": {
+			"server": "ntfy server",
+			"serverHint": "local, never exposed",
+			"topic": "Topic",
+			"topicHint": "secret: whoever knows it can make it ring",
+			"token": "Publish token",
+			"tokenSaved": "saved — empty = unchanged",
+			"tokenRequired": "required",
+			"saved": "saved"
+		},
+		"wake": {
+			"last": "Last wake-up: {{detail}}",
+			"failed": "Last wake-up failed: {{detail}}",
+			"none": "No wake-up attempted since launch."
+		},
+		"relay": {
+			"result": "Relay: {{detail}}",
+			"test": "Test the relay",
+			"saved": "Relay saved.",
+			"save": "Save the relay"
+		},
+		"devices": {
+			"title_one": "Paired devices · {{count}}",
+			"title_other": "Paired devices · {{count}}",
+			"pair": "Pair an iPhone",
+			"pairing": "Scan the QR code to open the page, add it to your home screen, then enter this code — valid for two minutes, single use:",
+			"empty": "No devices.",
+			"seen": "seen {{when}}"
+		},
+		"check": {
+			"ok": "ok",
+			"todo": "needs setup"
+		}
+	},
+	"startMission": {
+		"confirm": {
+			"title": "Start a mission on {{reference}}?",
+			"ticketPrefix": "“{{title}}” — ",
+			"guided": "the lead agent reads the ticket with you. You approve what it understood, then its approach, then its breakdown: nothing starts before that.",
+			"autonomous": "the lead agent reads the ticket, proposes a breakdown, and nothing starts until you approve its plan.",
+			"action": "Start the mission"
+		},
+		"activity": {
+			"title": "Mission from {{reference}}",
+			"firstStep": "Reading the ticket and starting the lead agent…"
+		},
+		"button": {
+			"title": "Open this ticket's mission and start its lead agent",
+			"label": "Start as a mission"
+		}
+	},
+	"teamWorkGrid": {
+		"view": {
+			"all": {
+				"label": "Everything",
+				"hint": "Cycle tickets and open PRs"
+			},
+			"blocked": {
+				"label": "Blocked",
+				"hint": "Failing CI, changes requested, stacked PRs"
+			},
+			"review": {
+				"label": "Awaiting review",
+				"hint": "Neither approved nor draft: the ball is in the reviewers' court"
+			},
+			"ready": {
+				"label": "Ready to merge",
+				"hint": "Approved, green CI, on a base branch"
+			}
+		},
+		"prState": {
+			"ciFailing": "CI failing",
+			"changesRequested": "changes requested",
+			"stacked": "stacked on {{base}}",
+			"ready": "ready to merge",
+			"ciPending": "CI running",
+			"draft": "draft",
+			"awaitingReview": "awaiting review"
+		},
+		"noWorktree": "No local worktree for this branch.",
+		"wholeTeam": "The whole team",
+		"everyone": "Everyone",
+		"memberTitle_one": "{{name}} — {{prs}} PR, {{count}} active ticket",
+		"memberTitle_other": "{{name}} — {{prs}} PR, {{count}} active tickets",
+		"cycleTitle": "Limit to tickets in the current cycle",
+		"cycle": "Cycle",
+		"emptyFor": "Nothing for {{name}} in “{{view}}”",
+		"empty": "Nothing in “{{view}}”",
+		"seeAll": "See everything",
+		"days_one": "{{count}} d",
+		"days_other": "{{count}} d",
+		"openAgent": "Open an agent on this branch",
+		"openWorktree": "Open the worktree",
+		"activeTickets": "active tickets",
+		"wip_one": "{{count}} WIP",
+		"wip_other": "{{count}} WIP",
+		"openPrs": "open PRs",
+		"prs_one": "{{count}} PR",
+		"prs_other": "{{count}} PRs",
+		"toReviewTitle": "Other people's PRs to review",
+		"toReview_one": "{{count}} to review",
+		"toReview_other": "{{count}} to review",
+		"mergedTitle": "merged since the last daily",
+		"merged_one": "{{count}} shipped",
+		"merged_other": "{{count}} shipped",
+		"now": "Right now",
+		"next": "Up next",
+		"nothingNext": "Nothing ready to start next.",
+		"pullRequests": "Pull requests · {{count}}",
+		"noOpenPr": "No open PRs.",
+		"reviewInbox": "Needs to review for others",
+		"onlyMember": "Show only {{name}}",
+		"blocked_one": "{{count}} blocked",
+		"blocked_other": "{{count}} blocked",
+		"nothingInProgress": "Nothing in progress."
+	},
+	"toolCall": {
+		"tool": "tool",
+		"verb": {
+			"read": "Read",
+			"wrote": "Wrote",
+			"edited": "Edited",
+			"searched": "Searched",
+			"listed": "Listed",
+			"subagent": "Subagent",
+			"fetched": "Fetched",
+			"webSearched": "Searched the web",
+			"todos": "Task list",
+			"steps": "Steps"
+		},
+		"fromLine": "from line {{line}}",
+		"lines_one": "{{count}} line",
+		"lines_other": "{{count}} lines",
+		"stepsDone": "{{done}} / {{total}} done",
+		"image": "image",
+		"stepCount_one": "{{count}} step",
+		"stepCount_other": "{{count}} steps",
+		"seeSubagent": "See what this subagent is doing",
+		"seeOutput": "See what the tool returned",
+		"failed": "failed",
+		"clickToOpen": "Click to open",
+		"shrink": "Shrink",
+		"enlarge": "Enlarge"
+	},
+	"usagePanel": {
+		"limits": {
+			"unavailable": "Limits unavailable — {{error}}",
+			"loading": "Reading limits…",
+			"none": "No limits reported.",
+			"title": "Subscription",
+			"refresh": "Ask the CLI again",
+			"remaining": "{{percent}}% left",
+			"usedResets": "{{percent}}% used · resets {{resetsAt}}",
+			"used": "{{percent}}% used"
+		},
+		"stat_one": "{{output}} output · {{count}} reply",
+		"stat_other": "{{output}} output · {{count}} replies",
+		"title": "Claude usage",
+		"source": "from the logs in {{path}}",
+		"periods": {
+			"last5h": "Last 5 hours",
+			"today": "Today",
+			"last7Days": "7 days",
+			"last30Days": "30 days"
+		},
+		"volumesNote": "Volumes measured in tokens, not to be confused with the limits above: the total adds up input, output and cache writes; cache reads are counted separately because they are not billed like generated text.",
+		"byDay": {
+			"title": "By day (last 30 days)",
+			"empty": "No activity."
+		},
+		"byWorktree": {
+			"title": "By worktree",
+			"empty": "No folder identified."
+		},
+		"byMission": {
+			"title": "By mission",
+			"empty": "No mission measured."
+		},
+		"byModel": {
+			"title": "By model",
+			"empty": "No model identified."
+		},
+		"allTime_one": "All time: {{tokens}} tokens over {{count}} reply · cache read {{cacheRead}}.",
+		"allTime_other": "All time: {{tokens}} tokens over {{count}} replies · cache read {{cacheRead}}."
+	}
+}

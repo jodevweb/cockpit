@@ -144,14 +144,24 @@ fn state_phase(workflow: &crate::config::WorkflowConfig, state: &str) -> &'stati
 	}
 }
 
-fn priority_label(priority: i64) -> &'static str {
+fn priority_label(priority: i64) -> String {
 	match priority {
-		1 => "Urgent",
-		2 => "Haute",
-		3 => "Moyenne",
-		4 => "Basse",
-		_ => "—",
+		1 => crate::i18n::t("team.priority.urgent"),
+		2 => crate::i18n::t("team.priority.high"),
+		3 => crate::i18n::t("team.priority.medium"),
+		4 => crate::i18n::t("team.priority.low"),
+		_ => "—".into(),
 	}
+}
+
+/// Un texte de l'écran Équipe, ses `{{nom}}` remplacés.
+fn tr(key: &str, args: &[(&str, &dyn std::fmt::Display)]) -> String {
+	crate::i18n::tf(&format!("team.{key}"), args)
+}
+
+/// Un décompte de l'écran Équipe (`team.<clé>_one` / `_other`…).
+fn count(key: &str, value: usize) -> String {
+	crate::brief::counted(&format!("team.{key}"), value)
 }
 
 // ──────────────────────────────── Équipe ────────────────────────────────
@@ -524,10 +534,12 @@ async fn linear_query(token: &str, query: &str, variables: Value) -> Result<Valu
 		.and_then(|v| v.as_array())
 		.and_then(|errors| errors.first())
 	{
-		return Err(CockpitError::msg(format!(
-			"Linear : {}",
-			first.get("message").and_then(|m| m.as_str()).unwrap_or("erreur")
-		)));
+		let message = first
+			.get("message")
+			.and_then(|m| m.as_str())
+			.map(str::to_string)
+			.unwrap_or_else(|| crate::i18n::t("team.errors.unknown"));
+		return Err(CockpitError::msg(tr("errors.linear", &[("message", &message)])));
 	}
 	Ok(body)
 }
@@ -760,10 +772,12 @@ pub(crate) async fn github_graphql(token: &str, query: &str, variables: Value) -
 		.and_then(|v| v.as_array())
 		.and_then(|errors| errors.first())
 	{
-		return Err(CockpitError::msg(format!(
-			"GitHub : {}",
-			first.get("message").and_then(|m| m.as_str()).unwrap_or("erreur")
-		)));
+		let message = first
+			.get("message")
+			.and_then(|m| m.as_str())
+			.map(str::to_string)
+			.unwrap_or_else(|| crate::i18n::t("team.errors.unknown"));
+		return Err(CockpitError::msg(tr("errors.github", &[("message", &message)])));
 	}
 	Ok(body)
 }
@@ -1033,7 +1047,7 @@ fn phrase_of(catalog: &[crate::config::ThemeConfig], label: &str) -> String {
 				theme.phrase.clone()
 			}
 		})
-		.unwrap_or_else(|| "ses sujets".to_string())
+		.unwrap_or_else(|| crate::i18n::t("team.narrative.theirTopics"))
 }
 
 fn join_phrases(catalog: &[crate::config::ThemeConfig], themes: &[ThemeCount]) -> String {
@@ -1041,16 +1055,14 @@ fn join_phrases(catalog: &[crate::config::ThemeConfig], themes: &[ThemeCount]) -
 	match phrases.len() {
 		0 => String::new(),
 		1 => phrases[0].to_string(),
-		_ => format!(
-			"{} et {}",
-			phrases[..phrases.len() - 1].join(", "),
-			phrases[phrases.len() - 1]
+		_ => tr(
+			"narrative.and",
+			&[
+				("list", &phrases[..phrases.len() - 1].join(", ")),
+				("last", &phrases[phrases.len() - 1]),
+			],
 		),
 	}
-}
-
-fn plural(count: usize, singular: &str, plural_form: &str) -> String {
-	format!("{count} {}", if count > 1 { plural_form } else { singular })
 }
 
 struct NarrativeInput<'a> {
@@ -1076,13 +1088,13 @@ fn build_narrative(
 ) -> Narrative {
 	let mut load = Vec::new();
 	if input.active_count > 0 {
-		load.push(plural(input.active_count, "ticket actif", "tickets actifs"));
+		load.push(count("narrative.activeTickets", input.active_count));
 	}
 	if input.review_count > 0 {
-		load.push(plural(input.review_count, "ticket en review", "tickets en review"));
+		load.push(count("narrative.reviewTickets", input.review_count));
 	}
 	if input.open_pr_count > 0 {
-		load.push(plural(input.open_pr_count, "PR ouverte", "PR ouvertes"));
+		load.push(count("narrative.openPrs", input.open_pr_count));
 	}
 	let load_text = if load.is_empty() {
 		String::new()
@@ -1094,12 +1106,12 @@ fn build_narrative(
 	let current_sentence = if top.is_empty() {
 		if input.active_count == 0 && input.open_pr_count == 0 {
 			if input.is_dev {
-				format!("{} n'a rien d'actif ni de PR ouverte en ce moment.", input.name)
+				tr("narrative.nothingActiveDev", &[("name", &input.name)])
 			} else {
-				format!("{} n'a pas de sujet actif suivi ici.", input.name)
+				tr("narrative.nothingActive", &[("name", &input.name)])
 			}
 		} else {
-			format!("{} avance sur des sujets variés{load_text}.", input.name)
+			tr("narrative.variedTopics", &[("name", &input.name), ("load", &load_text)])
 		}
 	} else {
 		let dominant = &top[0];
@@ -1115,66 +1127,83 @@ fn build_narrative(
 			let tail = if others.is_empty() {
 				String::new()
 			} else {
-				format!(", avec aussi {}", join_phrases(catalog, others))
+				tr("narrative.alsoOn", &[("themes", &join_phrases(catalog, others))])
 			};
-			format!(
-				"{} est surtout sur {}{tail}{load_text}.",
-				input.name,
-				phrase_of(catalog, &dominant.label)
+			tr(
+				"narrative.mostlyOn",
+				&[
+					("name", &input.name),
+					("theme", &phrase_of(catalog, &dominant.label)),
+					("tail", &tail),
+					("load", &load_text),
+				],
 			)
 		} else {
-			format!(
-				"{} travaille sur {}{load_text}.",
-				input.name,
-				join_phrases(catalog, &top)
+			tr(
+				"narrative.workingOn",
+				&[
+					("name", &input.name),
+					("themes", &join_phrases(catalog, &top)),
+					("load", &load_text),
+				],
 			)
 		}
 	};
 
 	let shipped_sentence = if input.shipped_count == 0 && input.opened_count == 0 {
-		"Rien de mergé depuis le dernier daily.".to_string()
+		crate::i18n::t("team.narrative.nothingMerged")
 	} else if input.shipped_count == 0 {
-		format!(
-			"{} depuis le dernier daily, rien de mergé encore.",
-			plural(input.opened_count, "PR ouverte", "PR ouvertes")
+		tr(
+			"narrative.openedNothingMerged",
+			&[("opened", &count("narrative.openPrs", input.opened_count))],
 		)
 	} else {
 		let themes = if shipped.is_empty() {
 			String::new()
 		} else {
-			format!(" sur {}", join_phrases(catalog, &shipped.iter().take(2).cloned().collect::<Vec<_>>()))
+			tr(
+				"narrative.shippedOn",
+				&[(
+					"themes",
+					&join_phrases(catalog, &shipped.iter().take(2).cloned().collect::<Vec<_>>()),
+				)],
+			)
 		};
 		let opened = if input.opened_count > 0 {
-			format!(
-				", et {}",
-				plural(input.opened_count, "nouvelle PR ouverte", "nouvelles PR ouvertes")
+			tr(
+				"narrative.andOpened",
+				&[("opened", &count("narrative.newOpenPrs", input.opened_count))],
 			)
 		} else {
 			String::new()
 		};
-		format!(
-			"A livré {}{themes} depuis le dernier daily{opened}.",
-			plural(input.shipped_count, "PR", "PR")
+		tr(
+			"narrative.shipped",
+			&[
+				("prs", &count("narrative.prs", input.shipped_count)),
+				("themes", &themes),
+				("opened", &opened),
+			],
 		)
 	};
 
 	let mut friction = Vec::new();
 	if input.red_flags > 0 {
-		friction.push(plural(input.red_flags, "point bloquant", "points bloquants"));
+		friction.push(count("narrative.blockingPoints", input.red_flags));
 	}
 	if input.orange_flags > 0 {
-		friction.push(format!("{} à challenger", input.orange_flags));
+		friction.push(tr("narrative.toChallenge", &[("count", &input.orange_flags)]));
 	}
 	if input.review_pending > 0 {
-		friction.push(format!(
-			"{} à reviewer pour les autres",
-			plural(input.review_pending, "PR", "PR")
+		friction.push(tr(
+			"narrative.toReview",
+			&[("prs", &count("narrative.prs", input.review_pending))],
 		));
 	}
 	let friction_sentence = if friction.is_empty() {
-		"Rien qui coince de son côté.".to_string()
+		crate::i18n::t("team.narrative.nothingStuck")
 	} else {
-		format!("À surveiller : {}.", friction.join(", "))
+		tr("narrative.toWatch", &[("items", &friction.join(", "))])
 	};
 
 	Narrative {
@@ -1217,9 +1246,9 @@ fn ticket_item(issue: &LinearIssue, now: DateTime<Utc>) -> FlagItem {
 		label: format!("{} {}", issue.identifier, truncate(&issue.title, 56)),
 		url: issue.url.clone(),
 		meta: format!(
-			"{} · {}j",
+			"{} · {}",
 			issue.state_name,
-			business_days_between(&issue.updated_at, now)
+			tr("days", &[("count", &business_days_between(&issue.updated_at, now))])
 		),
 	}
 }
@@ -1233,7 +1262,10 @@ fn pr_item(pr: &PullRequest, now: DateTime<Utc>) -> FlagItem {
 	FlagItem {
 		label: format!("#{} {}", pr.number, truncate(&pr.title, 56)),
 		url: pr.url.clone(),
-		meta: format!("{}j{ci}", business_days_between(&pr.created_at, now)),
+		meta: format!(
+			"{}{ci}",
+			tr("days", &[("count", &business_days_between(&pr.created_at, now))])
+		),
 	}
 }
 
@@ -1306,12 +1338,11 @@ fn compute_flags(
 				member: name.to_string(),
 				category: "blocked",
 				question: if ids.len() == 1 {
-					format!("{} marqué Blocked — qu'est-ce qui débloque ?", ids[0])
+					tr("flags.blockedOne", &[("id", &ids[0])])
 				} else {
-					format!(
-						"{} tickets marqués Blocked ({}) — qu'est-ce qui débloque ?",
-						ids.len(),
-						sample(&ids, 3)
+					tr(
+						"flags.blockedMany",
+						&[("count", &ids.len()), ("ids", &sample(&ids, 3))],
 					)
 				},
 				ticket_id: Some(ctx.blocked[0].identifier.clone()),
@@ -1333,9 +1364,9 @@ fn compute_flags(
 					"red",
 					name,
 					"pr-stacked",
-					format!(
-						"PR #{} basée sur `{}` (pas dev) — merger la base d'abord ?",
-						pr.number, pr.base_ref
+					tr(
+						"flags.stacked",
+						&[("number", &pr.number), ("base", &pr.base_ref)],
 					),
 					pr,
 				));
@@ -1344,7 +1375,7 @@ fn compute_flags(
 					"red",
 					name,
 					"pr-ci-failing",
-					format!("PR #{} en échec CI — à corriger avant review/merge.", pr.number),
+					tr("flags.ciFailing", &[("number", &pr.number)]),
 					pr,
 				));
 			} else if pr.review_decision == "APPROVED" {
@@ -1352,10 +1383,7 @@ fn compute_flags(
 					"red",
 					name,
 					"pr-approved",
-					format!(
-						"PR #{} approuvée mais non mergée — qu'est-ce qui bloque le merge ?",
-						pr.number
-					),
+					tr("flags.approved", &[("number", &pr.number)]),
 					pr,
 				));
 			} else if pr.review_decision == "CHANGES_REQUESTED" {
@@ -1363,7 +1391,7 @@ fn compute_flags(
 					"orange",
 					name,
 					"pr-changes-requested",
-					format!("PR #{} : changements demandés — à traiter côté auteur.", pr.number),
+					tr("flags.changesRequested", &[("number", &pr.number)]),
 					pr,
 				));
 			} else if pr.is_draft {
@@ -1384,16 +1412,19 @@ fn compute_flags(
 				member: name.to_string(),
 				category: "pr-review-stale",
 				question: if review_stale.len() == 1 {
-					format!(
-						"PR #{} en attente de review depuis {oldest_age}j — créneau de review ?",
-						oldest.number
+					tr(
+						"flags.reviewStaleOne",
+						&[("number", &oldest.number), ("age", &oldest_age)],
 					)
 				} else {
-					format!(
-						"{} PR en attente de review depuis >{}j ({}, plus ancienne {oldest_age}j) — review à planifier ?",
-						review_stale.len(),
-						T.pr_review_stale_days,
-						sample(&numbers, 3)
+					tr(
+						"flags.reviewStaleMany",
+						&[
+							("count", &review_stale.len()),
+							("days", &T.pr_review_stale_days),
+							("numbers", &sample(&numbers, 3)),
+							("age", &oldest_age),
+						],
 					)
 				},
 				ticket_id: None,
@@ -1411,11 +1442,13 @@ fn compute_flags(
 				severity: "orange",
 				member: name.to_string(),
 				category: "pr-draft",
-				question: format!(
-					"{} PR en draft depuis >{}j ({}) — encore d'actualité ?",
-					draft_stale.len(),
-					T.pr_draft_stale_days,
-					sample(&numbers, 3)
+				question: tr(
+					"flags.draftStale",
+					&[
+						("count", &draft_stale.len()),
+						("days", &T.pr_draft_stale_days),
+						("numbers", &sample(&numbers, 3)),
+					],
 				),
 				ticket_id: None,
 				ticket_url: None,
@@ -1440,16 +1473,18 @@ fn compute_flags(
 				member: name.to_string(),
 				category: "inprogress-nopr",
 				question: if ids.len() == 1 {
-					format!(
-						"{} est In Progress sans PR depuis >{}j — où ça en est ?",
-						ids[0], T.in_progress_no_pr_stale_days
+					tr(
+						"flags.inProgressNoPrOne",
+						&[("id", &ids[0]), ("days", &T.in_progress_no_pr_stale_days)],
 					)
 				} else {
-					format!(
-						"{} tickets In Progress sans PR depuis >{}j ({}) — où ça en est ?",
-						ids.len(),
-						T.in_progress_no_pr_stale_days,
-						sample(&ids, 3)
+					tr(
+						"flags.inProgressNoPrMany",
+						&[
+							("count", &ids.len()),
+							("days", &T.in_progress_no_pr_stale_days),
+							("ids", &sample(&ids, 3)),
+						],
 					)
 				},
 				ticket_id: Some(stale_no_pr[0].identifier.clone()),
@@ -1471,11 +1506,13 @@ fn compute_flags(
 				severity: "orange",
 				member: name.to_string(),
 				category: "review-stale",
-				question: format!(
-					"{} ticket(s) en review depuis >{}j ({}) — en attente de qui ?",
-					ids.len(),
-					T.review_stale_days,
-					sample(&ids, 3)
+				question: tr(
+					"flags.reviewStale",
+					&[
+						("count", &ids.len()),
+						("days", &T.review_stale_days),
+						("ids", &sample(&ids, 3)),
+					],
 				),
 				ticket_id: Some(stale_review[0].identifier.clone()),
 				ticket_url: Some(stale_review[0].url.clone()),
@@ -1490,10 +1527,7 @@ fn compute_flags(
 				severity: "orange",
 				member: name.to_string(),
 				category: "wip",
-				question: format!(
-					"{} tickets In Progress en parallèle — à prioriser / recentrer ?",
-					ctx.active.len()
-				),
+				question: tr("flags.wip", &[("count", &ctx.active.len())]),
 				ticket_id: None,
 				ticket_url: None,
 				pr_number: None,
@@ -1507,9 +1541,14 @@ fn compute_flags(
 				severity: "orange",
 				member: name.to_string(),
 				category: "assignee-mismatch",
-				question: format!(
-					"{issue_id} assigné à {name} mais codé par @{} (PR #{}) — réassigner ?",
-					pr.author, pr.number
+				question: tr(
+					"flags.assigneeMismatch",
+					&[
+						("issue", issue_id),
+						("name", &name),
+						("author", &pr.author),
+						("number", &pr.number),
+					],
 				),
 				ticket_id: Some(issue_id.clone()),
 				ticket_url: None,
@@ -1533,10 +1572,9 @@ fn compute_flags(
 					member: name.to_string(),
 					category: "idle",
 					question: if active_or_review == 0 {
-						"aucune PR ouverte ni ticket actif — sur quoi es-tu ?".to_string()
+						crate::i18n::t("team.flags.idleNothing")
 					} else {
-						"aucune PR ouverte et tickets actifs sans activité récente — dispo ? bloqué ?"
-							.to_string()
+						crate::i18n::t("team.flags.idleStale")
 					},
 					ticket_id: None,
 					ticket_url: None,
@@ -1663,11 +1701,7 @@ pub async fn build_board(config: &Config, cycle_only: bool) -> Result<TeamBoard>
 	// Une équipe sans membre n'a pas de daily à raconter, et le dire vaut mieux
 	// qu'un tableau vide dont on cherche la cause dans un fichier.
 	if members.is_empty() {
-		return Err(CockpitError::msg(
-			"Aucun membre déclaré : ajoute l'équipe dans Réglages → Équipe. Chacun a besoin \
-			 de son identifiant dans le suivi de tâches pour qu'on lui rattache ses tickets, \
-			 et de son login GitHub pour ses pull requests.",
-		));
+		return Err(CockpitError::msg(crate::i18n::t("team.errors.noMembers")));
 	}
 
 	// Le daily passe par le fournisseur configuré, comme le reste du cockpit. Il
@@ -1703,7 +1737,7 @@ pub async fn build_board(config: &Config, cycle_only: bool) -> Result<TeamBoard>
 				(
 					Vec::new(),
 					Vec::new(),
-					Some("Renseigne `github.repo` (ex. acme/monorepo) dans Réglages.".to_string()),
+					Some(crate::i18n::t("team.errors.githubRepoMissing")),
 				)
 			} else {
 				match fetch_open_prs(&token, &owner, &name, &config.linear.team_key).await {
@@ -2192,11 +2226,11 @@ mod narrative_tests {
 			Vec::new(),
 		);
 		assert!(
-			narrative.text.contains("travaille sur"),
+			narrative.text.contains("is working on"),
 			"2 sur 5 ne fait pas un focus : {}",
 			narrative.text
 		);
-		assert!(!narrative.text.contains("surtout sur"));
+		assert!(!narrative.text.contains("is mostly on"));
 	}
 
 	/// Avec une vraie majorité, l'affirmation est légitime.
@@ -2224,7 +2258,7 @@ mod narrative_tests {
 			Vec::new(),
 		);
 		assert!(
-			narrative.text.contains("surtout sur la facturation"),
+			narrative.text.contains("is mostly on la facturation"),
 			"{}",
 			narrative.text
 		);

@@ -7,6 +7,7 @@ import {
 	useState,
 	type ReactNode,
 } from "react";
+import { useTranslation } from "react-i18next";
 import { Button } from "@/components/ui";
 
 /**
@@ -50,6 +51,7 @@ interface ConfirmStore {
 const Context = createContext<ConfirmStore | null>(null);
 
 export function ConfirmProvider({ children }: { children: ReactNode }) {
+	const { t } = useTranslation("components3");
 	const [request, setRequest] = useState<Request | null>(null);
 	const [draft, setDraft] = useState("");
 	const field = useRef<HTMLInputElement>(null);
@@ -61,12 +63,12 @@ export function ConfirmProvider({ children }: { children: ReactNode }) {
 				setRequest({
 					title: options.title,
 					message: options.message,
-					confirmLabel: options.confirmLabel ?? "Confirmer",
+					confirmLabel: options.confirmLabel ?? t("confirm.confirm"),
 					danger: options.danger ?? false,
 					resolve: (value) => resolve(value === true),
 				});
 			}),
-		[],
+		[t],
 	);
 
 	const promptText = useCallback<ConfirmStore["promptText"]>(
@@ -76,7 +78,7 @@ export function ConfirmProvider({ children }: { children: ReactNode }) {
 				setRequest({
 					title: options.title,
 					message: options.message,
-					confirmLabel: options.confirmLabel ?? "Valider",
+					confirmLabel: options.confirmLabel ?? t("confirm.validate"),
 					danger: false,
 					input: {
 						placeholder: options.placeholder ?? "",
@@ -85,7 +87,7 @@ export function ConfirmProvider({ children }: { children: ReactNode }) {
 					resolve: (value) => resolve(typeof value === "string" ? value : null),
 				});
 			}),
-		[],
+		[t],
 	);
 
 	// Le champ n'existe qu'une fois la modale montée.
@@ -165,7 +167,7 @@ export function ConfirmProvider({ children }: { children: ReactNode }) {
 						) : null}
 
 						<div className="mt-4 flex justify-end gap-2">
-							<Button onClick={() => close(request.input ? null : false)}>Annuler</Button>
+							<Button onClick={() => close(request.input ? null : false)}>{t("confirm.cancel")}</Button>
 							<Button
 								variant={request.danger ? "danger" : "solid"}
 								onClick={accept}

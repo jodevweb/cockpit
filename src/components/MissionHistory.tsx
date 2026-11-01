@@ -1,5 +1,7 @@
 import { ChevronDown, ChevronRight } from "lucide-react";
 import { useState } from "react";
+import { useTranslation } from "react-i18next";
+import { t as translate } from "@/i18n";
 import { Dot, Spinner } from "@/components/ui";
 import { api } from "@/lib/ipc";
 import type { Execution, Outcome } from "@/lib/types";
@@ -18,6 +20,7 @@ import { useAsync } from "@/lib/useAsync";
  * s'est-il passé », pas ce qu'on lit à chaque coup d'œil.
  */
 export function MissionHistory({ missionId }: { missionId: string }) {
+	const { t } = useTranslation("components2");
 	const [open, setOpen] = useState(false);
 	const runs = useAsync(
 		() => (open ? api.executions.forMission(missionId) : Promise.resolve([])),
@@ -33,21 +36,20 @@ export function MissionHistory({ missionId }: { missionId: string }) {
 				className="focus-ring flex items-center gap-1.5 self-start rounded-md py-1 text-[11px] text-ink-faint hover:text-ink-muted"
 			>
 				{open ? <ChevronDown size={11} /> : <ChevronRight size={11} />}
-				Ce qui s'est passé
+				{t("missionHistory.whatHappened")}
 				{open && runs.data?.length ? (
-					<span className="font-mono text-[10px]">{runs.data.length} agents</span>
+					<span className="font-mono text-[10px]">{t("missionHistory.agents", { count: runs.data.length })}</span>
 				) : null}
 			</button>
 
 			{open ? (
 				runs.loading ? (
 					<div className="flex items-center gap-2 px-2 py-1 text-[11px] text-ink-faint">
-						<Spinner /> relecture…
+						<Spinner /> {t("missionHistory.loading")}
 					</div>
 				) : !runs.data?.length ? (
 					<p className="px-2 py-1 text-[11px] leading-relaxed text-ink-faint">
-						Aucun agent relevé pour cette mission. Le cockpit ne tient ce carnet que
-						depuis la version 0.54 : ce qui a tourné avant n'y figure pas.
+						{t("missionHistory.empty")}
 					</p>
 				) : (
 					<div className="flex flex-col gap-0.5 pl-1">
@@ -62,27 +64,25 @@ export function MissionHistory({ missionId }: { missionId: string }) {
 }
 
 /** Ce qu'une issue veut dire, en clair. Le nom de la variante ne sort jamais. */
-const ISSUES: Record<Outcome, { label: string; tone: "success" | "warning" | "neutral" }> = {
-	running: { label: "en cours", tone: "success" },
-	answered: { label: "a rendu", tone: "success" },
-	failed: { label: "en erreur", tone: "warning" },
-	lostAtLaunch: { label: "perdu au lancement", tone: "warning" },
-	stopped: { label: "arrêté", tone: "neutral" },
-	orphaned: { label: "cockpit fermé", tone: "neutral" },
+const ISSUES: Record<Outcome, { tone: "success" | "warning" | "neutral" }> = {
+	running: { tone: "success" },
+	answered: { tone: "success" },
+	failed: { tone: "warning" },
+	lostAtLaunch: { tone: "warning" },
+	stopped: { tone: "neutral" },
+	orphaned: { tone: "neutral" },
 };
 
 /** Qui a demandé ce lancement. Le distinguer est tout l'intérêt de l'avoir noté. */
-const ACTEURS: Record<string, string> = {
-	me: "toi",
-	master: "le maître",
-	cockpit: "le cockpit",
-	permanence: "la Permanence",
-};
+const ACTEURS = new Set(["me", "master", "cockpit", "permanence"]);
 
 export function HistoryLine({ run }: { run: Execution }) {
-	const issue = ISSUES[run.outcome] ?? { label: run.outcome, tone: "neutral" as const };
+	const { t } = useTranslation("components2");
+	const issue = ISSUES[run.outcome]
+		? { label: t(`missionHistory.outcome.${run.outcome}`), tone: ISSUES[run.outcome].tone }
+		: { label: run.outcome, tone: "neutral" as const };
 	const heure = run.startedAt.slice(11, 16);
-	const qui = ACTEURS[run.origin.actor] ?? run.origin.actor;
+	const qui = ACTEURS.has(run.origin.actor) ? t(`missionHistory.actor.${run.origin.actor}`) : run.origin.actor;
 	const role = run.origin.role || "agent";
 
 	return (
@@ -92,11 +92,11 @@ export function HistoryLine({ run }: { run: Execution }) {
 				<span className="shrink-0 text-[11px] font-medium text-ink">{role}</span>
 				{run.origin.attempt > 0 ? (
 					<span className="shrink-0 text-[10px] text-warning">
-						reprise {run.origin.attempt}
+						{t("missionHistory.retry", { attempt: run.origin.attempt })}
 					</span>
 				) : null}
 				<span className="min-w-0 flex-1 truncate font-mono text-[10px] text-ink-faint">
-					{run.model || run.engineLabel} · lancé par {qui}
+					{t("missionHistory.launchedBy", { model: run.model || run.engineLabel, who: qui })}
 				</span>
 				<Spend run={run} />
 				<span className="flex shrink-0 items-center gap-1 text-[10px] text-ink-muted">
@@ -126,12 +126,13 @@ export function HistoryLine({ run }: { run: Execution }) {
  * tours muets se disent.
  */
 export function Spend({ run }: { run: Execution }) {
+	const { t } = useTranslation("components2");
 	const { reportedUsd, unknownTurns } = run.tally.cost;
 	if (reportedUsd > 0) {
 		return (
 			<span
 				className="shrink-0 font-mono text-[10px] text-ink-muted"
-				title={`Valorisation annoncée par le moteur — pas une dépense.\n${run.tally.inputTokens} jetons en entrée, ${run.tally.outputTokens} en sortie`}
+				title={t("missionHistory.reportedHint", { input: run.tally.inputTokens, output: run.tally.outputTokens })}
 			>
 				{reportedUsd.toFixed(2)} $
 			</span>
@@ -141,9 +142,9 @@ export function Spend({ run }: { run: Execution }) {
 		return (
 			<span
 				className="shrink-0 font-mono text-[10px] text-ink-faint"
-				title={`${run.engineLabel} n'annonce pas ce que coûtent ses tours. Ce n'est pas un coût nul : c'est un chiffre qu'on n'a pas.`}
+				title={t("missionHistory.unknownHint", { engine: run.engineLabel })}
 			>
-				coût non dit
+				{t("missionHistory.unknownCost")}
 			</span>
 		);
 	}
@@ -165,12 +166,12 @@ export function totalSpend(runs: Execution[]): { label: string; title: string } 
 		.reduce((sum, run) => sum + run.tally.cost.reportedUsd, 0);
 
 	if (annonce === 0 && muets === 0) return null;
-	const label = annonce > 0 ? `${annonce.toFixed(2)} $` : "coût non dit";
+	const label = annonce > 0 ? `${annonce.toFixed(2)} $` : translate("components2:missionHistory.unknownCost");
 	const details = [
-		`${runs.length} agent${runs.length > 1 ? "s" : ""}`,
-		annonce > 0 ? "valorisation annoncée par les moteurs, jamais une dépense" : null,
-		perdu > 0 ? `dont ${perdu.toFixed(2)} $ sur des agents qui n'ont rien rendu` : null,
-		muets > 0 ? `${muets} tour${muets > 1 ? "s" : ""} dont le coût n'est pas annoncé` : null,
+		translate("components2:missionHistory.agents", { count: runs.length }),
+		annonce > 0 ? translate("components2:missionHistory.totalReported") : null,
+		perdu > 0 ? translate("components2:missionHistory.totalLost", { amount: perdu.toFixed(2) }) : null,
+		muets > 0 ? translate("components2:missionHistory.totalUnknown", { count: muets }) : null,
 	].filter(Boolean);
 	return { label, title: details.join("\n") };
 }

@@ -6,6 +6,7 @@ import { api } from "@/lib/ipc";
 import type { ListeningPort } from "@/lib/types";
 import { useAsync } from "@/lib/useAsync";
 import { useCockpit } from "@/app/store";
+import { useTranslation } from "react-i18next";
 
 /**
  * Un port appartient-il à ce workspace ?
@@ -29,6 +30,7 @@ function belongsTo(port: ListeningPort, cwd: string): boolean {
  * ce qui écoute ici, ouvrable d'un clic, arrêtable du même endroit.
  */
 export function PortsMonitor({ cwd, label }: { cwd: string; label: string }) {
+	const { t } = useTranslation("components1");
 	const [open, setOpen] = useState(false);
 
 	return (
@@ -38,9 +40,9 @@ export function PortsMonitor({ cwd, label }: { cwd: string; label: string }) {
 				icon={Activity}
 				active={open}
 				onClick={() => setOpen(true)}
-				title="Ce qui écoute sur ce worktree — ports, mémoire, arrêt"
+				title={t("portsMonitor.buttonHint")}
 			>
-				Moniteur
+				{t("portsMonitor.button")}
 			</Button>
 			{open ? (
 				<PortsDialog cwd={cwd} label={label} onClose={() => setOpen(false)} />
@@ -58,6 +60,7 @@ function PortsDialog({
 	label: string;
 	onClose: () => void;
 }) {
+	const { t } = useTranslation("components1");
 	const { notify } = useCockpit();
 	const { confirm } = useConfirm();
 	const [stopping, setStopping] = useState<number | null>(null);
@@ -73,17 +76,16 @@ function PortsDialog({
 	const stop = useCallback(
 		async (port: ListeningPort) => {
 			const ok = await confirm({
-				title: `Arrêter ${port.process} sur le port ${port.port} ?`,
-				message:
-					"Le processus et sa descendance sont arrêtés. Ce qu'il servait devient injoignable jusqu'à ce qu'on le relance.",
-				confirmLabel: "Arrêter",
+				title: t("portsMonitor.stopConfirm.title", { process: port.process, port: port.port }),
+				message: t("portsMonitor.stopConfirm.message"),
+				confirmLabel: t("portsMonitor.stopConfirm.confirm"),
 				danger: true,
 			});
 			if (!ok) return;
 			setStopping(port.pid);
 			try {
 				await api.system.stopProcess(port.pid);
-				notify(`${port.process} arrêté (port ${port.port}).`);
+				notify(t("portsMonitor.stopped", { process: port.process, port: port.port }));
 				ports.reload();
 			} catch (error) {
 				notify(String(error));
@@ -91,7 +93,7 @@ function PortsDialog({
 				setStopping(null);
 			}
 		},
-		[confirm, notify, ports],
+		[confirm, notify, ports, t],
 	);
 
 	return (
@@ -101,7 +103,7 @@ function PortsDialog({
 					<Activity size={13} className="shrink-0 text-accent-soft" />
 					<div className="min-w-0 flex-1">
 						<h2 className="truncate text-[13px] font-semibold text-ink">
-							Ce qui écoute sur {label}
+							{t("portsMonitor.title", { label })}
 						</h2>
 						<p className="truncate font-mono text-[10px] text-ink-faint">{cwd}</p>
 					</div>
@@ -110,7 +112,7 @@ function PortsDialog({
 						icon={RefreshCw}
 						loading={ports.loading}
 						onClick={() => ports.reload()}
-						title="Relire les ports"
+						title={t("portsMonitor.reload")}
 					/>
 					<Button size="sm" icon={X} onClick={onClose} />
 				</header>
@@ -125,8 +127,8 @@ function PortsDialog({
 					) : mine.length === 0 ? (
 						<Empty
 							icon={Activity}
-							message="Rien n'écoute sur ce worktree."
-							hint="Les serveurs lancés depuis ce dossier apparaîtront ici, avec ce qu'ils retiennent en mémoire."
+							message={t("portsMonitor.empty.message")}
+							hint={t("portsMonitor.empty.hint")}
 						/>
 					) : (
 						<div className="flex flex-col gap-1.5">
@@ -149,13 +151,13 @@ function PortsDialog({
 									    qu'un poste rame avec huit serveurs oubliés. */}
 									{port.memoryMb > 0 ? (
 										<span className="shrink-0 font-mono text-[10px] tabular-nums text-ink-faint">
-											{Math.round(port.memoryMb)} Mo
+											{t("portsMonitor.memory", { mb: Math.round(port.memoryMb) })}
 										</span>
 									) : null}
 									<Button
 										size="sm"
 										icon={ExternalLink}
-										title={`Ouvrir http://localhost:${port.port}`}
+										title={t("portsMonitor.open", { url: `http://localhost:${port.port}` })}
 										onClick={() => {
 											void api.system
 												.openUrl(`http://localhost:${port.port}`)
@@ -167,7 +169,7 @@ function PortsDialog({
 										variant="danger"
 										icon={Square}
 										loading={stopping === port.pid}
-										title="Arrêter ce serveur"
+										title={t("portsMonitor.stop")}
 										onClick={() => void stop(port)}
 									/>
 								</div>
@@ -177,8 +179,7 @@ function PortsDialog({
 				</div>
 
 				<footer className="shrink-0 border-t border-line-soft px-4 py-2 text-[10px] leading-snug text-ink-faint">
-					Seuls les serveurs lancés depuis ce worktree sont listés. Les autres — et les
-					conteneurs Docker — restent dans « Serveurs & conteneurs ».
+					{t("portsMonitor.footer")}
 				</footer>
 			</div>
 		</Modal>

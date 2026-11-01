@@ -1,4 +1,6 @@
 import type { Turn } from "@/app/agents";
+import { t } from "@/i18n";
+import { lazyLabels } from "@/lib/language";
 
 /**
  * Les images qu'un agent décrit en données, et que le cockpit dessine.
@@ -222,9 +224,7 @@ export function illustrationsOf(turns: Turn[]): Illustration[] {
 	return found;
 }
 
-export const SOURCE_LABELS: Record<Source, string> = {
-	mesure: "mesuré",
-	depot: "constaté dans le dépôt",
-	capture: "capturé",
-	agent: "dit par l'agent",
-};
+export const SOURCE_LABELS: Record<Source, string> = lazyLabels(
+	["mesure", "depot", "capture", "agent"] as const,
+	(source) => t(`lib:illustrations.source.${source}`),
+);

@@ -9,6 +9,7 @@ import {
 } from "react";
 import { useWorkGroups } from "@/components/WorkspacePanel";
 import { api } from "@/lib/ipc";
+import { replyDirective } from "@/lib/language";
 import { hasTauri } from "@/lib/preview";
 import { usePersistentState } from "@/lib/useAsync";
 import { useAgentActions } from "./agents";
@@ -83,11 +84,15 @@ export const RESUME_KEY = "workspace.resumeMode";
  * lui demande donc de constater avant de continuer, et de redemander ce qu'il
  * attendait de nous plutôt que de le supposer.
  */
-export const RESUME_PROMPT =
-	"Le cockpit vient de redémarrer : ta conversation est reprise là où elle s'était " +
-	"arrêtée. Fais d'abord le point — relis ce que tu étais en train de faire, vérifie " +
-	"l'état réel du dépôt plutôt que de te fier à ta dernière action, et dis en une ligne " +
-	"où tu en es. Reprends ensuite. Si tu attendais une réponse de ma part, redemande-la.";
+export function resumePrompt(): string {
+	return (
+		"The cockpit has just restarted: your conversation picks up where it left " +
+		"off. First take stock — reread what you were doing, check the actual state " +
+		"of the repository rather than trusting your last action, and say in one line " +
+		"where you are. Then carry on. If you were waiting for an answer from me, ask for it again.\n\n" +
+		replyDirective()
+	);
+}
 
 interface HibernateStore {
 	sleeping: SleepingGroup[];
@@ -198,7 +203,7 @@ export function HibernateProvider({ children }: { children: ReactNode }) {
 							(agent) => !agent.claudeSessionId || !alive.has(agent.claudeSessionId),
 						),
 					},
-					resumeMode === "resume" ? RESUME_PROMPT : "",
+					resumeMode === "resume" ? resumePrompt() : "",
 				);
 			}
 		};
@@ -319,6 +324,6 @@ export function HibernateProvider({ children }: { children: ReactNode }) {
 
 export function useHibernate(): HibernateStore {
 	const store = useContext(Context);
-	if (!store) throw new Error("useHibernate doit être utilisé dans HibernateProvider");
+	if (!store) throw new Error("useHibernate must be used inside HibernateProvider");
 	return store;
 }

@@ -1,4 +1,6 @@
-/** Formatages partagés — toujours en français, toujours compacts. */
+/** Formatages partagés — dans la langue de l'interface, toujours compacts. */
+
+import { locale, t } from "@/i18n";
 
 const RELATIVE_STEPS: Array<[number, Intl.RelativeTimeFormatUnit]> = [
 	[60, "second"],
@@ -9,21 +11,29 @@ const RELATIVE_STEPS: Array<[number, Intl.RelativeTimeFormatUnit]> = [
 	[31557600, "month"],
 ];
 
-const relative = new Intl.RelativeTimeFormat("fr", { numeric: "auto" });
+// Créés à la demande, pas au chargement : la langue n'y est pas encore connue.
+let relativeCache: { locale: string; format: Intl.RelativeTimeFormat } | null = null;
+function relative(): Intl.RelativeTimeFormat {
+	const current = locale();
+	if (relativeCache?.locale !== current) {
+		relativeCache = { locale: current, format: new Intl.RelativeTimeFormat(current, { numeric: "auto" }) };
+	}
+	return relativeCache.format;
+}
 
 /** « il y a 3 min » à partir d'un nombre de secondes écoulées. */
 export function fromSeconds(seconds: number): string {
 	if (!Number.isFinite(seconds)) return "—";
-	if (seconds < 45) return "à l'instant";
+	if (seconds < 45) return t("lib:format.justNow");
 
 	let previous = 1;
 	for (const [limit, unit] of RELATIVE_STEPS) {
 		if (seconds < limit) {
-			return relative.format(-Math.round(seconds / previous), unit);
+			return relative().format(-Math.round(seconds / previous), unit);
 		}
 		previous = limit;
 	}
-	return relative.format(-Math.round(seconds / 31557600), "year");
+	return relative().format(-Math.round(seconds / 31557600), "year");
 }
 
 export function fromTimestamp(seconds: number | null | undefined): string {
@@ -42,7 +52,7 @@ export function clockTime(iso: string | null | undefined): string {
 	if (!iso) return "";
 	const parsed = new Date(iso);
 	if (Number.isNaN(parsed.getTime())) return "";
-	return parsed.toLocaleTimeString("fr-FR", {
+	return parsed.toLocaleTimeString(locale(), {
 		hour: "2-digit",
 		minute: "2-digit",
 	});
@@ -52,7 +62,7 @@ export function fullDate(iso: string | null | undefined): string {
 	if (!iso) return "—";
 	const parsed = new Date(iso);
 	if (Number.isNaN(parsed.getTime())) return "—";
-	return parsed.toLocaleString("fr-FR", {
+	return parsed.toLocaleString(locale(), {
 		day: "2-digit",
 		month: "short",
 		hour: "2-digit",
@@ -60,19 +70,23 @@ export function fullDate(iso: string | null | undefined): string {
 	});
 }
 
-const compact = new Intl.NumberFormat("fr-FR", {
-	notation: "compact",
-	maximumFractionDigits: 1,
-});
+let compactCache: { locale: string; format: Intl.NumberFormat } | null = null;
 
 export function compactNumber(value: number): string {
-	return compact.format(value);
+	const current = locale();
+	if (compactCache?.locale !== current) {
+		compactCache = {
+			locale: current,
+			format: new Intl.NumberFormat(current, { notation: "compact", maximumFractionDigits: 1 }),
+		};
+	}
+	return compactCache.format.format(value);
 }
 
 export function bytes(value: number): string {
-	if (value < 1024) return `${value} o`;
-	if (value < 1024 * 1024) return `${(value / 1024).toFixed(0)} Ko`;
-	return `${(value / (1024 * 1024)).toFixed(1)} Mo`;
+	if (value < 1024) return t("lib:format.bytes", { value });
+	if (value < 1024 * 1024) return t("lib:format.kilobytes", { value: (value / 1024).toFixed(0) });
+	return t("lib:format.megabytes", { value: (value / (1024 * 1024)).toFixed(1) });
 }
 
 export function duration(seconds: number): string {

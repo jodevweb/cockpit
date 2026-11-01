@@ -14,6 +14,7 @@ import {
 	Terminal,
 } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { DiffView } from "@/components/LogView";
 import {
 	Badge,
@@ -33,16 +34,21 @@ import { usePersistentState, useAsync } from "@/lib/useAsync";
 import { useCockpit } from "@/app/store";
 
 /** Lettre et couleur d'un statut de fichier, à la manière d'un client git. */
-const STATE_MARK: Record<string, { letter: string; className: string; label: string }> = {
-	added: { letter: "A", className: "bg-success/15 text-success", label: "ajouté" },
-	modified: { letter: "M", className: "bg-warning/15 text-warning", label: "modifié" },
-	deleted: { letter: "D", className: "bg-critical/15 text-critical", label: "supprimé" },
-	renamed: { letter: "R", className: "bg-info/15 text-info", label: "renommé" },
-	copied: { letter: "C", className: "bg-info/15 text-info", label: "copié" },
+const STATE_MARK: Record<string, { letter: string; className: string }> = {
+	added: { letter: "A", className: "bg-success/15 text-success" },
+	modified: { letter: "M", className: "bg-warning/15 text-warning" },
+	deleted: { letter: "D", className: "bg-critical/15 text-critical" },
+	renamed: { letter: "R", className: "bg-info/15 text-info" },
+	copied: { letter: "C", className: "bg-info/15 text-info" },
 };
 
+/** Le statut connu (clé de `STATE_MARK`), ramené à « modifié » s'il est inconnu. */
+function stateKey(state: string) {
+	return STATE_MARK[state] ? state : "modified";
+}
+
 function stateMark(state: string) {
-	return STATE_MARK[state] ?? STATE_MARK.modified;
+	return STATE_MARK[stateKey(state)];
 }
 
 // ────────────────────────────── Arbre de fichiers ──────────────────────────────
@@ -145,6 +151,7 @@ function FileTree({
 	selected: string | null;
 	onSelect: (path: string) => void;
 }) {
+	const { t } = useTranslation("views");
 	const folders = [...dir.dirs.values()].sort((a, b) => a.name.localeCompare(b.name));
 	const files = [...dir.files].sort((a, b) => a.path.localeCompare(b.path));
 
@@ -197,7 +204,7 @@ function FileTree({
 						key={file.path}
 						type="button"
 						onClick={() => onSelect(file.path)}
-						title={`${file.path} — ${mark.label}`}
+						title={`${file.path} — ${t(`git.state.${stateKey(file.state)}`)}`}
 						className={clsx(
 							"flex w-full items-center gap-1.5 rounded-lg py-1 pr-2 text-left transition-colors",
 							selected === file.path ? "bg-raised" : "hover:bg-surface",
@@ -241,6 +248,7 @@ function BranchRow({
 	selected: boolean;
 	onSelect: () => void;
 }) {
+	const { t } = useTranslation("views");
 	return (
 		<Row selected={selected} onClick={onSelect}>
 			<div className="flex items-center gap-2">
@@ -262,20 +270,20 @@ function BranchRow({
 			</div>
 			<div className="mt-1 flex items-center gap-2 pl-[18px] font-mono text-[10px]">
 				{branch.name === base ? (
-					<span className="text-accent-soft">base</span>
+					<span className="text-accent-soft">{t("git.branch.base")}</span>
 				) : branch.commitsAhead > 0 ? (
 					<span className="text-info">
-						{branch.commitsAhead} commit{branch.commitsAhead > 1 ? "s" : ""} / {base}
+						{t("git.branch.commitsAhead", { count: branch.commitsAhead, base })}
 					</span>
 				) : (
-					<span className="text-ink-faint/70">à jour avec {base}</span>
+					<span className="text-ink-faint/70">{t("git.branch.upToDate", { base })}</span>
 				)}
 				{branch.ahead > 0 ? <span className="text-warning">↑{branch.ahead}</span> : null}
 				{branch.behind > 0 ? (
 					<span className="text-ink-faint">↓{branch.behind}</span>
 				) : null}
 				{branch.worktreePath ? (
-					<span className="ml-auto text-ink-faint/70">worktree</span>
+					<span className="ml-auto text-ink-faint/70">{t("git.branch.worktree")}</span>
 				) : null}
 			</div>
 		</Row>
@@ -311,6 +319,7 @@ export function BranchActions({
 	behind: number;
 	onDone: () => void;
 }) {
+	const { t } = useTranslation("views");
 	const { notify } = useCockpit();
 	const { confirm, promptText } = useConfirm();
 	const [busy, setBusy] = useState<string | null>(null);
@@ -322,7 +331,7 @@ export function BranchActions({
 			// git dit peu de choses quand tout va bien : mieux vaut sa dernière
 			// ligne qu'un « terminé » qui n'apprend rien.
 			const last = output.trim().split("\n").filter(Boolean).pop();
-			notify(last ? `${label} — ${last}` : `${label} terminé.`);
+			notify(last ? `${label} — ${last}` : t("git.actions.done", { label }));
 			onDone();
 		} catch (error) {
 			notify(String(error));
@@ -333,17 +342,16 @@ export function BranchActions({
 
 	const createPr = async () => {
 		const title = await promptText({
-			title: `Ouvrir une pull request depuis ${branch}`,
-			message:
-				"La branche est poussée avant l'ouverture — GitHub refuse une PR dont la tête lui est inconnue.",
-			placeholder: "feat: quotas fair-use",
-			confirmLabel: "Créer la PR",
+			title: t("git.actions.pr.title", { branch }),
+			message: t("git.actions.pr.message"),
+			placeholder: t("git.actions.pr.placeholder"),
+			confirmLabel: t("git.actions.pr.confirm"),
 		});
 		if (!title) return;
 		setBusy("PR");
 		try {
 			const url = await api.git.createPr(path, title);
-			notify(`Pull request ouverte pour ${branch}.`);
+			notify(t("git.actions.pr.opened", { branch }));
 			if (url) void api.system.openUrl(url).catch(() => undefined);
 			onDone();
 		} catch (error) {
@@ -355,10 +363,10 @@ export function BranchActions({
 
 	const stash = async () => {
 		const message = await promptText({
-			title: `Remiser le travail en cours de ${branch}`,
-			message: "Fichiers non suivis compris : l'arbre redevient vraiment propre.",
-			placeholder: "wip: essai de refonte",
-			confirmLabel: "Remiser",
+			title: t("git.actions.stash.title", { branch }),
+			message: t("git.actions.stash.message"),
+			placeholder: t("git.actions.stash.placeholder"),
+			confirmLabel: t("git.actions.stash.confirm"),
 		});
 		if (message === null) return;
 		await run("Stash", () => api.git.stash(path, message));
@@ -366,10 +374,10 @@ export function BranchActions({
 
 	const commit = async () => {
 		const message = await promptText({
-			title: `Commit sur ${branch}`,
-			message: "Tout le travail en cours est enregistré en un commit.",
-			placeholder: "fix: corrige le calcul des quotas",
-			confirmLabel: "Commiter",
+			title: t("git.actions.commit.title", { branch }),
+			message: t("git.actions.commit.message"),
+			placeholder: t("git.actions.commit.placeholder"),
+			confirmLabel: t("git.actions.commit.confirm"),
 		});
 		if (!message) return;
 		await run("Commit", () => api.git.commit(path, message));
@@ -377,12 +385,12 @@ export function BranchActions({
 
 	const push = async () => {
 		const ok = await confirm({
-			title: `Pousser ${branch} ?`,
+			title: t("git.actions.push.title", { branch }),
 			message:
 				ahead > 0
-					? `${ahead} commit${ahead > 1 ? "s" : ""} partiront sur origin, visibles de toute l'équipe.`
-					: "La branche sera publiée sur origin.",
-			confirmLabel: "Pousser",
+					? t("git.actions.push.messageAhead", { count: ahead })
+					: t("git.actions.push.messageNew"),
+			confirmLabel: t("git.actions.push.confirm"),
 		});
 		if (!ok) return;
 		await run("Push", () => api.git.push(path));
@@ -396,8 +404,8 @@ export function BranchActions({
 				onClick={() => void run("Pull", () => api.git.pull(path))}
 				title={
 					behind > 0
-						? `${behind} commit(s) de retard — pull en avance rapide`
-						: "À jour ; pull en avance rapide"
+						? t("git.actions.pull.hintBehind", { count: behind })
+						: t("git.actions.pull.hintUpToDate")
 				}
 			>
 				Pull{behind > 0 ? ` ${behind}` : ""}
@@ -406,7 +414,7 @@ export function BranchActions({
 				icon={GitCommitHorizontal}
 				disabled={busy !== null}
 				onClick={() => void commit()}
-				title="Enregistre tout le travail en cours"
+				title={t("git.actions.commit.hint")}
 			>
 				Commit
 			</Button>
@@ -414,7 +422,7 @@ export function BranchActions({
 				icon={ArrowUpFromLine}
 				disabled={busy !== null}
 				onClick={() => void push()}
-				title="Publie la branche sur origin"
+				title={t("git.actions.push.hint")}
 			>
 				Push{ahead > 0 ? ` ${ahead}` : ""}
 			</Button>
@@ -422,7 +430,7 @@ export function BranchActions({
 				icon={GitPullRequest}
 				disabled={busy !== null}
 				onClick={() => void createPr()}
-				title="Pousse la branche et ouvre une pull request"
+				title={t("git.actions.pr.hint")}
 			>
 				PR
 			</Button>
@@ -430,7 +438,7 @@ export function BranchActions({
 				icon={Archive}
 				disabled={busy !== null}
 				onClick={() => void stash()}
-				title="Met le travail en cours de côté"
+				title={t("git.actions.stash.hint")}
 			>
 				Stash
 			</Button>
@@ -439,6 +447,7 @@ export function BranchActions({
 }
 
 export function GitView() {
+	const { t } = useTranslation("views");
 	const { notify, go } = useCockpit();
 	const [query, setQuery] = useState("");
 	const [selectedBranch, setSelectedBranch] = useState<string | null>(null);
@@ -510,7 +519,7 @@ export function GitView() {
 		() =>
 			current
 				? api.git.branchDiff(current.name, base)
-				: Promise.reject(new Error("Aucune branche sélectionnée")),
+				: Promise.reject(new Error(t("git.noBranchSelected"))),
 		[current?.name, base],
 		{ enabled: Boolean(current), subscribe: events.onGitChanged },
 	);
@@ -552,13 +561,13 @@ export function GitView() {
 				title="Git"
 				subtitle={
 					overview.data
-						? `${branches.length} branches · comparées à ${base}`
-						: "Lecture du dépôt…"
+						? t("git.subtitle", { count: branches.length, base })
+						: t("git.reading")
 				}
 				actions={
 					<>
 						<label className="flex items-center gap-1.5 text-[10px] text-ink-faint">
-							Comparer à
+							{t("git.compareTo")}
 							<select
 								value={base}
 								onChange={(event) => setBaseOverride(event.target.value)}
@@ -596,7 +605,7 @@ export function GitView() {
 						<SearchField
 							value={query}
 							onChange={setQuery}
-							placeholder="Filtrer les branches…"
+							placeholder={t("git.filterPlaceholder")}
 						/>
 						<div className="flex items-center gap-1.5">
 							<select
@@ -604,19 +613,19 @@ export function GitView() {
 								onChange={(event) => setScope(event.target.value as typeof scope)}
 								className="focus-ring min-w-0 flex-1 rounded-lg border border-line-soft bg-surface px-1.5 py-1 text-[10px] text-ink-muted"
 							>
-								<option value="all">Toutes</option>
-								<option value="worktree">Avec worktree</option>
-								<option value="ahead">Non fusionnées</option>
-								<option value="unpushed">À pousser</option>
+								<option value="all">{t("git.scope.all")}</option>
+								<option value="worktree">{t("git.scope.worktree")}</option>
+								<option value="ahead">{t("git.scope.ahead")}</option>
+								<option value="unpushed">{t("git.scope.unpushed")}</option>
 							</select>
 							<select
 								value={sort}
 								onChange={(event) => setSort(event.target.value as typeof sort)}
 								className="focus-ring min-w-0 flex-1 rounded-lg border border-line-soft bg-surface px-1.5 py-1 text-[10px] text-ink-muted"
 							>
-								<option value="activity">Activité</option>
-								<option value="commits">Commits</option>
-								<option value="name">Nom</option>
+								<option value="activity">{t("git.sort.activity")}</option>
+								<option value="commits">{t("git.sort.commits")}</option>
+								<option value="name">{t("git.sort.name")}</option>
 							</select>
 							<span className="shrink-0 font-mono text-[10px] text-ink-faint tabular-nums">
 								{filtered.length}
@@ -634,7 +643,7 @@ export function GitView() {
 							/>
 						))}
 						{filtered.length === 0 && !overview.loading ? (
-							<Empty icon={GitBranch} message="Aucune branche" />
+							<Empty icon={GitBranch} message={t("git.noBranch")} />
 						) : null}
 					</div>
 				</div>
@@ -647,10 +656,10 @@ export function GitView() {
 									{current.name}
 								</div>
 								<div className="truncate font-mono text-[10px] text-ink-faint">
-									{fileCount} fichier{fileCount > 1 ? "s" : ""} ·{" "}
+									{t("git.fileCount", { count: fileCount })} ·{" "}
 									<span className="text-success">+{diff.data?.additions ?? 0}</span>{" "}
-									<span className="text-critical">−{diff.data?.deletions ?? 0}</span> ·
-									depuis {diff.data?.mergeBase.slice(0, 8) ?? "…"} ({base})
+									<span className="text-critical">−{diff.data?.deletions ?? 0}</span> ·{" "}
+									{t("git.since", { sha: diff.data?.mergeBase.slice(0, 8) ?? "…", base })}
 								</div>
 							</div>
 							{current.worktreePath ? (
@@ -673,7 +682,7 @@ export function GitView() {
 												.catch((error) => notify(String(error)));
 										}}
 									>
-										Éditeur
+										{t("git.editor")}
 									</Button>
 									<Button
 										icon={Terminal}
@@ -683,16 +692,16 @@ export function GitView() {
 												.catch((error) => notify(String(error)));
 										}}
 									>
-										Terminal
+										{t("git.terminal")}
 									</Button>
 									<Button
 										icon={GitBranch}
 										onClick={() =>
 											go("worktrees", { worktreePath: current.worktreePath ?? undefined })
 										}
-										title="Ouvrir le worktree correspondant"
+										title={t("git.openWorktree")}
 									>
-										Worktree
+										{t("git.worktree")}
 									</Button>
 								</>
 							) : null}
@@ -703,9 +712,9 @@ export function GitView() {
 								<div className="hairline-b flex shrink-0 items-center gap-1 px-2.5 py-1.5">
 									{(
 										[
-											["files", "Fichiers", fileCount],
-											["commits", "Commits", diff.data?.commits.length ?? 0],
-											["graph", "Graphe", null],
+											["files", t("git.panel.files"), fileCount],
+											["commits", t("git.panel.commits"), diff.data?.commits.length ?? 0],
+											["graph", t("git.panel.graph"), null],
 										] as Array<[Panel, string, number | null]>
 									).map(([id, label, count]) => (
 										<button
@@ -738,8 +747,8 @@ export function GitView() {
 										fileCount === 0 && !diff.loading ? (
 											<Empty
 												icon={GitMerge}
-												message={`Rien ne distingue ${current.name} de ${base}`}
-												hint="Aucun commit propre à cette branche."
+												message={t("git.noDifference", { branch: current.name, base })}
+												hint={t("git.noDifferenceHint")}
 											/>
 										) : (
 											<FileTree
@@ -772,7 +781,7 @@ export function GitView() {
 												</div>
 											))}
 											{(diff.data?.commits ?? []).length === 0 && !diff.loading ? (
-												<Empty icon={GitCommitHorizontal} message="Aucun commit propre" />
+												<Empty icon={GitCommitHorizontal} message={t("git.noOwnCommit")} />
 											) : null}
 										</div>
 									) : null}
@@ -803,7 +812,7 @@ export function GitView() {
 												{selectedFile}
 											</span>
 											<Button size="sm" onClick={() => setSelectedFile(null)}>
-												Fermer
+												{t("git.close")}
 											</Button>
 										</div>
 										<div className="min-h-0 flex-1 overflow-auto">
@@ -821,15 +830,15 @@ export function GitView() {
 								) : (
 									<Empty
 										icon={Network}
-										message="Choisis un fichier"
-										hint={`Le diff s'affiche ici, comparé au point de divergence avec ${base}.`}
+										message={t("git.pickFile")}
+										hint={t("git.pickFileHint", { base })}
 									/>
 								)}
 							</div>
 						</div>
 					</div>
 				) : (
-					<Empty icon={GitBranch} message="Aucune branche à afficher" />
+					<Empty icon={GitBranch} message={t("git.nothingToShow")} />
 				)}
 			</div>
 		</>

@@ -1,9 +1,11 @@
 import clsx from "clsx";
 import { ExternalLink, Undo2, X } from "lucide-react";
 import { useState } from "react";
+import { useTranslation } from "react-i18next";
 import { verdictLabel, verdictTone } from "@/components/EngagementCard";
 import { useConfirm } from "@/components/Confirm";
 import { Badge, Button, Dot } from "@/components/ui";
+import { locale } from "@/i18n";
 import { fromTimestamp } from "@/lib/format";
 import { api } from "@/lib/ipc";
 import type { Engagement, PermanenceState } from "@/lib/types";
@@ -27,6 +29,7 @@ export function EngagementPanel({
 	onClose: () => void;
 	onChange: (state: PermanenceState) => void;
 }) {
+	const { t } = useTranslation("components3");
 	const { notify } = useCockpit();
 	const { confirm } = useConfirm();
 	const [busy, setBusy] = useState(false);
@@ -37,16 +40,16 @@ export function EngagementPanel({
 	// pourquoi, ni ce qu'il faudrait faire à la main.
 	const blocking =
 		engagement.produced.length === 0
-			? "Rien n'a été produit : il n'y a rien à défaire."
+			? t("engagementPanel.nothingProduced")
 			: stuck.length > 0
-				? `Le cockpit ne sait pas défaire : ${stuck.map((entry) => entry.label).join(", ")}. À reprendre à la main.`
+				? t("engagementPanel.cannotUndo", { items: stuck.map((entry) => entry.label).join(", ") })
 				: "";
 
 	const undo = async () => {
 		const ok = await confirm({
-			title: "Annuler ce qui a été fait ?",
+			title: t("engagementPanel.undoConfirmTitle"),
 			message: engagement.produced.map((entry) => entry.label).join(", "),
-			confirmLabel: "Annuler",
+			confirmLabel: t("engagementPanel.undoConfirm"),
 			danger: true,
 		});
 		if (!ok) return;
@@ -56,8 +59,8 @@ export function EngagementPanel({
 			onChange(result.state);
 			notify(
 				result.failed.length > 0
-					? `N'a pas pu être défait : ${result.failed.join(", ")}`
-					: `Défait : ${result.stopped.join(", ")}`,
+					? t("engagementPanel.undoFailed", { items: result.failed.join(", ") })
+					: t("engagementPanel.undone", { items: result.stopped.join(", ") }),
 			);
 		} catch (error) {
 			notify(String(error));
@@ -73,25 +76,28 @@ export function EngagementPanel({
 				<span className="min-w-0 flex-1 truncate text-[12.5px] font-semibold text-ink">
 					{engagement.goal || engagement.label}
 				</span>
-				<Button size="sm" icon={X} onClick={onClose} title="Fermer" />
+				<Button size="sm" icon={X} onClick={onClose} title={t("engagementPanel.close")} />
 			</header>
 
 			<div className="flex min-h-0 flex-1 flex-col gap-4 overflow-y-auto p-3.5">
-				<Block title="Déclencheur">
+				<Block title={t("engagementPanel.trigger")}>
 					<p className="text-[11.5px] text-ink">{engagement.label}</p>
 					<p className="font-mono text-[10.5px] text-ink-faint">
-						{engagement.trigger || "sans déclencheur"} · règle « {engagement.rule} »
+						{t("engagementPanel.triggerLine", {
+							trigger: engagement.trigger || t("engagementPanel.noTrigger"),
+							rule: engagement.rule,
+						})}
 					</p>
 				</Block>
 
 				{/* L'oracle avant le verdict : on doit pouvoir juger si la preuve
 				    visée est la bonne, indépendamment du fait qu'elle soit atteinte. */}
-				<Block title="Oracle">
+				<Block title={t("engagementPanel.oracle")}>
 					<div className="flex items-center gap-2 rounded-lg bg-raised px-2 py-1.5">
 						<span className="min-w-0 flex-1 truncate font-mono text-[10.5px] text-ink-muted">
 							{engagement.oracle?.kind
 								? `${engagement.oracle.kind} · ${engagement.oracle.key}`
-								: "aucun"}
+								: t("engagementPanel.none")}
 						</span>
 						{!running ? (
 							<Badge tone={verdictTone(engagement.verdict)}>
@@ -106,10 +112,10 @@ export function EngagementPanel({
 					) : null}
 				</Block>
 
-				<Block title="Chronologie">
+				<Block title={t("engagementPanel.timeline")}>
 					<div className="flex flex-col">
 						{engagement.steps.length === 0 ? (
-							<p className="text-[11px] text-ink-faint">Rien encore.</p>
+							<p className="text-[11px] text-ink-faint">{t("engagementPanel.nothingYet")}</p>
 						) : (
 							engagement.steps.map((step, index) => (
 								/* L'horodatage à droite plutôt qu'en colonne : « il y a
@@ -139,7 +145,7 @@ export function EngagementPanel({
 				</Block>
 
 				{engagement.produced.length > 0 ? (
-					<Block title="Produit">
+					<Block title={t("engagementPanel.produced")}>
 						<div className="flex flex-col gap-1">
 							{engagement.produced.map((entry, index) => (
 								<div
@@ -154,7 +160,7 @@ export function EngagementPanel({
 										<Button
 											size="sm"
 											icon={ExternalLink}
-											title="Ouvrir"
+											title={t("engagementPanel.open")}
 											onClick={() =>
 												void api.system
 													.openUrl(entry.url)
@@ -168,12 +174,17 @@ export function EngagementPanel({
 					</Block>
 				) : null}
 
-				<Block title="Coût">
+				<Block title={t("engagementPanel.cost")}>
 					<p
 						className="font-mono text-[11px] text-ink-muted"
-						title="ce que cela vaudrait aux tarifs de l'API ; sur un abonnement rien n'est débité, c'est le quota de la fenêtre qui se consomme"
+						title={t("engagementPanel.costHint")}
 					>
-						≈ {engagement.costUsd.toFixed(2).replace(".", ",")} $
+						≈{" "}
+						{engagement.costUsd.toLocaleString(locale(), {
+							minimumFractionDigits: 2,
+							maximumFractionDigits: 2,
+						})}{" "}
+						$
 						{engagement.endedAt > engagement.startedAt
 							? ` · ${Math.max(1, Math.round((engagement.endedAt - engagement.startedAt) / 60))} min`
 							: ""}
@@ -187,10 +198,10 @@ export function EngagementPanel({
 						className="w-full justify-center"
 						disabled={Boolean(blocking) || busy}
 						loading={busy}
-						title={blocking || "Défaire ce qui a été produit"}
+						title={blocking || t("engagementPanel.undoHint")}
 						onClick={() => void undo()}
 					>
-						Annuler ce qui a été fait
+						{t("engagementPanel.undo")}
 					</Button>
 					{blocking ? (
 						<p className="mt-1 text-[10px] leading-snug text-ink-faint">{blocking}</p>

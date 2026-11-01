@@ -22,6 +22,7 @@ import {
 	useState,
 	type ReactNode,
 } from "react";
+import { useTranslation } from "react-i18next";
 import { useAgentRuns } from "@/app/agents";
 import { useCockpit } from "@/app/store";
 import { DiffView } from "@/components/LogView";
@@ -69,11 +70,12 @@ export function ChangeTourProvider({ children }: { children: ReactNode }) {
 
 /* ── L'ordre et l'arbre ──────────────────────────────────────────────── */
 
+// `label` est une clé du catalogue `components3`, traduite au rendu.
 const STATE: Record<string, { label: string; tone: string; dot: string }> = {
-	added: { label: "Ajouté", tone: "text-success", dot: "bg-success" },
-	untracked: { label: "Nouveau", tone: "text-success", dot: "bg-success" },
-	modified: { label: "Modifié", tone: "text-warning", dot: "bg-warning" },
-	deleted: { label: "Supprimé", tone: "text-critical", dot: "bg-critical" },
+	added: { label: "changeTour.state.added", tone: "text-success", dot: "bg-success" },
+	untracked: { label: "changeTour.state.untracked", tone: "text-success", dot: "bg-success" },
+	modified: { label: "changeTour.state.modified", tone: "text-warning", dot: "bg-warning" },
+	deleted: { label: "changeTour.state.deleted", tone: "text-critical", dot: "bg-critical" },
 };
 
 function stateOf(file: FileChange) {
@@ -136,6 +138,7 @@ function buildTree(files: FileChange[]): TreeNode {
 /* ── La visite ───────────────────────────────────────────────────────── */
 
 function Tour({ runId, onClose }: { runId: string; onClose: () => void }) {
+	const { t } = useTranslation("components3");
 	const { runs } = useAgentRuns();
 	const { notify } = useCockpit();
 	const run = runs.find((entry) => entry.id === runId);
@@ -222,10 +225,10 @@ function Tour({ runId, onClose }: { runId: string; onClose: () => void }) {
 						<Sparkles size={14} />
 					</span>
 					<div className="min-w-0 flex-1">
-						<div className="truncate text-[13px] font-semibold text-ink">Visite des changements</div>
+						<div className="truncate text-[13px] font-semibold text-ink">{t("changeTour.title")}</div>
 						<div className="truncate font-mono text-[10px] text-ink-faint">
-							{run?.label ?? "Agent"}
-							{data ? ` · ${data.baseLabel} · ${files.length} fichier${files.length > 1 ? "s" : ""}` : ""}
+							{run?.label ?? t("changeTour.agent")}
+							{data ? ` · ${data.baseLabel} · ${t("changeTour.fileCount", { count: files.length })}` : ""}
 							{data ? (
 								<>
 									{" · "}
@@ -242,12 +245,12 @@ function Tour({ runId, onClose }: { runId: string; onClose: () => void }) {
 							active={!!story}
 							disabled={telling}
 							onClick={() => void tell()}
-							title="Un modèle écrit le récit de chaque fichier, dans l'ordre où les lire"
+							title={t("changeTour.tellTitle")}
 						>
-							{telling ? "Le récit s'écrit…" : story ? "Raconter à nouveau" : "Raconter"}
+							{telling ? t("changeTour.telling") : story ? t("changeTour.tellAgain") : t("changeTour.tell")}
 						</Button>
 					) : null}
-					<Button size="sm" icon={X} onClick={onClose} title="Fermer (Échap)" />
+					<Button size="sm" icon={X} onClick={onClose} title={t("changeTour.closeEsc")} />
 				</div>
 
 				{/* La progression : une case par étape. */}
@@ -262,7 +265,7 @@ function Tour({ runId, onClose }: { runId: string; onClose: () => void }) {
 									"h-full flex-1 transition-colors",
 									index < step ? "bg-accent/60" : index === step ? "bg-accent" : "bg-transparent hover:bg-line",
 								)}
-								aria-label={`Étape ${index}`}
+								aria-label={t("changeTour.stepAria", { index })}
 							/>
 						))}
 					</div>
@@ -295,10 +298,9 @@ function Tour({ runId, onClose }: { runId: string; onClose: () => void }) {
 							</div>
 						) : files.length === 0 ? (
 							<div className="flex flex-1 flex-col items-center justify-center gap-2 p-8 text-center">
-								<p className="text-[13px] font-semibold text-ink">Rien à visiter</p>
+								<p className="text-[13px] font-semibold text-ink">{t("changeTour.empty.title")}</p>
 								<p className="max-w-sm text-[12px] text-ink-muted">
-									Aucun fichier ne diffère {data.baseLabel}. L'agent a peut-être tout annulé, ou
-									travaillé dans un autre dossier.
+									{t("changeTour.empty.body", { base: data.baseLabel })}
 								</p>
 							</div>
 						) : (
@@ -341,20 +343,24 @@ function Tour({ runId, onClose }: { runId: string; onClose: () => void }) {
 						{data && files.length > 0 ? (
 							<div className="border-t border-line-soft flex shrink-0 items-center gap-2 px-4 py-2.5">
 								<Button icon={ArrowLeft} disabled={step === 0} onClick={() => go(step - 1)}>
-									Précédent
+									{t("changeTour.nav.previous")}
 								</Button>
 								<span className="flex-1 text-center font-mono text-[10.5px] text-ink-faint">
-									{step === 0 ? "Introduction" : step === last ? "Fin" : `Fichier ${step} sur ${files.length}`}
+									{step === 0
+										? t("changeTour.nav.intro")
+										: step === last
+											? t("changeTour.nav.end")
+											: t("changeTour.nav.fileOf", { step, total: files.length })}
 									{"  ·  ←  →"}
 								</span>
 								{step < last ? (
 									<Button variant="solid" onClick={() => go(step + 1)}>
-										{step === 0 ? "Commencer la visite" : step === files.length ? "Terminer" : "Suivant"}
+										{step === 0 ? t("changeTour.start") : step === files.length ? t("changeTour.nav.finish") : t("changeTour.nav.next")}
 										<ArrowRight size={13} />
 									</Button>
 								) : (
 									<Button variant="solid" icon={Check} onClick={onClose}>
-										Fermer
+										{t("changeTour.close")}
 									</Button>
 								)}
 							</div>
@@ -489,6 +495,7 @@ function Intro({
 	deletions: number;
 	onStart: () => void;
 }) {
+	const { t } = useTranslation("components3");
 	const counts = (["added", "untracked", "modified", "deleted"] as const)
 		.map((state) => ({ state, count: files.filter((file) => file.state === state).length }))
 		.filter((entry) => entry.count > 0);
@@ -497,7 +504,7 @@ function Intro({
 			<div className="flex flex-col items-center gap-2">
 				<span className="font-mono text-[10px] tracking-[0.1em] text-ink-faint uppercase">{baseLabel}</span>
 				<h2 className="text-[22px] font-semibold text-ink">
-					{files.length} fichier{files.length > 1 ? "s" : ""} à parcourir
+					{t("changeTour.intro.heading", { count: files.length })}
 				</h2>
 				<p className="font-mono text-[12px]">
 					<span className="text-success">+{additions}</span> <span className="text-critical">−{deletions}</span>
@@ -507,8 +514,7 @@ function Intro({
 				{counts.map(({ state, count }) => (
 					<span key={state} className="flex items-center gap-1.5 rounded-full bg-raised px-3 py-1 text-[11.5px] text-ink">
 						<span className={clsx("size-1.5 rounded-full", STATE[state].dot)} />
-						{count} {STATE[state].label.toLowerCase()}
-						{count > 1 ? "s" : ""}
+						{t(`changeTour.count.${state}`, { count })}
 					</span>
 				))}
 			</div>
@@ -517,12 +523,12 @@ function Intro({
 			) : (
 				<p className="max-w-xl text-[12.5px] leading-relaxed text-ink-muted">
 					{telling
-						? "Un modèle lit le diff et écrit le récit de chaque fichier — une trentaine de secondes."
-						: "Chaque fichier s'accompagne de ce que l'agent en disait en le modifiant. « Raconter » fait écrire un vrai récit, dans l'ordre où lire les fichiers."}
+						? t("changeTour.intro.telling")
+						: t("changeTour.intro.hint")}
 				</p>
 			)}
 			<Button variant="solid" onClick={onStart}>
-				Commencer la visite
+				{t("changeTour.start")}
 				<ArrowRight size={13} />
 			</Button>
 		</div>
@@ -546,6 +552,7 @@ function FileStep({
 	said: string[];
 	story: string | null;
 }) {
+	const { t } = useTranslation("components3");
 	const viewer = useFileViewer();
 	const diff = useAsync(
 		() => api.tour.fileDiff(root, base, file.path, file.state === "untracked"),
@@ -558,16 +565,16 @@ function FileStep({
 			<div className="flex shrink-0 flex-col gap-3 px-6 pt-5 pb-4">
 				<div className="flex items-center gap-2">
 					<span className="font-mono text-[10px] tracking-[0.1em] text-ink-faint uppercase">
-						Étape {index} sur {total}
+						{t("changeTour.file.stepOf", { index, total })}
 					</span>
-					<span className={clsx("font-mono text-[10px] tracking-[0.1em] uppercase", state.tone)}>· {state.label}</span>
+					<span className={clsx("font-mono text-[10px] tracking-[0.1em] uppercase", state.tone)}>· {t(state.label)}</span>
 					<span className="font-mono text-[10px] tabular-nums">
 						<span className="text-success">+{file.added}</span> <span className="text-critical">−{file.removed}</span>
 					</span>
 					<span className="flex-1" />
 					{file.state !== "deleted" && viewer ? (
 						<Button size="sm" icon={FileCode2} onClick={() => viewer.open(`${root}/${file.path}`)}>
-							Ouvrir le fichier
+							{t("changeTour.file.open")}
 						</Button>
 					) : null}
 				</div>
@@ -581,27 +588,26 @@ function FileStep({
 					{story ? (
 						<>
 							<div className="mb-1 flex items-center gap-1.5 font-mono text-[10px] tracking-[0.08em] text-accent uppercase">
-								<Sparkles size={11} /> Le récit
+								<Sparkles size={11} /> {t("changeTour.file.story")}
 							</div>
 							<p className="text-[13px] leading-relaxed text-ink">{story}</p>
 						</>
 					) : said.length > 0 ? (
 						<>
 							<div className="mb-1 flex items-center gap-1.5 font-mono text-[10px] tracking-[0.08em] text-accent uppercase">
-								<MessageSquareQuote size={11} /> Ce qu'en disait l'agent
+								<MessageSquareQuote size={11} /> {t("changeTour.file.said")}
 							</div>
 							<div className="flex flex-col gap-1.5">
 								{said.slice(-3).map((text) => (
 									<p key={text} className="text-[12.5px] leading-relaxed text-ink">
-										« {text} »
+										{t("changeTour.file.quote", { text })}
 									</p>
 								))}
 							</div>
 						</>
 					) : (
 						<p className="text-[12.5px] leading-relaxed text-ink-muted">
-							L'agent n'a rien dit en touchant ce fichier : il vient sans doute d'une commande (un
-							fichier généré, une dépendance). « Raconter » en donnera le sens.
+							{t("changeTour.file.silent")}
 						</p>
 					)}
 				</div>
@@ -622,21 +628,22 @@ function FileStep({
 }
 
 function Outro({ files, onRestart, onClose }: { files: FileChange[]; onRestart: () => void; onClose: () => void }) {
+	const { t } = useTranslation("components3");
 	return (
 		<div className="flex flex-1 flex-col items-center justify-center gap-4 p-10 text-center">
 			<span className="grid size-12 place-items-center rounded-2xl bg-success/12 text-success">
 				<Check size={22} />
 			</span>
-			<h2 className="text-[20px] font-semibold text-ink">Visite terminée</h2>
+			<h2 className="text-[20px] font-semibold text-ink">{t("changeTour.outro.title")}</h2>
 			<p className="max-w-md text-[12.5px] text-ink-muted">
-				Tu as parcouru les {files.length} fichiers changés.
+				{t("changeTour.outro.body", { count: files.length })}
 			</p>
 			<div className="flex gap-2">
 				<Button icon={RotateCcw} onClick={onRestart}>
-					Recommencer
+					{t("changeTour.outro.restart")}
 				</Button>
 				<Button variant="solid" icon={Check} onClick={onClose}>
-					Fermer
+					{t("changeTour.close")}
 				</Button>
 			</div>
 		</div>

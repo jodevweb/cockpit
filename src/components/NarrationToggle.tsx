@@ -1,8 +1,10 @@
 import clsx from "clsx";
 import { AlertTriangle, ChevronDown, KeyRound, Play, Volume2, VolumeX } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
+import { useTranslation } from "react-i18next";
 import type { AgentRun } from "@/app/agents";
 import { useCockpit } from "@/app/store";
+import { locale } from "@/i18n";
 import { api } from "@/lib/ipc";
 import {
 	type Engine,
@@ -36,6 +38,7 @@ const QUIET_MS = 60_000;
  * chaque onglet d'agent, muet sauf pour celui qu'on a choisi.
  */
 export function useNarration(run: AgentRun, pending: Array<{ tool: string }>): void {
+	const { t } = useTranslation("components2");
 	const active = useNarrated() === run.id;
 	const heard = useRef<Heard | null>(null);
 	const latest = useRef(run);
@@ -51,10 +54,10 @@ export function useNarration(run: AgentRun, pending: Array<{ tool: string }>): v
 		const where = run.thinking
 			? progress(run.turns)
 			: pending.length > 0
-				? "Il attend ta réponse."
-				: "Il est à l'arrêt.";
-		const name = humanize(run.label, 80) || "cet agent";
-		say([{ text: `Je te raconte ce que fait ${name}. ${where}`, keep: true }]);
+				? t("narration.waitingForYou")
+				: t("narration.stopped");
+		const name = humanize(run.label, 80) || t("narration.thisAgent");
+		say([{ text: t("narration.intro", { name, where }), keep: true }]);
 		// L'état initial ne se lit qu'à l'activation : la suite vient de l'effet
 		// suivant.
 		// eslint-disable-next-line react-hooks/exhaustive-deps
@@ -96,6 +99,7 @@ export function useNarration(run: AgentRun, pending: Array<{ tool: string }>): v
 
 /** Écouter cet agent, ou se taire ; et choisir la voix. */
 export function NarrationToggle({ runId }: { runId: string }) {
+	const { t } = useTranslation("components2");
 	const narrated = useNarrated();
 	const on = narrated === runId;
 	const settings = useVoiceSettings();
@@ -117,7 +121,7 @@ export function NarrationToggle({ runId }: { runId: string }) {
 			<button
 				type="button"
 				onClick={() => setNarrated(on ? null : runId)}
-				title={on ? "Couper la voix" : "Écouter en direct ce que fait l'agent"}
+				title={on ? t("narration.mute") : t("narration.listenLive")}
 				className={clsx(
 					"focus-ring flex h-7 items-center gap-1.5 rounded-l-lg px-2 text-[11.5px] font-medium transition-colors",
 					on ? "bg-accent text-accent-ink" : "text-ink-muted hover:bg-hover hover:text-ink",
@@ -135,19 +139,19 @@ export function NarrationToggle({ runId }: { runId: string }) {
 								/>
 							))}
 						</span>
-						Écoute
+						{t("narration.listening")}
 					</>
 				) : (
 					<>
 						<VolumeX size={13} />
-						Écouter
+						{t("narration.listen")}
 					</>
 				)}
 			</button>
 			<button
 				type="button"
 				onClick={() => setOpen((value) => !value)}
-				title={fallback ? `ElevenLabs a échoué, la voix du Mac a pris le relais : ${fallback}` : "Voix et débit"}
+				title={fallback ? t("narration.elevenLabsFailed", { reason: fallback }) : t("narration.voiceAndRate")}
 				className={clsx(
 					"focus-ring grid h-7 w-5 place-items-center rounded-r-lg",
 					on ? "bg-accent text-accent-ink" : "text-ink-faint hover:bg-hover hover:text-ink",
@@ -200,6 +204,7 @@ function Segment<T extends string | number>({
  * deux copies auraient divergé au premier ajout.
  */
 export function VoiceSettings({ inMenu = false }: { inMenu?: boolean }) {
+	const { t } = useTranslation("components2");
 	const settings = useVoiceSettings();
 	const fallback = useFallback();
 	const [voices, setVoices] = useState<Voice[]>([]);
@@ -212,7 +217,7 @@ export function VoiceSettings({ inMenu = false }: { inMenu?: boolean }) {
 
 	useEffect(() => {
 		if (!native) return;
-		void api.speech.voices().then((all) => setVoices(all.filter((voice) => voice.locale.startsWith("fr"))));
+		void api.speech.voices().then((all) => setVoices(all.filter((voice) => voice.locale.startsWith(locale().split("-")[0]))));
 		void api.speech.hasKey().then(setHasKey);
 	}, [native]);
 
@@ -250,19 +255,19 @@ export function VoiceSettings({ inMenu = false }: { inMenu?: boolean }) {
 			)}
 		>
 			<div className="flex flex-col gap-1.5">
-				<span className={label}>Moteur</span>
+				<span className={label}>{t("voiceSettings.engine")}</span>
 				<Segment<Engine>
 					value={settings.engine}
 					options={[
-						["Voix du Mac", "system"],
+						[t("voiceSettings.macVoice"), "system"],
 						["ElevenLabs", "elevenlabs"],
 					]}
 					onChange={(engine) => updateVoice({ engine })}
 				/>
 				<span className="text-[10px] leading-snug text-ink-faint">
 					{settings.engine === "elevenlabs"
-						? "La voix la plus humaine, décomptée des caractères de ton forfait ElevenLabs. Aucun abonnement Claude ni ChatGPT ne fournit de voix à une autre application."
-						: "Gratuite et hors ligne. Nettement meilleure avec une voix Premium."}
+						? t("voiceSettings.elevenLabsHint")
+						: t("voiceSettings.systemHint")}
 				</span>
 			</div>
 
@@ -271,7 +276,7 @@ export function VoiceSettings({ inMenu = false }: { inMenu?: boolean }) {
 			{settings.engine === "elevenlabs" || !inMenu ? (
 					<div className="flex flex-col gap-1.5">
 					<span className="flex items-center justify-between">
-						<span className={label}>Clé ElevenLabs</span>
+						<span className={label}>{t("voiceSettings.elevenLabsKey")}</span>
 						{/* Là où elle se crée : dans les réglages du compte, pas dans
 						    l'abonnement, où on la cherche d'abord. */}
 						<button
@@ -279,15 +284,15 @@ export function VoiceSettings({ inMenu = false }: { inMenu?: boolean }) {
 							onClick={() => void api.system.openUrl("https://elevenlabs.io/app/settings/api-keys").catch(() => undefined)}
 							className="text-[10.5px] text-accent hover:underline"
 						>
-							Créer une clé
+							{t("voiceSettings.createKey")}
 						</button>
 					</span>
 					{hasKey ? (
 						<div className="flex items-center gap-2 text-[11.5px] text-ink">
 							<KeyRound size={12} className="text-success" />
-							<span className="flex-1">Rangée dans le trousseau du Mac</span>
+							<span className="flex-1">{t("voiceSettings.keyStored")}</span>
 							<button type="button" onClick={() => void saveKey("")} className="text-[11px] text-ink-faint hover:text-critical">
-								Retirer
+								{t("voiceSettings.removeKey")}
 							</button>
 						</div>
 					) : (
@@ -305,7 +310,7 @@ export function VoiceSettings({ inMenu = false }: { inMenu?: boolean }) {
 								onClick={() => void saveKey(key)}
 								className="rounded-md bg-accent px-2 text-[11.5px] font-medium text-accent-ink disabled:opacity-40"
 							>
-								Ranger
+								{t("voiceSettings.storeKey")}
 							</button>
 						</div>
 					)}
@@ -317,9 +322,9 @@ export function VoiceSettings({ inMenu = false }: { inMenu?: boolean }) {
 				<>
 					{hasKey ? (
 						<label className="flex flex-col gap-1.5">
-							<span className={label}>Voix</span>
+							<span className={label}>{t("voiceSettings.voice")}</span>
 							{cloud === null && !error ? (
-								<span className="text-[11px] text-ink-faint">Lecture des voix du compte…</span>
+								<span className="text-[11px] text-ink-faint">{t("voiceSettings.loadingVoices")}</span>
 							) : (
 								<select
 									value={settings.cloudVoice ?? ""}
@@ -335,13 +340,12 @@ export function VoiceSettings({ inMenu = false }: { inMenu?: boolean }) {
 								</select>
 							)}
 							<span className="text-[10px] leading-snug text-ink-faint">
-								Les voix de ta bibliothèque ElevenLabs, françaises d'abord. Ajoute-en depuis leur site
-								(Voice Library) pour qu'elles apparaissent ici.
+								{t("voiceSettings.libraryHint")}
 							</span>
 						</label>
 					) : null}
 					<div className="flex flex-col gap-1.5">
-						<span className={label}>Modèle</span>
+						<span className={label}>{t("voiceSettings.model")}</span>
 						<Segment<string>
 							value={settings.cloudModel}
 							options={CLOUD_MODELS}
@@ -351,7 +355,7 @@ export function VoiceSettings({ inMenu = false }: { inMenu?: boolean }) {
 				</>
 			) : (
 				<label className="flex flex-col gap-1.5">
-					<span className={label}>Voix</span>
+					<span className={label}>{t("voiceSettings.voice")}</span>
 					{native ? (
 						<select
 							value={settings.systemVoice ?? ""}
@@ -365,26 +369,25 @@ export function VoiceSettings({ inMenu = false }: { inMenu?: boolean }) {
 							))}
 						</select>
 					) : (
-						<span className="text-[11px] text-ink-faint">Voix du navigateur, en aperçu.</span>
+						<span className="text-[11px] text-ink-faint">{t("voiceSettings.browserVoice")}</span>
 					)}
 					{native && voices.length > 0 && !hasGoodSystemVoice(voices) ? (
 						<span className="text-[10px] leading-snug text-warning">
-							Aucune voix Premium installée. Télécharge Audrey (Premium) : Réglages Système → Accessibilité →
-							Contenu énoncé → Voix du système → Gérer les voix → Français.
+							{t("voiceSettings.noPremiumVoice")}
 						</span>
 					) : null}
 				</label>
 			)}
 
 			<div className="flex flex-col gap-1.5">
-				<span className={label}>Débit</span>
+				<span className={label}>{t("voiceSettings.rate")}</span>
 				<Segment<number> value={settings.rate} options={RATES} onChange={(rate) => updateVoice({ rate })} />
 			</div>
 
 			{fallback && settings.engine === "elevenlabs" ? (
 				<p className="flex gap-1.5 rounded-md bg-warning/10 px-2 py-1.5 text-[10.5px] leading-snug text-warning">
 					<AlertTriangle size={11} className="mt-px shrink-0" />
-					<span>La voix du Mac a pris le relais : {fallback}</span>
+					<span>{t("voiceSettings.fallback", { reason: fallback })}</span>
 				</p>
 			) : null}
 
@@ -394,7 +397,7 @@ export function VoiceSettings({ inMenu = false }: { inMenu?: boolean }) {
 					silence();
 					say([
 						{
-							text: "Il a corrigé l'arrondi du panier et relancé les tests. C'est terminé : il a modifié trois fichiers, et les tests passent.",
+							text: t("voiceSettings.sample"),
 							keep: true,
 						},
 					]);
@@ -402,7 +405,7 @@ export function VoiceSettings({ inMenu = false }: { inMenu?: boolean }) {
 				className="flex items-center justify-center gap-1.5 rounded-md border border-line-soft py-1.5 text-[11.5px] text-ink hover:bg-hover"
 			>
 				<Play size={11} />
-				Essayer cette voix
+				{t("voiceSettings.tryVoice")}
 			</button>
 			{inMenu ? (
 				<button
@@ -410,7 +413,7 @@ export function VoiceSettings({ inMenu = false }: { inMenu?: boolean }) {
 					onClick={() => go("settings", { settingsTab: "voice" })}
 					className="text-center text-[11px] text-ink-faint hover:text-ink"
 				>
-					Tous les réglages de la voix et de l'assistant
+					{t("voiceSettings.allSettings")}
 				</button>
 			) : null}
 		</div>

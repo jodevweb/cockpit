@@ -1,9 +1,10 @@
 import clsx from "clsx";
 import { memo, useMemo } from "react";
+import { useTranslation } from "react-i18next";
 import { LocalImage } from "@/components/LocalImage";
 import { openLightbox } from "@/components/Lightbox";
+import { locale, t as translate } from "@/i18n";
 import {
-	SOURCE_LABELS,
 	type AvantApres,
 	type Capture,
 	type Frise,
@@ -23,10 +24,11 @@ import {
  * produisent la même image, ce qu'aucun schéma libre ne garantissait.
  */
 export const Illustration = memo(function Illustration({ item, cwd }: { item: Item; cwd: string }) {
+	const { t } = useTranslation("components2");
 	return (
 		<figure className="m-0 flex min-w-0 flex-col gap-2 rounded-xl bg-surface p-3 shadow-card">
 			<figcaption className="flex items-start gap-2">
-				<span className="min-w-0 flex-1 text-[12.5px] leading-snug font-semibold text-ink">{item.titre || GENRE_LABELS[item.genre]}</span>
+				<span className="min-w-0 flex-1 text-[12.5px] leading-snug font-semibold text-ink">{item.titre || t(`illustration.genre.${item.genre}`)}</span>
 				<SourceBadge source={item.source} />
 			</figcaption>
 			{item.genre === "frise" ? <FriseView item={item} /> : null}
@@ -39,15 +41,6 @@ export const Illustration = memo(function Illustration({ item, cwd }: { item: It
 	);
 });
 
-const GENRE_LABELS: Record<Item["genre"], string> = {
-	frise: "La chaîne d'événements",
-	avant_apres: "Avant, après",
-	mesure: "Mesuré",
-	table: "La table qui change",
-	capture: "Capture annotée",
-	matrice: "Les options comparées",
-};
-
 const SOURCE_TONES: Record<Source, string> = {
 	mesure: "bg-accent-dim text-accent",
 	depot: "bg-raised text-ink",
@@ -56,9 +49,10 @@ const SOURCE_TONES: Record<Source, string> = {
 };
 
 export function SourceBadge({ source }: { source: Source }) {
+	const { t } = useTranslation("components2");
 	return (
 		<span className={clsx("shrink-0 rounded-full px-2 py-0.5 text-[10.5px] font-semibold", SOURCE_TONES[source])}>
-			{SOURCE_LABELS[source]}
+			{t(`illustration.source.${source}`)}
 		</span>
 	);
 }
@@ -142,6 +136,7 @@ function GrapheView({
 	/** Les nœuds propres à ce côté : ajoutés après, disparus avant. */
 	marked: Set<string>;
 }) {
+	const { t } = useTranslation("components2");
 	const columns = useMemo(() => layout(graphe), [graphe]);
 	const position = new Map<string, { x: number; y: number }>();
 	columns.forEach((column, columnIndex) =>
@@ -157,7 +152,7 @@ function GrapheView({
 	return (
 		<svg
 			role="img"
-			aria-label={`${tone === "avant" ? "Avant" : "Après"} : ${graphe.noeuds.join(", ")}`}
+			aria-label={t(tone === "avant" ? "illustration.beforeGraph" : "illustration.afterGraph", { nodes: graphe.noeuds.join(", ") })}
 			viewBox={`-2 -2 ${width + 4} ${height + 4}`}
 			className="block h-auto max-h-56 w-full"
 			style={{ maxWidth: width + 4 }}
@@ -215,6 +210,7 @@ function GrapheView({
 }
 
 function AvantApresView({ item }: { item: AvantApres }) {
+	const { t } = useTranslation("components2");
 	const avant = new Set(item.avant.noeuds);
 	const apres = new Set(item.apres.noeuds);
 	const disparus = new Set(item.avant.noeuds.filter((noeud) => !apres.has(noeud)));
@@ -222,30 +218,36 @@ function AvantApresView({ item }: { item: AvantApres }) {
 	return (
 		<div className="grid gap-3 sm:grid-cols-2">
 			<div className="flex min-w-0 flex-col gap-1.5 rounded-lg bg-critical/5 p-2.5">
-				<span className="text-[10.5px] font-semibold tracking-wide text-critical uppercase">Avant</span>
+				<span className="text-[10.5px] font-semibold tracking-wide text-critical uppercase">{t("illustration.before")}</span>
 				<GrapheView graphe={item.avant} tone="avant" marked={disparus} />
 			</div>
 			<div className="flex min-w-0 flex-col gap-1.5 rounded-lg bg-accent-dim/50 p-2.5">
-				<span className="text-[10.5px] font-semibold tracking-wide text-accent uppercase">Après</span>
+				<span className="text-[10.5px] font-semibold tracking-wide text-accent uppercase">{t("illustration.after")}</span>
 				<GrapheView graphe={item.apres} tone="apres" marked={nouveaux} />
 			</div>
 		</div>
 	);
 }
 
-/** Le chiffre tel qu'on le lit en français : espace des milliers, virgule. */
+/** Le chiffre tel qu'on le lit dans la langue de l'interface. */
 function format(value: number): string {
-	return value.toLocaleString("fr-FR", { maximumFractionDigits: 2 });
+	return value.toLocaleString(locale(), { maximumFractionDigits: 2 });
 }
 
 /** L'écart en pourcentage : « −83 % » se lit d'un coup, un rapport se calcule. */
 function ratio(avant: number, apres: number): string | null {
 	if (avant <= 0 || avant === apres) return null;
 	const change = Math.round(((apres - avant) / avant) * 100);
-	return change === 0 ? null : `${change > 0 ? "+" : "−"}${Math.abs(change).toLocaleString("fr-FR")} %`;
+	return change === 0
+		? null
+		: translate("components2:illustration.percent", {
+				sign: change > 0 ? "+" : "−",
+				value: Math.abs(change).toLocaleString(locale()),
+			});
 }
 
 function MesureView({ item }: { item: Mesure }) {
+	const { t } = useTranslation("components2");
 	return (
 		<div className="flex flex-col gap-3">
 			{item.mesures.map((mesure, index) => {
@@ -260,14 +262,14 @@ function MesureView({ item }: { item: Mesure }) {
 							{change ? <span className="font-mono text-[11px] font-semibold text-accent">{change}</span> : null}
 						</div>
 						<div className="flex items-center gap-2">
-							<span className="w-10 shrink-0 text-[10.5px] text-ink-muted">avant</span>
+							<span className="w-10 shrink-0 text-[10.5px] text-ink-muted">{t("illustration.beforeShort")}</span>
 							<span className="h-3.5 min-w-0 flex-1">
 								<span className="block h-full rounded bg-ink-faint/45" style={{ width: `${(mesure.avant / max) * 100}%` }} />
 							</span>
 							<span className="w-20 shrink-0 text-right font-mono text-[11px] text-ink-muted">{format(mesure.avant)}{unit}</span>
 						</div>
 						<div className="flex items-center gap-2">
-							<span className="w-10 shrink-0 text-[10.5px] text-ink-muted">après</span>
+							<span className="w-10 shrink-0 text-[10.5px] text-ink-muted">{t("illustration.afterShort")}</span>
 							<span className="h-3.5 min-w-0 flex-1">
 								<span className="block h-full rounded bg-accent" style={{ width: `${(mesure.apres / max) * 100}%` }} />
 							</span>
@@ -281,7 +283,7 @@ function MesureView({ item }: { item: Mesure }) {
 					$ {item.commande}
 				</code>
 			) : (
-				<span className="text-[10.5px] text-warning">Aucune commande citée : ces chiffres ne se rejouent pas.</span>
+				<span className="text-[10.5px] text-warning">{t("illustration.noCommand")}</span>
 			)}
 		</div>
 	);
@@ -321,13 +323,14 @@ function resolve(path: string, cwd: string): string {
 }
 
 function CaptureView({ item, cwd }: { item: Capture; cwd: string }) {
+	const { t } = useTranslation("components2");
 	const path = resolve(item.image, cwd);
 	return (
 		<div className="flex flex-wrap items-start gap-3">
 			<button
 				type="button"
-				title="Voir en grand"
-				onClick={() => openLightbox([{ key: path, kind: "image", path, label: item.titre || "capture" }])}
+				title={t("illustration.enlarge")}
+				onClick={() => openLightbox([{ key: path, kind: "image", path, label: item.titre || t("illustration.captureLabel") }])}
 				className="focus-ring relative min-w-0 flex-[1_1_18rem] overflow-hidden rounded-lg bg-raised shadow-[0_0_0_1px_var(--line-soft)]"
 			>
 				<LocalImage path={path} alt={item.titre} className="block h-auto w-full" />

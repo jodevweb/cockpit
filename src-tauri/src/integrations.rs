@@ -153,7 +153,12 @@ async fn json_get_uncached(url: &str, token: &str, scheme: &str) -> Result<Value
 		)));
 	}
 	serde_json::from_str(&body)
-		.map_err(|e| CockpitError::msg(format!("Réponse illisible ({e}) : {}", &body[..body.len().min(200)])))
+		.map_err(|e| {
+			CockpitError::msg(crate::i18n::tf(
+				"integrations.unreadableResponseBody",
+				&[("error", &e), ("body", &&body[..body.len().min(200)])],
+			))
+		})
 }
 
 /// Refuse un token dont le préfixe ne correspond pas à ce qu'attend l'API.
@@ -199,13 +204,11 @@ async fn sentry_org(config: &Config) -> Result<String> {
 		.unwrap_or_default();
 
 	match slugs.as_slice() {
-		[] => Err(CockpitError::msg(
-			"Ce token Sentry ne donne accès à aucune organisation.",
-		)),
+		[] => Err(CockpitError::msg(crate::i18n::t("integrations.sentryNoOrg"))),
 		[only] => Ok(only.clone()),
-		several => Err(CockpitError::msg(format!(
-			"Plusieurs organisations Sentry accessibles ({}) — choisis-en une dans Réglages → Organisation Sentry.",
-			several.join(", ")
+		several => Err(CockpitError::msg(crate::i18n::tf(
+			"integrations.sentrySeveralOrgs",
+			&[("orgs", &several.join(", "))],
 		))),
 	}
 }
@@ -354,7 +357,7 @@ pub async fn linear_create_issue(
 	let identifier = text(&body, "/data/issueCreate/issue/identifier");
 	let url = text(&body, "/data/issueCreate/issue/url");
 	if identifier.is_empty() {
-		return Err(CockpitError::msg("Linear n'a pas créé le ticket."));
+		return Err(CockpitError::msg(crate::i18n::t("integrations.linearNotCreated")));
 	}
 	Ok((identifier, url))
 }
@@ -364,7 +367,7 @@ pub async fn linear_create_issue(
 fn sentry_issue_segment(issue_id: &str) -> Result<&str> {
 	let id = issue_id.trim();
 	if id.is_empty() || !id.chars().all(|c| c.is_ascii_alphanumeric() || c == '-' || c == '_') {
-		return Err(CockpitError::msg(format!("Identifiant d'issue Sentry invalide : {issue_id}")));
+		return Err(CockpitError::msg(crate::i18n::tf("integrations.sentryInvalidIssue", &[("id", &issue_id)])));
 	}
 	Ok(id)
 }
@@ -445,10 +448,7 @@ pub struct KpiDashboard {
 /// ouvrir le dashboard.
 pub async fn betterstack_dashboards(config: &Config) -> Result<Vec<KpiDashboard>> {
 	if config.betterstack.telemetry_token.is_empty() {
-		return Err(CockpitError::msg(
-			"Les dashboards KPI vivent sur telemetry.betterstack.com, que le token Uptime ne \
-			 couvre pas. Ajoute le token « Better Stack · KPI » dans Réglages.",
-		));
+		return Err(CockpitError::msg(crate::i18n::t("integrations.kpiTokenMissing")));
 	}
 
 	let value = json_get(
@@ -590,7 +590,7 @@ async fn clickhouse_access(config: &Config) -> Result<ClickhouseAccess> {
 
 	let token = config.betterstack.telemetry_token.trim();
 	if token.is_empty() {
-		return Err(CockpitError::msg("Token Telemetry manquant."));
+		return Err(CockpitError::msg(crate::i18n::t("integrations.telemetryTokenMissing")));
 	}
 
 	// Un mois : assez long pour ne pas y penser, assez court pour qu'un jeton
@@ -621,28 +621,19 @@ async fn clickhouse_access(config: &Config) -> Result<ClickhouseAccess> {
 		// Ces deux refus sont les cas courants, et le message brut de l'API
 		// n'indique pas quoi faire.
 		if body.contains("global API token") {
-			return Err(CockpitError::msg(
-				"Ce token Telemetry est un token d'équipe : il liste les dashboards mais ne peut \
-				 pas ouvrir l'accès aux données. Il faut un « Global API token » (Better Stack → \
-				 API tokens → Global API tokens), en écriture.",
-			));
+			return Err(CockpitError::msg(crate::i18n::t("integrations.telemetryTeamToken")));
 		}
 		if body.contains("read-only") {
-			return Err(CockpitError::msg(
-				"Ce token global est en lecture seule : ouvrir un accès aux données compte comme \
-				 une écriture. Deux options — recréer le token sans la case « read-only », ou \
-				 coller des identifiants SQL API existants (Better Stack → Integrations → SQL \
-				 API) dans les trois champs ClickHouse des Réglages.",
-			));
+			return Err(CockpitError::msg(crate::i18n::t("integrations.telemetryReadOnly")));
 		}
-		return Err(CockpitError::msg(format!(
-			"Connexion Better Stack {status} — {}",
-			body.chars().take(300).collect::<String>()
+		return Err(CockpitError::msg(crate::i18n::tf(
+			"integrations.betterstackConnection",
+			&[("status", &status), ("body", &body.chars().take(300).collect::<String>())],
 		)));
 	}
 
 	let value: Value = serde_json::from_str(&body)
-		.map_err(|e| CockpitError::msg(format!("Réponse illisible : {e}")))?;
+		.map_err(|e| CockpitError::msg(crate::i18n::tf("integrations.unreadableResponse", &[("error", &e)])))?;
 	// L'API répond tantôt à plat, tantôt en JSON:API : on accepte les deux.
 	let fields = value
 		.pointer("/data/attributes")
@@ -657,9 +648,7 @@ async fn clickhouse_access(config: &Config) -> Result<ClickhouseAccess> {
 		data_sources: fields.get("data_sources").cloned().unwrap_or(Value::Null),
 	};
 	if access.host.is_empty() || access.password.is_empty() {
-		return Err(CockpitError::msg(
-			"Better Stack a répondu sans identifiants de connexion exploitables.",
-		));
+		return Err(CockpitError::msg(crate::i18n::t("integrations.betterstackNoCredentials")));
 	}
 
 	// Le mot de passe n'est rendu qu'à la création : sans ce cache, chaque
@@ -741,7 +730,7 @@ async fn clickhouse_query(access: &ClickhouseAccess, sql: &str) -> Result<Value>
 			body.chars().take(300).collect::<String>()
 		)));
 	}
-	serde_json::from_str(&body).map_err(|e| CockpitError::msg(format!("Réponse illisible : {e}")))
+	serde_json::from_str(&body).map_err(|e| CockpitError::msg(crate::i18n::tf("integrations.unreadableResponse", &[("error", &e)])))
 }
 
 /// Nom à substituer à `{{source}}` dans la requête d'un graphique.
@@ -804,7 +793,7 @@ pub async fn betterstack_kpi_values(
 	hours: i64,
 ) -> Result<Vec<KpiValue>> {
 	if config.betterstack.telemetry_token.is_empty() {
-		return Err(CockpitError::msg("Token Telemetry manquant."));
+		return Err(CockpitError::msg(crate::i18n::t("integrations.telemetryTokenMissing")));
 	}
 
 	// Les graphiques sont des requêtes SQL : il faut un accès aux données, que
@@ -873,7 +862,7 @@ pub async fn betterstack_kpi_values(
 					kind,
 					columns: Vec::new(),
 					rows: Vec::new(),
-					error: Some("Ce graphique n'expose pas de requête.".into()),
+					error: Some(crate::i18n::t("integrations.chartNoQuery")),
 				};
 			}
 
@@ -1190,7 +1179,7 @@ pub async fn linear_issue_detail(config: &Config, id: &str) -> Result<LinearIssu
 	let issue = body
 		.pointer("/data/issue")
 		.filter(|v| !v.is_null())
-		.ok_or_else(|| CockpitError::msg(format!("Ticket {id} introuvable.")))?;
+		.ok_or_else(|| CockpitError::msg(crate::i18n::tf("integrations.issueNotFound", &[("id", &id)])))?;
 
 	Ok(LinearIssueDetail {
 		id: text(issue, "/id"),
@@ -1261,7 +1250,7 @@ pub async fn linear_update_issue(config: &Config, id: &str, patch: Value) -> Res
 		.and_then(|v| v.as_bool())
 		!= Some(true)
 	{
-		return Err(CockpitError::msg("Linear a refusé la modification."));
+		return Err(CockpitError::msg(crate::i18n::t("integrations.linearUpdateRefused")));
 	}
 	Ok(())
 }
@@ -1292,11 +1281,11 @@ pub async fn linear_issues(config: &Config, only_mine: bool) -> Result<Vec<FeedI
 				.unwrap_or(0.0) as i64;
 			// Échelle Linear : 0 = non définie, 1 = urgent … 4 = basse.
 			let (priority_label, priority_tone) = match priority {
-				1 => ("Urgent", "critical"),
-				2 => ("Haute", "warning"),
-				3 => ("Moyenne", "info"),
-				4 => ("Basse", "neutral"),
-				_ => ("Sans priorité", "neutral"),
+				1 => (crate::i18n::t("integrations.priority.urgent"), "critical"),
+				2 => (crate::i18n::t("integrations.priority.high"), "warning"),
+				3 => (crate::i18n::t("integrations.priority.medium"), "info"),
+				4 => (crate::i18n::t("integrations.priority.low"), "neutral"),
+				_ => (crate::i18n::t("integrations.priority.none"), "neutral"),
 			};
 			FeedItem {
 				id: text(issue, "/identifier"),
@@ -1319,7 +1308,7 @@ pub async fn linear_issues(config: &Config, only_mine: bool) -> Result<Vec<FeedI
 				],
 				// La priorité décide de l'ordre dans lequel on prend les tickets :
 				// elle doit se lire dans la liste, pas seulement dans la fiche.
-				tags: vec![tag(priority_label, "", priority_tone)],
+				tags: vec![tag(&priority_label, "", priority_tone)],
 				payload: issue.clone(),
 			}
 		})
@@ -1355,7 +1344,7 @@ pub async fn github_viewer(config: &Config) -> Result<String> {
 	let value = json_get("https://api.github.com/user", &token, "Bearer").await?;
 	let login = text(&value, "/login");
 	if login.is_empty() {
-		return Err(CockpitError::msg("GitHub ne dit pas qui est connecté."));
+		return Err(CockpitError::msg(crate::i18n::t("integrations.githubNoLogin")));
 	}
 	Ok(login)
 }
@@ -1448,7 +1437,7 @@ pub async fn github_pulls_by_branch(
 	config: &Config,
 ) -> Result<std::collections::HashMap<String, BranchPr>> {
 	if config.github.repo.is_empty() {
-		return Err(CockpitError::msg("`github.repo` n'est pas configuré."));
+		return Err(CockpitError::msg(crate::i18n::t("integrations.githubRepoMissing")));
 	}
 	let token = github_token(config).await?;
 	let mut index = std::collections::HashMap::new();
@@ -1613,9 +1602,7 @@ pub async fn github_pull_for_branch(config: &Config, branch: &str) -> Result<Opt
 
 pub async fn github_pulls(config: &Config) -> Result<Vec<FeedItem>> {
 	if config.github.repo.is_empty() {
-		return Err(CockpitError::msg(
-			"Renseigne `github.repo` (ex. acme/monorepo) dans Réglages.",
-		));
+		return Err(CockpitError::msg(crate::i18n::t("integrations.githubRepoSet")));
 	}
 	let token = github_token(config).await?;
 
@@ -1697,7 +1684,7 @@ pub async fn github_pulls(config: &Config) -> Result<Vec<FeedItem>> {
 /// Dernières exécutions de workflows Actions : l'état du CI en un coup d'œil.
 pub async fn github_runs(config: &Config) -> Result<Vec<FeedItem>> {
 	if config.github.repo.is_empty() {
-		return Err(CockpitError::msg("`github.repo` n'est pas configuré."));
+		return Err(CockpitError::msg(crate::i18n::t("integrations.githubRepoMissing")));
 	}
 	let token = github_token(config).await?;
 
@@ -1765,7 +1752,7 @@ pub async fn trigger_runs(config: &Config, environment: Option<&str>) -> Result<
 		Some(name) => available
 			.iter()
 			.find(|env| env.name == name)
-			.ok_or_else(|| CockpitError::msg(format!("Environnement Trigger.dev inconnu : {name}")))?,
+			.ok_or_else(|| CockpitError::msg(crate::i18n::tf("integrations.triggerUnknownEnv", &[("name", &name)])))?,
 		None => &available[0],
 	};
 
@@ -1775,10 +1762,7 @@ pub async fn trigger_runs(config: &Config, environment: Option<&str>) -> Result<
 	// key suit le nom de l'environnement (`tr_dev_`, `tr_prod_`, `tr_staging_`…),
 	// et cette liste n'est pas fermée.
 	if chosen.token.starts_with("tr_pat_") {
-		return Err(CockpitError::msg(
-			"Trigger.dev attend la secret key d'un environnement, pas un Personal Access \
-			 Token `tr_pat_…` (celui du CLI). Dashboard → ton projet → l'environnement → API keys.",
-		));
+		return Err(CockpitError::msg(crate::i18n::t("integrations.triggerPatToken")));
 	}
 
 	let value = json_get(
@@ -1955,19 +1939,18 @@ async fn railway_project_id(config: &Config) -> Result<String> {
 		.unwrap_or_default();
 
 	match projects.as_slice() {
-		[] => Err(CockpitError::msg(
-			"Ce token Railway n'énumère aucun projet (c'est le cas des tokens de portée projet). \
-			 Ouvre le projet dans le dashboard et colle l'identifiant de l'URL \
-			 `railway.com/project/<identifiant>` dans Réglages → Projet Railway.",
-		)),
+		[] => Err(CockpitError::msg(crate::i18n::t("integrations.railwayNoProject"))),
 		[(id, _)] => Ok(id.clone()),
-		several => Err(CockpitError::msg(format!(
-			"Plusieurs projets Railway accessibles ({}) — choisis-en un dans Réglages → Projet Railway.",
-			several
-				.iter()
-				.map(|(id, name)| format!("{name} = {id}"))
-				.collect::<Vec<_>>()
-				.join(", ")
+		several => Err(CockpitError::msg(crate::i18n::tf(
+			"integrations.railwaySeveralProjects",
+			&[(
+				"projects",
+				&several
+					.iter()
+					.map(|(id, name)| format!("{name} = {id}"))
+					.collect::<Vec<_>>()
+					.join(", "),
+			)],
 		))),
 	}
 }
@@ -2036,9 +2019,7 @@ pub async fn stripe_events(config: &Config) -> Result<Vec<FeedItem>> {
 	expect_token_kind(
 		&config.stripe.token,
 		&["rk_", "sk_"],
-		"Stripe refuse les clés publiables (`pk_…`) : l'API serveur exige une clé secrète. \
-		 Crée une clé restreinte en lecture seule (`rk_…`) dans Développeurs → Clés API → \
-		 Clés restreintes, avec le droit `read` sur Events.",
+		&crate::i18n::t("integrations.stripePublishableKey"),
 	)?;
 
 	let value = json_get(
@@ -2109,7 +2090,7 @@ fn is_pull_request(issue: &Value) -> bool {
 
 pub async fn github_issues(config: &Config, only_mine: bool) -> Result<Vec<FeedItem>> {
 	if config.github.repo.is_empty() {
-		return Err(CockpitError::msg("`github.repo` n'est pas configuré."));
+		return Err(CockpitError::msg(crate::i18n::t("integrations.githubRepoMissing")));
 	}
 	let token = github_token(config).await?;
 	let assignee = if only_mine { "&assignee=@me" } else { "" };
@@ -2375,9 +2356,9 @@ pub async fn github_issue_update(config: &Config, number: &str, patch: Value) ->
 		.await?;
 
 	if !response.status().is_success() {
-		return Err(CockpitError::msg(format!(
-			"GitHub a refusé la modification ({}).",
-			response.status()
+		return Err(CockpitError::msg(crate::i18n::tf(
+			"integrations.githubUpdateRefused",
+			&[("status", &response.status())],
 		)));
 	}
 	Ok(())
@@ -2405,9 +2386,7 @@ fn gitlab_api(config: &Config) -> String {
 fn gitlab_project(config: &Config) -> Result<String> {
 	let project = config.gitlab.project.trim();
 	if project.is_empty() {
-		return Err(CockpitError::msg(
-			"Renseigne le chemin du projet GitLab (ex. groupe/projet) dans Réglages.",
-		));
+		return Err(CockpitError::msg(crate::i18n::t("integrations.gitlabProjectSet")));
 	}
 	Ok(urlencoding::encode(project).into_owned())
 }
@@ -2845,9 +2824,9 @@ pub async fn gitlab_issue_update(config: &Config, iid: &str, patch: Value) -> Re
 		.await?;
 
 	if !response.status().is_success() {
-		return Err(CockpitError::msg(format!(
-			"GitLab a refusé la modification ({}).",
-			response.status()
+		return Err(CockpitError::msg(crate::i18n::tf(
+			"integrations.gitlabUpdateRefused",
+			&[("status", &response.status())],
 		)));
 	}
 	Ok(())
@@ -2917,7 +2896,7 @@ pub async fn github_team_issues(
 	logins: &[String],
 ) -> Result<Vec<crate::tickets::TeamIssue>> {
 	if config.github.repo.trim().is_empty() {
-		return Err(CockpitError::msg("`github.repo` n'est pas configuré."));
+		return Err(CockpitError::msg(crate::i18n::t("integrations.githubRepoMissing")));
 	}
 	let token = github_token(config).await?;
 	let repo = &config.github.repo;
@@ -2997,7 +2976,7 @@ pub async fn github_login(config: &Config) -> String {
 /// réveillée. Rend l'identifiant du run relancé.
 pub async fn github_rerun(config: &Config, branch: &str) -> Result<String> {
 	if config.github.repo.is_empty() {
-		return Err(CockpitError::msg("`github.repo` n'est pas configuré."));
+		return Err(CockpitError::msg(crate::i18n::t("integrations.githubRepoMissing")));
 	}
 	let token = github_token(config).await?;
 	let runs = json_get_uncached(
@@ -3015,11 +2994,11 @@ pub async fn github_rerun(config: &Config, branch: &str) -> Result<String> {
 		.get("workflow_runs")
 		.and_then(|value| value.as_array())
 		.and_then(|runs| runs.first())
-		.ok_or_else(|| CockpitError::msg(format!("Aucun run de CI sur « {branch} ».")))?;
+		.ok_or_else(|| CockpitError::msg(crate::i18n::tf("integrations.noCiRun", &[("branch", &branch)])))?;
 	let id = run
 		.get("id")
 		.and_then(|value| value.as_u64())
-		.ok_or_else(|| CockpitError::msg("Le run rendu n'a pas d'identifiant."))?;
+		.ok_or_else(|| CockpitError::msg(crate::i18n::t("integrations.runNoId")))?;
 
 	let response = client()?
 		.post(format!(
@@ -3034,9 +3013,9 @@ pub async fn github_rerun(config: &Config, branch: &str) -> Result<String> {
 	if !response.status().is_success() {
 		let status = response.status();
 		let body = response.text().await.unwrap_or_default();
-		return Err(CockpitError::msg(format!(
-			"GitHub a refusé la relance ({status}) : {}",
-			body.chars().take(200).collect::<String>()
+		return Err(CockpitError::msg(crate::i18n::tf(
+			"integrations.githubRerunRefused",
+			&[("status", &status), ("body", &body.chars().take(200).collect::<String>())],
 		)));
 	}
 	Ok(id.to_string())
@@ -3045,7 +3024,7 @@ pub async fn github_rerun(config: &Config, branch: &str) -> Result<String> {
 /// Pose un label sur une pull request. Se retire d'un clic.
 pub async fn github_add_label(config: &Config, number: u64, label: &str) -> Result<()> {
 	if config.github.repo.is_empty() {
-		return Err(CockpitError::msg("`github.repo` n'est pas configuré."));
+		return Err(CockpitError::msg(crate::i18n::t("integrations.githubRepoMissing")));
 	}
 	let token = github_token(config).await?;
 	let response = client()?
@@ -3062,9 +3041,9 @@ pub async fn github_add_label(config: &Config, number: u64, label: &str) -> Resu
 	if !response.status().is_success() {
 		let status = response.status();
 		let body = response.text().await.unwrap_or_default();
-		return Err(CockpitError::msg(format!(
-			"GitHub a refusé le label ({status}) : {}",
-			body.chars().take(200).collect::<String>()
+		return Err(CockpitError::msg(crate::i18n::tf(
+			"integrations.githubLabelRefused",
+			&[("status", &status), ("body", &body.chars().take(200).collect::<String>())],
 		)));
 	}
 	Ok(())
@@ -3073,7 +3052,7 @@ pub async fn github_add_label(config: &Config, number: u64, label: &str) -> Resu
 /// Retire un label posé. Sert à défaire ce qu'un engagement a produit.
 pub async fn github_remove_label(config: &Config, number: u64, label: &str) -> Result<()> {
 	if config.github.repo.is_empty() {
-		return Err(CockpitError::msg("`github.repo` n'est pas configuré."));
+		return Err(CockpitError::msg(crate::i18n::t("integrations.githubRepoMissing")));
 	}
 	let token = github_token(config).await?;
 	let response = client()?
@@ -3090,8 +3069,9 @@ pub async fn github_remove_label(config: &Config, number: u64, label: &str) -> R
 	// 404 : le label n'y est plus. C'est le résultat voulu, pas une erreur.
 	if !response.status().is_success() && response.status().as_u16() != 404 {
 		let status = response.status();
-		return Err(CockpitError::msg(format!(
-			"GitHub a refusé le retrait du label ({status})."
+		return Err(CockpitError::msg(crate::i18n::tf(
+			"integrations.githubUnlabelRefused",
+			&[("status", &status)],
 		)));
 	}
 	Ok(())
@@ -3106,7 +3086,7 @@ pub async fn github_remove_label(config: &Config, number: u64, label: &str) -> R
 /// message s'affiche sous les yeux de quelqu'un.
 pub async fn github_comment(config: &Config, number: u64, body: &str) -> Result<String> {
 	if config.github.repo.is_empty() {
-		return Err(CockpitError::msg("`github.repo` n'est pas configuré."));
+		return Err(CockpitError::msg(crate::i18n::t("integrations.githubRepoMissing")));
 	}
 	let token = github_token(config).await?;
 	let signed = format!(
@@ -3129,9 +3109,9 @@ pub async fn github_comment(config: &Config, number: u64, body: &str) -> Result<
 	if !response.status().is_success() {
 		let status = response.status();
 		let body = response.text().await.unwrap_or_default();
-		return Err(CockpitError::msg(format!(
-			"GitHub a refusé le commentaire ({status}) : {}",
-			body.chars().take(200).collect::<String>()
+		return Err(CockpitError::msg(crate::i18n::tf(
+			"integrations.githubCommentRefused",
+			&[("status", &status), ("body", &body.chars().take(200).collect::<String>())],
 		)));
 	}
 	let value: Value = response.json().await.unwrap_or(Value::Null);
@@ -3192,18 +3172,19 @@ pub async fn create_pull_request(
 ) -> Result<String> {
 	let title = title.trim();
 	if title.is_empty() {
-		return Err(CockpitError::msg("Une pull request a besoin d'un titre."));
+		return Err(CockpitError::msg(crate::i18n::t("integrations.prTitleRequired")));
 	}
 	if branch == base {
-		return Err(CockpitError::msg(format!(
-			"`{branch}` est la branche de base : il n'y a rien à proposer."
+		return Err(CockpitError::msg(crate::i18n::tf(
+			"integrations.prSameAsBase",
+			&[("branch", &branch)],
 		)));
 	}
 	let (owner, name) = config
 		.github
 		.repo
 		.split_once('/')
-		.ok_or_else(|| CockpitError::msg("Renseigne `github.repo` (ex. acme/monorepo)."))?;
+		.ok_or_else(|| CockpitError::msg(crate::i18n::t("integrations.githubRepoFormat")))?;
 	let token = github_token(config).await?;
 
 	let response = client()?
@@ -3227,7 +3208,7 @@ pub async fn create_pull_request(
 			.ok()
 			.and_then(|value| value.get("message").and_then(|m| m.as_str()).map(String::from))
 			.unwrap_or(raw);
-		return Err(CockpitError::msg(format!("PR refusée ({status}) : {message}")));
+		return Err(CockpitError::msg(crate::i18n::tf("integrations.prRefused", &[("status", &status), ("message", &message)])));
 	}
 	Ok(serde_json::from_str::<Value>(&raw)
 		.ok()
@@ -3238,7 +3219,7 @@ pub async fn create_pull_request(
 /// Ferme une pull request. Sert à défaire un brouillon ouvert par erreur.
 pub async fn close_pull_request(config: &Config, number: u64) -> Result<()> {
 	if config.github.repo.is_empty() {
-		return Err(CockpitError::msg("`github.repo` n'est pas configuré."));
+		return Err(CockpitError::msg(crate::i18n::t("integrations.githubRepoMissing")));
 	}
 	let token = github_token(config).await?;
 	let response = client()?
@@ -3252,9 +3233,9 @@ pub async fn close_pull_request(config: &Config, number: u64) -> Result<()> {
 		.send()
 		.await?;
 	if !response.status().is_success() {
-		return Err(CockpitError::msg(format!(
-			"GitHub a refusé la fermeture ({}).",
-			response.status()
+		return Err(CockpitError::msg(crate::i18n::tf(
+			"integrations.githubCloseRefused",
+			&[("status", &response.status())],
 		)));
 	}
 	Ok(())

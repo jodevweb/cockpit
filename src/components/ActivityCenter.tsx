@@ -3,6 +3,7 @@ import { Check, ChevronDown, Hand, Loader2, Pause, X } from "lucide-react";
 import { useAgentActions, useAgentRuns, type AgentRun } from "@/app/agents";
 import { AnimatePresence, motion } from "motion/react";
 import { useEffect, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { duration, fromSeconds } from "@/lib/format";
 import { dismissActivity, openActivities, setActivitiesCollapsed, useActivities, type Activity } from "@/lib/activity";
 
@@ -46,6 +47,7 @@ function lastAt(run: AgentRun): number | null {
 const REPLIED_FOR_MS = 12 * 3600_000;
 
 function useAgentPulses(): AgentPulse[] {
+	const { t } = useTranslation("components3");
 	const { runs, pendingFor } = useAgentRuns();
 	const out: AgentPulse[] = [];
 	for (const run of runs) {
@@ -56,18 +58,23 @@ function useAgentPulses(): AgentPulse[] {
 				run,
 				kind: "asks",
 				since: lastAt(run),
-				what: asks[0]?.tool === "AskUserQuestion" ? "te pose une question" : `demande l'autorisation · ${asks[0]?.tool ?? "outil"}`,
+				what:
+					asks[0]?.tool === "AskUserQuestion"
+						? t("activityCenter.pulse.asksQuestion")
+						: t("activityCenter.pulse.asksPermission", {
+								tool: asks[0]?.tool ?? t("activityCenter.pulse.tool"),
+							}),
 			});
 			continue;
 		}
 		if (run.thinking) {
-			out.push({ run, kind: "working", since: lastAt(run), what: run.activity ? `utilise ${run.activity}` : "réfléchit" });
+			out.push({ run, kind: "working", since: lastAt(run), what: run.activity ? t("activityCenter.pulse.using", { tool: run.activity }) : t("activityCenter.pulse.thinking") });
 			continue;
 		}
 		const last = [...run.turns].reverse().find((turn) => turn.kind === "assistant" || turn.kind === "user");
 		const at = lastAt(run);
 		if (last?.kind === "assistant" && at && Date.now() - at < REPLIED_FOR_MS) {
-			out.push({ run, kind: "replied", since: at, what: "a fini — rien ne tourne, il attend ta consigne" });
+			out.push({ run, kind: "replied", since: at, what: t("activityCenter.pulse.replied") });
 		}
 	}
 	return out;
@@ -81,6 +88,7 @@ function useAgentPulses(): AgentPulse[] {
  * agent qui avait fini depuis longtemps.
  */
 export function ActivityChip() {
+	const { t } = useTranslation("components3");
 	const { activities, collapsed, manual } = useActivities();
 	const pulses = useAgentPulses();
 	const running = activities.filter((activity) => activity.state === "running").length;
@@ -93,15 +101,23 @@ export function ActivityChip() {
 		<button
 			type="button"
 			onClick={() => (open ? setActivitiesCollapsed(true) : openActivities())}
-			title={open ? "Replier" : "Ce qui tourne, et ce qui t'attend"}
+			title={open ? t("activityCenter.chip.collapse") : t("activityCenter.chip.hint")}
 			className={clsx(
 				"focus-ring flex h-7 shrink-0 items-center gap-1.5 rounded-lg px-2.5 text-[12px] font-medium transition-colors",
 				working > 0 ? "bg-accent-dim text-accent-soft" : yours > 0 ? "bg-warning/12 text-warning" : "bg-success/12 text-success",
 			)}
 		>
 			{working > 0 ? <Loader2 size={13} className="animate-spin" /> : yours > 0 ? <Hand size={13} /> : <Check size={13} />}
-			{working > 0 ? `${working} au travail` : yours > 0 ? "À toi" : "Terminé"}
-			{working > 0 && yours > 0 ? <span className="rounded bg-warning/15 px-1 text-warning">à toi · {yours}</span> : null}
+			{working > 0
+				? t("activityCenter.chip.working", { count: working })
+				: yours > 0
+					? t("activityCenter.chip.yours")
+					: t("activityCenter.chip.done")}
+			{working > 0 && yours > 0 ? (
+				<span className="rounded bg-warning/15 px-1 text-warning">
+					{t("activityCenter.chip.yoursCount", { count: yours })}
+				</span>
+			) : null}
 			{working === 0 && yours > 1 ? <span>· {yours}</span> : null}
 		</button>
 	);
@@ -109,6 +125,7 @@ export function ActivityChip() {
 
 /** Le panneau, sous la barre du haut : le cockpit, les agents, ce qui t'attend. */
 export function ActivityPanel() {
+	const { t } = useTranslation("components3");
 	const { activities, collapsed, manual } = useActivities();
 	const pulses = useAgentPulses();
 	const { show } = useAgentActions();
@@ -132,21 +149,25 @@ export function ActivityPanel() {
 				>
 					<header className="flex items-center gap-2 px-3.5 pt-3 pb-2">
 						<span className="text-[12px] font-semibold text-ink">
-							{running ? "Ça tourne" : yours.length > 0 ? "À toi de jouer" : "Rien ne tourne"}
+							{running
+								? t("activityCenter.panel.running")
+								: yours.length > 0
+									? t("activityCenter.panel.yourTurn")
+									: t("activityCenter.panel.idle")}
 						</span>
 						<button
 							type="button"
 							onClick={() => setActivitiesCollapsed(true)}
 							className="focus-ring ml-auto flex items-center gap-1 rounded-md px-1.5 py-0.5 text-[11px] text-ink-muted hover:bg-hover hover:text-ink"
-							title="Replier dans la barre du haut"
+							title={t("activityCenter.panel.collapseHint")}
 						>
 							<ChevronDown size={12} />
-							Réduire
+							{t("activityCenter.panel.collapse")}
 						</button>
 					</header>
 					<div className="flex min-h-0 flex-col gap-3 overflow-y-auto px-2.5 pb-3">
 						{activities.length > 0 ? (
-							<Section title="Cockpit s'en occupe">
+							<Section title={t("activityCenter.panel.cockpit")}>
 								<AnimatePresence initial={false}>
 									{activities.map((activity) => (
 										<motion.div
@@ -164,14 +185,14 @@ export function ActivityPanel() {
 							</Section>
 						) : null}
 						{working.length > 0 ? (
-							<Section title="Au travail">
+							<Section title={t("activityCenter.panel.working")}>
 								{working.map((pulse) => (
 									<AgentLine key={pulse.run.id} pulse={pulse} now={now} onOpen={() => show(pulse.run.id)} />
 								))}
 							</Section>
 						) : null}
 						{yours.length > 0 ? (
-							<Section title="À toi de jouer">
+							<Section title={t("activityCenter.panel.yourTurn")}>
 								{yours.map((pulse) => (
 									<AgentLine key={pulse.run.id} pulse={pulse} now={now} onOpen={() => show(pulse.run.id)} />
 								))}
@@ -179,7 +200,7 @@ export function ActivityPanel() {
 						) : null}
 						{activities.length === 0 && working.length === 0 && yours.length === 0 ? (
 							<p className="px-1.5 py-2 text-[12px] text-ink-muted">
-								Aucun agent ne travaille, aucune action en cours : rien ne se passe en arrière-plan.
+								{t("activityCenter.panel.empty")}
 							</p>
 						) : null}
 					</div>
@@ -199,6 +220,7 @@ function Section({ title, children }: { title: string; children: React.ReactNode
 }
 
 function AgentLine({ pulse, now, onOpen }: { pulse: AgentPulse; now: number; onOpen: () => void }) {
+	const { t } = useTranslation("components3");
 	const tone =
 		pulse.kind === "working" ? "bg-accent-dim/50" : pulse.kind === "asks" ? "bg-warning/12" : "bg-raised";
 	return (
@@ -206,7 +228,7 @@ function AgentLine({ pulse, now, onOpen }: { pulse: AgentPulse; now: number; onO
 			type="button"
 			onClick={onOpen}
 			className={clsx("focus-ring relative flex w-full items-start gap-2.5 overflow-hidden rounded-xl px-3 py-2 text-left hover:brightness-95", tone)}
-			title="Ouvrir l'agent"
+			title={t("activityCenter.openAgent")}
 		>
 			{pulse.kind === "working" ? <span className="loading-bar absolute inset-x-0 bottom-0 h-0.5" aria-hidden /> : null}
 			<span
@@ -233,6 +255,7 @@ function AgentLine({ pulse, now, onOpen }: { pulse: AgentPulse; now: number; onO
 }
 
 function Row({ activity, now }: { activity: Activity; now: number }) {
+	const { t } = useTranslation("components3");
 	const [open, setOpen] = useState(false);
 	const current = activity.steps[activity.steps.length - 1];
 	const elapsed = ((activity.endedAt ?? now) - activity.startedAt) / 1000;
@@ -265,7 +288,9 @@ function Row({ activity, now }: { activity: Activity; now: number }) {
 						<span className="shrink-0 font-mono text-[10.5px] text-ink-faint tabular-nums">{duration(Math.max(0, elapsed))}</span>
 					</div>
 					<p className={clsx("mt-0.5 text-[11.5px] leading-snug", failed ? "text-critical" : "text-ink-muted")}>
-						{activity.state === "running" ? (current?.text ?? "Je m'en occupe…") : (activity.result ?? (failed ? "Échec." : "C'est fait."))}
+						{activity.state === "running"
+							? (current?.text ?? t("activityCenter.row.working"))
+							: (activity.result ?? (failed ? t("activityCenter.row.failed") : t("activityCenter.row.done")))}
 					</p>
 					{activity.steps.length > 1 ? (
 						<button
@@ -273,7 +298,9 @@ function Row({ activity, now }: { activity: Activity; now: number }) {
 							onClick={() => setOpen((value) => !value)}
 							className="focus-ring mt-1 rounded text-[10.5px] text-ink-faint hover:text-ink"
 						>
-							{open ? "Masquer les étapes" : `${activity.steps.length} étapes`}
+							{open
+								? t("activityCenter.row.hideSteps")
+								: t("activityCenter.row.steps", { count: activity.steps.length })}
 						</button>
 					) : null}
 					{open ? (
@@ -291,7 +318,7 @@ function Row({ activity, now }: { activity: Activity; now: number }) {
 						type="button"
 						onClick={() => dismissActivity(activity.id)}
 						className="focus-ring rounded p-0.5 text-ink-faint hover:text-ink"
-						title={running ? "Ne plus suivre ici (l'action continue)" : "Écarter"}
+						title={running ? t("activityCenter.row.unfollow") : t("activityCenter.row.dismiss")}
 					>
 						<X size={12} />
 					</button>

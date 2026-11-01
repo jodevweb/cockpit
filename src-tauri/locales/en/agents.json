@@ -1,1 +1,389 @@
-{}
+{
+	"brief": {
+		"sources": {
+			"conventions": {
+				"label": "The repository's rules",
+				"hint": "where the repository writes its conventions, and the skills it stores — an engine only reads the file of its own family"
+			},
+			"product": {
+				"label": "What the product does",
+				"hint": "the sentence declared for reading changes — without it, an agent only talks about the code"
+			},
+			"lessons": {
+				"label": "The project notebook",
+				"hint": "what has already had to be redone by hand, filtered on the files at stake"
+			},
+			"place": {
+				"label": "The branch and its state",
+				"hint": "base, divergence, uncommitted files, latest commits — read from the repository, always available"
+			},
+			"ticket": {
+				"label": "The branch's ticket",
+				"hint": "the request and its comments, from the declared tracker"
+			},
+			"review": {
+				"label": "Review feedback",
+				"hint": "description and discussion of the merge request opened on this branch"
+			},
+			"attempts": {
+				"label": "What has already been tried",
+				"hint": "past conversations in this folder, one line each"
+			}
+		},
+		"missing": {
+			"noFolder": "the folder does not exist",
+			"ticket": "ticket {{id}} unreadable ({{error}})",
+			"pullRequests": "pull requests unreadable ({{error}})",
+			"pullRequest": "pull request #{{number}} unreadable ({{error}})",
+			"mergeRequests": "merge requests unreadable ({{error}})",
+			"mergeRequestNotes": "discussion of MR !{{iid}} unreadable ({{error}})"
+		},
+		"sections": {
+			"product": {
+				"label": "The product",
+				"detail": "what the team declared"
+			},
+			"lessons": {
+				"label": "The notebook"
+			},
+			"place": {
+				"label": "The branch",
+				"detail": "repository state"
+			},
+			"ticket": {
+				"label": "Ticket {{identifier}}"
+			},
+			"review": {
+				"label": "Review {{reference}}",
+				"descriptionOnly": "description only"
+			},
+			"attempts": {
+				"label": "Attempts"
+			}
+		},
+		"count": {
+			"lessons_one": "{{count}} lesson",
+			"lessons_other": "{{count}} lessons",
+			"feedback_one": "{{count}} comment",
+			"feedback_other": "{{count}} comments",
+			"conversations_one": "{{count}} conversation",
+			"conversations_other": "{{count}} conversations",
+			"skills_one": "{{count}} skill",
+			"skills_other": "{{count}} skills",
+			"files_one": "{{count}} file",
+			"files_other": "{{count}} files"
+		}
+	},
+	"impact": {
+		"errors": {
+			"folder": "Analyses folder: {{error}}",
+			"unreadable": "Unreadable analysis: {{error}}",
+			"write": "Writing the analysis: {{error}}",
+			"alreadyRunning": "An analysis of this change is already running.",
+			"changeGone": "This change no longer exists: the pull request was closed, or the branch is gone.",
+			"noWorkdir": "No folder for the agent to work in."
+		},
+		"interrupted": {
+			"label": "Reading interrupted by the cockpit closing",
+			"detail": "The agent running it stops with the application. Restart it from the Impact screen."
+		},
+		"journal": {
+			"analysis": "Change analysis"
+		},
+		"rawReportTitle": "The report"
+	},
+	"properties": {
+		"errors": {
+			"folder": "Properties folder: {{error}}",
+			"serialize": "Serialization: {{error}}",
+			"write": "Write: {{error}}",
+			"changeGone": "This change no longer exists.",
+			"noneDeclared": "This project has not declared any properties. Write what must stay true in Settings → Agents, or ask the cockpit to suggest some based on your own fixes.",
+			"noneApplicable": "None of the declared properties concern the files in this change.",
+			"noWorkdir": "No folder for the agents to work in.",
+			"propertyGone": "This property no longer exists.",
+			"repoMissing": "This project's main repository cannot be found on this machine.",
+			"noFixesCalibration": "No identifiable fix in the last four hundred commits. Calibration relies on commits that fix something: without them, nothing tells whether this property can fail.",
+			"noFixesSuggest": "No identifiable fix in the recent history: nothing to build on to suggest properties specific to this repository.",
+			"nothingUsable": "The agent suggested nothing usable. Try again, or write the first property yourself."
+		},
+		"judgeSilent": "The judge did not answer: {{error}}",
+		"journal": {
+			"label": "Property check",
+			"broken": "{{count}} broken"
+		}
+	},
+	"team": {
+		"priority": {
+			"urgent": "Urgent",
+			"high": "High",
+			"medium": "Medium",
+			"low": "Low"
+		},
+		"errors": {
+			"unknown": "error",
+			"linear": "Linear: {{message}}",
+			"github": "GitHub: {{message}}",
+			"noMembers": "No members declared: add the team in Settings → Team. Each person needs their task tracker identifier so their tickets can be attached to them, and their GitHub login for their pull requests.",
+			"githubRepoMissing": "Fill in `github.repo` (e.g. acme/monorepo) in Settings."
+		},
+		"narrative": {
+			"theirTopics": "their topics",
+			"and": "{{list}} and {{last}}",
+			"activeTickets_one": "{{count}} active ticket",
+			"activeTickets_other": "{{count}} active tickets",
+			"reviewTickets_one": "{{count}} ticket in review",
+			"reviewTickets_other": "{{count}} tickets in review",
+			"openPrs_one": "{{count}} open PR",
+			"openPrs_other": "{{count}} open PRs",
+			"newOpenPrs_one": "{{count}} new PR opened",
+			"newOpenPrs_other": "{{count}} new PRs opened",
+			"prs_one": "{{count}} PR",
+			"prs_other": "{{count}} PRs",
+			"blockingPoints_one": "{{count}} blocking issue",
+			"blockingPoints_other": "{{count}} blocking issues",
+			"nothingActiveDev": "{{name}} has nothing active and no open PR right now.",
+			"nothingActive": "{{name}} has no active topic tracked here.",
+			"variedTopics": "{{name}} is moving forward on various topics{{load}}.",
+			"alsoOn": ", and also {{themes}}",
+			"mostlyOn": "{{name}} is mostly on {{theme}}{{tail}}{{load}}.",
+			"workingOn": "{{name}} is working on {{themes}}{{load}}.",
+			"nothingMerged": "Nothing merged since the last daily.",
+			"openedNothingMerged": "{{opened}} since the last daily, nothing merged yet.",
+			"shippedOn": " on {{themes}}",
+			"andOpened": ", and {{opened}}",
+			"shipped": "Shipped {{prs}}{{themes}} since the last daily{{opened}}.",
+			"toChallenge": "{{count}} to challenge",
+			"toReview": "{{prs}} to review for others",
+			"nothingStuck": "Nothing stuck on their side.",
+			"toWatch": "To watch: {{items}}."
+		},
+		"days": "{{count}}d",
+		"flags": {
+			"blockedOne": "{{id}} marked Blocked — what would unblock it?",
+			"blockedMany": "{{count}} tickets marked Blocked ({{ids}}) — what would unblock them?",
+			"stacked": "PR #{{number}} based on `{{base}}` (not dev) — merge the base first?",
+			"ciFailing": "PR #{{number}} failing CI — fix before review/merge.",
+			"approved": "PR #{{number}} approved but not merged — what is blocking the merge?",
+			"changesRequested": "PR #{{number}}: changes requested — for the author to address.",
+			"reviewStaleOne": "PR #{{number}} waiting for review for {{age}}d — find a review slot?",
+			"reviewStaleMany": "{{count}} PRs waiting for review for >{{days}}d ({{numbers}}, oldest {{age}}d) — plan a review?",
+			"draftStale": "{{count}} PR(s) in draft for >{{days}}d ({{numbers}}) — still relevant?",
+			"inProgressNoPrOne": "{{id}} has been In Progress with no PR for >{{days}}d — where is it at?",
+			"inProgressNoPrMany": "{{count}} tickets In Progress with no PR for >{{days}}d ({{ids}}) — where are they at?",
+			"reviewStale": "{{count}} ticket(s) in review for >{{days}}d ({{ids}}) — waiting on whom?",
+			"wip": "{{count}} tickets In Progress in parallel — prioritize / refocus?",
+			"assigneeMismatch": "{{issue}} assigned to {{name}} but coded by @{{author}} (PR #{{number}}) — reassign?",
+			"idleNothing": "no open PR and no active ticket — what are you working on?",
+			"idleStale": "no open PR and active tickets with no recent activity — available? blocked?"
+		}
+	},
+	"automations": {
+		"errors": {
+			"serialize": "Automations: {{error}}",
+			"noName": "Give it a name.",
+			"badTime": "The time is written HH:MM, for example 14:00.",
+			"unreadableAnswer": "The agent's answer was not readable.",
+			"alreadyRunning": "It is already running.",
+			"emptyCorrection": "The correction is empty.",
+			"notFound": "Automation not found.",
+			"runNotFound": "Run not found.",
+			"noOutput": "This run has no output.",
+			"noChromium": "Chrome (or a Chromium browser) is needed to produce the PDF. The Markdown can always be copied.",
+			"pdfTimeout": "The browser did not render the PDF within a minute.",
+			"pdfNotProduced": "PDF not produced. {{detail}}",
+			"noSlackWebhook": "Fill in this automation's Slack webhook in its settings.",
+			"slack": "Slack: {{error}}",
+			"slackRefused": "Slack refused: {{status}}"
+		},
+		"missed": {
+			"closedNoCatchUp": "The cockpit was closed at the scheduled time, and catch-up is turned off.",
+			"closedUntilAfter": "The cockpit was closed until after the meeting."
+		},
+		"items": {
+			"draft": "draft",
+			"agentsIn": "Agents in {{name}}",
+			"turns_one": "{{count}} turn",
+			"turns_other": "{{count}} turns",
+			"minutes": "{{count}} min"
+		},
+		"sources": {
+			"noLinearToken": "no Linear token in the settings",
+			"noSentryToken": "no Sentry token in the settings",
+			"tracker": "task tracker"
+		},
+		"nothingFound": "Nothing found over the period in the sources read.",
+		"notify": {
+			"linesReady_one": "{{count}} line ready.",
+			"linesReady_other": "{{count}} lines ready.",
+			"silent": "No answer: {{sources}}.",
+			"ready": "{{name}} is ready",
+			"failed": "{{name}} did not complete"
+		},
+		"render": {
+			"silent": "No answer this time: {{sources}}.",
+			"period": "From {{from}} to {{to}}",
+			"slackPeriod": "from {{from}} to {{to}}"
+		}
+	},
+	"permanence": {
+		"closed": {
+			"disabled": "Disabled in the settings.",
+			"suspended": "Suspended. Running engagements finish; no new one starts.",
+			"offHours": "Outside the declared service hours.",
+			"capped": "Daily cap reached. It will start again tomorrow.",
+			"quota": "Shared quota below the floor: it leaves room for you.",
+			"tripped": "Circuit breaker: too many failures in a row. It stopped itself."
+		},
+		"verdict": {
+			"pending": "running",
+			"reached": "reached",
+			"missed": "missed",
+			"offTopic": "off-topic",
+			"undecided": "undecidable",
+			"rehearsed": "rehearsal"
+		},
+		"tripped": "{{count}} failures in a row. Last: {{last}}",
+		"journal": {
+			"breakerTripped": "Circuit breaker tripped",
+			"emergencyStop": "Emergency stop",
+			"undo": "Engagement undone",
+			"act": "Action: {{tool}}",
+			"missionOpened": "Mission opened by the Permanence",
+			"rule": "rule “{{rule}}”",
+			"ruleAwaiting": "rule “{{rule}}” — the plan awaits your approval"
+		},
+		"halt": {
+			"requested": "Stop requested.",
+			"cannotStop": "{{kind}} · {{what}} — the cockpit does not know how to stop it",
+			"summary": "{{stopped}} stopped, {{failed}} failed"
+		},
+		"undo": {
+			"nothingProduced": "Nothing was produced: there is nothing to undo.",
+			"cannotUndo": "The cockpit does not know how to undo: {{items}}. To be handled by hand.",
+			"engagementGone": "This engagement no longer exists.",
+			"missionPaused": "mission “{{name}}” paused",
+			"missionFailed": "mission “{{name}}” — {{error}}",
+			"labelRemoved": "label “{{label}}” removed",
+			"labelFailed": "label “{{label}}” — {{error}}",
+			"labelNoTarget": "label “{{label}}” — unreadable target",
+			"cannotUndoKind": "{{kind}} · {{what}} — the cockpit does not know how to undo it",
+			"step": "undoes what was done",
+			"stepResult": "{{undone}} undone, {{failed}} resisted",
+			"summary": "{{undone}} undone, {{failed}} failed"
+		},
+		"signals": {
+			"clock": "Clock",
+			"every": "{{rule}} — every {{hours}} h",
+			"author": "author: {{author}}",
+			"reviewRequested": "review requested from: {{people}}",
+			"noPriority": "no priority",
+			"assignedToMe": "assigned to me · priority: {{priority}}"
+		},
+		"dropped": {
+			"noTrigger": "no recognized trigger",
+			"noActiveRule": "no active rule",
+			"noNode": "triage unavailable: Node not found",
+			"noAnswer": "triage gave no answer: {{error}}",
+			"notDecided": "triage did not decide",
+			"byTriage": "dismissed by triage",
+			"ruleGone": "the rule “{{rule}}” no longer exists"
+		},
+		"blind": {
+			"linear": "Linear: {{error}}",
+			"source": "{{source}}: {{message}}"
+		},
+		"cannotOpen": {
+			"running": "an engagement is already running ({{max}} at most at a time)",
+			"quarantined": "this item was just handled; it is left alone for {{hours}} h",
+			"dailyCap": "daily cap reached ({{max}} engagements)"
+		},
+		"oracle": {
+			"none": "No oracle declared: nothing can tell whether the goal is reached.",
+			"unknownKind": "The cockpit does not know how to query an oracle of type “{{kind}}”.",
+			"commandGone": "The command “{{id}}” is no longer declared in this repository.",
+			"commandSensitive": "“{{name}}” is marked sensitive: it cannot serve as proof. Checking must not change anything.",
+			"noRepo": "No local repository to run the command in.",
+			"commandOk": "`{{line}}` exited with 0.",
+			"commandFailed": "`{{line}}` failed ({{code}}). {{tail}}",
+			"commandNotLaunched": "`{{line}}` could not be launched: {{error}}",
+			"commandTimeout": "`{{line}}` returned nothing after ten minutes.",
+			"forgesSilent": "The forges did not answer: {{error}}",
+			"changeGone": "This change no longer exists: it was merged or closed.",
+			"ciGreen": "CI is green.",
+			"ciRed": "CI is still red.",
+			"ciPending": "CI has not concluded (state: {{state}}).",
+			"noGithubAccount": "The GitHub account could not be determined (`gh` missing or not signed in).",
+			"commented": "A comment from {{me}} was posted on #{{number}}.",
+			"notCommented": "No comment from {{me}} on #{{number}}.",
+			"githubSilent": "GitHub did not answer: {{error}}",
+			"checkFailed": "The check failed: {{error}}",
+			"propertyNotApplicable": "The property “{{id}}” does not apply to this change."
+		},
+		"errors": {
+			"notPullRequest": "This change is not a pull request."
+		},
+		"engagement": {
+			"noNode": "Node cannot be found: the agent could not declare its intent, and a plan read from text is not a plan.",
+			"agentSilent": "The agent did not answer: {{error}}",
+			"agentSilentShort": "the agent did not answer",
+			"noIntent": "The agent declared no intent. Without a statable goal, nothing goes out.",
+			"noIntentShort": "no intent declared",
+			"planned": "planned, not executed",
+			"plannedWhy": "planned — {{why}}",
+			"openMissionStep": "open a mission",
+			"openMissionWhy": "code must be written: the work will go through a mission",
+			"rehearsed": "Rehearsal: the plan is written, nothing was done.",
+			"missionNotAllowed": "Code would have had to be written, and “open a mission” is not in the allow list. Nothing was done.",
+			"sharedBranch": "The integration branch would be “{{branch}}”, which is shared. Nothing was done.",
+			"missionOpenedStep": "opens a mission",
+			"missionName": "mission “{{name}}”",
+			"awaitingApprovalStep": "awaits your approval",
+			"awaitingApprovalWhy": "this rule asks for the human gate again: the plan is waiting",
+			"missionFailed": "The mission could not be opened: {{error}}",
+			"missionFailedShort": "mission could not be opened",
+			"resolvedWithoutActs": "{{why}} No action was requested: the situation resolved without it.",
+			"resolvedAllRefused": "{{why}} No action could be taken: it was not what settled this.",
+			"someRefused": "{{why}} {{count}} action(s) refused.",
+			"missionGone": "The mission has disappeared: impossible to say what became of it.",
+			"missionGoneShort": "mission disappeared",
+			"missionFailedNote": "The mission failed. {{note}}",
+			"askOracle": "queries the oracle"
+		},
+		"acts": {
+			"notAllowed": "“{{power}}” is not in the allow list: the action was not taken.",
+			"sharedBranch": "“{{branch}}” is a shared branch: the Permanence never writes to it. It only works on branches of its own.",
+			"noBranch": "Cannot find the branch of this change.",
+			"rerun": "run #{{id}} restarted",
+			"noLabel": "No label requested.",
+			"labelSet": "label “{{label}}” set",
+			"labelOn": "{{label}} on #{{number}}",
+			"commandUnknown": "The command “{{id}}” is not declared.",
+			"commandSensitive": "“{{name}}” is marked sensitive: it does not run without you.",
+			"noBranchName": "No branch name requested.",
+			"sharedBranchName": "“{{name}}” is a shared branch name: it will not take it.",
+			"noRepo": "No local repository.",
+			"branchCreated": "branch “{{name}}” created",
+			"noWorktreeBranch": "No branch for the worktree.",
+			"sharedWorktree": "“{{branch}}” is a shared branch: it does not check it out as a worktree, otherwise an agent would write to it at the next action.",
+			"worktreeByAgent": "Worktree creation goes through an agent command: it needs someone present.",
+			"worktreeOpened": "worktree of “{{branch}}” checked out",
+			"lineFailed": "`{{line}}` failed: {{error}}",
+			"draftOpened": "Draft PR opened: {{url}}",
+			"draftLabel": "draft · {{branch}}",
+			"noWorktree": "The branch “{{branch}}” is not checked out as a worktree: an agent started in the main repository would write where you are working.",
+			"needsApp": "Starting an agent needs the application: it does not start from a test bench.",
+			"agentOn": "agent on {{branch}}",
+			"agentStarted": "agent started in {{worktree}}",
+			"noText": "No text to write.",
+			"commented": "comment posted, signed",
+			"commentOn": "comment on #{{number}}",
+			"unknown": "The cockpit does not know how to perform “{{tool}}”."
+		},
+		"comment": {
+			"disabled": "The power to comment is not enabled.",
+			"noScopes": "No condition is checked: it comments nowhere, by design.",
+			"noCondition": "No condition is true on #{{number}}: it is not allowed to write there."
+		}
+	}
+}

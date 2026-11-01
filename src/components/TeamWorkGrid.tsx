@@ -26,6 +26,8 @@ import type { MemberBoard, MemberPr, TicketCard } from "@/lib/types";
 import { usePersistentState, useAsync } from "@/lib/useAsync";
 import { useAgentActions } from "@/app/agents";
 import { useCockpit } from "@/app/store";
+import { t as translate } from "@/i18n";
+import { useTranslation } from "react-i18next";
 
 /**
  * Qui travaille sur quoi, à l'instant T.
@@ -37,9 +39,8 @@ import { useCockpit } from "@/app/store";
  */
 
 interface WorkView {
+	/** Sert aussi de clé de traduction : `teamWorkGrid.view.<id>.label` / `.hint`. */
 	id: string;
-	label: string;
-	hint: string;
 	/** Retient les PR à montrer ; `null` les garde toutes. */
 	pr: ((pr: MemberPr) => boolean) | null;
 	/** Masque les personnes que la vue ne concerne pas. */
@@ -51,30 +52,22 @@ const BASE_BRANCHES = new Set(["dev", "main", "master", "stage"]);
 const VIEWS: WorkView[] = [
 	{
 		id: "all",
-		label: "Tout",
-		hint: "Tickets du cycle et PR ouvertes",
 		pr: null,
 		membersWithPrOnly: false,
 	},
 	{
 		id: "blocked",
-		label: "Ça bloque",
-		hint: "CI en échec, changements demandés, PR empilées",
 		pr: (pr) =>
 			pr.ciState === "failing" || pr.reviewDecision === "CHANGES_REQUESTED" || pr.stacked,
 		membersWithPrOnly: true,
 	},
 	{
 		id: "review",
-		label: "Attend une review",
-		hint: "Ni approuvée, ni brouillon : la balle est chez les relecteurs",
 		pr: (pr) => !pr.isDraft && pr.reviewDecision !== "APPROVED" && pr.ciState !== "failing",
 		membersWithPrOnly: true,
 	},
 	{
 		id: "ready",
-		label: "À merger",
-		hint: "Approuvées, CI verte, sur une branche de base",
 		pr: (pr) =>
 			pr.reviewDecision === "APPROVED" &&
 			pr.ciState === "success" &&
@@ -87,17 +80,21 @@ const VIEWS: WorkView[] = [
 /** État d'une PR, dans l'ordre où il faut s'en occuper. */
 function prState(pr: MemberPr): { rank: number; label: string; tone: string } {
 	if (pr.ciState === "failing")
-		return { rank: 0, label: "CI en échec", tone: "text-critical" };
+		return { rank: 0, label: translate("components1:teamWorkGrid.prState.ciFailing"), tone: "text-critical" };
 	if (pr.reviewDecision === "CHANGES_REQUESTED")
-		return { rank: 1, label: "changements demandés", tone: "text-warning" };
+		return { rank: 1, label: translate("components1:teamWorkGrid.prState.changesRequested"), tone: "text-warning" };
 	if (pr.stacked)
-		return { rank: 2, label: `empilée sur ${pr.baseRef}`, tone: "text-critical" };
+		return {
+			rank: 2,
+			label: translate("components1:teamWorkGrid.prState.stacked", { base: pr.baseRef }),
+			tone: "text-critical",
+		};
 	if (pr.reviewDecision === "APPROVED" && pr.ciState === "success")
-		return { rank: 3, label: "prête à merger", tone: "text-success" };
+		return { rank: 3, label: translate("components1:teamWorkGrid.prState.ready"), tone: "text-success" };
 	if (pr.ciState === "pending")
-		return { rank: 4, label: "CI en cours", tone: "text-warning" };
-	if (pr.isDraft) return { rank: 5, label: "brouillon", tone: "text-ink-faint" };
-	return { rank: 4, label: "en attente de review", tone: "text-ink-faint" };
+		return { rank: 4, label: translate("components1:teamWorkGrid.prState.ciPending"), tone: "text-warning" };
+	if (pr.isDraft) return { rank: 5, label: translate("components1:teamWorkGrid.prState.draft"), tone: "text-ink-faint" };
+	return { rank: 4, label: translate("components1:teamWorkGrid.prState.awaitingReview"), tone: "text-ink-faint" };
 }
 
 function urgency(prs: MemberPr[]): number {
@@ -128,6 +125,7 @@ export function TeamWorkGrid({
 	/** Masque la barre de personnes, quand l'hôte en a déjà une. */
 	compact?: boolean;
 } = {}) {
+	const { t } = useTranslation("components1");
 	const { notify, worktrees, go } = useCockpit();
 	const { open: openAgent } = useAgentActions();
 	const [viewId, setViewId] = usePersistentState("team.view", "all");
@@ -145,6 +143,7 @@ export function TeamWorkGrid({
 		enabled: given === undefined,
 	});
 	const view = VIEWS.find((entry) => entry.id === viewId) ?? VIEWS[0];
+	const viewLabel = t(`teamWorkGrid.view.${view.id}.label`);
 	const everyone = useMemo(() => given ?? board.data?.members ?? [], [given, board.data]);
 
 	const open = (url: string) => {
@@ -154,12 +153,12 @@ export function TeamWorkGrid({
 	const onAgent = (branch: string) => {
 		const tree = treeOf(branch);
 		if (tree) openAgent(tree.path);
-		else notify("Aucun worktree local pour cette branche.");
+		else notify(t("teamWorkGrid.noWorktree"));
 	};
 	const onWorktree = (branch: string) => {
 		const tree = treeOf(branch);
 		if (tree) go("worktrees", { worktreePath: tree.path });
-		else notify("Aucun worktree local pour cette branche.");
+		else notify(t("teamWorkGrid.noWorktree"));
 	};
 
 	const cards = useMemo(() => {
@@ -202,9 +201,9 @@ export function TeamWorkGrid({
 							icon={Users}
 							active={focus === null}
 							onClick={() => setFocus(null)}
-							title="Toute l'équipe"
+							title={t("teamWorkGrid.wholeTeam")}
 						>
-							Tous
+							{t("teamWorkGrid.everyone")}
 						</Button>
 						{everyone.map((member) => {
 							const active = focus === member.name;
@@ -214,7 +213,11 @@ export function TeamWorkGrid({
 									key={member.name}
 									type="button"
 									onClick={() => setFocus(active ? null : member.name)}
-									title={`${member.name} — ${member.prs.length} PR, ${member.metrics.activeWip} ticket(s) actif(s)`}
+									title={t("teamWorkGrid.memberTitle", {
+										name: member.name,
+										prs: member.prs.length,
+										count: member.metrics.activeWip,
+									})}
 									className={clsx(
 										"focus-ring flex h-7 items-center gap-1.5 rounded-lg border px-2 text-[11px] transition-colors",
 										active
@@ -247,18 +250,18 @@ export function TeamWorkGrid({
 							size="sm"
 							active={entry.id === view.id}
 							onClick={() => setViewId(entry.id)}
-							title={entry.hint}
+							title={t(`teamWorkGrid.view.${entry.id}.hint`)}
 						>
-							{entry.label}
+							{t(`teamWorkGrid.view.${entry.id}.label`)}
 						</Button>
 					))}
 					<Button
 						size="sm"
 						active={cycleOnly}
 						onClick={() => setCycleOnly(!cycleOnly)}
-						title="Limiter aux tickets du cycle en cours"
+						title={t("teamWorkGrid.cycleTitle")}
 					>
-						Cycle
+						{t("teamWorkGrid.cycle")}
 					</Button>
 					{given === undefined ? (
 						<Freshness
@@ -280,11 +283,11 @@ export function TeamWorkGrid({
 						icon={Eye}
 						message={
 							focus
-								? `Rien pour ${focus} dans « ${view.label} »`
-								: `Rien dans « ${view.label} »`
+								? t("teamWorkGrid.emptyFor", { name: focus, view: viewLabel })
+								: t("teamWorkGrid.empty", { view: viewLabel })
 						}
-						hint={view.hint}
-						action={{ label: "Voir tout", onClick: () => setViewId("all") }}
+						hint={t(`teamWorkGrid.view.${view.id}.hint`)}
+						action={{ label: t("teamWorkGrid.seeAll"), onClick: () => setViewId("all") }}
 					/>
 				) : null}
 
@@ -328,6 +331,7 @@ function PrLine({
 	onAgent?: (branch: string) => void;
 	onWorktree?: (branch: string) => void;
 }) {
+	const { t } = useTranslation("components1");
 	const state = prState(pr);
 	return (
 		<div className="group flex items-start gap-1.5">
@@ -344,7 +348,7 @@ function PrLine({
 				</button>
 				<div className="flex items-center gap-1.5 font-mono text-[10px]">
 					<span className={state.tone}>{state.label}</span>
-					<span className="text-ink-faint">· {pr.ageDays} j</span>
+					<span className="text-ink-faint">· {t("teamWorkGrid.days", { count: pr.ageDays })}</span>
 					{pr.stacked ? <Layers size={9} className="text-critical" /> : null}
 					{pr.ticketId ? (
 						<span className="truncate text-ink-faint">· {pr.ticketId}</span>
@@ -359,14 +363,14 @@ function PrLine({
 							size="sm"
 							icon={AlertTriangle}
 							onClick={() => onAgent(pr.headRef)}
-							title="Ouvrir un agent sur cette branche"
+							title={t("teamWorkGrid.openAgent")}
 						/>
 					) : null}
 					<Button
 						size="sm"
 						icon={GitBranch}
 						onClick={() => onWorktree(pr.headRef)}
-						title="Ouvrir le worktree"
+						title={t("teamWorkGrid.openWorktree")}
 					/>
 				</div>
 			) : null}
@@ -423,6 +427,7 @@ function FocusPanel({
 	onAgent: (branch: string) => void;
 	onWorktree: (branch: string) => void;
 }) {
+	const { t } = useTranslation("components1");
 	const metrics = member.metrics;
 	return (
 		<div className="flex flex-col gap-3">
@@ -431,13 +436,13 @@ function FocusPanel({
 					<span className="text-[13px] font-semibold text-ink">{member.name}</span>
 					<Badge>{member.roleLabel}</Badge>
 					<span className="ml-auto flex items-center gap-3 font-mono text-[10px] text-ink-faint">
-						<span title="tickets actifs">{metrics.activeWip} WIP</span>
-						<span title="PR ouvertes">{metrics.openPrs} PR</span>
-						<span title="PR des autres à relire" className="text-info">
-							{metrics.prsToReview} à relire
+						<span title={t("teamWorkGrid.activeTickets")}>{t("teamWorkGrid.wip", { count: metrics.activeWip })}</span>
+						<span title={t("teamWorkGrid.openPrs")}>{t("teamWorkGrid.prs", { count: metrics.openPrs })}</span>
+						<span title={t("teamWorkGrid.toReviewTitle")} className="text-info">
+							{t("teamWorkGrid.toReview", { count: metrics.prsToReview })}
 						</span>
-						<span title="mergées depuis le dernier daily" className="text-success">
-							{metrics.mergedSinceDaily} livrées
+						<span title={t("teamWorkGrid.mergedTitle")} className="text-success">
+							{t("teamWorkGrid.merged", { count: metrics.mergedSinceDaily })}
 						</span>
 					</span>
 				</div>
@@ -452,7 +457,7 @@ function FocusPanel({
 			    de tête pendant qu'elle parlait. */}
 			<section className="panel flex flex-col gap-1.5 p-3">
 				<h3 className="mb-0.5 text-[10px] font-semibold tracking-[0.09em] text-ink-faint uppercase">
-					En ce moment
+					{t("teamWorkGrid.now")}
 				</h3>
 				<NowFeed member={member} prs={prs} onOpen={onOpen} />
 			</section>
@@ -460,17 +465,17 @@ function FocusPanel({
 			<div className="grid grid-cols-1 gap-3 lg:grid-cols-2">
 				<section className="panel flex flex-col gap-1.5 p-3">
 					<h3 className="mb-0.5 text-[10px] font-semibold tracking-[0.09em] text-ink-faint uppercase">
-						À suivre
+						{t("teamWorkGrid.next")}
 					</h3>
 					{member.next.length === 0 ? (
 						<p className="py-1 text-[11px] text-ink-faint">
-							Rien de prêt à démarrer ensuite.
+							{t("teamWorkGrid.nothingNext")}
 						</p>
 					) : null}
 					{member.next.length > 0 ? (
 						<>
 							<div className="mt-1 border-t border-line-soft pt-1.5 text-[10px] text-ink-faint">
-								À suivre
+								{t("teamWorkGrid.next")}
 							</div>
 							{member.next.slice(0, 4).map((ticket) => (
 								<button
@@ -493,10 +498,10 @@ function FocusPanel({
 
 				<section className="panel flex flex-col gap-1.5 p-3">
 					<h3 className="mb-0.5 text-[10px] font-semibold tracking-[0.09em] text-ink-faint uppercase">
-						Pull requests · {prs.length}
+						{t("teamWorkGrid.pullRequests", { count: prs.length })}
 					</h3>
 					{prs.length === 0 ? (
-						<p className="py-1 text-[11px] text-ink-faint">Aucune PR ouverte.</p>
+						<p className="py-1 text-[11px] text-ink-faint">{t("teamWorkGrid.noOpenPr")}</p>
 					) : null}
 					{prs.map((pr) => (
 						<PrLine
@@ -511,7 +516,7 @@ function FocusPanel({
 					{member.reviewInbox.length > 0 ? (
 						<>
 							<div className="mt-1 flex items-center gap-1.5 border-t border-line-soft pt-1.5 text-[10px] text-ink-faint">
-								<Eye size={10} /> Doit relire pour les autres
+								<Eye size={10} /> {t("teamWorkGrid.reviewInbox")}
 							</div>
 							{member.reviewInbox.map((item) => (
 								<button
@@ -529,7 +534,7 @@ function FocusPanel({
 									</span>
 									<PrLabels labels={item.labels} max={2} />
 									<span className="shrink-0 font-mono text-[10px] text-ink-faint">
-										{item.author} · {item.ageDays} j
+										{item.author} · {t("teamWorkGrid.days", { count: item.ageDays })}
 									</span>
 								</button>
 							))}
@@ -554,6 +559,7 @@ function MemberCard({
 	onSelect: () => void;
 	onOpen: (url: string) => void;
 }) {
+	const { t } = useTranslation("components1");
 	const blocked = urgency(prs);
 
 	return (
@@ -564,7 +570,7 @@ function MemberCard({
 				type="button"
 				onClick={onSelect}
 				className="focus-ring flex items-center gap-2 rounded text-left"
-				title={`Ne voir que ${member.name}`}
+				title={t("teamWorkGrid.onlyMember", { name: member.name })}
 			>
 				<span className="flex h-5 w-5 items-center justify-center rounded bg-raised font-mono text-[10px] text-ink-faint">
 					{initials(member.name)}
@@ -574,25 +580,25 @@ function MemberCard({
 				</span>
 				{blocked > 0 ? (
 					<Badge tone="critical">
-						{blocked} bloquée{blocked > 1 ? "s" : ""}
+						{t("teamWorkGrid.blocked", { count: blocked })}
 					</Badge>
 				) : null}
 				{member.metrics.prsToReview > 0 ? (
 					<span
 						className="flex items-center gap-1 font-mono text-[10px] text-info"
-						title="PR des autres à relire"
+						title={t("teamWorkGrid.toReviewTitle")}
 					>
 						<Eye size={11} />
 						{member.metrics.prsToReview}
 					</span>
 				) : null}
-				<span className="font-mono text-[10px] text-ink-faint" title="tickets actifs">
-					{member.metrics.activeWip} WIP
+				<span className="font-mono text-[10px] text-ink-faint" title={t("teamWorkGrid.activeTickets")}>
+					{t("teamWorkGrid.wip", { count: member.metrics.activeWip })}
 				</span>
 			</button>
 
 			{prs.length === 0 && (!showTickets || member.activeTickets.length === 0) ? (
-				<p className="py-1 text-[11px] text-ink-faint">Rien en cours.</p>
+				<p className="py-1 text-[11px] text-ink-faint">{t("teamWorkGrid.nothingInProgress")}</p>
 			) : null}
 
 			{prs.slice(0, 6).map((pr) => (

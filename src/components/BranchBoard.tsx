@@ -13,6 +13,7 @@ import {
 	Ticket,
 } from "lucide-react";
 import { createContext, memo, useContext, useEffect, useMemo, useRef, useState } from "react";
+import { Trans, useTranslation } from "react-i18next";
 import { useAgentRuns } from "@/app/agents";
 import { movedSince, useReview, useReviewFlow } from "@/app/review";
 import { useCockpit } from "@/app/store";
@@ -83,6 +84,7 @@ function BranchBoardView({
 	 */
 	only?: BoardSection | null;
 }) {
+	const { t } = useTranslation("components2");
 	const { worktrees, missions, activeProject, notify, config } = useCockpit();
 	const readOnly = config?.workflow?.reviewReadOnly ?? true;
 	const { show } = useWorkspace();
@@ -146,13 +148,21 @@ function BranchBoardView({
 	const fetching = active && sources.some((source) => source.loading);
 	const firstLoad = active && sources.some((source) => source.initial);
 
-	const prState = openPr ? (openPr.isDraft ? "brouillon" : "ouverte") : past.data?.state === "merged" ? "fusionnée" : past.data?.state === "closed" ? "fermée" : null;
+	const prState = openPr
+		? openPr.isDraft
+			? t("branchBoard.pr.draft")
+			: t("branchBoard.pr.open")
+		: past.data?.state === "merged"
+			? t("branchBoard.pr.merged")
+			: past.data?.state === "closed"
+				? t("branchBoard.pr.closed")
+				: null;
 
 	if (only === "ticket") {
 		return (
 			<div className="min-h-0 flex-1 overflow-y-auto bg-base px-5 py-4">
 				{ticketIds.length === 0 ? (
-					<p className="text-[12px] text-ink-faint">Aucun identifiant de ticket dans la branche ni dans la PR.</p>
+					<p className="text-[12px] text-ink-faint">{t("branchBoard.ticket.none")}</p>
 				) : (
 					<div className="mx-auto flex max-w-[900px] flex-col gap-6">
 						{ticketIds.map((id) => (
@@ -182,12 +192,12 @@ function BranchBoardView({
 					<div className="flex flex-col items-start gap-3 p-2">
 						<p className="text-[12.5px] text-ink-muted">
 							{number
-								? `La PR #${number} n'a pas encore été relue.`
-								: "Pas de PR sur cette branche : rien à relire pour l'instant."}
+								? t("branchBoard.review.notYet", { number })
+								: t("branchBoard.review.noPr")}
 						</p>
 						{openPr ? (
 							<Button size="sm" variant="solid" icon={ScanSearch} onClick={() => void start("revue")} loading={busy}>
-								Relire la PR
+								{t("branchBoard.review.reviewPr")}
 							</Button>
 						) : null}
 					</div>
@@ -204,14 +214,14 @@ function BranchBoardView({
 			</div>
 			<div className="mx-auto flex max-w-[1400px] flex-col gap-3">
 				{firstLoad ? (
-					<p className="px-1 text-[11.5px] text-ink-faint">Je rassemble ce qui tient à {branch}…</p>
+					<p className="px-1 text-[11.5px] text-ink-faint">{t("branchBoard.gathering", { branch })}</p>
 				) : null}
 				{/* La PR et ce qui la motive : ce qu'on regarde en premier. */}
 				<div className={only ? "flex flex-col gap-3" : "grid grid-cols-1 gap-3 lg:grid-cols-3"}>
 					<Card
 						icon={GitPullRequest}
 						section="pr"
-						title={number ? `PR #${number}` : "Pull request"}
+						title={number ? t("branchBoard.pr.number", { number }) : t("branchBoard.pr.title")}
 						tone={openPr ? "accent" : undefined}
 						className="lg:col-span-2"
 						aside={prState ? <Pill>{prState}</Pill> : null}
@@ -229,20 +239,30 @@ function BranchBoardView({
 								{openPr ? (
 									<div className="flex flex-wrap items-center gap-1.5 text-[11.5px] text-ink-muted">
 										<Pill tone={openPr.ciState === "failing" ? "critical" : openPr.ciState === "success" ? "success" : undefined}>
-											{openPr.ciState === "failing" ? "CI rouge" : openPr.ciState === "success" ? "CI verte" : "CI en cours"}
+											{openPr.ciState === "failing"
+												? t("branchBoard.pr.ciRed")
+												: openPr.ciState === "success"
+													? t("branchBoard.pr.ciGreen")
+													: t("branchBoard.pr.ciRunning")}
 										</Pill>
 										<Pill tone={openPr.reviewDecision === "APPROVED" ? "success" : openPr.reviewDecision === "CHANGES_REQUESTED" ? "warning" : undefined}>
 											{openPr.reviewDecision === "APPROVED"
-												? "approuvée"
+												? t("branchBoard.pr.approved")
 												: openPr.reviewDecision === "CHANGES_REQUESTED"
-													? "changements demandés"
-													: "pas encore approuvée"}
+													? t("branchBoard.pr.changesRequested")
+													: t("branchBoard.pr.notApproved")}
 										</Pill>
 										<span>
-											de <span className="text-ink">{openPr.author}</span> · {openPr.baseRef} ← {openPr.headRef}
+											<Trans
+												t={t}
+												i18nKey="branchBoard.pr.byAuthor"
+												values={{ author: openPr.author }}
+												components={{ author: <span className="text-ink" /> }}
+											/>{" "}
+											· {openPr.baseRef} ← {openPr.headRef}
 										</span>
 										{openPr.reviewRequestLogins.length > 0 ? (
-											<span>· relecture demandée à {openPr.reviewRequestLogins.join(", ")}</span>
+											<span>· {t("branchBoard.pr.reviewRequested", { logins: openPr.reviewRequestLogins.join(", ") })}</span>
 										) : null}
 									</div>
 								) : null}
@@ -251,12 +271,12 @@ function BranchBoardView({
 										current ? (
 											movedSince(current, openPr.headSha) ? (
 												<Button size="sm" variant="solid" icon={ScanSearch} onClick={() => void start("verification")} loading={busy}>
-													Revérifier les corrections
+													{t("branchBoard.review.recheck")}
 												</Button>
 											) : null
 										) : (
 											<Button size="sm" variant="solid" icon={ScanSearch} onClick={() => void start("revue")} loading={busy}>
-												Relire cette PR
+												{t("branchBoard.review.reviewThisPr")}
 											</Button>
 										)
 									) : null}
@@ -273,7 +293,7 @@ function BranchBoardView({
 							</div>
 						) : (
 							<p className="text-[12px] text-ink-faint">
-								{prs.initial || past.loading ? "Je cherche la PR de cette branche…" : `Aucune PR pour ${branch}.`}
+								{prs.initial || past.loading ? t("branchBoard.pr.searching") : t("branchBoard.pr.none", { branch })}
 							</p>
 						)}
 					</Card>
@@ -281,12 +301,12 @@ function BranchBoardView({
 					<Card
 						icon={Ticket}
 						section="ticket"
-						title={ticketIds.length > 1 ? "Tickets" : "Ticket"}
+						title={t("branchBoard.ticket.title", { count: ticketIds.length })}
 						aside={ticketIds.length ? <Pill>{ticketIds.join(" · ")}</Pill> : null}
 						loading={ticketIds.length > 0 && tickets.initial}
 					>
 						{ticketIds.length === 0 ? (
-							<p className="text-[12px] text-ink-faint">Aucun identifiant de ticket dans la branche ni dans la PR.</p>
+							<p className="text-[12px] text-ink-faint">{t("branchBoard.ticket.none")}</p>
 						) : (
 							<div className="flex flex-col gap-2.5">
 								{(tickets.data ?? []).map((issue, index) =>
@@ -313,7 +333,7 @@ function BranchBoardView({
 										</div>
 									) : (
 										<span key={ticketIds[index]} className="text-[11.5px] text-ink-faint">
-											{ticketIds[index]} : introuvable.
+											{t("branchBoard.ticket.notFound", { id: ticketIds[index] })}
 										</span>
 									),
 								)}
@@ -339,17 +359,17 @@ function BranchBoardView({
 
 				<div className={only ? "flex flex-col gap-3" : "grid grid-cols-1 gap-3 md:grid-cols-2 xl:grid-cols-3"}>
 					{mission ? (
-						<Card icon={ListChecks} section="mission" title="Mission" aside={<Pill tone="accent">{MISSION_STATE_LABELS[mission.state]}</Pill>}>
+						<Card icon={ListChecks} section="mission" title={t("branchBoard.mission.title")} aside={<Pill tone="accent">{MISSION_STATE_LABELS[mission.state]}</Pill>}>
 							<p className="text-[13px] font-semibold text-ink">{mission.title}</p>
 							<p className="mt-1 text-[11.5px] text-ink-muted">
-								{group.mission?.role} · {mission.tasks.length} tâche{mission.tasks.length > 1 ? "s" : ""}
+								{group.mission?.role} · {t("branchBoard.mission.tasks", { count: mission.tasks.length })}
 							</p>
 						</Card>
 					) : null}
 
-					<Card icon={Bot} section="agents" title="Agents" aside={<Pill>{here.length}</Pill>}>
+					<Card icon={Bot} section="agents" title={t("branchBoard.agents.title")} aside={<Pill>{here.length}</Pill>}>
 						{here.length === 0 ? (
-							<p className="text-[12px] text-ink-faint">Aucun agent sur ce worktree.</p>
+							<p className="text-[12px] text-ink-faint">{t("branchBoard.agents.none")}</p>
 						) : (
 							<div className="flex flex-col gap-3">
 								{here.map((run, index) => (
@@ -362,9 +382,13 @@ function BranchBoardView({
 										<span className="flex items-center gap-1.5 text-[12px]">
 											<span className="size-2 rounded-full" style={{ background: agentColor(index) }} />
 											<span className="min-w-0 flex-1 truncate font-medium text-ink">{run.label}</span>
-											{run.profile === "review" ? <Pill>{readOnly ? "revue · lecture seule" : "revue"}</Pill> : null}
+											{run.profile === "review" ? <Pill>{readOnly ? t("branchBoard.agents.reviewReadOnly") : t("branchBoard.agents.review")}</Pill> : null}
 											<span className={clsx("shrink-0 text-[10.5px]", run.thinking ? "text-success" : run.running ? "text-info" : "text-ink-faint")}>
-												{run.thinking ? "travaille" : run.running ? "attend" : "arrêté"}
+												{run.thinking
+												? t("branchBoard.agents.working")
+												: run.running
+													? t("branchBoard.agents.waiting")
+													: t("branchBoard.agents.stopped")}
 											</span>
 										</span>
 										<ContextGauge run={run} compact />
@@ -382,7 +406,7 @@ function BranchBoardView({
 										className="focus-ring flex items-center gap-1 rounded-md bg-raised px-2 py-1 text-[11px] text-ink-muted hover:text-ink"
 									>
 										<Terminal size={11} />
-										{terminal.label || "terminal"}
+										{terminal.label || t("branchBoard.agents.terminal")}
 									</button>
 								))}
 							</div>
@@ -392,12 +416,16 @@ function BranchBoardView({
 					<Card
 						icon={GitCommitHorizontal}
 						section="commits"
-						title="Commits"
-						aside={tree?.status ? <Pill>{tree.status.ahead} en avance · {tree.status.behind} en retard</Pill> : null}
+						title={t("branchBoard.commits.title")}
+						aside={
+							tree?.status ? (
+								<Pill>{t("branchBoard.commits.aheadBehind", { ahead: tree.status.ahead, behind: tree.status.behind })}</Pill>
+							) : null
+						}
 						loading={commits.initial}
 					>
 						{(commits.data ?? []).length === 0 ? (
-							<p className="text-[12px] text-ink-faint">Aucun commit.</p>
+							<p className="text-[12px] text-ink-faint">{t("branchBoard.commits.none")}</p>
 						) : (
 							<ul className="flex flex-col gap-1">
 								{(commits.data ?? []).map((commit) => (
@@ -414,12 +442,12 @@ function BranchBoardView({
 					<Card
 						icon={PencilLine}
 						section="commits"
-						title="Modifié, pas encore commité"
+						title={t("branchBoard.changes.title")}
 						aside={changes.initial ? null : <Pill>{(changes.data ?? []).length}</Pill>}
 						loading={changes.initial}
 					>
 						{(changes.data ?? []).length === 0 ? (
-							<p className="text-[12px] text-ink-faint">Rien en attente : tout est commité.</p>
+							<p className="text-[12px] text-ink-faint">{t("branchBoard.changes.none")}</p>
 						) : (
 							<ul className="flex flex-col gap-0.5">
 								{(changes.data ?? []).slice(0, 12).map((change) => (
@@ -431,7 +459,7 @@ function BranchBoardView({
 										>
 											<span className="min-w-0 flex-1 truncate font-mono text-ink">{change.path}</span>
 											{change.state === "untracked" ? (
-												<span className="shrink-0 text-[10.5px] text-info">nouveau</span>
+												<span className="shrink-0 text-[10.5px] text-info">{t("branchBoard.new")}</span>
 											) : (
 												<span className="shrink-0 font-mono text-[10.5px]">
 													<span className="text-success">+{change.added}</span> <span className="text-critical">−{change.removed}</span>
@@ -445,7 +473,7 @@ function BranchBoardView({
 					</Card>
 
 					{visuals.length > 0 ? (
-						<Card icon={ImageIcon} section="captures" title="Recette · captures" aside={<Pill>{visuals.length}</Pill>}>
+						<Card icon={ImageIcon} section="captures" title={t("branchBoard.captures.title")} aside={<Pill>{visuals.length}</Pill>}>
 							{/* La carte défile : aucune raison de s'arrêter aux neuf premières. */}
 							<div className="grid grid-cols-3 gap-1.5">
 								{visuals.map((file) => {
@@ -467,7 +495,7 @@ function BranchBoardView({
 					) : null}
 
 					{myPorts.length > 0 ? (
-						<Card icon={Network} section="ports" title="Ce qui tourne" aside={<Pill>{myPorts.length}</Pill>}>
+						<Card icon={Network} section="ports" title={t("branchBoard.ports.title")} aside={<Pill>{myPorts.length}</Pill>}>
 							<ul className="flex flex-col gap-1">
 								{myPorts.map((port) => (
 									<li key={`${port.pid}-${port.port}`}>
@@ -478,7 +506,7 @@ function BranchBoardView({
 										>
 											<span className="font-mono text-ink">:{port.port}</span>
 											<span className="min-w-0 flex-1 truncate text-ink-muted">{port.process}</span>
-											<span className="shrink-0 text-[10.5px] text-ink-faint">{Math.round(port.memoryMb)} Mo</span>
+											<span className="shrink-0 text-[10.5px] text-ink-faint">{t("branchBoard.ports.memory", { mb: Math.round(port.memoryMb) })}</span>
 										</button>
 									</li>
 								))}
@@ -501,7 +529,7 @@ function BranchBoardView({
 				{(docs.data ?? []).length > 0 && (!only || only === "docs") ? (
 					<>
 						<p className="mt-1 px-1 text-[11px] font-semibold tracking-[0.06em] text-ink-muted uppercase">
-							Documents · {(docs.data ?? []).length}
+							{t("branchBoard.docs.title", { count: (docs.data ?? []).length })}
 						</p>
 						<div className="grid grid-cols-1 gap-3 md:grid-cols-2 xl:grid-cols-4">
 							{(docs.data ?? []).map((doc) => (
@@ -514,7 +542,7 @@ function BranchBoardView({
 									<span className="flex items-center gap-1.5">
 										<FileText size={13} className="shrink-0 text-accent" />
 										<span className="min-w-0 flex-1 truncate text-[12.5px] font-semibold text-ink">{doc.name}</span>
-										{doc.untracked ? <Pill tone="accent">nouveau</Pill> : null}
+										{doc.untracked ? <Pill tone="accent">{t("branchBoard.new")}</Pill> : null}
 									</span>
 									<span className="truncate font-mono text-[10px] text-ink-faint">{doc.relative}</span>
 									<span className="line-clamp-4 text-[11.5px] leading-relaxed text-ink-muted">{doc.preview}</span>
@@ -543,6 +571,7 @@ const CAPTURE_PAGE = 24;
  * clic ouvre en grand, avec les flèches pour passer de l'une à l'autre.
  */
 function CaptureGallery({ files, loading }: { files: QaFile[]; loading: boolean }) {
+	const { t } = useTranslation("components2");
 	const all = useMemo(
 		() =>
 			[...files]
@@ -577,11 +606,11 @@ function CaptureGallery({ files, loading }: { files: QaFile[]; loading: boolean 
 			{loading ? (
 				<SkeletonRows rows={4} />
 			) : all.length === 0 ? (
-				<p className="p-2 text-[12.5px] text-ink-muted">Aucune capture de recette dans ce dossier.</p>
+				<p className="p-2 text-[12.5px] text-ink-muted">{t("branchBoard.captures.none")}</p>
 			) : (
 				<>
 					<p className="mb-3 px-1 text-[11.5px] text-ink-faint">
-						{all.length} capture{all.length > 1 ? "s" : ""}, les plus récentes d'abord
+						{t("branchBoard.captures.count", { count: all.length })}
 					</p>
 					<div className="grid gap-3 [grid-template-columns:repeat(auto-fill,minmax(220px,1fr))]">
 						{shown.map(({ file, media: item }, index) => (
@@ -606,7 +635,7 @@ function CaptureGallery({ files, loading }: { files: QaFile[]; loading: boolean 
 					</div>
 					{rest > 0 ? (
 						<div ref={more} className="py-4 text-center text-[11.5px] text-ink-faint">
-							encore {rest} capture{rest > 1 ? "s" : ""}…
+							{t("branchBoard.captures.more", { count: rest })}
 						</div>
 					) : null}
 				</>

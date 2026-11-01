@@ -1,0 +1,1048 @@
+{
+	"agentMap": {
+		"genre": {
+			"frise": "timeline",
+			"avant_apres": "before/after",
+			"mesure": "measurement",
+			"table": "table",
+			"capture": "annotated screenshot",
+			"matrice": "matrix"
+		},
+		"eyebrow": {
+			"ask": "your instruction",
+			"explore": "exploration",
+			"subagent": "subagent",
+			"changed": "file changed",
+			"andAlso": "and also",
+			"tests": "tests",
+			"commands": "commands",
+			"visuals": "visuals",
+			"review": "review delivered",
+			"reviewPr": "review delivered · PR #{{pr}}",
+			"footprint": "what changed · {{base}}",
+			"earlier": "earlier",
+			"asking": "asking you a question",
+			"conclusion": "its conclusion",
+			"said": "it said",
+			"yours": "your turn",
+			"now": "right now",
+			"error": "error",
+			"delivered": "delivered",
+			"pastAsk": "past instruction"
+		},
+		"ask": {
+			"replies_one": "+ {{count}} reply from you",
+			"replies_other": "+ {{count}} replies from you"
+		},
+		"explore": {
+			"files_one": "{{count}} file browsed",
+			"files_other": "{{count}} files browsed",
+			"searches_one": "{{count}} search",
+			"searches_other": "{{count}} searches"
+		},
+		"agent": {
+			"gestures": "{{count}} actions"
+		},
+		"change": {
+			"others_one": "{{count}} other file",
+			"others_other": "{{count}} other files"
+		},
+		"tests": {
+			"running": "Tests are running",
+			"noResult": "Tests with no result",
+			"failing": "Tests are failing",
+			"passing": "Tests are passing",
+			"failuresSoFar_one": "{{count}} failure so far",
+			"failuresSoFar_other": "{{count}} failures so far",
+			"failuresBefore_one": "{{count}} failure before passing",
+			"failuresBefore_other": "{{count}} failures before passing",
+			"runs_one": "{{count}} run",
+			"runs_other": "{{count}} runs"
+		},
+		"commands": {
+			"ran_one": "{{count}} command run",
+			"ran_other": "{{count}} commands run"
+		},
+		"failedCount": "{{count}} failed",
+		"review": {
+			"blocking_one": "{{count}} blocking",
+			"blocking_other": "{{count}} blocking",
+			"important_one": "{{count}} important",
+			"important_other": "{{count}} important",
+			"suggestion_one": "{{count}} suggestion",
+			"suggestion_other": "{{count}} suggestions",
+			"merge": "You can merge",
+			"blockingVerdict": "Blocking",
+			"changes": "Changes requested",
+			"delivered": "Review delivered",
+			"nothing": "nothing to flag",
+			"open": "open the review point by point",
+			"loading": "Reading the stored review…"
+		},
+		"severity": {
+			"bloquant": "blocking",
+			"important": "important",
+			"suggestion": "suggestion"
+		},
+		"said": {
+			"earlier_one": "{{count}} message before",
+			"earlier_other": "{{count}} messages before"
+		},
+		"waiting": {
+			"title": "The agent is waiting for your reply",
+			"detail": "see the card at the top"
+		},
+		"live": {
+			"using": "Using {{tool}}",
+			"thinking": "Thinking"
+		},
+		"delivered": {
+			"pr": "PR {{list}}",
+			"commits_one": "{{count}} commit",
+			"commits_other": "{{count}} commits",
+			"pushed": "pushed to {{branches}}"
+		},
+		"media": {
+			"images_one": "{{count}} image",
+			"images_other": "{{count}} images",
+			"pdfs": "{{count}} PDF",
+			"videos_one": "{{count}} video",
+			"videos_other": "{{count}} videos"
+		},
+		"warn": {
+			"edits": "reworked {{count}} times",
+			"editsDuring": "reworked {{count}} times in {{duration}}",
+			"tests": "same failure {{count}} times in a row",
+			"testsDuring": "same failure {{count}} times in a row in {{duration}}",
+			"repeat": "“{{command}}” rerun {{count}} times"
+		},
+		"loop": {
+			"edits": "{{file}} reworked {{count}} times",
+			"tests": "{{target}} failing {{count}} times in a row",
+			"repeat": "{{target}} rerun {{count}} times"
+		},
+		"folded": {
+			"changed_one": "{{count}} file changed",
+			"changed_other": "{{count}} files changed",
+			"testsKo": "tests failing",
+			"testsOk": "tests passing",
+			"nothingChanged": "nothing changed",
+			"resumed": "Resumed",
+			"circled": "went in circles: {{loop}}"
+		},
+		"empty": "Write your instruction: a map of what the agent does will draw itself here, step by step, as it goes.",
+		"backToNow": "Back to the present",
+		"needsYou": "The agent needs you",
+		"panel": {
+			"fullText": "The full text",
+			"terminal": "Its terminal",
+			"gone": "This step is no longer on the map: you're reading its last version.",
+			"thinking": "It's thinking: whatever it runs will show up here as soon as it runs it.",
+			"nothing": "Nothing to detail for this step."
+		},
+		"remark": {
+			"anchor": "the step “{{title}}”",
+			"placeholder": "A remark about this step — the agent will know which one you mean.",
+			"later": "Later",
+			"laterTitle": "Keep it with the others, to send together",
+			"send": "Send"
+		},
+		"strip": {
+			"episodes": "Episodes"
+		},
+		"state": {
+			"subagents_one": "{{count}} subagent",
+			"subagents_other": "{{count}} subagents",
+			"waiting": "Waiting for your reply",
+			"working": "Working",
+			"awaiting": "waiting for {{agents}}",
+			"thinking": "thinking",
+			"asks": "Asking you a question",
+			"done": "Done",
+			"background": "{{agents}} in the background",
+			"idle": "nothing running · your turn",
+			"quietTitle": "Nothing new for a while: a long command, or a stuck agent.",
+			"since": "for {{duration}}",
+			"loopTitle": "A repetition worth a look: the agent isn't necessarily stuck, but it keeps coming back to it.",
+			"circling": "Going in circles",
+			"circled": "Went in circles",
+			"compactedTitle": "The CLI summarized the conversation to make room. Of what the agent read before, it only keeps the summary: if it relies on a detail, it should reread it.",
+			"compacted": "Memory summarized {{ago}}",
+			"sinceAsk": "{{duration}} since your instruction",
+			"total": "{{duration}} in total",
+			"tour": "Tour the changes"
+		},
+		"node": {
+			"remarkPending": "A remark is waiting to be sent",
+			"took": "Time spent on this step",
+			"expandTitle": "Expand this episode",
+			"collapseTitle": "Collapse this episode",
+			"expand": "expand",
+			"collapse": "collapse"
+		},
+		"viewLarge": "View full size",
+		"since": {
+			"longTitle": "Long: a command that isn't returning, or a stuck agent.",
+			"title": "Since this step started"
+		},
+		"stage": {
+			"before": "before",
+			"after": "after"
+		},
+		"fate": {
+			"deleted": "deleted",
+			"created": "created",
+			"modified": "modified"
+		},
+		"fateCount": {
+			"deleted_one": "{{count}} deleted",
+			"deleted_other": "{{count}} deleted",
+			"created_one": "{{count}} created",
+			"created_other": "{{count}} created",
+			"modified_one": "{{count}} modified",
+			"modified_other": "{{count}} modified"
+		},
+		"footprint": {
+			"lede": "Read from the repository, {{base}} — not from what the agent says. Compare it with its conclusion."
+		},
+		"tourFiles": "Tour the changes, file by file",
+		"deliveredSections": {
+			"pullRequests": "Pull requests",
+			"commits": "Commits",
+			"pushed": "Pushed",
+			"files": "Files produced"
+		},
+		"gallery": {
+			"enlarge": "Enlarge"
+		}
+	},
+	"missionJourney": {
+		"journey": {
+			"understanding": "Understanding",
+			"approach": "Approach",
+			"split": "Breakdown",
+			"execution": "Execution",
+			"delivery": "Delivery"
+		},
+		"copy": {
+			"understanding": {
+				"working": "The lead is reading the ticket",
+				"workingHint": "Read it on the left at the same time. In a moment, it will tell you what it understood — ten lines at most, with its questions set apart.",
+				"proposal": "What the lead understood",
+				"approve": "Approve — move on to the approach"
+			},
+			"approach": {
+				"working": "The lead is preparing its approach",
+				"workingHint": "How it plans to go about it: the steps, the places in the code, the order, the risks. No split between executors yet.",
+				"proposal": "The proposed approach",
+				"approve": "Approve — move on to the breakdown"
+			},
+			"split": {
+				"working": "The lead is breaking down the work",
+				"workingHint": "Who does what, where, and in what order — true to the approach you approved. Nothing starts before you agree.",
+				"proposal": "The proposed breakdown",
+				"approve": "Approve — launch the executors"
+			}
+		},
+		"stop": {
+			"title": "Abandon “{{title}}”?",
+			"message": "The lead is stopped and the mission closed. What was approved stays readable in its history.",
+			"confirm": "Abandon",
+			"done": "Mission abandoned."
+		},
+		"back": "Missions",
+		"noBranch": "no branch",
+		"stepper": {
+			"yours": "your turn",
+			"stopped": "stopped",
+			"masterStopped": "lead stopped",
+			"tasksProgress": "{{done}}/{{total}} tasks",
+			"integrating": "integrating…",
+			"masterWriting": "the lead is writing…",
+			"approvedVersion": "approved · v{{version}}",
+			"approved": "approved",
+			"tasks_one": "{{count}} task",
+			"tasks_other": "{{count}} tasks",
+			"prOpen": "PR open",
+			"closed": "closed"
+		},
+		"nothingProposed": "Nothing was proposed at this step.",
+		"yourMove": "Your move",
+		"working": {
+			"relaunched": "Lead relaunched: it picks up from what was approved.",
+			"starting": "The lead is starting…",
+			"stopped": "The lead is stopped",
+			"startingHint": "It takes the ticket and picks up from what was already approved. A few seconds.",
+			"stoppedHint": "Nobody is working on this step right now: no proposal will arrive until it's relaunched.",
+			"correction": "Your correction, being taken into account",
+			"plusAnswers": "+ your answers to its questions",
+			"now": "What it's doing right now",
+			"notRunning": "The lead isn't running. Relaunch it: it will pick up from what was already approved, without asking you again for what you signed off.",
+			"relaunch": "Relaunch the lead"
+		},
+		"proposal": {
+			"maxTitle": "Cockpit rejects any longer proposal",
+			"lines": "{{count}}/{{max}} lines"
+		},
+		"split": {
+			"executors_one": "{{count}} executor",
+			"executors_other": "{{count}} executors",
+			"estimate_one": "≈ {{duration}} of work, based on {{count}} mission of similar size",
+			"estimate_other": "≈ {{duration}} of work, based on {{count}} missions of similar size",
+			"failureRate": "{{percent}}% failed"
+		},
+		"task": {
+			"verifies": "judges the others' work",
+			"wholeRepoRead": "the whole repository, read-only",
+			"wholeRepoNoScope": "the whole repository — no scope declared",
+			"after": "starts after “{{title}}”",
+			"hideBrief": "Hide the brief",
+			"readBrief": "Read its full brief"
+		},
+		"decision": {
+			"splitApproved": "Breakdown approved — the executors are off.",
+			"approved": "Approved — the lead moves on.",
+			"correctionSent": "Correction sent — the lead is reworking its proposal.",
+			"needsYou_one": "It needs you · {{count}} question",
+			"needsYou_other": "It needs you · {{count}} questions",
+			"answerPlaceholder": "Your answer…",
+			"feedbackLabel": "A clarification, a correction?",
+			"placeholder": {
+				"understanding": "E.g.: it's not the admin screen that's targeted, it's the customer area.",
+				"approach": "E.g.: reuse the existing export service rather than creating one.",
+				"split": "E.g.: merge the two front-end tasks, they touch the same files."
+			},
+			"unanswered_one": "{{count}} question unanswered: if you approve, the lead will decide on its own.",
+			"unanswered_other": "{{count}} questions unanswered: if you approve, the lead will decide on its own.",
+			"withFeedback": "Approving also passes on your clarification.",
+			"nothingWithoutYou": "Nothing goes out without your approval.",
+			"correctTitle": "Write what's wrong: without a reason, the lead would make the same proposal again.",
+			"requestVersion": "Request a new version"
+		},
+		"verdict": {
+			"approved": "Approved",
+			"corrected": "Corrected"
+		},
+		"quoted": "“{{text}}”",
+		"versions": {
+			"hide": "Hide previous versions · {{count}}",
+			"show": "Show previous versions · {{count}}"
+		},
+		"ticket": {
+			"title": "The ticket",
+			"openExternal": "Open at the provider",
+			"noTicket": "This mission doesn't come from a ticket: “{{title}}”.",
+			"assignee": "Assigned to {{name}}",
+			"noDescription": "No description.",
+			"comments": "Comments · {{count}}"
+		}
+	},
+	"workspaceTiles": {
+		"tiles": {
+			"progress": {
+				"eyebrow": "progress",
+				"title": "Where this agent stands in its instructions"
+			},
+			"branch": {
+				"eyebrow": "view",
+				"title": "Everything tied to the branch"
+			},
+			"pr": {
+				"eyebrow": "pull request",
+				"title": "This branch's pull request"
+			},
+			"mission": {
+				"eyebrow": "mission",
+				"title": "The mission that opened this folder"
+			},
+			"agents": {
+				"eyebrow": "agents",
+				"title": "This folder's agents and terminals"
+			},
+			"commits": {
+				"eyebrow": "commits",
+				"title": "The commits, and what isn't committed yet"
+			},
+			"docs": {
+				"eyebrow": "documents",
+				"title": "The worktree's documents"
+			},
+			"captures": {
+				"eyebrow": "QA",
+				"title": "The QA captures"
+			},
+			"ports": {
+				"eyebrow": "servers",
+				"title": "What's running in this folder"
+			},
+			"ticket": {
+				"eyebrow": "ticket",
+				"title": "This branch's ticket"
+			},
+			"review": {
+				"eyebrow": "code review",
+				"title": "The PR's review"
+			},
+			"territory": {
+				"eyebrow": "territory",
+				"title": "The worksite's agents, laid over the code"
+			},
+			"browser": {
+				"eyebrow": "browser",
+				"title": "The page the agent is driving, live"
+			}
+		},
+		"progress": {
+			"label": "Progress",
+			"title": "The agent's steps, its sub-agents, and how long it has been working",
+			"silent": "silent {{duration}}",
+			"steps_one": "{{done}} / {{count}} steps",
+			"steps_other": "{{done}} / {{count}} steps",
+			"helpers_one": "{{back}} / {{count}} sub-agents back",
+			"helpers_other": "{{back}} / {{count}} sub-agents back",
+			"busyNoSteps": "working — it keeps no step list",
+			"idle": "nothing running"
+		},
+		"board": {
+			"workingFor": "working for",
+			"launchedAgo": "instructions sent",
+			"lastActionAgo": "last action",
+			"toolCalls": "tool calls",
+			"filesWritten": "files written",
+			"brief": "Current instructions",
+			"steps": "Its steps",
+			"countNotPercent": "A count, not a percentage: the agent extends its list when it discovers more work.",
+			"noSteps": "This agent keeps no step list: nothing tells how much of the work is done. What follows only shows that it's moving.",
+			"helpers": "Its sub-agents",
+			"helpersBack_one": "{{back}} / {{count}} back",
+			"helpersBack_other": "{{back}} / {{count}} back",
+			"helperRunning": "running",
+			"helperFailed": "failed",
+			"helperDone": "back",
+			"lastAction": "Its last action"
+		},
+		"verdict": {
+			"merge": "ready to merge",
+			"corrections": "changes",
+			"bloquant": "blocking"
+		},
+		"branch": {
+			"prDraft": "draft",
+			"prOpen": "open",
+			"prMerged": "merged",
+			"prClosed": "closed",
+			"headerTitle": "The PR, the ticket, the review, the commits, the documents",
+			"label": "View",
+			"seeAll": "see all",
+			"ciRed": "CI red",
+			"ciGreen": "CI green",
+			"ciPending": "CI…",
+			"searchingPr": "looking for the PR…",
+			"noPr": "no PR yet",
+			"noTicket": "no ticket",
+			"reviewTitle": "The PR's code review",
+			"recheck": "to recheck",
+			"reviewRound": "Review · round {{number}}",
+			"notReviewed": "not reviewed yet",
+			"mission": "Mission",
+			"agentsTitle": "This folder's agents and terminals, with their context",
+			"working_one": "{{count}} working",
+			"working_other": "{{count}} working",
+			"agents_one": "{{count}} agent",
+			"agents_other": "{{count}} agents",
+			"terminals_one": "{{count}} terminal",
+			"terminals_other": "{{count}} terminals",
+			"commitsTitle": "The branch's commits, and what isn't committed yet",
+			"uncommitted_one": "{{count}} uncommitted",
+			"uncommitted_other": "{{count}} uncommitted",
+			"commits_one": "{{count}} commit",
+			"commits_other": "{{count}} commits",
+			"commitsLabel": "Commits",
+			"documents_one": "{{count}} document",
+			"documents_other": "{{count}} documents",
+			"captures_one": "{{count}} capture",
+			"captures_other": "{{count}} captures",
+			"portsTitle": "What's listening in this folder",
+			"servers_one": "{{count}} server",
+			"servers_other": "{{count}} servers"
+		},
+		"territory": {
+			"label": "Territory",
+			"title": "Where this agent read and wrote, collisions and stale reads",
+			"collisions_one": "{{count}} collision",
+			"collisions_other": "{{count}} collisions",
+			"stale_one": "{{count}} stale",
+			"stale_other": "{{count}} stale",
+			"files_one": "{{count}} file",
+			"files_other": "{{count}} files",
+			"written_one": "{{count}} written",
+			"written_other": "{{count}} written",
+			"read_one": "{{count}} read",
+			"read_other": "{{count}} read",
+			"untouched": "hasn't touched any file yet",
+			"agentsHere_one": "{{count}} agent here",
+			"agentsHere_other": "{{count}} agents here"
+		},
+		"browser": {
+			"label": "Browser",
+			"title": "The page this folder's agents are driving — one click opens it live",
+			"live": "live",
+			"drivingSelf": "driving",
+			"drivingOther": "{{name}} driving",
+			"openRight": "open on the right",
+			"blank": "no page open — one click opens it"
+		}
+	},
+	"assistant": {
+		"shortcutTaken": "{{shortcut}} is already taken: the voice assistant won't hear you",
+		"chooseShortcut": "Choose a shortcut",
+		"see": "View",
+		"doneSentence": "Done.",
+		"quoted": "“{{text}}”",
+		"close": "Close",
+		"placeholder": "Open the cart workspace, start a mission from NW-3050…",
+		"hint": "Hold {{shortcut}} to speak · ⌘J to type",
+		"errors": {
+			"worktreeNotFound": "I can't find the worktree “{{name}}”.",
+			"agentNotFound": "I can't find the agent “{{name}}”.",
+			"viewUnknown": "I don't know the screen “{{name}}”.",
+			"projectNotFound": "I can't find the project “{{name}}”.",
+			"workspaceNotFound": "I can't find the workspace “{{name}}”.",
+			"whichTicket": "Which ticket do you want to start from?",
+			"missionNotFound": "I can't find the mission “{{name}}”.",
+			"noMainRepo": "No main repository is set for this project.",
+			"whichBranch": "For which branch?",
+			"whichPr": "Which PR do you want me to review?",
+			"whatToAsk": "What should I ask it?",
+			"noWorkspace": "No workspace is open: tell me which folder to work in.",
+			"folderNotFound": "I can't find the folder “{{name}}”.",
+			"notUnderstood": "I didn't understand your request."
+		},
+		"mission": {
+			"activity": "Mission from {{ticket}}",
+			"firstStep": "Reading the ticket and launching the lead agent…",
+			"started": "Mission started: {{title}}.",
+			"existed": "The mission already existed.",
+			"existedOpening": "The mission already existed: {{title}}. Opening it for you."
+		},
+		"branch": {
+			"activity": "Branch {{name}}",
+			"firstStep": "Creating the branch…"
+		},
+		"tell": {
+			"activity": "Instructions for {{name}}",
+			"sent": "Instructions sent: the agent is on it.",
+			"launched": "New agent launched with the instructions."
+		},
+		"git": {
+			"pullStep": "Fetching the latest commits…",
+			"pulled": "Branch up to date.",
+			"pushStep": "Pushing the branch…",
+			"pushed": "Branch pushed."
+		},
+		"phase": {
+			"listening": "Listening… release {{shortcut}} when you're done",
+			"transcribing": "Transcribing…",
+			"thinking": "Thinking…",
+			"error": "I couldn't do it",
+			"done": "Done",
+			"answered": "Cockpit replies",
+			"idle": "Ask Cockpit"
+		},
+		"settings": {
+			"nothingHeard": "(nothing heard — speak closer to the mic)",
+			"hold": "Hold, speak, release: the assistant understands, acts and answers out loud — even when Cockpit is behind another window.",
+			"keyboard": "The same from the keyboard, with Cockpit in front.",
+			"cost": "What you say is transcribed by ElevenLabs (the voice key, above) then understood by Claude, on your subscription: a few seconds of your ElevenLabs plan and a little of your Claude quota per request. Actions run directly; what it can't find, it doesn't guess.",
+			"noKey": "Without an ElevenLabs key, the assistant can't hear you — ⌘J still works. Store it in the Voice section.",
+			"speak": "Speak… (4 s)",
+			"testMic": "Test the mic",
+			"appOnly": "In the app only.",
+			"heard": "Heard:",
+			"micDenied": "If the mic is denied: System Settings → Privacy & Security → Microphone → Cockpit."
+		},
+		"shortcut": {
+			"active": "{{shortcut}} is active, in every application.",
+			"failed": "{{shortcut}} couldn't be registered. Choose another one.",
+			"failedWithError": "{{shortcut}} couldn't be registered: {{error}} Choose another one.",
+			"recording": "Type the combination… (Esc to cancel)",
+			"record": "Record a shortcut…"
+		}
+	},
+	"branchBoard": {
+		"gathering": "Gathering everything tied to {{branch}}…",
+		"new": "new",
+		"pr": {
+			"draft": "draft",
+			"open": "open",
+			"merged": "merged",
+			"closed": "closed",
+			"number": "PR #{{number}}",
+			"title": "Pull request",
+			"ciRed": "CI red",
+			"ciGreen": "CI green",
+			"ciRunning": "CI running",
+			"approved": "approved",
+			"changesRequested": "changes requested",
+			"notApproved": "not approved yet",
+			"byAuthor": "by <author>{{author}}</author>",
+			"reviewRequested": "review requested from {{logins}}",
+			"searching": "Looking for this branch's PR…",
+			"none": "No PR for {{branch}}."
+		},
+		"review": {
+			"notYet": "PR #{{number}} hasn't been reviewed yet.",
+			"noPr": "No PR on this branch: nothing to review for now.",
+			"reviewPr": "Review the PR",
+			"recheck": "Recheck the fixes",
+			"reviewThisPr": "Review this PR"
+		},
+		"ticket": {
+			"none": "No ticket identifier in the branch or in the PR.",
+			"title_one": "Ticket",
+			"title_other": "Tickets",
+			"notFound": "{{id}}: not found."
+		},
+		"mission": {
+			"title": "Mission",
+			"tasks_one": "{{count}} task",
+			"tasks_other": "{{count}} tasks"
+		},
+		"agents": {
+			"title": "Agents",
+			"none": "No agent on this worktree.",
+			"reviewReadOnly": "review · read-only",
+			"review": "review",
+			"working": "working",
+			"waiting": "waiting",
+			"stopped": "stopped",
+			"terminal": "terminal"
+		},
+		"commits": {
+			"title": "Commits",
+			"aheadBehind": "{{ahead}} ahead · {{behind}} behind",
+			"none": "No commits."
+		},
+		"changes": {
+			"title": "Modified, not committed yet",
+			"none": "Nothing pending: everything is committed."
+		},
+		"captures": {
+			"title": "QA · captures",
+			"none": "No QA captures in this folder.",
+			"count_one": "{{count}} capture, most recent first",
+			"count_other": "{{count}} captures, most recent first",
+			"more_one": "{{count}} more capture…",
+			"more_other": "{{count}} more captures…"
+		},
+		"ports": {
+			"title": "What's running",
+			"memory": "{{mb}} MB"
+		},
+		"docs": {
+			"title_one": "Documents · {{count}}",
+			"title_other": "Documents · {{count}}"
+		}
+	},
+	"missionGraph": {
+		"working": "working…",
+		"sentBack": "Sent back for changes",
+		"ticket": {
+			"eyebrow": "ticket",
+			"none": "No ticket"
+		},
+		"master": {
+			"eyebrow": "lead",
+			"title": "Oversees the mission",
+			"awaitingYou": "awaiting your decision",
+			"idle": "standing by"
+		},
+		"task": {
+			"asksPermission": "is asking for your permission",
+			"rejected": "rejected the work",
+			"delivered": "handed in its work",
+			"failed": "failed",
+			"waiting": "waiting its turn"
+		},
+		"pr": {
+			"eyebrow": "pull request",
+			"open": "Open",
+			"toOpen": "To open",
+			"recomposing": "the lead is reassembling",
+			"onceVerified": "once everything is verified"
+		},
+		"phase": {
+			"done": "done",
+			"live": "working",
+			"wait": "waiting",
+			"failed": "failed",
+			"yours": "your turn"
+		},
+		"detail": {
+			"close": "Close",
+			"reproaches_one": "Rework · {{count}}",
+			"reproaches_other": "Rework · {{count}}",
+			"fullBrief": "Its full instructions",
+			"follow": "Follow its conversation",
+			"noAgent": "No agent on this task yet."
+		}
+	},
+	"actions": {
+		"openTicket": "Open the ticket in the browser",
+		"openWorktreeNamed": "Open the worktree {{name}}",
+		"permanenceRevoked": "The Permanence will no longer comment on #{{number}}.",
+		"permanenceAllowed": "The Permanence may report on #{{number}}. One comment a day, signed.",
+		"noPrompt": "No prompt for this action in the library: the agent starts without instructions.",
+		"openPr": "Open pull request #{{number}}",
+		"fixCiHint": "Launch the agent that fixes the CI",
+		"fixCi": "Fix the CI",
+		"feedbackHint": "Handle the review feedback with an agent",
+		"feedback": "Feedback",
+		"agentHint": "Open an agent on this branch",
+		"agent": "Agent",
+		"openWorktree": "Open this branch's worktree",
+		"allowedHint": "The Permanence may report here. Click to revoke it.",
+		"allowHint": "Allow the Permanence to report here, once a day, signed.",
+		"allowed": "Allowed",
+		"allow": "Allow"
+	},
+	"accounts": {
+		"notLoggedIn": "Not signed in on this machine yet.",
+		"loggedIn": "signed in",
+		"nameRequired": "Give the account a name: that's what sets it apart.",
+		"nameTaken": "An account is already called “{{label}}”.",
+		"loginTerminal": "Sign in — {{label}}",
+		"intro": "An account is the identity agents work under — not the program that runs them, that's what engines are for. Each has its own configuration folder: Cockpit points to it, the CLI signs in there by itself, and no token goes through here. A project attached to an account sends it everything — its agents, its terminals, its limits.",
+		"loading": "Asking each account who it is…",
+		"openProject": "open project",
+		"reconnect": "Sign in again",
+		"connect": "Sign in",
+		"attach": "Attach “{{name}}”",
+		"remove": "Remove",
+		"new": "New",
+		"nameLabel": "Name",
+		"nameHint": "the one you'll see on screen",
+		"namePlaceholder": "Work account",
+		"dirLabel": "Folder",
+		"dirHint": "empty = ~/.claude-<name>",
+		"dirPlaceholder": "~/.claude-work",
+		"add": "Add",
+		"footer": "The folder is created when you add the account; signing in then happens in a terminal, just as you would by hand.",
+		"reading": "Reading…",
+		"reload": "Reload accounts"
+	},
+	"briefBar": {
+		"chars": "{{value}} chars",
+		"kchars": "{{value}}k chars",
+		"loading": "Cockpit is gathering what it knows about this branch…",
+		"agentWillKnow": "The agent will know",
+		"nothing": "nothing beyond your instruction — no declared source answered.",
+		"collapse": "Collapse",
+		"expand": "Read what will be attached, word for word",
+		"refresh": "Gather again — the branch may have moved",
+		"missing": "Couldn't read: {{sources}}",
+		"clickToDetach": "{{detail}} — click to leave it out",
+		"clickToAttach": "{{detail}} — click to attach it"
+	},
+	"fileFinder": {
+		"recent": "Recently opened",
+		"writtenByAgents": "Written by agents",
+		"uncommitted": "Modified, not yet committed",
+		"files_one": "{{count}} file",
+		"files_other": "{{count}} files",
+		"buttonHint": "Open a file from this worktree by name (⌘P)",
+		"button": "Files",
+		"placeholder": "A file name — “agentmap”, “panel work”, “apps/web env”",
+		"scanning": "Scanning the repository…",
+		"noMatch": "No file by that name.",
+		"typeToSearch": "Type part of a name to search the whole repository.",
+		"total_one": "{{formatted}} file",
+		"total_other": "{{formatted}} files",
+		"scanningShort": "scanning the repository…",
+		"keys": "↑↓ to choose · Enter to open · ⌘P",
+		"whyAgent": "written by an agent",
+		"whyChanged": "modified"
+	},
+	"feedPanel": {
+		"sort": {
+			"recent": "Newest",
+			"oldest": "Oldest",
+			"severity": "Severity",
+			"status": "Status",
+			"title": "Title"
+		},
+		"severity": {
+			"critical": "Critical",
+			"warning": "Warning",
+			"info": "Info",
+			"success": "OK"
+		},
+		"sortHint": "Display order",
+		"filters": "Filters",
+		"clearAll": "Clear all",
+		"empty": "Nothing to show",
+		"selectItem": "Select an item"
+	},
+	"illustration": {
+		"genre": {
+			"frise": "The chain of events",
+			"avant_apres": "Before, after",
+			"mesure": "Measured",
+			"table": "The table that changes",
+			"capture": "Annotated screenshot",
+			"matrice": "The options compared"
+		},
+		"source": {
+			"mesure": "measured",
+			"depot": "found in the repository",
+			"capture": "captured",
+			"agent": "stated by the agent"
+		},
+		"beforeGraph": "Before: {{nodes}}",
+		"afterGraph": "After: {{nodes}}",
+		"before": "Before",
+		"after": "After",
+		"beforeShort": "before",
+		"afterShort": "after",
+		"percent": "{{sign}}{{value}}%",
+		"noCommand": "No command cited: these figures can't be reproduced.",
+		"enlarge": "View full size",
+		"captureLabel": "screenshot"
+	},
+	"linearIssue": {
+		"state": "State",
+		"priority": "Priority",
+		"priorities": {
+			"urgent": "Urgent",
+			"high": "High",
+			"medium": "Medium",
+			"low": "Low",
+			"none": "—"
+		},
+		"priorityChanged": "priority {{priority}}",
+		"assignee": "Assignee",
+		"unassigned": "unassigned",
+		"nobody": "nobody",
+		"assignedTo": "assigned to {{name}}",
+		"labels": "Labels",
+		"labelRemoved": "label {{name}} removed",
+		"labelAdded": "label {{name}} added",
+		"noDescription": "No description.",
+		"comments": "Comments · {{count}}"
+	},
+	"missionHistory": {
+		"whatHappened": "What happened",
+		"agents_one": "{{count}} agent",
+		"agents_other": "{{count}} agents",
+		"loading": "reading…",
+		"empty": "No agents recorded for this mission. Cockpit has only kept this log since version 0.54: whatever ran before isn't in it.",
+		"outcome": {
+			"running": "running",
+			"answered": "delivered",
+			"failed": "failed",
+			"lostAtLaunch": "lost at launch",
+			"stopped": "stopped",
+			"orphaned": "Cockpit closed"
+		},
+		"actor": {
+			"me": "you",
+			"master": "the lead",
+			"cockpit": "Cockpit",
+			"permanence": "the Permanence"
+		},
+		"retry": "retry {{attempt}}",
+		"launchedBy": "{{model}} · launched by {{who}}",
+		"reportedHint": "Value reported by the engine — not an expense.\n{{input}} input tokens, {{output}} output",
+		"unknownHint": "{{engine}} doesn't report what its turns cost. That's not a zero cost: it's a figure we don't have.",
+		"unknownCost": "cost not reported",
+		"totalReported": "value reported by the engines, never an expense",
+		"totalLost": "including {{amount}} $ on agents that delivered nothing",
+		"totalUnknown_one": "{{count}} turn whose cost isn't reported",
+		"totalUnknown_other": "{{count}} turns whose cost isn't reported"
+	},
+	"viewBoundary": {
+		"failed": "The “{{view}}” screen couldn't be displayed.",
+		"rest": "The rest of Cockpit works — the other screens are reachable from the menu, and whatever is running keeps running.",
+		"retry": "Try again"
+	},
+	"lightbox": {
+		"openInViewer": "Open the file in the viewer",
+		"close": "Close",
+		"previous": "Previous image",
+		"next": "Next image"
+	},
+	"shellView": {
+		"pondering": "nothing running — it's reading the output and thinking about what's next",
+		"noCommand": "No command run for this instruction.",
+		"runningSince": "running<elapsed/> — the output arrives when the command returns",
+		"running": "running — the output arrives when the command returns",
+		"interrupted": "interrupted before answering",
+		"linesAbove_one": "… {{count}} line above",
+		"linesAbove_other": "… {{count}} lines above",
+		"noOutput": "(no output)",
+		"since": "for {{duration}}"
+	},
+	"pdfView": {
+		"page": "page {{current}} / {{total}}",
+		"zoomOut": "Zoom out",
+		"percent": "{{value}}%",
+		"zoomIn": "Zoom in",
+		"fitWidth": "Fit to window width"
+	},
+	"markdown": {
+		"loadImageFrom": "Load the image from <host>{{host}}</host>",
+		"enlarge": "View full size"
+	},
+	"charts": {
+		"trend_one": "Trend over {{count}} point",
+		"trend_other": "Trend over {{count}} points",
+		"segment": "{{label}}: {{value}}"
+	},
+	"narration": {
+		"waitingForYou": "It's waiting for your reply.",
+		"stopped": "It's stopped.",
+		"thisAgent": "this agent",
+		"intro": "I'll tell you what {{name}} is doing. {{where}}",
+		"mute": "Mute the voice",
+		"listenLive": "Listen live to what the agent is doing",
+		"listening": "Listening",
+		"listen": "Listen",
+		"elevenLabsFailed": "ElevenLabs failed, the Mac voice took over: {{reason}}",
+		"voiceAndRate": "Voice and speed"
+	},
+	"voiceSettings": {
+		"engine": "Engine",
+		"macVoice": "Mac voice",
+		"elevenLabsHint": "The most human voice, counted against the characters of your ElevenLabs plan. No Claude or ChatGPT subscription provides a voice to another application.",
+		"systemHint": "Free and offline. Much better with a Premium voice.",
+		"elevenLabsKey": "ElevenLabs key",
+		"createKey": "Create a key",
+		"keyStored": "Stored in the Mac keychain",
+		"removeKey": "Remove",
+		"storeKey": "Save",
+		"voice": "Voice",
+		"loadingVoices": "Loading the account's voices…",
+		"libraryHint": "The voices in your ElevenLabs library, those in your language first. Add more from their site (Voice Library) to see them here.",
+		"model": "Model",
+		"browserVoice": "Browser voice, in preview.",
+		"noPremiumVoice": "No Premium voice installed. Download one: System Settings → Accessibility → Spoken Content → System Voice → Manage Voices.",
+		"rate": "Speed",
+		"fallback": "The Mac voice took over: {{reason}}",
+		"sample": "It fixed the cart rounding and reran the tests. It's done: it changed three files, and the tests pass.",
+		"tryVoice": "Try this voice",
+		"allSettings": "All voice and assistant settings"
+	},
+	"promptLauncher": {
+		"myPrompts": "My prompts",
+		"openedInTerminal": "Opened in Terminal: {{label}}",
+		"saved": "Prompt saved.",
+		"deleteTitle": "Delete “{{label}}”?",
+		"delete": "Delete",
+		"title": "Launch an agent",
+		"reset": "Restore the default library",
+		"label": "Label",
+		"labelPlaceholder": "Check, then commit + push",
+		"group": "Group",
+		"groupHint": "Delivery, Review, Quality…",
+		"text": "Prompt sent to the agent",
+		"cancel": "Cancel",
+		"save": "Save",
+		"openInTerminal": "Open in Terminal.app instead",
+		"new": "New prompt",
+		"footer": "A click launches the agent here, with the conversation and the reply box in Cockpit. The terminal icon opens it in Terminal.app instead, for anything that needs a real TTY. The library lives in <path>{{path}}</path>."
+	},
+	"panelReport": {
+		"verdict": {
+			"ok": "ok",
+			"reserves": "reservations",
+			"blocking": "blocking"
+		},
+		"noVerdict": "no verdict",
+		"title": "Cross-examination",
+		"angles_one": "{{count}} angle",
+		"angles_other": "{{count}} angles",
+		"agreed": "in agreement",
+		"disputes_one": "{{count}} disagreement",
+		"disputes_other": "{{count}} disagreements",
+		"costHint": "What this cross-examination would cost at API rates. On a subscription nothing is charged: it uses up the window's quota.",
+		"severestWins": "A single angle is enough to carry the verdict: two readings that saw nothing don't prove the third one was wrong.",
+		"stale": "The branch has moved since this cross-examination.",
+		"silent": "No answer: {{names}}",
+		"collapse": "Collapse the opinions",
+		"expand": "Read each angle",
+		"heldBy": "Held by",
+		"against": "Disputed by"
+	},
+	"reviewPanel": {
+		"title": "Code review",
+		"verdict": {
+			"merge": "You can merge",
+			"corrections": "Changes requested",
+			"bloquant": "Blocking"
+		},
+		"severity": {
+			"bloquant": "Blocking",
+			"important": "Important",
+			"suggestion": "Suggestion"
+		},
+		"check": {
+			"corrige": "fixed",
+			"partiel": "partially",
+			"non_corrige": "not fixed"
+		},
+		"round": "Round {{number}}",
+		"roundVerification": "Round {{number}} · check",
+		"commit": "commit",
+		"recheck": "Check again",
+		"reviewAgainHint": "A full review, from scratch",
+		"reviewAgain": "Review again",
+		"pushedSince": "{{author}} pushed since this round: the PR is no longer the one that was reviewed.",
+		"theAuthor": "The author",
+		"understand": "Understanding the PR",
+		"previousPoints": "Earlier points",
+		"earlierPoint": "point from an earlier round",
+		"nothing": "Nothing to flag this round.",
+		"openFileAtLine": "Open the file at this line",
+		"openOnGitHub": "Open the PR on GitHub at this line to post the comment",
+		"posted": "posted",
+		"fix": "Fix",
+		"quoted": "“{{text}}”",
+		"copyComment": "Copy the comment",
+		"copied": "Copied",
+		"copy": "Copy"
+	},
+	"resources": {
+		"gigabytes": "{{value}} GB",
+		"megabytes": "{{value}} MB",
+		"heaviest": "The heaviest process in this subtree: {{name}}",
+		"processesShort_one": "{{count}} proc.",
+		"processesShort_other": "{{count}} procs.",
+		"percent": "{{value}}%",
+		"title": "Resource usage",
+		"subtitle": "Cockpit and everything it runs",
+		"close": "Close (Esc)",
+		"appOnly": "Cockpit alone",
+		"cpu": "{{value}}% CPU",
+		"withChildren": "With its child processes",
+		"processes_one": "{{count}} process · {{cpu}}%",
+		"processes_other": "{{count}} processes · {{cpu}}%",
+		"machine": "Machine",
+		"machineShare": "Cockpit uses {{value}}% of it",
+		"agents": "Agents",
+		"terminals": "Terminals",
+		"footnote": "Memory figures are added up without accounting for what processes share: the total is therefore a ceiling, not an exact bill. The interface itself runs in a WebKit process that macOS doesn't attribute to anyone without privileges — count about sixty more megabytes.",
+		"spendNoQuota": "Tokens used today. The CLI doesn't report the quota.",
+		"spendLeft": "{{left}}% left on “{{window}}”",
+		"spendLeftResets": "{{left}}% left on “{{window}}”, resets {{resets}}",
+		"tickerHint": "What Cockpit weighs on the machine"
+	},
+	"terminalView": {
+		"typeOnly": "Type without running",
+		"runAsIs": "Run as is",
+		"mainRepo": "main repository",
+		"scripts": "Scripts",
+		"scriptsHint": "Repository scripts and custom commands",
+		"noScripts": "No scripts in this folder.",
+		"footer": "The command is typed then run in this shell — ⇧Enter does the opposite of the chosen entry."
+	}
+}

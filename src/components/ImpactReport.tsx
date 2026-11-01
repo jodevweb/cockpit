@@ -28,6 +28,8 @@ import type {
 	Severity,
 } from "@/lib/types";
 import { useCockpit } from "@/app/store";
+import { locale, t } from "@/i18n";
+import { useTranslation } from "react-i18next";
 
 /**
  * Chaque bloc a sa silhouette, et l'ordre ne change jamais.
@@ -74,11 +76,40 @@ export const RISQUE_TONE: Record<string, Severity | "neutral"> = {
 /** Une date lisible, en un coup d'œil, depuis des secondes epoch. */
 function depuis(at: number): string {
 	const minutes = Math.max(0, Math.round((Date.now() / 1000 - at) / 60));
-	if (minutes < 1) return "à l'instant";
-	if (minutes < 60) return `il y a ${minutes} min`;
+	if (minutes < 1) return t("components1:impactReport.ago.now");
+	if (minutes < 60) return t("components1:impactReport.ago.minutes", { count: minutes });
 	const heures = Math.round(minutes / 60);
-	if (heures < 24) return `il y a ${heures} h`;
-	return `il y a ${Math.round(heures / 24)} j`;
+	if (heures < 24) return t("components1:impactReport.ago.hours", { count: heures });
+	return t("components1:impactReport.ago.days", { count: Math.round(heures / 24) });
+}
+
+/**
+ * Le verdict et le risque arrivent du Rust sous leur valeur stockée (`réserves`,
+ * `élevé`…) : on les compare tels quels, on ne traduit que ce qu'on affiche.
+ */
+const VERDICT_KEYS: Record<string, string> = { ok: "ok", réserves: "reserves", bloquant: "blocking" };
+const RISQUE_KEYS: Record<string, string> = { faible: "low", moyen: "medium", élevé: "high" };
+
+export function verdictLabel(verdict: string): string {
+	if (!verdict) return t("components1:impactReport.noVerdict");
+	const key = VERDICT_KEYS[verdict];
+	return key ? t(`components1:impactReport.verdict.${key}`) : verdict;
+}
+
+export function riskLabel(risk: string): string {
+	const key = RISQUE_KEYS[risk];
+	return t("components1:impactReport.risk", {
+		level: key ? t(`components1:impactReport.riskLevel.${key}`) : risk || t("components1:impactReport.riskLevel.unknown"),
+	});
+}
+
+/** Le nom anglais de la langue de l'interface, pour dire à l'agent dans quelle langue répondre. */
+function languageName(): string {
+	try {
+		return new Intl.DisplayNames(["en"], { type: "language" }).of(locale()) ?? "English";
+	} catch {
+		return "English";
+	}
 }
 
 function Bloc({ section }: { section: ImpactSection }) {
@@ -151,24 +182,25 @@ export function briefFor(change: Change, analysis: ImpactAnalysis): string {
 	const verifications = lignes("verifier");
 
 	return [
-		`Tu reprends la branche \`${change.branch}\` (${change.repo} ${change.reference}).`,
+		`You are taking over the branch \`${change.branch}\` (${change.repo} ${change.reference}).`,
 		"",
-		"Une lecture d'impact a déjà été faite sur ce changement. Voici ce qu'elle a",
-		"conclu — prends-la comme point de départ, pas comme parole d'évangile :",
-		"vérifie sur le code avant d'agir, et dis-le si tu la trouves à côté.",
+		"An impact reading has already been done on this change. Here is what it",
+		"concluded — take it as a starting point, not as gospel: check against the",
+		"code before acting, and say so if you find it off the mark.",
 		"",
-		`## Ce que ça change\n${bloc("produit")?.body || analysis.headline}`,
-		bloc("pourquoi")?.body ? `\n## Pourquoi maintenant\n${bloc("pourquoi")?.body}` : "",
-		risques ? `\n## Ce qui peut casser\n${risques}` : "",
-		verifications ? `\n## À vérifier avant de fusionner\n${verifications}` : "",
+		`## What it changes\n${bloc("produit")?.body || analysis.headline}`,
+		bloc("pourquoi")?.body ? `\n## Why now\n${bloc("pourquoi")?.body}` : "",
+		risques ? `\n## What can break\n${risques}` : "",
+		verifications ? `\n## To check before merging\n${verifications}` : "",
 		"",
-		"## Ce que j'attends de toi",
-		"Traite les risques ci-dessus dans l'ordre où ils sont écrits — le premier",
-		"est le plus grave. Pour chacun : confirme-le sur le code, corrige s'il est",
-		"réel, et dis-le franchement s'il ne l'est pas plutôt que d'inventer une",
-		"correction. Ne touche à rien d'autre : ni refactor, ni nettoyage, ni",
-		"amélioration que personne n'a demandée. Termine par ce que tu as changé et",
-		"ce qui reste ouvert.",
+		"## What I expect from you",
+		"Handle the risks above in the order they are written — the first one is",
+		"the most serious. For each: confirm it against the code, fix it if it is",
+		"real, and say plainly if it is not rather than inventing a fix. Touch",
+		"nothing else: no refactor, no cleanup, no improvement nobody asked for.",
+		"End with what you changed and what remains open.",
+		"",
+		`Reply in ${languageName()}, the language of the user's interface.`,
 	]
 		.filter(Boolean)
 		.join("\n");
@@ -206,6 +238,7 @@ export function ImpactReport({
 	/** Juger ce changement propriété par propriété. */
 	onAudit: () => void;
 }) {
+	const { t } = useTranslation("components1");
 	const { notify } = useCockpit();
 	// Une analyse est scellée à la tête de la branche : quatre commits plus tard,
 	// elle raconte un état qui n'existe plus. Le dire vaut mieux que l'effacer —
@@ -224,10 +257,10 @@ export function ImpactReport({
 				<div className="min-w-0 flex-1">
 					<div className="flex flex-wrap items-center gap-1.5">
 						<Badge tone={VERDICT_TONE[analysis.verdict] ?? "neutral"}>
-							{analysis.verdict || "sans verdict"}
+							{verdictLabel(analysis.verdict)}
 						</Badge>
 						<Badge tone={RISQUE_TONE[analysis.risk] ?? "neutral"}>
-							risque {analysis.risk || "inconnu"}
+							{riskLabel(analysis.risk)}
 						</Badge>
 						<span className="font-mono text-[10px] text-ink-faint">
 							{change.repo} {change.reference}
@@ -246,15 +279,15 @@ export function ImpactReport({
 						variant="solid"
 						icon={Wrench}
 						onClick={onWorkOn}
-						title="Ouvrir un agent sur cette branche, avec cette lecture en main"
+						title={t("impactReport.workOnTitle")}
 					>
-						Traiter
+						{t("impactReport.workOn")}
 					</Button>
 					{change.url ? (
 						<Button
 							size="sm"
 							icon={ExternalLink}
-							title="Ouvrir sur la forge"
+							title={t("impactReport.openForge")}
 							onClick={() => {
 								void api.system.openUrl(change.url).catch((error) => notify(String(error)));
 							}}
@@ -267,11 +300,10 @@ export function ImpactReport({
 				<div className="flex shrink-0 items-center gap-2 border-b border-line-soft bg-warning/8 px-4 py-2">
 					<AlertTriangle size={12} className="shrink-0 text-warning" />
 					<p className="flex-1 text-[11px] text-warning">
-						La branche a bougé depuis cette lecture — elle décrit un état qui
-						n'existe plus.
+						{t("impactReport.stale")}
 					</p>
 					<Button size="sm" icon={RefreshCw} loading={running} onClick={onAnalyze}>
-						Relire
+						{t("impactReport.reread")}
 					</Button>
 				</div>
 			) : null}
@@ -320,7 +352,9 @@ export function ImpactReport({
 				) : null}
 				{analysis.durationSeconds > 0 ? (
 					<span className="font-mono text-[10px] text-ink-faint">
-						{Math.max(1, Math.round(analysis.durationSeconds / 60))} min de lecture
+						{t("impactReport.readingMinutes", {
+							count: Math.max(1, Math.round(analysis.durationSeconds / 60)),
+						})}
 					</span>
 				) : null}
 				{/* « en tarif API » et non « coût » : le moteur rend ce montant de la
@@ -331,9 +365,9 @@ export function ImpactReport({
 				{analysis.costUsd > 0 ? (
 					<span
 						className="font-mono text-[10px] text-ink-faint"
-						title="Ce que cette lecture vaudrait aux tarifs de l'API. Sur un abonnement, rien n'est débité : c'est le quota de la fenêtre qui se consomme."
+						title={t("impactReport.apiCostTitle")}
 					>
-						≈ {analysis.costUsd.toFixed(2)} $ en tarif API
+						{t("impactReport.apiCost", { cost: analysis.costUsd.toFixed(2) })}
 					</span>
 				) : null}
 				<div className="ml-auto flex items-center gap-1.5">
@@ -341,14 +375,14 @@ export function ImpactReport({
 						<Button
 							size="sm"
 							icon={FileText}
-							title="Ouvrir le dossier de faits envoyé à l'agent"
+							title={t("impactReport.briefTitle")}
 							onClick={() => {
 								void api.system
 									.reveal(analysis.briefPath)
 									.catch((error) => notify(String(error)));
 							}}
 						>
-							Le dossier
+							{t("impactReport.brief")}
 						</Button>
 					) : null}
 					{/* Jeter une lecture plutôt que la corriger : quand un rapport est
@@ -362,9 +396,9 @@ export function ImpactReport({
 						icon={Target}
 						loading={auditing}
 						onClick={onAudit}
-						title="Juger ce changement sur les propriétés déclarées du projet — une par une, avec la preuve"
+						title={t("impactReport.auditTitle")}
 					>
-						{audit ? "Revérifier" : "Vérifier"}
+						{audit ? t("impactReport.reaudit") : t("impactReport.audit")}
 					</Button>
 					<Button
 						size="sm"
@@ -373,17 +407,17 @@ export function ImpactReport({
 						onClick={onConfront}
 						title={
 							panel
-								? "Refaire lire ce changement sous trois angles — quatre agents, quelques minutes"
-								: "Faire relire ce changement sous trois angles indépendants, et ne garder que ce sur quoi ils divergent. Quatre agents, quelques minutes."
+								? t("impactReport.reconfrontTitle")
+								: t("impactReport.confrontTitle")
 						}
 					>
-						{panel ? "Reconfronter" : "Confronter"}
+						{panel ? t("impactReport.reconfront") : t("impactReport.confront")}
 					</Button>
 					<Button size="sm" icon={Trash2} variant="danger" onClick={onForget}>
-						Oublier
+						{t("impactReport.forget")}
 					</Button>
 					<Button size="sm" icon={RefreshCw} loading={running} onClick={onAnalyze}>
-						Relire
+						{t("impactReport.reread")}
 					</Button>
 				</div>
 			</footer>

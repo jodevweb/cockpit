@@ -1175,12 +1175,12 @@ fn project(index: usize, beat: Beat) -> crate::sessions::SessionEvent {
 					// La taille réelle plutôt que celle de l'extrait : une sortie
 					// coupée doit dire de quoi elle a été coupée.
 					event.detail = (bytes > MAX_EXCERPT as u64)
-						.then(|| format!("sortie de {bytes} octets, extrait ci-dessus"));
+						.then(|| crate::i18n::tf("executions.outputTruncated", &[("bytes", &bytes)]));
 				}
 				ExecEvent::TurnEnd { ok, text } => {
 					event.kind = if ok { "system" } else { "tool-error" }.into();
 					event.text = if text.trim().is_empty() {
-						"Tour terminé.".into()
+						crate::i18n::t("executions.turnEnded")
 					} else {
 						text
 					};
@@ -1191,8 +1191,8 @@ fn project(index: usize, beat: Beat) -> crate::sessions::SessionEvent {
 				}
 				ExecEvent::Lifecycle { step, note } => {
 					event.text = match (step, note.is_empty()) {
-						(Step::Resumed, _) => "Tour suivant relancé.".into(),
-						(Step::Answered, true) => "Agent terminé.".into(),
+						(Step::Resumed, _) => crate::i18n::t("executions.turnResumed"),
+						(Step::Answered, true) => crate::i18n::t("executions.agentDone"),
 						(_, true) => format!("{step:?}"),
 						(_, false) => note,
 					};
@@ -1313,7 +1313,7 @@ pub fn close_orphans(alive: &std::collections::HashSet<String>) {
 			note_step(
 				&exec.id,
 				Step::Orphaned,
-				"Le cockpit s'est arrêté pendant cette exécution.",
+				&crate::i18n::t("executions.orphaned"),
 			);
 		}
 	}
@@ -1825,7 +1825,7 @@ mod tests {
 			bytes: 5_242_880,
 			excerpt: "début…".into(),
 		});
-		assert_eq!(event.detail.as_deref(), Some("sortie de 5242880 octets, extrait ci-dessus"));
+		assert_eq!(event.detail.as_deref(), Some("5242880-byte output, excerpt above"));
 	}
 
 	#[test]
@@ -1849,7 +1849,7 @@ mod tests {
 				note: String::new(),
 			})
 			.text,
-			"Tour suivant relancé."
+			"Next turn relaunched."
 		);
 		assert_eq!(
 			projette(ExecEvent::Lifecycle {
@@ -1857,7 +1857,7 @@ mod tests {
 				note: String::new(),
 			})
 			.text,
-			"Agent terminé."
+			"Agent finished."
 		);
 		assert_eq!(
 			projette(ExecEvent::Lifecycle {

@@ -1,4 +1,6 @@
 import type { Turn } from "@/app/agents";
+import { t } from "@/i18n";
+import { lazyLabels } from "@/lib/language";
 import { delivered } from "@/lib/delivered";
 import { commandOf, isTestCommand, kindOf, pathOf, type Episode } from "@/lib/episodes";
 import { mediaOfPath, type Media } from "@/lib/media";
@@ -168,7 +170,7 @@ function build(episode: Episode, cwd: string): Film {
 			key: "read",
 			kind: "read",
 			offset: offset(firstRead),
-			caption: `Lit ${read.length} fichier${read.length > 1 ? "s" : ""}.`,
+			caption: t("lib:film.caption.read", { count: read.length }),
 			turn: firstRead,
 			files: read.slice(0, 6),
 			more: Math.max(0, read.length - 6),
@@ -187,7 +189,7 @@ function build(episode: Episode, cwd: string): Film {
 			key: "think",
 			kind: "think",
 			offset: offset(hypothesis),
-			caption: "Ce qu'il suppose.",
+			caption: t("lib:film.caption.think"),
 			turn: hypothesis,
 			quote: firstSentence(hypothesis.text, 140),
 		});
@@ -200,7 +202,7 @@ function build(episode: Episode, cwd: string): Film {
 			key: "edit",
 			kind: "edit",
 			offset: offset(firstEditTurn),
-			caption: `Modifie ${basename(pathOf(firstEditTurn))}.`,
+			caption: t("lib:film.caption.edit", { file: basename(pathOf(firstEditTurn)) }),
 			turn: firstEditTurn,
 			file: basename(pathOf(firstEditTurn)),
 			...diff,
@@ -216,7 +218,7 @@ function build(episode: Episode, cwd: string): Film {
 			key,
 			kind: "test",
 			offset: offset(turn),
-			caption: ok ? "Les tests passent." : "Des tests échouent.",
+			caption: ok ? t("lib:film.caption.testsPass") : t("lib:film.caption.testsFail"),
 			turn,
 			command: commandOf(turn).split("\n")[0],
 			ok,
@@ -233,7 +235,7 @@ function build(episode: Episode, cwd: string): Film {
 				key: "fix",
 				kind: "fix",
 				offset: offset(fix),
-				caption: `Corrige ${basename(pathOf(fix))}.`,
+				caption: t("lib:film.caption.fix", { file: basename(pathOf(fix)) }),
 				turn: fix,
 				file: basename(pathOf(fix)),
 				...diffOf(fix),
@@ -250,7 +252,7 @@ function build(episode: Episode, cwd: string): Film {
 			key: "see",
 			kind: "see",
 			offset: offset(seen),
-			caption: isBrowserTool(seen.tool) ? "Vérifie dans le navigateur." : "Regarde le résultat.",
+			caption: isBrowserTool(seen.tool) ? t("lib:film.caption.seeBrowser") : t("lib:film.caption.seeResult"),
 			turn: seen,
 			media: imagesOf(seen).at(-1)!,
 		});
@@ -265,17 +267,23 @@ function build(episode: Episode, cwd: string): Film {
 			key: "deliver",
 			kind: "deliver",
 			offset: offset(shipped.turns.at(-1) ?? null),
-			caption: "Livre.",
+			caption: t("lib:film.caption.deliver"),
 			turn: shipped.turns.at(-1) ?? null,
-			title: review ? `PR ${review.label}` : commit ? `Commit ${commit.sha}` : `Poussé : ${shipped.pushed.at(-1)}`,
-			detail: commit?.message ?? (shipped.pushed.length > 0 ? `branche ${shipped.pushed.at(-1)}` : ""),
+			title: review
+				? `PR ${review.label}`
+				: commit
+					? `Commit ${commit.sha}`
+					: t("lib:film.deliver.pushed", { branch: shipped.pushed.at(-1) }),
+			detail:
+				commit?.message ??
+				(shipped.pushed.length > 0 ? t("lib:film.deliver.branch", { branch: shipped.pushed.at(-1) }) : ""),
 		});
 	} else if (answer) {
 		add({
 			key: "deliver",
 			kind: "deliver",
 			offset: offset(answer),
-			caption: "Rend la main.",
+			caption: t("lib:film.caption.handBack"),
 			turn: answer,
 			title: firstSentence(answer.text, 90),
 			detail: "",
@@ -323,14 +331,10 @@ function timeline(tools: Turn[], start: number | null): { segments: Segment[]; d
 	return { segments: merged, duration: total };
 }
 
-export const PHASE_LABELS: Record<Phase, string> = {
-	read: "lire",
-	edit: "modifier",
-	test: "tester",
-	see: "vérifier à l'écran",
-	run: "commandes",
-	agent: "sous-agents",
-};
+export const PHASE_LABELS: Record<Phase, string> = lazyLabels(
+	["read", "edit", "test", "see", "run", "agent"] as const,
+	(phase) => t(`lib:film.phase.${phase}`),
+);
 
 /** « 4:30 », « 1 h 02 » : l'heure du film, pas l'heure de la journée. */
 export function clock(ms: number | null): string {

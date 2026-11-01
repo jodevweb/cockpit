@@ -1,4 +1,5 @@
 import clsx from "clsx";
+import { t } from "@/i18n";
 
 /**
  * Petites figures pour la vue d'ensemble.
@@ -44,7 +45,7 @@ export function Sparkline({
 			style={{ height }}
 			className={clsx("w-full", className)}
 			role="img"
-			aria-label={`Tendance sur ${values.length} points`}
+			aria-label={t("components2:charts.trend", { count: values.length })}
 		>
 			<polyline
 				points={points.join(" ")}
@@ -89,7 +90,7 @@ export function StackedBar({ segments }: { segments: Segment[] }) {
 				{shown.map((segment) => (
 					<div
 						key={segment.label}
-						title={`${segment.label} : ${segment.value}`}
+						title={t("components2:charts.segment", { label: segment.label, value: segment.value })}
 						style={{
 							width: `${(segment.value / total) * 100}%`,
 							backgroundColor: segment.color,

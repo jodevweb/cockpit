@@ -80,48 +80,56 @@ pub struct BriefSource {
 /// finit par ne plus désigner la même chose, et une case qui décoche une
 /// section inexistante ne se voit pas.
 pub fn sources() -> Vec<BriefSource> {
-	let source = |id: &str, label: &str, hint: &str| BriefSource {
-		id: id.into(),
-		label: label.into(),
-		hint: hint.into(),
+	["conventions", "product", "lessons", "place", "ticket", "review", "attempts"]
+		.into_iter()
+		.map(|id| BriefSource {
+			id: id.into(),
+			label: crate::i18n::t(&format!("brief.sources.{id}.label")),
+			hint: crate::i18n::t(&format!("brief.sources.{id}.hint")),
+		})
+		.collect()
+}
+
+/// Un décompte dans la langue de l'utilisateur : `<clé>_one`, `<clé>_other`…
+///
+/// Les formes suivent les règles de pluriel de chaque langue (le français met
+/// zéro au singulier, le japonais n'a qu'une forme, le russe en a trois). Une
+/// forme absente d'un catalogue retombe sur `_other` de la même langue.
+pub(crate) fn counted(key: &str, count: usize) -> String {
+	let lang = crate::i18n::lang();
+	let form = match lang.as_str() {
+		"fr" | "pt-BR" => {
+			if count <= 1 {
+				"one"
+			} else {
+				"other"
+			}
+		}
+		"ja" | "zh-CN" | "ko" => "other",
+		"ru" => {
+			let (ten, hundred) = (count % 10, count % 100);
+			if ten == 1 && hundred != 11 {
+				"one"
+			} else if (2..=4).contains(&ten) && !(12..=14).contains(&hundred) {
+				"few"
+			} else {
+				"many"
+			}
+		}
+		_ => {
+			if count == 1 {
+				"one"
+			} else {
+				"other"
+			}
+		}
 	};
-	vec![
-		source(
-			"conventions",
-			"Les règles du dépôt",
-			"où le dépôt écrit ses conventions, et les compétences qu'il range — un moteur ne lit que le fichier de sa famille",
-		),
-		source(
-			"product",
-			"Ce que fait le produit",
-			"la phrase déclarée pour la lecture des changements — sans elle, un agent ne parle que du code",
-		),
-		source(
-			"lessons",
-			"Le carnet du projet",
-			"ce qu'on a déjà eu à reprendre à la main, filtré sur les fichiers en jeu",
-		),
-		source(
-			"place",
-			"La branche et son état",
-			"base, écart, fichiers non commités, derniers commits — lu dans le dépôt, toujours disponible",
-		),
-		source(
-			"ticket",
-			"Le ticket de la branche",
-			"la demande et ses commentaires, chez le suivi déclaré",
-		),
-		source(
-			"review",
-			"Les retours de revue",
-			"description et échanges de la demande de fusion ouverte sur cette branche",
-		),
-		source(
-			"attempts",
-			"Ce qui a déjà été tenté",
-			"les conversations passées dans ce dossier, en une ligne chacune",
-		),
-	]
+	let key_form = format!("{key}_{form}");
+	let text = crate::i18n::tf(&key_form, &[("count", &count)]);
+	if text != key_form {
+		return text;
+	}
+	crate::i18n::tf(&format!("{key}_other"), &[("count", &count)])
 }
 
 /// Le dossier complet, tel que l'interface le reçoit.
@@ -171,7 +179,7 @@ fn clamp(text: &str) -> String {
 		return text.to_string();
 	}
 	let kept: String = text.chars().take(MAX_SECTION_CHARS).collect();
-	format!("{kept}\n\n> (coupé ici — va lire la source si ce qui manque compte.)")
+	format!("{kept}\n\n> (cut here — read the source if what is missing matters.)")
 }
 
 /// Assemble ce qui a été retenu, la consigne en dernier.
@@ -192,10 +200,10 @@ pub fn assemble(sections: &[BriefSection], prompt: &str) -> String {
 	}
 
 	let mut out = String::from(
-		"# Ce que le cockpit a rassemblé pour toi\n\n\
-		 Ce qui suit a été réuni automatiquement à partir du dépôt et des outils déclarés. \
-		 C'est un point de départ, pas une vérité : si quelque chose contredit ce que tu lis \
-		 dans le code, c'est le code qui a raison, et dis-le.\n\n",
+		"# What the cockpit gathered for you\n\n\
+		 What follows was collected automatically from the repository and the declared tools. \
+		 It is a starting point, not the truth: if something contradicts what you read in the \
+		 code, the code is right, and say so.\n\n",
 	);
 	for entry in retained {
 		out.push_str(entry.text.trim());
@@ -206,7 +214,7 @@ pub fn assemble(sections: &[BriefSection], prompt: &str) -> String {
 	if prompt.is_empty() {
 		return out.trim_end().to_string();
 	}
-	out.push_str("---\n\n# Ce qu'on te demande\n\n");
+	out.push_str("---\n\n# What you are asked to do\n\n");
 	out.push_str(prompt);
 	out
 }
@@ -261,7 +269,7 @@ pub async fn compose(cwd: &str) -> Brief {
 
 	let path = PathBuf::from(cwd);
 	if !path.is_dir() {
-		brief.missing.push("le dossier n'existe pas".into());
+		brief.missing.push(crate::i18n::t("brief.missing.noFolder"));
 		return brief;
 	}
 
@@ -323,9 +331,9 @@ fn product_section(config: &Config) -> Option<BriefSection> {
 	let brief = config.impact.brief.trim();
 	section(
 		"product",
-		"Le produit",
-		"ce que l'équipe a déclaré",
-		format!("## Ce que fait ce produit\n\n{brief}"),
+		&crate::i18n::t("brief.sections.product.label"),
+		&crate::i18n::t("brief.sections.product.detail"),
+		format!("## What this product does\n\n{brief}"),
 		true,
 	)
 }
@@ -355,15 +363,15 @@ async fn lessons_section(repo: &Path, cwd: &Path) -> Option<BriefSection> {
 	}
 
 	let mut out = String::from(
-		"## Ce que ce dépôt a déjà eu à corriger\n\n\
-		 Ces règles viennent de travaux repris à la main après coup. Elles ont été validées \
-		 par quelqu'un, mais elles ne sont pas la loi : si l'une d'elles ne s'applique pas ici, \
-		 dis-le plutôt que de la suivre de travers.\n\n",
+		"## What this repository has already had to fix\n\n\
+		 These rules come from work that was redone by hand afterwards. Someone validated them, \
+		 but they are not the law: if one of them does not apply here, say so rather than \
+		 following it the wrong way.\n\n",
 	);
 	for lesson in &found {
 		out.push_str(&format!("- {}", lesson.text.trim()));
 		if !lesson.scope.is_empty() {
-			out.push_str(&format!(" _(sur {})_", lesson.scope.join(", ")));
+			out.push_str(&format!(" _(on {})_", lesson.scope.join(", ")));
 		}
 		out.push('\n');
 	}
@@ -372,8 +380,8 @@ async fn lessons_section(repo: &Path, cwd: &Path) -> Option<BriefSection> {
 	// décochée n'a servi à personne.
 	let mut built = section(
 		"lessons",
-		"Le carnet",
-		&plural(found.len(), "leçon"),
+		&crate::i18n::t("brief.sections.lessons.label"),
+		&counted("brief.count.lessons", found.len()),
 		out,
 		true,
 	)?;
@@ -389,13 +397,13 @@ async fn lessons_section(repo: &Path, cwd: &Path) -> Option<BriefSection> {
 /// la section qui évite le plus d'erreurs bêtes — un agent qui ignore qu'il
 /// travaille sur du travail en cours écrase ce qui s'y trouvait.
 async fn place_section(path: &Path, branch: &str) -> Option<BriefSection> {
-	let mut out = String::from("## Où tu travailles\n\n");
-	out.push_str(&format!("- Dossier : `{}`\n", path.to_string_lossy()));
+	let mut out = String::from("## Where you are working\n\n");
+	out.push_str(&format!("- Folder: `{}`\n", path.to_string_lossy()));
 
 	if branch.is_empty() {
-		out.push_str("- Branche : détachée — aucun nom de branche à citer.\n");
+		out.push_str("- Branch: detached — no branch name to cite.\n");
 	} else {
-		out.push_str(&format!("- Branche : `{branch}`\n"));
+		out.push_str(&format!("- Branch: `{branch}`\n"));
 	}
 
 	let named = crate::git::default_branch(path).await;
@@ -416,7 +424,7 @@ async fn place_section(path: &Path, branch: &str) -> Option<BriefSection> {
 			let behind: usize = parts.next().unwrap_or("0").parse().unwrap_or(0);
 			let ahead: usize = parts.next().unwrap_or("0").parse().unwrap_or(0);
 			out.push_str(&format!(
-				"- Base : `{base}` — {} en avance, {} en retard\n",
+				"- Base: `{base}` — {} ahead, {} behind\n",
 				plural(ahead, "commit"),
 				plural(behind, "commit"),
 			));
@@ -427,16 +435,16 @@ async fn place_section(path: &Path, branch: &str) -> Option<BriefSection> {
 	// plus utile de toute la section.
 	if let Ok(changes) = crate::git::working_diff(path).await {
 		if changes.is_empty() {
-			out.push_str("- Copie de travail : propre, rien en cours.\n");
+			out.push_str("- Working copy: clean, nothing in progress.\n");
 		} else {
 			out.push_str(&format!(
-				"- Copie de travail : {} non commité(s)\n",
-				plural(changes.len(), "fichier")
+				"- Working copy: {} uncommitted\n",
+				plural(changes.len(), "file")
 			));
-			out.push_str("\n### Fichiers déjà modifiés ici\n\n");
+			out.push_str("\n### Files already modified here\n\n");
 			for change in changes.iter().take(40) {
 				if change.state == "untracked" {
-					out.push_str(&format!("- `{}` (nouveau)\n", change.path));
+					out.push_str(&format!("- `{}` (new)\n", change.path));
 				} else {
 					out.push_str(&format!(
 						"- `{}` (+{} −{})\n",
@@ -445,14 +453,14 @@ async fn place_section(path: &Path, branch: &str) -> Option<BriefSection> {
 				}
 			}
 			if changes.len() > 40 {
-				out.push_str(&format!("- … et {} autres\n", changes.len() - 40));
+				out.push_str(&format!("- … and {} more\n", changes.len() - 40));
 			}
 		}
 	}
 
 	if let Ok(commits) = crate::git::recent_commits(path, 5).await {
 		if !commits.is_empty() {
-			out.push_str("\n### Derniers commits\n\n");
+			out.push_str("\n### Latest commits\n\n");
 			for commit in commits {
 				out.push_str(&format!(
 					"- `{}` {} ({})\n",
@@ -464,9 +472,17 @@ async fn place_section(path: &Path, branch: &str) -> Option<BriefSection> {
 		}
 	}
 
-	section("place", "La branche", "état du dépôt", out, true)
+	section(
+		"place",
+		&crate::i18n::t("brief.sections.place.label"),
+		&crate::i18n::t("brief.sections.place.detail"),
+		out,
+		true,
+	)
 }
 
+/// Un décompte anglais pour le texte joint aux agents (les consignes sont en
+/// anglais) ; ce qui s'affiche passe par [`counted`].
 fn plural(count: usize, word: &str) -> String {
 	if count > 1 {
 		format!("{count} {word}s")
@@ -490,7 +506,7 @@ async fn ticket_section(config: &Config, branch: &str) -> Result<Option<BriefSec
 	};
 	Ok(section(
 		"ticket",
-		&format!("Ticket {identifier}"),
+		&crate::i18n::tf("brief.sections.ticket.label", &[("identifier", &identifier)]),
 		&title,
 		markdown,
 		true,
@@ -522,7 +538,10 @@ pub(crate) async fn ticket_markdown(
 	let ticket = match provider.get(id).await {
 		Ok(ticket) => ticket,
 		Err(error) => {
-			return Err(format!("ticket {id} illisible ({error})"));
+			return Err(crate::i18n::tf(
+				"brief.missing.ticket",
+				&[("id", id), ("error", &error)],
+			));
 		}
 	};
 
@@ -533,14 +552,14 @@ pub(crate) async fn ticket_markdown(
 		.map(|state| state.name.clone())
 		.unwrap_or_default();
 	if !state.is_empty() {
-		out.push_str(&format!("- État : {state}\n"));
+		out.push_str(&format!("- State: {state}\n"));
 	}
 	if !ticket.url.is_empty() {
-		out.push_str(&format!("- Adresse : {}\n", ticket.url));
+		out.push_str(&format!("- URL: {}\n", ticket.url));
 	}
 	if !ticket.labels.is_empty() {
 		out.push_str(&format!(
-			"- Libellés : {}\n",
+			"- Labels: {}\n",
 			ticket
 				.labels
 				.iter()
@@ -554,10 +573,10 @@ pub(crate) async fn ticket_markdown(
 	let description = ticket.description.trim();
 	if description.is_empty() {
 		out.push_str(
-			"Le ticket n'a pas de description : ne suppose pas ce qu'il voulait dire, demande.\n",
+			"The ticket has no description: do not assume what it meant, ask.\n",
 		);
 	} else {
-		out.push_str("### La demande, telle qu'elle a été écrite\n\n");
+		out.push_str("### The request, as written\n\n");
 		out.push_str(description);
 		out.push('\n');
 	}
@@ -570,18 +589,18 @@ pub(crate) async fn ticket_markdown(
 		.filter(|comment| !comment.body.trim().is_empty())
 		.map(|comment| {
 			let author = if comment.author.trim().is_empty() {
-				"quelqu'un"
+				"someone"
 			} else {
 				comment.author.trim()
 			};
 			format!(
-				"- **{author}** : {}",
+				"- **{author}**: {}",
 				comment.body.trim().chars().take(600).collect::<String>()
 			)
 		})
 		.collect();
 	if !comments.is_empty() {
-		out.push_str("\n### Ce qui s'est dit sur le ticket\n\n");
+		out.push_str("\n### What was said on the ticket\n\n");
 		out.push_str(&comments.join("\n"));
 		out.push('\n');
 	}
@@ -616,17 +635,24 @@ async fn github_review(config: &Config, branch: &str) -> Result<Option<BriefSect
 		Ok(Some(pr)) => pr,
 		// Aucune demande de fusion n'est un fait ordinaire, pas un manque.
 		Ok(None) => return Ok(None),
-		Err(error) => return Err(format!("pull requests illisibles ({error})")),
+		Err(error) => {
+			return Err(crate::i18n::tf("brief.missing.pullRequests", &[("error", &error)]))
+		}
 	};
 
 	let conversation =
 		match crate::integrations::github_pull_conversation(config, &pr.number.to_string()).await {
 			Ok(value) => value,
-			Err(error) => return Err(format!("pull request #{} illisible ({error})", pr.number)),
+			Err(error) => {
+				return Err(crate::i18n::tf(
+					"brief.missing.pullRequest",
+					&[("number", &pr.number), ("error", &error)],
+				))
+			}
 		};
 
 	let mut echanges = Vec::new();
-	for (pointer, kind) in [("/reviews", "revue"), ("/comments", "commentaire")] {
+	for (pointer, kind) in [("/reviews", "review"), ("/comments", "comment")] {
 		let Some(list) = conversation.pointer(pointer).and_then(|v| v.as_array()) else {
 			continue;
 		};
@@ -642,14 +668,14 @@ async fn github_review(config: &Config, branch: &str) -> Result<Option<BriefSect
 			let author = entry
 				.pointer("/user/login")
 				.and_then(|v| v.as_str())
-				.unwrap_or("quelqu'un");
+				.unwrap_or("someone");
 			let state = entry
 				.get("state")
 				.and_then(|v| v.as_str())
 				.unwrap_or_default()
 				.to_lowercase();
 			echanges.push(format!(
-				"- **{author}** ({kind}{}) : {}",
+				"- **{author}** ({kind}{}): {}",
 				if state.is_empty() {
 					String::new()
 				} else {
@@ -681,7 +707,9 @@ async fn gitlab_review(config: &Config, branch: &str) -> Result<Option<BriefSect
 	let mr = match crate::integrations::gitlab_merge_request_for_branch(config, branch).await {
 		Ok(Some(mr)) => mr,
 		Ok(None) => return Ok(None),
-		Err(error) => return Err(format!("merge requests illisibles ({error})")),
+		Err(error) => {
+			return Err(crate::i18n::tf("brief.missing.mergeRequests", &[("error", &error)]))
+		}
 	};
 	let iid = mr
 		.get("iid")
@@ -712,14 +740,19 @@ async fn gitlab_review(config: &Config, branch: &str) -> Result<Option<BriefSect
 				let author = note
 					.pointer("/author/name")
 					.and_then(|v| v.as_str())
-					.unwrap_or("quelqu'un");
+					.unwrap_or("someone");
 				echanges.push(format!(
-					"- **{author}** : {}",
+					"- **{author}**: {}",
 					body.chars().take(800).collect::<String>()
 				));
 			}
 		}
-		Err(error) => return Err(format!("échanges de la MR !{iid} illisibles ({error})")),
+		Err(error) => {
+			return Err(crate::i18n::tf(
+				"brief.missing.mergeRequestNotes",
+				&[("iid", &iid), ("error", &error)],
+			))
+		}
 	}
 
 	let text_of = |pointer: &str| {
@@ -756,12 +789,12 @@ fn review_text(
 		return None;
 	}
 
-	let mut out = format!("## Demande de fusion {reference} — {title}\n\n");
+	let mut out = format!("## Merge request {reference} — {title}\n\n");
 	if !state.trim().is_empty() {
-		out.push_str(&format!("- État : {state}\n"));
+		out.push_str(&format!("- State: {state}\n"));
 	}
 	if !url.trim().is_empty() {
-		out.push_str(&format!("- Adresse : {url}\n"));
+		out.push_str(&format!("- URL: {url}\n"));
 	}
 	out.push('\n');
 	if !body.trim().is_empty() {
@@ -771,22 +804,22 @@ fn review_text(
 	}
 	if !echanges.is_empty() {
 		out.push_str(
-			"### Ce qui a été dit\n\n\
-			 Les retours ci-dessous n'ont pas forcément été traités. Vérifie dans le code avant \
-			 de conclure qu'un point est réglé.\n\n",
+			"### What was said\n\n\
+			 The feedback below has not necessarily been addressed. Check in the code before \
+			 concluding that a point is settled.\n\n",
 		);
 		out.push_str(&echanges.join("\n"));
 		out.push('\n');
 	}
 
 	let detail = if echanges.is_empty() {
-		"description seule".to_string()
+		crate::i18n::t("brief.sections.review.descriptionOnly")
 	} else {
-		plural(echanges.len(), "retour")
+		counted("brief.count.feedback", echanges.len())
 	};
 	section(
 		"review",
-		&format!("Revue {reference}"),
+		&crate::i18n::tf("brief.sections.review.label", &[("reference", &reference)]),
 		&detail,
 		out,
 		true,
@@ -835,13 +868,13 @@ fn attempts_section(cwd: &str) -> Option<BriefSection> {
 		if title.is_empty() {
 			continue;
 		}
-		let mut line = format!("- « {} »", title.chars().take(200).collect::<String>());
+		let mut line = format!("- \"{}\"", title.chars().take(200).collect::<String>());
 		let mut facts = Vec::new();
 		if summary.user_messages > 0 {
-			facts.push(plural(summary.user_messages, "échange"));
+			facts.push(plural(summary.user_messages, "exchange"));
 		}
 		if summary.has_error {
-			facts.push("s'est terminée sur une erreur".into());
+			facts.push("ended with an error".into());
 		}
 		if !facts.is_empty() {
 			line.push_str(&format!(" ({})", facts.join(", ")));
@@ -854,16 +887,16 @@ fn attempts_section(cwd: &str) -> Option<BriefSection> {
 
 	let count = lines.len();
 	let out = format!(
-		"## Ce qui a déjà été tenté dans ce dossier\n\n\
-		 {} conversation(s) s'y sont déjà tenues. Ce n'est pas forcément lié à ce qu'on te \
-		 demande — mais si ça l'est, ne recommence pas ce qui a échoué.\n\n{}\n",
-		count,
+		"## What has already been tried in this folder\n\n\
+		 {} already took place here. It is not necessarily related to what you are asked — \
+		 but if it is, do not repeat what failed.\n\n{}\n",
+		plural(count, "conversation"),
 		lines.join("\n")
 	);
 	section(
 		"attempts",
-		"Tentatives",
-		&plural(count, "conversation"),
+		&crate::i18n::t("brief.sections.attempts.label"),
+		&counted("brief.count.conversations", count),
 		out,
 		true,
 	)
@@ -910,13 +943,13 @@ fn conventions_section(repo: &Path) -> Option<BriefSection> {
 	}
 
 	let mut out = String::from(
-		"## Les règles du dépôt\n\n\
-		 Ce dépôt déclare ses conventions par écrit. Va les lire avant d'écrire du code : \
-		 elles priment sur tes habitudes, et un agent qui ne les a pas lues produit du code \
-		 à reprendre.\n\n",
+		"## The repository's rules\n\n\
+		 This repository declares its conventions in writing. Read them before writing code: \
+		 they take precedence over your habits, and an agent that has not read them produces \
+		 code that needs redoing.\n\n",
 	);
 	if !found.is_empty() {
-		out.push_str("Fichiers d'instructions présents :\n\n");
+		out.push_str("Instruction files present:\n\n");
 		for name in &found {
 			out.push_str(&format!("- `{name}`\n"));
 		}
@@ -924,10 +957,10 @@ fn conventions_section(repo: &Path) -> Option<BriefSection> {
 	}
 	if !skills.is_empty() {
 		out.push_str(&format!(
-			"Le dépôt range aussi {} en markdown ordinaire, un dossier par sujet dans \
-			 `.claude/skills/<nom>/SKILL.md`. Ouvre celles qui recouvrent ce qu'on te demande \
-			 — elles portent les conventions du domaine, pas des généralités :\n\n{}\n",
-			plural(skills.len(), "compétence"),
+			"The repository also stores {} as plain markdown, one folder per topic in \
+			 `.claude/skills/<name>/SKILL.md`. Open the ones that cover what you are asked — they \
+			 carry the domain's conventions, not generalities:\n\n{}\n",
+			plural(skills.len(), "skill"),
 			skills
 				.iter()
 				.map(|name| format!("`{name}`"))
@@ -937,15 +970,21 @@ fn conventions_section(repo: &Path) -> Option<BriefSection> {
 	}
 
 	let detail = match (found.len(), skills.len()) {
-		(0, count) => plural(count, "compétence"),
-		(count, 0) => plural(count, "fichier"),
+		(0, count) => counted("brief.count.skills", count),
+		(count, 0) => counted("brief.count.files", count),
 		(files, count) => format!(
 			"{}, {}",
-			plural(files, "fichier"),
-			plural(count, "compétence")
+			counted("brief.count.files", files),
+			counted("brief.count.skills", count)
 		),
 	};
-	section("conventions", "Les règles du dépôt", &detail, out, true)
+	section(
+		"conventions",
+		&crate::i18n::t("brief.sources.conventions.label"),
+		&detail,
+		out,
+		true,
+	)
 }
 
 /// Les compétences déclarées par le dépôt, par ordre alphabétique.
@@ -999,14 +1038,14 @@ mod tests {
 		let contexte = out.find("## Où").expect("la section est jointe");
 		let consigne = out.find("corrige l’arrondi du panier").expect("la consigne est là");
 		assert!(contexte < consigne, "le contexte doit précéder la consigne");
-		assert!(out.contains("Ce qu'on te demande"));
+		assert!(out.contains("What you are asked to do"));
 	}
 
 	#[test]
 	fn un_brief_sans_consigne_reste_lisible() {
 		let sections = vec![fake("place", "## Où\n\nici", true)];
 		let out = assemble(&sections, "   ");
-		assert!(!out.contains("Ce qu'on te demande"));
+		assert!(!out.contains("What you are asked to do"));
 		assert!(out.trim_end().ends_with("ici"));
 	}
 
@@ -1034,7 +1073,7 @@ mod tests {
 	fn une_section_trop_longue_dit_qu_elle_est_coupee() {
 		let long = "a".repeat(MAX_SECTION_CHARS + 500);
 		let built = section("x", "X", "", long, true).expect("section produite");
-		assert!(built.text.contains("coupé ici"));
+		assert!(built.text.contains("cut here"));
 		assert!(built.chars <= MAX_SECTION_CHARS + 200);
 	}
 
@@ -1054,8 +1093,14 @@ mod tests {
 			&["- **alex** : revois ça".into()],
 		)
 		.expect("section produite");
-		assert_eq!(built.detail, "1 retour");
+		assert_eq!(built.detail, "1 comment");
 		assert!(built.text.contains("revois ça"));
+	}
+
+	#[test]
+	fn un_decompte_affiche_prend_la_bonne_forme() {
+		assert_eq!(counted("brief.count.files", 1), "1 file");
+		assert_eq!(counted("brief.count.files", 3), "3 files");
 	}
 
 	#[test]
@@ -1151,12 +1196,12 @@ mod tests {
 			"le fichier modifié est cité"
 		);
 		assert!(
-			built.text.contains("`brouillon.txt` (nouveau)"),
+			built.text.contains("`brouillon.txt` (new)"),
 			"le fichier non suivi est cité comme neuf : {}",
 			built.text
 		);
 		assert!(
-			built.text.contains("2 fichiers non commité"),
+			built.text.contains("2 files uncommitted"),
 			"le décompte est juste : {}",
 			built.text
 		);
@@ -1171,8 +1216,8 @@ mod tests {
 		let branche = crate::git::current_branch(&dir).await.unwrap_or_default();
 		let built = place_section(&dir, &branche).await.expect("section produite");
 
-		assert!(built.text.contains("propre, rien en cours"));
-		assert!(!built.text.contains("Fichiers déjà modifiés"));
+		assert!(built.text.contains("clean, nothing in progress"));
+		assert!(!built.text.contains("Files already modified"));
 		std::fs::remove_dir_all(&dir).ok();
 	}
 
@@ -1182,6 +1227,6 @@ mod tests {
 	async fn un_dossier_absent_ne_fait_pas_echouer_la_composition() {
 		let built = compose("/dossier/qui/n/existe/pas").await;
 		assert!(built.sections.is_empty());
-		assert_eq!(built.missing, vec!["le dossier n'existe pas".to_string()]);
+		assert_eq!(built.missing, vec!["the folder does not exist".to_string()]);
 	}
 }

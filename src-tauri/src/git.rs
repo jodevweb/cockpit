@@ -57,9 +57,9 @@ pub async fn run_git(cwd: &Path, args: &[&str]) -> Result<String> {
 
 	if !output.status.success() {
 		let stderr = String::from_utf8_lossy(&output.stderr).trim().to_string();
-		return Err(CockpitError::msg(format!(
-			"git {} a échoué : {stderr}",
-			args.join(" ")
+		return Err(CockpitError::msg(crate::i18n::tf(
+			"git.commandFailed",
+			&[("args", &args.join(" ")), ("error", &stderr)],
 		)));
 	}
 	Ok(String::from_utf8_lossy(&output.stdout).to_string())
@@ -72,9 +72,7 @@ pub async fn current_branch(path: &Path) -> Result<String> {
 		.trim()
 		.to_string();
 	if name == "HEAD" {
-		return Err(CockpitError::msg(
-			"HEAD détachée : aucune branche à publier depuis ce dossier.",
-		));
+		return Err(CockpitError::msg(crate::i18n::t("git.detachedHead")));
 	}
 	Ok(name)
 }
@@ -144,7 +142,7 @@ pub async fn push_branch(path: &Path, branch: &str) -> Result<String> {
 pub async fn commit_all(path: &Path, message: &str) -> Result<String> {
 	let message = message.trim();
 	if message.is_empty() {
-		return Err(CockpitError::msg("Un commit a besoin d'un message."));
+		return Err(CockpitError::msg(crate::i18n::t("git.commitMessageRequired")));
 	}
 	run_git(path, &["add", "-A"]).await?;
 	run_git(path, &["commit", "-m", message]).await
@@ -321,7 +319,7 @@ pub async fn main_worktree(repo: &Path) -> Result<PathBuf> {
 		.into_iter()
 		.next()
 		.map(|(path, ..)| path)
-		.ok_or_else(|| CockpitError::msg("git ne déclare aucun worktree."))
+		.ok_or_else(|| CockpitError::msg(crate::i18n::t("git.noWorktree")))
 }
 
 /// Ce qu'un worktree occupe, et ce qu'on récupérerait sans rien perdre.
@@ -504,9 +502,9 @@ pub async fn disk_usages(paths: &[String], refresh: bool) -> Vec<DiskUsage> {
 /// n'est pas une suppression de travail, c'est un dossier qu'on refera.
 pub async fn purge_rebuildable(path: &Path, deps: bool) -> Result<u64> {
 	if !path.is_dir() {
-		return Err(CockpitError::msg(format!(
-			"{} n'existe pas.",
-			path.display()
+		return Err(CockpitError::msg(crate::i18n::tf(
+			"git.pathMissing",
+			&[("path", &path.display())],
 		)));
 	}
 	let (builds, dependencies) = rebuildable_dirs(path);
@@ -724,12 +722,12 @@ pub async fn create_branch(repo: &Path, name: &str, base: Option<&str>) -> Resul
 	let name = name.trim();
 	run_git(repo, &["check-ref-format", "--branch", name])
 		.await
-		.map_err(|_| CockpitError::msg(format!("« {name} » n'est pas un nom de branche valide.")))?;
+		.map_err(|_| CockpitError::msg(crate::i18n::tf("git.invalidBranchName", &[("name", &name)])))?;
 	if run_git(repo, &["rev-parse", "--verify", "--quiet", &format!("refs/heads/{name}")])
 		.await
 		.is_ok()
 	{
-		return Err(CockpitError::msg(format!("La branche « {name} » existe déjà.")));
+		return Err(CockpitError::msg(crate::i18n::tf("git.branchExists", &[("name", &name)])));
 	}
 	let base = match base.map(str::trim).filter(|b| !b.is_empty()) {
 		Some(base) => base.to_string(),
@@ -741,7 +739,7 @@ pub async fn create_branch(repo: &Path, name: &str, base: Option<&str>) -> Resul
 	// Sans suivi : une branche créée depuis `origin/dev` le suivrait, et un
 	// simple `git push` voudrait alors pousser sur `dev`.
 	run_git(repo, &["branch", "--no-track", "--end-of-options", name, &base]).await?;
-	Ok(format!("Branche {name} créée depuis {base}."))
+	Ok(crate::i18n::tf("git.branchCreated", &[("name", &name), ("base", &base)]))
 }
 
 /// La version la plus à jour d'une branche, pour **comparer** contre elle.
@@ -993,8 +991,9 @@ pub async fn branch_diff(repo: &Path, branch: &str, base: &str) -> Result<Branch
 		.await
 		.map(|raw| raw.trim().to_string())
 		.map_err(|_| {
-			CockpitError::msg(format!(
-				"`{branch}` et `{base}` n'ont aucun ancêtre commun — rien à comparer."
+			CockpitError::msg(crate::i18n::tf(
+				"git.noCommonAncestor",
+				&[("branch", &branch), ("base", &base)],
 			))
 		})?;
 

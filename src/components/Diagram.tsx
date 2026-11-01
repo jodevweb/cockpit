@@ -1,5 +1,6 @@
 import clsx from "clsx";
 import { useEffect, useId, useState } from "react";
+import { useTranslation } from "react-i18next";
 
 /**
  * Un schéma écrit par un agent, dessiné.
@@ -82,6 +83,7 @@ export function Diagram({
 	compact?: boolean;
 	className?: string;
 }) {
+	const { t } = useTranslation("components3");
 	const id = `diagram-${useId().replace(/[^a-zA-Z0-9]/g, "")}`;
 	const theme = useTheme();
 	const [svg, setSvg] = useState<string | null>(null);
@@ -120,7 +122,7 @@ export function Diagram({
 		return (
 			<div className="overflow-hidden rounded-lg border border-line-soft">
 				<div className="border-b border-line-soft bg-surface/60 px-3 py-1 font-mono text-[10px] text-warning">
-					schéma illisible — voici son texte
+					{t("diagram.unreadable")}
 				</div>
 				<pre className="overflow-x-auto bg-void p-3 font-mono text-[11px] leading-relaxed text-ink-muted">
 					<code>{source}</code>
@@ -147,7 +149,7 @@ export function Diagram({
 		<figure className="overflow-hidden rounded-lg border border-line-soft bg-surface">
 			{picture}
 			<figcaption className="border-t border-line-soft px-3 py-1 font-mono text-[10px] text-ink-faint">
-				schéma dit par l'agent
+				{t("diagram.caption")}
 			</figcaption>
 		</figure>
 	);

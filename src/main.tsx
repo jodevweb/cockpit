@@ -8,7 +8,7 @@ import { installWindowZoom } from "./lib/windowZoom";
 import "./styles.css";
 
 const container = document.getElementById("root");
-if (!container) throw new Error("Racine introuvable");
+if (!container) throw new Error("Root element not found");
 
 // Avant le rendu : l'écouteur vit sur le document, pas sur un composant.
 installWindowZoom();

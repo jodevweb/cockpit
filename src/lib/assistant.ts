@@ -9,17 +9,24 @@
  * n'est pas devinée : l'assistant le dit.
  */
 
+import { t } from "@/i18n";
+import { languageName } from "@/lib/language";
+
 const MODIFIERS: Record<string, string> = { control: "⌃", ctrl: "⌃", alt: "⌥", option: "⌥", shift: "⇧", super: "⌘", cmd: "⌘", command: "⌘" };
 
-/** `control+alt+KeyJ` → « ⌃⌥ J », `alt+Space` → « ⌥ Espace ». */
+/** `control+alt+KeyJ` → « ⌃⌥ J », `alt+Space` → « ⌥ Espace » (dans la langue de l'interface). */
 export function shortcutLabel(accelerator: string): string {
 	const parts = accelerator.split("+").filter(Boolean);
 	const key = parts.pop() ?? "";
 	const mods = parts.map((part) => MODIFIERS[part.toLowerCase()] ?? part).join("");
 	const name =
 		key === "Space"
-			? "Espace"
-			: key.replace(/^Key/, "").replace(/^Digit/, "").replace(/^Arrow/, "Flèche ").replace("Backquote", "`");
+			? t("lib:assistant.keys.space")
+			: key
+					.replace(/^Key/, "")
+					.replace(/^Digit/, "")
+					.replace(/^Arrow(.*)$/, (_, direction: string) => t("lib:assistant.keys.arrow", { direction }))
+					.replace("Backquote", "`");
 	return mods ? `${mods} ${name}` : name;
 }
 
@@ -50,80 +57,80 @@ export interface AssistantAction {
 }
 
 export const ACTIONS: AssistantAction[] = [
-	{ name: "go_to", description: "Afficher un écran du cockpit.", params: { view: "identifiant d'écran, tel que listé" } },
-	{ name: "switch_project", description: "Changer de projet actif.", params: { project: "nom du projet, tel que listé" } },
+	{ name: "go_to", description: "Show a cockpit screen.", params: { view: "screen identifier, as listed" } },
+	{ name: "switch_project", description: "Change the active project.", params: { project: "project name, as listed" } },
 	{
 		name: "open_workspace",
-		description: "Ouvrir le workspace d'un dossier : ses agents et terminaux.",
-		params: { folder: "nom de dossier d'un worktree ou d'un agent, tel que listé" },
+		description: "Open a folder's workspace: its agents and terminals.",
+		params: { folder: "folder name of a worktree or an agent, as listed" },
 	},
 	{
 		name: "open_worktree",
-		description: "Afficher un worktree dans l'écran Worktrees.",
-		params: { folder: "nom de dossier du worktree, tel que listé" },
+		description: "Show a worktree in the Worktrees screen.",
+		params: { folder: "folder name of the worktree, as listed" },
 	},
 	{
 		name: "start_mission",
 		description:
-			"Créer une mission à partir d'un ticket (Linear ou autre) et lancer son agent maître. Si une mission existe déjà sur ce ticket, elle est rouverte.",
-		params: { ticket: "identifiant du ticket (ex. NW-3050) ou son adresse" },
+			"Create a mission from a ticket (Linear or other) and launch its lead agent. If a mission already exists for that ticket, it is reopened.",
+		params: { ticket: "ticket identifier (e.g. NW-3050) or its URL" },
 	},
-	{ name: "open_mission", description: "Afficher une mission existante.", params: { mission: "identifiant de mission, tel que listé" } },
+	{ name: "open_mission", description: "Show an existing mission.", params: { mission: "mission identifier, as listed" } },
 	{
 		name: "create_branch",
-		description: "Créer une branche git dans le dépôt principal, sans la sortir.",
+		description: "Create a git branch in the main repository, without checking it out.",
 		params: {
-			name: "nom de branche git valide (ex. fix/cart-rounding), sans espace ni accent",
-			base: "branche de départ, facultative (par défaut la branche d'intégration)",
+			name: "valid git branch name (e.g. fix/cart-rounding), no spaces or accents",
+			base: "starting branch, optional (defaults to the integration branch)",
 		},
 	},
 	{
 		name: "create_worktree",
-		description: "Créer un worktree pour une branche, avec la commande de l'équipe.",
-		params: { branch: "nom de la branche" },
+		description: "Create a worktree for a branch, using the team's command.",
+		params: { branch: "branch name" },
 	},
 	{
 		name: "review_pr",
 		description:
-			"Faire relire une PR par un agent en lecture seule (code review complète) : le cockpit met sa branche à jour, ouvre ou crée son worktree, lance l'agent avec la consigne de revue, et range les points relevés. Pour une PR que la personne RELIT — en général celle de quelqu'un d'autre.",
-		params: { pr: "numéro de la PR, tel que listé — facultatif : vide = la PR d'Ici" },
+			"Have a read-only agent review a PR (full code review): the cockpit updates its branch, opens or creates its worktree, launches the agent with the review instructions, and files the points raised. For a PR the person REVIEWS — usually someone else's.",
+		params: { pr: "PR number, as listed — optional: empty = the PR from Here" },
 	},
 	{
 		name: "recheck_pr",
 		description:
-			"Vérifier les corrections poussées sur une PR déjà relue : l'agent vérifie chaque point de la revue précédente, relit ce qui a changé, et dit si on peut fusionner.",
-		params: { pr: "numéro de la PR, tel que listé — facultatif : vide = la PR d'Ici" },
+			"Check the fixes pushed to an already reviewed PR: the agent checks each point of the previous review, rereads what changed, and says whether it can be merged.",
+		params: { pr: "PR number, as listed — optional: empty = the PR from Here" },
 	},
 	{
 		name: "tell_agent",
 		description:
-			"Confier un travail à un agent déjà ouvert : lui envoyer une consigne. Par défaut, l'agent d'Ici. S'il n'y a pas d'agent vivant dans ce dossier, le cockpit en lance un avec la consigne.",
+			"Hand work to an agent that is already open: send it an instruction. By default, the agent from Here. If there is no live agent in that folder, the cockpit launches one with the instruction.",
 		params: {
-			agent: "identifiant d'agent, tel que listé — facultatif : vide = l'agent d'Ici",
-			prompt: "la consigne complète, écrite pour l'agent (voir les règles)",
+			agent: "agent identifier, as listed — optional: empty = the agent from Here",
+			prompt: "the complete instruction, written for the agent (see the rules)",
 		},
 	},
 	{
 		name: "launch_agent",
 		description:
-			"Lancer un NOUVEL agent dans un dossier — un worktree, un dépôt, n'importe quel dossier listé — sans créer de branche ni de worktree, et ouvrir son workspace. Avec une consigne si la personne en donne une.",
+			"Launch a NEW agent in a folder — a worktree, a repository, any listed folder — without creating a branch or a worktree, and open its workspace. With an instruction if the person gives one.",
 		params: {
-			folder: "nom de dossier, tel que listé dans Dossiers ou Worktrees — facultatif : vide = le dossier d'Ici",
-			prompt: "la consigne à donner à l'agent, facultative",
+			folder: "folder name, as listed under Folders or Worktrees — optional: empty = the folder from Here",
+			prompt: "the instruction to give the agent, optional",
 		},
 	},
-	{ name: "git_pull", description: "Faire un pull sur un worktree.", params: { folder: "nom de dossier du worktree" } },
-	{ name: "git_push", description: "Pousser la branche d'un worktree.", params: { folder: "nom de dossier du worktree" } },
+	{ name: "git_pull", description: "Pull a worktree.", params: { folder: "folder name of the worktree" } },
+	{ name: "git_push", description: "Push a worktree's branch.", params: { folder: "folder name of the worktree" } },
 	{
 		name: "listen_agent",
-		description: "Raconter à voix haute ce que fait un agent ouvert.",
-		params: { agent: "identifiant d'agent, tel que listé" },
+		description: "Narrate out loud what an open agent is doing.",
+		params: { agent: "agent identifier, as listed" },
 	},
-	{ name: "stop_listening", description: "Arrêter de raconter ce que fait un agent.", params: {} },
+	{ name: "stop_listening", description: "Stop narrating what an agent is doing.", params: {} },
 	{
 		name: "visit_changes",
-		description: "Ouvrir la visite guidée des changements d'un agent.",
-		params: { agent: "identifiant d'agent, tel que listé" },
+		description: "Open the guided tour of an agent's changes.",
+		params: { agent: "agent identifier, as listed" },
 	},
 ];
 
@@ -154,88 +161,97 @@ export interface AssistantContext {
 	branches: string[];
 }
 
-export const SYSTEM = `Tu es l'assistant vocal de Cockpit, un poste de pilotage d'agents de code. \
-La personne te parle ; sa phrase a été transcrite, parfois imparfaitement (« worktri » pour worktree, \
-un identifiant de ticket mal découpé). Tu choisis UNE action du catalogue et tu en remplis les paramètres.
+/**
+ * La consigne système, en anglais : un prompt anglais et une consigne de
+ * langue (en tête de `buildPrompt`, lue au moment de la demande) valent mieux
+ * qu'un prompt par langue. Les noms d'actions, les clés JSON et « Here »
+ * restent fixes : le code les relit.
+ */
+export const SYSTEM = `You are the voice assistant of Cockpit, a control station for coding agents. \
+The person speaks to you; their sentence has been transcribed, sometimes imperfectly ("worktri" for worktree, \
+a ticket identifier split the wrong way). You pick ONE action from the catalog and fill in its parameters.
 
-Règles :
-- Les paramètres qui désignent quelque chose d'existant (dossier, agent, mission, écran, projet) reprennent \
-EXACTEMENT une valeur du contexte. Choisis la plus proche de ce qui a été dit ; s'il y en a plusieurs \
-plausibles ou aucune, ne choisis pas : action null, et demande laquelle dans "say".
-- Un nom de branche à créer s'écrit en minuscules, avec des tirets, sans espace ni accent.
-- Une question sur l'état du cockpit (combien d'agents, où en est une mission) : action null, et la \
-réponse dans "say", tirée du contexte.
-- « Ici » est ce que la personne a sous les yeux. « Ici », « ce workspace », « cet agent », « ma PR », \
-« le worktree où je suis » désignent Ici, sauf si elle nomme autre chose.
-- Une demande de TRAVAIL (corriger, implémenter, traiter une review, lancer des tests, pousser un \
-correctif…) se confie à un agent : tell_agent si un agent est ouvert dans le dossier visé (Ici par \
-défaut), sinon launch_agent dans ce dossier. Une PR citée par son numéro se retrouve par sa branche dans \
-la liste des PR, puis dans les worktrees et les agents. N'ouvre JAMAIS un workspace déjà ouvert pour \
-répondre à une demande de travail : ça ne fait rien.
-- RELIRE n'est pas CORRIGER. « Fais-moi la review / relis / code review de la PR 2056 » → review_pr. \
-« X a corrigé / a poussé ses corrections, vérifie / est-ce que je peux merger » → recheck_pr. Mais \
-« corrige / fais les corrections de la review de X sur MA PR » est un travail sur son propre code → \
-tell_agent (ou launch_agent). review_pr et recheck_pr se chargent du worktree et de l'agent : ne les \
-fais pas précéder d'un open_workspace.
-- La consigne ("prompt") d'un agent est autonome : écrite à la deuxième personne, elle reprend tout ce \
-qui a été dit d'utile — numéro de PR, ticket, nom de la personne qui a relu — et dit où trouver ce qu'il \
-faut (par exemple : lire les commentaires de review de la PR avec gh). N'invente rien de ce que tu ne \
-sais pas, comme le contenu d'une review : c'est à l'agent d'aller le lire.
-- "say" : une ou deux phrases courtes en français, tutoiement, à la première personne, dites à voix \
-haute — pas de Markdown, pas de chemin, pas de code. Pour une action : ce que tu fais (« Je confie la \
-review de Frank à l'agent du workspace. »). N'annonce JAMAIS une action que tu ne fais pas : sans \
-action, dis ce qui te manque.
+Rules:
+- Parameters that designate something that exists (folder, agent, mission, screen, project) reuse \
+EXACTLY a value from the context. Pick the closest to what was said; if several are \
+plausible or none is, don't pick: action null, and ask which one in "say".
+- A branch name to create is written in lowercase, with hyphens, no spaces or accents.
+- A question about the state of the cockpit (how many agents, how a mission is going): action null, and the \
+answer in "say", drawn from the context.
+- "Here" is what the person has in front of them. "Here", "this workspace", "this agent", "my PR", \
+"the worktree I'm in" (and their equivalents in any language) designate Here, unless they name something else.
+- A request for WORK (fix, implement, address a review, run tests, push a \
+fix…) is handed to an agent: tell_agent if an agent is open in the target folder (Here by \
+default), otherwise launch_agent in that folder. A PR cited by its number is found through its branch in \
+the PR list, then in the worktrees and agents. NEVER open a workspace that is already open to \
+answer a request for work: it does nothing.
+- REVIEWING is not FIXING. "Review / reread / do the code review of PR 2056" → review_pr. \
+"X fixed it / pushed their fixes, check it / can I merge" → recheck_pr. But \
+"fix / apply the fixes from X's review on MY PR" is work on their own code → \
+tell_agent (or launch_agent). review_pr and recheck_pr take care of the worktree and the agent: don't \
+precede them with an open_workspace.
+- An agent's instruction ("prompt") stands on its own: written in the second person, it restates everything \
+useful that was said — PR number, ticket, name of the person who reviewed — and says where to find what's \
+needed (for example: read the PR's review comments with gh). Don't invent anything you don't \
+know, such as the content of a review: it's up to the agent to go and read it. Write it in the person's language.
+- "say": one or two short sentences in the person's language (given at the top of the request), informal \
+register (e.g. "tu" in French), in the first person, spoken out loud — no Markdown, no paths, no code. For an action: what you're doing \
+("I'm handing Frank's review to the workspace agent."). NEVER announce an action you're not taking: \
+without an action, say what you're missing.
 
-Réponds par un objet JSON seul, sans texte autour : {"say": string, "action": string | null, "params": object}`;
+Reply with a JSON object alone, no text around it: {"say": string, "action": string | null, "params": object}`;
 
-function lines<T>(items: T[], render: (item: T) => string, empty = "(aucun)"): string {
+function lines<T>(items: T[], render: (item: T) => string, empty = "(none)"): string {
 	return items.length > 0 ? items.map((item) => `- ${render(item)}`).join("\n") : empty;
 }
 
 function hereLines(here: Here | null): string {
-	if (!here) return "(aucun workspace ouvert)";
+	if (!here) return "(no workspace open)";
 	return [
-		`- workspace : ${here.folder}${here.onScreen ? " (affiché à l'écran)" : " (le dernier ouvert, pas à l'écran)"}`,
-		`- branche : ${here.branch ?? "inconnue"}`,
-		`- agent au premier plan : ${here.agent ? `${here.agent.id} — ${here.agent.label} — ${here.agent.state}` : "aucun"}`,
-		`- PR de cette branche : ${here.pr ? `#${here.pr.number} — ${here.pr.title}` : "aucune connue"}`,
+		`- workspace: ${here.folder}${here.onScreen ? " (shown on screen)" : " (the last one opened, not on screen)"}`,
+		`- branch: ${here.branch ?? "unknown"}`,
+		`- foreground agent: ${here.agent ? `${here.agent.id} — ${here.agent.label} — ${here.agent.state}` : "none"}`,
+		`- PR for this branch: ${here.pr ? `#${here.pr.number} — ${here.pr.title}` : "none known"}`,
 	].join("\n");
 }
 
 export function buildPrompt(utterance: string, context: AssistantContext): string {
-	return `Demande : « ${utterance} »
+	return `Language: the person speaks ${languageName()}. Write "say" and any agent "prompt" in ${languageName()}, \
+unless the request itself is clearly in another language — then use that one.
 
-Écran actuel : ${context.view}
+Request: "${utterance}"
 
-Ici :
+Current screen: ${context.view}
+
+Here:
 ${hereLines(context.here)}
 
-PR ouvertes (numéro — branche — titre — auteur — relecteurs demandés — décision) :
-${lines(context.prs, (pr) => `#${pr.number} — ${pr.branch} — ${pr.title} — ${pr.author} — ${pr.reviewers.join(", ") || "personne"} — ${pr.review || "aucune"}`)}
+Open PRs (number — branch — title — author — requested reviewers — decision):
+${lines(context.prs, (pr) => `#${pr.number} — ${pr.branch} — ${pr.title} — ${pr.author} — ${pr.reviewers.join(", ") || "nobody"} — ${pr.review || "none"}`)}
 
-Écrans :
+Screens:
 ${lines(context.views, (view) => `${view.id} — ${view.label}`)}
 
-Projets :
-${lines(context.projects, (project) => `${project.name}${project.active ? " (actif)" : ""}`)}
+Projects:
+${lines(context.projects, (project) => `${project.name}${project.active ? " (active)" : ""}`)}
 
-Worktrees (dossier — branche) :
-${lines(context.worktrees, (tree) => `${tree.folder} — ${tree.branch ?? "détachée"}`)}
+Worktrees (folder — branch):
+${lines(context.worktrees, (tree) => `${tree.folder} — ${tree.branch ?? "detached"}`)}
 
-Dossiers (récents d'abord) :
-${context.folders.length > 0 ? context.folders.join(", ") : "(aucun)"}
+Folders (most recent first):
+${context.folders.length > 0 ? context.folders.join(", ") : "(none)"}
 
-Agents ouverts (identifiant — nom — dossier — état) :
+Open agents (identifier — name — folder — state):
 ${lines(context.agents, (agent) => `${agent.id} — ${agent.label} — ${agent.folder} — ${agent.state}`)}
 
-Missions (identifiant — ticket — titre — état) :
-${lines(context.missions, (mission) => `${mission.id} — ${mission.ticket || "sans ticket"} — ${mission.title} — ${mission.state}`)}
+Missions (identifier — ticket — title — state):
+${lines(context.missions, (mission) => `${mission.id} — ${mission.ticket || "no ticket"} — ${mission.title} — ${mission.state}`)}
 
-Branches locales :
-${context.branches.length > 0 ? context.branches.join(", ") : "(inconnues)"}
+Local branches:
+${context.branches.length > 0 ? context.branches.join(", ") : "(unknown)"}
 
-Catalogue d'actions :
-${ACTIONS.map((action) => `- ${action.name} : ${action.description} Paramètres : ${JSON.stringify(action.params)}`).join("\n")}`;
+Action catalog:
+${ACTIONS.map((action) => `- ${action.name}: ${action.description} Parameters: ${JSON.stringify(action.params)}`).join("\n")}`;
 }
 
 export interface Decision {

@@ -130,10 +130,10 @@ fn read_list<T: for<'a> Deserialize<'a>>(path: &Path) -> Vec<T> {
 
 fn write_list<T: Serialize>(path: &Path, list: &[T]) -> Result<()> {
 	std::fs::create_dir_all(notebook_dir())
-		.map_err(|e| CockpitError::msg(format!("Dossier du carnet : {e}")))?;
+		.map_err(|e| CockpitError::msg(crate::i18n::tf("notebook.dir", &[("error", &e)])))?;
 	let raw = serde_json::to_string_pretty(list)
-		.map_err(|e| CockpitError::msg(format!("Carnet illisible : {e}")))?;
-	std::fs::write(path, raw).map_err(|e| CockpitError::msg(format!("Écriture du carnet : {e}")))
+		.map_err(|e| CockpitError::msg(crate::i18n::tf("notebook.unreadable", &[("error", &e)])))?;
+	std::fs::write(path, raw).map_err(|e| CockpitError::msg(crate::i18n::tf("notebook.write", &[("error", &e)])))
 }
 
 // ── Les leçons ──────────────────────────────────────────────────────────────
@@ -148,7 +148,7 @@ pub fn lessons(project: &str) -> Vec<Lesson> {
 
 pub fn save_lesson(mut lesson: Lesson) -> Result<Vec<Lesson>> {
 	if lesson.text.trim().is_empty() {
-		return Err(CockpitError::msg("Une leçon vide n'apprend rien."));
+		return Err(CockpitError::msg(crate::i18n::t("notebook.emptyLesson")));
 	}
 	let mut all: Vec<Lesson> = read_list(&lessons_path());
 	if lesson.id.trim().is_empty() {
@@ -420,7 +420,7 @@ pub async fn capture(cwd: &str) -> Option<Handback> {
 		let (Ok(left), Ok(right)) = (std::fs::read(&before), std::fs::read(&after)) else {
 			// Fichier disparu depuis : c'est une reprise en soi.
 			changed.push(file.clone());
-			patch.push_str(&format!("--- {file}\n+++ (supprimé)\n"));
+			patch.push_str(&format!("--- {file}\n+++ (deleted)\n"));
 			continue;
 		};
 		if left == right {
@@ -509,24 +509,27 @@ pub fn dismiss(id: &str) -> Result<Vec<Handback>> {
 /// truismes qui noieront les deux règles qui comptaient.
 fn draft_prompt(handback: &Handback) -> String {
 	format!(
-		"Un agent a rendu du travail, et un humain l'a repris à la main juste après. Voici ce \
-		 qu'il a changé par-dessus.\n\n\
-		 Ta question, la seule : y a-t-il là une règle que l'agent aurait dû connaître d'avance ?\n\n\
-		 La plupart du temps, non. Un renommage, un ajustement de goût, un choix qui pouvait \
-		 aller dans les deux sens, une correction propre à ce cas précis : rien de tout cela ne \
-		 se réutilise, et l'écrire encombrerait la mémoire du projet pour rien. Dans ce cas, \
-		 réponds exactement « RIEN » et arrête-toi là.\n\n\
-		 S'il y a bien une règle — une convention du dépôt qui n'a pas été suivie, un piège \
-		 propre à ce code, une contrainte qu'on ne devine pas en le lisant — alors rends \
-		 exactement cette forme :\n\n\
-		 Leçon: <une à trois phrases, à l'impératif, dites à un agent qui n'a pas encore \
-		 commencé. Ce qu'il faut faire, pas ce qui s'est passé.>\n\
-		 Portée: <chemins de fichiers ou de dossiers, séparés par des virgules, où cette règle \
-		 s'applique. Si elle vaut pour tout le dépôt, écris « tout ».>\n\n\
-		 Tu es dans le dépôt : va lire le code autour si le diff ne suffit pas à trancher. Tu ne \
-		 peux rien modifier.\n\n\
-		 ## Ce que l'humain a repris\n\n\
-		 Fichiers : {}\n\n```diff\n{}\n```",
+		"An agent delivered some work, and a human took it back by hand right after. Here is \
+		 what they changed on top of it.\n\n\
+		 Your question, the only one: is there a rule here that the agent should have known in advance?\n\n\
+		 Most of the time, no. A rename, a matter of taste, a choice that could have gone \
+		 either way, a fix specific to this exact case: none of that is reusable, and writing \
+		 it down would clutter the project's memory for nothing. In that case, answer exactly \
+		 \"NOTHING\" and stop there.\n\n\
+		 If there is a real rule — a repository convention that was not followed, a pitfall \
+		 specific to this code, a constraint you cannot guess by reading it — then return \
+		 exactly this form:\n\n\
+		 Lesson: <one to three sentences, in the imperative, addressed to an agent that has not \
+		 started yet. What to do, not what happened.>\n\
+		 Scope: <file or folder paths, comma-separated, where this rule applies. If it holds \
+		 for the whole repository, write \"all\".>\n\n\
+		 Keep the markers NOTHING, Lesson:, Scope: and all in English exactly as written.\n\
+		 {}\n\n\
+		 You are in the repository: go read the surrounding code if the diff is not enough to \
+		 decide. You cannot modify anything.\n\n\
+		 ## What the human took back\n\n\
+		 Files: {}\n\n```diff\n{}\n```",
+		crate::i18n::reply_directive(),
 		handback.files.join(", "),
 		handback.patch
 	)
@@ -541,7 +544,7 @@ pub async fn draft(id: String) -> Result<Lesson> {
 	let handback = handbacks("")
 		.into_iter()
 		.find(|entry| entry.id == id)
-		.ok_or_else(|| CockpitError::msg("Cette reprise n'est plus là."))?;
+		.ok_or_else(|| CockpitError::msg(crate::i18n::t("notebook.handbackGone")))?;
 
 	let config = crate::config::Config::for_repo(&handback.project);
 	let cwd = if std::path::Path::new(&handback.cwd).is_dir() {
@@ -563,9 +566,7 @@ pub async fn draft(id: String) -> Result<Lesson> {
 
 	let (text, scope) = parse_draft(&rendu.text);
 	if text.is_empty() {
-		return Err(CockpitError::msg(
-			"Rien à retenir de cette reprise — c'était une correction de circonstance.",
-		));
+		return Err(CockpitError::msg(crate::i18n::t("notebook.nothingToLearn")));
 	}
 
 	Ok(Lesson {
@@ -590,7 +591,9 @@ pub async fn draft(id: String) -> Result<Lesson> {
 /// attendue, pas un échec de lecture.
 fn parse_draft(rendu: &str) -> (String, Vec<String>) {
 	let trimmed = rendu.trim();
-	if trimmed.is_empty() || trimmed.to_uppercase().starts_with("RIEN") {
+	// `NOTHING` aujourd'hui, `RIEN` dans les réponses d'avant la traduction.
+	let upper = trimmed.to_uppercase();
+	if trimmed.is_empty() || upper.starts_with("RIEN") || upper.starts_with("NOTHING") {
 		return (String::new(), Vec::new());
 	}
 
@@ -599,7 +602,8 @@ fn parse_draft(rendu: &str) -> (String, Vec<String>) {
 	for line in trimmed.lines() {
 		let line = line.trim();
 		if let Some(rest) = line
-			.strip_prefix("Leçon:")
+			.strip_prefix("Lesson:")
+			.or_else(|| line.strip_prefix("Leçon:"))
 			.or_else(|| line.strip_prefix("Leçon :"))
 			.or_else(|| line.strip_prefix("Lecon:"))
 		{
@@ -607,13 +611,15 @@ fn parse_draft(rendu: &str) -> (String, Vec<String>) {
 			continue;
 		}
 		if let Some(rest) = line
-			.strip_prefix("Portée:")
+			.strip_prefix("Scope:")
+			.or_else(|| line.strip_prefix("Portée:"))
 			.or_else(|| line.strip_prefix("Portée :"))
 			.or_else(|| line.strip_prefix("Portee:"))
 		{
 			// « tout » n'est pas un chemin : c'est l'absence de portée, et une
 			// liste vide est déjà ce qui veut dire « partout ».
-			if !rest.trim().eq_ignore_ascii_case("tout") {
+			let rest_trim = rest.trim();
+			if !rest_trim.eq_ignore_ascii_case("tout") && !rest_trim.eq_ignore_ascii_case("all") {
 				scope = rest
 					.split(',')
 					.map(|part| part.trim().trim_matches('`').to_string())
@@ -687,6 +693,21 @@ mod tests {
 		);
 		assert!(text.starts_with("Passe par le client"));
 		assert_eq!(scope, vec!["apps/web/src", "packages/api"]);
+	}
+
+	/// Les marqueurs anglais d'aujourd'hui et les français des réponses déjà
+	/// enregistrées se relisent pareil.
+	#[test]
+	fn les_marqueurs_anglais_et_francais_se_relisent() {
+		assert_eq!(parse_draft("NOTHING"), (String::new(), Vec::new()));
+		let (text, scope) = parse_draft("Lesson: Use the shared client.\nScope: apps/web, packages/api");
+		assert_eq!(text, "Use the shared client.");
+		assert_eq!(scope, vec!["apps/web", "packages/api"]);
+		let (_, scope) = parse_draft("Lesson: Write tests.\nScope: all");
+		assert!(scope.is_empty());
+		let (text, scope) = parse_draft("Leçon: Passe par le client.\nPortée: apps/web");
+		assert_eq!(text, "Passe par le client.");
+		assert_eq!(scope, vec!["apps/web"]);
 	}
 
 	/// « tout » veut dire « sans portée » : le traiter comme un chemin ferait

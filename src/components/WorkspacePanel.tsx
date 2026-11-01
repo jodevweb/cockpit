@@ -22,6 +22,8 @@ import {
 	X,
 } from "lucide-react";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useTranslation } from "react-i18next";
+import { t } from "@/i18n";
 import { AgentChat, RunState } from "@/components/AgentChat";
 import { BranchBoard } from "@/components/BranchBoard";
 import { BrowserView } from "@/components/BrowserView";
@@ -132,7 +134,7 @@ function agentTabName(
 	// Sans consigne, le rôle que ce chantier tient dans sa mission dit encore
 	// quelque chose — « recette » se reconnaît, « Agent 2 » non.
 	if (role) return tabName(role, index, total);
-	return tabName("Agent", index, total);
+	return tabName(t("components3:workspacePanel.tabs.agent"), index, total);
 }
 
 /**
@@ -164,6 +166,7 @@ export function useWorkGroups(): WorkGroup[] {
 	const runs = useMemo(() => all.filter((run) => !isLibreRun(run)), [all, registry]);
 	const { tabs: terminals } = useTerminals();
 	const { worktrees, missions, config } = useCockpit();
+	const { t } = useTranslation("components3");
 
 	// À quel dépôt appartient chaque dossier ouvert. Un workspace n'est qu'un
 	// dossier avec des agents dedans : rien n'y disait de quel projet il
@@ -197,7 +200,7 @@ export function useWorkGroups(): WorkGroup[] {
 				table.set(integration.path, {
 					id: mission.id,
 					title: mission.title,
-					role: "maître",
+					role: t("workspacePanel.masterRole"),
 				});
 			}
 			for (const task of mission.tasks) {
@@ -211,7 +214,7 @@ export function useWorkGroups(): WorkGroup[] {
 			}
 		}
 		return table;
-	}, [missions, worktrees]);
+	}, [missions, worktrees, t]);
 
 	return useMemo(() => {
 		const groups = new Map<string, WorkGroup>();
@@ -435,6 +438,7 @@ function GroupRail({
 	}
 
 	const { go, missions } = useCockpit();
+	const { t } = useTranslation("components3");
 	const { sort, move } = useRailOrder();
 	const rows = sort(natural);
 
@@ -577,7 +581,10 @@ function GroupRail({
 													row.members[0]).cwd,
 											)
 										}
-										title={`${row.title}\n${row.members.length} workspace(s)`}
+										title={t("workspacePanel.rail.missionTitle", {
+										title: row.title,
+										count: row.members.length,
+									})}
 										className="focus-ring flex min-w-0 items-center gap-1.5"
 									>
 										<Layers size={11} className="shrink-0" />
@@ -597,7 +604,7 @@ function GroupRail({
 										) : null}
 									</button>
 									<RailClose
-										title={`Fermer les ${row.members.length} workspaces de cette mission`}
+										title={t("workspacePanel.rail.closeMission", { count: row.members.length })}
 										onClose={() => onCloseMission(row.title, row.members)}
 									/>
 								</div>
@@ -640,7 +647,7 @@ function GroupRail({
 									) : null}
 								</button>
 								<RailClose
-									title="Fermer ce workspace — arrête tout et l'oublie"
+									title={t("workspacePanel.closeWorkspace")}
 									onClose={() => onCloseGroup(group)}
 								/>
 							</div>
@@ -658,7 +665,10 @@ function GroupRail({
 						<button
 							type="button"
 							onClick={() => onWake(entry.cwd)}
-							title={`${entry.cwd}\n\n${describeSleeping(entry)}\nClic pour reprendre`}
+							title={t("workspacePanel.rail.sleepingTitle", {
+								cwd: entry.cwd,
+								state: describeSleeping(entry),
+							})}
 							className="focus-ring flex min-w-0 items-center gap-1.5"
 						>
 							<Moon size={10} className="shrink-0" />
@@ -667,14 +677,14 @@ function GroupRail({
 						{/* Rien ne tourne ici : l'oublier ne coupe aucun travail, seulement
 						    la trace qui le proposait à la reprise. Pas de confirmation. */}
 						<RailClose
-							title="Oublier ce chantier endormi"
+							title={t("workspacePanel.rail.forgetSleeping")}
 							onClose={() => onForget(entry.cwd)}
 						/>
 					</div>
 				))}
 				</div>
 				<div className="shrink-0 pl-1">
-					<NewGroupMenu label="+ Chantier" align="right" />
+					<NewGroupMenu label={t("workspacePanel.rail.newWorkspace")} align="right" />
 				</div>
 			</div>
 
@@ -693,7 +703,7 @@ function GroupRail({
 					    menu, en se rappelant de quelle mission il s'agissait. */}
 					<button
 						type="button"
-						title={`Ouvrir la mission « ${openMission.title} »`}
+						title={t("workspacePanel.rail.openMission", { title: openMission.title })}
 						onClick={() => go("missions")}
 						className="focus-ring flex h-6 min-w-0 shrink-0 items-center gap-1.5 rounded-md px-1.5 text-[11px] text-accent-soft hover:bg-hover"
 					>
@@ -712,7 +722,7 @@ function GroupRail({
 									<span>{etats[suivie.state] ?? suivie.state}</span>
 									{total > 0 ? (
 										<span>
-											· {rendues}/{total} rendues
+											{t("workspacePanel.rail.delivered", { done: rendues, total })}
 										</span>
 									) : null}
 								</span>
@@ -755,7 +765,7 @@ function GroupRail({
 									) : null}
 								</button>
 								<RailClose
-									title="Fermer ce workspace de la mission"
+									title={t("workspacePanel.rail.closeMissionWorkspace")}
 									onClose={() => onCloseGroup(member)}
 								/>
 							</div>
@@ -780,12 +790,16 @@ type MissionRow = Extract<RailRow, { kind: "mission" }>;
 function describeSleeping(entry: SleepingGroup): string {
 	const parts: string[] = [];
 	if (entry.agents.length > 0) {
-		parts.push(`${entry.agents.length} agent${entry.agents.length > 1 ? "s" : ""}`);
+		parts.push(t("components3:workspacePanel.summary.agents", { count: entry.agents.length }));
 	}
 	if (entry.terminals.length > 0) {
-		parts.push(`${entry.terminals.length} term.`);
+		parts.push(
+			t("components3:workspacePanel.summary.terminals", { count: entry.terminals.length }),
+		);
 	}
-	return parts.length > 0 ? `Endormi — ${parts.join(" · ")}` : "Endormi";
+	return parts.length > 0
+		? t("components3:workspacePanel.sleeping.withParts", { parts: parts.join(" · ") })
+		: t("components3:workspacePanel.sleeping.empty");
 }
 
 /**
@@ -804,6 +818,7 @@ function NewGroupMenu({ label, align }: { label: string; align?: "left" | "right
 	const { worktrees, config, reloadWorktrees, worktreesLoading, notify, runJob } =
 		useCockpit();
 	const { open: openAgent } = useAgentRuns();
+	const { t } = useTranslation("components3");
 	const terminals = useTerminals();
 	const groups = useWorkGroups();
 	const mainRepo = config?.mainRepo ?? null;
@@ -828,14 +843,14 @@ function NewGroupMenu({ label, align }: { label: string; align?: "left" | "right
 		const chosen = await open({
 			directory: true,
 			multiple: false,
-			title: "Ouvrir un dossier en workspace",
+			title: t("workspacePanel.menu.browseDialog"),
 			defaultPath: config?.projectsRoot || config?.mainRepo || undefined,
 		});
 		if (typeof chosen === "string") {
 			openAgent(chosen, "", undefined, undefined, true);
 			rememberFolder(chosen);
 		}
-	}, [config?.mainRepo, config?.projectsRoot, openAgent]);
+	}, [config?.mainRepo, config?.projectsRoot, openAgent, t]);
 
 	/**
 	 * Lancer la création d'un worktree, puis ouvrir son workspace.
@@ -890,9 +905,9 @@ function NewGroupMenu({ label, align }: { label: string; align?: "left" | "right
 		const list: QuickAction[] = [
 			{
 				id: "browse",
-				group: "Parcourir",
-				label: "Ouvrir un dossier…",
-				hint: "n'importe où sur le disque, hors des worktrees listés",
+				group: t("workspacePanel.menu.browseGroup"),
+				label: t("workspacePanel.menu.browseLabel"),
+				hint: t("workspacePanel.menu.browseHint"),
 				run: () => void browse(),
 			},
 		];
@@ -900,18 +915,18 @@ function NewGroupMenu({ label, align }: { label: string; align?: "left" | "right
 		list.push(
 			...places.map((place) => ({
 				id: place.path,
-				group: "Worktrees",
+				group: t("workspacePanel.menu.worktreesGroup"),
 				label: place.name,
 				hint: place.folder === place.name ? place.path : place.folder,
 				note: place.detached
-					? "HEAD détachée"
+					? t("workspacePanel.menu.detachedHead")
 					: known.has(place.path)
-						? "déjà ouvert"
+						? t("workspacePanel.menu.alreadyOpen")
 						: undefined,
 				run: () => openAgent(place.path, "", undefined, undefined, true),
 				extra: {
 					icon: Terminal,
-					title: "Ouvrir un terminal ici (⇧Entrée)",
+					title: t("workspacePanel.menu.openTerminalHere"),
 					run: () => terminals.open(place.path),
 				},
 			})),
@@ -932,13 +947,13 @@ function NewGroupMenu({ label, align }: { label: string; align?: "left" | "right
 				list.push({
 					id: `branch:${branch.remote}/${branch.name}`,
 					group: branch.remoteOnly
-						? "Branches d'ailleurs, jamais sorties ici"
-						: "Branches sans worktree",
+						? t("workspacePanel.menu.remoteBranchesGroup")
+						: t("workspacePanel.menu.localBranchesGroup"),
 					label: branch.name,
 					hint: branch.remoteOnly
-						? `sur ${branch.remote} — la sortir ici, puis y travailler`
-						: "créer le worktree, puis y travailler",
-					note: branch.lastCommit?.author || "création",
+						? t("workspacePanel.menu.remoteBranchHint", { remote: branch.remote })
+						: t("workspacePanel.menu.localBranchHint"),
+					note: branch.lastCommit?.author || t("workspacePanel.menu.creationNote"),
 					run: () => createAndOpen(branch.name),
 				});
 			}
@@ -955,13 +970,14 @@ function NewGroupMenu({ label, align }: { label: string; align?: "left" | "right
 		openAgent,
 		terminals,
 		worktrees,
+		t,
 	]);
 
 	return (
 		<QuickMenu
 			label={label}
 			icon={FolderGit2}
-			title="Ouvrir un workspace — un worktree existant, ou une branche dont le worktree reste à créer"
+			title={t("workspacePanel.menu.title")}
 			actions={actions}
 			// Les deux listes viennent d'un scan périodique : sans relecture à
 			// l'ouverture, un worktree créé à l'instant n'y est pas, et une
@@ -973,7 +989,7 @@ function NewGroupMenu({ label, align }: { label: string; align?: "left" | "right
 				else setOpened(true);
 			}}
 			loading={worktreesLoading || branches.loading}
-			emptyMessage="Aucun worktree connu."
+			emptyMessage={t("workspacePanel.menu.empty")}
 			// Coller une branche que le cockpit n'a pas encore vue — parce qu'elle
 			// vient d'être poussée et qu'on n'a pas refetché — ne doit pas finir sur
 			// « rien à ce nom ». C'est le geste le plus courant avant une relecture.
@@ -986,14 +1002,14 @@ function NewGroupMenu({ label, align }: { label: string; align?: "left" | "right
 					if (pr) {
 						return {
 							id: `pr:${pr}`,
-							group: "Une pull request",
+							group: t("workspacePanel.menu.prGroup"),
 							label: `PR #${pr}`,
-							hint: "la relire en lecture seule — ⇧Entrée : ouvrir seulement sa branche",
-							note: "revue",
+							hint: t("workspacePanel.menu.prHint"),
+							note: t("workspacePanel.menu.prNote"),
 							run: (): void => void startReview(pr, "revue").catch((error) => notify(String(error))),
 							extra: {
 								icon: FolderGit2,
-								title: "Ouvrir seulement le workspace de sa branche",
+								title: t("workspacePanel.menu.prOpenBranch"),
 								run: (): void =>
 									void api.reviews
 										.prepare(pr, "revue")
@@ -1009,15 +1025,15 @@ function NewGroupMenu({ label, align }: { label: string; align?: "left" | "right
 					return mainRepo && looksLikeBranch(query)
 						? {
 								id: `create:${query}`,
-								group: "Cette branche n'est pas encore ici",
+								group: t("workspacePanel.menu.newBranchGroup"),
 								label: query,
-								hint: "la sortir en worktree, puis ouvrir son workspace",
-								note: "création",
+								hint: t("workspacePanel.menu.newBranchHint"),
+								note: t("workspacePanel.menu.creationNote"),
 								run: () => createAndOpen(query),
 							}
 						: null;
 				},
-				[createAndOpen, mainRepo, startReview, notify, openAgent],
+				[createAndOpen, mainRepo, startReview, notify, openAgent, t],
 			)}
 			align={align}
 		/>
@@ -1056,12 +1072,13 @@ function WorkspaceSpend({ cwd }: { cwd: string }) {
  * rester vide en attendant qu'on devine.
  */
 function WorkspaceEmpty() {
+	const { t } = useTranslation("components3");
 	return (
 		<div className="flex min-h-0 flex-1 flex-col items-center justify-center gap-4">
 			<Empty
 				icon={Bot}
-				message="Aucun chantier ouvert"
-				hint="Un chantier, c'est une branche sortie dans son propre dossier, et tout ce qu'on y fait travailler."
+				message={t("workspacePanel.empty.message")}
+				hint={t("workspacePanel.empty.hint")}
 			/>
 			{/* L'enchaînement, montré plutôt qu'expliqué. C'est la question qui
 			    revient le plus de ceux qui découvrent — « comment j'ouvre un agent
@@ -1070,20 +1087,20 @@ function WorkspaceEmpty() {
 			<div className="flex items-center gap-2 text-[11px] text-ink-faint">
 				<span className="flex items-center gap-1.5">
 					<GitBranch size={12} className="text-accent-soft" />
-					une branche
+					{t("workspacePanel.empty.stepBranch")}
 				</span>
 				<ChevronRight size={11} className="text-ink-faint/60" />
 				<span className="flex items-center gap-1.5">
 					<FolderOpen size={12} className="text-accent-soft" />
-					son dossier
+					{t("workspacePanel.empty.stepFolder")}
 				</span>
 				<ChevronRight size={11} className="text-ink-faint/60" />
 				<span className="flex items-center gap-1.5">
 					<Bot size={12} className="text-accent-soft" />
-					tes agents et tes terminaux
+					{t("workspacePanel.empty.stepAgents")}
 				</span>
 			</div>
-			<NewGroupMenu label="Ouvrir une branche" />
+			<NewGroupMenu label={t("workspacePanel.empty.openBranch")} />
 		</div>
 	);
 }
@@ -1094,6 +1111,7 @@ export function WorkspacePanel() {
 	const agents = useAgentRuns();
 	const terminals = useTerminals();
 	const { confirm } = useConfirm();
+	const { t } = useTranslation("components3");
 	const { sleeping, sleep, wake, forget } = useHibernate();
 
 	const owned = groups.find((entry) => entry.cwd === workspace.cwd) ?? null;
@@ -1170,9 +1188,9 @@ export function WorkspacePanel() {
 	// d'abord — c'était trois gestes pour en fermer un.
 	const closeWorkGroup = async (target: WorkGroup) => {
 		const ok = await confirm({
-			title: `Fermer ${target.label} ?`,
-			message: `${summary(target)} — tout s'arrête, y compris ce qui tourne encore.`,
-			confirmLabel: "Fermer le workspace",
+			title: t("workspacePanel.confirm.closeTitle", { label: target.label }),
+			message: t("workspacePanel.confirm.message", { what: summary(target) }),
+			confirmLabel: t("workspacePanel.confirm.closeLabel"),
 			danger: true,
 		});
 		if (!ok) return;
@@ -1189,11 +1207,11 @@ export function WorkspacePanel() {
 	/** Une mission tient plusieurs workspaces : on les nomme avant de tout fermer. */
 	const closeMission = async (title: string, members: WorkGroup[]) => {
 		const ok = await confirm({
-			title: `Fermer les ${members.length} workspaces de « ${title} » ?`,
-			message: `${members
-				.map((member) => member.label)
-				.join(", ")} — tout s'arrête, y compris ce qui tourne encore.`,
-			confirmLabel: "Tout fermer",
+			title: t("workspacePanel.confirm.closeMissionTitle", { count: members.length, title }),
+			message: t("workspacePanel.confirm.message", {
+				what: members.map((member) => member.label).join(", "),
+			}),
+			confirmLabel: t("workspacePanel.confirm.closeAll"),
 			danger: true,
 		});
 		if (!ok) return;
@@ -1351,8 +1369,8 @@ export function WorkspacePanel() {
 					{boardTab ? (
 						<TabChip
 							icon={LayoutDashboard}
-							label="Vue"
-							title="Tout ce qui tient à cette branche : PR, ticket, revue, agents, commits, documents, captures"
+							label={t("workspacePanel.tabs.board")}
+							title={t("workspacePanel.tabs.boardTitle")}
 							tone="neutral"
 							pulse={false}
 							badge={null}
@@ -1363,8 +1381,8 @@ export function WorkspacePanel() {
 					{browserTab ? (
 						<TabChip
 							icon={Globe}
-							label="Navigateur"
-							title="Le navigateur de ce workspace : celui que l'agent pilote pour tester, en direct — et où tu peux cliquer toi aussi"
+							label={t("workspacePanel.tabs.browser")}
+							title={t("workspacePanel.tabs.browserTitle")}
 							tone="neutral"
 							pulse={false}
 							badge={null}
@@ -1387,14 +1405,19 @@ export function WorkspacePanel() {
 							selected={active.kind === "agent" && active.id === entry.id}
 							onSelect={() => agents.show(entry.id)}
 							onClose={() => closeTab({ kind: "agent", id: entry.id })}
-							closeTitle="Fermer et arrêter l'agent"
+							closeTitle={t("workspacePanel.tabs.closeAgent")}
 						/>
 					))}
 					{group.terminals.map((entry, index) => (
 						<TabChip
 							key={entry.id}
 							icon={Terminal}
-							label={tabName("Terminal", index, group.terminals.length, entry.label)}
+							label={tabName(
+								t("workspacePanel.tabs.terminal"),
+								index,
+								group.terminals.length,
+								entry.label,
+							)}
 							title={tabTitle(group)}
 							tone={entry.running ? "info" : "neutral"}
 							pulse={false}
@@ -1402,7 +1425,7 @@ export function WorkspacePanel() {
 							selected={active.kind === "terminal" && active.id === entry.id}
 							onSelect={() => show(group.cwd, { kind: "terminal", id: entry.id })}
 							onClose={() => closeTab({ kind: "terminal", id: entry.id })}
-							closeTitle="Fermer le terminal et ce qu'il fait tourner"
+							closeTitle={t("workspacePanel.tabs.closeTerminal")}
 						/>
 					))}
 				{/* Deux boutons nommés plutôt qu'un « + » : il n'ouvrait que des
@@ -1418,17 +1441,17 @@ export function WorkspacePanel() {
 						size="sm"
 						icon={Bot}
 						onClick={() => agents.open(group.cwd, "", undefined, undefined, true)}
-						title="Un agent de plus sur ce chantier"
+						title={t("workspacePanel.toolbar.addAgentTitle")}
 					>
-						+ Agent
+						{t("workspacePanel.toolbar.addAgent")}
 					</Button>
 					<Button
 						size="sm"
 						icon={Terminal}
 						onClick={() => terminals.open(group.cwd)}
-						title="Un terminal de plus sur ce chantier (⌘⇧T)"
+						title={t("workspacePanel.toolbar.addTerminalTitle")}
 					>
-						+ Terminal
+						{t("workspacePanel.toolbar.addTerminal")}
 					</Button>
 				
 				{run ? <RunState run={run} /> : null}
@@ -1437,20 +1460,20 @@ export function WorkspacePanel() {
 						size="sm"
 						icon={Square}
 						onClick={() => agents.stop(run.id)}
-						title="Arrêter"
+						title={t("workspacePanel.toolbar.stop")}
 					/>
 				) : null}
 
 				{terminal ? (
 					<>
 						<Badge tone={terminal.running ? "success" : "neutral"}>
-							{terminal.running ? "shell" : "terminé"}
+							{terminal.running ? t("workspacePanel.status.shell") : t("workspacePanel.status.finished")}
 						</Badge>
 						{terminal.running ? (
 							<Button
 								size="sm"
 								onClick={() => terminals.interrupt(terminal.id)}
-								title="Interrompre ce qui tourne (⌃C)"
+								title={t("workspacePanel.toolbar.interrupt")}
 							>
 								⌃C
 							</Button>
@@ -1459,7 +1482,7 @@ export function WorkspacePanel() {
 							size="sm"
 							icon={Eraser}
 							onClick={() => terminals.clear(terminal.id)}
-							title="Effacer l'écran"
+							title={t("workspacePanel.toolbar.clear")}
 						/>
 					</>
 				) : null}
@@ -1472,7 +1495,7 @@ export function WorkspacePanel() {
 					size="sm"
 					icon={Moon}
 					onClick={() => sleep(group.cwd)}
-					title="Mettre de côté — les processus s'arrêtent, le workspace se retrouve au prochain lancement"
+					title={t("workspacePanel.toolbar.sleep")}
 				/>
 				{/* Fermer le workspace, pas l'onglet : les croix des onglets ne
 				    ferment qu'eux, et rien n'arrêtait un workspace entier. */}
@@ -1482,8 +1505,8 @@ export function WorkspacePanel() {
 					onClick={() => void closeGroup()}
 					title={
 						group.mission
-							? `Fermer la mission « ${group.mission.title} » — tous ses workspaces s'arrêtent`
-							: "Fermer le workspace — arrête tout et l'oublie"
+							? t("workspacePanel.toolbar.closeMission", { title: group.mission.title })
+							: t("workspacePanel.closeWorkspace")
 					}
 				/>
 			</div>
@@ -1676,6 +1699,7 @@ export const DOCK_KEY = "workspace.dock";
 export function WorkspaceDock() {
 	const { show, showGroup } = useWorkspace();
 	const { go } = useCockpit();
+	const { t } = useTranslation("components3");
 	const groups = useWorkGroups();
 	const agents = useAgentRuns();
 	const terminals = useTerminals();
@@ -1715,7 +1739,7 @@ export function WorkspaceDock() {
 							<button
 								type="button"
 								onClick={() => reach(group.cwd)}
-								title={`${group.cwd} — ouvrir dans l'écran Workspaces`}
+								title={t("workspacePanel.dock.openTitle", { cwd: group.cwd })}
 								className="focus-ring flex items-center gap-2 rounded-lg text-[11px] text-ink"
 							>
 								<span className="max-w-44 truncate font-medium">{group.label}</span>
@@ -1726,9 +1750,9 @@ export function WorkspaceDock() {
 									)}
 								>
 									{asking
-										? "te pose une question"
+										? t("workspacePanel.status.asking")
 										: waiting
-											? "autorisation ?"
+											? t("workspacePanel.status.permission")
 											: summary(group)}
 								</span>
 								{unread > 0 ? (
@@ -1741,7 +1765,7 @@ export function WorkspaceDock() {
 								size="sm"
 								icon={open ? ChevronDown : ChevronUp}
 								onClick={() => setExpanded(open ? null : group.cwd)}
-								title={open ? "Replier la liste" : "Voir le détail du groupe"}
+								title={open ? t("workspacePanel.dock.collapse") : t("workspacePanel.dock.expand")}
 							/>
 						</div>
 
@@ -1758,20 +1782,20 @@ export function WorkspaceDock() {
 										)}
 										hint={
 											agents.pendingFor(run.id).some(isQuestion)
-												? "te pose une question"
+												? t("workspacePanel.status.asking")
 												: agents.pendingFor(run.id).length > 0
-													? "autorisation ?"
+													? t("workspacePanel.status.permission")
 													: run.running
 														? run.thinking
-															? (run.activity ?? "réfléchit")
-															: "prêt"
-														: "terminé"
+															? (run.activity ?? t("workspacePanel.status.thinking"))
+															: t("workspacePanel.status.ready")
+														: t("workspacePanel.status.finished")
 										}
 										tone={run.running ? "success" : "neutral"}
 										pulse={run.thinking}
 										onSelect={() => reach(group.cwd, { kind: "agent", id: run.id })}
 										onClose={() => agents.close(run.id)}
-										closeTitle="Fermer et arrêter l'agent"
+										closeTitle={t("workspacePanel.tabs.closeAgent")}
 									/>
 								))}
 								{group.terminals.map((terminal, index) => (
@@ -1779,18 +1803,22 @@ export function WorkspaceDock() {
 										key={terminal.id}
 										icon={Terminal}
 										label={tabName(
-											"Terminal",
+											t("workspacePanel.tabs.terminal"),
 											index,
 											group.terminals.length,
 											terminal.label,
 										)}
 										title={tabTitle(group)}
-										hint={terminal.running ? "shell ouvert" : "terminé"}
+										hint={
+											terminal.running
+												? t("workspacePanel.status.shellOpen")
+												: t("workspacePanel.status.finished")
+										}
 										tone={terminal.running ? "info" : "neutral"}
 										pulse={false}
 										onSelect={() => reach(group.cwd, { kind: "terminal", id: terminal.id })}
 										onClose={() => terminals.close(terminal.id)}
-										closeTitle="Fermer le terminal et ce qu'il fait tourner"
+										closeTitle={t("workspacePanel.tabs.closeTerminal")}
 									/>
 								))}
 							</div>
@@ -1805,10 +1833,12 @@ export function WorkspaceDock() {
 function summary(group: WorkGroup): string {
 	const parts: string[] = [];
 	if (group.runs.length > 0) {
-		parts.push(`${group.runs.length} agent${group.runs.length > 1 ? "s" : ""}`);
+		parts.push(t("components3:workspacePanel.summary.agents", { count: group.runs.length }));
 	}
 	if (group.terminals.length > 0) {
-		parts.push(`${group.terminals.length} term.`);
+		parts.push(
+			t("components3:workspacePanel.summary.terminals", { count: group.terminals.length }),
+		);
 	}
 	return parts.join(" · ");
 }

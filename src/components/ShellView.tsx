@@ -1,5 +1,6 @@
 import anser from "anser";
 import { useEffect, useState } from "react";
+import { Trans, useTranslation } from "react-i18next";
 import type { Turn } from "@/app/agents";
 import { duration } from "@/lib/format";
 import { useStickToBottom } from "@/lib/useStickToBottom";
@@ -38,6 +39,7 @@ export function ShellView({
 	/** Sa dernière commande a répondu : il lit la sortie, rien ne tourne. */
 	pondering: boolean;
 }) {
+	const { t } = useTranslation("components2");
 	const last = turns[turns.length - 1];
 	const bottom = useStickToBottom<HTMLDivElement>([turns.length, last?.output, pondering]);
 
@@ -54,17 +56,18 @@ export function ShellView({
 				<div className="flex items-center gap-2 text-ink-faint">
 					<span className="text-accent">$</span>
 					<Cursor />
-					<span>rien ne tourne — il lit la sortie et réfléchit à la suite</span>
+					<span>{t("shellView.pondering")}</span>
 				</div>
 			) : null}
 			{turns.length === 0 && !pondering ? (
-				<p className="py-6 text-center text-ink-faint">Aucune commande lancée pour cette consigne.</p>
+				<p className="py-6 text-center text-ink-faint">{t("shellView.noCommand")}</p>
 			) : null}
 		</div>
 	);
 }
 
 function Command({ turn, live }: { turn: Turn; live: boolean }) {
+	const { t } = useTranslation("components2");
 	const running = turn.output === undefined && live;
 	const lines = (turn.output ?? "").split("\n");
 	const cut = Math.max(0, lines.length - TAIL);
@@ -86,12 +89,15 @@ function Command({ turn, live }: { turn: Turn; live: boolean }) {
 				<div className="mt-0.5 flex items-center gap-2 text-ink-faint">
 					<Cursor />
 					<span>
-						tourne{turn.at ? <Elapsed since={turn.at} /> : null} — la sortie arrive quand la commande rend la
-						main
+						{turn.at ? (
+							<Trans t={t} i18nKey="shellView.runningSince" components={{ elapsed: <Elapsed since={turn.at} /> }} />
+						) : (
+							t("shellView.running")
+						)}
 					</span>
 				</div>
 			) : turn.output === undefined ? (
-				<div className="mt-0.5 text-ink-faint">interrompue avant d'avoir répondu</div>
+				<div className="mt-0.5 text-ink-faint">{t("shellView.interrupted")}</div>
 			) : shown.trim() ? (
 				<div
 					className={
@@ -100,7 +106,7 @@ function Command({ turn, live }: { turn: Turn; live: boolean }) {
 							: "mt-0.5 whitespace-pre-wrap break-all text-ink-muted"
 					}
 				>
-					{cut > 0 ? <div className="text-ink-faint">… {cut} lignes plus haut</div> : null}
+					{cut > 0 ? <div className="text-ink-faint">{t("shellView.linesAbove", { count: cut })}</div> : null}
 					{anser.ansiToJson(shown, { use_classes: false, json: true }).map((chunk, index) => (
 						<span
 							key={index}
@@ -114,7 +120,7 @@ function Command({ turn, live }: { turn: Turn; live: boolean }) {
 					))}
 				</div>
 			) : (
-				<div className="mt-0.5 text-ink-faint">(aucune sortie)</div>
+				<div className="mt-0.5 text-ink-faint">{t("shellView.noOutput")}</div>
 			)}
 		</div>
 	);
@@ -126,10 +132,11 @@ function Cursor() {
 
 /** « depuis 12s », tenu à jour tant que la commande tourne. */
 function Elapsed({ since }: { since: number }) {
+	const { t } = useTranslation("components2");
 	const [now, setNow] = useState(() => Date.now());
 	useEffect(() => {
 		const timer = window.setInterval(() => setNow(Date.now()), 1000);
 		return () => window.clearInterval(timer);
 	}, []);
-	return <> depuis {duration(Math.max(0, Math.round((now - since) / 1000)))}</>;
+	return <> {t("shellView.since", { duration: duration(Math.max(0, Math.round((now - since) / 1000))) })}</>;
 }

@@ -2,6 +2,7 @@ import clsx from "clsx";
 import { FileText, Minus, MoveHorizontal, Plus } from "lucide-react";
 import type { PDFDocumentLoadingTask, PDFDocumentProxy, RenderTask } from "pdfjs-dist";
 import { useEffect, useRef, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { Button, ErrorNote, Spinner } from "@/components/ui";
 import { localFileBytes } from "@/lib/localFile";
 
@@ -152,6 +153,7 @@ const ZOOMS = [0.5, 0.75, 1, 1.25, 1.5, 2, 3];
 
 /** Toutes les pages, l'une sous l'autre ; chacune ne se dessine qu'en approchant de l'écran. */
 export function PdfDocument({ path }: { path: string }) {
+	const { t } = useTranslation("components2");
 	const { pdf, error } = usePdf(path);
 	const frame = useRef<HTMLDivElement>(null);
 	const [available, setAvailable] = useState(0);
@@ -194,20 +196,20 @@ export function PdfDocument({ path }: { path: string }) {
 		<div className="flex h-full min-h-0 flex-col">
 			<div className="hairline-b flex items-center gap-1.5 px-3 py-1.5">
 				<span className="font-mono text-[11px] text-ink-muted tabular-nums">
-					{pdf ? `page ${current} / ${pdf.numPages}` : "…"}
+					{pdf ? t("pdfView.page", { current, total: pdf.numPages }) : "…"}
 				</span>
 				<span className="flex-1" />
-				<Button size="sm" icon={Minus} onClick={() => step(-1)} title="Réduire" />
+				<Button size="sm" icon={Minus} onClick={() => step(-1)} title={t("pdfView.zoomOut")} />
 				<span className="w-11 text-center font-mono text-[11px] text-ink-muted tabular-nums">
-					{Math.round((width / (natural * (96 / 72))) * 100)} %
+					{t("pdfView.percent", { value: Math.round((width / (natural * (96 / 72))) * 100) })}
 				</span>
-				<Button size="sm" icon={Plus} onClick={() => step(1)} title="Agrandir" />
+				<Button size="sm" icon={Plus} onClick={() => step(1)} title={t("pdfView.zoomIn")} />
 				<Button
 					size="sm"
 					icon={MoveHorizontal}
 					active={zoom === null}
 					onClick={() => setZoom(null)}
-					title="À la largeur de la fenêtre"
+					title={t("pdfView.fitWidth")}
 				/>
 			</div>
 			<div ref={frame} className="min-h-0 flex-1 overflow-auto bg-void">

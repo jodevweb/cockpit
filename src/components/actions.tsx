@@ -1,4 +1,5 @@
 import { AlertTriangle, Bot, ExternalLink, FolderGit2, MessageSquare } from "lucide-react";
+import { useTranslation } from "react-i18next";
 import { Button } from "@/components/ui";
 import { StartMission } from "@/components/StartMission";
 import { api } from "@/lib/ipc";
@@ -56,6 +57,7 @@ export function TicketActions({
 	url?: string;
 	size?: "sm" | "md";
 }) {
+	const { t } = useTranslation("components2");
 	const { notify, go } = useCockpit();
 	const tree = useWorktreeForTicket(identifier);
 
@@ -65,7 +67,7 @@ export function TicketActions({
 				<Button
 					size={size}
 					icon={ExternalLink}
-					title="Ouvrir le ticket dans le navigateur"
+					title={t("actions.openTicket")}
 					onClick={() => {
 						void api.system.openUrl(url).catch((error) => notify(String(error)));
 					}}
@@ -77,7 +79,7 @@ export function TicketActions({
 				<Button
 					size={size}
 					icon={FolderGit2}
-					title={`Ouvrir le worktree ${tree.branch ?? tree.folderName}`}
+					title={t("actions.openWorktreeNamed", { name: tree.branch ?? tree.folderName })}
 					onClick={() => go("worktrees", { worktreePath: tree.path })}
 				>
 					Worktree
@@ -104,6 +106,7 @@ export function PrActions({
 	changesRequested?: boolean;
 	size?: "sm" | "md";
 }) {
+	const { t } = useTranslation("components2");
 	const { notify, go, hasConnector, config, reloadConfig } = useCockpit();
 	const { open: openAgent } = useAgentActions();
 	const tree = useWorktreeFor(headRef);
@@ -126,8 +129,8 @@ export function PrActions({
 			reloadConfig();
 			notify(
 				allowed
-					? `La Permanence ne commentera plus sur #${number}.`
-					: `La Permanence peut rendre compte sur #${number}. Un commentaire par jour, signé.`,
+					? t("actions.permanenceRevoked", { number })
+					: t("actions.permanenceAllowed", { number }),
 			);
 		} catch (error) {
 			notify(String(error));
@@ -149,7 +152,7 @@ export function PrActions({
 			// cherchait un prompt que la liste par défaut n'a jamais eu : sans
 			// réglage maison, l'agent partait sans consigne.
 			const prompt = ids.map((id) => library.find((entry) => entry.id === id)).find(Boolean);
-			if (!prompt) notify("Aucun prompt pour ce geste dans la bibliothèque : l'agent part sans consigne.");
+			if (!prompt) notify(t("actions.noPrompt"));
 			openAgent(tree.path, prompt?.text ?? "");
 		} catch (error) {
 			notify(String(error));
@@ -162,7 +165,7 @@ export function PrActions({
 				<Button
 					size={size}
 					icon={ExternalLink}
-					title={`Ouvrir la pull request #${number}`}
+					title={t("actions.openPr", { number })}
 					onClick={() => {
 						void api.system.openUrl(url).catch((error) => notify(String(error)));
 					}}
@@ -174,37 +177,37 @@ export function PrActions({
 				<Button
 					size={size}
 					icon={AlertTriangle}
-					title="Lancer l'agent qui corrige la CI"
+					title={t("actions.fixCiHint")}
 					onClick={() => void launch("ci-red")}
 				>
-					Corriger la CI
+					{t("actions.fixCi")}
 				</Button>
 			) : null}
 			{tree && canAgent && changesRequested ? (
 				<Button
 					size={size}
 					icon={Bot}
-					title="Traiter les retours de review avec un agent"
+					title={t("actions.feedbackHint")}
 					onClick={() => void launch("coderabbit", "review-comments")}
 				>
-					Retours
+					{t("actions.feedback")}
 				</Button>
 			) : null}
 			{tree && canAgent ? (
 				<Button
 					size={size}
 					icon={Bot}
-					title="Ouvrir un agent sur cette branche"
+					title={t("actions.agentHint")}
 					onClick={() => openAgent(tree.path)}
 				>
-					Agent
+					{t("actions.agent")}
 				</Button>
 			) : null}
 			{tree ? (
 				<Button
 					size={size}
 					icon={FolderGit2}
-					title="Ouvrir le worktree de cette branche"
+					title={t("actions.openWorktree")}
 					onClick={() => go("worktrees", { worktreePath: tree.path })}
 				>
 					Worktree
@@ -217,12 +220,12 @@ export function PrActions({
 					active={allowed}
 					title={
 						allowed
-							? "La Permanence peut rendre compte ici. Cliquer pour le lui retirer."
-							: "Autoriser la Permanence à rendre compte ici, une fois par jour, signé."
+							? t("actions.allowedHint")
+							: t("actions.allowHint")
 					}
 					onClick={() => void toggleAllowance()}
 				>
-					{allowed ? "Autorisée" : "Autoriser"}
+					{allowed ? t("actions.allowed") : t("actions.allow")}
 				</Button>
 			) : null}
 		</>

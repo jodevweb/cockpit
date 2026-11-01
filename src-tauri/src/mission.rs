@@ -216,11 +216,22 @@ impl Step {
 		}
 	}
 
-	pub fn label(self) -> &'static str {
+	/// Le nom de l'étape, tel que l'utilisateur le lit.
+	pub fn label(self) -> String {
+		crate::i18n::t(match self {
+			Step::Understanding => "mission.step.understanding",
+			Step::Approach => "mission.step.approach",
+			Step::Split => "mission.step.split",
+		})
+	}
+
+	/// Le nom de l'étape dans les consignes et les réponses d'outil du
+	/// maître, toujours en anglais comme le reste de ses prompts.
+	pub fn protocol_label(self) -> &'static str {
 		match self {
-			Step::Understanding => "compréhension",
-			Step::Approach => "approche",
-			Step::Split => "découpage",
+			Step::Understanding => "understanding",
+			Step::Approach => "approach",
+			Step::Split => "breakdown",
 		}
 	}
 }
@@ -467,18 +478,18 @@ pub fn list() -> Vec<Mission> {
 
 pub fn get(id: &str) -> Result<Mission> {
 	let raw = std::fs::read_to_string(path_of(id))
-		.map_err(|_| CockpitError::msg(format!("Mission inconnue : {id}")))?;
-	serde_json::from_str(&raw).map_err(|e| CockpitError::msg(format!("Mission illisible : {e}")))
+		.map_err(|_| CockpitError::msg(crate::i18n::tf("mission.unknown", &[("id", &id)])))?;
+	serde_json::from_str(&raw).map_err(|e| CockpitError::msg(crate::i18n::tf("mission.unreadable", &[("error", &e)])))
 }
 
 pub fn save(mission: &Mission) -> Result<()> {
 	let dir = missions_dir();
 	std::fs::create_dir_all(&dir)
-		.map_err(|e| CockpitError::msg(format!("Dossier des missions : {e}")))?;
+		.map_err(|e| CockpitError::msg(crate::i18n::tf("mission.folderError", &[("error", &e)])))?;
 	let raw = serde_json::to_string_pretty(mission)
-		.map_err(|e| CockpitError::msg(format!("Mission illisible : {e}")))?;
+		.map_err(|e| CockpitError::msg(crate::i18n::tf("mission.unreadable", &[("error", &e)])))?;
 	std::fs::write(path_of(&mission.id), raw)
-		.map_err(|e| CockpitError::msg(format!("Écriture de la mission : {e}")))
+		.map_err(|e| CockpitError::msg(crate::i18n::tf("mission.writeError", &[("error", &e)])))
 }
 
 pub(crate) fn identifier() -> String {
@@ -501,7 +512,7 @@ pub fn create(
 ) -> Result<Mission> {
 	let title = title.trim();
 	if title.is_empty() {
-		return Err(CockpitError::msg("Une mission a besoin d'un intitulé."));
+		return Err(CockpitError::msg(crate::i18n::t("mission.titleRequired")));
 	}
 	let mission = Mission {
 		id: identifier(),
@@ -533,7 +544,7 @@ pub fn create(
 		updated_at: now(),
 	};
 	save(&mission)?;
-	crate::journal::record("mission", "Mission ouverte", &mission.title, true, &mission.ticket);
+	crate::journal::record("mission", &crate::i18n::t("mission.journal.opened"), &mission.title, true, &mission.ticket);
 	Ok(mission)
 }
 
@@ -550,9 +561,9 @@ pub fn remove(id: &str) -> Result<()> {
 	match std::fs::remove_file(&path) {
 		Ok(()) => Ok(()),
 		Err(error) if error.kind() == std::io::ErrorKind::NotFound => Ok(()),
-		Err(error) => Err(CockpitError::msg(format!(
-			"Suppression de {} impossible : {error}",
-			path.display()
+		Err(error) => Err(CockpitError::msg(crate::i18n::tf(
+			"mission.deleteFailed",
+			&[("path", &path.display()), ("error", &error)],
 		))),
 	}
 }
@@ -573,9 +584,7 @@ pub fn rework(id: &str, task_id: &str, reproche: &str, verifies: impl Fn(&str) -
 	let task_id = task_id.trim().to_string();
 	let reproche = reproche.trim().to_string();
 	if reproche.is_empty() {
-		return Err(CockpitError::msg(
-			"Une reprise sans motif ne dit pas quoi corriger.",
-		));
+		return Err(CockpitError::msg(crate::i18n::t("mission.reworkNeedsReason")));
 	}
 
 	let mission = get(id)?;
@@ -583,7 +592,7 @@ pub fn rework(id: &str, task_id: &str, reproche: &str, verifies: impl Fn(&str) -
 		.tasks
 		.iter()
 		.find(|task| task.id == task_id)
-		.ok_or_else(|| CockpitError::msg(format!("Tâche inconnue : {task_id}")))?;
+		.ok_or_else(|| CockpitError::msg(crate::i18n::tf("mission.unknownTask", &[("id", &task_id)])))?;
 	if task.attempts >= MAX_ATTEMPTS {
 		// Ce qui lui a déjà été reproché part avec le refus : au troisième
 		// renvoi, la question n'est plus « que corriger » mais « est-ce qu'on
@@ -598,8 +607,11 @@ pub fn rework(id: &str, task_id: &str, reproche: &str, verifies: impl Fn(&str) -
 			})
 			.collect::<String>();
 		return Err(CockpitError::msg(format!(
-			"« {} » a déjà été reprise {} fois. Reprends la main plutôt que de relancer.{}",
-			task.title, task.attempts, déjà
+			"{}{déjà}",
+			crate::i18n::tf(
+				"mission.reworkLimit",
+				&[("title", &task.title), ("count", &task.attempts)],
+			)
 		)));
 	}
 
@@ -617,12 +629,15 @@ pub fn rework(id: &str, task_id: &str, reproche: &str, verifies: impl Fn(&str) -
 				entry.session_id = None;
 				// Ce qu'elle avait conclu ne vaut plus : elle va rejuger.
 				entry.verdict.clear();
-				entry.note = format!("Reprise {} : {reproche}", entry.attempts);
+				entry.note = crate::i18n::tf(
+					"mission.note.rework",
+					&[("count", &entry.attempts), ("reason", &reproche)],
+				);
 				entry.reproaches.push(reproche.clone());
 				// La consigne s'accumule : l'exécutant reprend son propre travail,
 				// il doit savoir ce qui lui est reproché sans perdre l'énoncé.
 				entry.brief = format!(
-					"{}\n\n── Reprise demandée ──\n{reproche}",
+					"{}\n\n── Rework requested ──\n{reproche}",
 					entry.brief.trim()
 				);
 			} else if verifies(&entry.role)
@@ -631,14 +646,14 @@ pub fn rework(id: &str, task_id: &str, reproche: &str, verifies: impl Fn(&str) -
 				// Ce qui a été jugé va changer : les vérifications rejugent.
 				entry.state = TaskState::Planned;
 				entry.session_id = None;
-				entry.note = "À refaire : une tâche a été reprise.".into();
+				entry.note = crate::i18n::t("mission.note.redoAfterRework");
 			}
 		}
 	})?;
 
 	crate::journal::record(
 		"mission",
-		"Tâche renvoyée en correction",
+		&crate::i18n::t("mission.journal.taskReworked"),
 		&mission.title,
 		true,
 		reproche.chars().take(120).collect::<String>().as_str(),
@@ -657,7 +672,7 @@ pub fn set_paused(id: &str, paused: bool) -> Result<Mission> {
 	let mission = update(id, |mission| mission.paused = paused)?;
 	crate::journal::record(
 		"mission",
-		if paused { "Mission suspendue" } else { "Mission reprise" },
+		&crate::i18n::t(if paused { "mission.journal.paused" } else { "mission.journal.resumed" }),
 		&mission.title,
 		true,
 		"",
@@ -712,11 +727,11 @@ pub async fn recover_all() -> usize {
 			for task in mission.tasks.iter_mut() {
 				if delivered.contains(&task.id) {
 					task.state = TaskState::Delivered;
-					task.note = "Travail retrouvé au démarrage : sa branche porte des commits.".into();
+					task.note = crate::i18n::t("mission.note.workFoundAtStartup");
 				} else if to_redo.contains(&task.id) {
 					task.state = TaskState::Planned;
 					task.session_id = None;
-					task.note = "Reprise après redémarrage du cockpit.".into();
+					task.note = crate::i18n::t("mission.note.resumedAfterRestart");
 				}
 			}
 			mission.master_session = None;
@@ -725,13 +740,12 @@ pub async fn recover_all() -> usize {
 		if !orphans.is_empty() {
 			crate::journal::record(
 				"mission",
-				"Tâches récupérées",
+				&crate::i18n::t("mission.journal.tasksRecovered"),
 				&mission.title,
 				true,
-				&format!(
-					"{} à relancer, {} déjà livrée(s)",
-					to_redo.len(),
-					delivered.len()
+				&crate::i18n::tf(
+					"mission.journal.tasksRecoveredDetail",
+					&[("relaunch", &to_redo.len()), ("delivered", &delivered.len())],
 				),
 			);
 		}
@@ -827,10 +841,10 @@ pub fn submit_plan(id: &str, plan: &str, mut tasks: Vec<Task>) -> Result<Mission
 	})?;
 	crate::journal::record(
 		"mission",
-		"Plan soumis",
+		&crate::i18n::t("mission.journal.planSubmitted"),
 		&mission.title,
 		true,
-		&format!("{} tâche(s)", mission.tasks.len()),
+		&crate::i18n::tf("mission.journal.planSubmittedDetail", &[("count", &mission.tasks.len())]),
 	);
 	Ok(mission)
 }
@@ -844,7 +858,7 @@ pub fn approve(id: &str) -> Result<Mission> {
 			mission.started_at = Some(now());
 		}
 	})?;
-	crate::journal::record("mission", "Plan approuvé", &mission.title, true, "");
+	crate::journal::record("mission", &crate::i18n::t("mission.journal.planApproved"), &mission.title, true, "");
 	Ok(mission)
 }
 
@@ -878,12 +892,12 @@ pub fn plan_allowed(mission: &Mission) -> Result<()> {
 	}
 	match mission.state {
 		MissionState::Understanding | MissionState::AwaitingUnderstanding => Err(CockpitError::msg(
-			"Ta compréhension du ticket n'est pas encore validée : appelle `understand`, puis \
-			 attends l'accord de l'utilisateur. Le découpage vient après l'approche.",
+			"Your understanding of the ticket is not approved yet: call `understand`, then \
+			 wait for the user's approval. The breakdown comes after the approach.",
 		)),
 		MissionState::Approaching | MissionState::AwaitingApproach => Err(CockpitError::msg(
-			"Ton approche n'est pas encore validée : appelle `approach`, puis attends l'accord \
-			 de l'utilisateur avant de découper.",
+			"Your approach is not approved yet: call `approach`, then wait for the user's \
+			 approval before splitting the work.",
 		)),
 		_ => Ok(()),
 	}
@@ -898,31 +912,31 @@ pub fn check_draft(step: Step, text: &str, questions: &[String]) -> Result<()> {
 	let text = text.trim();
 	if text.is_empty() {
 		return Err(CockpitError::msg(format!(
-			"Une {} vide n'engage personne.",
-			step.label()
+			"An empty {} commits no one.",
+			step.protocol_label()
 		)));
 	}
 	if let Some(max) = step.max_lines() {
 		let lines = text.lines().filter(|line| !line.trim().is_empty()).count();
 		if lines > max {
 			return Err(CockpitError::msg(format!(
-				"{lines} lignes : la {} tient en {max} au plus. Resserre sur l'essentiel, \
-				 écrit pour un développeur qui découvre le ticket — le détail viendra plus tard.",
-				step.label()
+				"{lines} lines: the {} fits in {max} at most. Tighten it to the essentials, \
+				 written for a developer discovering the ticket — details will come later.",
+				step.protocol_label()
 			)));
 		}
 		let chars = text.chars().count();
 		if chars > max * 160 {
 			return Err(CockpitError::msg(format!(
-				"{chars} caractères : des lignes aussi longues ne se lisent pas d'un coup d'œil. \
-				 Phrases courtes, une idée par ligne."
+				"{chars} characters: lines this long cannot be read at a glance. \
+				 Short sentences, one idea per line."
 			)));
 		}
 	}
 	if questions.len() > 5 {
 		return Err(CockpitError::msg(
-			"Plus de cinq questions : pose celles qui changent vraiment le travail, et tranche \
-			 le reste toi-même en le disant.",
+			"More than five questions: ask the ones that really change the work, and settle \
+			 the rest yourself, saying so.",
 		));
 	}
 	Ok(())
@@ -944,14 +958,14 @@ pub fn submit_draft(id: &str, step: Step, text: &str, questions: Vec<String>) ->
 	let current = get(id)?;
 	if !current.guided {
 		return Err(CockpitError::msg(
-			"Cette mission est autonome : elle n'a pas d'étapes à valider. Propose directement \
-			 ton découpage avec `plan`.",
+			"This mission is autonomous: it has no steps to approve. Submit your breakdown \
+			 directly with `plan`.",
 		));
 	}
 	if current.state != step.working() {
 		return Err(CockpitError::msg(format!(
-			"Ce n'est pas le moment de la {} : la mission en est à « {:?} ».",
-			step.label(),
+			"This is not the time for the {}: the mission is at \"{:?}\".",
+			step.protocol_label(),
 			current.state
 		)));
 	}
@@ -973,7 +987,7 @@ pub fn submit_draft(id: &str, step: Step, text: &str, questions: Vec<String>) ->
 	})?;
 	crate::journal::record(
 		"mission",
-		&format!("Proposition — {}", step.label()),
+		&crate::i18n::tf("mission.journal.proposal", &[("step", &step.label())]),
 		&mission.title,
 		true,
 		"",
@@ -984,9 +998,9 @@ pub fn submit_draft(id: &str, step: Step, text: &str, questions: Vec<String>) ->
 /// Où mène une décision humaine sur une étape. Pur.
 pub fn decide(state: MissionState, step: Step, approved: bool) -> Result<MissionState> {
 	if state != step.awaiting() {
-		return Err(CockpitError::msg(format!(
-			"Rien n'attend ta décision sur la {} : la mission en est à « {state:?} ».",
-			step.label()
+		return Err(CockpitError::msg(crate::i18n::tf(
+			"mission.nothingAwaitsDecision",
+			&[("step", &step.label()), ("state", &format!("{state:?}"))],
 		)));
 	}
 	Ok(if approved {
@@ -1010,9 +1024,7 @@ pub fn review(
 	let feedback = feedback.trim().to_string();
 	let answers: Vec<String> = answers.into_iter().map(|a| a.trim().to_string()).collect();
 	if !approved && feedback.is_empty() && answers.iter().all(|a| a.is_empty()) {
-		return Err(CockpitError::msg(
-			"Dis ce qui ne va pas : sans motif, le maître referait la même proposition.",
-		));
+		return Err(CockpitError::msg(crate::i18n::t("mission.correctionNeedsReason")));
 	}
 
 	let current = get(id)?;
@@ -1040,10 +1052,9 @@ pub fn review(
 	})?;
 	crate::journal::record(
 		"mission",
-		&format!(
-			"{} — {}",
-			if approved { "Validé" } else { "Corrigé" },
-			step.label()
+		&crate::i18n::tf(
+			if approved { "mission.journal.stepApproved" } else { "mission.journal.stepCorrected" },
+			&[("step", &step.label())],
 		),
 		&mission.title,
 		true,
@@ -1109,9 +1120,7 @@ pub fn update_master_session(id: &str, session: Option<String>) -> Result<Missio
 pub fn attach_task(id: &str, task_id: &str, session_id: &str) -> Result<Mission> {
 	let task_id = task_id.trim().to_string();
 	if task_id.is_empty() {
-		return Err(CockpitError::msg(
-			"Tâche sans identifiant : impossible d'y rattacher un exécutant.",
-		));
+		return Err(CockpitError::msg(crate::i18n::t("mission.taskWithoutId")));
 	}
 	let session = session_id.to_string();
 	let mut found = false;
@@ -1123,7 +1132,7 @@ pub fn attach_task(id: &str, task_id: &str, session_id: &str) -> Result<Mission>
 		}
 	})?;
 	if !found {
-		return Err(CockpitError::msg(format!("Tâche inconnue : {task_id}")));
+		return Err(CockpitError::msg(crate::i18n::tf("mission.unknownTask", &[("id", &task_id)])));
 	}
 	Ok(mission)
 }
@@ -1138,7 +1147,7 @@ pub fn finish(id: &str, pr_url: &str) -> Result<Mission> {
 		mission.state = MissionState::Done;
 		mission.finished_at = Some(now());
 	})?;
-	crate::journal::record("mission", "Mission close", &mission.title, true, &mission.pr_url);
+	crate::journal::record("mission", &crate::i18n::t("mission.journal.closed"), &mission.title, true, &mission.pr_url);
 	Ok(mission)
 }
 
@@ -1196,13 +1205,15 @@ pub async fn cleanup(id: &str) -> Result<Vec<String>> {
 	if !removed.is_empty() || libéré > 0 {
 		crate::journal::record(
 			"mission",
-			"Worktrees rangés",
+			&crate::i18n::t("mission.journal.worktreesCleaned"),
 			&mission.title,
 			true,
-			&format!(
-				"{} dossier(s) retirés, {:.1} Go rendus au disque",
-				removed.len(),
-				libéré as f64 / 1024.0 / 1024.0 / 1024.0,
+			&crate::i18n::tf(
+				"mission.journal.worktreesCleanedDetail",
+				&[
+					("count", &removed.len()),
+					("size", &format!("{:.1}", libéré as f64 / 1024.0 / 1024.0 / 1024.0)),
+				],
 			),
 		);
 	}
@@ -1290,10 +1301,10 @@ pub async fn purge(id: &str) -> Result<Vec<String>> {
 	remove(id)?;
 	crate::journal::record(
 		"mission",
-		"Mission supprimée",
+		&crate::i18n::t("mission.journal.deleted"),
 		&mission.title,
 		true,
-		&format!("{} élément(s) effacé(s)", done.len()),
+		&crate::i18n::tf("mission.journal.deletedDetail", &[("count", &done.len())]),
 	);
 	Ok(done)
 }
@@ -1815,17 +1826,17 @@ pub fn lessons(limit: usize) -> String {
 			.collect();
 		let reprises = mission.tasks.iter().filter(|task| task.attempts > 0).count();
 		let issue = match mission.state {
-			MissionState::Failed => "abandonnée",
-			_ => "livrée",
+			MissionState::Failed => "abandoned",
+			_ => "delivered",
 		};
 		lignes.push(format!(
-			"- « {title} » — {count} tâches ({roles}), {issue}{reprises}",
+			"- \"{title}\" — {count} tasks ({roles}), {issue}{reprises}",
 			title = mission.title,
 			count = mission.tasks.len(),
 			roles = roles.join(", "),
 			issue = issue,
 			reprises = if reprises > 0 {
-				format!(", {reprises} reprise(s)")
+				format!(", {reprises} rework(s)")
 			} else {
 				String::new()
 			},
@@ -1851,13 +1862,13 @@ pub fn lessons(limit: usize) -> String {
 		}
 	}
 
-	let mut texte = format!("Missions déjà menées sur ce dépôt :\n{}", lignes.join("\n"));
+	let mut texte = format!("Missions already carried out on this repository:\n{}", lignes.join("\n"));
 	if !motifs.is_empty() {
-		texte.push_str("\n\nCe qui a échoué, et pourquoi :\n");
+		texte.push_str("\n\nWhat failed, and why:\n");
 		texte.push_str(&motifs.join("\n"));
 		texte.push_str(
-			"\n\nCe ne sont pas des consignes : ce sont des faits. \
-			 À toi de juger ce qu'ils changent à ton découpage.",
+			"\n\nThese are not instructions: they are facts. \
+			 It is up to you to judge what they change in your breakdown.",
 		);
 	}
 	texte
@@ -1871,7 +1882,7 @@ mod lessons_tests {
 	fn sans_mission_close_on_ne_dit_rien() {
 		// Mieux vaut le silence qu'une section vide dans le prompt du maître.
 		let texte = lessons(5);
-		assert!(texte.is_empty() || texte.starts_with("Missions déjà menées"));
+		assert!(texte.is_empty() || texte.starts_with("Missions already carried out"));
 	}
 }
 
@@ -1936,10 +1947,7 @@ pub fn blocking_reason(mission: &Mission, task: &Task) -> Option<String> {
 		.collect();
 
 	if soeurs.is_empty() {
-		return Some(format!(
-			"Elle part de `{base}`, qui n'est la branche d'aucune tâche de ce plan. \
-			 Replanifie en la faisant partir de la branche d'intégration."
-		));
+		return Some(crate::i18n::tf("mission.blocked.unknownBase", &[("base", &base)]));
 	}
 	if soeurs.iter().any(|soeur| {
 		matches!(soeur.state, TaskState::Delivered | TaskState::Integrated)
@@ -1950,9 +1958,7 @@ pub fn blocking_reason(mission: &Mission, task: &Task) -> Option<String> {
 		.iter()
 		.all(|soeur| matches!(soeur.state, TaskState::Failed) && soeur.attempts >= MAX_ATTEMPTS)
 	{
-		return Some(format!(
-			"La tâche dont elle part (`{base}`) a épuisé ses reprises : elle ne livrera pas."
-		));
+		return Some(crate::i18n::tf("mission.blocked.baseExhausted", &[("base", &base)]));
 	}
 	None
 }
@@ -2089,7 +2095,7 @@ pub(crate) mod blocking_tests {
 			tache("b", "feat-b", "feat-a", TaskState::Planned, 0),
 		]);
 		let raison = blocking_reason(&mission, &mission.tasks[1]);
-		assert!(raison.is_some_and(|texte| texte.contains("épuisé ses reprises")));
+		assert!(raison.is_some_and(|texte| texte.contains("used up its reworks")));
 	}
 
 	#[test]
@@ -2102,7 +2108,7 @@ pub(crate) mod blocking_tests {
 			0,
 		)]);
 		let raison = blocking_reason(&mission, &mission.tasks[0]);
-		assert!(raison.is_some_and(|texte| texte.contains("aucune tâche")));
+		assert!(raison.is_some_and(|texte| texte.contains("any task")));
 	}
 
 	#[test]

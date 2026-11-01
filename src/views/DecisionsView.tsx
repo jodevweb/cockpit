@@ -1,6 +1,7 @@
 import clsx from "clsx";
 import { Bot, Inbox, ListChecks, MessageCircleQuestion, ShieldQuestion } from "lucide-react";
-import { useEffect, useMemo, useRef, useState } from "react";
+import { type ReactNode, useEffect, useMemo, useRef, useState } from "react";
+import { Trans, useTranslation } from "react-i18next";
 import { useAgentActions } from "@/app/agents";
 import { freezes, useDecisions, waitedSince, type Decision } from "@/app/decisions";
 import { useCockpit } from "@/app/store";
@@ -9,6 +10,7 @@ import { Markdown } from "@/components/Markdown";
 import { Button, KeyHint } from "@/components/ui";
 import { filmOf } from "@/lib/film";
 import { shortPath } from "@/lib/format";
+import { t } from "@/i18n";
 
 /**
  * Ce qui attend ta décision, en une file.
@@ -20,12 +22,9 @@ import { shortPath } from "@/lib/format";
  * deux choses, pas en s'installant.
  */
 
-const KIND_LABELS: Record<Decision["kind"], string> = {
-	question: "te pose une question",
-	permission: "demande une autorisation",
-	reply: "attend ta réponse",
-	plan: "plan à approuver",
-};
+function kindLabel(kind: Decision["kind"]): string {
+	return t(`views:decisions.kind.${kind}`);
+}
 
 const KIND_ICONS = {
 	question: MessageCircleQuestion,
@@ -34,12 +33,17 @@ const KIND_ICONS = {
 	plan: ListChecks,
 };
 
+/** `<Trans>` injecte le texte de la touche : `KeyHint` l'exige à la déclaration. */
+function Key({ children }: { children?: ReactNode }) {
+	return <KeyHint>{children}</KeyHint>;
+}
+
 function titleOf(decision: Decision): string {
 	switch (decision.kind) {
 		case "question":
-			return decision.questions[0]?.question || "Une question";
+			return decision.questions[0]?.question || t("views:decisions.aQuestion");
 		case "permission":
-			return `Utiliser ${decision.request.tool}`;
+			return t("views:decisions.useTool", { tool: decision.request.tool });
 		case "reply":
 			return lastQuestion(decision.text);
 		case "plan":
@@ -58,7 +62,7 @@ function lastQuestion(text: string): string {
 }
 
 function whoOf(decision: Decision): string {
-	return decision.kind === "plan" ? "Mission" : decision.run.label;
+	return decision.kind === "plan" ? t("views:decisions.mission") : decision.run.label;
 }
 
 /** Ce qu'une autorisation demande, dit en une ligne. */
@@ -71,6 +75,7 @@ function requestSummary(input: unknown): string {
 }
 
 export function DecisionsView() {
+	const { t } = useTranslation("views");
 	const decisions = useDecisions();
 	const [selected, setSelected] = useState<string | null>(null);
 	const current = decisions.find((decision) => decision.key === selected) ?? decisions[0] ?? null;
@@ -97,15 +102,18 @@ export function DecisionsView() {
 	return (
 		<div className="flex min-h-0 flex-1 flex-col overflow-y-auto">
 			<header className="flex flex-wrap items-baseline gap-x-4 gap-y-1 px-6 pt-5 pb-3">
-				<h1 className="m-0 text-[20px] font-semibold text-ink">Décisions</h1>
+				<h1 className="m-0 text-[20px] font-semibold text-ink">{t("decisions.title")}</h1>
 				<span className="text-[13px] text-ink-muted">
 					{decisions.length === 0
-						? "Rien ne t'attend."
-						: `${decisions.length} décision${decisions.length > 1 ? "s" : ""} · la plus ancienne attend ${waitedSince(oldest ?? now, now).replace("depuis ", "depuis ")}`}
+						? t("decisions.nothingWaiting")
+							: t("decisions.summary", { count: decisions.length, since: waitedSince(oldest ?? now, now) })}
 				</span>
 				<span className="ml-auto flex items-center gap-2 text-[11.5px] text-ink-faint">
-					<KeyHint>↑</KeyHint>
-					<KeyHint>↓</KeyHint> changer · <KeyHint>1</KeyHint>…<KeyHint>9</KeyHint> choisir · <KeyHint>⌘⇧D</KeyHint> revenir
+					<Trans
+						t={t}
+						i18nKey="decisions.keys"
+						components={{ up: <Key />, down: <Key />, one: <Key />, nine: <Key />, back: <Key /> }}
+					/>
 				</span>
 			</header>
 
@@ -115,8 +123,7 @@ export function DecisionsView() {
 						<Inbox size={20} />
 					</span>
 					<p className="max-w-md text-[13px] leading-relaxed text-ink-muted">
-						Aucun agent ne t'attend. Les questions, autorisations, réponses attendues et plans à approuver
-						arriveront ici, rangés par ce qu'ils débloquent.
+						{t("decisions.empty")}
 					</p>
 				</div>
 			) : (
@@ -146,12 +153,12 @@ export function DecisionsView() {
 									<span className="flex min-w-0 flex-1 flex-col gap-1">
 										<span className="line-clamp-2 text-[13.5px] leading-snug font-semibold text-ink">{titleOf(decision)}</span>
 										<span className="truncate text-[11.5px] text-ink-muted">
-											{whoOf(decision)} · {KIND_LABELS[decision.kind]}
+											{whoOf(decision)} · {kindLabel(decision.kind)}
 										</span>
 										<span className="flex flex-wrap gap-1.5">
 											{freezes(decision) ? (
 												<span className="rounded-md bg-warning/12 px-2 py-0.5 text-[10.5px] font-semibold text-warning">
-													{decision.kind === "plan" ? `bloque ${decision.unblocks} tâche${decision.unblocks > 1 ? "s" : ""}` : "agent à l'arrêt"}
+													{decision.kind === "plan" ? t("decisions.blocksTasks", { count: decision.unblocks }) : t("decisions.agentStopped")}
 												</span>
 											) : null}
 											<span className="rounded-md bg-raised px-2 py-0.5 text-[10.5px] text-ink-muted">{waitedSince(decision.since, now)}</span>
@@ -175,6 +182,7 @@ export function DecisionsView() {
 }
 
 function DecisionDetail({ decision }: { decision: Decision }) {
+	const { t } = useTranslation("views");
 	const { show } = useAgentActions();
 	const { go } = useCockpit();
 	const film = useMemo(
@@ -194,11 +202,11 @@ function DecisionDetail({ decision }: { decision: Decision }) {
 				</span>
 				{decision.kind === "plan" ? (
 					<Button size="sm" onClick={() => go("missions", { missionId: decision.mission.id })}>
-						Ouvrir la mission
+						{t("decisions.openMission")}
 					</Button>
 				) : (
 					<Button size="sm" onClick={() => show(decision.run.id)}>
-						Ouvrir la conversation
+						{t("decisions.openConversation")}
 					</Button>
 				)}
 			</div>
@@ -223,7 +231,7 @@ function DecisionDetail({ decision }: { decision: Decision }) {
 			) : null}
 			{film && film.frames.length >= 2 ? (
 				<div className="border-t border-line-soft pt-3">
-					<p className="m-0 mb-2 text-[11.5px] text-ink-muted">Ce qu'il a fait avant de te demander :</p>
+					<p className="m-0 mb-2 text-[11.5px] text-ink-muted">{t("decisions.beforeAsking")}</p>
 					<FilmStrip film={film} />
 				</div>
 			) : null}
@@ -284,6 +292,7 @@ function OptionCard({
 }
 
 function QuestionDecision({ decision }: { decision: Extract<Decision, { kind: "question" }> }) {
+	const { t } = useTranslation("views");
 	const { answer, decide } = useAgentActions();
 	const [step, setStep] = useState(0);
 	const [picked, setPicked] = useState<Array<{ header: string; choice: string }>>([]);
@@ -308,7 +317,7 @@ function QuestionDecision({ decision }: { decision: Extract<Decision, { kind: "q
 		<div className="flex flex-col gap-3">
 			{decision.questions.length > 1 ? (
 				<span className="text-[11px] font-semibold tracking-wide text-warning uppercase">
-					Question {step + 1} sur {decision.questions.length} · {question.header}
+					{t("decisions.question.step", { step: step + 1, total: decision.questions.length, header: question.header })}
 				</span>
 			) : (
 				<span className="text-[11px] font-semibold tracking-wide text-warning uppercase">{question.header}</span>
@@ -332,10 +341,10 @@ function QuestionDecision({ decision }: { decision: Extract<Decision, { kind: "q
 					onChange={(event) => setCustom(event.target.value)}
 					onKeyDown={(event) => {
 						if (event.key === "Enter" && custom.trim()) {
-							answer(decision.request.id, [...picked, { header: "Précision", choice: custom.trim() }]);
+							answer(decision.request.id, [...picked, { header: "Clarification", choice: custom.trim() }]);
 						}
 					}}
-					placeholder="Autre réponse, ou précision — Entrée pour envoyer"
+					placeholder={t("decisions.question.customPlaceholder")}
 					className="focus-ring min-w-0 flex-1 rounded-lg bg-raised px-3 py-2 text-[12.5px] text-ink outline-none placeholder:text-ink-faint"
 				/>
 				<Button
@@ -344,12 +353,12 @@ function QuestionDecision({ decision }: { decision: Extract<Decision, { kind: "q
 						decide(
 							decision.request.id,
 							false,
-							"L'utilisateur a passé la question : avance avec ce que tu sais, ou demande-lui dans ta réponse.",
+							"The user skipped the question: move on with what you know, or ask them in your reply.",
 						)
 					}
-					title="L'agent continue sans ta réponse"
+					title={t("decisions.question.skipHint")}
 				>
-					Passer
+					{t("decisions.question.skip")}
 				</Button>
 			</div>
 		</div>
@@ -357,26 +366,33 @@ function QuestionDecision({ decision }: { decision: Extract<Decision, { kind: "q
 }
 
 function PermissionDecision({ decision }: { decision: Extract<Decision, { kind: "permission" }> }) {
+	const { t } = useTranslation("views");
 	const { decide } = useAgentActions();
 	useDigits(2, (index) => decide(decision.request.id, index === 0));
 	return (
 		<div className="flex flex-col gap-3">
-			<span className="text-[11px] font-semibold tracking-wide text-warning uppercase">Autorisation</span>
+			<span className="text-[11px] font-semibold tracking-wide text-warning uppercase">{t("decisions.permission.label")}</span>
 			<h2 className="m-0 text-[20px] leading-tight font-semibold text-ink">
-				L'agent veut utiliser <span className="font-mono text-[18px]">{decision.request.tool}</span>
+				<Trans
+					t={t}
+					i18nKey="decisions.permission.wantsTool"
+					values={{ tool: decision.request.tool }}
+					components={{ tool: <span className="font-mono text-[18px]" /> }}
+				/>
 			</h2>
 			<code className="block max-h-48 overflow-auto rounded-lg bg-raised px-3 py-2.5 font-mono text-[12px] whitespace-pre-wrap text-ink">
 				{requestSummary(decision.request.input)}
 			</code>
 			<div className="grid gap-3 sm:grid-cols-2">
-				<OptionCard index={0} label="Autoriser" description="Il continue avec cet outil." onPick={() => decide(decision.request.id, true)} />
-				<OptionCard index={1} label="Refuser" description="Il cherche une autre voie, ou te le dit." onPick={() => decide(decision.request.id, false)} />
+				<OptionCard index={0} label={t("decisions.permission.allow")} description={t("decisions.permission.allowHint")} onPick={() => decide(decision.request.id, true)} />
+				<OptionCard index={1} label={t("decisions.permission.deny")} description={t("decisions.permission.denyHint")} onPick={() => decide(decision.request.id, false)} />
 			</div>
 		</div>
 	);
 }
 
 function ReplyDecision({ decision }: { decision: Extract<Decision, { kind: "reply" }> }) {
+	const { t } = useTranslation("views");
 	const { send } = useAgentActions();
 	const [draft, setDraft] = useState("");
 	const [whole, setWhole] = useState(false);
@@ -385,16 +401,16 @@ function ReplyDecision({ decision }: { decision: Extract<Decision, { kind: "repl
 		send(decision.run.id, text.trim(), { follows: true });
 		setDraft("");
 	};
-	useDigits(decision.options.length, (index) => reply(`Option ${index + 1} : ${decision.options[index]}`));
+	useDigits(decision.options.length, (index) => reply(t("decisions.reply.option", { number: index + 1, option: decision.options[index] })));
 	const question = lastQuestion(decision.text);
 	return (
 		<div className="flex flex-col gap-3">
-			<span className="text-[11px] font-semibold tracking-wide text-ink-muted uppercase">Il a rendu la main sur une question</span>
+			<span className="text-[11px] font-semibold tracking-wide text-ink-muted uppercase">{t("decisions.reply.label")}</span>
 			<h2 className="m-0 text-[20px] leading-tight font-semibold text-ink">{question}</h2>
 			{decision.options.length > 0 ? (
 				<div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
 					{decision.options.map((option, index) => (
-						<OptionCard key={option} index={index} label={option} onPick={() => reply(`Option ${index + 1} : ${option}`)} />
+						<OptionCard key={option} index={index} label={option} onPick={() => reply(t("decisions.reply.option", { number: index + 1, option }))} />
 					))}
 				</div>
 			) : null}
@@ -403,7 +419,7 @@ function ReplyDecision({ decision }: { decision: Extract<Decision, { kind: "repl
 				onClick={() => setWhole((value) => !value)}
 				className="focus-ring self-start rounded text-[12px] font-medium text-accent hover:text-accent-soft"
 			>
-				{whole ? "Replier son message" : "Lire tout son message"}
+				{whole ? t("decisions.reply.collapse") : t("decisions.reply.expand")}
 			</button>
 			{whole ? (
 				<div className="max-h-80 overflow-y-auto rounded-lg bg-raised p-3">
@@ -421,11 +437,11 @@ function ReplyDecision({ decision }: { decision: Extract<Decision, { kind: "repl
 						}
 					}}
 					rows={2}
-					placeholder="Ta réponse — ⌘↵ pour envoyer"
+					placeholder={t("decisions.reply.placeholder")}
 					className="focus-ring min-w-0 flex-1 resize-none rounded-lg bg-raised px-3 py-2 text-[12.5px] text-ink outline-none placeholder:text-ink-faint"
 				/>
 				<Button variant="solid" disabled={!draft.trim()} onClick={() => reply(draft)}>
-					Répondre
+					{t("decisions.reply.send")}
 				</Button>
 			</div>
 		</div>

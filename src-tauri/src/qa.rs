@@ -167,14 +167,14 @@ fn mime_of(extension: &str) -> &'static str {
 /// `asset://` refuse silencieusement tout ce qui sort de son scope — un dossier
 /// caché comme `.claude` suffit à le faire échouer selon la plateforme.
 pub fn data_url(path: &Path, max_bytes: u64) -> Result<String, String> {
-	let metadata = std::fs::metadata(path).map_err(|e| format!("Fichier illisible : {e}"))?;
+	let metadata = std::fs::metadata(path).map_err(|e| crate::i18n::tf("qa.fileUnreadable", &[("error", &e)]))?;
 	if metadata.len() > max_bytes {
-		return Err(format!(
-			"Fichier trop lourd pour l'aperçu ({} Mo).",
-			metadata.len() / 1_048_576
+		return Err(crate::i18n::tf(
+			"qa.fileTooLarge",
+			&[("size", &(metadata.len() / 1_048_576))],
 		));
 	}
-	let bytes = std::fs::read(path).map_err(|e| format!("Lecture impossible : {e}"))?;
+	let bytes = std::fs::read(path).map_err(|e| crate::i18n::tf("qa.readFailed", &[("error", &e)]))?;
 	let extension = path
 		.extension()
 		.map(|e| e.to_string_lossy().to_lowercase())

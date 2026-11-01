@@ -1,5 +1,6 @@
 import clsx from "clsx";
 import { AlertTriangle, Bot, ExternalLink, GitMerge, Layers } from "lucide-react";
+import { Trans, useTranslation } from "react-i18next";
 import { useConfirm } from "@/components/Confirm";
 import { Markdown } from "@/components/Markdown";
 import { Badge, Button, Chips } from "@/components/ui";
@@ -19,6 +20,7 @@ const BASE_BRANCHES = new Set(["dev", "main", "master", "stage"]);
  * aucun appel supplémentaire pour afficher la fiche.
  */
 export function PullRequestDetail({ item }: { item: FeedItem }) {
+	const { t } = useTranslation("components3");
 	const { notify, worktrees, go } = useCockpit();
 	const { confirm } = useConfirm();
 	const { open: openAgent } = useAgentActions();
@@ -46,14 +48,14 @@ export function PullRequestDetail({ item }: { item: FeedItem }) {
 	 */
 	const launch = async (promptId: string) => {
 		if (!worktree) {
-			notify("Aucun worktree local pour cette branche.");
+			notify(t("pullRequestDetail.noWorktree"));
 			return;
 		}
 		try {
 			const library = await api.prompts.list();
 			const prompt = library.find((entry) => entry.id === promptId);
 			if (!prompt) {
-				notify(`Prompt « ${promptId} » introuvable dans la bibliothèque.`);
+				notify(t("pullRequestDetail.promptMissing", { id: promptId }));
 				return;
 			}
 			openAgent(worktree.path, prompt.text);
@@ -80,14 +82,14 @@ export function PullRequestDetail({ item }: { item: FeedItem }) {
 							#{item.id}
 						</span>
 						<Badge tone={raw.draft ? "neutral" : "warning"}>
-							{raw.draft ? "brouillon" : "ouverte"}
+							{raw.draft ? t("pullRequestDetail.draft") : t("pullRequestDetail.open")}
 						</Badge>
 						{/* Les labels disent de quelle nature est la PR (hotfix, chore,
 						    release…) : ils se lisent avec le titre, pas plus bas. */}
 						<Chips items={item.tags ?? []} max={4} />
 						{stacked ? (
 							<span className="flex items-center gap-1 text-[10px] text-critical">
-								<Layers size={10} /> empilée
+								<Layers size={10} /> {t("pullRequestDetail.stacked")}
 							</span>
 						) : null}
 						<span className="ml-auto shrink-0 font-mono text-[10px] text-ink-faint">
@@ -111,15 +113,15 @@ export function PullRequestDetail({ item }: { item: FeedItem }) {
 			</div>
 
 			<div className="grid shrink-0 grid-cols-4 gap-2 border-b border-line-soft p-3">
-				{stat("Auteur", meta("auteur") || "—")}
-				{stat("Fichiers", raw.changed_files ?? "—")}
+				{stat(t("pullRequestDetail.author"), meta("auteur") || "—")}
+				{stat(t("pullRequestDetail.files"), raw.changed_files ?? "—")}
 				{stat(
-					"Ajouts",
+					t("pullRequestDetail.additions"),
 					raw.additions !== undefined ? `+${raw.additions}` : "—",
 					"text-success",
 				)}
 				{stat(
-					"Suppressions",
+					t("pullRequestDetail.deletions"),
 					raw.deletions !== undefined ? `−${raw.deletions}` : "—",
 					"text-critical",
 				)}
@@ -128,14 +130,25 @@ export function PullRequestDetail({ item }: { item: FeedItem }) {
 			<div className="flex flex-wrap items-center gap-2 border-b border-line-soft px-3 py-2">
 				{meta("à reviewer par") ? (
 					<span className="text-[10px] text-ink-muted">
-						À reviewer par <span className="text-ink">{meta("à reviewer par")}</span>
+						<Trans
+							t={t}
+							i18nKey="pullRequestDetail.reviewers"
+							values={{ names: meta("à reviewer par") }}
+							components={{ name: <span className="text-ink" /> }}
+						/>
 					</span>
 				) : (
-					<span className="text-[10px] text-ink-faint">Aucun reviewer demandé</span>
+					<span className="text-[10px] text-ink-faint">{t("pullRequestDetail.noReviewer")}</span>
 				)}
 				{meta("assigné") ? (
 					<span className="text-[10px] text-ink-muted">
-						· Assigné à <span className="text-ink">{meta("assigné")}</span>
+						·{" "}
+						<Trans
+							t={t}
+							i18nKey="pullRequestDetail.assignee"
+							values={{ name: meta("assigné") }}
+							components={{ name: <span className="text-ink" /> }}
+						/>
 					</span>
 				) : null}
 				<div className="ml-auto flex gap-1.5">
@@ -147,9 +160,9 @@ export function PullRequestDetail({ item }: { item: FeedItem }) {
 							size="sm"
 							icon={AlertTriangle}
 							onClick={() => void launch("ci-red")}
-							title="Lancer l'agent qui corrige la CI"
+							title={t("pullRequestDetail.fixCiHint")}
 						>
-							Corriger la CI
+							{t("pullRequestDetail.fixCi")}
 						</Button>
 					) : null}
 					{worktree && changesRequested ? (
@@ -157,9 +170,9 @@ export function PullRequestDetail({ item }: { item: FeedItem }) {
 							size="sm"
 							icon={Bot}
 							onClick={() => void launch("coderabbit")}
-							title="Traiter les retours de review avec un agent"
+							title={t("pullRequestDetail.feedbackHint")}
 						>
-							Retours
+							{t("pullRequestDetail.feedback")}
 						</Button>
 					) : null}
 					{worktree ? (
@@ -167,18 +180,18 @@ export function PullRequestDetail({ item }: { item: FeedItem }) {
 							size="sm"
 							icon={Bot}
 							onClick={() => openAgent(worktree.path)}
-							title="Ouvrir un agent sur cette branche"
+							title={t("pullRequestDetail.agentHint")}
 						>
-							Agent
+							{t("pullRequestDetail.agent")}
 						</Button>
 					) : null}
 					{worktree ? (
 						<Button
 							size="sm"
 							onClick={() => go("worktrees", { worktreePath: worktree.path })}
-							title="Ouvrir le worktree de cette branche"
+							title={t("pullRequestDetail.worktreeHint")}
 						>
-							Worktree
+							{t("pullRequestDetail.worktree")}
 						</Button>
 					) : null}
 					{!raw.draft && !stacked ? (
@@ -187,20 +200,20 @@ export function PullRequestDetail({ item }: { item: FeedItem }) {
 							icon={GitMerge}
 							onClick={() => {
 								void confirm({
-									title: `Merger #${item.id} dans ${base} ?`,
-									message: `« ${item.title} » — action irréversible et visible de toute l'équipe.`,
-									confirmLabel: "Merger",
+									title: t("pullRequestDetail.mergeTitle", { id: item.id, base }),
+									message: t("pullRequestDetail.mergeMessage", { title: item.title }),
+									confirmLabel: t("pullRequestDetail.merge"),
 									danger: true,
 								}).then((ok) => {
 									if (!ok) return;
 									return api.git
 										.mergePullRequest(Number(item.id))
-										.then(() => notify(`#${item.id} mergée.`))
+										.then(() => notify(t("pullRequestDetail.merged", { id: item.id })))
 										.catch((error) => notify(String(error)));
 								});
 							}}
 						>
-							Merger
+							{t("pullRequestDetail.merge")}
 						</Button>
 					) : null}
 				</div>
@@ -212,7 +225,7 @@ export function PullRequestDetail({ item }: { item: FeedItem }) {
 						<Markdown source={body} />
 					</div>
 				) : (
-					<p className="text-[11px] text-ink-faint">Pas de description.</p>
+					<p className="text-[11px] text-ink-faint">{t("pullRequestDetail.noDescription")}</p>
 				)}
 			</div>
 		</div>

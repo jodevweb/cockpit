@@ -259,7 +259,7 @@ pub async fn limits() -> Limits {
 		Some(path) => path,
 		None => {
 			return Limits {
-				error: "Le CLI `claude` est introuvable.".into(),
+				error: crate::i18n::t("usage.claudeNotFound"),
 				..Default::default()
 			}
 		}
@@ -284,14 +284,14 @@ pub async fn limits() -> Limits {
 				error: String::from_utf8_lossy(&sortie.stderr)
 					.lines()
 					.next()
-					.unwrap_or("Le CLI a refusé la demande.")
-					.to_string(),
+					.map(str::to_string)
+					.unwrap_or_else(|| crate::i18n::t("usage.cliRefused")),
 				..Default::default()
 			}
 		}
 		Err(error) => {
 			return Limits {
-				error: format!("Lecture des plafonds : {error}"),
+				error: crate::i18n::tf("usage.limitsRead", &[("error", &error)]),
 				..Default::default()
 			}
 		}

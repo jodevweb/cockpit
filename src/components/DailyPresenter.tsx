@@ -1,7 +1,9 @@
 import clsx from "clsx";
 import { ChevronLeft, ChevronRight, ClipboardCopy, CircleDot, ExternalLink, Pause, Play, Plus, Timer, X } from "lucide-react";
 import { useEffect, useMemo, useRef, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { Badge, Button, PriorityBadge } from "@/components/ui";
+import { t as translate } from "@/i18n";
 import { SOURCE_LABEL } from "@/lib/automations";
 import { api } from "@/lib/ipc";
 import type { AutomationRun, Flag, MemberBoard } from "@/lib/types";
@@ -22,12 +24,10 @@ interface Commitment {
 	status: "pending" | "done" | "ongoing" | "postponed";
 }
 
-const STATUS_LABEL: Record<Commitment["status"], string> = {
-	pending: "—",
-	done: "Fait",
-	ongoing: "En cours",
-	postponed: "Reporté",
-};
+/** Le verdict d'un engagement, dit au rendu. */
+function statusLabel(status: Commitment["status"]): string {
+	return status === "pending" ? "—" : translate(`components3:dailyPresenter.status.${status}`);
+}
 
 function clock(seconds: number): string {
 	const minutes = Math.floor(seconds / 60);
@@ -58,7 +58,7 @@ function partsOf(member: MemberBoard, flags: Flag[], run: AutomationRun | null):
 		const items = new Map(run.items.map((item) => [item.id, item]));
 		return run.parts.map((part) => ({
 			title: part.title,
-			empty: "Rien.",
+			empty: translate("components3:dailyPresenter.parts.nothing"),
 			lines: part.lines
 				.filter((line) => !run.dropped.includes(line.id))
 				.map((line) => ({
@@ -76,28 +76,32 @@ function partsOf(member: MemberBoard, flags: Flag[], run: AutomationRun | null):
 	const opened = member.delta.filter((item) => item.kind === "opened");
 	return [
 		{
-			title: "Livré",
-			empty: "Rien de fusionné depuis le dernier daily.",
+			title: translate("components3:dailyPresenter.parts.shipped"),
+			empty: translate("components3:dailyPresenter.parts.shippedEmpty"),
 			lines: [
 				...merged.map((item) => ({ key: item.url, title: item.label, links: [{ label: "PR", url: item.url }] })),
 				...(opened.length > 0
-					? [{ key: "opened", title: `${opened.length} PR ouverte${opened.length > 1 ? "s" : ""} depuis`, links: [] }]
+					? [{ key: "opened", title: translate("components3:dailyPresenter.parts.openedSince", { count: opened.length }), links: [] }]
 					: []),
 			],
 		},
 		{
-			title: "En cours",
-			empty: "Aucun ticket actif.",
+			title: translate("components3:dailyPresenter.parts.ongoing"),
+			empty: translate("components3:dailyPresenter.parts.ongoingEmpty"),
 			lines: member.activeTickets.slice(0, 6).map((ticket) => ({
 				key: ticket.identifier,
 				title: ticket.title,
-				detail: `${ticket.identifier} · ${ticket.progress} % · ${ticket.ageDays} j`,
+				detail: translate("components3:dailyPresenter.parts.ticketDetail", {
+					id: ticket.identifier,
+					progress: ticket.progress,
+					days: ticket.ageDays,
+				}),
 				links: ticket.url ? [{ label: ticket.identifier, url: ticket.url }] : [],
 			})),
 		},
 		{
-			title: "À traiter",
-			empty: "Rien qui coince.",
+			title: translate("components3:dailyPresenter.parts.toHandle"),
+			empty: translate("components3:dailyPresenter.parts.toHandleEmpty"),
 			lines: flags.slice(0, 5).map((flag) => ({
 				key: flag.key,
 				title: flag.question,
@@ -138,6 +142,7 @@ export function DailyPresenter({
 	sinceDaily: string;
 	onClose: () => void;
 }) {
+		const { t } = useTranslation("components3");
 	// L'ordre de passage est stable d'un daily à l'autre : chacun sait quand
 	// vient son tour, ce qui évite les « à qui le tour ? ».
 	const [order] = usePersistentState<string[]>("daily.order", []);
@@ -242,29 +247,33 @@ export function DailyPresenter({
 
 	/** Trace du daily, à coller dans Slack. */
 	const recap = () => {
-		const lines = [`# Daily — depuis le ${sinceDaily}`, ""];
+		const lines = [t("dailyPresenter.recap.heading", { date: sinceDaily }), ""];
 		for (const member of speakers) {
 			const memberFlags = flags.filter((flag) => flag.member === member.name);
 			lines.push(`## ${member.name}`);
 			if (ownsRun(member) && run) {
 				for (const entry of partsOf(member, memberFlags, run)) {
 					if (entry.lines.length === 0) continue;
-					lines.push(`- ${entry.title} : ${entry.lines.map((line) => line.title).join(" · ")}`);
+					lines.push(t("dailyPresenter.recap.part", { title: entry.title, lines: entry.lines.map((line) => line.title).join(" · ") }));
 				}
 			} else {
 				lines.push(member.narrative.text);
 				const merged = member.delta.filter((item) => item.kind === "merged");
-				if (merged.length > 0) lines.push(`- Livré : ${merged.map((item) => item.label).join(" · ")}`);
+				if (merged.length > 0) lines.push(t("dailyPresenter.recap.shipped", { items: merged.map((item) => item.label).join(" · ") }));
 				for (const flag of memberFlags.filter((entry) => entry.severity === "red")) lines.push(`- ⚠︎ ${flag.question}`);
 			}
 			const own = commitments[member.name];
 			if (own?.text) {
-				lines.push(`- Engagement : ${own.text}${own.status !== "pending" ? ` (${STATUS_LABEL[own.status]})` : ""}`);
+				lines.push(
+					own.status !== "pending"
+						? t("dailyPresenter.recap.commitmentWithStatus", { text: own.text, status: statusLabel(own.status) })
+						: t("dailyPresenter.recap.commitment", { text: own.text }),
+				);
 			}
 			lines.push("");
 		}
 		if (parked.length > 0) {
-			lines.push("## Sujets mis de côté");
+			lines.push(t("dailyPresenter.recap.parked"));
 			for (const entry of parked) lines.push(`- ${entry.subject} (${entry.member})`);
 		}
 		void navigator.clipboard.writeText(lines.join("\n"));
@@ -284,32 +293,32 @@ export function DailyPresenter({
 	return (
 		<div className="fixed inset-0 z-50 flex flex-col bg-void">
 			<div className="hairline-b flex items-center gap-3 px-6 py-3">
-				<span className="text-[14px] font-semibold text-ink">Daily</span>
-				<span className="text-[12px] text-ink-muted">depuis le {sinceDaily}</span>
+				<span className="text-[14px] font-semibold text-ink">{t("dailyPresenter.title")}</span>
+				<span className="text-[12px] text-ink-muted">{t("dailyPresenter.since", { date: sinceDaily })}</span>
 				<div className="ml-auto flex items-center gap-3">
 					<span className="flex items-center gap-1.5 text-[12px] text-ink-muted">
 						<Timer size={13} />
-						total {clock(total)}
+						{t("dailyPresenter.total", { time: clock(total) })}
 					</span>
 					<span className="font-mono text-[12px] text-ink-muted">
 						{Math.min(index + 1, speakers.length)} / {speakers.length}
 					</span>
-					<Button size="sm" icon={X} onClick={onClose} title="Quitter (échap)" />
+					<Button size="sm" icon={X} onClick={onClose} title={t("dailyPresenter.quit")} />
 				</div>
 			</div>
 
 			{done ? (
 				<div className="flex min-h-0 flex-1 flex-col items-center justify-center gap-6 px-10">
 					<div className="text-center">
-						<p className="text-[26px] font-semibold text-ink">Daily terminé</p>
+						<p className="text-[26px] font-semibold text-ink">{t("dailyPresenter.done.title")}</p>
 						<p className="mt-1 text-[13px] text-ink-muted">
-							{clock(total)} pour {speakers.length} personnes
+							{t("dailyPresenter.done.duration", { time: clock(total), count: speakers.length })}
 						</p>
 					</div>
 					{parked.length > 0 ? (
 						<div className="w-full max-w-2xl">
 							<div className="mb-2 text-[11px] font-semibold tracking-[0.08em] text-ink-muted uppercase">
-								À reprendre maintenant · {parked.length}
+								{t("dailyPresenter.done.parked", { count: parked.length })}
 							</div>
 							<div className="flex flex-col gap-1.5">
 								{parked.map((entry, position) => (
@@ -322,20 +331,20 @@ export function DailyPresenter({
 							</div>
 						</div>
 					) : (
-						<p className="text-[13px] text-ink-muted">Aucun sujet mis de côté.</p>
+						<p className="text-[13px] text-ink-muted">{t("dailyPresenter.done.noParked")}</p>
 					)}
 					<div className="flex gap-2">
 						<Button icon={ClipboardCopy} onClick={recap}>
-							Copier le récap
+							{t("dailyPresenter.done.copyRecap")}
 						</Button>
 						<Button variant="solid" onClick={onClose}>
-							Fermer
+								{t("dailyPresenter.done.close")}
 						</Button>
 					</div>
 				</div>
 			) : current ? (
 				<div className="flex min-h-0 flex-1 gap-4 overflow-y-auto p-5">
-					<aside aria-label="Tour de parole" className="flex w-[240px] shrink-0 flex-col gap-1 self-start rounded-2xl bg-surface p-3 shadow-card">
+					<aside aria-label={t("dailyPresenter.speakers")} className="flex w-[240px] shrink-0 flex-col gap-1 self-start rounded-2xl bg-surface p-3 shadow-card">
 						{speakers.map((member, position) => {
 							const now = position === index;
 							const past = position < index;
@@ -363,11 +372,11 @@ export function DailyPresenter({
 									</span>
 									<span className="min-w-0 flex-1 truncate text-[13.5px] text-ink">{member.name}</span>
 									{now ? (
-										<span className="rounded-full bg-accent-dim px-2 py-0.5 text-[11px] font-semibold text-accent">parle</span>
+										<span className="rounded-full bg-accent-dim px-2 py-0.5 text-[11px] font-semibold text-accent">{t("dailyPresenter.speaker.speaking")}</span>
 									) : past ? (
-										<span className="text-[11px] text-ink-muted">fait</span>
+										<span className="text-[11px] text-ink-muted">{t("dailyPresenter.speaker.done")}</span>
 									) : ownsRun(member) ? (
-										<span className="rounded-full bg-info/12 px-2 py-0.5 text-[11px] font-semibold text-info">prêt</span>
+										<span className="rounded-full bg-info/12 px-2 py-0.5 text-[11px] font-semibold text-info">{t("dailyPresenter.speaker.ready")}</span>
 									) : null}
 								</button>
 							);
@@ -378,7 +387,7 @@ export function DailyPresenter({
 						<div className="flex flex-wrap items-center justify-between gap-4">
 							<div className="min-w-0">
 								<span className="text-[11px] font-semibold tracking-[0.06em] text-ink-muted uppercase">
-									{ownsRun(current) ? "Sa partie · préparée par son automatisation" : current.roleLabel}
+									{ownsRun(current) ? t("dailyPresenter.preparedByAutomation") : current.roleLabel}
 								</span>
 								<h1 className="mt-1 text-[28px] leading-tight font-semibold text-ink">{current.name}</h1>
 								<p className="mt-1.5 max-w-3xl text-[15px] leading-relaxed text-ink-muted">
@@ -386,13 +395,15 @@ export function DailyPresenter({
 								</p>
 								{ownsRun(current) && silent.length > 0 ? (
 									<p className="mt-1 text-[12.5px] text-warning">
-										Sans réponse cette fois : {silent.map((source) => SOURCE_LABEL[source.source] ?? source.source).join(", ")}.
+										{t("dailyPresenter.silentSources", {
+											sources: silent.map((source) => SOURCE_LABEL[source.source] ?? source.source).join(", "),
+										})}
 									</p>
 								) : null}
 							</div>
 							<div className="flex items-center gap-3">
 								<div className="relative size-16">
-									<svg width="64" height="64" viewBox="0 0 64 64" role="img" aria-label="Temps de parole restant">
+									<svg width="64" height="64" viewBox="0 0 64 64" role="img" aria-label={t("dailyPresenter.timeLeft")}>
 										<circle cx="32" cy="32" r="27" fill="none" stroke="var(--color-line-soft)" strokeWidth="6" />
 										<circle
 											cx="32"
@@ -416,11 +427,11 @@ export function DailyPresenter({
 										{clock(elapsed)}
 									</span>
 								</div>
-								<Button icon={paused ? Play : Pause} onClick={() => setPaused(!paused)} title="Pause (p)" />
+								<Button icon={paused ? Play : Pause} onClick={() => setPaused(!paused)} title={t("dailyPresenter.pause")} />
 							</div>
 						</div>
 
-						<div role="tablist" aria-label="Parties" className="flex flex-wrap gap-1 rounded-xl bg-raised p-1">
+						<div role="tablist" aria-label={t("dailyPresenter.partsLabel")} className="flex flex-wrap gap-1 rounded-xl bg-raised p-1">
 							{parts.map((entry, position) => (
 								<button
 									key={entry.title}
@@ -478,24 +489,28 @@ export function DailyPresenter({
 
 						<div className="mt-auto flex flex-wrap items-center justify-between gap-2">
 							<Button icon={ChevronLeft} onClick={backward} disabled={index === 0 && part === 0}>
-								Précédent
+								{t("dailyPresenter.nav.previous")}
 							</Button>
 							<Button variant="solid" onClick={forward}>
-								{part < parts.length - 1 ? "Partie suivante" : index < speakers.length - 1 ? "Au suivant" : "Terminer"}
+								{part < parts.length - 1
+									? t("dailyPresenter.nav.nextPart")
+									: index < speakers.length - 1
+										? t("dailyPresenter.nav.nextSpeaker")
+										: t("dailyPresenter.nav.finish")}
 								<ChevronRight size={14} />
 							</Button>
 						</div>
 					</main>
 
-					<aside aria-label="Engagements et sujets" className="flex w-[300px] shrink-0 flex-col gap-4 self-start">
+					<aside aria-label={t("dailyPresenter.sideLabel")} className="flex w-[300px] shrink-0 flex-col gap-4 self-start">
 						<section className="flex flex-col gap-3 rounded-2xl bg-surface p-4 shadow-card">
 							<span className="text-[11px] font-semibold tracking-[0.06em] text-ink-muted uppercase">
-								Ce que {current.name} avait dit
+								{t("dailyPresenter.pledge.title", { name: current.name })}
 							</span>
 							{pledge?.text ? (
 								<div className="flex flex-col gap-2.5 rounded-xl border border-line-soft p-3">
 									<span className="text-[14px] leading-snug font-semibold text-ink">{pledge.text}</span>
-									<div role="group" aria-label="Statut" className="flex flex-wrap gap-1.5">
+									<div role="group" aria-label={t("dailyPresenter.pledge.status")} className="flex flex-wrap gap-1.5">
 										{(["done", "ongoing", "postponed"] as const).map((status) => (
 											<button
 												key={status}
@@ -513,13 +528,13 @@ export function DailyPresenter({
 														: "border border-line text-ink-muted hover:text-ink",
 												)}
 											>
-												{STATUS_LABEL[status]}
+												{statusLabel(status)}
 											</button>
 										))}
 									</div>
 								</div>
 							) : (
-								<p className="text-[13px] text-ink-muted">Aucun engagement au dernier daily.</p>
+								<p className="text-[13px] text-ink-muted">{t("dailyPresenter.pledge.none")}</p>
 							)}
 							<input
 								ref={pledgeRef}
@@ -528,13 +543,13 @@ export function DailyPresenter({
 								onKeyDown={(event) => {
 									if (event.key === "Enter") savePledge();
 								}}
-								placeholder="Engagement pour le prochain daily…"
+								placeholder={t("dailyPresenter.pledge.placeholder")}
 								className="focus-ring h-10 w-full rounded-lg border border-line bg-surface px-3 text-[13px] text-ink"
 							/>
 						</section>
 						<section className="flex flex-col gap-2.5 rounded-2xl bg-surface p-4 shadow-card">
 							<span className="flex items-center justify-between text-[11px] font-semibold tracking-[0.06em] text-ink-muted uppercase">
-								Mis de côté
+								{t("dailyPresenter.parked.title")}
 								{parked.length > 0 ? <Badge tone="accent">{parked.length}</Badge> : null}
 							</span>
 							{parked.map((entry, position) => (
@@ -550,18 +565,18 @@ export function DailyPresenter({
 									onKeyDown={(event) => {
 										if (event.key === "Enter") park();
 									}}
-									placeholder="Sujet à reprendre après…"
+									placeholder={t("dailyPresenter.parked.placeholder")}
 									className="focus-ring h-10 min-w-0 flex-1 rounded-lg border border-line bg-surface px-3 text-[13px] text-ink"
 								/>
-								<Button icon={Plus} onClick={park} disabled={!subject.trim()} title="Mettre de côté" />
+								<Button icon={Plus} onClick={park} disabled={!subject.trim()} title={t("dailyPresenter.parked.add")} />
 							</div>
 						</section>
-						<p className="px-1 text-[11px] text-ink-muted">→ suite · ← retour · p pause · échap quitter</p>
+						<p className="px-1 text-[11px] text-ink-muted">{t("dailyPresenter.shortcuts")}</p>
 					</aside>
 				</div>
 			) : (
 				<div className="flex flex-1 items-center justify-center">
-					<p className="text-[13px] text-ink-muted">Aucun développeur à présenter.</p>
+					<p className="text-[13px] text-ink-muted">{t("dailyPresenter.noDevelopers")}</p>
 				</div>
 			)}
 		</div>

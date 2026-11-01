@@ -17,6 +17,7 @@ import {
 	Zap,
 } from "lucide-react";
 import { useEffect, useMemo, useRef, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { open } from "@tauri-apps/plugin-dialog";
 import { KeyHint } from "@/components/ui";
 import { recentFolders, rememberFolder } from "@/lib/recentFolders";
@@ -62,25 +63,25 @@ function score(haystack: string, needle: string): number {
 	return 300 + hits - cursor / 10;
 }
 
-const VIEWS: Array<{ id: ViewId; label: string }> = [
-	{ id: "map", label: "Carte" },
-	{ id: "today", label: "Aujourd'hui" },
-	{ id: "decisions", label: "Décisions · ce qui attend ta réponse" },
-	{ id: "recap", label: "Récap en images · ce qui s'est passé" },
-	{ id: "automations", label: "Automatisations · rendez-vous préparés seuls" },
-	{ id: "overview", label: "Vue d'ensemble" },
-	{ id: "team", label: "Daily · équipe" },
-	{ id: "agents", label: "Agents IA" },
-	{ id: "workspace", label: "Workspaces · agents et terminaux ouverts" },
-	{ id: "libres", label: "Agents libres · lancés hors chantier" },
-	{ id: "worktrees", label: "Worktrees" },
-	{ id: "git", label: "Git" },
-	{ id: "scripts", label: "Scripts" },
-	{ id: "docs", label: "Documents" },
-	{ id: "observability", label: "Observabilité" },
-	{ id: "delivery", label: "Flux · Linear, PR, CI, déploiements" },
-	{ id: "infra", label: "Serveurs & conteneurs · ce qui tourne sur le poste" },
-	{ id: "settings", label: "Réglages" },
+const VIEWS: ViewId[] = [
+	"map",
+	"today",
+	"decisions",
+	"recap",
+	"automations",
+	"overview",
+	"team",
+	"agents",
+	"workspace",
+	"libres",
+	"worktrees",
+	"git",
+	"scripts",
+	"docs",
+	"observability",
+	"delivery",
+	"infra",
+	"settings",
 ];
 
 export function CommandPalette({ onClose }: { onClose: () => void }) {
@@ -100,6 +101,7 @@ export function CommandPalette({ onClose }: { onClose: () => void }) {
 	const [query, setQuery] = useState("");
 	const [cursor, setCursor] = useState(0);
 	const listRef = useRef<HTMLDivElement>(null);
+	const { t } = useTranslation("app");
 
 	const mainRepo = config?.mainRepo ?? "";
 	const prompts = useAsync(() => api.prompts.list().catch(() => []), []);
@@ -117,30 +119,32 @@ export function CommandPalette({ onClose }: { onClose: () => void }) {
 
 		for (const view of VIEWS) {
 			list.push({
-				id: `view:${view.id}`,
-				label: view.label,
-				hint: "aller à",
-				group: "Navigation",
+				id: `view:${view}`,
+				label: t(`commandPalette.views.${view}`),
+				hint: t("commandPalette.hint.goTo"),
+				group: t("commandPalette.group.navigation"),
 				icon: LayoutGrid,
-				run: () => go(view.id),
+				run: () => go(view),
 			});
 		}
 
 		// Un agent libre : le lanceur, puis un dossier déjà connu en une frappe.
 		list.push({
 			id: "libre:new",
-			label: "Lancer un agent libre…",
-			hint: "⌘N · un dossier, un agent",
-			group: "Agents libres",
+			label: t("commandPalette.libre.launch"),
+			hint: t("commandPalette.libre.launchHint"),
+			group: t("commandPalette.group.libres"),
 			icon: Zap,
 			run: () => openLauncher(),
 		});
 		for (const entry of libreFolders()) {
 			list.push({
 				id: `libre:${entry.folder}`,
-				label: `Lancer un agent dans ${entry.folder.replace(/^\/Users\/[^/]+/, "~")}`,
-				hint: "le lanceur, rempli avec tes derniers choix",
-				group: "Agents libres",
+				label: t("commandPalette.libre.launchIn", {
+					folder: entry.folder.replace(/^\/Users\/[^/]+/, "~"),
+				}),
+				hint: t("commandPalette.libre.launchInHint"),
+				group: t("commandPalette.group.libres"),
 				icon: Zap,
 				run: () => openLauncher(entry.folder),
 			});
@@ -152,9 +156,9 @@ export function CommandPalette({ onClose }: { onClose: () => void }) {
 			if (project.id === activeProject?.id) continue;
 			list.push({
 				id: `project:${project.id}`,
-				label: `Projet · ${project.name}`,
+				label: t("commandPalette.project.label", { name: project.name }),
 				hint: project.githubRepo || project.mainRepo,
-				group: "Projets",
+				group: t("commandPalette.group.projects"),
 				icon: Boxes,
 				run: () => switchProject(project.id),
 			});
@@ -168,13 +172,15 @@ export function CommandPalette({ onClose }: { onClose: () => void }) {
 				id: `wt-pull:${tree.path}`,
 				label: `Pull ${name}`,
 				hint:
-					tree.status.behind > 0 ? `${tree.status.behind} commit(s) de retard` : "à jour",
+					tree.status.behind > 0
+						? t("commandPalette.git.behind", { count: tree.status.behind })
+						: t("commandPalette.git.upToDate"),
 				group: "Git",
 				icon: ArrowDownToLine,
 				run: () => {
 					void api.git
 						.pull(tree.path)
-						.then(() => notify(`${name} — à jour.`))
+						.then(() => notify(t("commandPalette.git.pulled", { name })))
 						.catch((error) => notify(String(error)));
 				},
 			});
@@ -182,13 +188,13 @@ export function CommandPalette({ onClose }: { onClose: () => void }) {
 				list.push({
 					id: `wt-push:${tree.path}`,
 					label: `Push ${name}`,
-					hint: `${tree.status.ahead} commit(s) à publier`,
+					hint: t("commandPalette.git.ahead", { count: tree.status.ahead }),
 					group: "Git",
 					icon: ArrowUpFromLine,
 					run: () => {
 						void api.git
 							.push(tree.path)
-							.then(() => notify(`${name} — poussée.`))
+							.then(() => notify(t("commandPalette.git.pushed", { name })))
 							.catch((error) => notify(String(error)));
 					},
 				});
@@ -203,7 +209,7 @@ export function CommandPalette({ onClose }: { onClose: () => void }) {
 			});
 			list.push({
 				id: `wt-editor:${tree.path}`,
-				label: `Ouvrir ${name} dans l'éditeur`,
+				label: t("commandPalette.worktree.openEditor", { name }),
 				hint: tree.path,
 				group: "Worktrees",
 				icon: FolderOpen,
@@ -213,23 +219,23 @@ export function CommandPalette({ onClose }: { onClose: () => void }) {
 			});
 			list.push({
 				id: `wt-agent:${tree.path}`,
-				label: `Lancer un agent sur ${name}`,
-				hint: "conversation dans le cockpit",
+				label: t("commandPalette.worktree.launchAgent", { name }),
+				hint: t("commandPalette.worktree.launchAgentHint"),
 				group: "Worktrees",
 				icon: Bot,
 				run: () => openAgent(tree.path),
 			});
 			list.push({
 				id: `wt-term:${tree.path}`,
-				label: `Terminal sur ${name}`,
-				hint: "shell dans le cockpit",
+				label: t("commandPalette.worktree.terminal", { name }),
+				hint: t("commandPalette.worktree.terminalHint"),
 				group: "Worktrees",
 				icon: Terminal,
 				run: () => openTerminal(tree.path),
 			});
 			list.push({
 				id: `wt-term-app:${tree.path}`,
-				label: `Ouvrir ${name} dans Terminal.app`,
+				label: t("commandPalette.worktree.terminalApp", { name }),
 				hint: tree.path,
 				group: "Worktrees",
 				icon: Terminal,
@@ -282,12 +288,12 @@ export function CommandPalette({ onClose }: { onClose: () => void }) {
 		// chemin vers « fais ça, là ».
 		list.push({
 			id: "action:agent-folder",
-			label: "Nouvel agent dans un dossier…",
-			hint: "n'importe quel dossier, sans branche ni worktree",
+			label: t("commandPalette.folder.newAgent"),
+			hint: t("commandPalette.folder.newAgentHint"),
 			group: "Actions",
 			icon: FolderPlus,
 			run: () => {
-				void open({ directory: true, multiple: false, title: "Lancer un agent dans…" })
+				void open({ directory: true, multiple: false, title: t("commandPalette.folder.dialogTitle") })
 					.then((chosen) => {
 						if (typeof chosen !== "string") return;
 						openAgent(chosen, "", undefined, undefined, true);
@@ -300,9 +306,11 @@ export function CommandPalette({ onClose }: { onClose: () => void }) {
 		for (const path of recentFolders().slice(0, 8)) {
 			list.push({
 				id: `folder:${path}`,
-				label: `Nouvel agent dans ${path.split("/").filter(Boolean).pop() ?? path}`,
+				label: t("commandPalette.folder.newAgentIn", {
+					folder: path.split("/").filter(Boolean).pop() ?? path,
+				}),
 				hint: path,
-				group: "Dossiers récents",
+				group: t("commandPalette.group.recentFolders"),
 				icon: FolderPlus,
 				run: () => {
 					openAgent(path, "", undefined, undefined, true);
@@ -314,7 +322,7 @@ export function CommandPalette({ onClose }: { onClose: () => void }) {
 
 		list.push({
 			id: "action:config",
-			label: "Ouvrir le fichier de configuration",
+			label: t("commandPalette.openConfig"),
 			hint: config?.configPath ?? "",
 			group: "Actions",
 			icon: FileText,
@@ -342,6 +350,7 @@ export function CommandPalette({ onClose }: { onClose: () => void }) {
 		projectList,
 		activeProject,
 		switchProject,
+		t,
 	]);
 
 	// Un identifiant tapé tel quel doit mener à la chose, pas à une liste :
@@ -356,7 +365,7 @@ export function CommandPalette({ onClose }: { onClose: () => void }) {
 			const known = (pulls.data ?? []).find((pr) => pr.number === number);
 			list.push({
 				id: `pr:${number}`,
-				label: known ? `#${number} ${known.title}` : `Ouvrir la PR #${number}`,
+				label: known ? `#${number} ${known.title}` : t("commandPalette.identifiers.openPr", { number }),
 				hint: known
 					? [
 							`${known.headRef} → ${known.baseRef} · ${known.author}`,
@@ -364,8 +373,8 @@ export function CommandPalette({ onClose }: { onClose: () => void }) {
 						]
 							.filter(Boolean)
 							.join(" · ")
-					: "sur GitHub",
-				group: "Identifiants",
+					: t("commandPalette.identifiers.onGithub"),
+				group: t("commandPalette.group.identifiers"),
 				icon: GitPullRequest,
 				run: () => {
 					const url =
@@ -382,9 +391,9 @@ export function CommandPalette({ onClose }: { onClose: () => void }) {
 		if (ticket) {
 			list.push({
 				id: `ticket:${ticket}`,
-				label: `Ouvrir ${ticket}`,
-				hint: "ticket Linear",
-				group: "Identifiants",
+				label: t("commandPalette.identifiers.openTicket", { ticket }),
+				hint: t("commandPalette.identifiers.linearTicket"),
+				group: t("commandPalette.group.identifiers"),
 				icon: FileText,
 				// On demande son URL à Linear plutôt que de la deviner : le nom du
 				// workspace n'apparaît nulle part dans la configuration.
@@ -398,7 +407,7 @@ export function CommandPalette({ onClose }: { onClose: () => void }) {
 		}
 
 		return list;
-	}, [query, pulls.data, config, notify]);
+	}, [query, pulls.data, config, notify, t]);
 
 	const results = useMemo(() => {
 		// Les identifiants passent devant : si on tape un numéro, c'est lui qu'on
@@ -448,7 +457,7 @@ export function CommandPalette({ onClose }: { onClose: () => void }) {
 					autoFocus
 					value={query}
 					spellCheck={false}
-					placeholder="Worktree, session, script, écran, #PR, ticket…"
+					placeholder={t("commandPalette.placeholder")}
 					onChange={(event) => setQuery(event.target.value)}
 					onKeyDown={(event) => {
 						if (event.key === "ArrowDown") {
@@ -469,7 +478,7 @@ export function CommandPalette({ onClose }: { onClose: () => void }) {
 
 				<div ref={listRef} className="min-h-0 flex-1 overflow-y-auto p-1.5">
 					{results.length === 0 ? (
-						<p className="px-3 py-8 text-center text-xs text-ink-faint">Aucun résultat.</p>
+						<p className="px-3 py-8 text-center text-xs text-ink-faint">{t("commandPalette.noResults")}</p>
 					) : (
 						results.map((action, index) => (
 							<button
@@ -501,16 +510,16 @@ export function CommandPalette({ onClose }: { onClose: () => void }) {
 				<div className="hairline-b flex h-8 shrink-0 items-center gap-3 px-3 text-[10px] text-ink-faint">
 					<span className="flex items-center gap-1">
 						<KeyHint>↑</KeyHint>
-						<KeyHint>↓</KeyHint> naviguer
+						<KeyHint>↓</KeyHint> {t("commandPalette.keys.navigate")}
 					</span>
 					<span className="flex items-center gap-1">
 						<KeyHint>
 							<CornerDownLeft size={9} />
 						</KeyHint>
-						exécuter
+						{t("commandPalette.keys.run")}
 					</span>
 					<span className="flex items-center gap-1">
-						<KeyHint>esc</KeyHint> fermer
+						<KeyHint>esc</KeyHint> {t("commandPalette.keys.close")}
 					</span>
 				</div>
 			</div>

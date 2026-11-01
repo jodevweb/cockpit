@@ -1,6 +1,7 @@
 import clsx from "clsx";
 import { ChevronDown, ChevronRight, FlaskConical } from "lucide-react";
 import { memo, useEffect, useMemo, useRef, useState } from "react";
+import { useTranslation } from "react-i18next";
 import type { Turn } from "@/app/agents";
 import { FilmStrip } from "@/components/Film";
 import { Illustration } from "@/components/Illustration";
@@ -8,6 +9,7 @@ import { LocalImage } from "@/components/LocalImage";
 import { openLightbox } from "@/components/Lightbox";
 import { Markdown } from "@/components/Markdown";
 import { MediaThumb } from "@/components/MediaThumb";
+import { locale } from "@/i18n";
 import { delivered } from "@/lib/delivered";
 import { summarize, type Episode } from "@/lib/episodes";
 import { clock, filmOf, firstSentence } from "@/lib/film";
@@ -110,6 +112,7 @@ const SWEEP: Array<[number, number]> = [
 
 /** L'avant et l'après superposés : on glisse pour passer de l'un à l'autre. */
 export function BeforeAfter({ avant, apres }: { avant: Media; apres: Media }) {
+	const { t: tr } = useTranslation("components3");
 	const [split, setSplit] = useState(50);
 	const touched = useRef(false);
 
@@ -138,7 +141,7 @@ export function BeforeAfter({ avant, apres }: { avant: Media; apres: Media }) {
 			<div className="relative h-72 overflow-hidden rounded-xl bg-raised shadow-card">
 				<button
 					type="button"
-					title="Voir en grand"
+					title={tr("planche.enlarge")}
 					onClick={() => openLightbox([avant, apres], 1)}
 					className="absolute inset-0 block"
 				>
@@ -157,14 +160,14 @@ export function BeforeAfter({ avant, apres }: { avant: Media; apres: Media }) {
 					style={{ left: `${split}%` }}
 				/>
 				<span className="pointer-events-none absolute top-2 left-2 rounded-md bg-surface px-2 py-0.5 text-[10.5px] font-semibold text-critical shadow-card">
-					avant
+					{tr("planche.before")}
 				</span>
 				<span className="pointer-events-none absolute top-2 right-2 rounded-md bg-surface px-2 py-0.5 text-[10.5px] font-semibold text-accent shadow-card">
-					après
+					{tr("planche.after")}
 				</span>
 			</div>
 			<label className="flex items-center gap-2 text-[11px] text-ink-muted">
-				<span className="shrink-0">Glisser pour comparer</span>
+				<span className="shrink-0">{tr("planche.slide")}</span>
 				<input
 					type="range"
 					min={0}
@@ -183,6 +186,7 @@ export function BeforeAfter({ avant, apres }: { avant: Media; apres: Media }) {
 
 /** La recette filmée par le cockpit, avec ses chapitres : les pages traversées. */
 function ProofVideo({ video }: { video: NonNullable<Turn["video"]> }) {
+	const { t } = useTranslation("components3");
 	const player = useRef<HTMLVideoElement>(null);
 	return (
 		<figure className="m-0 flex min-w-0 flex-col gap-2">
@@ -198,7 +202,7 @@ function ProofVideo({ video }: { video: NonNullable<Turn["video"]> }) {
 					className="block max-h-80 w-full bg-[#0f1315] object-contain"
 				/>
 				<span className="pointer-events-none absolute top-2 left-2 rounded-md bg-[rgba(43,179,163,0.22)] px-2 py-0.5 text-[10.5px] font-semibold text-[#62d6c6]">
-					filmé par le cockpit · {Math.round(video.seconds)} s
+					{t("planche.filmed", { seconds: Math.round(video.seconds) })}
 				</span>
 			</div>
 			{video.chapters.length > 1 ? (
@@ -237,6 +241,7 @@ function pageName(url: string): string {
 
 /** Le test tiré de la recette, proposé : copié, ou confié à l'agent pour qu'il le range. */
 function ProofTestBlock({ test, onAsk }: { test: ProofTest; onAsk?: (text: string) => void }) {
+	const { t } = useTranslation("components3");
 	const [open, setOpen] = useState(false);
 	const [copied, setCopied] = useState(false);
 	return (
@@ -248,12 +253,12 @@ function ProofTestBlock({ test, onAsk }: { test: ProofTest; onAsk?: (text: strin
 					onClick={() => setOpen((value) => !value)}
 					className="focus-ring flex items-center gap-1 rounded text-[12.5px] font-semibold text-ink"
 				>
-					Le test qu'on en tire
+					{t("planche.test.title")}
 					{open ? <ChevronDown size={12} /> : <ChevronRight size={12} />}
 				</button>
 				<span className="text-[11px] text-ink-muted">
-					{test.steps} geste{test.steps > 1 ? "s" : ""} rejoué{test.steps > 1 ? "s" : ""}
-					{test.skipped > 0 ? ` · ${test.skipped} écarté${test.skipped > 1 ? "s" : ""} (captures, lectures)` : ""}
+					{t("planche.test.steps", { count: test.steps })}
+					{test.skipped > 0 ? ` · ${t("planche.test.skipped", { count: test.skipped })}` : ""}
 				</span>
 				<span className="flex-1" />
 				<button
@@ -263,7 +268,7 @@ function ProofTestBlock({ test, onAsk }: { test: ProofTest; onAsk?: (text: strin
 					}}
 					className="focus-ring rounded-md bg-raised px-2.5 py-1 text-[11.5px] text-ink hover:bg-hover"
 				>
-					{copied ? "Copié" : "Copier"}
+					{copied ? t("planche.test.copied") : t("planche.test.copy")}
 				</button>
 				{onAsk ? (
 					<button
@@ -271,7 +276,7 @@ function ProofTestBlock({ test, onAsk }: { test: ProofTest; onAsk?: (text: strin
 						onClick={() => onAsk(askToKeep(test))}
 						className="focus-ring rounded-md bg-accent px-2.5 py-1 text-[11.5px] font-semibold text-accent-ink"
 					>
-						Le faire ajouter par l'agent
+						{t("planche.test.ask")}
 					</button>
 				) : null}
 			</div>
@@ -286,13 +291,14 @@ function ProofTestBlock({ test, onAsk }: { test: ProofTest; onAsk?: (text: strin
 
 /** Ce que git constate : une tuile par fichier, large comme son volume. */
 function Constat({ changes }: { changes: PlancheData["changes"] }) {
+	const { t } = useTranslation("components3");
 	if (changes.length === 0) return null;
 	const added = changes.reduce((sum, change) => sum + change.added, 0);
 	const removed = changes.reduce((sum, change) => sum + change.removed, 0);
 	const max = Math.max(...changes.map((change) => change.added + change.removed), 1);
 	return (
 		<div className="flex flex-wrap items-center gap-x-3 gap-y-1.5">
-			<span className="text-[10.5px] font-semibold tracking-[0.05em] text-ink-muted uppercase">Constaté</span>
+			<span className="text-[10.5px] font-semibold tracking-[0.05em] text-ink-muted uppercase">{t("planche.observed")}</span>
 			<span className="flex items-center gap-[3px]">
 				{changes.slice(0, 18).map((change) => (
 					<span
@@ -304,7 +310,7 @@ function Constat({ changes }: { changes: PlancheData["changes"] }) {
 				))}
 			</span>
 			<span className="font-mono text-[11px] text-ink-muted">
-				{changes.length} fichier{changes.length > 1 ? "s" : ""} · +{added} −{removed}
+				{t("planche.files", { count: changes.length })} · +{added} −{removed}
 			</span>
 		</div>
 	);
@@ -325,6 +331,7 @@ export const Planche = memo(function Planche({
 	/** Écrit à l'agent : faire ranger le test tiré de sa recette. */
 	onAsk?: (text: string) => void;
 }) {
+	const { t } = useTranslation("components3");
 	const data = useMemo(() => plancheOf(episode, answer, cwd), [episode, answer, cwd]);
 	const body = rest(answer.text, data.head);
 	const [open, setOpen] = useState(body.length <= FOLD);
@@ -386,7 +393,7 @@ export const Planche = memo(function Planche({
 								onClick={() => setOpen(false)}
 								className="focus-ring flex items-center gap-1 self-start rounded text-[11.5px] font-medium text-ink-faint hover:text-ink"
 							>
-								<ChevronDown size={12} /> Replier le détail
+								<ChevronDown size={12} /> {t("planche.foldDetail")}
 							</button>
 						) : null}
 					</div>
@@ -396,7 +403,8 @@ export const Planche = memo(function Planche({
 						onClick={() => setOpen(true)}
 						className="focus-ring flex items-center gap-1 self-start rounded text-[12px] font-semibold text-accent hover:text-accent-soft"
 					>
-						<ChevronRight size={12} /> Lire le détail ({body.length.toLocaleString("fr-FR")} signes)
+						<ChevronRight size={12} />{" "}
+						{t("planche.readDetail", { count: body.length, chars: body.length.toLocaleString(locale()) })}
 					</button>
 				)
 			) : null}

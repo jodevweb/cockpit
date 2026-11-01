@@ -9,6 +9,7 @@ import {
 	Trash2,
 } from "lucide-react";
 import { useEffect, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { Button, Empty, Spinner } from "@/components/ui";
 import { api } from "@/lib/ipc";
 import type { RepoCommand } from "@/lib/types";
@@ -31,6 +32,7 @@ import { useCockpit } from "@/app/store";
  * touchent une fois par trimestre.
  */
 export function CommandsSettings() {
+	const { t } = useTranslation("components3");
 	const { config, reloadConfig, notify, activeProject } = useCockpit();
 	const [draft, setDraft] = useState<RepoCommand[]>([]);
 	const [saving, setSaving] = useState(false);
@@ -48,7 +50,7 @@ export function CommandsSettings() {
 		try {
 			await api.config.updateProject({ commands: next });
 			reloadConfig();
-			notify("Commandes enregistrées.");
+			notify(t("commandsSettings.saved"));
 		} catch (error) {
 			notify(String(error));
 		} finally {
@@ -86,17 +88,15 @@ export function CommandsSettings() {
 	return (
 		<div className="flex flex-col gap-3">
 			<p className="text-[11px] leading-relaxed text-ink-faint">
-				Les commandes qu'on ne retape pas de mémoire : celles à options, celles dont on
-				oublie les drapeaux. Elles s'affichent dans l'écran Scripts et dans le menu des
-				terminaux. Les scripts bruts du dépôt, eux, apparaissent déjà sans être déclarés.
+				{t("commandsSettings.intro")}
 			</p>
 
 			<div className="panel flex flex-col gap-2 p-3.5">
 				{draft.length === 0 ? (
 					<Empty
 						icon={SquareTerminal}
-						message="Aucune commande déclarée."
-						hint="Le cockpit peut lire les scripts de ce dépôt et te proposer de les ajouter."
+						message={t("commandsSettings.empty")}
+						hint={t("commandsSettings.emptyHint")}
 					/>
 				) : (
 					draft.map((command) => (
@@ -115,9 +115,9 @@ export function CommandsSettings() {
 						loading={detecting}
 						disabled={!repo}
 						onClick={() => void detect()}
-						title="Lire les scripts du dépôt et proposer ceux qui manquent"
+						title={t("commandsSettings.detectHint")}
 					>
-						Détecter depuis le dépôt
+						{t("commandsSettings.detect")}
 					</Button>
 					<Button
 						size="sm"
@@ -125,8 +125,8 @@ export function CommandsSettings() {
 						onClick={() =>
 							add({
 								id: `cmd-${Date.now().toString(36)}`,
-								group: "Commandes",
-								label: "Nouvelle commande",
+								group: t("commandsSettings.defaultGroup"),
+								label: t("commandsSettings.defaultLabel"),
 								description: "",
 								base: "",
 								positional: null,
@@ -136,7 +136,7 @@ export function CommandsSettings() {
 							})
 						}
 					>
-						Écrire une commande
+						{t("commandsSettings.write")}
 					</Button>
 					{saving ? <Spinner /> : null}
 				</div>
@@ -146,7 +146,7 @@ export function CommandsSettings() {
 				<div className="panel flex flex-col gap-2 p-3.5">
 					<div className="flex items-center gap-2">
 						<h4 className="text-[11px] font-semibold tracking-[0.06em] text-accent-soft uppercase">
-							Trouvées dans le dépôt · {found.length}
+							{t("commandsSettings.found", { count: found.length })}
 						</h4>
 						{found.length > 0 ? (
 							<Button
@@ -159,7 +159,7 @@ export function CommandsSettings() {
 									void save(next);
 								}}
 							>
-								Tout ajouter
+								{t("commandsSettings.addAll")}
 							</Button>
 						) : null}
 						<Button
@@ -167,13 +167,13 @@ export function CommandsSettings() {
 							className={found.length > 0 ? "" : "ml-auto"}
 							onClick={() => setFound(null)}
 						>
-							Fermer
+							{t("commandsSettings.close")}
 						</Button>
 					</div>
 
 					{found.length === 0 ? (
 						<p className="text-[11px] text-ink-faint">
-							Rien de nouveau : tout ce que ce dépôt déclare est déjà là.
+							{t("commandsSettings.nothingNew")}
 						</p>
 					) : (
 						found.map((command) => (
@@ -194,7 +194,7 @@ export function CommandsSettings() {
 										);
 									}}
 								>
-									Ajouter
+									{t("commandsSettings.add")}
 								</Button>
 							</div>
 						))
@@ -212,6 +212,7 @@ function CommandRow({
 	command: RepoCommand;
 	onRemove: () => void;
 }) {
+	const { t } = useTranslation("components3");
 	const [open, setOpen] = useState(false);
 	const details = command.options.length > 0 || command.positional !== null;
 
@@ -224,16 +225,16 @@ function CommandRow({
 		>
 			<div className="flex items-center gap-2">
 				<span className="text-[12px] font-medium text-ink">
-					{command.label || "— sans nom —"}
+					{command.label || t("commandsSettings.unnamed")}
 				</span>
 				<span className="shrink-0 text-[10px] text-ink-faint">{command.group}</span>
 				{command.danger ? (
 					<span className="flex items-center gap-1 text-[10px] text-critical">
-						<AlertOctagon size={10} /> sensible
+						<AlertOctagon size={10} /> {t("commandsSettings.sensitive")}
 					</span>
 				) : null}
 				{!command.scoped ? (
-					<span className="text-[10px] text-ink-faint">dépôt principal</span>
+					<span className="text-[10px] text-ink-faint">{t("commandsSettings.mainRepo")}</span>
 				) : null}
 				<Button
 					size="sm"
@@ -241,7 +242,7 @@ function CommandRow({
 					variant="danger"
 					className="ml-auto"
 					onClick={onRemove}
-					title="Retirer"
+					title={t("commandsSettings.remove")}
 				/>
 			</div>
 
@@ -261,15 +262,17 @@ function CommandRow({
 					>
 						{open ? <ChevronDown size={11} /> : <ChevronRight size={11} />}
 						{command.options.length > 0
-							? `${command.options.length} option${command.options.length > 1 ? "s" : ""}`
-							: "argument attendu"}
+							? t("commandsSettings.options", { count: command.options.length })
+							: t("commandsSettings.expectsArgument")}
 					</button>
 					{open ? (
 						<ul className="mt-1 flex flex-col gap-0.5">
 							{command.positional ? (
 								<li className="text-[10.5px] text-ink-muted">
 									<span className="font-mono text-ink-faint">
-										{command.positional.required ? "argument requis" : "argument"}
+										{command.positional.required
+											? t("commandsSettings.requiredArgument")
+											: t("commandsSettings.argument")}
 									</span>{" "}
 									— {command.positional.label}
 								</li>

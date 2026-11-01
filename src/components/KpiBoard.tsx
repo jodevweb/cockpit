@@ -7,6 +7,8 @@ import { api } from "@/lib/ipc";
 import type { KpiChart, KpiValue } from "@/lib/types";
 import { useAsync } from "@/lib/useAsync";
 import { useCockpit } from "@/app/store";
+import { useTranslation } from "react-i18next";
+import { t as translate } from "@/i18n";
 
 /** Chaque type de graphique a sa silhouette : on repère la forme avant le texte. */
 const CHART_ICON: Record<
@@ -22,7 +24,7 @@ const CHART_ICON: Record<
 function groupBySection(charts: KpiChart[]) {
 	const sections = new Map<string, KpiChart[]>();
 	for (const chart of charts) {
-		const key = chart.section || "Sans section";
+		const key = chart.section || translate("components1:kpiBoard.noSection");
 		sections.set(key, [...(sections.get(key) ?? []), chart]);
 	}
 	return [...sections.entries()];
@@ -38,6 +40,7 @@ function groupBySection(charts: KpiChart[]) {
  * matières et renvoie au dashboard d'un clic.
  */
 export function KpiBoard() {
+	const { t } = useTranslation("components1");
 	const { notify } = useCockpit();
 	const [query, setQuery] = useState("");
 	const [openId, setOpenId] = useState<string | null>(null);
@@ -84,13 +87,14 @@ export function KpiBoard() {
 					<SearchField
 						value={query}
 						onChange={setQuery}
-						placeholder="Filtrer les indicateurs…"
+						placeholder={t("kpiBoard.filter")}
 					/>
 				</div>
 				<span className="ml-auto text-[10px] text-ink-faint">
-					{filtered.length} dashboard{filtered.length > 1 ? "s" : ""} ·{" "}
-					{filtered.reduce((total, dashboard) => total + dashboard.charts.length, 0)}{" "}
-					indicateurs
+					{t("kpiBoard.dashboards", { count: filtered.length })} ·{" "}
+					{t("kpiBoard.indicators", {
+						count: filtered.reduce((total, dashboard) => total + dashboard.charts.length, 0),
+					})}
 				</span>
 				{dashboards.loading ? <Spinner /> : null}
 				<Button size="sm" icon={RefreshCw} onClick={dashboards.reload} />
@@ -104,8 +108,8 @@ export function KpiBoard() {
 				{!dashboards.error && filtered.length === 0 && !dashboards.initial ? (
 					<Empty
 						icon={BarChart3}
-						message="Aucun dashboard"
-						hint="Les dashboards KPI viennent de Better Stack Telemetry."
+						message={t("kpiBoard.empty.message")}
+						hint={t("kpiBoard.empty.hint")}
 					/>
 				) : null}
 
@@ -124,7 +128,7 @@ export function KpiBoard() {
 										{dashboard.name}
 									</h3>
 									<span className="shrink-0 text-[10px] text-ink-faint">
-										{openId === dashboard.id ? "masquer" : "afficher les valeurs"}
+										{openId === dashboard.id ? t("kpiBoard.hide") : t("kpiBoard.show")}
 									</span>
 								</button>
 								{openId === dashboard.id ? (
@@ -133,17 +137,17 @@ export function KpiBoard() {
 										onChange={(event) => setHours(Number(event.target.value))}
 										className="focus-ring rounded-lg border border-line-soft bg-surface px-1.5 py-0.5 text-[10px] text-ink-muted"
 									>
-										<option value={1}>1 h</option>
-										<option value={24}>24 h</option>
-										<option value={168}>7 j</option>
-										<option value={720}>30 j</option>
+										<option value={1}>{t("kpiBoard.hours", { count: 1 })}</option>
+										<option value={24}>{t("kpiBoard.hours", { count: 24 })}</option>
+										<option value={168}>{t("kpiBoard.days", { count: 7 })}</option>
+										<option value={720}>{t("kpiBoard.days", { count: 30 })}</option>
 									</select>
 								) : null}
 								{openId === dashboard.id && values.loading ? <Spinner /> : null}
 								<button
 									type="button"
 									onClick={() => open(dashboard.url)}
-									title="Ouvrir dans Better Stack"
+									title={t("kpiBoard.openExternal")}
 									className="shrink-0 text-ink-faint hover:text-ink-muted"
 								>
 									<ExternalLink size={11} />

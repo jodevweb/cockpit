@@ -263,7 +263,7 @@ pub fn home_account_dir() -> PathBuf {
 pub fn accounts(config: &Config) -> Vec<AccountConfig> {
 	let mut list = vec![AccountConfig {
 		id: HOME_ACCOUNT.into(),
-		label: "Compte du poste".into(),
+		label: crate::i18n::t("config.homeAccount"),
 		dir: String::new(),
 	}];
 	for account in &config.accounts {
@@ -414,10 +414,10 @@ fn environment_name_of(token: &str) -> String {
 			let mut chars = name.chars();
 			match chars.next() {
 				Some(first) => first.to_uppercase().collect::<String>() + chars.as_str(),
-				None => "Par défaut".into(),
+				None => crate::i18n::t("config.defaultEnvironment"),
 			}
 		}
-		None => "Par défaut".into(),
+		None => crate::i18n::t("config.defaultEnvironment"),
 	}
 }
 
@@ -718,9 +718,8 @@ impl WorkflowConfig {
 				.into_iter()
 				.find(|value| !inert_in_shell(value))
 			{
-				let message = format!(
-					"Valeur refusée dans la commande de worktree (caractère de shell) : {hostile}"
-				);
+				let message =
+					crate::i18n::tf("config.worktreeHostileValue", &[("value", &hostile)]);
 				return (format!("echo {} >&2; exit 1", shell_arg(&message)), false);
 			}
 		}
@@ -1052,12 +1051,14 @@ pub const PROTECTED_BRANCHES: [&str; 9] = [
 /// En dur et sans outil correspondant, sur le modèle explicite de `remote.rs`.
 /// Le critère n'est pas « ce qu'un humain lit » — un commentaire aussi se lit —
 /// mais **ce qui engage une décision plutôt qu'un compte rendu**.
+/// En anglais : la liste n'est lue que dans la consigne de la Permanence, et
+/// les consignes s'écrivent en anglais (voir `i18n::reply_directive`).
 pub const NEVER: [&str; 5] = [
-	"approuver ou refuser une revue",
-	"assigner",
-	"fermer",
-	"fusionner",
-	"déployer",
+	"approve or reject a review",
+	"assign",
+	"close",
+	"merge",
+	"deploy",
 ];
 
 #[derive(Debug, Clone, Serialize, Deserialize, Default)]
@@ -1616,7 +1617,15 @@ pub const MASTER_ROLE: &str = "master";
 /// Volontairement génériques : ils décrivent une responsabilité, pas une pile
 /// technique. C'est à chaque équipe d'y mettre sa stack.
 pub fn default_roles() -> Vec<RoleConfig> {
-	let role = |id: &str, label: &str, prompt: &str, scope: &[&str]| RoleConfig {
+	default_roles_in(&crate::i18n::lang())
+}
+
+/// Les mêmes, libellés dans une langue donnée. `Config::load` passe par là :
+/// la langue en cours se lit elle-même dans la config, et la demander pendant
+/// le chargement tournerait en rond.
+fn default_roles_in(lang: &str) -> Vec<RoleConfig> {
+	let label = |key: &str| crate::i18n::t_in(lang, key);
+	let role = |id: &str, label: String, prompt: &str, scope: &[&str]| RoleConfig {
 		id: id.into(),
 		label: label.into(),
 		prompt: prompt.into(),
@@ -1637,32 +1646,32 @@ pub fn default_roles() -> Vec<RoleConfig> {
 		// mission — reste posé par le cockpit et ne se configure pas.
 		role(
 			MASTER_ROLE,
-			"Agent maître",
+			label("config.roles.master"),
 			"",
 			&[],
 		),
 		role(
 			"backend",
-			"Développement back-end",
-			"Tu implémentes la partie serveur de la tâche qui t'est confiée.\n\n\
-			 Les contrats posés sur la branche d'intégration font foi : lis-les dans \
-			 le code plutôt que de te fier à ce qu'on t'en dit, et signale ce qui te \
-			 manque au lieu de l'inventer. Suis les conventions du dépôt telles que \
-			 le code voisin les montre.\n\n\
-			 Commite ton travail : ce qui n'est pas commité n'existe pas pour la \
-			 suite de la mission.",
+			label("config.roles.backend"),
+			"You implement the server side of the task you are given.\n\n\
+			 The contracts set on the integration branch are authoritative: read them in \
+			 the code rather than relying on what you are told about them, and report what \
+			 you are missing instead of inventing it. Follow the repository's conventions as \
+			 the neighbouring code shows them.\n\n\
+			 Commit your work: what is not committed does not exist for the rest of the \
+			 mission.",
 			&[],
 		),
 		role(
 			"frontend",
-			"Développement front-end",
-			"Tu implémentes l'interface de la tâche qui t'est confiée.\n\n\
-			 Les contrats posés sur la branche d'intégration font foi : lis-les dans \
-			 le code. Tu ne modifies pas le serveur — si un contrat te manque, tu le \
-			 signales plutôt que de l'inventer. Suis les conventions du dépôt telles \
-			 que les composants voisins les montrent.\n\n\
-			 Commite ton travail : ce qui n'est pas commité n'existe pas pour la \
-			 suite de la mission.",
+			label("config.roles.frontend"),
+			"You implement the user interface of the task you are given.\n\n\
+			 The contracts set on the integration branch are authoritative: read them in \
+			 the code. You do not modify the server — if a contract is missing, you report \
+			 it rather than inventing it. Follow the repository's conventions as the \
+			 neighbouring components show them.\n\n\
+			 Commit your work: what is not committed does not exist for the rest of the \
+			 mission.",
 			&[],
 		),
 		// Recette et relecture rendent un verdict, pas une dissertation : leur
@@ -1671,35 +1680,35 @@ pub fn default_roles() -> Vec<RoleConfig> {
 		// de s'y prendre : le format est une interface, la méthode leur revient.
 		role(
 			"qa",
-			"Tests et recette",
-			"Tu vérifies que la fonctionnalité se comporte comme la tâche le \
-			 demande. Tu ne corriges pas le code des autres.\n\n\
-			 Termine par un verdict sur une ligne :\n\
-			 `VERDICT: bloquant` — un comportement attendu manque ou est faux.\n\
-			 `VERDICT: réserves` — cela fonctionne, mais quelque chose devra être repris.\n\
-			 `VERDICT: ok` — rien à redire.\n\n\
-			 Sous le verdict, liste ce qui doit être corrigé, un point par ligne, \
-			 en nommant le fichier et ce qui ne va pas. Ces lignes seront transmises \
-			 telles quelles à qui devra corriger, sans le rapport autour : elles \
-			 doivent se suffire.\n\n\
-			 Ce que tu n'as pas pu vérifier se dit, plutôt que de se deviner.",
+			label("config.roles.qa"),
+			"You check that the feature behaves as the task requires. You do not fix \
+			 other people's code.\n\n\
+			 End with a verdict on a single line (keep these markers in English exactly):\n\
+			 `VERDICT: blocking` — an expected behaviour is missing or wrong.\n\
+			 `VERDICT: concerns` — it works, but something will need to be reworked.\n\
+			 `VERDICT: ok` — nothing to report.\n\n\
+			 Under the verdict, list what must be fixed, one item per line, naming the \
+			 file and what is wrong. These lines will be passed as they are to whoever \
+			 has to fix them, without the surrounding report: they must stand on their \
+			 own.\n\n\
+			 State what you could not check, rather than leaving it to be guessed.",
 			&[],
 		),
 		role(
 			"review",
-			"Relecture",
-			"Tu relis les changements de la mission et signales ce qui est faux, \
-			 fragile, ou incohérent entre les contributions. Tu ne modifies rien.\n\n\
-			 Termine par un verdict sur une ligne :\n\
-			 `VERDICT: bloquant` — cela ne doit pas être fusionné en l'état.\n\
-			 `VERDICT: réserves` — fusionnable, mais quelque chose devra être repris.\n\
-			 `VERDICT: ok` — rien à redire.\n\n\
-			 Sous le verdict, liste ce qui doit être corrigé, un point par ligne, \
-			 en nommant le fichier et ce qui ne va pas. Ces lignes seront transmises \
-			 telles quelles à qui devra corriger, sans le rapport autour : elles \
-			 doivent se suffire.\n\n\
-			 Ne bloque que sur ce qui le mérite : un secret qui fuit, une régression, \
-			 une migration manquante. Le reste passe en réserves.",
+			label("config.roles.review"),
+			"You review the mission's changes and report what is wrong, fragile, or \
+			 inconsistent between the contributions. You modify nothing.\n\n\
+			 End with a verdict on a single line (keep these markers in English exactly):\n\
+			 `VERDICT: blocking` — this must not be merged as it is.\n\
+			 `VERDICT: concerns` — mergeable, but something will need to be reworked.\n\
+			 `VERDICT: ok` — nothing to report.\n\n\
+			 Under the verdict, list what must be fixed, one item per line, naming the \
+			 file and what is wrong. These lines will be passed as they are to whoever \
+			 has to fix them, without the surrounding report: they must stand on their \
+			 own.\n\n\
+			 Only block on what deserves it: a leaking secret, a regression, a missing \
+			 migration. Everything else goes under concerns.",
 			&[],
 		),
 	]
@@ -2303,14 +2312,14 @@ impl Config {
 				"GitHub",
 				"repository",
 				!self.github.repo.trim().is_empty(),
-				"le dépôt (`github.repo`), et un jeton ou une session `gh`",
+				&crate::i18n::t("config.connectorMissing.github"),
 			),
 			entry(
 				"linear",
 				"Linear",
 				"tickets",
 				!self.linear.token.trim().is_empty(),
-				"un jeton Linear",
+				&crate::i18n::t("config.connectorMissing.linear"),
 			),
 			// Le projet compte autant que le jeton : un jeton seul ne dit pas où
 			// chercher les tickets, et l'écran s'ouvrirait vide sans expliquer.
@@ -2319,21 +2328,21 @@ impl Config {
 				"GitLab",
 				"tickets",
 				!self.gitlab.token.trim().is_empty() && !self.gitlab.project.trim().is_empty(),
-				"un jeton GitLab (portée `api`) et le chemin du projet",
+				&crate::i18n::t("config.connectorMissing.gitlab"),
 			),
 			entry(
 				"sentry",
 				"Sentry",
 				"monitoring",
 				!self.sentry.token.trim().is_empty(),
-				"un jeton Sentry",
+				&crate::i18n::t("config.connectorMissing.sentry"),
 			),
 			entry(
 				"betterstack",
 				"Better Stack",
 				"monitoring",
 				!self.betterstack.token.trim().is_empty(),
-				"un jeton Better Stack",
+				&crate::i18n::t("config.connectorMissing.betterstack"),
 			),
 			entry(
 				"trigger",
@@ -2341,21 +2350,21 @@ impl Config {
 				"ci",
 				!self.trigger.token.trim().is_empty()
 					|| !self.trigger.environments.is_empty(),
-				"une secret key Trigger.dev",
+				&crate::i18n::t("config.connectorMissing.trigger"),
 			),
 			entry(
 				"railway",
 				"Railway",
 				"deploy",
 				!self.railway.token.trim().is_empty(),
-				"un jeton Railway",
+				&crate::i18n::t("config.connectorMissing.railway"),
 			),
 			entry(
 				"stripe",
 				"Stripe",
 				"payments",
 				!self.stripe.token.trim().is_empty(),
-				"une clé Stripe",
+				&crate::i18n::t("config.connectorMissing.stripe"),
 			),
 		]
 	}
@@ -2417,7 +2426,9 @@ impl Config {
 		// nulle part — ils étaient dans le binaire.
 		cfg.seed_workflow(existing_install);
 		if cfg.roles.is_empty() {
-			cfg.roles = default_roles();
+			// Pas `i18n::lang()` : elle relit la config qu'on est en train de charger.
+			let lang = if cfg!(test) { "en" } else { crate::i18n::resolve(&cfg.general.language) };
+			cfg.roles = default_roles_in(lang);
 		}
 
 		cfg.github.token = env_override(&cfg.github.token, "COCKPIT_GITHUB_TOKEN");
@@ -2799,89 +2810,79 @@ impl Config {
 					"github",
 					"GitHub",
 					&self.github.token,
-					"Token classique `repo` — ou laisse vide, le cockpit utilisera `gh auth token`.",
+					&crate::i18n::t("config.secretHint.github"),
 				),
 				secret(
 					"sentry",
 					"Sentry",
 					&self.sentry.token,
-					"Auth token utilisateur avec les scopes `project:read`, `event:read`, `event:write`.",
+					&crate::i18n::t("config.secretHint.sentry"),
 				),
 				secret(
 					"linear",
 					"Linear",
 					&self.linear.token,
-					"Clé API personnelle (Settings → API → Personal API keys).",
+					&crate::i18n::t("config.secretHint.linear"),
 				),
 				secret(
 					"gitlab",
 					"GitLab",
 					&self.gitlab.token,
-					"Jeton personnel de portée `api` — `read_api` suffit à lire, pas à changer \
-					 l'état d'un ticket.",
+					&crate::i18n::t("config.secretHint.gitlab"),
 				),
 				secret(
 					"trigger",
 					"Trigger.dev",
 					&self.trigger.token,
-					"Secret key d'un environnement — `tr_dev_…`, `tr_prod_…`, `tr_staging_…` selon \
-					 l'environnement (projet → API keys), pas le Personal Access Token `tr_pat_…` du CLI.",
+					&crate::i18n::t("config.secretHint.trigger"),
 				),
 				secret(
 					"railway",
 					"Railway",
 					&self.railway.token,
-					"Token de compte ou de workspace (Account Settings → Tokens) — un token de \
-					 portée projet oblige à renseigner l'identifiant du projet à côté.",
+					&crate::i18n::t("config.secretHint.railway"),
 				),
 				secret(
 					"betterstack",
 					"Better Stack",
 					&self.betterstack.token,
-					"Token API Uptime (monitors et incidents).",
+					&crate::i18n::t("config.secretHint.betterstack"),
 				),
 				secret(
 					"betterstack_telemetry",
 					"Better Stack · KPI",
 					&self.betterstack.telemetry_token,
-					"« Global API token » (Better Stack → API tokens → Global API tokens). Un token \
-					 d'équipe sait lister les dashboards, mais pas ouvrir l'accès aux données : \
-					 les valeurs resteraient vides.",
+					&crate::i18n::t("config.secretHint.betterstackTelemetry"),
 				),
 				secret(
 					"betterstack_clickhouse_host",
 					"Better Stack · SQL host",
 					&self.betterstack.clickhouse_host,
-					"Facultatif : à ne remplir que si le token KPI ne peut pas ouvrir l'accès \
-					 lui-même. Better Stack → Integrations → SQL API (ex. \
-					 eu-nbg-2-connect.betterstackdata.com).",
+					&crate::i18n::t("config.secretHint.betterstackClickhouseHost"),
 				),
 				secret(
 					"betterstack_clickhouse_username",
 					"Better Stack · SQL user",
 					&self.betterstack.clickhouse_username,
-					"Identifiant SQL API, à côté du host.",
+					&crate::i18n::t("config.secretHint.betterstackClickhouseUsername"),
 				),
 				secret(
 					"betterstack_clickhouse_password",
 					"Better Stack · SQL password",
 					&self.betterstack.clickhouse_password,
-					"Mot de passe SQL API — Better Stack ne le réaffiche jamais après création.",
+					&crate::i18n::t("config.secretHint.betterstackClickhousePassword"),
 				),
 				secret(
 					"stripe",
 					"Stripe",
 					&self.stripe.token,
-					"Clé restreinte en lecture seule `rk_…` (Développeurs → Clés API → Clés \
-					 restreintes) : une clé publiable `pk_…` est rejetée par l'API serveur.",
+					&crate::i18n::t("config.secretHint.stripe"),
 				),
 				secret(
 					"sandbox_oauth_token",
-					"Compte isolé (Claude)",
+					&crate::i18n::t("config.secretLabel.sandboxOauthToken"),
 					&self.sandbox.oauth_token,
-					"Lance `claude setup-token` depuis Réglages → Isolation, colle le jeton \
-					 affiché — une fois, il dure un an. Jamais celui de l'hôte : un conteneur ne \
-					 peut pas lire le trousseau macOS.",
+					&crate::i18n::t("config.secretHint.sandboxOauthToken"),
 				),
 			],
 		}

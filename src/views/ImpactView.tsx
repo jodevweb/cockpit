@@ -12,14 +12,14 @@ import {
 	X,
 } from "lucide-react";
 import { useCallback, useEffect, useMemo, useState } from "react";
+import { useTranslation } from "react-i18next";
 import {
 	AnalysisAge,
 	briefFor,
 	DiffBar,
 	ImpactReport,
 	RISQUE_TONE,
-	VERDICT_TONE,
-} from "@/components/ImpactReport";
+	VERDICT_TONE, verdictLabel, riskLabel } from "@/components/ImpactReport";
 import {
 	Badge,
 	Button,
@@ -44,24 +44,17 @@ import { useAgentActions } from "@/app/agents";
 import { useCockpit } from "@/app/store";
 import { createWorktreeTracked } from "@/lib/worktreeFlow";
 
+// `label` est une clé de l'espace `views` : traduite au rendu.
 const FORGES = {
-	github: { icon: Github, label: "GitHub" },
-	gitlab: { icon: Gitlab, label: "GitLab" },
-	local: { icon: GitBranch, label: "branche locale" },
+	github: { icon: Github, label: "impact.forge.github" },
+	gitlab: { icon: Gitlab, label: "impact.forge.gitlab" },
+	local: { icon: GitBranch, label: "impact.forge.local" },
 };
 
 type FiltreId = "tous" | "aLire" | "risque" | "perimes";
 
-const FILTRES: Array<{ id: FiltreId; label: string; hint: string }> = [
-	{ id: "tous", label: "Tout", hint: "Tout ce qui bouge" },
-	{ id: "aLire", label: "Pas encore lus", hint: "Aucune analyse à ce jour" },
-	{ id: "risque", label: "Risque élevé", hint: "Ce que l'analyse a jugé sérieux" },
-	{
-		id: "perimes",
-		label: "Périmés",
-		hint: "La branche a bougé depuis la lecture",
-	},
-];
+// Les libellés vivent dans le catalogue, sous `impact.filter.<id>`.
+const FILTRES: FiltreId[] = ["tous", "aLire", "risque", "perimes"];
 
 /** Une analyse ne vaut que pour la tête qu'elle a lue. */
 function perime(change: Change): boolean {
@@ -85,6 +78,7 @@ function ChangeCard({
 	onAnalyze: () => void;
 }) {
 	const { notify } = useCockpit();
+	const { t } = useTranslation("views");
 	const forge = FORGES[change.forge] ?? FORGES.local;
 	const Forge = forge.icon;
 	const analysis = change.analysis;
@@ -114,7 +108,7 @@ function ChangeCard({
 								}[RISQUE_TONE[analysis.risk] ?? "neutral"]
 							: "border border-line bg-transparent",
 					)}
-					title={analysis ? `Risque ${analysis.risk}` : "Pas encore lu"}
+					title={analysis ? t("impact.card.risk", { risk: riskLabel(analysis.risk) }) : t("impact.card.unread")}
 				/>
 				<Forge size={11} className="shrink-0 text-ink-faint" />
 				{/* `min-w-0` : sans lui, `truncate` ne coupe rien dans une rangée
@@ -126,12 +120,12 @@ function ChangeCard({
 				<span className="shrink-0 font-mono text-[10px] text-ink-muted">
 					{change.reference}
 				</span>
-				{change.draft ? <Badge tone="neutral">brouillon</Badge> : null}
-				{change.forge === "local" ? <Badge tone="info">sans PR</Badge> : null}
+				{change.draft ? <Badge tone="neutral">{t("impact.card.draft")}</Badge> : null}
+				{change.forge === "local" ? <Badge tone="info">{t("impact.card.noPr")}</Badge> : null}
 				{change.projectName ? (
 					<span
 						className="ml-auto max-w-[38%] shrink-0 truncate font-mono text-[10px] text-ink-faint"
-						title={`Projet ${change.projectName}`}
+						title={t("impact.card.project", { name: change.projectName })}
 						style={change.projectColor ? { color: change.projectColor } : undefined}
 					>
 						{change.projectName}
@@ -152,7 +146,7 @@ function ChangeCard({
 				<DiffBar additions={change.additions} deletions={change.deletions} />
 				{change.changedFiles !== null ? (
 					<span className="font-mono text-[10px] text-ink-faint">
-						{change.changedFiles} fichier{change.changedFiles > 1 ? "s" : ""}
+						{t("impact.card.files", { count: change.changedFiles })}
 					</span>
 				) : null}
 				{change.ci !== "none" ? (
@@ -164,7 +158,11 @@ function ChangeCard({
 							change.ci === "pending" && "text-warning",
 						)}
 					>
-						CI {change.ci === "failing" ? "en échec" : change.ci === "success" ? "au vert" : "en cours"}
+						{change.ci === "failing"
+							? t("impact.card.ciFailing")
+							: change.ci === "success"
+								? t("impact.card.ciSuccess")
+								: t("impact.card.ciPending")}
 					</span>
 				) : null}
 				{change.author ? (
@@ -193,7 +191,7 @@ function ChangeCard({
 				// Sans cette ligne, la carte non lue n'était qu'un trou : on y voyait
 				// l'absence d'analyse sans comprendre qu'elle se demande.
 				<p className="border-l-2 border-line-soft pl-2 text-[11.5px] leading-relaxed text-ink-faint italic">
-					Ce que ce changement implique n'a pas encore été lu.
+					{t("impact.card.notRead")}
 				</p>
 			)}
 
@@ -204,16 +202,16 @@ function ChangeCard({
 				{analysis ? (
 					<>
 						<Badge tone={VERDICT_TONE[analysis.verdict] ?? "neutral"}>
-							{analysis.verdict || "lu"}
+							{analysis.verdict ? verdictLabel(analysis.verdict) : t("impact.card.read")}
 						</Badge>
 						{analysis.riskCount > 0 ? (
 							<span className="text-[10px] whitespace-nowrap text-ink-faint">
-								{analysis.riskCount} risque{analysis.riskCount > 1 ? "s" : ""}
+								{t("impact.card.risks", { count: analysis.riskCount })}
 							</span>
 						) : null}
 						{analysis.checkCount > 0 ? (
 							<span className="text-[10px] whitespace-nowrap text-ink-faint">
-								· {analysis.checkCount} à vérifier
+								· {t("impact.card.checks", { count: analysis.checkCount })}
 							</span>
 						) : null}
 						<AnalysisAge at={analysis.at} />
@@ -224,7 +222,7 @@ function ChangeCard({
 						<Button
 							size="sm"
 							icon={ExternalLink}
-							title={`Ouvrir sur ${forge.label}`}
+							title={t("impact.card.openOn", { forge: t(forge.label) })}
 							onClick={() => {
 								void api.system
 									.openUrl(change.url)
@@ -240,19 +238,17 @@ function ChangeCard({
 						onClick={onAnalyze}
 					>
 						{running
-							? "Lecture…"
-							: depasse
-								? "Relire"
-								: analysis
-									? "Relire"
-									: "Comprendre"}
+							? t("impact.card.reading")
+							: depasse || analysis
+								? t("impact.card.reread")
+								: t("impact.understand")}
 					</Button>
 				</div>
 			</div>
 
 			{depasse ? (
 				<p className="flex items-center gap-1 text-[10px] text-warning">
-					<AlertTriangle size={10} /> La branche a bougé depuis cette lecture.
+					<AlertTriangle size={10} /> {t("impact.card.stale")}
 				</p>
 			) : null}
 		</article>
@@ -274,6 +270,7 @@ function ChangeCard({
  */
 export function ImpactView() {
 	const { notify, activeProject, projectList, reloadConfig, runJob, go } = useCockpit();
+	const { t } = useTranslation("views");
 	const { open: openAgent } = useAgentActions();
 	const [filtre, setFiltre] = usePersistentState<FiltreId>("impact.filtre", "tous");
 	const [portee, setPortee] = usePersistentState<string>("impact.portee", "");
@@ -323,14 +320,14 @@ export function ImpactView() {
 				await api.config.updateProject(fix.patch, fix.project);
 				reloadConfig();
 				scan.reload();
-				notify("Configuration corrigée.");
+				notify(t("impact.notify.fixed"));
 			} catch (error) {
 				notify(String(error));
 			} finally {
 				setFixing(null);
 			}
 		},
-		[notify, reloadConfig, scan],
+		[notify, reloadConfig, scan, t],
 	);
 
 	const analyze = useCallback(
@@ -343,8 +340,8 @@ export function ImpactView() {
 				scan.reload();
 				notify(
 					analysis.verdict === "bloquant"
-						? "Lecture terminée — elle signale un blocage."
-						: "Lecture terminée.",
+						? t("impact.notify.readBlocking")
+						: t("impact.notify.read"),
 				);
 			} catch (error) {
 				notify(String(error));
@@ -352,7 +349,7 @@ export function ImpactView() {
 				setRunning((current) => current.filter((entry) => entry !== key));
 			}
 		},
-		[notify, scan],
+		[notify, scan, t],
 	);
 
 	/**
@@ -369,8 +366,8 @@ export function ImpactView() {
 				setPanels((current) => ({ ...current, [key]: panel }));
 				notify(
 					panel.disputes.length === 0
-						? "Confrontation terminée — les trois angles s'accordent."
-						: `Confrontation terminée — ${panel.disputes.length} désaccord(s) à trancher.`,
+						? t("impact.notify.confrontAgree")
+						: t("impact.notify.confrontDisputes", { count: panel.disputes.length }),
 				);
 			} catch (error) {
 				notify(String(error));
@@ -378,7 +375,7 @@ export function ImpactView() {
 				setConfronting((current) => current.filter((entry) => entry !== key));
 			}
 		},
-		[notify],
+		[notify, t],
 	);
 
 	/**
@@ -396,8 +393,8 @@ export function ImpactView() {
 				const broken = result.checks.filter((check) => check.verdict === "enfreinte");
 				notify(
 					broken.length === 0
-						? "Vérification terminée — rien d'enfreint."
-						: `Vérification terminée — ${broken.length} propriété(s) enfreinte(s).`,
+						? t("impact.notify.auditClean")
+						: t("impact.notify.auditBroken", { count: broken.length }),
 				);
 			} catch (error) {
 				notify(String(error));
@@ -405,7 +402,7 @@ export function ImpactView() {
 				setAuditing((current) => current.filter((entry) => entry !== key));
 			}
 		},
-		[notify],
+		[notify, t],
 	);
 
 	/**
@@ -424,7 +421,7 @@ export function ImpactView() {
 				return;
 			}
 			if (!change.repoPath) {
-				notify("Ce dépôt n'est pas sur ce poste : impossible d'y ouvrir un agent.");
+				notify(t("impact.notify.repoMissing"));
 				return;
 			}
 			try {
@@ -441,7 +438,7 @@ export function ImpactView() {
 				// L'échec est déjà dit dans le centre d'activité.
 			}
 		},
-		[go, notify, openAgent, runJob],
+		[go, notify, openAgent, runJob, t],
 	);
 
 	const forget = useCallback(
@@ -461,12 +458,12 @@ export function ImpactView() {
 					return reste;
 				});
 				scan.reload();
-				notify("Lecture oubliée.");
+				notify(t("impact.notify.forgotten"));
 			} catch (error) {
 				notify(String(error));
 			}
 		},
-		[notify, scan],
+		[notify, scan, t],
 	);
 
 	const visibles = useMemo(() => {
@@ -529,20 +526,22 @@ export function ImpactView() {
 	return (
 		<>
 			<ViewHeader
-				title="Impact"
+				title={t("impact.title")}
 				subtitle={
 					scan.data
-						? `${changes.length} en vol · ${lus} lu${lus > 1 ? "s" : ""}${
-								perimes ? ` · ${perimes} périmé${perimes > 1 ? "s" : ""}` : ""
-							}`
-						: "Ce qui bouge, et ce que ça implique"
+						? [
+								t("impact.subtitle.inFlight", { count: changes.length }),
+								t("impact.subtitle.read", { count: lus }),
+								...(perimes ? [t("impact.subtitle.stale", { count: perimes })] : []),
+							].join(" · ")
+						: t("impact.subtitle.default")
 				}
 				actions={
 					<>
 						{projectList.length > 1 ? (
 							<>
 								<Button active={portee === ""} onClick={() => setPortee("")}>
-									Tous les projets
+									{t("impact.allProjects")}
 								</Button>
 								{activeProject ? (
 									<Button
@@ -558,7 +557,7 @@ export function ImpactView() {
 							icon={RefreshCw}
 							loading={scan.loading}
 							onClick={() => scan.reload()}
-							title="Reprendre le recensement"
+							title={t("impact.rescan")}
 						/>
 					</>
 				}
@@ -567,19 +566,19 @@ export function ImpactView() {
 			<div className="flex min-h-0 flex-1">
 				<div className="flex min-h-0 flex-1 flex-col">
 					<div className="hairline-b flex shrink-0 flex-wrap items-center gap-1.5 px-4 py-2">
-						{FILTRES.map((entry) => (
+						{FILTRES.map((id) => (
 							<Button
-								key={entry.id}
+								key={id}
 								size="sm"
-								active={filtre === entry.id}
-								title={entry.hint}
-								onClick={() => setFiltre(entry.id)}
+								active={filtre === id}
+								title={t(`impact.filter.${id}.hint`)}
+								onClick={() => setFiltre(id)}
 							>
-								{entry.label}
+								{t(`impact.filter.${id}.label`)}
 							</Button>
 						))}
 						<div className="ml-auto w-48">
-							<SearchField value={query} onChange={setQuery} placeholder="Filtrer…" />
+							<SearchField value={query} onChange={setQuery} placeholder={t("impact.filterPlaceholder")} />
 						</div>
 					</div>
 
@@ -622,17 +621,17 @@ export function ImpactView() {
 								icon={ScanEye}
 								message={
 									changes.length === 0
-										? "Rien ne bouge sur les dépôts déclarés."
-										: "Aucun changement ne correspond à ce filtre."
+										? t("impact.empty.nothing")
+										: t("impact.empty.noMatch")
 								}
 								hint={
 									changes.length === 0
-										? "Le moniteur suit les pull requests, les merge requests et les branches locales en avance sur leur base."
+										? t("impact.empty.nothingHint")
 										: undefined
 								}
 							/>
 						) : (
-							<Section title="Changements en vol" count={visibles.length}>
+							<Section title={t("impact.changes")} count={visibles.length}>
 								{/* `items-start` : chaque carte garde sa hauteur propre. Étirées
 								    à la plus haute de leur ligne, celles qui ont peu à dire se
 								    remplissaient de vide, et leur bouton flottait au milieu de
@@ -679,19 +678,19 @@ export function ImpactView() {
 								icon={Sparkles}
 								message={
 									running.includes(courant.key)
-										? "Lecture en cours…"
-										: "Ce changement n'a pas encore été lu."
+										? t("impact.panel.reading")
+										: t("impact.panel.unread")
 								}
 								hint={
 									running.includes(courant.key)
-										? "Un agent parcourt le diff et le code autour — quelques minutes. Tu peux aller ailleurs dans le cockpit, la lecture continue et t'attendra ici. Fermer le cockpit, en revanche, l'interrompt."
-										: "L'analyse dit ce que ça change pour le produit, pourquoi ce travail arrive maintenant, et ce qui peut casser."
+										? t("impact.panel.readingHint")
+										: t("impact.panel.unreadHint")
 								}
 								action={
 									running.includes(courant.key)
 										? undefined
 										: {
-												label: "Comprendre",
+												label: t("impact.understand"),
 												onClick: () => void analyze(courant.key),
 											}
 								}

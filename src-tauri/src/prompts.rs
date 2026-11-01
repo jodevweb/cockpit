@@ -49,41 +49,41 @@ fn library_path() -> PathBuf {
 /// « avant » se prend avant de toucher au code. Elle ne suppose ni navigateur,
 /// ni outil, ni forme de dépôt : sans moyen de capturer, il le dit, et rien
 /// d'autre ne change.
-pub const VISUAL_TEMPLATE: &str = "Ton compte rendu se regarde avant de se lire. L'utilisateur pilote \
-plusieurs agents à la fois : il doit comprendre ce que tu as fait d'un coup d'œil — l'image d'abord, le \
-texte ensuite.
+pub const VISUAL_TEMPLATE: &str = "Your report is looked at before it is read. The user steers \
+several agents at once: they must understand what you did at a glance — the image first, the text \
+second.
 
-- Ta conclusion commence par UNE phrase qui dit ce qui est vrai maintenant (« La liste tient sur un écran \
-de téléphone. »), pas ce que tu as fait. Le détail vient après, aussi court que possible.
-- Si ta tâche change ce qui se voit à l'écran et que tu peux le capturer (navigateur piloté, outil de \
-capture, script du dépôt) : prends une capture AVANT de toucher au code, puis une APRÈS, du même écran et au \
-même cadrage. Range-les dans `.claude/work/rendu/` sous les noms `avant-<sujet>.png` et `apres-<sujet>.png`. \
-Sur la capture d'après, pose des repères numérotés avec l'outil `mcp__cockpit__illustrer` (genre `capture`) \
-: un repère par changement visible, une phrase par repère.
-- Pour le reste, `mcp__cockpit__illustrer` dessine à partir de tes données. Choisis le genre selon ce que tu \
-as fait : `frise` pour un bug (la chaîne d'événements et le maillon qui casse), `avant_apres` pour une \
-refonte (ce qui dépend de quoi), `mesure` pour une optimisation (des chiffres sortis d'une commande, avec \
-la commande), `table` pour une migration, `matrice` pour comparer des options. Une à trois images, pas plus.
-- Sans cet outil, un bloc ```mermaid court (douze nœuds au plus) remplace `frise` et `avant_apres`.
-- Cite chaque capture dans ta conclusion en Markdown : `![légende](chemin)`.
-- N'invente jamais une image ni un chiffre : pas de capture si tu n'as pas pu lancer l'application, pas de \
-mesure sans commande, pas de schéma décoratif. Dis-le en une phrase à la place.
-- Pour une réponse à une question, un correctif de quelques lignes, ou une tâche sans effet visible ni \
-structurel : aucune image, la phrase de tête et du texte court.
+- Your conclusion starts with ONE sentence saying what is true now (\"The list fits on a phone \
+screen.\"), not what you did. Details come after, as short as possible.
+- If your task changes what is visible on screen and you can capture it (driven browser, screenshot \
+tool, repository script): take a screenshot BEFORE touching the code, then one AFTER, of the same screen \
+with the same framing. Store them in `.claude/work/rendu/` as `before-<subject>.png` and \
+`after-<subject>.png`. On the after screenshot, place numbered markers with the `mcp__cockpit__illustrer` \
+tool (genre `capture`): one marker per visible change, one sentence per marker.
+- For everything else, `mcp__cockpit__illustrer` draws from your data. Pick the genre according to what \
+you did: `frise` for a bug (the chain of events and the link that breaks), `avant_apres` for a \
+refactor (what depends on what), `mesure` for an optimisation (numbers that came out of a command, with \
+the command), `table` for a migration, `matrice` to compare options. One to three images, no more.
+- Without that tool, a short ```mermaid block (twelve nodes at most) replaces `frise` and `avant_apres`.
+- Cite each screenshot in your conclusion in Markdown: `![caption](path)`.
+- Never invent an image or a number: no screenshot if you could not run the application, no \
+measurement without a command, no decorative diagram. Say so in one sentence instead.
+- For an answer to a question, a fix of a few lines, or a task with no visible or structural \
+effect: no image, just the opening sentence and short text.
 
-La liste des fichiers modifiés, le film de ton travail et tes tests sont déjà dessinés à partir de ce que \
-le cockpit a vu passer : ne les refais pas.";
+The list of modified files, the film of your work and your tests are already drawn from what \
+Cockpit saw go by: do not redo them.";
 
 /// La consigne de la liste d'étapes, jointe quand le pont du cockpit est là
 /// pour porter son outil (voir `permissions.rs`).
 ///
 /// Le CLI n'a plus d'outil de liste de tâches : sans celui-ci, rien ne dit où
 /// en est un agent lancé depuis une heure, sinon qu'il tourne encore.
-pub const STEPS_TEMPLATE: &str = "Sur toute tâche de plus de deux étapes, tiens la liste de tes étapes avec \
-l'outil `mcp__cockpit__etapes` : pose-la avant ton premier geste, puis rappelle-la chaque fois qu'une étape \
-commence, se termine, ou que tu en découvres une nouvelle. C'est par elle que l'utilisateur voit où tu en es. \
-Des étapes concrètes, cinq à douze, une seule en cours à la fois. Pour une question ou un correctif de \
-quelques lignes : pas de liste.";
+pub const STEPS_TEMPLATE: &str = "On any task of more than two steps, keep the list of your steps with \
+the `mcp__cockpit__etapes` tool: set it before your first action, then call it again each time a step \
+starts, ends, or you discover a new one. It is how the user sees where you are. \
+Concrete steps, five to twelve, only one in progress at a time. For a question or a fix of \
+a few lines: no list.";
 
 /// La consigne de rendu en images telle que l'équipe l'a réglée, ou rien si
 /// elle l'a coupée (`workflow.visual_reports`).
@@ -99,11 +99,14 @@ pub fn visual() -> Option<String> {
 	Some(text).filter(|text| !text.trim().is_empty())
 }
 
+/// `group` et `label` sont des clés de catalogue : la bibliothèque par défaut
+/// s'affiche dans la langue de l'utilisateur. Le texte, lui, part à l'agent :
+/// il reste en anglais, comme tous les prompts.
 fn prompt(id: &str, group: &str, label: &str, text: &str) -> Prompt {
 	Prompt {
 		id: id.into(),
-		group: group.into(),
-		label: label.into(),
+		group: crate::i18n::t(group),
+		label: crate::i18n::t(label),
 		text: text.trim().into(),
 	}
 }
@@ -112,109 +115,109 @@ pub fn defaults() -> Vec<Prompt> {
 	vec![
 		// Les deux consignes du geste « Relire » (voir `review.rs`) : `{pr}`,
 		// `{titre}`, `{auteur}`, `{branche}` et `{base}` y sont remplacés.
-		prompt("revue", "Revue", "Code review complète d'une PR", crate::review::REVIEW_TEMPLATE),
-		prompt("revue-suivi", "Revue", "Vérifier les corrections d'une PR", crate::review::FOLLOWUP_TEMPLATE),
+		prompt("revue", "prompts.group.review", "prompts.label.review", crate::review::REVIEW_TEMPLATE),
+		prompt("revue-suivi", "prompts.group.review", "prompts.label.reviewFollowup", crate::review::FOLLOWUP_TEMPLATE),
 		// Ajoutée aux consignes de chaque agent, jamais envoyée comme message
 		// (voir `visual`).
-		prompt("rendu", "Rendu", "Rendre compte en images", VISUAL_TEMPLATE),
+		prompt("rendu", "prompts.group.visual", "prompts.label.visual", VISUAL_TEMPLATE),
 		prompt(
 			"ship",
-			"Livraison",
-			"Vérifier puis commit + push",
-			"Lance les vérifications déclarées par le dépôt sur ce qui est modifié — mise en forme, \
-			 types, tests. Si tout passe, commit avec un message conventionnel décrivant le \
-			 changement, puis push. Si quelque chose échoue, corrige d'abord et ne commit pas tant \
-			 que ce n'est pas vert. Ne touche à rien d'autre que ce qui est déjà modifié.",
+			"prompts.group.delivery",
+			"prompts.label.ship",
+			"Run the checks the repository declares on what has been modified — formatting, \
+			 types, tests. If everything passes, commit with a conventional message describing the \
+			 change, then push. If something fails, fix it first and do not commit until \
+			 it is green. Do not touch anything other than what is already modified.",
 		),
 		prompt(
 			"review-then-ship",
-			"Livraison",
-			"Relire puis commit + push",
-			"Relis les changements en cours comme le ferait un relecteur exigeant : correction, cas \
-			 limites, cohérence avec le reste du dépôt. Traite les remarques justifiées, écarte les \
-			 autres en disant pourquoi. Relance ensuite les vérifications du projet ; si tout est \
-			 vert, commit et push.",
+			"prompts.group.delivery",
+			"prompts.label.reviewThenShip",
+			"Review the pending changes as a demanding reviewer would: correctness, edge \
+			 cases, consistency with the rest of the repository. Address the justified remarks, dismiss the \
+			 others saying why. Then run the project's checks again; if everything is \
+			 green, commit and push.",
 		),
 		prompt(
 			"open-pr",
-			"Livraison",
-			"Ouvrir la pull request",
-			"Ouvre la pull request de cette branche : ce qui change, pourquoi, et la preuve que ça \
-			 marche. Lie le ticket s'il y en a un. Vérifie d'abord que la branche est à jour avec sa \
-			 base et que les vérifications passent en local.",
+			"prompts.group.delivery",
+			"prompts.label.openPr",
+			"Open the pull request for this branch: what changes, why, and the proof that it \
+			 works. Link the ticket if there is one. First check that the branch is up to date with its \
+			 base and that the checks pass locally.",
 		),
 		prompt(
 			"review-comments",
-			"Revue",
-			"Traiter les retours de revue",
-			"Récupère les commentaires laissés sur la pull request de cette branche — humains comme \
-			 automatiques. Pour chacun : applique la correction si elle est pertinente, sinon réponds \
-			 en expliquant pourquoi tu ne l'appliques pas. Résous les fils traités. \
-			 Termine par un commit + push des corrections.",
+			"prompts.group.review",
+			"prompts.label.reviewComments",
+			"Fetch the comments left on this branch's pull request — human as well as \
+			 automated. For each one: apply the fix if it is relevant, otherwise reply \
+			 explaining why you are not applying it. Resolve the threads you handled. \
+			 Finish with a commit + push of the fixes.",
 		),
 		prompt(
 			"pr-health",
-			"Revue",
-			"État de santé de la PR",
-			"Fais le point sur la pull request de cette branche : état de l'intégration continue, \
-			 conflits avec sa base, relecteurs en attente, commentaires non résolus, taille du diff. \
-			 Dis-moi ce qui bloque la fusion et dans quel ordre traiter.",
+			"prompts.group.review",
+			"prompts.label.prHealth",
+			"Take stock of this branch's pull request: continuous integration status, \
+			 conflicts with its base, pending reviewers, unresolved comments, diff size. \
+			 Tell me what is blocking the merge and in which order to handle it.",
 		),
 		prompt(
 			"ci-red",
-			"Correctifs",
-			"L'intégration continue est rouge",
-			"L'intégration continue échoue sur cette branche. Trouve quels travaux échouent, lis les \
-			 journaux, identifie la cause réelle (pas le symptôme) et corrige. \
-			 Rejoue les tests concernés en local pour vérifier avant de pousser.",
+			"prompts.group.fixes",
+			"prompts.label.ciRed",
+			"Continuous integration is failing on this branch. Find which jobs fail, read the \
+			 logs, identify the real cause (not the symptom) and fix it. \
+			 Re-run the affected tests locally to check before pushing.",
 		),
 		prompt(
 			"conflicts",
-			"Correctifs",
-			"Résoudre les conflits avec la base",
-			"Fusionne la branche de base dans celle-ci et résous les conflits. Pour chaque conflit, \
-			 garde l'intention des deux côtés plutôt que d'écraser. \
-			 Vérifie ensuite que la construction et les tests des parties touchées passent.",
+			"prompts.group.fixes",
+			"prompts.label.conflicts",
+			"Merge the base branch into this one and resolve the conflicts. For each conflict, \
+			 keep the intent of both sides rather than overwriting. \
+			 Then check that the build and the tests of the affected parts pass.",
 		),
 		prompt(
 			"self-qa",
-			"Qualité",
-			"Recette de ce qui a été fait",
-			"Vérifie sur pièces ce qui a été implémenté sur cette branche : exécute réellement le \
-			 code et produis les preuves (captures, appels d'API, cas adversariaux) plutôt qu'une \
-			 relecture. Signale tout écart avec le comportement attendu.",
+			"prompts.group.quality",
+			"prompts.label.selfQa",
+			"Verify on the evidence what was implemented on this branch: actually run the \
+			 code and produce the proof (screenshots, API calls, adversarial cases) rather than a \
+			 read-through. Report any gap with the expected behaviour.",
 		),
 		prompt(
 			"conventions",
-			"Qualité",
-			"Vérifier les conventions",
-			"Vérifie que les fichiers modifiés respectent les conventions du dépôt, telles que sa \
-			 documentation et le code existant les établissent. \
-			 Applique les corrections évidentes, liste celles qui demandent un arbitrage.",
+			"prompts.group.quality",
+			"prompts.label.conventions",
+			"Check that the modified files follow the repository's conventions, as its \
+			 documentation and existing code establish them. \
+			 Apply the obvious fixes, list the ones that need a decision.",
 		),
 		prompt(
 			"tests",
-			"Qualité",
-			"Compléter les tests",
-			"Regarde ce que cette branche change et dis-moi ce qui n'est pas couvert par les tests. \
-			 Écris les tests manquants qui ont de la valeur (cas limites, régressions possibles), \
-			 pas du test de façade. Lance-les pour vérifier qu'ils passent.",
+			"prompts.group.quality",
+			"prompts.label.tests",
+			"Look at what this branch changes and tell me what is not covered by tests. \
+			 Write the missing tests that have value (edge cases, possible regressions), \
+			 not window-dressing tests. Run them to check that they pass.",
 		),
 		prompt(
 			"prod-error",
-			"Investigation",
-			"Investiguer une erreur de production",
-			"Investigue cette erreur de production : reproduis-la si possible, remonte à la cause \
-			 dans le code, et propose un correctif avec son test de non-régression. \
-			 Vérifie d'abord si un ticket existe déjà pour elle.",
+			"prompts.group.investigation",
+			"prompts.label.prodError",
+			"Investigate this production error: reproduce it if possible, trace it back to the cause \
+			 in the code, and propose a fix with its regression test. \
+			 First check whether a ticket already exists for it.",
 		),
 		prompt(
 			"ticket",
-			"Investigation",
-			"Implémenter un ticket",
-			"Implémente le ticket correspondant à cette branche : lis-le, repère ce qu'il touche, \
-			 puis procède par couches — données, service, interface — en vérifiant à chaque étape. \
-			 Respecte les conventions du dépôt.",
+			"prompts.group.investigation",
+			"prompts.label.ticket",
+			"Implement the ticket matching this branch: read it, find what it touches, \
+			 then proceed layer by layer — data, service, interface — checking at each step. \
+			 Follow the repository's conventions.",
 		),
 	]
 }
@@ -232,26 +235,26 @@ pub fn list() -> Vec<Prompt> {
 
 fn write(prompts: Vec<Prompt>) -> Result<Vec<Prompt>> {
 	std::fs::create_dir_all(config_dir())
-		.map_err(|e| CockpitError::msg(format!("Dossier de configuration : {e}")))?;
+		.map_err(|e| CockpitError::msg(crate::i18n::tf("prompts.configFolderError", &[("error", &e)])))?;
 	let raw = toml::to_string_pretty(&Library {
 		prompts: prompts.clone(),
 	})
-	.map_err(|e| CockpitError::msg(format!("Sérialisation : {e}")))?;
+	.map_err(|e| CockpitError::msg(crate::i18n::tf("prompts.serializeError", &[("error", &e)])))?;
 	std::fs::write(library_path(), raw)
-		.map_err(|e| CockpitError::msg(format!("Écriture de prompts.toml : {e}")))?;
+		.map_err(|e| CockpitError::msg(crate::i18n::tf("prompts.writeError", &[("error", &e)])))?;
 	Ok(prompts)
 }
 
 /// Crée ou remplace un prompt. Un `id` vide en fabrique un depuis le libellé.
 pub fn save(mut prompt: Prompt) -> Result<Vec<Prompt>> {
 	if prompt.label.trim().is_empty() || prompt.text.trim().is_empty() {
-		return Err(CockpitError::msg("Un prompt a besoin d'un libellé et d'un texte."));
+		return Err(CockpitError::msg(crate::i18n::t("prompts.labelAndTextRequired")));
 	}
 	if prompt.id.trim().is_empty() {
 		prompt.id = slug(&prompt.label);
 	}
 	if prompt.group.trim().is_empty() {
-		prompt.group = "Mes prompts".into();
+		prompt.group = crate::i18n::t("prompts.group.mine");
 	}
 
 	let mut prompts = list();

@@ -1,6 +1,7 @@
 import clsx from "clsx";
 import { AlertTriangle, GitBranch, GitMerge, GitPullRequest } from "lucide-react";
 import { useMemo } from "react";
+import { useTranslation } from "react-i18next";
 import { Badge, Dot, Freshness, Skeleton } from "@/components/ui";
 import { api } from "@/lib/ipc";
 import type { ProjectHealth } from "@/lib/types";
@@ -16,6 +17,7 @@ import { useAllSessions, useCockpit } from "@/app/store";
  * basculer dessus.
  */
 export function ProjectsHealth() {
+	const { t } = useTranslation("components3");
 	const { activeProject, switchProject, go } = useCockpit();
 	const sessions = useAllSessions();
 
@@ -59,7 +61,7 @@ export function ProjectsHealth() {
 		<div className="panel flex flex-col divide-y divide-line-soft">
 			<div className="flex items-center gap-2 px-3 py-1.5">
 				<span className="flex-1 text-[10px] font-semibold tracking-[0.09em] text-ink-faint uppercase">
-					Projets
+					{t("projectsHealth.title")}
 				</span>
 				<Freshness
 					at={health.updatedAt}
@@ -80,7 +82,7 @@ export function ProjectsHealth() {
 						<button
 							type="button"
 							onClick={() => (active ? go("worktrees") : switchProject(project.id))}
-							title={active ? "Ouvrir les worktrees" : "Basculer sur ce projet"}
+							title={active ? t("projectsHealth.openWorktrees") : t("projectsHealth.switch")}
 							className="focus-ring min-w-0 flex-1 rounded text-left"
 						>
 							<span
@@ -91,7 +93,7 @@ export function ProjectsHealth() {
 							>
 								{project.name}
 								{active ? (
-									<span className="ml-1.5 text-[10px] text-accent-soft">actif</span>
+									<span className="ml-1.5 text-[10px] text-accent-soft">{t("projectsHealth.active")}</span>
 								) : null}
 							</span>
 							<span className="block truncate font-mono text-[10px] text-ink-faint">
@@ -105,14 +107,14 @@ export function ProjectsHealth() {
 							{live > 0 ? (
 								<span
 									className="flex items-center gap-1 text-success"
-									title="agents actifs"
+									title={t("projectsHealth.liveAgents")}
 								>
 									<Dot tone="success" pulse />
 									{live}
 								</span>
 							) : null}
 							{project.ciFailing > 0 ? (
-								<span className="flex items-center gap-1 text-critical" title="CI en échec">
+								<span className="flex items-center gap-1 text-critical" title={t("projectsHealth.ciFailing")}>
 									<AlertTriangle size={11} />
 									{project.ciFailing}
 								</span>
@@ -120,7 +122,7 @@ export function ProjectsHealth() {
 							{project.readyToMerge > 0 ? (
 								<span
 									className="flex items-center gap-1 text-success"
-									title="prêtes à merger"
+									title={t("projectsHealth.readyToMerge")}
 								>
 									<GitMerge size={11} />
 									{project.readyToMerge}
@@ -129,26 +131,26 @@ export function ProjectsHealth() {
 							{project.openPrs > 0 ? (
 								<span
 									className="flex items-center gap-1 text-ink-faint"
-									title="PR ouvertes"
+									title={t("projectsHealth.openPrs")}
 								>
 									<GitPullRequest size={11} />
 									{project.openPrs}
 								</span>
 							) : null}
-							<span className="flex items-center gap-1 text-ink-faint" title="worktrees">
+							<span className="flex items-center gap-1 text-ink-faint" title={t("projectsHealth.worktrees")}>
 								<GitBranch size={11} />
 								{project.worktrees}
 							</span>
 							{project.dirty > 0 ? (
 								<span
 									className="text-warning"
-									title="worktrees avec du travail non commité"
+									title={t("projectsHealth.dirtyHint")}
 								>
-									{project.dirty} sales
+									{t("projectsHealth.dirty", { count: project.dirty })}
 								</span>
 							) : null}
 							{project.unpushed > 0 ? (
-								<span className="text-info" title="worktrees avec des commits non poussés">
+								<span className="text-info" title={t("projectsHealth.unpushed")}>
 									↑{project.unpushed}
 								</span>
 							) : null}
@@ -156,7 +158,7 @@ export function ProjectsHealth() {
 							    projet : on montre ce qu'on a, en disant que c'est partiel. */}
 							{project.error ? (
 								<span title={project.error}>
-									<Badge tone="warning">partiel</Badge>
+									<Badge tone="warning">{t("projectsHealth.partial")}</Badge>
 								</span>
 							) : null}
 						</div>

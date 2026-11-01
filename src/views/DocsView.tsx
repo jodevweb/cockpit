@@ -28,6 +28,7 @@ import { api } from "@/lib/ipc";
 import type { DocEntry } from "@/lib/types";
 import { usePersistentState, useAsync } from "@/lib/useAsync";
 import { useCockpit } from "@/app/store";
+import { useTranslation } from "react-i18next";
 
 /**
  * Icône par nature de document.
@@ -54,6 +55,7 @@ function iconOf(doc: DocEntry) {
  */
 export function DocsView() {
 	const { worktrees, focus, clearFocus, notify, go, reloadWorktrees } = useCockpit();
+	const { t } = useTranslation("views");
 	const [query, setQuery] = useState("");
 	const [selectedPath, setSelectedPath] = useState<string | null>(null);
 	const [layout, setLayout] = usePersistentState<"grid" | "list">("docs.layout", "grid");
@@ -165,9 +167,9 @@ export function DocsView() {
 						icon={ArrowLeft}
 						variant="outline"
 						onClick={() => setSelectedPath(null)}
-						title="Retour à la mosaïque (Échap)"
+						title={t("docs.backToGrid")}
 					>
-						Documents
+						{t("docs.title")}
 					</Button>
 					<div className="min-w-0 flex-1">
 						<h1 className="truncate text-[14px] leading-tight font-semibold tracking-[-0.01em]">
@@ -180,7 +182,7 @@ export function DocsView() {
 					<Button
 						icon={GitBranch}
 						onClick={() => go("worktrees", { worktreePath: selected.worktreePath })}
-						title="Ouvrir le worktree d'origine"
+						title={t("docs.openWorktree")}
 					>
 						{selected.worktree}
 					</Button>
@@ -190,7 +192,7 @@ export function DocsView() {
 							void api.system.reveal(selected.path).catch((error) => notify(String(error)));
 						}}
 					>
-						Révéler
+						{t("docs.reveal")}
 					</Button>
 				</div>
 				<div className="min-h-0 flex-1 overflow-y-auto px-6 py-5">
@@ -214,8 +216,8 @@ export function DocsView() {
 	return (
 		<>
 			<ViewHeader
-				title="Documents"
-				subtitle="Livrables des agents : plans, revues, QA, wiki — sur tous les worktrees."
+				title={t("docs.title")}
+				subtitle={t("docs.subtitle")}
 				actions={
 					<>
 						<Freshness at={docs.updatedAt} loading={docs.loading} onReload={refresh} />
@@ -225,14 +227,14 @@ export function DocsView() {
 								icon={LayoutGrid}
 								active={layout === "grid"}
 								onClick={() => setLayout("grid")}
-								title="Mosaïque"
+								title={t("docs.grid")}
 							/>
 							<Button
 								size="sm"
 								icon={List}
 								active={layout === "list"}
 								onClick={() => setLayout("list")}
-								title="Liste"
+								title={t("docs.list")}
 							/>
 						</div>
 					</>
@@ -241,12 +243,12 @@ export function DocsView() {
 
 			<div className="hairline-b flex flex-wrap items-center gap-2 px-4 py-2">
 				<div className="w-72">
-					<SearchField value={query} onChange={setQuery} placeholder="Chercher…" />
+					<SearchField value={query} onChange={setQuery} placeholder={t("docs.search")} />
 				</div>
 
 				<div className="flex flex-wrap items-center gap-1">
 					<Button size="sm" active={category === null} onClick={() => setCategory(null)}>
-						Tout · {all.length}
+						{t("docs.all", { count: all.length })}
 					</Button>
 					{categories.map(([name, count]) => (
 						<Button
@@ -265,17 +267,17 @@ export function DocsView() {
 						size="sm"
 						active={groupBy === "category"}
 						onClick={() => setGroupBy("category")}
-						title="Regrouper par famille de document"
+						title={t("docs.groupByTypeTitle")}
 					>
-						Par type
+						{t("docs.groupByType")}
 					</Button>
 					<Button
 						size="sm"
 						active={groupBy === "worktree"}
 						onClick={() => setGroupBy("worktree")}
-						title="Regrouper par worktree d'origine"
+						title={t("docs.groupByWorktreeTitle")}
 					>
-						Par worktree
+						{t("docs.groupByWorktree")}
 					</Button>
 				</div>
 			</div>
@@ -285,8 +287,8 @@ export function DocsView() {
 				{items.length === 0 && !docs.loading ? (
 					<Empty
 						icon={FileText}
-						message="Aucun document"
-						hint="Les fichiers de .claude/work, .claude/reviews, docs/ et les markdown racine apparaissent ici."
+						message={t("docs.empty")}
+						hint={t("docs.emptyHint")}
 					/>
 				) : null}
 
@@ -345,6 +347,7 @@ export function DocsView() {
 }
 
 function DocCard({ doc, onOpen }: { doc: DocEntry; onOpen: () => void }) {
+	const { t } = useTranslation("views");
 	const Icon = iconOf(doc);
 	return (
 		<button
@@ -358,7 +361,7 @@ function DocCard({ doc, onOpen }: { doc: DocEntry; onOpen: () => void }) {
 				<span className="min-w-0 flex-1 truncate text-[12.5px] font-medium text-ink">
 					{doc.name}
 				</span>
-				{doc.untracked ? <Badge tone="warning">non versionné</Badge> : null}
+				{doc.untracked ? <Badge tone="warning">{t("docs.untracked")}</Badge> : null}
 			</div>
 
 			{doc.preview ? (
@@ -366,7 +369,7 @@ function DocCard({ doc, onOpen }: { doc: DocEntry; onOpen: () => void }) {
 					{doc.preview}
 				</p>
 			) : (
-				<p className="text-[10px] text-ink-faint/60 italic">Aucun aperçu</p>
+				<p className="text-[10px] text-ink-faint/60 italic">{t("docs.noPreview")}</p>
 			)}
 
 			<div className="mt-auto flex items-center gap-1.5 pt-1">

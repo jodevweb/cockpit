@@ -12,6 +12,7 @@ import {
 	Trash2,
 } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { DiffView } from "@/components/LogView";
 import {
 	Badge,
@@ -58,6 +59,7 @@ function WorktreeRow({
 	usage?: DiskUsage;
 	onSelect: () => void;
 }) {
+	const { t } = useTranslation("views");
 	const dirty = dirtyCount(tree);
 	return (
 		<Row selected={selected} onClick={onSelect}>
@@ -84,12 +86,12 @@ function WorktreeRow({
 			</div>
 			<div className="mt-1 flex items-center gap-2 pl-[18px] font-mono text-[10px]">
 				{dirty > 0 ? (
-					<span className="text-warning">{dirty} modif.</span>
+					<span className="text-warning">{t("worktrees.row.dirty", { count: dirty })}</span>
 				) : (
-					<span className="text-ink-faint/70">propre</span>
+					<span className="text-ink-faint/70">{t("worktrees.row.clean")}</span>
 				)}
 				{tree.status.conflicted > 0 ? (
-					<span className="text-critical">{tree.status.conflicted} conflits</span>
+					<span className="text-critical">{t("worktrees.row.conflicts", { count: tree.status.conflicted })}</span>
 				) : null}
 				{tree.status.ahead > 0 ? (
 					<span className="text-info">↑{tree.status.ahead}</span>
@@ -100,21 +102,26 @@ function WorktreeRow({
 					// rien. Montrer le total ferait supprimer des dossiers pour rien.
 					<span
 						className="text-warning"
-						title={`${bytes(usage.bytes)} au total, dont ${bytes(usage.builds)} de sorties de build et ${bytes(usage.dependencies)} de dépendances — ces dernières sont clonées depuis le store pnpm et ne coûtent presque rien.`}
+						title={t("worktrees.row.usageHint", {
+							total: bytes(usage.bytes),
+							builds: bytes(usage.builds),
+							dependencies: bytes(usage.dependencies),
+						})}
 					>
-						{bytes(usage.builds)} de build
+						{t("worktrees.row.builds", { size: bytes(usage.builds) })}
 					</span>
 				) : null}
 				{tree.status.behind > 0 ? (
 					<span className="text-ink-faint">↓{tree.status.behind}</span>
 				) : null}
-				{tree.isMain ? <Badge tone="accent">principal</Badge> : null}
+				{tree.isMain ? <Badge tone="accent">{t("worktrees.row.main")}</Badge> : null}
 			</div>
 		</Row>
 	);
 }
 
 function WorktreeDetail({ tree }: { tree: Worktree }) {
+	const { t } = useTranslation("views");
 	const { notify, go, hasConnector, config } = useCockpit();
 	// Sans commande déclarée, le geste disparaît : lancer un `pnpm dev` qui
 	// n'existe peut-être pas ici ouvrirait un terminal sur une erreur.
@@ -157,14 +164,14 @@ function WorktreeDetail({ tree }: { tree: Worktree }) {
 					<div className="truncate font-mono text-[10px] text-ink-faint">{tree.path}</div>
 				</div>
 				<Button icon={FolderOpen} onClick={() => guard(api.system.openEditor(tree.path))}>
-					Éditeur
+					{t("worktrees.detail.editor")}
 				</Button>
 				<Button
 					icon={Terminal}
 					onClick={() => openTerminal(tree.path)}
-					title="Shell sur ce worktree, dans le panneau de travail (⌘⇧T)"
+					title={t("worktrees.detail.terminalHint")}
 				>
-					Terminal
+					{t("worktrees.detail.terminal")}
 				</Button>
 				{/* Sans le CLI, ce bouton ne peut que rendre une erreur : il attend
 				    qu'il soit installé plutôt que de le laisser découvrir au clic. */}
@@ -172,9 +179,9 @@ function WorktreeDetail({ tree }: { tree: Worktree }) {
 					<Button
 						icon={Bot}
 						onClick={() => openAgent(tree.path)}
-						title="Lancer un agent ici, sans quitter le cockpit"
+						title={t("worktrees.detail.agentHint")}
 					>
-						Agent
+						{t("worktrees.detail.agent")}
 					</Button>
 				) : null}
 				{/* Les gestes git là où l'on travaille, et pas seulement dans l'écran
@@ -204,9 +211,9 @@ function WorktreeDetail({ tree }: { tree: Worktree }) {
 							if (live) showTab(tree.path, { kind: "terminal", id: live.id });
 							else openTerminal(tree.path, { command: devCommand, label: "dev" });
 						}}
-						title={`${devCommand} dans un terminal du panneau — ⌃C pour l'arrêter`}
+						title={t("worktrees.detail.devHint", { command: devCommand })}
 					>
-						Dev
+						{t("worktrees.detail.dev")}
 					</Button>
 				) : null}
 			</div>
@@ -214,7 +221,7 @@ function WorktreeDetail({ tree }: { tree: Worktree }) {
 			<div className="grid min-h-0 flex-1 grid-cols-2 divide-x divide-line-soft overflow-hidden">
 				<div className="flex min-h-0 flex-col overflow-y-auto p-3">
 					<Section
-						title="Modifications"
+						title={t("worktrees.detail.changes")}
 						count={changes.data?.length}
 						actions={
 							// Le spinner s'ajoute au bouton au lieu de le remplacer :
@@ -234,7 +241,7 @@ function WorktreeDetail({ tree }: { tree: Worktree }) {
 						    rafraîchissement. */}
 						{(changes.data ?? []).length === 0 && !changes.initial ? (
 							<p className="px-1 py-3 text-[11px] text-ink-faint">
-								Arbre propre — rien à comparer.
+								{t("worktrees.detail.cleanTree")}
 							</p>
 						) : (
 							<div className="flex flex-col gap-0.5">
@@ -253,7 +260,7 @@ function WorktreeDetail({ tree }: { tree: Worktree }) {
 											{change.path}
 										</span>
 										{change.state === "untracked" ? (
-											<Badge>nouveau</Badge>
+											<Badge>{t("worktrees.detail.new")}</Badge>
 										) : (
 											<span className="shrink-0 font-mono text-[10px]">
 												<span className="text-success">+{change.added}</span>{" "}
@@ -266,7 +273,7 @@ function WorktreeDetail({ tree }: { tree: Worktree }) {
 						)}
 					</Section>
 
-					<Section title="Derniers commits" className="mt-4">
+					<Section title={t("worktrees.detail.recentCommits")} className="mt-4">
 						<div className="flex flex-col gap-1">
 							{commits.data?.map((commit) => (
 								<div key={commit.sha} className="flex items-start gap-2 px-1 py-1">
@@ -286,12 +293,12 @@ function WorktreeDetail({ tree }: { tree: Worktree }) {
 
 					{/* Les livrables de QA vivent dans le worktree : c'est ici qu'on les
 					    consulte, plutôt que dans le Finder. */}
-					<Section title="Self-QA" className="mt-4">
+					<Section title={t("worktrees.detail.selfQa")} className="mt-4">
 						<QaGallery path={tree.path} />
 					</Section>
 
 					{sessions.length > 0 ? (
-						<Section title="Sessions d'agents" count={sessions.length} className="mt-4">
+						<Section title={t("worktrees.detail.agentSessions")} count={sessions.length} className="mt-4">
 							<div className="flex flex-col gap-0.5">
 								{sessions.slice(0, 8).map((session) => (
 									<button
@@ -325,7 +332,7 @@ function WorktreeDetail({ tree }: { tree: Worktree }) {
 									{selectedFile}
 								</span>
 								<Button size="sm" onClick={() => setSelectedFile(null)}>
-									Fermer
+									{t("worktrees.detail.close")}
 								</Button>
 							</div>
 							<div className="min-h-0 flex-1 overflow-auto">
@@ -336,15 +343,15 @@ function WorktreeDetail({ tree }: { tree: Worktree }) {
 								) : diff.error ? (
 									<ErrorNote error={diff.error} />
 								) : (
-									<DiffView diff={diff.data ?? "Fichier non suivi — aucun diff."} />
+									<DiffView diff={diff.data ?? t("worktrees.detail.untracked")} />
 								)}
 							</div>
 						</>
 					) : (
 						<Empty
 							icon={FileDiff}
-							message="Choisis un fichier"
-							hint="Le diff s'affiche ici, comparé à HEAD."
+							message={t("worktrees.detail.pickFile")}
+							hint={t("worktrees.detail.pickFileHint")}
 						/>
 					)}
 				</div>
@@ -354,6 +361,7 @@ function WorktreeDetail({ tree }: { tree: Worktree }) {
 }
 
 export function WorktreesView() {
+	const { t } = useTranslation("views");
 	const {
 		worktrees,
 		worktreesError,
@@ -436,15 +444,17 @@ export function WorktreesView() {
 	return (
 		<>
 			<ViewHeader
-				title={mode === "fleet" ? "Flotte" : "Worktrees"}
+				title={mode === "fleet" ? t("worktrees.fleet") : t("worktrees.title")}
 				// Le total des builds vit dans le sous-titre, pas dans un écran à
 				// part : c'est le chiffre qui explique un disque qui se remplit, et
 				// il n'était visible nulle part. Rien tant que la mesure n'est pas
 				// revenue — un « 0 Go » le temps du calcul se lirait comme un
 				// verdict.
-				subtitle={`${worktrees.length} arbres · ${shortPath(mainRepo, 2)}${
-					buildsTotal > 0 ? ` · ${bytes(buildsTotal)} de builds effaçables` : ""
-				}`}
+				subtitle={[
+					t("worktrees.trees", { count: worktrees.length }),
+					shortPath(mainRepo, 2),
+					...(buildsTotal > 0 ? [t("worktrees.erasableBuilds", { size: bytes(buildsTotal) })] : []),
+				].join(" · ")}
 				actions={
 					<>
 						<Freshness
@@ -459,19 +469,18 @@ export function WorktreesView() {
 								setSelectedPath(null);
 							}}
 						>
-							Flotte
+							{t("worktrees.fleet")}
 						</Button>
 						<Button active={mode === "list"} onClick={() => setMode("list")}>
-							Liste
+							{t("worktrees.list")}
 						</Button>
 						<Button
 							icon={GitBranch}
 							onClick={() => {
 								void promptText({
-									title: "Nouveau worktree",
-									message:
-										"Nom de la branche. Existante ou non — son workspace s'ouvrira dès qu'elle sera prête.",
-									placeholder: "feat/ma-feature",
+									title: t("worktrees.create.title"),
+									message: t("worktrees.create.message"),
+									placeholder: t("worktrees.create.placeholder"),
 								}).then((branch) => {
 									if (!branch) return;
 									// Créer un worktree n'est jamais le but : on vient y
@@ -490,9 +499,9 @@ export function WorktreesView() {
 									).catch(() => undefined);
 								});
 							}}
-							title="Sortir une branche en worktree — la commande vient des Réglages"
+							title={t("worktrees.create.hint")}
 						>
-							Nouveau
+							{t("worktrees.create.button")}
 						</Button>
 						{worktreesLoading ? <Spinner /> : null}
 						<Button size="sm" icon={RefreshCw} onClick={reloadWorktrees} />
@@ -515,7 +524,7 @@ export function WorktreesView() {
 				<div className="flex min-h-0 flex-1">
 					<div className="hairline-r flex w-72 shrink-0 flex-col bg-base">
 						<div className="p-2.5">
-							<SearchField value={query} onChange={setQuery} placeholder="Filtrer…" />
+							<SearchField value={query} onChange={setQuery} placeholder={t("worktrees.filter")} />
 						</div>
 						<div className="min-h-0 flex-1 overflow-y-auto px-1.5 pb-3">
 							{filtered.map((tree) => (
@@ -541,22 +550,22 @@ export function WorktreesView() {
 											className="w-full justify-center"
 											onClick={() => {
 												void confirm({
-													title: `Vider les builds de ${selected.folderName} ?`,
-													message: `${bytes(poids.builds)} de sorties de build et de caches sont effacés — rien d'autre. Le code, l'historique et les fichiers non commités ne sont pas touchés : une commande de build les refait à l'identique.`,
-													confirmLabel: "Vider",
+													title: t("worktrees.purge.title", { name: selected.folderName }),
+													message: t("worktrees.purge.message", { size: bytes(poids.builds) }),
+													confirmLabel: t("worktrees.purge.confirm"),
 												}).then((ok) => {
 													if (!ok) return;
 													void api.worktrees
 														.purgeBuilds(selected.path, false)
 														.then((rendu) => {
-															notify(`${bytes(rendu)} rendus au disque.`);
+															notify(t("worktrees.purge.done", { size: bytes(rendu) }));
 															usage.reload();
 														})
 														.catch((error) => notify(String(error)));
 												});
 											}}
 										>
-											Vider {bytes(poids.builds)} de builds
+											{t("worktrees.purge.button", { size: bytes(poids.builds) })}
 										</Button>
 									</div>
 								);
@@ -575,10 +584,9 @@ export function WorktreesView() {
 									onClick={() => {
 										const name = selected.folderName;
 										void confirm({
-											title: `Supprimer le worktree ${name} ?`,
-											message:
-												"Le dossier et son infra locale sont retirés — bases, buckets et stack Docker, ce qui prend souvent une à deux minutes. La branche distante reste en place.",
-											confirmLabel: "Supprimer",
+											title: t("worktrees.remove.title", { name }),
+											message: t("worktrees.remove.message"),
+											confirmLabel: t("worktrees.remove.confirm"),
 											danger: true,
 										}).then((ok) => {
 											if (!ok) return;
@@ -595,7 +603,7 @@ export function WorktreesView() {
 										});
 									}}
 								>
-									Supprimer {selected.folderName}
+									{t("worktrees.remove.button", { name: selected.folderName })}
 								</Button>
 							</div>
 						) : null}
@@ -604,7 +612,7 @@ export function WorktreesView() {
 					{selected ? (
 						<WorktreeDetail tree={selected} />
 					) : (
-						<Empty icon={GitBranch} message="Aucun worktree" />
+						<Empty icon={GitBranch} message={t("worktrees.none")} />
 					)}
 				</div>
 			)}

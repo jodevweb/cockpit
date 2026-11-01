@@ -193,7 +193,7 @@ pub fn approval(cwd: &str) -> Approval {
 pub fn approve(cwd: &str) -> crate::error::Result<Approval> {
 	let servers = read_servers(&Path::new(cwd).join(FILE));
 	if servers.is_empty() {
-		return Err(crate::error::CockpitError::msg("Ce dépôt ne déclare aucun serveur MCP."));
+		return Err(crate::error::CockpitError::msg(crate::i18n::t("mcp.noServers")));
 	}
 	let mut approvals = load_approvals();
 	approvals.insert(repo_identity(cwd), serde_json::Value::String(fingerprint(&servers)));
@@ -291,15 +291,14 @@ pub fn describe(name: &str, config: &serde_json::Value, sandboxed: bool) -> Serv
 	let blocker = if !sandboxed {
 		String::new()
 	} else if local {
-		format!("adresse locale : dans un conteneur, {url} désigne le conteneur, pas le poste")
-			.replace(&format!("{url}"), "cette adresse")
+		crate::i18n::t("mcp.blockerLocal")
 	} else if !command.is_empty() && !IN_IMAGE.contains(&command) {
-		format!("`{command}` n'est pas dans l'image d'isolation")
+		crate::i18n::tf("mcp.blockerNotInImage", &[("command", &command)])
 	} else if !url.is_empty()
 		&& config.get("headers").is_none()
 		&& !PROVISIONED.contains(&name)
 	{
-		"autorisation OAuth : elle vit dans le trousseau du poste, absent du conteneur".to_string()
+		crate::i18n::t("mcp.blockerOauth")
 	} else {
 		String::new()
 	};
@@ -370,7 +369,7 @@ mod tests {
 			true,
 		);
 		assert!(!s.reachable);
-		assert!(s.blocker.contains("adresse locale"));
+		assert!(s.blocker.contains("local address"));
 	}
 
 	#[test]
@@ -382,7 +381,7 @@ mod tests {
 
 		let bun = describe("maison", &json!({ "command": "bun" }), true);
 		assert!(!bun.reachable);
-		assert!(bun.blocker.contains("image d'isolation"));
+		assert!(bun.blocker.contains("isolation image"));
 	}
 
 	#[test]

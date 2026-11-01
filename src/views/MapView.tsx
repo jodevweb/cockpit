@@ -33,6 +33,8 @@ import {
 } from "lucide-react";
 import { AnimatePresence, motion } from "motion/react";
 import { createContext, useContext, useEffect, useMemo, useRef, useState } from "react";
+import { useTranslation } from "react-i18next";
+import { t as translate } from "@/i18n";
 import { useBlockers, type Blocker } from "@/app/blockers";
 import { useAgentRuns, type AgentRun } from "@/app/agents";
 import { useCockpit } from "@/app/store";
@@ -145,6 +147,7 @@ export function MapView() {
 }
 
 function World() {
+	const { t } = useTranslation("views");
 	const { projectList, activeProject, switchProject, missions, go, config } = useCockpit();
 	const { runs: all, pendingFor } = useAgentRuns();
 	// Un agent libre ne relève d'aucune île : il vit dans son propre écran.
@@ -207,12 +210,12 @@ function World() {
 				branches: branch ? [branch] : [],
 			});
 		}
-		if (open.length > 5) card("more:tickets", "more", "arrive", { kind: "more", label: `${open.length - 5} autres tickets`, view: "today" }, { tickets: [], branches: [] });
+		if (open.length > 5) card("more:tickets", "more", "arrive", { kind: "more", label: t("map.more.tickets", { count: open.length - 5 }), view: "today" }, { tickets: [], branches: [] });
 		const issues = sentry.data ?? [];
 		for (const item of issues.slice(0, 2)) {
 			card(`sentry:${item.id}`, "sentry", "arrive", { kind: "sentry", item }, { tickets: [], branches: [] });
 		}
-		if (issues.length > 2) card("more:sentry", "more", "arrive", { kind: "more", label: `${issues.length - 2} autres erreurs`, view: "observability" }, { tickets: [], branches: [] });
+		if (issues.length > 2) card("more:sentry", "more", "arrive", { kind: "more", label: t("map.more.errors", { count: issues.length - 2 }), view: "observability" }, { tickets: [], branches: [] });
 
 		// En cours : les missions, puis les chantiers — ceux qu'on pilote à la main
 		// comme ceux qu'une mission a ouverts.
@@ -251,7 +254,7 @@ function World() {
 				url: pr.url,
 			});
 		}
-		if (all.length > 6) card("more:prs", "more", "livrer", { kind: "more", label: `${all.length - 6} autres PR`, view: "delivery" }, { tickets: [], branches: [] });
+		if (all.length > 6) card("more:prs", "more", "livrer", { kind: "more", label: t("map.more.prs", { count: all.length - 6 }), view: "delivery" }, { tickets: [], branches: [] });
 		for (const item of (deploys.data ?? []).slice(0, 2)) {
 			card(`deploy:${item.id}`, "deploy", "livrer", { kind: "deploy", item }, { tickets: [], branches: [] });
 		}
@@ -262,7 +265,7 @@ function World() {
 			card(`monitor:${item.id}`, "monitor", "prod", { kind: "monitor", item }, { tickets: [], branches: [] });
 		}
 		return out;
-	}, [tickets.data, sentry.data, missions, groups, prs.data, deploys.data, monitors.data, doneStates, activeProject?.linearTeamKey, reviews]);
+	}, [tickets.data, sentry.data, missions, groups, prs.data, deploys.data, monitors.data, doneStates, activeProject?.linearTeamKey, reviews, t]);
 
 	// ── Les îles ────────────────────────────────────────────────────────
 	const pulses = useMemo(() => {
@@ -289,7 +292,7 @@ function World() {
 	const islands: Array<IslandInput<CardData>> = useMemo(() => {
 		const list: ProjectView[] = projectList.length > 0
 			? projectList
-			: [{ id: "local", name: config?.mainRepo?.split("/").pop() ?? "Projet" } as ProjectView];
+			: [{ id: "local", name: config?.mainRepo?.split("/").pop() ?? t("map.defaultProject") } as ProjectView];
 		const activeId = activeProject?.id ?? list[0]?.id;
 		return list.map((project) => ({
 			id: project.id,
@@ -297,7 +300,7 @@ function World() {
 			open: project.id === activeId,
 			cards: project.id === activeId ? cards : [],
 		}));
-	}, [projectList, activeProject?.id, cards, config?.mainRepo]);
+	}, [projectList, activeProject?.id, cards, config?.mainRepo, t]);
 
 	const placed = useMemo(() => place(islands), [islands]);
 	const edges = useMemo<Edge[]>(() => {
@@ -453,7 +456,7 @@ function World() {
 					{/* Où l'on est, et de quoi remonter : c'est aussi la navigation. */}
 					<nav className="absolute bottom-4 left-1/2 z-10 flex -translate-x-1/2 items-center gap-0.5 rounded-xl bg-raised p-1 shadow-[var(--shadow-pop)]">
 						<Crumb current={altitude.level === "world" && !chantier} onClick={() => { setChantier(null); setAltitude({ level: "world" }); }}>
-							<MapIcon size={12} /> Tous les projets
+							<MapIcon size={12} /> {t("map.allProjects")}
 						</Crumb>
 						{openIsland ? (
 							<>
@@ -494,7 +497,7 @@ function World() {
 								className="absolute inset-x-4 top-3 bottom-16 z-20 flex flex-col overflow-hidden rounded-[var(--radius-panel)] bg-base shadow-[var(--shadow-pop)]"
 							>
 								<header className="hairline-b flex items-center gap-2 bg-surface px-3 py-2">
-									<span className="text-[12.5px] font-semibold text-ink">{openGroup.mission?.role ?? "Chantier"}</span>
+									<span className="text-[12.5px] font-semibold text-ink">{openGroup.mission?.role ?? t("map.chantier")}</span>
 									<span className="font-mono text-[11px] text-ink-faint">{openGroup.label}</span>
 									<span className="ml-auto" />
 									<Button
@@ -505,9 +508,9 @@ function World() {
 											go("workspace");
 										}}
 									>
-										Ouvrir le workspace
+										{t("map.openWorkspace")}
 									</Button>
-									<Button size="sm" icon={X} onClick={() => setChantier(null)} title="Revenir à la carte" />
+									<Button size="sm" icon={X} onClick={() => setChantier(null)} title={t("map.backToMap")} />
 								</header>
 								<ChantierMap cwd={openGroup.cwd} runs={openGroup.runs} active />
 							</motion.section>
@@ -530,8 +533,8 @@ function regionSummary(region: RegionId, cards: Array<WorldCard<CardData>>): { b
 	switch (region) {
 		case "arrive":
 			return {
-				big: `${count("ticket")} ticket${count("ticket") > 1 ? "s" : ""}`,
-				alert: count("sentry") > 0 ? `${count("sentry")} erreur${count("sentry") > 1 ? "s" : ""} à trier` : null,
+				big: translate("views:map.summary.tickets", { count: count("ticket") }),
+				alert: count("sentry") > 0 ? translate("views:map.summary.errorsToTriage", { count: count("sentry") }) : null,
 			};
 		case "encours": {
 			const agents = mine
@@ -542,17 +545,31 @@ function regionSummary(region: RegionId, cards: Array<WorldCard<CardData>>): { b
 				0,
 			);
 			return {
-				big: `${agents} agent${agents > 1 ? "s" : ""}`,
-				alert: clashes > 0 ? `${clashes} collision${clashes > 1 ? "s" : ""}` : `${count("mission")} mission${count("mission") > 1 ? "s" : ""} · ${count("chantier")} chantier${count("chantier") > 1 ? "s" : ""}`,
+				big: translate("views:map.summary.agents", { count: agents }),
+				alert:
+					clashes > 0
+						? translate("views:map.summary.collisions", { count: clashes })
+						: `${translate("views:map.summary.missions", { count: count("mission") })} · ${translate("views:map.summary.chantiers", { count: count("chantier") })}`,
 			};
 		}
 		case "livrer": {
 			const red = mine.filter((card) => card.data.payload.kind === "pr" && card.data.payload.pr.ciState === "failing").length;
-			return { big: `${count("pr")} PR`, alert: red > 0 ? `${red} CI rouge${red > 1 ? "s" : ""}` : null };
+			return {
+				big: translate("views:map.summary.prs", { count: count("pr") }),
+				alert: red > 0 ? translate("views:map.summary.redCi", { count: red }) : null,
+			};
 		}
 		case "prod": {
 			const down = mine.filter((card) => card.data.payload.kind === "monitor" && card.data.payload.item.severity === "critical").length;
-			return { big: down > 0 ? `${down} en panne` : count("monitor") > 0 ? "en ligne" : "—", alert: null };
+			return {
+				big:
+					down > 0
+						? translate("views:map.summary.down", { count: down })
+						: count("monitor") > 0
+							? translate("views:map.summary.online")
+							: "—",
+				alert: null,
+			};
 		}
 	}
 }
@@ -609,10 +626,11 @@ const TONE = {
 
 /** Épinglé au-dessus de la carte : ce qui arrête une machine, où que l'on regarde. */
 function Waiting({ items }: { items: Blocker[] }) {
+	const { t } = useTranslation("views");
 	if (items.length === 0) return null;
 	return (
 		<div className="hairline-b flex shrink-0 items-center gap-2 overflow-x-auto bg-surface px-3 py-2">
-			<span className="shrink-0 font-mono text-[10px] tracking-[0.08em] text-ink-faint uppercase">Ce qui t'attend</span>
+			<span className="shrink-0 font-mono text-[10px] tracking-[0.08em] text-ink-faint uppercase">{t("map.waiting")}</span>
 			{items.slice(0, 6).map((item) => (
 				<button
 					key={item.key}
@@ -644,6 +662,7 @@ interface IslandData extends Record<string, unknown> {
 
 function IslandNode({ data }: NodeProps<Node<IslandData>>) {
 	const band = useBand();
+	const { t } = useTranslation("views");
 	const { openProject } = useMapActions();
 	const tint = data.color ? `#${data.color.replace(/^#/, "")}` : "var(--color-accent)";
 
@@ -656,7 +675,7 @@ function IslandNode({ data }: NodeProps<Node<IslandData>>) {
 				// Une île repliée se lit surtout de haut : ses lettres sont faites pour
 				// le zoom de la vue d'ensemble, pas pour le sien.
 				className="focus-ring flex h-full w-full flex-col items-start justify-between rounded-[40px] bg-surface/70 p-10 text-left shadow-[var(--shadow-card)] transition-shadow hover:shadow-[var(--shadow-pop)]"
-				title={`Ouvrir ${data.name}`}
+				title={t("map.island.open", { name: data.name })}
 			>
 				<span className="flex items-center gap-3 text-[52px] leading-none font-bold tracking-tight text-ink">
 					<span className="size-5 rounded-full" style={{ background: tint }} />
@@ -666,19 +685,23 @@ function IslandNode({ data }: NodeProps<Node<IslandData>>) {
 					{pulse && pulse.agents + pulse.missions > 0 ? (
 						<>
 							<span>
-								<span className="font-mono text-ink">{pulse.agents}</span> agent{pulse.agents > 1 ? "s" : ""}
-								{pulse.working > 0 ? <span className="text-success"> · {pulse.working} au travail</span> : null}
+								<span className="font-mono text-ink">{pulse.agents}</span>{" "}
+								{t("map.island.agentsWord", { count: pulse.agents })}
+								{pulse.working > 0 ? (
+									<span className="text-success"> · {t("map.island.working", { count: pulse.working })}</span>
+								) : null}
 							</span>
 							<span>
-								<span className="font-mono text-ink">{pulse.missions}</span> mission{pulse.missions > 1 ? "s" : ""}
+								<span className="font-mono text-ink">{pulse.missions}</span>{" "}
+								{t("map.island.missionsWord", { count: pulse.missions })}
 							</span>
-							{pulse.awaiting > 0 ? <span className="font-semibold text-warning">{pulse.awaiting} t'attend{pulse.awaiting > 1 ? "ent" : ""}</span> : null}
+							{pulse.awaiting > 0 ? <span className="font-semibold text-warning">{t("map.island.awaiting", { count: pulse.awaiting })}</span> : null}
 						</>
 					) : (
-						<span>calme</span>
+						<span>{t("map.island.calm")}</span>
 					)}
 				</span>
-				<span className="text-[22px] font-medium text-accent-soft">Ouvrir ce projet →</span>
+				<span className="text-[22px] font-medium text-accent-soft">{t("map.island.openProject")}</span>
 			</button>
 		);
 	}
@@ -701,17 +724,17 @@ function IslandNode({ data }: NodeProps<Node<IslandData>>) {
 				<span className="text-[190px] leading-none font-bold tracking-tight text-ink">{data.name}</span>
 				{data.counts ? (
 					<span className="font-mono text-[90px] text-accent">
-						{data.counts.agents} agent{data.counts.agents > 1 ? "s" : ""} · {data.counts.prs} PR
+						{t("map.summary.agents", { count: data.counts.agents })} · {t("map.summary.prs", { count: data.counts.prs })}
 					</span>
 				) : null}
 				{data.counts && data.counts.waiting > 0 ? (
 					<span className="text-[80px] font-semibold text-warning">
-						{data.counts.waiting} chose{data.counts.waiting > 1 ? "s" : ""} t'attend{data.counts.waiting > 1 ? "ent" : ""}
+						{t("map.island.thingsWaiting", { count: data.counts.waiting })}
 					</span>
 				) : null}
 				{data.counts && data.counts.errors > 0 ? (
 					<span className="text-[80px] font-semibold text-critical">
-						{data.counts.errors} erreur{data.counts.errors > 1 ? "s" : ""} en prod
+						{t("map.island.prodErrors", { count: data.counts.errors })}
 					</span>
 				) : null}
 			</div>
@@ -729,6 +752,7 @@ interface RegionData extends Record<string, unknown> {
 
 function RegionNode({ data }: NodeProps<Node<RegionData>>) {
 	const band = useBand();
+	const { t } = useTranslation("views");
 	const { goRegion } = useMapActions();
 	const live = data.id === "encours";
 	return (
@@ -743,7 +767,7 @@ function RegionNode({ data }: NodeProps<Node<RegionData>>) {
 				type="button"
 				onClick={() => goRegion(data.id)}
 				className="focus-ring absolute top-3.5 left-4 flex items-baseline gap-2 rounded text-left"
-				title="Cadrer cette région"
+				title={t("map.region.frame")}
 			>
 				<span className={clsx("text-[13px] font-semibold tracking-[0.02em] uppercase", live ? "text-accent" : "text-ink-muted")}>{data.label}</span>
 				<span className="text-[12px] text-ink-faint">{data.hint}</span>
@@ -759,21 +783,15 @@ function RegionNode({ data }: NodeProps<Node<RegionData>>) {
 			</div>
 			{data.count === 0 ? (
 				<p className="absolute inset-x-6 top-20 text-center text-[12px] leading-relaxed text-ink-faint">
-					{EMPTY[data.id]}
+					{t(`map.region.empty.${data.id}`)}
 				</p>
 			) : null}
 		</div>
 	);
 }
 
-const EMPTY: Record<RegionId, string> = {
-	arrive: "Aucun ticket à toi, aucune erreur à trier.",
-	encours: "Rien ne tourne. Lance un agent ou une mission depuis un ticket.",
-	livrer: "Aucune PR ouverte.",
-	prod: "Branche une supervision (Better Stack) dans les Réglages pour voir la prod ici.",
-};
-
 function CardNode({ data }: NodeProps<Node<CardData>>) {
+	const { t } = useTranslation("views");
 	const band = useBand();
 	const payload = data.payload;
 	return (
@@ -787,12 +805,12 @@ function CardNode({ data }: NodeProps<Node<CardData>>) {
 		>
 			<Handle type="target" position={Position.Left} className="!size-1.5 !border-0 !bg-line" />
 			{payload.kind === "ticket" ? <TicketCard item={payload.item} taken={payload.taken} /> : null}
-			{payload.kind === "sentry" ? <FeedCard item={payload.item} icon={Siren} eyebrow="Sentry · à trier" tone="critical" /> : null}
+			{payload.kind === "sentry" ? <FeedCard item={payload.item} icon={Siren} eyebrow={t("map.card.sentry")} tone="critical" /> : null}
 			{payload.kind === "mission" ? <MissionCard mission={payload.mission} /> : null}
 			{payload.kind === "chantier" ? <ChantierCard group={payload.group} /> : null}
 			{payload.kind === "pr" ? <PrCard pr={payload.pr} mine={payload.mine} review={payload.review} /> : null}
-			{payload.kind === "deploy" ? <FeedCard item={payload.item} icon={Rocket} eyebrow="Déploiement" /> : null}
-			{payload.kind === "monitor" ? <FeedCard item={payload.item} icon={AlertTriangle} eyebrow="Supervision" /> : null}
+			{payload.kind === "deploy" ? <FeedCard item={payload.item} icon={Rocket} eyebrow={t("map.card.deploy")} /> : null}
+			{payload.kind === "monitor" ? <FeedCard item={payload.item} icon={AlertTriangle} eyebrow={t("map.card.monitor")} /> : null}
 			{payload.kind === "more" ? <MoreCard label={payload.label} view={payload.view} /> : null}
 			<Handle type="source" position={Position.Right} className="!size-1.5 !border-0 !bg-line" />
 		</div>
@@ -823,6 +841,7 @@ function Pill({ children, tone }: { children: React.ReactNode; tone: "accent" | 
 }
 
 function TicketCard({ item, taken }: { item: FeedItem; taken: boolean }) {
+	const { t } = useTranslation("views");
 	return (
 		<div className={clsx("flex h-full flex-col gap-1.5 px-3.5 py-3", taken && "opacity-70")}>
 			<div className="flex items-center gap-2">
@@ -830,7 +849,7 @@ function TicketCard({ item, taken }: { item: FeedItem; taken: boolean }) {
 				<Eyebrow>
 					{item.id} · {item.status}
 				</Eyebrow>
-				{taken ? <span className="ml-auto"><Pill tone="accent">en mission</Pill></span> : null}
+				{taken ? <span className="ml-auto"><Pill tone="accent">{t("map.ticket.inMission")}</Pill></span> : null}
 			</div>
 			<button
 				type="button"
@@ -885,6 +904,7 @@ const TASK_TONE: Record<string, string> = {
 };
 
 function MissionCard({ mission }: { mission: Mission }) {
+	const { t } = useTranslation("views");
 	const { go } = useCockpit();
 	const waiting = awaitsHuman(mission);
 	// Rendue : l'exécutant a livré, que le maître l'ait déjà recomposée ou non.
@@ -897,7 +917,10 @@ function MissionCard({ mission }: { mission: Mission }) {
 		>
 			<span className="flex w-full items-center gap-2">
 				<ListChecks size={12} className="shrink-0 text-accent" />
-				<Eyebrow>Mission{mission.ticket ? ` · ${mission.ticket}` : ""}</Eyebrow>
+				<Eyebrow>
+					{t("map.mission.eyebrow")}
+					{mission.ticket ? ` · ${mission.ticket}` : ""}
+				</Eyebrow>
 				<span className="ml-auto">
 					<Pill tone={waiting ? "warning" : mission.state === "failed" ? "critical" : mission.state === "done" ? "success" : "accent"}>
 						{MISSION_STATE_LABELS[mission.state]}
@@ -917,23 +940,31 @@ function MissionCard({ mission }: { mission: Mission }) {
 						))}
 					</span>
 					<span className="text-[11px] text-ink-muted">
-						{done} / {mission.tasks.length} tâche{mission.tasks.length > 1 ? "s" : ""} rendue{done > 1 ? "s" : ""}
+						{t("map.mission.tasksDelivered", { count: mission.tasks.length, done })}
 					</span>
 				</span>
 			) : (
-				<span className="mt-auto text-[11px] text-ink-muted">{waiting ? "attend ton accord pour démarrer" : "le maître prépare le découpage"}</span>
+				<span className="mt-auto text-[11px] text-ink-muted">{waiting ? t("map.mission.awaitingApproval") : t("map.mission.planning")}</span>
 			)}
 		</button>
 	);
 }
 
 function agentLine(run: AgentRun): { label: string; tone: string } {
-	if (!run.running) return { label: "arrêté", tone: "text-ink-faint" };
-	if (run.thinking) return { label: run.activity ? `travaille · ${run.activity}` : "travaille", tone: "text-success" };
-	return { label: "attend", tone: "text-info" };
+	if (!run.running) return { label: translate("views:map.agent.stopped"), tone: "text-ink-faint" };
+	if (run.thinking) {
+		return {
+			label: run.activity
+				? translate("views:map.agent.workingOn", { activity: run.activity })
+				: translate("views:map.agent.working"),
+			tone: "text-success",
+		};
+	}
+	return { label: translate("views:map.agent.waiting"), tone: "text-info" };
 }
 
 function ChantierCard({ group }: { group: WorkGroup }) {
+	const { t } = useTranslation("views");
 	const { openChantier } = useMapActions();
 	const clashes = collisions(group.runs).length;
 	const ask = group.runs.find((run) => run.turns.find((turn) => turn.kind === "user"))?.turns.find((turn) => turn.kind === "user")?.text;
@@ -942,11 +973,11 @@ function ChantierCard({ group }: { group: WorkGroup }) {
 			type="button"
 			onClick={() => openChantier(group.cwd)}
 			className="focus-ring flex h-full flex-col gap-1.5 px-3.5 py-3 text-left"
-			title="Ouvrir la carte du chantier"
+			title={t("map.chantierCard.open")}
 		>
 			<span className="flex w-full items-center gap-2">
 				<Bot size={12} className="shrink-0 text-accent" />
-				<Eyebrow>{group.mission ? `${group.mission.role} · ` : "Chantier · "}{group.label}</Eyebrow>
+				<Eyebrow>{group.mission ? group.mission.role : t("map.chantier")} · {group.label}</Eyebrow>
 				{clashes > 0 ? (
 					<span className="ml-auto">
 						<Pill tone="critical">
@@ -957,7 +988,7 @@ function ChantierCard({ group }: { group: WorkGroup }) {
 				) : null}
 			</span>
 			<span className="line-clamp-2 text-[13px] leading-snug font-semibold text-ink">
-				{ask ? ask.split("\n")[0] : `${group.runs.length} agent${group.runs.length > 1 ? "s" : ""} sur ce worktree`}
+				{ask ? ask.split("\n")[0] : t("map.chantierCard.agentsOnWorktree", { count: group.runs.length })}
 			</span>
 			<span className="mt-auto flex flex-col gap-0.5">
 				{group.runs.slice(0, 3).map((run, index) => {
@@ -970,9 +1001,9 @@ function ChantierCard({ group }: { group: WorkGroup }) {
 						</span>
 					);
 				})}
-				{group.runs.length > 3 ? <span className="text-[10.5px] text-ink-faint">+ {group.runs.length - 3} autres</span> : null}
+				{group.runs.length > 3 ? <span className="text-[10.5px] text-ink-faint">{t("map.chantierCard.others", { count: group.runs.length - 3 })}</span> : null}
 				{group.runs.length === 0 && group.terminals.length > 0 ? (
-					<span className="text-[11px] text-ink-muted">{group.terminals.length} terminal{group.terminals.length > 1 ? "aux" : ""}</span>
+					<span className="text-[11px] text-ink-muted">{t("map.chantierCard.terminals", { count: group.terminals.length })}</span>
 				) : null}
 			</span>
 		</button>
@@ -980,6 +1011,7 @@ function ChantierCard({ group }: { group: WorkGroup }) {
 }
 
 function PrCard({ pr, mine, review }: { pr: PullRequest; mine: boolean; review: Review | null }) {
+	const { t } = useTranslation("views");
 	const startReview = useReviewFlow();
 	const { notify } = useCockpit();
 	const moved = movedSince(review, pr.headSha);
@@ -988,26 +1020,26 @@ function PrCard({ pr, mine, review }: { pr: PullRequest; mine: boolean; review: 
 		void startReview(pr.number, kind).catch((error) => notify(String(error).replace(/^(Ipc)?Error:\s*/, "")));
 	const ci =
 		pr.ciState === "failing"
-			? { label: "CI rouge", tone: "critical" as const }
+			? { label: t("map.pr.ciFailing"), tone: "critical" as const }
 			: pr.ciState === "success"
-				? { label: "CI verte", tone: "success" as const }
-				: { label: "CI en cours", tone: "neutral" as const };
+				? { label: t("map.pr.ciPassing"), tone: "success" as const }
+				: { label: t("map.pr.ciRunning"), tone: "neutral" as const };
 	const reviewLabel =
 		pr.reviewDecision === "APPROVED"
-			? "approuvée"
+			? t("map.pr.approved")
 			: pr.reviewDecision === "CHANGES_REQUESTED"
-				? "changements demandés"
+				? t("map.pr.changesRequested")
 				: pr.reviewRequestLogins.length > 0
-					? `relecture : ${pr.reviewRequestLogins.join(", ")}`
-					: "pas encore relue";
+					? t("map.pr.reviewRequested", { logins: pr.reviewRequestLogins.join(", ") })
+					: t("map.pr.notReviewed");
 	return (
 		<div className="flex h-full flex-col gap-1.5 px-3.5 py-3">
 			<div className="flex items-center gap-2">
 				<GitPullRequest size={12} className={clsx("shrink-0", mine ? "text-accent" : "text-ink-faint")} />
 				<Eyebrow>
 					#{pr.number} · {pr.author}
-					{mine ? " · sortie ici" : ""}
-					{pr.isDraft ? " · brouillon" : ""}
+					{mine ? ` · ${t("map.pr.fromHere")}` : ""}
+					{pr.isDraft ? ` · ${t("map.pr.draft")}` : ""}
 				</Eyebrow>
 				<span className="ml-auto">
 					<Pill tone={ci.tone}>{ci.label}</Pill>
@@ -1024,16 +1056,22 @@ function PrCard({ pr, mine, review }: { pr: PullRequest; mine: boolean; review: 
 				{/* Ta revue avant tout le reste : c'est le geste qu'on vient faire. */}
 				{moved ? (
 					<Button size="sm" variant="solid" icon={ScanSearch} onClick={() => relaunch("verification")}>
-						Revérifier
+						{t("map.pr.recheck")}
 					</Button>
 				) : !review && !mine ? (
 					<Button size="sm" icon={ScanSearch} onClick={() => relaunch("revue")}>
-						Relire
+						{t("map.pr.review")}
 					</Button>
 				) : null}
 				<span className="min-w-0 flex-1 truncate text-[11px] text-ink-muted">
 					{last
-						? `revue · tour ${last.number} · ${last.verdict === "merge" ? "à fusionner" : `${last.findings.length} point${last.findings.length > 1 ? "s" : ""}`}`
+						? t("map.pr.reviewRound", {
+								round: last.number,
+								verdict:
+									last.verdict === "merge"
+										? t("map.pr.toMerge")
+										: t("map.pr.findings", { count: last.findings.length }),
+							})
 						: `${reviewLabel} · ${fromSeconds((Date.now() - Date.parse(pr.createdAt)) / 1000)}`}
 				</span>
 				<PrActions

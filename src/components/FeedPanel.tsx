@@ -1,6 +1,8 @@
+import { metaLabel } from "@/lib/feedMeta";
 import clsx from "clsx";
 import { ExternalLink, Inbox, RefreshCw, SlidersHorizontal, X } from "lucide-react";
 import { useEffect, useMemo, useState, type ReactNode } from "react";
+import { useTranslation } from "react-i18next";
 import {
 	Badge,
 	Button,
@@ -13,6 +15,7 @@ import {
 	Spinner,
 } from "@/components/ui";
 import { PayloadView } from "@/components/PayloadView";
+import { t as translate } from "@/i18n";
 import { fromIso, truncate } from "@/lib/format";
 import { api } from "@/lib/ipc";
 import { onChange, type ChangeTopic } from "@/lib/refresh";
@@ -42,13 +45,7 @@ export interface FeedSource {
  */
 type SortId = "recent" | "oldest" | "severity" | "status" | "title";
 
-const SORTS: Array<{ id: SortId; label: string }> = [
-	{ id: "recent", label: "Plus récent" },
-	{ id: "oldest", label: "Plus ancien" },
-	{ id: "severity", label: "Gravité" },
-	{ id: "status", label: "Statut" },
-	{ id: "title", label: "Titre" },
-];
+const SORTS: SortId[] = ["recent", "oldest", "severity", "status", "title"];
 
 const SEVERITY_RANK: Record<string, number> = {
 	critical: 0,
@@ -57,12 +54,7 @@ const SEVERITY_RANK: Record<string, number> = {
 	success: 3,
 };
 
-const SEVERITY_LABEL: Record<string, string> = {
-	critical: "Critique",
-	warning: "Avertissement",
-	info: "Info",
-	success: "OK",
-};
+const SEVERITIES = new Set(["critical", "warning", "info", "success"]);
 
 /** Une dimension de filtrage et ses valeurs, avec leur fréquence. */
 interface Facet {
@@ -105,7 +97,12 @@ function buildFacets(items: FeedItem[]): Facet[] {
 
 		facets.push({
 			key,
-			label: key === "severity" ? "Gravité" : key === "status" ? "Statut" : key.slice(5),
+			label:
+				key === "severity"
+					? translate("components2:feedPanel.sort.severity")
+					: key === "status"
+						? translate("components2:feedPanel.sort.status")
+						: metaLabel(key.slice(5)),
 			values: [...values.entries()]
 				.map(([value, count]) => ({ value, count }))
 				.sort((a, b) => b.count - a.count),
@@ -134,6 +131,7 @@ export function FeedPanel({
 	pollMs?: number;
 	emptyHint?: string;
 }) {
+	const { t } = useTranslation("components2");
 	const [sourceId, setSourceId] = useState(sources[0]?.id ?? "");
 	const [query, setQuery] = useState("");
 	const [selectedId, setSelectedId] = useState<string | null>(null);
@@ -264,11 +262,11 @@ export function FeedPanel({
 							value={sort}
 							onChange={(event) => setSort(event.target.value as SortId)}
 							className="focus-ring rounded-lg border border-line-soft bg-surface px-1.5 py-1 text-[10px] text-ink-muted"
-							title="Ordre d'affichage"
+							title={t("feedPanel.sortHint")}
 						>
 							{SORTS.map((option) => (
-								<option key={option.id} value={option.id}>
-									{option.label}
+								<option key={option} value={option}>
+									{t(`feedPanel.sort.${option}`)}
 								</option>
 							))}
 						</select>
@@ -280,7 +278,8 @@ export function FeedPanel({
 								active={showFilters || activeCount > 0}
 								onClick={() => setShowFilters((open) => !open)}
 							>
-								Filtres{activeCount > 0 ? ` · ${activeCount}` : ""}
+								{t("feedPanel.filters")}
+								{activeCount > 0 ? ` · ${activeCount}` : ""}
 							</Button>
 						) : null}
 
@@ -289,7 +288,7 @@ export function FeedPanel({
 								size="sm"
 								icon={X}
 								onClick={() => setPicked({})}
-								title="Tout effacer"
+								title={t("feedPanel.clearAll")}
 							/>
 						) : null}
 
@@ -322,7 +321,9 @@ export function FeedPanel({
 													)}
 												>
 													{facet.key === "severity"
-														? (SEVERITY_LABEL[value] ?? value)
+														? SEVERITIES.has(value)
+															? t(`feedPanel.severity.${value}`)
+															: value
 														: truncate(value, 28)}
 													<span className="ml-1 text-ink-faint/70">{count}</span>
 												</button>
@@ -349,7 +350,7 @@ export function FeedPanel({
 					) : null}
 					{feed.error ? <ErrorNote error={feed.error} onRetry={feed.reload} /> : null}
 					{!feed.error && items.length === 0 && !feed.loading ? (
-						<Empty icon={Inbox} message="Rien à afficher" hint={emptyHint} />
+						<Empty icon={Inbox} message={t("feedPanel.empty")} hint={emptyHint} />
 					) : null}
 					{items.map((item) => (
 						<Row
@@ -420,7 +421,7 @@ export function FeedPanel({
 								.map((field) => (
 									<div key={field.label} className="bg-base px-3 py-2">
 										<div className="text-[10px] tracking-[0.06em] text-ink-faint uppercase">
-											{field.label}
+											{metaLabel(field.label)}
 										</div>
 										<div className="text-selectable truncate font-mono text-[11px] text-ink-muted">
 											{field.value}
@@ -434,7 +435,7 @@ export function FeedPanel({
 						</div>
 					</>
 				) : (
-					<Empty icon={Inbox} message="Sélectionne un élément" />
+					<Empty icon={Inbox} message={t("feedPanel.selectItem")} />
 				)}
 			</div>
 		</div>

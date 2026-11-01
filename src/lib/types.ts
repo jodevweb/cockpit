@@ -1,3 +1,6 @@
+import { t } from "@/i18n";
+import { lazyList } from "./language";
+
 /** Miroir des structures sérialisées par le backend Rust (camelCase). */
 
 export type Severity = "critical" | "warning" | "info" | "success";
@@ -1322,26 +1325,50 @@ export interface Oracle {
  * disparaître.
  */
 export const TRIGGERS = [
-	{ id: "ci_red", label: "La CI passe au rouge", hint: "sur un changement en vol" },
+	{
+		id: "ci_red",
+		get label() {
+			return t("lib:types.triggers.ci_red.label");
+		},
+		get hint() {
+			return t("lib:types.triggers.ci_red.hint");
+		},
+	},
 	{
 		id: "review_changes_requested",
-		label: "Une revue demande des changements",
-		hint: "sur une PR ouverte",
+		get label() {
+			return t("lib:types.triggers.review_changes_requested.label");
+		},
+		get hint() {
+			return t("lib:types.triggers.review_changes_requested.hint");
+		},
 	},
 	{
 		id: "pr_stale",
-		label: "Un changement n'a plus bougé",
-		hint: "au-delà du délai — les brouillons sont ignorés",
+		get label() {
+			return t("lib:types.triggers.pr_stale.label");
+		},
+		get hint() {
+			return t("lib:types.triggers.pr_stale.hint");
+		},
 	},
 	{
 		id: "schedule",
-		label: "À intervalle régulier",
-		hint: "sans signal, sur l'horloge — le seul qui parte sans qu'il se passe rien",
+		get label() {
+			return t("lib:types.triggers.schedule.label");
+		},
+		get hint() {
+			return t("lib:types.triggers.schedule.hint");
+		},
 	},
 	{
 		id: "linear_assigned",
-		label: "Un ticket Linear m'est assigné",
-		hint: "repart si sa priorité change ensuite — la condition juge laquelle",
+		get label() {
+			return t("lib:types.triggers.linear_assigned.label");
+		},
+		get hint() {
+			return t("lib:types.triggers.linear_assigned.hint");
+		},
 	},
 ] as const;
 
@@ -1378,10 +1405,30 @@ export interface PermanenceRule {
  * « commenter », on autorise « commenter là ».
  */
 export const COMMENT_SCOPES = [
-	{ id: "i_commented", label: "j'ai déjà commenté sur cette PR" },
-	{ id: "i_allowed", label: "j'ai autorisé cette PR nommément" },
-	{ id: "hers", label: "la PR a été ouverte par la Permanence" },
-	{ id: "mine", label: "la PR est de moi" },
+	{
+		id: "i_commented",
+		get label() {
+			return t("lib:types.commentScopes.i_commented");
+		},
+	},
+	{
+		id: "i_allowed",
+		get label() {
+			return t("lib:types.commentScopes.i_allowed");
+		},
+	},
+	{
+		id: "hers",
+		get label() {
+			return t("lib:types.commentScopes.hers");
+		},
+	},
+	{
+		id: "mine",
+		get label() {
+			return t("lib:types.commentScopes.mine");
+		},
+	},
 ] as const;
 
 /** Signature apposée en fin de commentaire. Non configurable, côté Rust aussi. */
@@ -1396,13 +1443,9 @@ export interface CommentPower {
 }
 
 /** Ce qu'elle ne fera jamais, quoi qu'on coche — en dur, ici comme en Rust. */
-export const NEVER = [
-	"approuver ou refuser une revue",
-	"assigner",
-	"fermer",
-	"fusionner",
-	"déployer",
-];
+export const NEVER: readonly string[] = lazyList(() =>
+	["review", "assign", "close", "merge", "deploy"].map((key) => t(`lib:types.never.${key}`)),
+);
 
 /**
  * Les gestes qu'on peut lui confier, un par un.
@@ -1412,14 +1455,54 @@ export const NEVER = [
  * règles et les oracles viennent du dépôt.
  */
 export const POWERS = [
-	{ id: "rerun_pipeline", label: "Relancer un pipeline" },
-	{ id: "create_branch", label: "Créer une branche" },
-	{ id: "open_draft_pr", label: "Ouvrir une PR en brouillon" },
-	{ id: "set_label", label: "Poser un label" },
-	{ id: "open_worktree", label: "Ouvrir un worktree" },
-	{ id: "start_agent", label: "Lancer un agent" },
-	{ id: "run_command", label: "Exécuter une commande du dépôt" },
-	{ id: "open_mission", label: "Ouvrir une mission pour écrire du code" },
+	{
+		id: "rerun_pipeline",
+		get label() {
+			return t("lib:types.powers.rerun_pipeline");
+		},
+	},
+	{
+		id: "create_branch",
+		get label() {
+			return t("lib:types.powers.create_branch");
+		},
+	},
+	{
+		id: "open_draft_pr",
+		get label() {
+			return t("lib:types.powers.open_draft_pr");
+		},
+	},
+	{
+		id: "set_label",
+		get label() {
+			return t("lib:types.powers.set_label");
+		},
+	},
+	{
+		id: "open_worktree",
+		get label() {
+			return t("lib:types.powers.open_worktree");
+		},
+	},
+	{
+		id: "start_agent",
+		get label() {
+			return t("lib:types.powers.start_agent");
+		},
+	},
+	{
+		id: "run_command",
+		get label() {
+			return t("lib:types.powers.run_command");
+		},
+	},
+	{
+		id: "open_mission",
+		get label() {
+			return t("lib:types.powers.open_mission");
+		},
+	},
 ] as const;
 
 /**

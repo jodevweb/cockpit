@@ -1,1 +1,246 @@
-{}
+{
+	"mobile": {
+		"common": {
+			"connecting": "Connexion…",
+			"back": "Retour",
+			"thisDevice": "Cet appareil",
+			"agent": "Agent",
+			"error": "Erreur {{status}}"
+		},
+		"tabs": {
+			"you": "À toi",
+			"agents": "Agents",
+			"missions": "Missions"
+		},
+		"pairing": {
+			"notPaired": "Cet appareil n'est pas encore appairé",
+			"title": "Appairer ce téléphone",
+			"help": "Sur le poste, ouvre Réglages → Accès mobile, et saisis le code affiché.",
+			"codePlaceholder": "CODE",
+			"submit": "Appairer"
+		},
+		"enroll": {
+			"done": "Face ID activé.",
+			"failed": "Clé d'accès : {{error}}"
+		},
+		"state": {
+			"toDecide_one": "t'attend",
+			"toDecide_other": "{{count}} à décider",
+			"working": "travaille",
+			"idle": "en attente",
+			"done": "terminé"
+		},
+		"tools": {
+			"bash": "Lancer une commande",
+			"write": "Écrire un fichier",
+			"edit": "Modifier un fichier",
+			"webFetch": "Lire une page web",
+			"mcp": "Utiliser {{name}} ({{server}})",
+			"other": "Utiliser {{tool}}"
+		},
+		"decision": {
+			"agentAsks": "{{agent}} demande",
+			"anAgentAsks": "Un agent demande",
+			"agentQuestion": "{{agent}} te pose une question",
+			"questionWaiting": "Une question t'attend",
+			"answer": "Répondre",
+			"deny": "Refuser",
+			"allow": "Autoriser"
+		},
+		"mission": {
+			"state": {
+				"planning": "Analyse",
+				"awaitingApproval": "Attend ton accord",
+				"running": "Exécution",
+				"integrating": "Intégration",
+				"failed": "Échouée",
+				"other": "En cours"
+			},
+			"task": {
+				"planned": "à lancer",
+				"running": "en cours",
+				"delivered": "livrée",
+				"integrated": "intégrée",
+				"failed": "échouée"
+			},
+			"progress_one": "{{done}} sur {{count}} tâche rendue",
+			"progress_other": "{{done}} sur {{count}} tâches rendues",
+			"approve": "Approuver le plan",
+			"paused": "En pause — elle se reprend depuis le poste.",
+			"pause": "Mettre en pause",
+			"stopAll": "Tout arrêter"
+		},
+		"agents": {
+			"browserOpen": "navigateur ouvert",
+			"emptyTitle": "Aucun agent ouvert",
+			"emptyHelp": "Ils se lancent depuis le poste."
+		},
+		"missions": {
+			"emptyTitle": "Aucune mission en cours",
+			"emptyHelp": "Elles se lancent depuis le poste."
+		},
+		"home": {
+			"decisions_one": "{{count}} décision t'attend",
+			"decisions_other": "{{count}} décisions t'attendent",
+			"working_one": "{{count}} agent au travail",
+			"working_other": "{{count}} agents au travail",
+			"noneWorking": "aucun agent ne travaille",
+			"noneOpen": "aucun agent ouvert",
+			"failedSection": "En échec",
+			"emptyTitle": "Rien ne t'attend",
+			"emptyWorking": "Tes agents avancent sans toi.",
+			"emptyCalm": "Tout est calme.",
+			"fleet": "La flotte",
+			"unreachable": "Le poste ne répond pas",
+			"unreachableTitle": "Injoignable"
+		},
+		"faceId": {
+			"off": "Face ID n'est pas activé",
+			"offHelp": "Sans lui, ce téléphone peut lire et refuser, jamais autoriser.",
+			"enable": "Activer Face ID",
+			"expired": "Le délai d'activation est passé : révoque ce téléphone sur le poste, puis appaire-le à nouveau."
+		},
+		"toast": {
+			"copied": "Copié.",
+			"denied": "Refusé.",
+			"allowed": "Autorisé.",
+			"approved": "Plan approuvé — les exécutants peuvent partir.",
+			"paused": "Mission suspendue — les exécutants sont coupés.",
+			"stopped": "Mission arrêtée. Le travail produit reste en place.",
+			"answered": "Répondu.",
+			"sent": "Envoyé."
+		},
+		"device": {
+			"label": "Appareil",
+			"notPaired": "Non appairé",
+			"armed": "Face ID est activé : ce téléphone peut autoriser, répondre et freiner.",
+			"unarmed": "Face ID n'est pas activé : ce téléphone peut lire et refuser, jamais autoriser.",
+			"notifications": "Notifications",
+			"ntfyHelp": "Dans l'app ntfy, abonne-toi à ce sujet, sur ce serveur.",
+			"copyTopic": "Copier le sujet",
+			"copyServer": "Copier le serveur",
+			"capabilities": "Ce que ce téléphone peut faire",
+			"canDo": "Lire, autoriser ou refuser un geste, répondre à un agent, approuver un plan, suspendre ou arrêter une mission.",
+			"cannotDo": "Lancer un agent, reprendre une mission et changer un réglage se font devant le poste."
+		},
+		"agent": {
+			"summary": "Résumé",
+			"thread": "Fil",
+			"screen": "Écran",
+			"jump": "↓ du nouveau",
+			"placeholder": "Répondre à l'agent…",
+			"send": "Envoyer"
+		},
+		"changes": {
+			"title": "Le constat · {{base}}",
+			"help": "Lu dans le dépôt, pas dans ce qu'il raconte.",
+			"root": "racine",
+			"deleted_one": "{{count}} supprimé",
+			"deleted_other": "{{count}} supprimés",
+			"created_one": "{{count}} créé",
+			"created_other": "{{count}} créés",
+			"modified_one": "{{count}} modifié",
+			"modified_other": "{{count}} modifiés",
+			"moreZones_one": "et {{count}} autre zone",
+			"moreZones_other": "et {{count}} autres zones"
+		},
+		"summary": {
+			"diagram": "Un schéma — il se dessine sur le poste.",
+			"before": "avant",
+			"after": "après",
+			"justSaid": "Ce qu'il vient de dire",
+			"conclusion": "Sa conclusion",
+			"working": "Il travaille",
+			"nothing": "Rien à montrer",
+			"silent": "Il n'a encore rien dit.",
+			"yourPrompt": "Ta consigne"
+		},
+		"thread": {
+			"actions_one": "{{count}} geste",
+			"actions_other": "{{count}} gestes",
+			"failed": "{{count}} en erreur",
+			"empty": "La conversation n'a pas commencé."
+		},
+		"screen": {
+			"live": "en direct",
+			"help": "La page que cet agent a sous les yeux, relue toutes les deux à trois secondes. Tu regardes ; pour y cliquer, c'est sur le poste.",
+			"stopped": "Son navigateur ne tourne plus."
+		},
+		"errors": {
+			"publicAccessDenied": "Accès public refusé.",
+			"unexpectedHost": "Hôte inattendu.",
+			"notPaired": "Appareil non appairé.",
+			"unknownDevice": "Appareil inconnu ou révoqué.",
+			"tooManyRequests": "Trop de requêtes.",
+			"pairingTailnetOnly": "L'appairage ne se fait que depuis le tailnet.",
+			"noPairing": "Aucun appairage en cours.",
+			"codeExpired": "Code expiré.",
+			"codeInvalid": "Code invalide.",
+			"passkeyExists": "Cet appareil a déjà une clé d'accès. Révoque-le sur le poste puis appaire-le à nouveau.",
+			"passkeyAlreadySet": "Cet appareil a déjà une clé d'accès.",
+			"enrollExpired": "Le délai pour activer Face ID est passé. Révoque cet appareil sur le poste puis appaire-le à nouveau.",
+			"noRegistration": "Aucun enregistrement en cours.",
+			"challengeExpired": "Défi expiré.",
+			"agentGone": "Cet agent n'est plus actif.",
+			"imagesOnly": "Seules les images se lisent d'ici.",
+			"imageNotFound": "Image introuvable.",
+			"outsideFolder": "Hors du dossier de cet agent.",
+			"imageTooLarge": "Image introuvable ou trop lourde.",
+			"browserNotRunning": "Son navigateur ne tourne pas.",
+			"denyLinkExpired": "Lien de refus expiré.",
+			"noPasskey": "Cet appareil n'a pas de clé d'accès : il ne peut que lire et refuser.",
+			"challengeUnknown": "Défi inconnu ou déjà consommé.",
+			"challengeOtherDevice": "Défi ouvert par un autre appareil.",
+			"invalidSignature": "Signature invalide.",
+			"noAgents": "Aucun agent en cours.",
+			"stateUnreadable": "État mobile illisible : {{error}}",
+			"stateWrite": "Écriture de l'état mobile : {{error}}",
+			"ntfyTokenFormat": "Un jeton ntfy commence par « tk_ » : celui-ci n'en est pas un. Le champ a peut-être été rempli automatiquement.",
+			"disabled": "L'accès mobile est coupé.",
+			"noTopic": "Aucun sujet ntfy configuré.",
+			"nothingSent": "Rien n'a été envoyé.",
+			"qr": "QR : {{error}}",
+			"funnelActive": "Tailscale Funnel est actif : il exposerait le cockpit sur Internet. Coupe-le (`tailscale funnel off`) avant d'activer l'accès mobile.",
+			"invalidOrigin": "Origine invalide : {{error}}",
+			"webauthn": "WebAuthn : {{error}}",
+			"port": "Port {{port}} : {{error}}"
+		},
+		"journal": {
+			"enabled": "Accès mobile activé",
+			"disabled": "Accès mobile coupé — appareils révoqués",
+			"deviceRevoked": "Appareil révoqué",
+			"devicePaired": "Appareil appairé",
+			"passkeyRegistered": "Clé d'accès enregistrée",
+			"toolDenied": "Outil refusé",
+			"toolAllowed": "Outil autorisé",
+			"signatureRejected": "Signature refusée",
+			"planApproved": "Plan approuvé depuis le mobile",
+			"missionPaused": "Mission suspendue depuis le mobile",
+			"missionStopped": "Mission arrêtée depuis le mobile",
+			"questionAnswered": "Question répondue",
+			"messageSent": "Message envoyé à un agent"
+		},
+		"remote": {
+			"missionStoppedNote": "Mission arrêtée depuis le mobile. Branches et worktrees sont conservés.",
+			"quickDenied": "Refusé."
+		},
+		"wake": {
+			"understandingTitle": "Le maître a lu le ticket",
+			"understandingDetail": "{{title}} — sa compréhension attend ta relecture",
+			"approachTitle": "Une approche attend ton accord",
+			"approachDetail": "{{title}} — avant tout découpage",
+			"planTitle": "Un plan attend ton accord",
+			"planDetail": "{{title}} — {{count}} tâche(s)",
+			"agentWaiting": "Un agent attend",
+			"request": "Demande : {{tool}}",
+			"deny": "Refuser",
+			"open": "Ouvrir",
+			"testBody": "Test du relais depuis les Réglages.",
+			"published": "Publié ({{status}}).",
+			"rejectedToken": "Refusé ({{status}}) — jeton de publication invalide.",
+			"rejectedRate": "Refusé ({{status}}) — trop de tentatives, le serveur temporise.",
+			"rejected": "Refusé ({{status}}).",
+			"unreachable": "Serveur ntfy injoignable : {{error}}"
+		}
+	}
+}

@@ -1,6 +1,7 @@
 import clsx from "clsx";
 import { Plus, Trash2 } from "lucide-react";
 import { useEffect, useState } from "react";
+import { Trans, useTranslation } from "react-i18next";
 import { Badge, Button, Field, KeyHint, Spinner, TextInput } from "@/components/ui";
 import { api } from "@/lib/ipc";
 import {
@@ -31,6 +32,7 @@ const PROTECTED_HINT = "main, master, dev, develop, staging, prod";
  * une règle absente ne déclenche rien, et ce n'est pas une erreur.
  */
 export function PermanenceSettings() {
+	const { t } = useTranslation("components3");
 	const { config, reloadConfig, notify } = useCockpit();
 	const [draft, setDraft] = useState<PermanenceConfig | null>(null);
 	// Sert l'indicateur discret de l'en-tête : sans bouton d'enregistrement, il
@@ -108,20 +110,25 @@ export function PermanenceSettings() {
 			kind: "command" as const,
 			key: command.id,
 			label: command.label || command.id,
-			group: "Commande du dépôt",
+			group: t("permanenceSettings.oracle.groupCommand"),
 		})),
 		...(config?.properties ?? []).map((property) => ({
 			kind: "property" as const,
 			key: property.id,
 			label: property.text || property.id,
-			group: "Propriété du projet",
+			group: t("permanenceSettings.oracle.groupProperty"),
 		})),
-		{ kind: "ci" as const, key: "success", label: "la CI passe au vert", group: "État de CI" },
+		{
+			kind: "ci" as const,
+			key: "success",
+			label: t("permanenceSettings.oracle.ciGreen"),
+			group: t("permanenceSettings.oracle.groupCi"),
+		},
 		{
 			kind: "comment" as const,
 			key: "posted",
-			label: "elle a posté un commentaire",
-			group: "GitHub",
+			label: t("permanenceSettings.oracle.commentPosted"),
+			group: t("permanenceSettings.oracle.groupGithub"),
 		},
 	];
 
@@ -129,22 +136,22 @@ export function PermanenceSettings() {
 		<div className="flex flex-col gap-5">
 			<p className="flex items-start gap-2 text-[11px] leading-relaxed text-ink-faint">
 				<span className="min-w-0 flex-1">
-				Un opérateur qui tient l'écosystème pendant que tu fais autre chose. Il ne décide
-				pas quoi construire : il répare, relance, met à jour — et il peut prouver qu'il a
-				réussi, parce que l'opération a des oracles que le produit n'a pas. Il ne tourne
-				que quand le cockpit est ouvert. <strong className="text-ink-muted">Tout se règle
-				sans bouton</strong> : ce que tu changes est pris en quittant le champ.
+				<Trans
+						t={t}
+						i18nKey="permanenceSettings.intro"
+						components={{ strong: <strong className="text-ink-muted" /> }}
+					/>
 				</span>
 				{saving ? <Spinner /> : null}
 			</p>
 
 			{/* ── Service ────────────────────────────────────────────────────── */}
 			<Block
-				title="Service"
-				scope="ce poste"
+				title={t("permanenceSettings.service.title")}
+				scope={t("permanenceSettings.scope.station")}
 				aside={
 					<label className="flex cursor-pointer items-center gap-2 text-[11px] text-ink-muted">
-						{draft.enabled ? "Activée" : "Désactivée"}
+						{draft.enabled ? t("permanenceSettings.service.enabled") : t("permanenceSettings.service.disabled")}
 						<input
 							type="checkbox"
 							className="accent-accent"
@@ -155,15 +162,17 @@ export function PermanenceSettings() {
 				}
 			>
 				<p className="text-[11px] leading-relaxed text-ink-faint">
-					Désactivée, l'entrée quitte le rail : un écran qui ne peut rien faire ne reste
-					pas au menu. On la rallume ici. Suspendre, en revanche, est un geste — il se
-					fait depuis l'écran, ou avec <KeyHint>⇧P</KeyHint>.
+					<Trans
+						t={t}
+						i18nKey="permanenceSettings.service.disabledHint"
+						components={{ kbd: <KeyHint>{""}</KeyHint> }}
+					/>
 				</p>
 
 				<div className="grid grid-cols-2 gap-3">
 					<Field
-						label="Heures de service"
-						hint="Vide = toujours. Une plage qui passe minuit se lit telle quelle."
+						label={t("permanenceSettings.service.hours")}
+						hint={t("permanenceSettings.service.hoursHint")}
 					>
 						<TextInput
 							value={draft.hours}
@@ -173,17 +182,17 @@ export function PermanenceSettings() {
 							onBlur={commitService}
 						/>
 					</Field>
-					<Field label="Cadence" hint="Entre deux regards. Vide = 2 minutes.">
+					<Field label={t("permanenceSettings.service.cadence")} hint={t("permanenceSettings.service.cadenceHint")}>
 						<Number
 							value={draft.cadenceMinutes}
-							suffix="min"
+							suffix={t("permanenceSettings.unit.minutes")}
 							onChange={(cadenceMinutes) => setDraft({ ...draft, cadenceMinutes })}
 							onCommit={commitService}
 						/>
 					</Field>
 					<Field
-						label="Plafond de jetons par jour"
-						hint="Celui qu'elle s'impose. Vide = 200 000."
+						label={t("permanenceSettings.service.dailyTokens")}
+						hint={t("permanenceSettings.service.dailyTokensHint")}
 					>
 						<Number
 							value={draft.dailyTokens}
@@ -191,7 +200,7 @@ export function PermanenceSettings() {
 							onCommit={commitService}
 						/>
 					</Field>
-					<Field label="Plafond d'engagements par jour" hint="Vide = 20.">
+					<Field label={t("permanenceSettings.service.dailyEngagements")} hint={t("permanenceSettings.service.dailyEngagementsHint")}>
 						<Number
 							value={draft.dailyEngagements}
 							onChange={(dailyEngagements) => setDraft({ ...draft, dailyEngagements })}
@@ -201,20 +210,20 @@ export function PermanenceSettings() {
 					{/* Le plafond qui compte vraiment : il porte sur ce que tu partages
 					    avec elle, pas sur ce qu'elle s'accorde à elle-même. */}
 					<Field
-						label="Elle te laisse la place sous"
-						hint="Pourcentage de quota d'abonnement restant. Vide = 15 %. Elle travaille en fond, toi au premier plan."
+						label={t("permanenceSettings.service.quotaFloor")}
+						hint={t("permanenceSettings.service.quotaFloorHint")}
 					>
 						<Number
 							value={draft.quotaFloorPercent}
-							suffix="% restants"
+							suffix={t("permanenceSettings.unit.percentLeft")}
 							onChange={(quotaFloorPercent) => setDraft({ ...draft, quotaFloorPercent })}
 							onCommit={commitService}
 						/>
 					</Field>
-					<Field label="Garder l'historique" hint="Engagements terminés. Vide = 14 jours.">
+					<Field label={t("permanenceSettings.service.retention")} hint={t("permanenceSettings.service.retentionHint")}>
 						<Number
 							value={draft.retentionDays}
-							suffix="jours"
+							suffix={t("permanenceSettings.unit.days")}
 							onChange={(retentionDays) => setDraft({ ...draft, retentionDays })}
 							onCommit={commitService}
 						/>
@@ -223,34 +232,33 @@ export function PermanenceSettings() {
 
 				<Check
 					checked={draft.catchUp}
-					label="Au réveil, rattraper ce qui s'est accumulé"
-					hint="Décoché, elle repart à zéro en disant ce qu'elle a sauté. Rattraper une nuit de signaux d'un coup est le plus sûr moyen de brûler un plafond."
+					label={t("permanenceSettings.service.catchUp")}
+					hint={t("permanenceSettings.service.catchUpHint")}
 					onChange={(catchUp) => void saveService({ catchUp })}
 				/>
 				<Check
 					checked={draft.notifyFailures}
-					label="Me notifier en cas d'échec"
+					label={t("permanenceSettings.service.notifyFailures")}
 					onChange={(notifyFailures) => void saveService({ notifyFailures })}
 				/>
 				<Check
 					checked={draft.notifyAll}
-					label="Me notifier à chaque engagement"
-					hint="Le succès est silencieux, l'échec parle : notifier chaque engagement rouvre une boîte de réception, et lire douze rapports ne vaut pas mieux que faire le travail."
+					label={t("permanenceSettings.service.notifyAll")}
+					hint={t("permanenceSettings.service.notifyAllHint")}
 					onChange={(notifyAll) => void saveService({ notifyAll })}
 				/>
 
 			</Block>
 
 			{/* ── Garde-fous ─────────────────────────────────────────────────── */}
-			<Block title="Garde-fous" scope="ce poste">
+			<Block title={t("permanenceSettings.guards.title")} scope={t("permanenceSettings.scope.station")}>
 				<p className="text-[11px] leading-relaxed text-ink-faint">
-					Chacun répond à une façon précise dont ça part en vrille, et aucun ne
-					remplace les autres. Ce sont eux qui rendent l'activation supportable.
+					{t("permanenceSettings.guards.intro")}
 				</p>
 				<div className="grid grid-cols-2 gap-3">
 					<Field
-						label="Engagements en même temps"
-						hint="Un seul par défaut. Un opérateur de permanence ne traite pas huit incidents en parallèle — et le plafond du jour ne protège pas d'une rafale."
+						label={t("permanenceSettings.guards.maxRunning")}
+						hint={t("permanenceSettings.guards.maxRunningHint")}
 					>
 						<Number
 							value={draft.maxRunning}
@@ -259,34 +267,34 @@ export function PermanenceSettings() {
 						/>
 					</Field>
 					<Field
-						label="Rodage à blanc"
-						hint="Elle décide, écrit ce qu'elle aurait fait, et n'agit pas. Le compteur repart dès que tu changes ses pouvoirs. Vide = 10."
+						label={t("permanenceSettings.guards.rehearsal")}
+						hint={t("permanenceSettings.guards.rehearsalHint")}
 					>
 						<Number
 							value={draft.rehearsal}
-							suffix="engagements"
+							suffix={t("permanenceSettings.unit.engagements")}
 							onChange={(rehearsal) => setDraft({ ...draft, rehearsal })}
 							onCommit={commitService}
 						/>
 					</Field>
 					<Field
-						label="Quarantaine par objet"
-						hint="Après un engagement, la même PR est laissée tranquille. C'est ce qui l'empêche de se réveiller sur son propre commit, et de s'acharner. Vide = 6 h."
+						label={t("permanenceSettings.guards.grace")}
+						hint={t("permanenceSettings.guards.graceHint")}
 					>
 						<Number
 							value={draft.graceHours}
-							suffix="heures"
+							suffix={t("permanenceSettings.unit.hours")}
 							onChange={(graceHours) => setDraft({ ...draft, graceHours })}
 							onCommit={commitService}
 						/>
 					</Field>
 					<Field
-						label="Coupe-circuit"
-						hint="Échecs d'affilée après lesquels elle se suspend. Le réarmement est un geste : une reprise automatique referait ce qu'il sert à empêcher. Vide = 3."
+						label={t("permanenceSettings.guards.breaker")}
+						hint={t("permanenceSettings.guards.breakerHint")}
 					>
 						<Number
 							value={draft.breaker}
-							suffix="échecs"
+							suffix={t("permanenceSettings.unit.failures")}
 							onChange={(breaker) => setDraft({ ...draft, breaker })}
 							onCommit={commitService}
 						/>
@@ -295,18 +303,17 @@ export function PermanenceSettings() {
 			</Block>
 
 			{/* ── Rôle ───────────────────────────────────────────────────────── */}
-			<Block title="Rôle" scope="ce poste">
+			<Block title={t("permanenceSettings.role.title")} scope={t("permanenceSettings.scope.station")}>
 				<p className="text-[11px] leading-relaxed text-ink-faint">
-					Deux modèles, pas un. Le tri regarde chaque delta — c'est 95 % des appels, sur
-					des entrées minuscules ; le travail ne démarre que lorsqu'un engagement part.
+					{t("permanenceSettings.role.intro")}
 				</p>
 				<div className="grid grid-cols-2 gap-3">
-					<Field label="Moteur" hint="Vide = le premier déclaré.">
+					<Field label={t("permanenceSettings.role.engine")} hint={t("permanenceSettings.role.engineHint")}>
 						<Select
 							value={draft.engine}
 							onChange={(engine) => setDraft({ ...draft, engine })}
 						>
-							<option value="">Le premier déclaré</option>
+							<option value="">{t("permanenceSettings.role.engineFirst")}</option>
 							{(config?.engines ?? []).map((engine) => (
 								<option key={engine.id} value={engine.id}>
 									{engine.label || engine.id}
@@ -315,7 +322,7 @@ export function PermanenceSettings() {
 						</Select>
 					</Field>
 					<div />
-					<Field label="Tri — modèle" hint="Le plus petit qui sache dire « rien ».">
+					<Field label={t("permanenceSettings.role.triageModel")} hint={t("permanenceSettings.role.triageModelHint")}>
 						<TextInput
 							value={draft.triage?.model ?? ""}
 							mono
@@ -325,13 +332,13 @@ export function PermanenceSettings() {
 							}
 						/>
 					</Field>
-					<Field label="Tri — profondeur">
+					<Field label={t("permanenceSettings.role.triageDepth")}>
 						<Depth
 							value={draft.triage?.depth ?? ""}
 							onChange={(depth) => setDraft({ ...draft, triage: { ...draft.triage, depth } })}
 						/>
 					</Field>
-					<Field label="Travail — modèle">
+					<Field label={t("permanenceSettings.role.workModel")}>
 						<TextInput
 							value={draft.work?.model ?? ""}
 							mono
@@ -339,7 +346,7 @@ export function PermanenceSettings() {
 							onChange={(model) => setDraft({ ...draft, work: { ...draft.work, model } })}
 						/>
 					</Field>
-					<Field label="Travail — profondeur">
+					<Field label={t("permanenceSettings.role.workDepth")}>
 						<Depth
 							value={draft.work?.depth ?? ""}
 							onChange={(depth) => setDraft({ ...draft, work: { ...draft.work, depth } })}
@@ -347,8 +354,8 @@ export function PermanenceSettings() {
 					</Field>
 				</div>
 				<Field
-					label="Consigne permanente"
-					hint="Jointe au contexte de chaque engagement, en plus du dossier du dépôt."
+					label={t("permanenceSettings.role.prompt")}
+					hint={t("permanenceSettings.role.promptHint")}
 				>
 					<textarea
 						rows={3}
@@ -356,15 +363,15 @@ export function PermanenceSettings() {
 						value={draft.prompt}
 						onChange={(event) => setDraft({ ...draft, prompt: event.target.value })}
 						className="focus-ring w-full resize-y rounded-lg border border-line-soft bg-raised px-2.5 py-1.5 text-xs leading-relaxed text-ink placeholder:text-ink-faint focus:border-accent/40"
-						placeholder="Ce qu'elle doit savoir avant d'agir, quel que soit l'engagement."
+						placeholder={t("permanenceSettings.role.promptPlaceholder")}
 					/>
 				</Field>
 			</Block>
 
 			{/* ── Règles ─────────────────────────────────────────────────────── */}
 			<Block
-				title="Règles"
-				scope="ce projet"
+				title={t("permanenceSettings.rules.title")}
+				scope={t("permanenceSettings.scope.project")}
 				aside={
 					<Button
 						icon={Plus}
@@ -390,18 +397,16 @@ export function PermanenceSettings() {
 							})
 						}
 					>
-						Ajouter
+						{t("permanenceSettings.rules.add")}
 					</Button>
 				}
 			>
 				<p className="text-[11px] leading-relaxed text-ink-faint">
-					Livrées éteintes. Une règle sans oracle énonçable ne démarre pas, même
-					allumée : c'est la seule condition d'arrêt d'un agent qui n'en a aucune.
+					{t("permanenceSettings.rules.intro")}
 				</p>
 				{rules.length === 0 ? (
 					<p className="rounded-lg border border-dashed border-line-soft px-3 py-4 text-center text-[11px] text-ink-faint">
-						Aucune règle. La Permanence ne fera rien tant que tu ne lui auras pas dit quoi
-						surveiller.
+						{t("permanenceSettings.rules.empty")}
 					</p>
 				) : (
 					rules.map((rule, index) => (
@@ -428,17 +433,19 @@ export function PermanenceSettings() {
 
 			{/* ── Pouvoirs ───────────────────────────────────────────────────── */}
 			<Block
-				title="Pouvoirs"
-				scope="ce projet"
+				title={t("permanenceSettings.powers.title")}
+				scope={t("permanenceSettings.scope.project")}
 				aside={
 					<span className="font-mono text-[10px] text-ink-faint">
-						{powers.length + (draft.comment?.enabled ? 1 : 0)} / {POWERS.length + 1} activés
+						{t("permanenceSettings.powers.enabledCount", {
+							count: powers.length + (draft.comment?.enabled ? 1 : 0),
+							total: POWERS.length + 1,
+						})}
 					</span>
 				}
 			>
 				<p className="text-[11px] leading-relaxed text-ink-faint">
-					Liste blanche, vide au départ, cochée un par un. Le critère : quelqu'un d'autre
-					que toi peut-il s'en apercevoir ?
+					{t("permanenceSettings.powers.intro")}
 				</p>
 				<div className="grid grid-cols-2 gap-x-4">
 					{POWERS.map((power) => (
@@ -451,7 +458,7 @@ export function PermanenceSettings() {
 							hint={
 								IMPLEMENTED_POWERS.includes(power.id)
 									? undefined
-									: "pas encore implémenté — le geste sera refusé"
+									: t("permanenceSettings.powers.notImplemented")
 							}
 							onChange={(on) =>
 								void saveProject({
@@ -475,16 +482,20 @@ export function PermanenceSettings() {
 				{/* Le garde-fou qui ne se coche pas, et qui prime sur tout ce qui
 				    précède : aucun geste ne touche une branche partagée. */}
 				<p className="border-t border-line-soft pt-3 text-[11px] leading-relaxed text-ink-faint">
-					<span className="font-medium text-ink-muted">Jamais sur une branche partagée.</span>{" "}
-					Quoi que tu coches, elle n'écrit ni sur {PROTECTED_HINT}, ni sur les branches de
-					base déclarées dans ton workflow. Elle ne travaille que sur des branches à elle —
-					toucher à une branche partagée n'est pas un geste d'opérateur, c'est un geste qui
-					engage tout le monde.
+					<Trans
+						t={t}
+						i18nKey="permanenceSettings.powers.neverShared"
+						values={{ branches: PROTECTED_HINT }}
+						components={{ b: <span className="font-medium text-ink-muted" /> }}
+					/>
 				</p>
 				<p className="text-[11px] leading-relaxed text-ink-faint">
-					<span className="font-medium text-ink-muted">Jamais :</span> {NEVER.join(", ")}.
-					Ces gestes n'ont pas d'outil — ce sont ceux qui engagent une décision, pas un
-					compte rendu.
+					<Trans
+						t={t}
+						i18nKey="permanenceSettings.powers.never"
+						values={{ list: NEVER.join(", ") }}
+						components={{ b: <span className="font-medium text-ink-muted" /> }}
+					/>
 				</p>
 			</Block>
 		</div>
@@ -508,6 +519,7 @@ function Comment({
 	value: PermanenceConfig["comment"];
 	onChange: (next: PermanenceConfig["comment"]) => void;
 }) {
+	const { t } = useTranslation("components3");
 	const comment = value ?? { enabled: false, scopes: [], perDay: 0 };
 	const scopes = comment.scopes ?? [];
 
@@ -520,18 +532,16 @@ function Comment({
 					checked={comment.enabled}
 					onChange={(event) => onChange({ ...comment, enabled: event.target.checked })}
 				/>
-				<span className="text-[12px] font-medium text-ink">Commenter une pull request</span>
-				<Badge tone="warning">lu par un humain</Badge>
+				<span className="text-[12px] font-medium text-ink">{t("permanenceSettings.comment.title")}</span>
+				<Badge tone="warning">{t("permanenceSettings.comment.readByHuman")}</Badge>
 			</div>
 			<p className="text-[11px] leading-relaxed text-ink-faint">
-				Jamais un objectif : seulement le compte rendu d'un engagement qui a déjà son
-				oracle. Elle dit ce qu'elle a fait sur la branche, elle n'ouvre pas de
-				conversation.
+				{t("permanenceSettings.comment.intro")}
 			</p>
 
 			<div className="flex flex-col gap-1 border-l-2 border-line-soft pl-2.5">
 				<p className="text-[10px] tracking-[0.06em] text-ink-faint uppercase">
-					Elle n'écrit que là où l'une de ces conditions est vraie
+					{t("permanenceSettings.comment.scopesTitle")}
 				</p>
 				{COMMENT_SCOPES.map((scope) => (
 					<Check
@@ -552,35 +562,38 @@ function Comment({
 				    vaut mieux le dire que le laisser croire actif. */}
 				{comment.enabled && scopes.length === 0 ? (
 					<p className="text-[11px] text-warning">
-						Aucune condition cochée : elle ne commentera nulle part.
+						{t("permanenceSettings.comment.noScope")}
 					</p>
 				) : null}
 			</div>
 
 			<div className="flex flex-col gap-1 border-l-2 border-line-soft pl-2.5">
 				<p className="text-[10px] tracking-[0.06em] text-ink-faint uppercase">
-					Et dans tous les cas
+					{t("permanenceSettings.comment.alwaysTitle")}
 				</p>
 				<div className="flex items-center gap-2 text-[11.5px] text-ink-muted">
-					Au plus
+					{t("permanenceSettings.comment.perDayBefore")}
 					<div className="w-16">
 						<Number
 							value={comment.perDay}
 							onChange={(perDay) => onChange({ ...comment, perDay })}
 						/>
 					</div>
-					commentaire(s) par PR et par jour.
+					{t("permanenceSettings.comment.perDayAfter")}
 				</div>
 				<Fixed>
-					Jamais deux d'affilée sans une réponse humaine entre les deux — sinon elle
-					monologue.
+					{t("permanenceSettings.comment.noMonologue")}
 				</Fixed>
 				<Fixed>
-					Signé <span className="font-mono">{COMMENT_SIGNATURE}</span> en fin de message.
-					Non modifiable : sur une PR, c'est ton compte que tes collègues lisent.
+					<Trans
+						t={t}
+						i18nKey="permanenceSettings.comment.signature"
+						values={{ signature: COMMENT_SIGNATURE }}
+						components={{ mono: <span className="font-mono" /> }}
+					/>
 				</Fixed>
 				<Fixed>
-					« Ne commente plus ici » retire une PR d'un geste, sans toucher au réglage.
+					{t("permanenceSettings.comment.optOut")}
 				</Fixed>
 			</div>
 		</div>
@@ -607,6 +620,7 @@ function Rule({
 	onChange: (next: PermanenceRule) => void;
 	onRemove: () => void;
 }) {
+	const { t } = useTranslation("components3");
 	const [draft, setDraft] = useState(rule);
 	useEffect(() => setDraft(rule), [rule]);
 
@@ -634,27 +648,27 @@ function Rule({
 				<div className="min-w-0 flex-1">
 					<TextInput
 						value={draft.label}
-						placeholder="Ce qu'elle fera, en une ligne"
+						placeholder={t("permanenceSettings.rule.labelPlaceholder")}
 						onChange={(label) => setDraft({ ...draft, label })}
 						onBlur={() => commit(draft)}
 					/>
 				</div>
 				{/* Une règle inapplicable se dit inapplicable, elle ne disparaît pas :
 				    sinon on la croit perdue. */}
-				{draft.enabled && !stated ? <Badge tone="critical">sans oracle</Badge> : null}
+				{draft.enabled && !stated ? <Badge tone="critical">{t("permanenceSettings.rule.noOracle")}</Badge> : null}
 				{draft.trigger && !known ? (
-					<Badge tone="critical">déclencheur inconnu</Badge>
+					<Badge tone="critical">{t("permanenceSettings.rule.unknownTrigger")}</Badge>
 				) : null}
-				<Button size="sm" icon={Trash2} onClick={onRemove} title="Retirer cette règle" />
+				<Button size="sm" icon={Trash2} onClick={onRemove} title={t("permanenceSettings.rule.remove")} />
 			</div>
 
 			<div className="grid grid-cols-2 gap-3">
-				<Field label="Déclencheur">
+				<Field label={t("permanenceSettings.rule.trigger")}>
 					<Select
 						value={draft.trigger}
 						onChange={(trigger) => commit({ ...draft, trigger })}
 					>
-						<option value="">Choisir…</option>
+						<option value="">{t("permanenceSettings.rule.choose")}</option>
 						{TRIGGERS.map((entry) => (
 							<option key={entry.id} value={entry.id}>
 								{entry.label}
@@ -662,7 +676,7 @@ function Rule({
 						))}
 					</Select>
 				</Field>
-				<Field label="Oracle" hint="La preuve visée, choisie parmi ce que ce dépôt déclare.">
+				<Field label={t("permanenceSettings.rule.oracle")} hint={t("permanenceSettings.rule.oracleHint")}>
 					<Select
 						value={draft.oracle?.kind ? `${draft.oracle.kind}:${draft.oracle.key}` : ""}
 						onChange={(value) => {
@@ -675,7 +689,7 @@ function Rule({
 							});
 						}}
 					>
-						<option value="">Aucun — la règle ne partira pas</option>
+						<option value="">{t("permanenceSettings.rule.oracleNone")}</option>
 						{sources.map((source) => (
 							<option key={`${source.kind}:${source.key}`} value={`${source.kind}:${source.key}`}>
 								{source.group} · {source.label}
@@ -683,18 +697,18 @@ function Rule({
 						))}
 					</Select>
 				</Field>
-				<Field label="Condition" hint="En français. Jugée au tri, avant tout engagement.">
+				<Field label={t("permanenceSettings.rule.condition")} hint={t("permanenceSettings.rule.conditionHint")}>
 					<TextInput
 						value={draft.condition}
-						placeholder="l'auteur du dernier commit, c'est moi"
+						placeholder={t("permanenceSettings.rule.conditionPlaceholder")}
 						onChange={(condition) => setDraft({ ...draft, condition })}
 						onBlur={() => commit(draft)}
 					/>
 				</Field>
-				<Field label="Réaction" hint="Ce qu'elle tente. L'objectif, lui, est écrit par elle.">
+				<Field label={t("permanenceSettings.rule.reaction")} hint={t("permanenceSettings.rule.reactionHint")}>
 					<TextInput
 						value={draft.reaction}
-						placeholder="répare, ouvre une PR en brouillon"
+						placeholder={t("permanenceSettings.rule.reactionPlaceholder")}
 						onChange={(reaction) => setDraft({ ...draft, reaction })}
 						onBlur={() => commit(draft)}
 					/>
@@ -703,29 +717,29 @@ function Rule({
 				    l'afficher ailleurs poserait une question sans réponse. */}
 				{draft.trigger === "schedule" || draft.trigger === "pr_stale" ? (
 					<Field
-						label="Délai"
+						label={t("permanenceSettings.rule.delay")}
 						hint={
 							draft.trigger === "schedule"
-								? "Entre deux départs de cette règle. Vide = 24 h."
-								: "Au-delà, un changement est considéré endormi. Vide = 72 h."
+								? t("permanenceSettings.rule.delayScheduleHint")
+								: t("permanenceSettings.rule.delayStaleHint")
 						}
 					>
 						<Number
 							value={draft.everyHours}
-							suffix="heures"
+							suffix={t("permanenceSettings.unit.hours")}
 							onChange={(everyHours) => setDraft({ ...draft, everyHours })}
 							onCommit={() => commit(draft)}
 						/>
 					</Field>
 				) : null}
-				<Field label="Budget de jetons" hint="Par engagement de cette règle. Vide = le plafond du jour.">
+				<Field label={t("permanenceSettings.rule.tokenBudget")} hint={t("permanenceSettings.rule.tokenBudgetHint")}>
 					<Number
 						value={draft.tokenBudget}
 						onChange={(tokenBudget) => setDraft({ ...draft, tokenBudget })}
 						onCommit={() => commit(draft)}
 					/>
 				</Field>
-				<Field label="Au plus par heure" hint="Vide = seul le plafond journalier s'applique.">
+				<Field label={t("permanenceSettings.rule.perHour")} hint={t("permanenceSettings.rule.perHourHint")}>
 					<Number value={draft.perHour} onChange={(perHour) => setDraft({ ...draft, perHour })} />
 				</Field>
 			</div>
@@ -735,14 +749,14 @@ function Rule({
 			    été donné une fois, ici, en cochant cette règle. */}
 			<Check
 				checked={draft.needsApproval}
-				label="Me demander mon accord avant que le travail ne parte"
-				hint="Sans ça, elle approuve elle-même le plan de la mission — l'accord, c'est cette règle. Coche pour une règle à enjeu."
+				label={t("permanenceSettings.rule.needsApproval")}
+				hint={t("permanenceSettings.rule.needsApprovalHint")}
 				onChange={(needsApproval) => commit({ ...draft, needsApproval })}
 			/>
 
 			<div className="flex justify-end">
 				<Button size="sm" variant="outline" onClick={() => commit(draft)}>
-					Enregistrer cette règle
+					{t("permanenceSettings.rule.save")}
 				</Button>
 			</div>
 		</div>
@@ -795,6 +809,7 @@ function Number({
 	/** Appelé en quittant le champ — l'écran n'a pas de bouton d'enregistrement. */
 	onCommit?: () => void;
 }) {
+	const { t } = useTranslation("components3");
 	return (
 		<div className="flex items-center gap-1.5">
 			<input
@@ -802,7 +817,7 @@ function Number({
 				inputMode="numeric"
 				spellCheck={false}
 				value={value === 0 ? "" : String(value)}
-				placeholder="défaut"
+				placeholder={t("permanenceSettings.unit.default")}
 				onChange={(event) => {
 					const digits = event.target.value.replace(/\D/g, "");
 					onChange(digits === "" ? 0 : globalThis.Number(digits));
@@ -837,12 +852,13 @@ function Select({
 }
 
 function Depth({ value, onChange }: { value: string; onChange: (value: string) => void }) {
+	const { t } = useTranslation("components3");
 	return (
 		<Select value={value} onChange={onChange}>
-			<option value="">Celle du moteur</option>
-			<option value="fast">Rapide</option>
-			<option value="normal">Normale</option>
-			<option value="deep">Profonde</option>
+			<option value="">{t("permanenceSettings.depth.engine")}</option>
+			<option value="fast">{t("permanenceSettings.depth.fast")}</option>
+			<option value="normal">{t("permanenceSettings.depth.normal")}</option>
+			<option value="deep">{t("permanenceSettings.depth.deep")}</option>
 		</Select>
 	);
 }

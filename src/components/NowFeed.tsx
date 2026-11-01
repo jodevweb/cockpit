@@ -1,8 +1,10 @@
 import clsx from "clsx";
 import { GitPullRequest, Ticket } from "lucide-react";
 import { useMemo } from "react";
+import { useTranslation } from "react-i18next";
 import { PrActions, TicketActions } from "@/components/actions";
 import { Badge, Dot, Empty, PrLabels, PriorityBadge } from "@/components/ui";
+import { t as translate } from "@/i18n";
 import { fromIso } from "@/lib/format";
 import type { MemberBoard, MemberPr, TicketCard } from "@/lib/types";
 
@@ -42,13 +44,13 @@ interface Subject {
 function subjectTone(subject: Subject): { tone: "critical" | "warning" | "success" | "neutral"; label: string } {
 	const pr = subject.prs;
 	if (pr.some((entry) => entry.ciState === "failing")) {
-		return { tone: "critical", label: "CI en échec" };
+		return { tone: "critical", label: translate("components3:nowFeed.state.ciFailing") };
 	}
 	if (pr.some((entry) => entry.reviewDecision === "CHANGES_REQUESTED")) {
-		return { tone: "warning", label: "changements demandés" };
+		return { tone: "warning", label: translate("components3:nowFeed.state.changesRequested") };
 	}
 	if (pr.some((entry) => entry.stacked)) {
-		return { tone: "warning", label: "PR empilée" };
+		return { tone: "warning", label: translate("components3:nowFeed.state.stacked") };
 	}
 	if (
 		pr.length > 0 &&
@@ -57,10 +59,11 @@ function subjectTone(subject: Subject): { tone: "critical" | "warning" | "succes
 				entry.reviewDecision === "APPROVED" && entry.ciState === "success" && !entry.isDraft,
 		)
 	) {
-		return { tone: "success", label: "prête à merger" };
+		return { tone: "success", label: translate("components3:nowFeed.state.ready") };
 	}
-	if (pr.some((entry) => entry.isDraft)) return { tone: "neutral", label: "brouillon" };
-	if (pr.length > 0) return { tone: "neutral", label: "en review" };
+	if (pr.some((entry) => entry.isDraft))
+		return { tone: "neutral", label: translate("components3:nowFeed.state.draft") };
+	if (pr.length > 0) return { tone: "neutral", label: translate("components3:nowFeed.state.inReview") };
 	return { tone: "neutral", label: subject.ticket?.stateName ?? "" };
 }
 
@@ -122,14 +125,15 @@ export function NowFeed({
 	prs: MemberPr[];
 	onOpen: (url: string) => void;
 }) {
+	const { t } = useTranslation("components3");
 	const subjects = useSubjects(member, prs);
 
 	if (subjects.length === 0) {
 		return (
 			<Empty
 				icon={Ticket}
-				message="Rien en cours"
-				hint="Aucun ticket actif ni pull request ouverte. Ce qui est à venir se lit plus bas."
+				message={t("nowFeed.empty")}
+				hint={t("nowFeed.emptyHint")}
 			/>
 		);
 	}
@@ -169,7 +173,7 @@ export function NowFeed({
 									<span className="min-w-0 flex-1 truncate text-[12.5px] text-ink">
 										{subject.prs[0].title}
 									</span>
-									<Badge>sans ticket</Badge>
+									<Badge>{t("nowFeed.noTicket")}</Badge>
 								</button>
 							)}
 							{ticket ? <PriorityBadge priority={ticket.priority} /> : null}
@@ -180,13 +184,13 @@ export function NowFeed({
 									"shrink-0 font-mono text-[10px]",
 									subject.idleDays <= 1 ? "text-success" : "text-ink-faint",
 								)}
-								title={`Dernière activité ${fromIso(subject.updatedAt)}`}
+								title={t("nowFeed.lastActivity", { when: fromIso(subject.updatedAt) })}
 							>
 								{subject.idleDays <= 0
-									? "aujourd'hui"
+									? t("nowFeed.today")
 									: subject.idleDays === 1
-										? "hier"
-										: `${subject.idleDays} j`}
+										? t("nowFeed.yesterday")
+										: t("nowFeed.days", { count: subject.idleDays })}
 							</span>
 						</div>
 

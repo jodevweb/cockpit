@@ -30,6 +30,8 @@ import {
 	Zap,
 } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
+import { useTranslation } from "react-i18next";
+import { t as translate } from "@/i18n";
 import { ResourcesPanel, ResourcesTicker, SpendTicker } from "@/components/ResourcesPanel";
 import { UsagePanel } from "@/components/UsagePanel";
 import { Dot, KeyHint } from "@/components/ui";
@@ -51,7 +53,6 @@ import { useAllSessions, useCockpit, type ViewId } from "./store";
 
 interface Entry {
 	id: ViewId;
-	label: string;
 	icon: React.ComponentType<{ size?: number; className?: string }>;
 	shortcut: string;
 }
@@ -91,55 +92,55 @@ const NEEDS: Partial<Record<ViewId, string>> = {
  * maniement du dépôt reste accessible, mais il descend en « Outillage » — c'est
  * un moyen, plus une destination.
  */
-const GROUPS: Array<{ title: string; entries: Entry[] }> = [
+const GROUPS: Array<{ id: string; entries: Entry[] }> = [
 	{
-		title: "Piloter",
+		id: "pilot",
 		entries: [
 			// La carte d'abord : c'est l'écran d'où l'on part.
-			{ id: "map", label: "Carte", icon: MapIcon, shortcut: "⇧C" },
-			{ id: "today", label: "Aujourd'hui", icon: Sun, shortcut: "1" },
+			{ id: "map", icon: MapIcon, shortcut: "⇧C" },
+			{ id: "today", icon: Sun, shortcut: "1" },
 			// Ce qui attend ta décision, puis la journée en images : les deux
 			// écrans d'un pilote dont les agents attendent plus qu'ils ne
 			// travaillent.
-			{ id: "decisions", label: "Décisions", icon: Inbox, shortcut: "⇧D" },
-			{ id: "recap", label: "Récap en images", icon: Clapperboard, shortcut: "⇧J" },
-			{ id: "automations", label: "Automatisations", icon: AlarmClock, shortcut: "⇧R" },
+			{ id: "decisions", icon: Inbox, shortcut: "⇧D" },
+			{ id: "recap", icon: Clapperboard, shortcut: "⇧J" },
+			{ id: "automations", icon: AlarmClock, shortcut: "⇧R" },
 			// Juste après « Aujourd'hui » : c'est un poste de pilotage, pas une
 			// chose qu'on produit.
-			{ id: "permanence", label: "Permanence", icon: Radar, shortcut: "⇧P" },
-			{ id: "overview", label: "Vue d'ensemble", icon: LayoutGrid, shortcut: "2" },
-			{ id: "team", label: "Daily", icon: Users, shortcut: "3" },
+			{ id: "permanence", icon: Radar, shortcut: "⇧P" },
+			{ id: "overview", icon: LayoutGrid, shortcut: "2" },
+			{ id: "team", icon: Users, shortcut: "3" },
 		],
 	},
 	{
-		title: "Produire",
+		id: "produce",
 		entries: [
 			// Pas de chiffre : ce sont les deux écrans sur lesquels on revient le
 			// plus souvent, ils méritent un raccourci qu'on n'atteint pas par erreur.
-			{ id: "missions", label: "Missions", icon: ListChecks, shortcut: "⇧M" },
-			{ id: "workspace", label: "Workspaces", icon: PanelsTopLeft, shortcut: "⇧A" },
+			{ id: "missions", icon: ListChecks, shortcut: "⇧M" },
+			{ id: "workspace", icon: PanelsTopLeft, shortcut: "⇧A" },
 			// ⌘N ouvre le lanceur, pas l'écran : pas de raccourci affiché ici.
-			{ id: "libres", label: "Agents libres", icon: SquareTerminal, shortcut: "" },
-			{ id: "agents", label: "Agents IA", icon: Bot, shortcut: "4" },
-			{ id: "docs", label: "Documents", icon: FileText, shortcut: "5" },
+			{ id: "libres", icon: SquareTerminal, shortcut: "" },
+			{ id: "agents", icon: Bot, shortcut: "4" },
+			{ id: "docs", icon: FileText, shortcut: "5" },
 		],
 	},
 	{
-		title: "Livrer",
+		id: "deliver",
 		entries: [
-			{ id: "delivery", label: "Flux", icon: Rocket, shortcut: "6" },
-			{ id: "impact", label: "Impact", icon: ScanEye, shortcut: "⇧I" },
-			{ id: "observability", label: "Observabilité", icon: Activity, shortcut: "7" },
+			{ id: "delivery", icon: Rocket, shortcut: "6" },
+			{ id: "impact", icon: ScanEye, shortcut: "⇧I" },
+			{ id: "observability", icon: Activity, shortcut: "7" },
 		],
 	},
 	{
-		title: "Outillage",
+		id: "tooling",
 		entries: [
-			{ id: "worktrees", label: "Worktrees", icon: GitBranch, shortcut: "8" },
-			{ id: "git", label: "Git", icon: Network, shortcut: "9" },
-			{ id: "scripts", label: "Scripts", icon: Terminal, shortcut: "0" },
+			{ id: "worktrees", icon: GitBranch, shortcut: "8" },
+			{ id: "git", icon: Network, shortcut: "9" },
+			{ id: "scripts", icon: Terminal, shortcut: "0" },
 			// Plus de chiffre libre : l'infra locale se rejoint par la palette.
-			{ id: "infra", label: "Serveurs & conteneurs", icon: Boxes, shortcut: "" },
+			{ id: "infra", icon: Boxes, shortcut: "" },
 		],
 	},
 ];
@@ -153,6 +154,7 @@ const GROUPS: Array<{ title: string; entries: Entry[] }> = [
  */
 function ProjectSwitcher() {
 	const { projectList, activeProject, switchProject } = useCockpit();
+	const { t } = useTranslation("app");
 	const [open, setOpen] = useState(false);
 	const box = useRef<HTMLDivElement>(null);
 
@@ -185,7 +187,7 @@ function ProjectSwitcher() {
 					style={{ background: activeProject?.color || "var(--color-accent)" }}
 				/>
 				<span className="min-w-0 flex-1 truncate text-[12.5px] font-medium text-ink">
-					{activeProject?.name ?? "Projet"}
+					{activeProject?.name ?? t("sidebar.project")}
 				</span>
 				{only ? null : <ChevronsUpDown size={12} className="shrink-0 text-ink-faint" />}
 			</button>
@@ -303,6 +305,7 @@ function DecisionsTail() {
 function RecapTail() {
 	const { runs } = useAgentRuns();
 	const seenAt = useRecapSeen();
+	const { t } = useTranslation("app");
 	const fresh = runs.filter((run) => {
 		if (run.thinking) return false;
 		for (let index = run.turns.length - 1; index >= 0; index -= 1) {
@@ -313,7 +316,7 @@ function RecapTail() {
 	}).length;
 	if (fresh === 0) return null;
 	return (
-		<span className="flex items-center gap-1 font-mono text-[10px] text-accent-soft" title={`${fresh} nouveau${fresh > 1 ? "x" : ""} depuis ta dernière visite`}>
+		<span className="flex items-center gap-1 font-mono text-[10px] text-accent-soft" title={t("sidebar.recapFresh", { count: fresh })}>
 			<Dot tone="success" />
 			{fresh}
 		</span>
@@ -327,6 +330,7 @@ function RecapTail() {
  * témoin n'a qu'à dire « 13:30 » le matin d'un daily.
  */
 function AutomationsTail() {
+	const { t } = useTranslation("app");
 	const overview = useAsync(() => api.automations.overview(), [], {
 		pollMs: 60_000,
 		subscribe: (onChange) => events.onAutomationRun(onChange),
@@ -334,7 +338,7 @@ function AutomationsTail() {
 	const list = overview.data ?? [];
 	if (list.some((entry) => entry.running)) {
 		return (
-			<span className="flex items-center gap-1 font-mono text-[10px] text-info" title="Une automatisation prépare son rendu">
+			<span className="flex items-center gap-1 font-mono text-[10px] text-info" title={t("sidebar.automations.running")}>
 				<Dot tone="info" pulse />
 			</span>
 		);
@@ -348,7 +352,7 @@ function AutomationsTail() {
 		.sort()[0];
 	if (!next) return null;
 	return (
-		<span className="font-mono text-[10px] text-ink-faint" title="Prochain rendu prêt aujourd'hui">
+		<span className="font-mono text-[10px] text-ink-faint" title={t("sidebar.automations.nextToday")}>
 			{next.slice(11)}
 		</span>
 	);
@@ -372,6 +376,7 @@ function LibresTail() {
  * par le lanceur du tout.
  */
 function LaunchButton() {
+	const { t } = useTranslation("app");
 	const [menu, setMenu] = useState(false);
 	const box = useRef<HTMLDivElement>(null);
 	const start = useLibreLaunch();
@@ -390,8 +395,15 @@ function LaunchButton() {
 	const describe = (entry: (typeof recents)[number]) => {
 		const choices = entry.choices;
 		if (!choices) return "";
-		const place = choices.place === "ici" ? "sur place" : choices.place === "branche" ? "branche neuve" : "worktree neuf";
-		const model = choices.model ? (MODELS.find((model) => model.id === choices.model)?.label ?? choices.model) : "modèle du poste";
+		const place =
+			choices.place === "ici"
+				? t("sidebar.launch.placeHere")
+				: choices.place === "branche"
+					? t("sidebar.launch.placeBranch")
+					: t("sidebar.launch.placeWorktree");
+		const model = choices.model
+			? (MODELS.find((model) => model.id === choices.model)?.label ?? choices.model)
+			: t("sidebar.launch.defaultModel");
 		const mode = PERMISSION_MODES.find((entry) => entry.id === choices.mode)?.label ?? choices.mode;
 		return `${place} · ${model} · ${mode}`;
 	};
@@ -402,15 +414,15 @@ function LaunchButton() {
 			<button
 				type="button"
 				onClick={() => openLauncher()}
-				title="Un dossier, un agent — comme cd puis claude (⌘N)"
+				title={t("sidebar.launch.title")}
 				className="focus-ring flex h-7 items-center gap-1.5 bg-accent pr-2 pl-2.5 text-[12px] font-semibold text-accent-ink hover:bg-accent-soft"
 			>
 				<Zap size={13} />
-				<span className="whitespace-nowrap">Lancer un agent</span>
+				<span className="whitespace-nowrap">{t("sidebar.launch.button")}</span>
 			</button>
 			<button
 				type="button"
-				aria-label="Relancer comme la dernière fois"
+				aria-label={t("sidebar.launch.again")}
 				onClick={() => setMenu((open) => !open)}
 				className="focus-ring flex h-7 w-6 items-center justify-center border-l border-accent-ink/20 bg-accent text-accent-ink hover:bg-accent-soft"
 			>
@@ -420,11 +432,11 @@ function LaunchButton() {
 			{menu ? (
 				<div className="absolute top-9 right-0 z-50 w-[380px] rounded-xl bg-surface p-1.5 shadow-[var(--shadow-pop)]">
 					<div className="px-2.5 pt-2 pb-1.5 text-[10px] font-semibold tracking-[0.06em] text-ink-faint uppercase">
-						Relancer comme la dernière fois
+						{t("sidebar.launch.again")}
 					</div>
 					{recents.length === 0 ? (
 						<p className="px-2.5 pb-2 text-[12px] text-ink-muted">
-							Rien encore : le premier lancement se retient pour la suite.
+							{t("sidebar.launch.noneYet")}
 						</p>
 					) : null}
 					{recents.map((entry) => (
@@ -463,7 +475,7 @@ function LaunchButton() {
 						className="focus-ring flex w-full items-center gap-3 rounded-lg px-2.5 py-2 text-left text-[12.5px] font-semibold text-accent hover:bg-hover"
 					>
 						<Zap size={15} />
-						<span className="flex-1">Autre dossier, autres réglages…</span>
+						<span className="flex-1">{t("sidebar.launch.other")}</span>
 						<KeyHint>⌘N</KeyHint>
 					</button>
 				</div>
@@ -487,6 +499,7 @@ function LaunchButton() {
  */
 export function Sidebar({ onOpenPalette }: { onOpenPalette: () => void }) {
 	const { view, go } = useCockpit();
+	const { t } = useTranslation("app");
 	const [atelier, setAtelier] = useState(false);
 	const [resources, setResources] = useState(false);
 	// Le détail de la consommation, ouvert depuis le témoin.
@@ -506,52 +519,52 @@ export function Sidebar({ onOpenPalette }: { onOpenPalette: () => void }) {
 				)}
 			>
 				<Logo size={20} className="mr-1.5 shadow-sm shadow-black/30" />
-				<TopTab active={view === "map"} onClick={() => go("map")} icon={MapIcon} title="La carte de tout le travail (⌘⇧C)">
-					Carte
+				<TopTab active={view === "map"} onClick={() => go("map")} icon={MapIcon} title={t("sidebar.top.mapTitle")}>
+					{t("sidebar.views.map")}
 				</TopTab>
 				<TopTab
 					active={view === "workspace"}
 					onClick={() => go("workspace")}
 					icon={PanelsTopLeft}
-					title="Les agents et terminaux ouverts (⌘⇧A)"
+					title={t("sidebar.top.workspaceTitle")}
 				>
-					Workspaces
+					{t("sidebar.views.workspace")}
 					<WorkspaceTail shortcut="⇧A" />
 				</TopTab>
 				<TopTab
 					active={view === "libres"}
 					onClick={() => go("libres")}
 					icon={SquareTerminal}
-					title="Les agents lancés hors chantier, comme au terminal"
+					title={t("sidebar.top.libresTitle")}
 				>
-					Agents libres
+					{t("sidebar.views.libres")}
 					<LibresTail />
 				</TopTab>
 				<TopTab
 					active={view === "decisions"}
 					onClick={() => go("decisions")}
 					icon={Inbox}
-					title="Ce qui attend ta décision, rangé par ce que ça débloque (⌘⇧D)"
+					title={t("sidebar.top.decisionsTitle")}
 				>
-					Décisions
+					{t("sidebar.views.decisions")}
 					<DecisionsTail />
 				</TopTab>
 				<TopTab
 					active={view === "recap"}
 					onClick={() => go("recap")}
 					icon={Clapperboard}
-					title="Ce qui s'est passé, en images : une histoire par tour d'agent (⌘⇧J)"
+					title={t("sidebar.top.recapTitle")}
 				>
-					Récap
+					{t("sidebar.top.recap")}
 					<RecapTail />
 				</TopTab>
 				<TopTab
 					active={view === "automations"}
 					onClick={() => go("automations")}
 					icon={AlarmClock}
-					title="Les rendez-vous qui se préparent seuls, comme le daily (⌘⇧R)"
+					title={t("sidebar.top.automationsTitle")}
 				>
-					Automatisations
+					{t("sidebar.views.automations")}
 					<AutomationsTail />
 				</TopTab>
 				{live.map((tab) => (
@@ -562,7 +575,7 @@ export function Sidebar({ onOpenPalette }: { onOpenPalette: () => void }) {
 						icon={tab.entry.icon}
 						title={tab.title}
 					>
-						{tab.entry.label}
+						{viewLabel(tab.entry.id)}
 						<span
 							className={clsx(
 								"flex items-center gap-1 font-mono text-[10px]",
@@ -578,7 +591,7 @@ export function Sidebar({ onOpenPalette }: { onOpenPalette: () => void }) {
 					<>
 						<ChevronRight size={12} className="shrink-0 text-ink-faint" />
 						<TopTab active onClick={() => undefined} icon={current.icon}>
-							{current.label}
+							{viewLabel(current.id)}
 						</TopTab>
 					</>
 				) : null}
@@ -590,7 +603,7 @@ export function Sidebar({ onOpenPalette }: { onOpenPalette: () => void }) {
 					onClick={onOpenPalette}
 					className="focus-ring flex h-7 w-56 min-w-[132px] shrink items-center justify-between gap-2 rounded-lg border border-line-soft bg-surface px-2.5 text-[11px] text-ink-faint transition-colors duration-150 hover:border-line hover:text-ink-muted"
 				>
-					<span className="truncate whitespace-nowrap">Aller à, lancer, demander…</span>
+					<span className="truncate whitespace-nowrap">{t("sidebar.search")}</span>
 					<KeyHint>⌘K</KeyHint>
 				</button>
 				{/* Ce qu'on dépense et ce que la machine encaisse : à voir sans rien
@@ -603,8 +616,8 @@ export function Sidebar({ onOpenPalette }: { onOpenPalette: () => void }) {
 					<ResourcesTicker onOpen={() => setResources(true)} />
 				</div>
 				<ActivityChip />
-				<TopTab active={atelier} onClick={() => setAtelier((open) => !open)} icon={LayoutGrid} title="Tous les écrans, le projet, les réglages">
-					Atelier
+				<TopTab active={atelier} onClick={() => setAtelier((open) => !open)} icon={LayoutGrid} title={t("sidebar.atelier.title")}>
+					{t("sidebar.atelier.name")}
 				</TopTab>
 			</header>
 
@@ -644,8 +657,13 @@ function useLiveTabs(): Array<{ entry: Entry; count: number; waiting: boolean; t
 			waiting: waiting > 0,
 			title:
 				waiting > 0
-					? `${ongoing.length} mission${ongoing.length > 1 ? "s" : ""} en cours, ${waiting} attend${waiting > 1 ? "ent" : ""} ton accord (⌘⇧M)`
-					: `${ongoing.length} mission${ongoing.length > 1 ? "s" : ""} en cours (⌘⇧M)`,
+					? translate("app:sidebar.live.missionsWaiting", {
+							missions: translate("app:sidebar.live.missions", { count: ongoing.length }),
+							count: waiting,
+						})
+					: translate("app:sidebar.live.missionsOngoing", {
+							missions: translate("app:sidebar.live.missions", { count: ongoing.length }),
+						}),
 		});
 	}
 
@@ -656,16 +674,21 @@ function useLiveTabs(): Array<{ entry: Entry; count: number; waiting: boolean; t
 			entry: entryScripts,
 			count: running,
 			waiting: false,
-			title: `${running} script${running > 1 ? "s" : ""} en cours`,
+			title: translate("app:sidebar.live.scripts", { count: running }),
 		});
 	}
 
 	return tabs;
 }
 
+/** Le nom d'un écran, tel que la barre et l'atelier l'affichent. */
+function viewLabel(view: ViewId): string {
+	return translate(`app:sidebar.views.${view}`);
+}
+
 /** L'entrée du catalogue qui correspond à un écran, réglages compris. */
 function entryOf(view: ViewId): Entry | null {
-	if (view === "settings") return { id: "settings", label: "Réglages", icon: Settings, shortcut: "," };
+	if (view === "settings") return { id: "settings", icon: Settings, shortcut: "," };
 	for (const group of GROUPS) {
 		const found = group.entries.find((entry) => entry.id === view);
 		if (found) return found;
@@ -708,6 +731,7 @@ function TopTab({
  */
 function Atelier({ onClose }: { onClose: () => void }) {
 	const { view, go, jobs, worktrees, activeProject, hasConnector, config } = useCockpit();
+	const { t } = useTranslation("app");
 	const sessions = useAllSessions();
 
 	useEffect(() => {
@@ -741,7 +765,7 @@ function Atelier({ onClose }: { onClose: () => void }) {
 		<>
 			<motion.button
 				type="button"
-				aria-label="Fermer l'atelier"
+				aria-label={t("sidebar.atelier.close")}
 				onClick={onClose}
 				initial={{ opacity: 0 }}
 				animate={{ opacity: 0.25 }}
@@ -756,17 +780,17 @@ function Atelier({ onClose }: { onClose: () => void }) {
 				className="fixed top-12 right-2 z-50 flex max-h-[calc(100vh-4rem)] w-[560px] flex-col overflow-hidden rounded-[var(--radius-panel)] bg-base shadow-[var(--shadow-pop)]"
 			>
 				<div className="flex items-center gap-2 px-3 pt-3">
-					<span className="text-[13px] font-semibold text-ink">Atelier</span>
-					<span className="text-[11px] text-ink-faint">tous les écrans · ⌘K pour chercher</span>
+					<span className="text-[13px] font-semibold text-ink">{t("sidebar.atelier.name")}</span>
+					<span className="text-[11px] text-ink-faint">{t("sidebar.atelier.subtitle")}</span>
 				</div>
 				<div className="pt-2">
 					<ProjectSwitcher />
 				</div>
 				<div className="grid min-h-0 grid-cols-2 gap-x-2 gap-y-4 overflow-y-auto px-2 pb-3">
 					{GROUPS.map((group) => (
-						<div key={group.title} className="flex flex-col gap-0.5">
+						<div key={group.id} className="flex flex-col gap-0.5">
 							<span className="px-2.5 pb-1 text-[10px] font-semibold tracking-[0.09em] text-ink-faint/70 uppercase">
-								{group.title}
+								{t(`sidebar.groups.${group.id}`)}
 							</span>
 							{group.entries
 								// Un projet sans équipe n'a pas de daily à tenir.
@@ -792,7 +816,7 @@ function Atelier({ onClose }: { onClose: () => void }) {
 											)}
 										>
 											<entry.icon size={14} className={active ? "text-accent" : "text-ink-faint"} />
-											<span className="flex-1 text-left">{entry.label}</span>
+											<span className="flex-1 text-left">{viewLabel(entry.id)}</span>
 											{entry.id === "workspace" ? (
 												<WorkspaceTail shortcut={entry.shortcut} />
 											) : badge !== null ? (
@@ -819,7 +843,7 @@ function Atelier({ onClose }: { onClose: () => void }) {
 					)}
 				>
 					<Settings size={14} className={view === "settings" ? "text-accent-soft" : "text-ink-faint"} />
-					Réglages
+					{t("sidebar.views.settings")}
 					<span className="ml-auto font-mono text-[10px] text-ink-faint/60">⌘,</span>
 				</button>
 			</motion.nav>

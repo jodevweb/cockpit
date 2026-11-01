@@ -3,6 +3,8 @@ import { ChevronDown, ChevronRight } from "lucide-react";
 import { useMemo, useState } from "react";
 import { Markdown } from "@/components/Markdown";
 import { fromIso } from "@/lib/format";
+import { useTranslation } from "react-i18next";
+import { t } from "@/i18n";
 
 /** Clés qu'on ne montre pas : bruit technique ou déjà affiché ailleurs. */
 const HIDDEN = /^(id|node_id|_links?|url|.*_url|avatar|gravatar.*|sha|guid|type|object)$/i;
@@ -30,7 +32,7 @@ function humanize(key: string): string {
 
 function render(value: unknown): string | null {
 	if (value === null || value === undefined || value === "") return null;
-	if (typeof value === "boolean") return value ? "oui" : "non";
+	if (typeof value === "boolean") return value ? t("components1:payloadView.yes") : t("components1:payloadView.no");
 	if (typeof value === "number") return String(value);
 	if (typeof value === "string") return value;
 
@@ -46,7 +48,7 @@ function render(value: unknown): string | null {
 						(entry as Record<string, unknown>)?.slug),
 			)
 			.filter((entry): entry is string => typeof entry === "string");
-		return names.length > 0 ? names.join(", ") : `${value.length} éléments`;
+		return names.length > 0 ? names.join(", ") : t("components1:payloadView.items", { count: value.length });
 	}
 
 	if (typeof value === "object") {
@@ -108,6 +110,7 @@ function flatten(payload: unknown): Row[] {
  * charge brute conservée en repli pour les cas où seul le JSON répond.
  */
 export function PayloadView({ payload }: { payload: unknown }) {
+	const { t } = useTranslation("components1");
 	const rows = useMemo(() => flatten(payload), [payload]);
 	const [showRaw, setShowRaw] = useState(false);
 
@@ -141,7 +144,7 @@ export function PayloadView({ payload }: { payload: unknown }) {
 			))}
 
 			{rows.length === 0 ? (
-				<p className="text-[11px] text-ink-faint">Aucun détail exploitable.</p>
+				<p className="text-[11px] text-ink-faint">{t("payloadView.empty")}</p>
 			) : null}
 
 			<div>
@@ -151,7 +154,7 @@ export function PayloadView({ payload }: { payload: unknown }) {
 					className="flex items-center gap-1 text-[10px] text-ink-faint hover:text-ink-muted"
 				>
 					{showRaw ? <ChevronDown size={11} /> : <ChevronRight size={11} />}
-					Données brutes
+					{t("payloadView.raw")}
 				</button>
 				{showRaw ? (
 					<pre

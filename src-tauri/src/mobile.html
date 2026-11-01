@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="fr">
+<html lang="en">
 	<head>
 		<meta charset="utf-8" />
 		<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
@@ -1004,9 +1004,9 @@
 			<div class="top">
 				<div style="flex: 1; min-width: 0">
 					<h1 id="title">Cockpit</h1>
-					<div class="say" id="say">Connexion…</div>
+					<div class="say" id="say" data-i18n="common.connecting">Connecting…</div>
 				</div>
-				<button class="gear" id="gear" aria-label="Cet appareil">
+				<button class="gear" id="gear" aria-label="This device" data-i18n-aria-label="common.thisDevice">
 					<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="7" y="2" width="10" height="20" rx="2.5" /><path d="M11 18h2" /></svg>
 				</button>
 			</div>
@@ -1014,15 +1014,15 @@
 			<nav class="tabs" id="tabs">
 				<button data-tab="you">
 					<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 13h4l2 3h4l2-3h4" /><path d="M5.5 5h13L21 13v5a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1v-5z" /></svg>
-					À toi<span class="count" id="countYou" hidden></span>
+					<span data-i18n="tabs.you">For you</span><span class="count" id="countYou" hidden></span>
 				</button>
 				<button data-tab="agents">
 					<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="8" width="16" height="12" rx="3" /><path d="M12 8V4M9 13v2M15 13v2" /><circle cx="12" cy="3.5" r="1" /></svg>
-					Agents
+					<span data-i18n="tabs.agents">Agents</span>
 				</button>
 				<button data-tab="missions">
 					<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="6" cy="6" r="2.5" /><circle cx="18" cy="18" r="2.5" /><path d="M8.5 6H14a4 4 0 0 1 0 8h-4a4 4 0 0 0 0 8" transform="translate(0 -2)" /></svg>
-					Missions
+					<span data-i18n="tabs.missions">Missions</span>
 				</button>
 			</nav>
 		</div>
@@ -1030,7 +1030,7 @@
 		<!-- Un agent : ce qu'il montre, ce qu'il dit, ce qu'il a sous les yeux. -->
 		<section id="agent">
 			<div class="bar">
-				<button class="back" id="back" aria-label="Retour">‹</button>
+				<button class="back" id="back" aria-label="Back" data-i18n-aria-label="common.back">‹</button>
 				<div style="flex: 1; min-width: 0">
 					<h2 id="agentName"></h2>
 					<div class="sub" id="agentSub" style="margin: 0"></div>
@@ -1038,23 +1038,23 @@
 				<span class="pill" id="agentState"></span>
 			</div>
 			<div class="seg" id="seg">
-				<button data-seg="summary">Résumé</button>
-				<button data-seg="thread">Fil</button>
-				<button data-seg="screen">Écran</button>
+				<button data-seg="summary" data-i18n="agent.summary">Summary</button>
+				<button data-seg="thread" data-i18n="agent.thread">Thread</button>
+				<button data-seg="screen" data-i18n="agent.screen">Screen</button>
 			</div>
 			<div class="scroll" id="agentScroll"></div>
-			<button class="jump" id="jump">↓ du nouveau</button>
+			<button class="jump" id="jump" data-i18n="agent.jump">↓ new activity</button>
 			<div class="composer">
-				<textarea id="draft" rows="1" placeholder="Répondre à l'agent…"></textarea>
-				<button class="send" id="send" disabled aria-label="Envoyer">↑</button>
+				<textarea id="draft" rows="1" placeholder="Reply to the agent…" data-i18n-placeholder="agent.placeholder"></textarea>
+				<button class="send" id="send" disabled aria-label="Send" data-i18n-aria-label="agent.send">↑</button>
 			</div>
 		</section>
 
 		<!-- Cet appareil : sa clé d'accès, ses notifications. -->
 		<section id="sheet">
 			<div class="bar">
-				<button class="back" id="sheetBack" aria-label="Retour">‹</button>
-				<h2 style="flex: 1">Cet appareil</h2>
+				<button class="back" id="sheetBack" aria-label="Back" data-i18n-aria-label="common.back">‹</button>
+				<h2 style="flex: 1" data-i18n="common.thisDevice">This device</h2>
 			</div>
 			<div class="scroll" id="sheetBody"></div>
 		</section>
@@ -1084,6 +1084,34 @@
 					(c) => ({ "<": "&lt;", ">": "&gt;", "&": "&amp;", '"': "&quot;", "'": "&#39;" })[c],
 				);
 
+			// ── Langue ────────────────────────────────────────────────────────
+			// Le serveur pose le catalogue (`window.I18N`, anglais en dessous) et
+			// la langue (`<html lang>`) avant ce script. Une clé absente se lit
+			// telle quelle : un oubli se voit, il ne casse rien.
+			const LANG = document.documentElement.lang || "en";
+			const plurals = new Intl.PluralRules(LANG);
+			const lookup = (key) =>
+				key.split(".").reduce((node, part) => (node && typeof node === "object" ? node[part] : undefined), window.I18N ?? {});
+			function template(key, vars) {
+				let text;
+				if (typeof vars.count === "number") text = lookup(`${key}_${plurals.select(vars.count)}`) ?? lookup(`${key}_other`);
+				text = text ?? lookup(key);
+				return typeof text === "string" ? text : key;
+			}
+			const fill = (text, vars) =>
+				text.replace(/\{\{\s*(\w+)\s*\}\}/g, (whole, name) => (name in vars ? String(vars[name]) : whole));
+			/** Un texte, ses `{{nom}}` remplacés. Pour `textContent` ou à passer par `esc`. */
+			const t = (key, vars = {}) => fill(template(key, vars), vars);
+			/** Un texte prêt pour `innerHTML` : la traduction est échappée, les valeurs
+			 *  sont du HTML déjà sûr (à échapper par l'appelant). */
+			const th = (key, vars = {}) => fill(esc(template(key, vars)), vars);
+
+			document.querySelectorAll("[data-i18n]").forEach((node) => (node.textContent = t(node.dataset.i18n)));
+			document.querySelectorAll("[data-i18n-placeholder]").forEach((node) => (node.placeholder = t(node.dataset.i18nPlaceholder)));
+			document
+				.querySelectorAll("[data-i18n-aria-label]")
+				.forEach((node) => node.setAttribute("aria-label", t(node.dataset.i18nAriaLabel)));
+
 			let toastTimer = null;
 			function toast(message) {
 				$("toast").textContent = message;
@@ -1110,7 +1138,12 @@
 						headers: { "content-type": "application/json", ...auth(), ...(options.headers ?? {}) },
 					});
 					const payload = await response.json().catch(() => ({}));
-					if (!response.ok) throw new Error(payload.error ?? `Erreur ${response.status}`);
+					if (!response.ok) {
+						// Le code dit la nature du refus ; le texte, lui, change avec la langue.
+						const failure = new Error(payload.error ?? t("common.error", { status: response.status }));
+						failure.code = payload.code;
+						throw failure;
+					}
 					return payload;
 				} finally {
 					if (!silent) loading(-1);
@@ -1211,17 +1244,17 @@
 
 			// ── Appairage ─────────────────────────────────────────────────────
 			function pairingScreen() {
-				$("say").textContent = "Cet appareil n'est pas encore appairé";
+				$("say").textContent = t("pairing.notPaired");
 				$("tabs").hidden = true;
 				$("view").innerHTML = `
 					<div class="card" style="margin-top:16px">
-						<div class="verb">Appairer ce téléphone</div>
+						<div class="verb">${th("pairing.title")}</div>
 						<div class="sub" style="font-size:13.5px;margin-top:6px">
-							Sur le poste, ouvre Réglages → Accès mobile, et saisis le code affiché.
+							${th("pairing.help")}
 						</div>
-						<input class="field code-in mono" id="code" placeholder="CODE" autocapitalize="characters" autocomplete="off" />
+						<input class="field code-in mono" id="code" placeholder="${th("pairing.codePlaceholder")}" autocapitalize="characters" autocomplete="off" />
 						<input class="field" id="name" value="iPhone" />
-						<div class="row"><button class="btn primary" id="go">Appairer</button></div>
+						<div class="row"><button class="btn primary" id="go">${th("pairing.submit")}</button></div>
 					</div>`;
 				$("go").onclick = (event) =>
 					act(event.target, async () => {
@@ -1246,9 +1279,9 @@
 						method: "POST",
 						body: JSON.stringify(encodeCredential(credential)),
 					});
-					toast("Face ID activé.");
+					toast(t("enroll.done"));
 				} catch (error) {
-					toast(`Clé d'accès : ${error.message ?? error}`);
+					toast(t("enroll.failed", { error: error.message ?? error }));
 				}
 				lastPrint = "";
 				refresh();
@@ -1266,10 +1299,10 @@
 
 			/** L'état d'un agent, en un mot et une couleur. */
 			function stateOf(agent) {
-				if (agent.waiting) return ["wait", agent.waiting > 1 ? `${agent.waiting} à décider` : "t'attend"];
-				if (agent.working) return ["live", "travaille"];
-				if (agent.running) return ["", "en attente"];
-				return ["", "terminé"];
+				if (agent.waiting) return ["wait", t("state.toDecide", { count: agent.waiting })];
+				if (agent.working) return ["live", t("state.working")];
+				if (agent.running) return ["", t("state.idle")];
+				return ["", t("state.done")];
 			}
 
 			function questionsOf(input) {
@@ -1289,25 +1322,25 @@
 			function describe(request) {
 				const input = request.input ?? {};
 				const tool = String(request.tool ?? "");
-				if (tool === "Bash") return ["Lancer une commande", input.command ?? ""];
-				if (tool === "Write") return ["Écrire un fichier", input.file_path ?? ""];
+				if (tool === "Bash") return [t("tools.bash"), input.command ?? ""];
+				if (tool === "Write") return [t("tools.write"), input.file_path ?? ""];
 				if (["Edit", "MultiEdit", "NotebookEdit"].includes(tool))
-					return ["Modifier un fichier", input.file_path ?? input.notebook_path ?? ""];
-				if (tool === "WebFetch") return ["Lire une page web", input.url ?? ""];
+					return [t("tools.edit"), input.file_path ?? input.notebook_path ?? ""];
+				if (tool === "WebFetch") return [t("tools.webFetch"), input.url ?? ""];
 				if (tool.startsWith("mcp__")) {
 					const [, server, ...name] = tool.split("__");
-					return [`Utiliser ${name.join(" ").replace(/_/g, " ")} (${server})`, JSON.stringify(input, null, 2)];
+					return [t("tools.mcp", { name: name.join(" ").replace(/_/g, " "), server }), JSON.stringify(input, null, 2)];
 				}
-				return [`Utiliser ${tool}`, JSON.stringify(input, null, 2)];
+				return [t("tools.other", { tool }), JSON.stringify(input, null, 2)];
 			}
 
 			function decisionCard(request) {
 				const from = agentOf(request.sessionId);
-				const who = `<div class="who">${from ? `<b>${esc(from.label)}</b> demande` : "Un agent demande"}</div>`;
+				const who = `<div class="who">${from ? th("decision.agentAsks", { agent: `<b>${esc(from.label)}</b>` }) : th("decision.anAgentAsks")}</div>`;
 				const questions = questionsOf(request.input);
 				if (questions) {
 					return `<div class="card yours" data-id="${esc(request.id)}">
-						<div class="who">${from ? `<b>${esc(from.label)}</b> te pose une question` : "Une question t'attend"}</div>
+						<div class="who">${from ? th("decision.agentQuestion", { agent: `<b>${esc(from.label)}</b>` }) : th("decision.questionWaiting")}</div>
 						${questions
 							.map(
 								(q, index) => `<div data-question="${index}" data-header="${esc(q.header)}" ${index ? 'style="margin-top:14px"' : ""}>
@@ -1318,7 +1351,7 @@
 								</div>`,
 							)
 							.join("")}
-						<div class="row"><button class="btn primary" data-act="answer" disabled>Répondre</button></div>
+						<div class="row"><button class="btn primary" data-act="answer" disabled>${th("decision.answer")}</button></div>
 					</div>`;
 				}
 				const [verb, body] = describe(request);
@@ -1327,35 +1360,39 @@
 					<div class="verb">${esc(verb)}</div>
 					${body ? `<pre class="code mono">${esc(body)}</pre>` : ""}
 					<div class="row">
-						<button class="btn danger" data-act="deny">Refuser</button>
-						<button class="btn primary" data-act="allow">Autoriser</button>
+						<button class="btn danger" data-act="deny">${th("decision.deny")}</button>
+						<button class="btn primary" data-act="allow">${th("decision.allow")}</button>
 					</div>
 				</div>`;
 			}
 
+			// L'état (une valeur du poste) donne la teinte ; le libellé vient du catalogue.
 			const MISSION = {
-				planning: ["Analyse", ""],
-				awaitingApproval: ["Attend ton accord", "wait"],
-				running: ["Exécution", "live"],
-				integrating: ["Intégration", "live"],
-				failed: ["Échouée", "bad"],
+				planning: "",
+				awaitingApproval: "wait",
+				running: "live",
+				integrating: "live",
+				failed: "bad",
 			};
 			const TASK = {
-				planned: ["à lancer", ""],
-				running: ["en cours", "live"],
-				delivered: ["livrée", "done"],
-				integrated: ["intégrée", "done"],
-				failed: ["échouée", "bad"],
+				planned: "",
+				running: "live",
+				delivered: "done",
+				integrated: "done",
+				failed: "bad",
 			};
 
 			/** Une mission : son avancée d'un regard, et ce qu'elle attend de toi. */
 			function missionCard(mission) {
-				const [label, tone] = MISSION[mission.state] ?? ["En cours", ""];
+				const known = mission.state in MISSION;
+				const label = t(`mission.state.${known ? mission.state : "other"}`);
+				const tone = known ? MISSION[mission.state] : "";
 				const tasks = mission.tasks ?? [];
 				const done = tasks.filter((task) => task.state === "delivered" || task.state === "integrated").length;
 				const rows = tasks
 					.map((task) => {
-						const [state, pill] = TASK[task.state] ?? ["", ""];
+						const state = task.state in TASK ? th(`mission.task.${task.state}`) : "";
+						const pill = TASK[task.state] ?? "";
 						const inner = `<span class="what"><b>${esc(task.role)}</b> ${esc(task.title)}${
 							task.note ? `<div class="sub">${esc(task.note)}</div>` : ""
 						}</span><span class="pill ${pill}">${state}</span>`;
@@ -1371,12 +1408,12 @@
 					<div class="who">${mission.project ? `<b>${esc(mission.project)}</b> · ` : ""}${esc(mission.ticket || mission.branch || "")}</div>
 					<div class="agent">
 						<div style="flex:1;min-width:0"><div class="verb">${esc(mission.title)}</div></div>
-						<span class="pill ${tone}">${label}</span>
+						<span class="pill ${tone}">${esc(label)}</span>
 					</div>
 					${
 						tasks.length
 							? `<div class="track">${tasks.map((task) => `<i class="${esc(task.state)}"></i>`).join("")}</div>
-								<div class="sub">${done} sur ${tasks.length} tâche${tasks.length > 1 ? "s" : ""} rendue${done > 1 ? "s" : ""}</div>`
+								<div class="sub">${th("mission.progress", { done, count: tasks.length })}</div>`
 							: ""
 					}
 					${
@@ -1387,16 +1424,16 @@
 								: ""
 					}
 					${rows ? `<div style="margin-top:10px">${rows}</div>` : ""}
-					${waiting ? `<div class="row"><button class="btn primary" data-act="approve">Approuver le plan</button></div>` : ""}
+					${waiting ? `<div class="row"><button class="btn primary" data-act="approve">${th("mission.approve")}</button></div>` : ""}
 					${
 						/* Le téléphone freine, il ne démarre pas : suspendre et arrêter y
 						   ont leur place, reprendre se décide devant la machine. */
 						mission.paused
-							? `<div class="sub" style="margin-top:10px">En pause — elle se reprend depuis le poste.</div>`
+							? `<div class="sub" style="margin-top:10px">${th("mission.paused")}</div>`
 							: mission.state === "running" || mission.state === "integrating"
 								? `<div class="row">
-										<button class="btn small" data-act="pause">Mettre en pause</button>
-										<button class="btn small danger" data-act="stop">Tout arrêter</button>
+										<button class="btn small" data-act="pause">${th("mission.pause")}</button>
+										<button class="btn small danger" data-act="stop">${th("mission.stopAll")}</button>
 									</div>`
 								: ""
 					}
@@ -1409,8 +1446,8 @@
 					<div class="agent ${tone}">
 						<span class="mark"></span>
 						<div style="flex:1;min-width:0">
-							<div class="name"><span>${esc(agent.label)}</span><span class="pill ${tone}">${label}</span></div>
-							<div class="sub">${agent.project ? `${esc(agent.project)} · ` : ""}${esc(agent.folder)}${agent.screen ? " · navigateur ouvert" : ""}</div>
+							<div class="name"><span>${esc(agent.label)}</span><span class="pill ${tone}">${esc(label)}</span></div>
+							<div class="sub">${agent.project ? `${esc(agent.project)} · ` : ""}${esc(agent.folder)}${agent.screen ? ` · ${th("agents.browserOpen")}` : ""}</div>
 							${agent.last ? `<div class="last">${esc(agent.last)}</div>` : ""}
 						</div>
 					</div>
@@ -1447,10 +1484,10 @@
 				$("countYou").textContent = yours;
 				document.querySelectorAll("#tabs button").forEach((button) => button.classList.toggle("on", button.dataset.tab === tab));
 
-				$("title").textContent = tab === "you" ? "À toi" : tab === "agents" ? "Agents" : "Missions";
+				$("title").textContent = t(`tabs.${tab}`);
 				$("say").textContent = [
-					yours ? `${yours} décision${yours > 1 ? "s" : ""} t'attend${yours > 1 ? "ent" : ""}` : null,
-					working ? `${working} agent${working > 1 ? "s" : ""} au travail` : agents.length ? "aucun agent ne travaille" : "aucun agent ouvert",
+					yours ? t("home.decisions", { count: yours }) : null,
+					working ? t("home.working", { count: working }) : agents.length ? t("home.noneWorking") : t("home.noneOpen"),
 				]
 					.filter(Boolean)
 					.join(" · ");
@@ -1459,36 +1496,36 @@
 				if (tab === "you") {
 					if (!inbox.armed) {
 						parts.push(`<div class="card">
-							<div class="verb">Face ID n'est pas activé</div>
-							<div class="sub" style="font-size:13.5px;margin-top:6px">Sans lui, ce téléphone peut lire et refuser, jamais autoriser.</div>
+							<div class="verb">${th("faceId.off")}</div>
+							<div class="sub" style="font-size:13.5px;margin-top:6px">${th("faceId.offHelp")}</div>
 							${inbox.enrollOpen
-								? `<div class="row"><button class="btn primary" data-enroll>Activer Face ID</button></div>`
-								: `<div class="sub" style="font-size:13.5px;margin-top:6px">Le délai d'activation est passé : révoque ce téléphone sur le poste, puis appaire-le à nouveau.</div>`}
+								? `<div class="row"><button class="btn primary" data-enroll>${th("faceId.enable")}</button></div>`
+								: `<div class="sub" style="font-size:13.5px;margin-top:6px">${th("faceId.expired")}</div>`}
 						</div>`);
 					}
 					parts.push(...asks.map(decisionCard), ...plans.map(missionCard));
 					if (failed.length) {
-						parts.push(`<div class="section">En échec</div>`, ...failed.map(missionCard));
+						parts.push(`<div class="section">${th("home.failedSection")}</div>`, ...failed.map(missionCard));
 					}
 					if (!yours && !failed.length) {
 						parts.push(`<div class="empty">
-							<div class="big">Rien ne t'attend</div>
-							${working ? "Tes agents avancent sans toi." : "Tout est calme."}
+							<div class="big">${th("home.emptyTitle")}</div>
+							${working ? th("home.emptyWorking") : th("home.emptyCalm")}
 						</div>`);
 					}
-					if (agents.length) parts.push(`<div class="section">La flotte</div>`, pulse(agents));
+					if (agents.length) parts.push(`<div class="section">${th("home.fleet")}</div>`, pulse(agents));
 				} else if (tab === "agents") {
 					// Ce qui t'attend d'abord, puis ce qui travaille, puis le reste.
 					const rank = (agent) => (agent.waiting ? 0 : agent.working ? 1 : agent.running ? 2 : 3);
 					const sorted = [...agents].sort((a, b) => rank(a) - rank(b));
 					parts.push(pulse(sorted), ...sorted.map(agentCard));
 					if (!agents.length) {
-						parts.push(`<div class="empty"><div class="big">Aucun agent ouvert</div>Ils se lancent depuis le poste.</div>`);
+						parts.push(`<div class="empty"><div class="big">${th("agents.emptyTitle")}</div>${th("agents.emptyHelp")}</div>`);
 					}
 				} else {
 					parts.push(...missions.map(missionCard));
 					if (!missions.length) {
-						parts.push(`<div class="empty"><div class="big">Aucune mission en cours</div>Elles se lancent depuis le poste.</div>`);
+						parts.push(`<div class="empty"><div class="big">${th("missions.emptyTitle")}</div>${th("missions.emptyHelp")}</div>`);
 					}
 				}
 
@@ -1511,12 +1548,13 @@
 					inbox = await api("/api/inbox", {}, silent);
 				} catch (error) {
 					const message = String(error.message ?? error);
-					if (message.includes("révoqué") || message.includes("inconnu")) {
+					// Sur le code, pas sur le texte : celui-ci suit la langue du poste.
+					if (error.code === "unknownDevice") {
 						store.clear();
 						return pairingScreen();
 					}
-					$("say").textContent = "Le poste ne répond pas";
-					if (firstLoad) $("view").innerHTML = `<div class="empty"><div class="big">Injoignable</div>${esc(message)}</div>`;
+					$("say").textContent = t("home.unreachable");
+					if (firstLoad) $("view").innerHTML = `<div class="empty"><div class="big">${th("home.unreachableTitle")}</div>${esc(message)}</div>`;
 					return;
 				}
 				firstLoad = false;
@@ -1542,7 +1580,7 @@
 				if ("enroll" in target.dataset) return enroll();
 				if (target.dataset.copy) {
 					navigator.clipboard.writeText(target.dataset.copy).then(
-						() => toast("Copié."),
+						() => toast(t("toast.copied")),
 						() => toast(target.dataset.copy),
 					);
 					return;
@@ -1560,12 +1598,12 @@
 			});
 
 			const DONE = {
-				deny: "Refusé.",
-				allow: "Autorisé.",
-				approve: "Plan approuvé — les exécutants peuvent partir.",
-				pause: "Mission suspendue — les exécutants sont coupés.",
-				stop: "Mission arrêtée. Le travail produit reste en place.",
-				answer: "Répondu.",
+				deny: "toast.denied",
+				allow: "toast.allowed",
+				approve: "toast.approved",
+				pause: "toast.paused",
+				stop: "toast.stopped",
+				answer: "toast.answered",
 			};
 
 			function decide(button) {
@@ -1591,7 +1629,7 @@
 						await refresh(true);
 						if (current) paintSegment(true);
 					},
-					DONE[kind],
+					DONE[kind] && t(DONE[kind]),
 				);
 			}
 
@@ -1600,29 +1638,27 @@
 				const notify = inbox?.notify;
 				$("sheetBody").innerHTML = `
 					<div class="card">
-						<div class="who">Appareil</div>
-						<div class="verb">${esc(inbox?.device ?? "Non appairé")}</div>
+						<div class="who">${th("device.label")}</div>
+						<div class="verb">${esc(inbox?.device ?? t("device.notPaired"))}</div>
 						<div class="sub" style="font-size:13.5px;margin-top:6px">${
-							inbox?.armed
-								? "Face ID est activé : ce téléphone peut autoriser, répondre et freiner."
-								: "Face ID n'est pas activé : ce téléphone peut lire et refuser, jamais autoriser."
+							inbox?.armed ? th("device.armed") : th("device.unarmed")
 						}</div>
-						${inbox && !inbox.armed && inbox.enrollOpen ? `<div class="row"><button class="btn primary" data-enroll>Activer Face ID</button></div>` : ""}
+						${inbox && !inbox.armed && inbox.enrollOpen ? `<div class="row"><button class="btn primary" data-enroll>${th("faceId.enable")}</button></div>` : ""}
 					</div>
 					${
 						notify?.topic
-							? `<div class="section">Notifications</div>
+							? `<div class="section">${th("device.notifications")}</div>
 								<div class="card">
-									<div class="sub" style="font-size:13.5px;margin:0 0 4px">Dans l'app ntfy, abonne-toi à ce sujet, sur ce serveur.</div>
-									<div class="row"><button class="btn small" data-copy="${esc(notify.topic)}">Copier le sujet</button>
-									<button class="btn small" data-copy="${esc(notify.server)}">Copier le serveur</button></div>
+									<div class="sub" style="font-size:13.5px;margin:0 0 4px">${th("device.ntfyHelp")}</div>
+									<div class="row"><button class="btn small" data-copy="${esc(notify.topic)}">${th("device.copyTopic")}</button>
+									<button class="btn small" data-copy="${esc(notify.server)}">${th("device.copyServer")}</button></div>
 								</div>`
 							: ""
 					}
-					<div class="section">Ce que ce téléphone peut faire</div>
+					<div class="section">${th("device.capabilities")}</div>
 					<div class="card"><div class="sub" style="font-size:13.5px;margin:0">
-						Lire, autoriser ou refuser un geste, répondre à un agent, approuver un plan, suspendre ou arrêter une mission.
-						Lancer un agent, reprendre une mission et changer un réglage se font devant le poste.
+						${th("device.canDo")}
+						${th("device.cannotDo")}
 					</div></div>`;
 				$("sheet").classList.add("on");
 			};
@@ -1678,15 +1714,15 @@
 
 			function paintAgentHeader() {
 				const known = agentOf(current.sessionId);
-				$("agentName").textContent = known?.label ?? "Agent";
+				$("agentName").textContent = known?.label ?? t("common.agent");
 				$("agentSub").textContent = [known?.project, known?.folder].filter(Boolean).join(" · ");
 				const [tone, label] = known?.waiting
 					? stateOf(known)
 					: current.working
-						? ["live", "travaille"]
+						? ["live", t("state.working")]
 						: current.running
-							? ["", "en attente"]
-							: ["", "terminé"];
+							? ["", t("state.idle")]
+							: ["", t("state.done")];
 				$("agentState").className = `pill ${tone}`;
 				$("agentState").textContent = label;
 				// L'écran n'a de sens que si son navigateur tourne.
@@ -1770,11 +1806,11 @@
 				for (const match of text.matchAll(IMAGE)) if (!found.has(match[1])) found.set(match[1], "");
 				const stage = (path) => {
 					const name = path.split("/").pop();
-					return /^(avant|before)\b/i.test(name) ? "avant" : /^(apr[eè]s|after)\b/i.test(name) ? "après" : "";
+					return /^(avant|before)\b/i.test(name) ? "before" : /^(apr[eè]s|after)\b/i.test(name) ? "after" : "";
 				};
 				return [...found]
 					.map(([path, caption]) => ({ path, caption, stage: stage(path) }))
-					.sort((a, b) => (a.stage === "avant" ? 0 : a.stage === "après" ? 1 : 2) - (b.stage === "avant" ? 0 : b.stage === "après" ? 1 : 2));
+					.sort((a, b) => (a.stage === "before" ? 0 : a.stage === "after" ? 1 : 2) - (b.stage === "before" ? 0 : b.stage === "after" ? 1 : 2));
 			}
 
 			/** Le constat, rangé par zones du dépôt — la même lecture que sur le poste. */
@@ -1794,7 +1830,7 @@
 				}
 				const zones = new Map();
 				for (const file of files) {
-					const name = folders(file.path).slice(0, depth).join("/") || "racine";
+					const name = folders(file.path).slice(0, depth).join("/") || t("changes.root");
 					const zone = zones.get(name) ?? { name, tiles: [], added: 0, removed: 0 };
 					zone.tiles.push({ ...file, fate: fate(file.state), name: file.path.split("/").pop() });
 					zone.added += file.added;
@@ -1810,12 +1846,12 @@
 			function footprintHtml(changes) {
 				const print = footprint(changes);
 				if (!print) return "";
-				const say = (count, word) => (count ? `<span><i class="${word === "supprimé" ? "deleted" : word === "créé" ? "created" : ""}"></i>${count} ${word}${count > 1 ? "s" : ""}</span>` : "");
+				const say = (count, fate) => (count ? `<span><i class="${fate === "modified" ? "" : fate}"></i>${th(`changes.${fate}`, { count })}</span>` : "");
 				const width = (tile) => Math.round(Math.min(96, Math.max(10, Math.sqrt(tile.added + tile.removed) * 3.2)));
-				return `<div class="section">Le constat · ${esc(changes.baseLabel ?? "")}</div>
+				return `<div class="section">${th("changes.title", { base: esc(changes.baseLabel ?? "") })}</div>
 					<div class="card">
-						<div class="sub" style="margin:0">Lu dans le dépôt, pas dans ce qu'il raconte.</div>
-						<div class="key">${say(print.deleted, "supprimé")}${say(print.created, "créé")}${say(print.modified, "modifié")}
+						<div class="sub" style="margin:0">${th("changes.help")}</div>
+						<div class="key">${say(print.deleted, "deleted")}${say(print.created, "created")}${say(print.modified, "modified")}
 							<span class="mono" style="margin-left:auto">+${changes.additions} −${changes.deletions}</span></div>
 						${print.zones
 							.map(
@@ -1832,7 +1868,7 @@
 								</details>`,
 							)
 							.join("")}
-						${print.more ? `<div class="sub" style="margin-top:10px">et ${print.more} autre${print.more > 1 ? "s" : ""} zone${print.more > 1 ? "s" : ""}</div>` : ""}
+						${print.more ? `<div class="sub" style="margin-top:10px">${th("changes.moreZones", { count: print.more })}</div>` : ""}
 					</div>`;
 			}
 
@@ -1857,7 +1893,7 @@
 						index += 1;
 						out.push(`<pre><code>${esc(body.join("\n"))}</code></pre>`);
 						// Le schéma se dessine sur le poste ; ici on en garde le texte.
-						if (language === "mermaid") out.push(`<div class="schema">Un schéma — il se dessine sur le poste.</div>`);
+						if (language === "mermaid") out.push(`<div class="schema">${th("summary.diagram")}</div>`);
 						continue;
 					}
 					if (!line.trim()) {
@@ -1907,20 +1943,20 @@
 						.map(
 							(shot) => `<div class="shot">
 								<img alt="${esc(shot.caption)}" data-src="${esc(base + encodeURIComponent(shot.path))}" />
-								${shot.stage ? `<span class="tag ${shot.stage === "après" ? "after" : ""}">${shot.stage}</span>` : ""}
+								${shot.stage ? `<span class="tag ${shot.stage === "after" ? "after" : ""}">${th(`summary.${shot.stage}`)}</span>` : ""}
 							</div>`,
 						)
 						.join("")}</div>`);
 				}
 				if (conclusion) {
-					parts.push(`<div class="section">${agent.working ? "Ce qu'il vient de dire" : "Sa conclusion"}</div>
+					parts.push(`<div class="section">${agent.working ? th("summary.justSaid") : th("summary.conclusion")}</div>
 						<div class="card"><div class="md">${md(conclusion.text)}</div></div>`);
 				} else {
-					parts.push(`<div class="empty"><div class="big">${agent.working ? "Il travaille" : "Rien à montrer"}</div>Il n'a encore rien dit.</div>`);
+					parts.push(`<div class="empty"><div class="big">${agent.working ? th("summary.working") : th("summary.nothing")}</div>${th("summary.silent")}</div>`);
 				}
 				parts.push(footprintHtml(agent.changes));
 				if (ask) {
-					parts.push(`<div class="section">Ta consigne</div>
+					parts.push(`<div class="section">${th("summary.yourPrompt")}</div>
 						<div class="card"><div class="last" style="-webkit-line-clamp:6;margin:0;color:var(--ink)">${esc(ask.text)}</div></div>`);
 				}
 				return parts.join("");
@@ -1942,7 +1978,7 @@
 						.map((event) => `<span class="${event.kind === "tool-error" ? "err" : ""}">${esc(toolName(event.tool))} ${esc((event.detail || event.text || "").slice(0, 160))}</span>`)
 						.join("\n");
 					out.push(`<details class="gestes">
-						<summary class="${failed ? "err" : ""}"><span>${gestures.length} geste${gestures.length > 1 ? "s" : ""}${failed ? ` · ${failed} en erreur` : ""} · ${esc(toolName(last.tool))}</span></summary>
+						<summary class="${failed ? "err" : ""}"><span>${th("thread.actions", { count: gestures.length })}${failed ? ` · ${th("thread.failed", { count: failed })}` : ""} · ${esc(toolName(last.tool))}</span></summary>
 						<div class="lines mono">${lines}</div>
 					</details>`);
 					gestures = [];
@@ -1957,14 +1993,14 @@
 					}
 				}
 				flush();
-				return out.join("") || `<div class="empty">La conversation n'a pas commencé.</div>`;
+				return out.join("") || `<div class="empty">${th("thread.empty")}</div>`;
 			}
 
 			// ── Écran : la page de son navigateur ───────────────────────────────
 			function screenHtml() {
-				return `<div class="screen"><img id="shotLive" alt="" /><span class="live-tag">en direct</span></div>
+				return `<div class="screen"><img id="shotLive" alt="" /><span class="live-tag">${th("screen.live")}</span></div>
 					<div class="address mono" id="shotUrl"></div>
-					<div class="sub" style="margin-top:8px">La page que cet agent a sous les yeux, relue toutes les deux à trois secondes. Tu regardes ; pour y cliquer, c'est sur le poste.</div>`;
+					<div class="sub" style="margin-top:8px">${th("screen.help")}</div>`;
 			}
 
 			let looking = false;
@@ -1982,7 +2018,7 @@
 						$("shotUrl").textContent = found.page;
 					}
 				} catch {
-					if (current === agent && $("shotUrl")) $("shotUrl").textContent = "Son navigateur ne tourne plus.";
+					if (current === agent && $("shotUrl")) $("shotUrl").textContent = t("screen.stopped");
 				} finally {
 					looking = false;
 				}
@@ -2042,7 +2078,7 @@
 						await pull(false);
 						showSegment("thread");
 					},
-					"Envoyé.",
+					t("toast.sent"),
 				);
 			};
 

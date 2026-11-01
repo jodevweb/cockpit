@@ -6,9 +6,11 @@ import { api } from "@/lib/ipc";
 import { announceChange } from "@/lib/refresh";
 import { usePersistentState } from "@/lib/useAsync";
 import { useCockpit } from "@/app/store";
+import { useTranslation } from "react-i18next";
 
 export function ObservabilityView() {
 	const { config, notify } = useCockpit();
+	const { t } = useTranslation("views");
 	const [showKpi, setShowKpi] = usePersistentState("observability.kpi", false);
 
 	const sources: FeedSource[] = [
@@ -37,15 +39,15 @@ export function ObservabilityView() {
 									events: meta("occurrences"),
 								})
 								.then((url) => {
-									notify("Ticket Linear créé.");
+									notify(t("observability.ticketCreated"));
 									void api.system.openUrl(url).catch(() => undefined);
 									reload();
 								})
 								.catch((error) => notify(String(error)));
 						}}
-						title="Créer le ticket Linear et l'annoter dans Sentry"
+						title={t("observability.ticketTitle")}
 					>
-						Ticket
+						{t("observability.ticket")}
 					</Button>
 					<Button
 						icon={CheckCircle2}
@@ -53,14 +55,14 @@ export function ObservabilityView() {
 							void api.feeds
 								.sentrySetStatus(item.id, "resolved")
 								.then(() => {
-									notify("Issue résolue.");
+									notify(t("observability.resolved"));
 									reload();
 									void announceChange("issues");
 								})
 								.catch((error) => notify(String(error)));
 						}}
 					>
-						Résoudre
+						{t("observability.resolve")}
 					</Button>
 					<Button
 						icon={BellOff}
@@ -68,32 +70,32 @@ export function ObservabilityView() {
 							void api.feeds
 								.sentrySetStatus(item.id, "ignored")
 								.then(() => {
-									notify("Issue ignorée.");
+									notify(t("observability.ignored"));
 									reload();
 									void announceChange("issues");
 								})
 								.catch((error) => notify(String(error)));
 						}}
 					>
-						Ignorer
+						{t("observability.ignore")}
 					</Button>
 				</>
 			),
 		},
 		{
 			id: "sentry-regressions",
-			label: "Régressions",
+			label: t("observability.regressions"),
 			// `is:regressed` — `is:regression` n'existe pas et Sentry répond 400.
 			load: () => api.feeds.sentry("is:unresolved is:regressed"),
 		},
 		{
 			id: "bs-incidents",
-			label: "Incidents",
+			label: t("observability.incidents"),
 			load: () => api.feeds.betterstackIncidents(),
 		},
 		{
 			id: "bs-monitors",
-			label: "Monitors",
+			label: t("observability.monitors"),
 			load: () => api.feeds.betterstackMonitors(),
 		},
 	];
@@ -101,11 +103,11 @@ export function ObservabilityView() {
 	return (
 		<>
 			<ViewHeader
-				title="Observabilité"
+				title={t("observability.title")}
 				actions={
 					<>
 						<Button active={!showKpi} onClick={() => setShowKpi(false)}>
-							Erreurs & incidents
+							{t("observability.errorsAndIncidents")}
 						</Button>
 						<Button active={showKpi} onClick={() => setShowKpi(true)}>
 							KPI
@@ -117,7 +119,7 @@ export function ObservabilityView() {
 						? `Sentry · ${config.sentryOrg}${
 								config.sentryProjects.length ? ` (${config.sentryProjects.join(", ")})` : ""
 							} · Better Stack`
-						: "Sentry et Better Stack"
+						: t("observability.subtitle")
 				}
 			/>
 			{showKpi ? (
@@ -126,7 +128,7 @@ export function ObservabilityView() {
 				<FeedPanel
 					sources={sources}
 					pollMs={120_000}
-					emptyHint="Vérifie le token et l'organisation dans Réglages si tu attendais des résultats."
+					emptyHint={t("observability.emptyHint")}
 				/>
 			)}
 		</>

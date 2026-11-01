@@ -1,6 +1,7 @@
 import clsx from "clsx";
 import { Pencil, Play, Plus, RotateCcw, Terminal, Trash2, Wand2, X } from "lucide-react";
 import { useMemo, useState } from "react";
+import { Trans, useTranslation } from "react-i18next";
 import { Badge, Button, Field, Spinner, TextInput } from "@/components/ui";
 import { api } from "@/lib/ipc";
 import type { Prompt } from "@/lib/types";
@@ -20,6 +21,7 @@ const EMPTY: Prompt = { id: "", label: "", group: "", text: "" };
  * modifiable : la bibliothèque livrée n'est qu'un point de départ.
  */
 export function PromptLauncher({ cwd, onClose }: { cwd: string; onClose: () => void }) {
+	const { t } = useTranslation("components2");
 	const { notify } = useCockpit();
 	const { confirm } = useConfirm();
 	const { open: openAgent } = useAgentActions();
@@ -30,11 +32,11 @@ export function PromptLauncher({ cwd, onClose }: { cwd: string; onClose: () => v
 	const groups = useMemo(() => {
 		const map = new Map<string, Prompt[]>();
 		for (const prompt of prompts.data ?? []) {
-			const key = prompt.group || "Mes prompts";
+			const key = prompt.group || t("promptLauncher.myPrompts");
 			map.set(key, [...(map.get(key) ?? []), prompt]);
 		}
 		return [...map.entries()];
-	}, [prompts.data]);
+	}, [prompts.data, t]);
 
 	// Par défaut on reste dans le cockpit ; Terminal.app devient le recours
 	// pour ce qui exige une vraie interactivité.
@@ -47,7 +49,7 @@ export function PromptLauncher({ cwd, onClose }: { cwd: string; onClose: () => v
 		setBusy(true);
 		try {
 			await api.prompts.launch(cwd, prompt.text);
-			notify(`Ouvert dans Terminal : ${prompt.label}`);
+			notify(t("promptLauncher.openedInTerminal", { label: prompt.label }));
 			onClose();
 		} catch (error) {
 			notify(String(error));
@@ -62,7 +64,7 @@ export function PromptLauncher({ cwd, onClose }: { cwd: string; onClose: () => v
 			await api.prompts.save(editing);
 			setEditing(null);
 			prompts.reload();
-			notify("Prompt enregistré.");
+			notify(t("promptLauncher.saved"));
 		} catch (error) {
 			notify(String(error));
 		}
@@ -70,8 +72,8 @@ export function PromptLauncher({ cwd, onClose }: { cwd: string; onClose: () => v
 
 	const remove = async (prompt: Prompt) => {
 		const ok = await confirm({
-			title: `Supprimer « ${prompt.label} » ?`,
-			confirmLabel: "Supprimer",
+			title: t("promptLauncher.deleteTitle", { label: prompt.label }),
+			confirmLabel: t("promptLauncher.delete"),
 			danger: true,
 		});
 		if (!ok) return;
@@ -88,14 +90,14 @@ export function PromptLauncher({ cwd, onClose }: { cwd: string; onClose: () => v
 			<div className="panel flex max-h-full w-full max-w-2xl flex-col overflow-hidden shadow-2xl shadow-black/50">
 				<div className="hairline-b flex items-center gap-2 px-4 py-2.5">
 					<Wand2 size={13} className="text-accent-soft" />
-					<span className="text-[12.5px] font-semibold text-ink">Lancer un agent</span>
+					<span className="text-[12.5px] font-semibold text-ink">{t("promptLauncher.title")}</span>
 					<span className="min-w-0 flex-1 truncate font-mono text-[10px] text-ink-faint">
 						{cwd}
 					</span>
 					<Button
 						size="sm"
 						icon={RotateCcw}
-						title="Restaurer la bibliothèque par défaut"
+						title={t("promptLauncher.reset")}
 						onClick={() => {
 							void api.prompts
 								.reset()
@@ -115,20 +117,20 @@ export function PromptLauncher({ cwd, onClose }: { cwd: string; onClose: () => v
 
 					{editing ? (
 						<div className="flex flex-col gap-2">
-							<Field label="Libellé">
+							<Field label={t("promptLauncher.label")}>
 								<TextInput
 									value={editing.label}
 									onChange={(label) => setEditing({ ...editing, label })}
-									placeholder="Vérifier puis commit + push"
+									placeholder={t("promptLauncher.labelPlaceholder")}
 								/>
 							</Field>
-							<Field label="Groupe" hint="Livraison, Revue, Qualité…">
+							<Field label={t("promptLauncher.group")} hint={t("promptLauncher.groupHint")}>
 								<TextInput
 									value={editing.group}
 									onChange={(group) => setEditing({ ...editing, group })}
 								/>
 							</Field>
-							<Field label="Prompt envoyé à l'agent">
+							<Field label={t("promptLauncher.text")}>
 								<textarea
 									value={editing.text}
 									onChange={(event) => setEditing({ ...editing, text: event.target.value })}
@@ -137,9 +139,9 @@ export function PromptLauncher({ cwd, onClose }: { cwd: string; onClose: () => v
 								/>
 							</Field>
 							<div className="flex justify-end gap-1.5">
-								<Button onClick={() => setEditing(null)}>Annuler</Button>
+								<Button onClick={() => setEditing(null)}>{t("promptLauncher.cancel")}</Button>
 								<Button variant="solid" onClick={() => void save()}>
-									Enregistrer
+									{t("promptLauncher.save")}
 								</Button>
 							</div>
 						</div>
@@ -178,7 +180,7 @@ export function PromptLauncher({ cwd, onClose }: { cwd: string; onClose: () => v
 												<Button
 													size="sm"
 													icon={Terminal}
-													title="Ouvrir plutôt dans Terminal.app"
+													title={t("promptLauncher.openInTerminal")}
 													disabled={busy}
 													onClick={() => void launchInTerminal(prompt)}
 												/>
@@ -201,14 +203,16 @@ export function PromptLauncher({ cwd, onClose }: { cwd: string; onClose: () => v
 							))}
 
 							<Button icon={Plus} onClick={() => setEditing({ ...EMPTY })}>
-								Nouveau prompt
+								{t("promptLauncher.new")}
 							</Button>
 
 							<p className="px-1 text-[10px] leading-relaxed text-ink-faint">
-								Un clic lance l'agent ici, avec la conversation et la zone de réponse dans
-								le cockpit. L'icône de terminal l'ouvre plutôt dans Terminal.app, pour ce
-								qui a besoin d'un vrai TTY. La bibliothèque vit dans{" "}
-								<Badge mono>~/.config/cockpit/prompts.toml</Badge>.
+								<Trans
+									t={t}
+									i18nKey="promptLauncher.footer"
+									values={{ path: "~/.config/cockpit/prompts.toml" }}
+									components={{ path: <Badge mono>{null}</Badge> }}
+								/>
 							</p>
 						</div>
 					)}

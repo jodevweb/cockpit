@@ -1,4 +1,6 @@
 import type { Turn } from "@/app/agents";
+import { t } from "@/i18n";
+import { replyDirective } from "@/lib/language";
 import type { Episode } from "@/lib/episodes";
 import { firstSentence, isBrowserTool } from "@/lib/film";
 
@@ -69,10 +71,10 @@ export function proofTestOf(episode: Episode): ProofTest | null {
 		cache.set(episode, null);
 		return null;
 	}
-	const title = episode.ask ? firstSentence(episode.ask.text, 80).replace(/["\\]/g, "") : "recette de l'agent";
+	const title = episode.ask ? firstSentence(episode.ask.text, 80).replace(/["\\]/g, "") : t("lib:proof.defaultTitle").replace(/["\\]/g, "");
 	const body = lines.map((line) => `\t${line}`).join("\n");
 	const end = lastUrl
-		? `\n\t// L'agent n'a pas dit ce qu'il attendait : on vérifie seulement où la recette s'arrête.\n\tawait expect(page).toHaveURL(${JSON.stringify(lastUrl)});`
+		? `\n\t// The agent didn't say what it expected: we only check where the walkthrough ends.\n\tawait expect(page).toHaveURL(${JSON.stringify(lastUrl)});`
 		: "";
 	const code = `import { expect, test } from "@playwright/test";\n\ntest("${title}", async ({ page }) => {\n${body}${end}\n});\n`;
 	const result = { title, code, steps: lines.length, skipped };
@@ -83,11 +85,12 @@ export function proofTestOf(episode: Episode): ProofTest | null {
 /** La consigne qui demande à l'agent de ranger le test dans le dépôt. */
 export function askToKeep(test: ProofTest): string {
 	return (
-		"Voici le test Playwright tiré de ta recette dans le navigateur. Ajoute-le au dépôt en " +
-		"respectant ses conventions (dossier des tests de bout en bout, sélecteurs, données de test), " +
-		"remplace la vérification d'adresse par ce que tu attendais vraiment de chaque étape, puis " +
-		"lance-le pour prouver qu'il passe.\n\n```ts\n" +
+		"Here is the Playwright test drawn from your walkthrough in the browser. Add it to the repository " +
+		"following its conventions (end-to-end test folder, selectors, test data), " +
+		"replace the URL check with what you actually expected from each step, then " +
+		"run it to prove it passes.\n\n```ts\n" +
 		test.code +
-		"```"
+		"```\n\n" +
+		replyDirective()
 	);
 }

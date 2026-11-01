@@ -4,6 +4,7 @@ import { awaitedDecision, awaitsHuman } from "@/lib/missions";
 import { readQuestions, type AgentQuestion, type Mission, type PermissionRequest } from "@/lib/types";
 import { isQuestion, useAgentRuns, type AgentRun } from "./agents";
 import { useCockpit } from "./store";
+import { t } from "@/i18n";
 
 /**
  * Ce qui attend ta décision, d'où que ça vienne.
@@ -144,9 +145,11 @@ export function useDecisions(): Decision[] {
 /** « depuis 12 min », « depuis 2 h » : ce qu'attend la machine. */
 export function waitedSince(since: number, now = Date.now()): string {
 	const minutes = Math.max(0, Math.round((now - since) / 60_000));
-	if (minutes < 1) return "à l'instant";
-	if (minutes < 60) return `depuis ${minutes} min`;
+	if (minutes < 1) return t("app:decisions.waited.now");
+	if (minutes < 60) return t("app:decisions.waited.minutes", { minutes });
 	const hours = Math.floor(minutes / 60);
-	if (hours < 24) return `depuis ${hours} h ${String(minutes % 60).padStart(2, "0")}`;
-	return `depuis ${Math.floor(hours / 24)} j`;
+	if (hours < 24) {
+		return t("app:decisions.waited.hours", { hours, minutes: String(minutes % 60).padStart(2, "0") });
+	}
+	return t("app:decisions.waited.days", { days: Math.floor(hours / 24) });
 }

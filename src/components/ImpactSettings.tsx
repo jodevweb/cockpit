@@ -2,13 +2,14 @@ import { useEffect, useState } from "react";
 import { Button, Field, TextInput } from "@/components/ui";
 import { api } from "@/lib/ipc";
 import { useCockpit } from "@/app/store";
+import { useTranslation } from "react-i18next";
 
 const PROFONDEURS = [
-	{ id: "", label: "Sans consigne" },
-	{ id: "fast", label: "Vite" },
-	{ id: "normal", label: "Normale" },
-	{ id: "deep", label: "À fond" },
-];
+	{ id: "", key: "none" },
+	{ id: "fast", key: "fast" },
+	{ id: "normal", key: "normal" },
+	{ id: "deep", key: "deep" },
+] as const;
 
 /**
  * Ce qui décide de la qualité d'une lecture de changement.
@@ -20,6 +21,7 @@ const PROFONDEURS = [
  * autre équipe, puisque rien n'est supposé du métier.
  */
 export function ImpactSettings() {
+	const { t } = useTranslation("components1");
 	const { config, reloadConfig, notify, activeProject } = useCockpit();
 	const [draft, setDraft] = useState({
 		brief: "",
@@ -63,7 +65,7 @@ export function ImpactSettings() {
 				},
 			});
 			reloadConfig();
-			notify("Lecture des changements enregistrée.");
+			notify(t("impactSettings.saved"));
 		} catch (error) {
 			notify(String(error));
 		} finally {
@@ -74,32 +76,35 @@ export function ImpactSettings() {
 	return (
 		<div className="flex flex-col gap-3">
 			<p className="text-[11px] leading-relaxed text-ink-faint">
-				L'écran Impact confie chaque changement à un agent qui ne peut rien écrire, et
-				garde ce qu'il en a compris jusqu'à ce que la branche bouge.
+				{t("impactSettings.intro")}
 			</p>
 
 			<div className="panel flex flex-col gap-3 p-3.5">
 				<Field
-					label={`Ce que fait ${activeProject?.name ?? "ce produit"}`}
-					hint="Deux ou trois phrases : à quoi sert le produit, qui s'en sert, ce qui compte pour eux. Sans ça, l'analyse ne peut parler que du code."
+					label={
+						activeProject?.name
+							? t("impactSettings.brief.label", { name: activeProject.name })
+							: t("impactSettings.brief.labelFallback")
+					}
+					hint={t("impactSettings.brief.hint")}
 				>
 					<textarea
 						value={draft.brief}
 						onChange={(event) => setDraft({ ...draft, brief: event.target.value })}
 						rows={4}
-						placeholder="Ex. : boutique en ligne pour des particuliers. Ce qui compte : que le total du panier soit juste, et qu'une commande payée parte le jour même."
+						placeholder={t("impactSettings.brief.placeholder")}
 						className="focus-ring text-selectable w-full resize-none rounded-lg border border-line-soft bg-raised px-2.5 py-2 text-[11px] leading-relaxed text-ink placeholder:text-ink-faint"
 					/>
 				</Field>
 
 				<div className="grid grid-cols-3 gap-2.5">
-					<Field label="Moteur" hint="Vide = le premier déclaré.">
+					<Field label={t("impactSettings.engine.label")} hint={t("impactSettings.engine.hint")}>
 						<select
 							value={draft.engine}
 							onChange={(event) => setDraft({ ...draft, engine: event.target.value, model: "" })}
 							className="focus-ring h-7 w-full rounded-lg border border-line-soft bg-raised px-2 text-[11px] text-ink"
 						>
-							<option value="">Par défaut</option>
+							<option value="">{t("impactSettings.default")}</option>
 							{engines.map((entry) => (
 								<option key={entry.id} value={entry.id}>
 									{entry.label || entry.id}
@@ -107,14 +112,14 @@ export function ImpactSettings() {
 							))}
 						</select>
 					</Field>
-					<Field label="Modèle" hint="Vide = le réglage du poste.">
+					<Field label={t("impactSettings.model.label")} hint={t("impactSettings.model.hint")}>
 						{models.length ? (
 							<select
 								value={draft.model}
 								onChange={(event) => setDraft({ ...draft, model: event.target.value })}
 								className="focus-ring h-7 w-full rounded-lg border border-line-soft bg-raised px-2 text-[11px] text-ink"
 							>
-								<option value="">Par défaut</option>
+								<option value="">{t("impactSettings.default")}</option>
 								{models.map((model) => (
 									<option key={model} value={model}>
 										{model}
@@ -132,7 +137,7 @@ export function ImpactSettings() {
 					{/* Comprendre les implications demande plus qu'une lecture rapide :
 					    c'est le seul endroit du cockpit où la profondeur se justifie, et
 					    où l'attente est acceptée puisqu'on l'a demandée. */}
-					<Field label="Profondeur" hint="Ce que le moteur sait en faire.">
+					<Field label={t("impactSettings.depth.label")} hint={t("impactSettings.depth.hint")}>
 						<select
 							value={draft.depth}
 							onChange={(event) => setDraft({ ...draft, depth: event.target.value })}
@@ -140,7 +145,7 @@ export function ImpactSettings() {
 						>
 							{PROFONDEURS.map((entry) => (
 								<option key={entry.id} value={entry.id}>
-									{entry.label}
+									{t(`impactSettings.depth.${entry.key}`)}
 								</option>
 							))}
 						</select>
@@ -157,16 +162,16 @@ export function ImpactSettings() {
 						className="mt-0.5 accent-[var(--color-accent)]"
 					/>
 					<span>
-						Suivre aussi les branches locales sans demande de fusion
+						{t("impactSettings.localBranches.label")}
 						<span className="mt-0.5 block text-[10px] leading-snug text-ink-faint">
-							Le travail parti depuis trois jours qu'aucune forge ne voit encore.
+							{t("impactSettings.localBranches.hint")}
 						</span>
 					</span>
 				</label>
 
 				<div className="flex justify-end">
 					<Button variant="solid" loading={saving} onClick={() => void save()}>
-						Enregistrer
+						{t("impactSettings.save")}
 					</Button>
 				</div>
 			</div>

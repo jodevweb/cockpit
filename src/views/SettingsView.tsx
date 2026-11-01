@@ -59,19 +59,15 @@ import { DOCK_KEY } from "@/components/WorkspacePanel";
  * soit. Le poste et la version ferment la liste — on n'y touche qu'une fois.
  */
 const TABS = [
-	{ id: "projects", label: "Projets", hint: "les dépôts que le cockpit pilote" },
-	{ id: "services", label: "Services", hint: "ce qui est branché, et avec quelles clés" },
-	{ id: "team", label: "Équipe & workflow", hint: "qui travaille, et comment" },
-	{ id: "agents", label: "Agents", hint: "les rôles confiés aux exécutants" },
-	{ id: "voice", label: "Voix & assistant", hint: "la voix, l'écoute, ElevenLabs" },
-	{
-		id: "permanence",
-		label: "Permanence",
-		hint: "ce qu'elle surveille, et ce qu'elle s'autorise",
-	},
-	{ id: "workstation", label: "Poste", hint: "dossiers, éditeur, apparence, démarrage" },
-	{ id: "mobile", label: "Accès mobile", hint: "suivre les agents depuis le téléphone" },
-	{ id: "version", label: "Version", hint: "mises à jour" },
+	{ id: "projects" },
+	{ id: "services" },
+	{ id: "team" },
+	{ id: "agents" },
+	{ id: "voice" },
+	{ id: "permanence" },
+	{ id: "workstation" },
+	{ id: "mobile" },
+	{ id: "version" },
 ] as const;
 
 type SettingsTab = (typeof TABS)[number]["id"];
@@ -109,6 +105,7 @@ function SentryProjectPicker({
 	selected: string;
 	onChange: (value: string) => void;
 }) {
+	const { t } = useTranslation("views");
 	const projects = useAsync(() => api.feeds.sentryProjects(), []);
 	const chosen = selected
 		.split(",")
@@ -128,7 +125,7 @@ function SentryProjectPicker({
 			<>
 				<TextInput value={selected} onChange={onChange} mono />
 				<p className="mt-1 text-[10px] text-ink-faint">
-					Liste indisponible ({projects.error}) — saisis les slugs à la main.
+					{t("settings.sentry.unavailable", { error: projects.error })}
 				</p>
 			</>
 		);
@@ -166,6 +163,7 @@ function SentryProjectPicker({
  * dans l'écran Delivery.
  */
 function TriggerEnvironments() {
+	const { t } = useTranslation("views");
 	const { config, reloadConfig, notify } = useCockpit();
 	const { confirm } = useConfirm();
 	const [draft, setDraft] = useState({ name: "", token: "", projectRef: "" });
@@ -179,7 +177,7 @@ function TriggerEnvironments() {
 			await api.config.saveTriggerEnv(name, token, projectRef);
 			setDraft({ name: "", token: "", projectRef: "" });
 			reloadConfig();
-			notify(`Environnement « ${name} » enregistré.`);
+			notify(t("settings.trigger.saved", { name }));
 		} catch (error) {
 			notify(String(error));
 		} finally {
@@ -189,15 +187,15 @@ function TriggerEnvironments() {
 
 	const remove = async (name: string) => {
 		const ok = await confirm({
-			title: `Retirer l'environnement « ${name} » ?`,
-			confirmLabel: "Retirer",
+			title: t("settings.trigger.removeTitle", { name }),
+			confirmLabel: t("settings.common.remove"),
 			danger: true,
 		});
 		if (!ok) return;
 		try {
 			await api.config.removeTriggerEnv(name);
 			reloadConfig();
-			notify(`Environnement « ${name} » retiré.`);
+			notify(t("settings.trigger.removed", { name }));
 		} catch (error) {
 			notify(String(error));
 		}
@@ -212,27 +210,27 @@ function TriggerEnvironments() {
 						{environment.name}
 					</span>
 					<span className="min-w-0 flex-1 truncate font-mono text-[10px] text-ink-faint">
-						{environment.projectRef || "projet par défaut"}
+						{environment.projectRef || t("settings.trigger.defaultProject")}
 					</span>
 					{environment.fromDefaultKey ? (
-						<Badge>clé principale</Badge>
+						<Badge>{t("settings.trigger.mainKey")}</Badge>
 					) : (
 						<Button size="sm" onClick={() => void remove(environment.name)}>
-							Retirer
+							{t("settings.common.remove")}
 						</Button>
 					)}
 				</div>
 			))}
 
 			<div className="flex items-end gap-2 p-2.5">
-				<Field label="Nom">
+				<Field label={t("settings.common.name")}>
 					<TextInput
 						value={draft.name}
 						onChange={(value) => setDraft((current) => ({ ...current, name: value }))}
-						placeholder="Production"
+						placeholder={t("settings.trigger.namePlaceholder")}
 					/>
 				</Field>
-				<Field label="Secret key">
+				<Field label={t("settings.trigger.secretKey")}>
 					<TextInput
 						type="password"
 						value={draft.token}
@@ -241,7 +239,7 @@ function TriggerEnvironments() {
 						mono
 					/>
 				</Field>
-				<Field label="Projet" hint="Vide = celui ci-dessus.">
+				<Field label={t("settings.trigger.project")} hint={t("settings.trigger.projectHint")}>
 					<TextInput
 						value={draft.projectRef}
 						onChange={(value) => setDraft((current) => ({ ...current, projectRef: value }))}
@@ -255,7 +253,7 @@ function TriggerEnvironments() {
 					disabled={busy || !draft.name.trim() || !draft.token.trim()}
 					onClick={() => void save(draft.name, draft.token, draft.projectRef)}
 				>
-					Ajouter
+					{t("settings.common.add")}
 				</Button>
 			</div>
 		</div>
@@ -271,6 +269,7 @@ function TriggerEnvironments() {
  * Sentry derrière.
  */
 function Projects() {
+	const { t } = useTranslation("views");
 	const { config, reloadConfig, notify, activeProject, switchProject } = useCockpit();
 	const { confirm } = useConfirm();
 	const [draft, setDraft] = useState({
@@ -302,7 +301,7 @@ function Projects() {
 			});
 			setDraft({ name: "", mainRepo: "", githubRepo: "", solo: false });
 			reloadConfig();
-			notify(`Projet « ${draft.name || draft.mainRepo} » ajouté.`);
+			notify(t("settings.projects.added", { name: draft.name || draft.mainRepo }));
 		} catch (error) {
 			notify(String(error));
 		} finally {
@@ -312,9 +311,9 @@ function Projects() {
 
 	const remove = async (id: string, name: string) => {
 		const ok = await confirm({
-			title: `Retirer le projet « ${name} » ?`,
-			message: "Seule la configuration du cockpit est modifiée — le dépôt reste intact.",
-			confirmLabel: "Retirer",
+			title: t("settings.projects.removeTitle", { name }),
+			message: t("settings.projects.removeMessage"),
+			confirmLabel: t("settings.common.remove"),
 			danger: true,
 		});
 		if (!ok) return;
@@ -335,7 +334,7 @@ function Projects() {
 						type="button"
 						onClick={() => switchProject(project.id)}
 						className="focus-ring min-w-0 flex-1 rounded text-left"
-						title="Activer ce projet"
+						title={t("settings.projects.activate")}
 					>
 						<span className="block truncate text-[11px] font-medium text-ink">
 							{project.name}
@@ -345,10 +344,10 @@ function Projects() {
 						</span>
 					</button>
 					{project.githubRepo ? <Badge>{project.githubRepo}</Badge> : null}
-					{project.solo ? <Badge>solo</Badge> : null}
+					{project.solo ? <Badge>{t("settings.projects.soloBadge")}</Badge> : null}
 					{projects.length > 1 ? (
 						<Button size="sm" onClick={() => void remove(project.id, project.name)}>
-							Retirer
+							{t("settings.common.remove")}
 						</Button>
 					) : null}
 				</div>
@@ -360,31 +359,31 @@ function Projects() {
 			<div className="flex flex-col gap-2 bg-void/40 p-2.5">
 			<div className="flex items-end gap-2">
 				<span className="mb-1.5 shrink-0 text-[10px] font-semibold tracking-[0.06em] text-ink-faint uppercase">
-					Nouveau
+					{t("settings.projects.new")}
 				</span>
-				<Field label="Nom">
+				<Field label={t("settings.common.name")}>
 					<TextInput
 						value={draft.name}
 						onChange={(value) => setDraft((current) => ({ ...current, name: value }))}
-						placeholder="Side project"
+						placeholder={t("settings.projects.namePlaceholder")}
 					/>
 				</Field>
 				<Field
-					label="Dossier"
-					hint="Un chemin, un « ~ », ou juste un nom sous ton dossier de projets."
+					label={t("settings.projects.folder")}
+					hint={t("settings.projects.folderHint")}
 				>
 					<TextInput
 						value={draft.mainRepo}
 						onChange={(value) => setDraft((current) => ({ ...current, mainRepo: value }))}
-						placeholder="~/Sites/mon-projet"
+						placeholder={t("settings.projects.folderPlaceholder")}
 						mono
 					/>
 				</Field>
-				<Field label="GitHub" hint="Vide = déduit du dépôt, s'il en a un.">
+				<Field label="GitHub" hint={t("settings.projects.githubHint")}>
 					<TextInput
 						value={draft.githubRepo}
 						onChange={(value) => setDraft((current) => ({ ...current, githubRepo: value }))}
-						placeholder={ground?.slug || "moi/mon-projet"}
+						placeholder={ground?.slug || t("settings.projects.githubPlaceholder")}
 						mono
 					/>
 				</Field>
@@ -392,10 +391,10 @@ function Projects() {
 					size="sm"
 					active={draft.solo}
 					onClick={() => setDraft((current) => ({ ...current, solo: !current.solo }))}
-					title="Projet sans équipe : masque le daily"
+					title={t("settings.projects.soloTitle")}
 					className="h-7"
 				>
-					Solo
+					{t("settings.projects.solo")}
 				</Button>
 				<Button
 					variant="solid"
@@ -405,12 +404,12 @@ function Projects() {
 					disabled={busy || !draft.mainRepo.trim() || ground?.isRepo === false}
 					title={
 						ground?.isRepo === false
-							? "Prépare le terrain d'abord — le bloc ci-dessous s'en charge"
+							? t("settings.projects.prepareFirst")
 							: undefined
 					}
 					onClick={() => void add()}
 				>
-					Ajouter
+					{t("settings.common.add")}
 				</Button>
 			</div>
 
@@ -431,6 +430,7 @@ function Projects() {
 }
 
 export function SettingsView() {
+	const { t } = useTranslation("views");
 	const { config, configError, reloadConfig, notify, activeProject, focus, clearFocus } =
 		useCockpit();
 	const [draft, setDraft] = useState({
@@ -579,7 +579,7 @@ export function SettingsView() {
 			}
 			setSecrets({});
 			reloadConfig();
-			notify("Configuration enregistrée.");
+			notify(t("settings.saved"));
 		} catch (error) {
 			notify(String(error));
 		} finally {
@@ -590,7 +590,7 @@ export function SettingsView() {
 	return (
 		<>
 			<ViewHeader
-				title="Réglages"
+				title={t("settings.title")}
 				subtitle={config?.configPath}
 				actions={
 					<>
@@ -602,7 +602,7 @@ export function SettingsView() {
 								}
 							}}
 						>
-							Révéler le fichier
+							{t("settings.revealFile")}
 						</Button>
 						{/* Ce bouton n'écrit que les champs du fichier de configuration :
 						    l'afficher sur une rubrique dont les panneaux ont leur propre
@@ -614,7 +614,7 @@ export function SettingsView() {
 								disabled={saving}
 								onClick={() => void save()}
 							>
-								{saving ? "Enregistrement…" : "Enregistrer"}
+								{saving ? t("settings.saving") : t("settings.save")}
 							</Button>
 						) : null}
 					</>
@@ -633,7 +633,7 @@ export function SettingsView() {
 							key={entry.id}
 							type="button"
 							onClick={() => setTab(entry.id)}
-							title={entry.hint}
+							title={t(`settings.tabs.${entry.id}.hint`)}
 							className={clsx(
 								"focus-ring rounded-lg px-2.5 py-1.5 text-left text-[12.5px] transition-colors",
 								tab === entry.id
@@ -641,7 +641,7 @@ export function SettingsView() {
 									: "text-ink-muted hover:bg-hover hover:text-ink",
 							)}
 						>
-							{entry.label}
+							{t(`settings.tabs.${entry.id}.label`)}
 						</button>
 					))}
 				</nav>
@@ -649,7 +649,7 @@ export function SettingsView() {
 				<div className="min-h-0 flex-1 overflow-y-auto p-5">
 				<div className="flex max-w-3xl flex-col gap-6">
 					{tab === "projects" ? (
-						<Section title="Projets">
+						<Section title={t("settings.sections.projects")}>
 							<Projects />
 						</Section>
 					) : null}
@@ -668,17 +668,19 @@ export function SettingsView() {
 						<div className="min-w-0 flex-1">
 							<p className="text-[12.5px] font-medium text-ink">
 								{scope === "project"
-									? `Les réglages ci-dessous s'appliquent à « ${activeProject?.name ?? "ce projet"} »`
-									: "Les réglages ci-dessous sont les valeurs par défaut, héritées par tous les projets"}
+									? t("settings.scope.projectTitle", {
+											name: activeProject?.name ?? t("settings.scope.thisProject"),
+										})
+									: t("settings.scope.globalTitle")}
 							</p>
 							<p className="mt-0.5 text-[10px] leading-snug text-ink-faint">
 								{scope === "project"
 									? cloisonne
-										? "Tu ne vois ici que ce que ce projet déclare. Un champ vide n'est pas configuré pour lui : dès qu'il y a plusieurs projets, aucun n'emprunte le dépôt ni l'équipe d'un autre. Seuls les jetons d'accès restent partagés."
-										: "Un champ laissé vide hérite des valeurs par défaut. Renseigne-le pour que ce projet ait le sien — un autre compte GitHub, une autre clé Sentry."
+										? t("settings.scope.projectHintIsolated")
+										: t("settings.scope.projectHint")
 									: cloisonne
-										? "Ces valeurs servent de repli aux jetons d'accès. Les dépôts et les équipes, eux, se déclarent projet par projet."
-										: "Ces valeurs servent partout où un projet ne dit rien. Bascule sur le projet pour lui donner ses propres réglages."}
+										? t("settings.scope.globalHintIsolated")
+										: t("settings.scope.globalHint")}
 							</p>
 						</div>
 						<div className="flex shrink-0 items-center gap-1 rounded-lg border border-line-soft p-0.5">
@@ -687,35 +689,35 @@ export function SettingsView() {
 								active={scope === "project"}
 								onClick={() => setScope("project")}
 							>
-								{activeProject?.name ?? "Projet"}
+								{activeProject?.name ?? t("settings.scope.project")}
 							</Button>
 							<Button
 								size="sm"
 								active={scope === "global"}
 								onClick={() => setScope("global")}
 							>
-								Défauts
+								{t("settings.scope.defaults")}
 							</Button>
 						</div>
 					</div>
 					) : null}
 
 					{tab === "services" ? (
-						<Section title="Services connectés">
+						<Section title={t("settings.sections.services")}>
 							<ConnectorsSettings />
 						</Section>
 					) : null}
 
 					{tab === "team" ? (
 						<>
-							<Section title="Flux de travail">
+							<Section title={t("settings.sections.workflow")}>
 								<WorkflowSettings />
 							</Section>
 
 							{/* L'équipe juste après le flux de travail : les deux décrivent
 							    la même chose — comment ce projet travaille — et se règlent
 							    au même moment, quand on branche un nouveau dépôt. */}
-							<Section title="Équipe">
+							<Section title={t("settings.sections.team")}>
 								<TeamSettings />
 							</Section>
 						</>
@@ -726,68 +728,68 @@ export function SettingsView() {
 							{/* Les comptes en tête : c'est sous eux que tout le reste tourne,
 							    et un moteur réglé au détail près sur la mauvaise identité ne
 							    sert à rien. */}
-							<Section title="Comptes">
+							<Section title={t("settings.sections.accounts")}>
 								<AccountsSettings />
 							</Section>
 
 							{/* Les moteurs avant les rôles : un rôle choisit son moteur, et
 							    on ne choisit pas dans une liste qu'on n'a pas encore
 							    remplie. */}
-							<Section title="Moteurs d'agents">
+							<Section title={t("settings.sections.engines")}>
 								<EnginesSettings />
 							</Section>
 
 							{/* Juste après les moteurs : un rôle choisit son moteur, ses
 							    outils viennent du dépôt. Les deux décident de ce qu'un agent
 							    peut faire, et l'un sans l'autre ne dit rien. */}
-							<Section title="Outils du dépôt (MCP)">
+							<Section title={t("settings.sections.mcp")}>
 								<McpSettings />
 							</Section>
 
-							<Section title="Rôles des agents">
+							<Section title={t("settings.sections.roles")}>
 								<RolesSettings />
 							</Section>
 
-							<Section title="Comment démarre une mission">
+							<Section title={t("settings.sections.missionMode")}>
 								<MissionModeSettings />
 							</Section>
 
 							{/* Ce qu'une mission a le droit de coûter, juste après les rôles
 							    qui la peuplent : c'est le même sujet vu par la dépense. */}
-							<Section title="Ce qu'une mission a le droit de coûter">
+							<Section title={t("settings.sections.missionBudget")}>
 								<MissionBudgetSettings />
 							</Section>
 
 							{/* Juste après la dépense : la même question posée à la
 							    machine plutôt qu'au portefeuille. */}
-							<Section title="Isolation des agents">
+							<Section title={t("settings.sections.sandbox")}>
 								<SandboxSettings />
 							</Section>
 
 							{/* Ce qui doit rester vrai vient en premier : c'est la seule
 							    chose de cet onglet qu'une machine puisse vérifier, et le
 							    reste — contexte, rôles, lectures — sert à s'en approcher. */}
-							<Section title="Ce qui doit rester vrai">
+							<Section title={t("settings.sections.properties")}>
 								<PropertiesSettings />
 							</Section>
 
 							{/* Les commandes du dépôt : ce que le cockpit sait lancer en
 							    ton nom, à côté de ce qu'il sait vérifier. */}
-							<Section title="Commandes du dépôt">
+							<Section title={t("settings.sections.commands")}>
 								<CommandsSettings />
 							</Section>
 
 							{/* Ce qu'un agent sait avant de commencer se règle au même
 							    endroit que ce qu'il a le droit de faire : les deux décident
 							    de ce qu'il produira. */}
-							<Section title="Contexte des agents">
+							<Section title={t("settings.sections.brief")}>
 								<BriefSettings />
 							</Section>
 
 							{/* La lecture des changements est un agent comme les autres :
 							    elle a son moteur et sa profondeur, et se règle donc ici
 							    plutôt que dans un coin de l'écran qui l'utilise. */}
-							<Section title="Lecture des changements">
+							<Section title={t("settings.sections.impact")}>
 								<ImpactSettings />
 							</Section>
 						</>
@@ -802,36 +804,31 @@ export function SettingsView() {
 					    Mac, pas dans la configuration d'un projet. */}
 					{tab === "voice" ? (
 						<>
-							<Section title="Voix">
+							<Section title={t("settings.sections.voice")}>
 								<p className="mb-3 max-w-xl text-[12px] leading-relaxed text-ink-muted">
-									La voix qui raconte ce que fait un agent quand tu l'écoutes, et qui te répond quand tu parles à
-									l'assistant. La clé ElevenLabs sert aux deux : à parler, et à t'entendre.
+									{t("settings.voice.intro")}
 								</p>
 								<VoiceSettings />
 							</Section>
-							<Section title="Assistant vocal">
+							<Section title={t("settings.sections.assistant")}>
 								<AssistantSettings />
 							</Section>
 						</>
 					) : null}
 
 					{tab === "mobile" ? (
-						<Section title="Accès mobile">
+						<Section title={t("settings.sections.mobile")}>
 							<RemoteAccess />
 						</Section>
 					) : null}
 
 					{tab === "version" ? (
-					<Section title="Version">
+					<Section title={t("settings.sections.version")}>
 						{/* Le texte cède avant le bouton : à cette largeur, une phrase qui
 						    ne se replie pas pousse l'action hors du cadre. */}
 						<div className="panel flex flex-wrap items-center justify-between gap-x-3 gap-y-2.5 p-3.5">
 							<p className="min-w-[16rem] flex-1 text-[11px] leading-relaxed text-ink-muted">
-								Le cockpit vérifie tout seul, quelques fois par jour. Rien ne
-								s'installe sans ton accord : une mise à jour relance l'application.
-								Les agents de workspace continuent pendant ce temps, sauf si tu
-								l'as coupé dans Poste → À la fermeture ; ceux des missions sont
-								repris au redémarrage.
+								{t("settings.version.intro")}
 							</p>
 							<UpdateCheck />
 						</div>
@@ -840,31 +837,31 @@ export function SettingsView() {
 
 					{tab === "workstation" ? (
 					<>
-					<Section title="Langue">
+					<Section title={t("settings.sections.language")}>
 						<LanguageSetting />
 					</Section>
 
-					<Section title="Apparence">
+					<Section title={t("settings.sections.appearance")}>
 						<ThemeSetting />
 					</Section>
 
-					<Section title="À la fermeture">
+					<Section title={t("settings.sections.onClose")}>
 						<RelaySetting />
 					</Section>
 
-					<Section title="Au démarrage">
+					<Section title={t("settings.sections.onStart")}>
 						<ResumeSetting />
 					</Section>
 
-					<Section title="Rappel des workspaces">
+					<Section title={t("settings.sections.dock")}>
 						<DockSetting />
 					</Section>
 
-					<Section title="Poste de travail">
+					<Section title={t("settings.sections.workstation")}>
 						<div className="panel grid grid-cols-2 gap-3 p-3.5">
 							<Field
-								label="Dossier des projets"
-								hint="Racine contenant le monorepo et les worktrees."
+								label={t("settings.workstation.projectsRoot")}
+								hint={t("settings.workstation.projectsRootHint")}
 							>
 								<TextInput
 									value={draft.projectsRoot}
@@ -874,7 +871,10 @@ export function SettingsView() {
 									mono
 								/>
 							</Field>
-							<Field label="Dépôt principal" hint="Source de vérité des worktrees git.">
+							<Field
+								label={t("settings.workstation.mainRepo")}
+								hint={t("settings.workstation.mainRepoHint")}
+							>
 								<TextInput
 									value={draft.mainRepo}
 									onChange={(value) =>
@@ -883,7 +883,7 @@ export function SettingsView() {
 									mono
 								/>
 							</Field>
-							<Field label="Éditeur" hint="zed · cursor · code">
+							<Field label={t("settings.workstation.editor")} hint="zed · cursor · code">
 								<TextInput
 									value={draft.editor}
 									onChange={(value) =>
@@ -899,9 +899,9 @@ export function SettingsView() {
 
 					{tab === "services" ? (
 					<>
-					<Section title="Identifiants de projet">
+					<Section title={t("settings.sections.identifiers")}>
 						<div className="panel grid grid-cols-2 gap-3 p-3.5">
-							<Field label="Dépôt GitHub" hint="owner/repo">
+							<Field label={t("settings.services.githubRepo")} hint="owner/repo">
 								<TextInput
 									value={draft.githubRepo}
 									onChange={(value) =>
@@ -911,7 +911,7 @@ export function SettingsView() {
 									mono
 								/>
 							</Field>
-							<Field label="Organisation Sentry">
+							<Field label={t("settings.services.sentryOrg")}>
 								<TextInput
 									value={draft.sentryOrg}
 									onChange={(value) =>
@@ -920,7 +920,10 @@ export function SettingsView() {
 									mono
 								/>
 							</Field>
-							<Field label="Projets Sentry" hint="Aucun coché = toute l'organisation.">
+							<Field
+								label={t("settings.services.sentryProjects")}
+								hint={t("settings.services.sentryProjectsHint")}
+							>
 								<SentryProjectPicker
 									selected={draft.sentryProjects}
 									onChange={(value) =>
@@ -933,8 +936,8 @@ export function SettingsView() {
 							    passait pour le réglage qui manquait au daily — lequel
 							    attend un UUID et des membres, dans la section Équipe. */}
 							<Field
-								label="Clé des tickets"
-								hint="préfixe Linear, ex. ABC — l'équipe du daily se règle plus bas"
+								label={t("settings.services.ticketKey")}
+								hint={t("settings.services.ticketKeyHint")}
 							>
 								<TextInput
 									value={draft.linearTeamKey}
@@ -949,32 +952,32 @@ export function SettingsView() {
 							    issues du dépôt GitHub. Un réglage de plus pour le redire
 							    serait un réglage de plus à oublier de changer. */}
 							<Field
-								label="Projet GitLab"
-								hint="chemin avec son groupe, ex. groupe/produit"
+								label={t("settings.services.gitlabProject")}
+								hint={t("settings.services.gitlabProjectHint")}
 							>
 								<TextInput
 									value={draft.gitlabProject}
 									onChange={(value) =>
 										setDraft((current) => ({ ...current, gitlabProject: value }))
 									}
-									placeholder="groupe/produit"
+									placeholder={t("settings.services.gitlabProjectPlaceholder")}
 									mono
 								/>
 							</Field>
 							<Field
-								label="Instance GitLab"
-								hint="vide = gitlab.com ; sinon la racine de la vôtre"
+								label={t("settings.services.gitlabHost")}
+								hint={t("settings.services.gitlabHostHint")}
 							>
 								<TextInput
 									value={draft.gitlabHost}
 									onChange={(value) =>
 										setDraft((current) => ({ ...current, gitlabHost: value }))
 									}
-									placeholder="https://gitlab.exemple.com"
+									placeholder={t("settings.services.gitlabHostPlaceholder")}
 									mono
 								/>
 							</Field>
-							<Field label="Projet Trigger.dev">
+							<Field label={t("settings.services.triggerProject")}>
 								<TextInput
 									value={draft.triggerProjectRef}
 									onChange={(value) =>
@@ -984,7 +987,7 @@ export function SettingsView() {
 									mono
 								/>
 							</Field>
-							<Field label="Projet Railway">
+							<Field label={t("settings.services.railwayProject")}>
 								<TextInput
 									value={draft.railwayProjectId}
 									onChange={(value) =>
@@ -996,16 +999,14 @@ export function SettingsView() {
 						</div>
 					</Section>
 
-					<Section title="Environnements Trigger.dev">
+					<Section title={t("settings.sections.triggerEnvironments")}>
 						<TriggerEnvironments />
 						<p className="mt-1.5 px-1 text-[10px] leading-relaxed text-ink-faint">
-							Une secret key ne vaut que pour un projet et un environnement : ajoute une
-							entrée par environnement à suivre (Production, Staging, Test…). Chacune
-							devient un onglet dans Delivery.
+							{t("settings.trigger.help")}
 						</p>
 					</Section>
 
-					<Section title="Jetons d'accès">
+					<Section title={t("settings.sections.secrets")}>
 						<div className="panel flex flex-col divide-y divide-line-soft">
 							{config?.secrets.map((secret) => (
 								<div key={secret.key} className="flex items-start gap-3 p-3.5">
@@ -1020,13 +1021,15 @@ export function SettingsView() {
 										    ne dit pas la même chose dans les deux cas. */}
 										{scope === "project" &&
 										activeProject?.overrides.includes(secret.key) ? (
-											<Badge tone="accent">propre au projet</Badge>
+											<Badge tone="accent">{t("settings.secrets.override")}</Badge>
 										) : secret.configured ? (
 											<Badge tone="success">
-												{scope === "project" ? "hérité" : "configuré"}
+												{scope === "project"
+													? t("settings.secrets.inherited")
+													: t("settings.secrets.configured")}
 											</Badge>
 										) : (
-											<Badge tone="neutral">absent</Badge>
+											<Badge tone="neutral">{t("settings.secrets.missing")}</Badge>
 										)}
 									</div>
 									<div className="min-w-0 flex-1">
@@ -1038,8 +1041,8 @@ export function SettingsView() {
 											}
 											placeholder={
 												secret.configured
-													? "•••••••• — laisse vide pour conserver"
-													: "Coller le token"
+													? t("settings.secrets.keepPlaceholder")
+													: t("settings.secrets.pastePlaceholder")
 											}
 											mono
 										/>
@@ -1052,14 +1055,11 @@ export function SettingsView() {
 						</div>
 						<p className="mt-2 flex items-start gap-2 px-1 text-[10px] leading-relaxed text-ink-faint">
 							<KeyRound size={11} className="mt-0.5 shrink-0" />
-							Les jetons sont écrits dans {config?.configPath} en permissions 600 et ne
-							redescendent jamais dans l'interface. Chaque valeur peut aussi être fournie
-							par variable d'environnement (COCKPIT_SENTRY_TOKEN, COCKPIT_LINEAR_TOKEN…),
-							qui l'emporte alors sur le fichier.
+							{t("settings.secrets.storage", { path: config?.configPath ?? "" })}
 						</p>
 					</Section>
 
-					<Section title="Repères">
+					<Section title={t("settings.sections.links")}>
 						<div className="panel flex flex-col gap-2 p-3.5 text-[11px] text-ink-muted">
 							{[
 								["Sentry", "https://sentry.io/settings/account/api/auth-tokens/"],
@@ -1098,7 +1098,7 @@ export function SettingsView() {
 								disabled={saving}
 								onClick={() => void save()}
 							>
-								Enregistrer la configuration
+								{t("settings.saveConfig")}
 							</Button>
 						</div>
 					) : null}
@@ -1121,6 +1121,7 @@ export function SettingsView() {
  * résultat est exactement ce qui rend un réglage d'apparence pénible.
  */
 function ThemeSetting() {
+	const { t } = useTranslation("views");
 	const [choice, setChoice] = useState<ThemeChoice>(() => readThemeChoice());
 
 	// « Système » reste vivant : la bascule du soir de macOS doit suivre, sinon
@@ -1131,9 +1132,9 @@ function ThemeSetting() {
 	}, [choice]);
 
 	const options: Array<{ value: ThemeChoice; label: string; hint: string }> = [
-		{ value: "dark", label: "Sombre", hint: "le thème d'origine" },
-		{ value: "light", label: "Clair", hint: "mêmes rôles, autres valeurs" },
-		{ value: "system", label: "Système", hint: "suit macOS, bascule comprise" },
+		{ value: "dark", label: t("settings.theme.dark"), hint: t("settings.theme.darkHint") },
+		{ value: "light", label: t("settings.theme.light"), hint: t("settings.theme.lightHint") },
+		{ value: "system", label: t("settings.theme.system"), hint: t("settings.theme.systemHint") },
 	];
 
 	return (
@@ -1155,9 +1156,7 @@ function ThemeSetting() {
 				))}
 			</div>
 			<p className="text-[10px] leading-relaxed text-ink-faint">
-				Le choix vaut pour ce poste et s'applique tout de suite — il n'attend pas
-				« Enregistrer la configuration », qui ne concerne que les réglages du projet. Les
-				terminaux ouverts se repeignent avec le reste.
+				{t("settings.theme.help")}
 			</p>
 		</div>
 	);
@@ -1215,6 +1214,7 @@ function LanguageSetting() {
  * parti garde la façon dont il a été lancé, et l'écran le dit.
  */
 function RelaySetting() {
+	const { t } = useTranslation("views");
 	const setting = useAsync(() => api.agents.relaySetting(), []);
 	const [enabled, setEnabled] = useState<boolean | null>(null);
 	const value = enabled ?? setting.data?.enabled ?? true;
@@ -1228,17 +1228,17 @@ function RelaySetting() {
 		<div className="panel flex flex-col gap-2.5 p-3.5">
 			<div className="flex flex-wrap gap-1.5">
 				<Button size="sm" active={value} onClick={() => choose(true)}>
-					Les agents continuent
+					{t("settings.relay.continue")}
 				</Button>
 				<Button size="sm" active={!value} onClick={() => choose(false)}>
-					Les agents s'arrêtent
+					{t("settings.relay.stop")}
 				</Button>
 			</div>
 			<p className="text-[10px] leading-relaxed text-ink-faint">
 				{value
-					? "Fermer le cockpit, ou le mettre à jour, n'arrête plus les agents de workspace lancés à la main : ils finissent leur tour sans fenêtre, et tu les retrouves au lancement suivant, conversation relue. Le navigateur du workspace, lui, se ferme avec l'app. Les missions, la revue et les agents isolés en conteneur gardent leur comportement : ils s'arrêtent et sont repris."
-					: "Fermer le cockpit arrête tous les agents en cours ; au lancement suivant, ils sont repris selon le réglage « Au démarrage »."}{" "}
-				Le choix vaut pour les agents lancés à partir de maintenant.
+					? t("settings.relay.continueHelp")
+					: t("settings.relay.stopHelp")}{" "}
+				{t("settings.relay.note")}
 			</p>
 		</div>
 	);
@@ -1258,23 +1258,24 @@ function RelaySetting() {
  * chose.
  */
 function ResumeSetting() {
+	const { t } = useTranslation("views");
 	const [mode, setMode] = usePersistentState<ResumeMode>(RESUME_KEY, "resume");
 
 	const options: Array<{ value: ResumeMode; label: string; hint: string }> = [
 		{
 			value: "resume",
-			label: "Reprendre le travail",
-			hint: "rouvre tout et demande à chaque agent de reprendre où il en était",
+			label: t("settings.resume.resume"),
+			hint: t("settings.resume.resumeHint"),
 		},
 		{
 			value: "reopen",
-			label: "Rouvrir sans relancer",
-			hint: "les conversations sont là, relues, mais personne ne repart de lui-même",
+			label: t("settings.resume.reopen"),
+			hint: t("settings.resume.reopenHint"),
 		},
 		{
 			value: "off",
-			label: "Ne rien rouvrir",
-			hint: "les workspaces attendent dans la barre ; un clic les réveille",
+			label: t("settings.resume.off"),
+			hint: t("settings.resume.offHint"),
 		},
 	];
 
@@ -1295,12 +1296,11 @@ function ResumeSetting() {
 			</div>
 			<p className="text-[10px] leading-relaxed text-ink-faint">
 				{mode === "resume"
-					? "Chaque agent rouvert reçoit une consigne de reprise : faire le point sur l'état réel du dépôt avant de continuer, plutôt que de repartir sur sa dernière action. Son contexte, lui, est intact — le CLI reprend la conversation par son identifiant."
+					? t("settings.resume.resumeHelp")
 					: mode === "reopen"
-						? "Les conversations sont rouvertes et relisibles ; c'est toi qui relances le travail."
-						: "Rien ne repart : ce qui tournait hier s'affiche endormi dans la barre des workspaces."}{" "}
-				Ce choix s'applique au prochain lancement du cockpit. Les missions en cours, elles,
-				reprennent toujours — leurs exécutants comme leur agent maître.
+						? t("settings.resume.reopenHelp")
+						: t("settings.resume.offHelp")}{" "}
+				{t("settings.resume.note")}
 			</p>
 		</div>
 	);
@@ -1315,22 +1315,23 @@ function ResumeSetting() {
  * encombrement. Les deux façons de travailler sont légitimes.
  */
 function DockSetting() {
+	const { t } = useTranslation("views");
 	const [visible, setVisible] = usePersistentState(DOCK_KEY, true);
 
 	return (
 		<div className="panel flex flex-col gap-2.5 p-3.5">
 			<div className="flex flex-wrap gap-1.5">
 				<Button size="sm" active={visible} onClick={() => setVisible(true)}>
-					Afficher
+					{t("settings.dock.show")}
 				</Button>
 				<Button size="sm" active={!visible} onClick={() => setVisible(false)}>
-					Masquer
+					{t("settings.dock.hide")}
 				</Button>
 			</div>
 			<p className="text-[10px] leading-relaxed text-ink-faint">
 				{visible
-					? "Les workspaces en cours restent rappelés en bas à droite, hors de leur écran : c'est leur seule trace quand tu regardes ailleurs."
-					: "Rien ne s'affiche par-dessus les autres écrans. Ce qui tourne reste visible dans l'écran Workspaces, et les notifications continuent de te prévenir."}
+					? t("settings.dock.showHelp")
+					: t("settings.dock.hideHelp")}
 			</p>
 		</div>
 	);

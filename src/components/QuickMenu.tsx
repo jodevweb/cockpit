@@ -2,6 +2,7 @@ import clsx from "clsx";
 import { ChevronDown, Search } from "lucide-react";
 import { useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import { Button, Spinner } from "@/components/ui";
+import { useTranslation } from "react-i18next";
 
 /**
  * Menu de raccourcis d'un onglet de travail.
@@ -67,6 +68,7 @@ export function QuickMenu({
 	    lui-même collé à droite, où un panneau aligné à gauche déborderait. */
 	align?: "left" | "right";
 }) {
+	const { t } = useTranslation("components1");
 	const [open, setOpen] = useState(false);
 	const [query, setQuery] = useState("");
 	const [cursor, setCursor] = useState(0);
@@ -175,7 +177,7 @@ export function QuickMenu({
 							ref={field}
 							value={query}
 							spellCheck={false}
-							placeholder="Chercher…"
+							placeholder={t("quickMenu.search")}
 							onChange={(event) => setQuery(event.target.value)}
 							onKeyDown={onKeyDown}
 							className="focus-ring h-7 w-full rounded-lg border border-line-soft bg-void pr-2 pl-7 text-[11px] text-ink placeholder:text-ink-faint focus:border-accent/40"
@@ -189,7 +191,7 @@ export function QuickMenu({
 							</div>
 						) : visibles.length === 0 ? (
 							<p className="px-2 py-6 text-center text-[11px] text-ink-faint">
-								{query.trim() ? "Rien à ce nom." : emptyMessage}
+								{query.trim() ? t("quickMenu.noMatch") : emptyMessage}
 							</p>
 						) : (
 							visibles.map((action, index) => (
@@ -231,6 +233,7 @@ function QuickRow({
 	onHover: () => void;
 	onChoose: (secondary: boolean) => void;
 }) {
+	const { t } = useTranslation("components1");
 	const row = useRef<HTMLDivElement>(null);
 	const Extra = action.extra?.icon;
 
@@ -272,7 +275,7 @@ function QuickRow({
 				{Extra && action.extra ? (
 					<button
 						type="button"
-						title={`${action.extra.title} (⇧Entrée)`}
+						title={t("quickMenu.extraHint", { title: action.extra.title })}
 						onClick={() => onChoose(true)}
 						className={clsx(
 							"focus-ring shrink-0 rounded p-1 text-ink-faint transition-opacity hover:text-accent-soft",

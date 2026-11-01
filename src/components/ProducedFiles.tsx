@@ -1,5 +1,6 @@
 import { ChevronDown, ChevronRight, FileText, FolderOpen } from "lucide-react";
 import { useMemo, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { FileLink } from "@/components/FileLink";
 import { Button } from "@/components/ui";
 import { api } from "@/lib/ipc";
@@ -56,6 +57,7 @@ export function ProducedFiles({ turns, cwd }: { turns: Turn[]; cwd: string }) {
 		return [...vus.entries()].map(([path, touches]) => ({ path, touches }));
 	}, [turns]);
 
+	const { t } = useTranslation("components1");
 	const { notify } = useCockpit();
 	const [ouvert, setOuvert] = useState(false);
 	if (files.length === 0) return null;
@@ -73,26 +75,24 @@ export function ProducedFiles({ turns, cwd }: { turns: Turn[]; cwd: string }) {
 						onClick={() => setOuvert((value) => !value)}
 						className="focus-ring flex items-center gap-1 rounded text-[11px] font-semibold tracking-[0.05em] text-ink-muted uppercase hover:text-ink"
 					>
-						{files.length} fichier{files.length > 1 ? "s" : ""} touché
-						{files.length > 1 ? "s" : ""}
+						{t("producedFiles.count", { count: files.length })}
 						{ouvert ? <ChevronDown size={11} /> : <ChevronRight size={11} />}
 					</button>
 				) : (
 					<h3 className="text-[11px] font-semibold tracking-[0.05em] text-ink-muted uppercase">
-						{files.length} fichier{files.length > 1 ? "s" : ""} touché
-						{files.length > 1 ? "s" : ""}
+						{t("producedFiles.count", { count: files.length })}
 					</h3>
 				)}
 				<Button
 					size="sm"
 					icon={FolderOpen}
 					className="ml-auto"
-					title="Ouvrir le worktree dans le Finder"
+					title={t("producedFiles.reveal.title")}
 					onClick={() => {
 						void api.system.reveal(cwd).catch((error) => notify(String(error)));
 					}}
 				>
-					Le dossier
+					{t("producedFiles.reveal.label")}
 				</Button>
 			</div>
 			{visible ? (

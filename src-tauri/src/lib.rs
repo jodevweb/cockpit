@@ -98,21 +98,21 @@ fn connectors_list() -> Vec<config::Connector> {
 		"CLI Claude Code",
 		"agents",
 		agent::claude_binary().is_some(),
-		"le CLI `claude` sur ce poste",
+		&i18n::t("lib.connectorMissing.claude"),
 	));
 	list.push(local(
 		"node",
 		"Node",
 		"orchestration",
 		agent::node_binary().is_some(),
-		"Node — les ponts d'autorisation et d'outils de mission en dépendent",
+		&i18n::t("lib.connectorMissing.node"),
 	));
 	list.push(local(
 		"docker",
 		"Docker",
 		"containers",
 		system::has_docker(),
-		"Docker sur ce poste",
+		&i18n::t("lib.connectorMissing.docker"),
 	));
 	list
 }
@@ -142,11 +142,11 @@ fn config_update(patch: Value) -> Result<ConfigView> {
 	// réglages du projet actif dans les champs globaux.
 	let current = Config::load();
 	let mut as_json = serde_json::to_value(&current)
-		.map_err(|e| CockpitError::msg(format!("Sérialisation config : {e}")))?;
+		.map_err(|e| CockpitError::msg(i18n::tf("lib.config.serialize", &[("error", &e)])))?;
 	merge(&mut as_json, &patch);
 
 	let updated: Config = serde_json::from_value(as_json)
-		.map_err(|e| CockpitError::msg(format!("Config invalide : {e}")))?;
+		.map_err(|e| CockpitError::msg(i18n::tf("lib.config.invalid", &[("error", &e)])))?;
 	updated.save()?;
 	Ok(updated.view())
 }
@@ -185,7 +185,7 @@ fn trigger_env_save(
 ) -> Result<ConfigView> {
 	let name = name.trim().to_string();
 	if name.is_empty() {
-		return Err(CockpitError::msg("Donne un nom à l'environnement."));
+		return Err(CockpitError::msg(i18n::t("lib.trigger.envNameRequired")));
 	}
 
 	let mut config = Config::load();
@@ -206,9 +206,7 @@ fn trigger_env_save(
 		}
 		None => {
 			if token.is_empty() {
-				return Err(CockpitError::msg(
-					"Un nouvel environnement a besoin de sa secret key (`tr_prod_…` / `tr_dev_…`).",
-				));
+				return Err(CockpitError::msg(i18n::t("lib.trigger.envKeyRequired")));
 			}
 			config.trigger.environments.push(config::TriggerEnvironment {
 				name,
@@ -282,7 +280,7 @@ fn tasks_clear_done() -> Result<Vec<tasks::Task>> {
 fn project_activate(id: String) -> Result<ConfigView> {
 	let mut config = Config::load();
 	if !config.projects.iter().any(|project| project.id == id) {
-		return Err(CockpitError::msg(format!("Projet inconnu : {id}")));
+		return Err(CockpitError::msg(i18n::tf("lib.project.unknown", &[("id", &id)])));
 	}
 	config.active_project = id;
 	config.save()?;
@@ -310,13 +308,13 @@ fn project_update(patch: Value, project: Option<String>) -> Result<ConfigView> {
 		.projects
 		.iter()
 		.position(|project| project.id == cible)
-		.ok_or_else(|| CockpitError::msg(format!("Projet « {cible} » introuvable.")))?;
+		.ok_or_else(|| CockpitError::msg(i18n::tf("lib.project.notFound", &[("id", &cible)])))?;
 
 	let mut as_json = serde_json::to_value(&config.projects[index])
-		.map_err(|e| CockpitError::msg(format!("Sérialisation projet : {e}")))?;
+		.map_err(|e| CockpitError::msg(i18n::tf("lib.project.serialize", &[("error", &e)])))?;
 	merge(&mut as_json, &patch);
 	config.projects[index] = serde_json::from_value(as_json)
-		.map_err(|e| CockpitError::msg(format!("Projet invalide : {e}")))?;
+		.map_err(|e| CockpitError::msg(i18n::tf("lib.project.invalid", &[("error", &e)])))?;
 
 	config.save()?;
 	integrations::clear_get_cache();
@@ -443,35 +441,31 @@ async fn project_prepare(request: Groundwork) -> Result<Ground> {
 	let config = Config::load();
 	let path = config::resolve_path(&request.path, &config.general.projects_root);
 	if path.is_empty() {
-		return Err(CockpitError::msg("Donne un dossier pour ce projet."));
+		return Err(CockpitError::msg(i18n::t("lib.project.folderRequired")));
 	}
 	let folder = Path::new(&path);
 
 	if request.create_dir && !folder.is_dir() {
 		std::fs::create_dir_all(folder)
-			.map_err(|error| CockpitError::msg(format!("Création du dossier : {error}")))?;
-		journal::record("projet", "Dossier créé", &path, true, "");
+			.map_err(|error| CockpitError::msg(i18n::tf("lib.project.createDir", &[("error", &error)])))?;
+		journal::record("projet", &i18n::t("lib.project.dirCreated"), &path, true, "");
 	}
 	if !folder.is_dir() {
-		return Err(CockpitError::msg(format!(
-			"`{path}` n'existe pas. Coche « créer le dossier » si c'est ce que tu veux."
-		)));
+		return Err(CockpitError::msg(i18n::tf("lib.project.pathMissing", &[("path", &path)])));
 	}
 
 	if request.git_init && !folder.join(".git").exists() {
 		git::run_git(folder, &["init"]).await?;
-		journal::record("projet", "Dépôt git initialisé", &path, true, "");
+		journal::record("projet", &i18n::t("lib.project.gitInitialized"), &path, true, "");
 	}
 
 	if request.create_remote {
 		let repo = request.repo.trim();
 		if repo.is_empty() {
-			return Err(CockpitError::msg("Donne un nom au dépôt à créer."));
+			return Err(CockpitError::msg(i18n::t("lib.project.repoNameRequired")));
 		}
 		if !folder.join(".git").exists() {
-			return Err(CockpitError::msg(
-				"Il faut un dépôt git local avant de lui donner un serveur.",
-			));
+			return Err(CockpitError::msg(i18n::t("lib.project.localRepoRequired")));
 		}
 		create_remote(folder, repo, &request.account, request.public).await?;
 	}
@@ -494,12 +488,10 @@ async fn create_remote(folder: &Path, repo: &str, account: &str, public: bool) -
 		)
 		.await
 	}
-	.map_err(|_| CockpitError::msg("Aucune session `gh` : lance `gh auth login`."))?;
+	.map_err(|_| CockpitError::msg(i18n::t("lib.project.noGhSession")))?;
 	let token = token.trim().to_string();
 	if token.is_empty() {
-		return Err(CockpitError::msg(format!(
-			"Aucun jeton pour le compte « {account} ». Lance `gh auth login`."
-		)));
+		return Err(CockpitError::msg(i18n::tf("lib.project.noGhToken", &[("account", &account)])));
 	}
 
 	let visibility = if public { "--public" } else { "--private" };
@@ -519,10 +511,10 @@ async fn create_remote(folder: &Path, repo: &str, account: &str, public: bool) -
 	.await?;
 	journal::record(
 		"projet",
-		if public {
-			"Dépôt GitHub public créé"
+		&if public {
+			i18n::t("lib.project.publicRepoCreated")
 		} else {
-			"Dépôt GitHub privé créé"
+			i18n::t("lib.project.privateRepoCreated")
 		},
 		repo,
 		true,
@@ -539,13 +531,10 @@ fn project_save(project: config::ProjectConfig) -> Result<ConfigView> {
 	let name = project.name.trim().to_string();
 	let main_repo = config::resolve_path(&project.main_repo, &config.general.projects_root);
 	if main_repo.is_empty() {
-		return Err(CockpitError::msg("Un projet a besoin de son dépôt principal."));
+		return Err(CockpitError::msg(i18n::t("lib.project.mainRepoRequired")));
 	}
 	if !Path::new(&main_repo).join(".git").exists() {
-		return Err(CockpitError::msg(format!(
-			"`{main_repo}` n'est pas un dépôt git. Le cockpit peut le créer pour toi : \
-			 utilise « Préparer » plutôt que de le faire à la main."
-		)));
+		return Err(CockpitError::msg(i18n::tf("lib.project.notGitRepo", &[("path", &main_repo)])));
 	}
 
 	let id = if project.id.trim().is_empty() {
@@ -572,9 +561,7 @@ fn project_save(project: config::ProjectConfig) -> Result<ConfigView> {
 fn project_remove(id: String) -> Result<ConfigView> {
 	let mut config = Config::load();
 	if config.projects.len() <= 1 {
-		return Err(CockpitError::msg(
-			"Le cockpit garde au moins un projet — modifie celui-ci plutôt que de le retirer.",
-		));
+		return Err(CockpitError::msg(i18n::t("lib.project.keepOne")));
 	}
 	config.projects.retain(|project| project.id != id);
 	if config.active_project == id {
@@ -623,9 +610,9 @@ fn config_file_path() -> String {
 fn main_repo() -> Result<PathBuf> {
 	let repo = PathBuf::from(&cfg().general.main_repo);
 	if !repo.join(".git").exists() {
-		return Err(CockpitError::msg(format!(
-			"`{}` n'est pas un dépôt git — corrige `general.main_repo` dans Réglages.",
-			repo.display()
+		return Err(CockpitError::msg(i18n::tf(
+			"lib.git.mainRepoInvalid",
+			&[("path", &repo.display())],
 		)));
 	}
 	Ok(repo)
@@ -759,14 +746,14 @@ fn register_talk(app: &AppHandle, accelerator: &str) -> voice_input::ShortcutSta
 		Err(error) => voice_input::ShortcutStatus {
 			accelerator: accelerator.to_string(),
 			registered: false,
-			error: Some(format!("Raccourci illisible : {error}")),
+			error: Some(i18n::tf("lib.shortcut.unreadable", &[("error", &error)])),
 		},
 		Ok(shortcut) => match app.global_shortcut().register(shortcut) {
 			Ok(()) => voice_input::ShortcutStatus { accelerator: accelerator.to_string(), registered: true, error: None },
 			Err(error) => voice_input::ShortcutStatus {
 				accelerator: accelerator.to_string(),
 				registered: false,
-				error: Some(format!("Déjà pris par une autre application, ou refusé par macOS ({error}).")),
+				error: Some(i18n::tf("lib.shortcut.taken", &[("error", &error)])),
 			},
 		},
 	};
@@ -828,7 +815,7 @@ fn assistant_set_shortcut(app: AppHandle, accelerator: String) -> Result<voice_i
 	use std::str::FromStr;
 	use tauri_plugin_global_shortcut::{GlobalShortcutExt, Shortcut};
 	let accelerator = accelerator.trim().to_string();
-	Shortcut::from_str(&accelerator).map_err(|e| CockpitError::msg(format!("Raccourci illisible : {e}")))?;
+	Shortcut::from_str(&accelerator).map_err(|e| CockpitError::msg(i18n::tf("lib.shortcut.unreadable", &[("error", &e)])))?;
 	let previous = voice_input::shortcut_status();
 	if previous.registered {
 		if let Ok(old) = Shortcut::from_str(&previous.accelerator) {
@@ -840,7 +827,7 @@ fn assistant_set_shortcut(app: AppHandle, accelerator: String) -> Result<voice_i
 		if previous.registered {
 			register_talk(&app, &previous.accelerator);
 		}
-		return Err(CockpitError::msg(status.error.unwrap_or_else(|| "Raccourci refusé.".into())));
+		return Err(CockpitError::msg(status.error.unwrap_or_else(|| i18n::t("lib.shortcut.refused"))));
 	}
 	voice_input::save_shortcut(&accelerator)?;
 	Ok(status)
@@ -893,7 +880,7 @@ fn voice_shortcut() -> tauri::plugin::TauriPlugin<tauri::Wry> {
 #[tauri::command]
 async fn git_create_branch(repo: String, name: String, base: Option<String>) -> Result<String> {
 	let result = git::create_branch(std::path::Path::new(&repo), &name, base.as_deref()).await;
-	logged("git", "Branche", &name, result)
+	logged("git", &i18n::t("lib.git.branch"), &name, result)
 }
 
 #[tauri::command]
@@ -966,7 +953,7 @@ async fn create_pr_on(
 ) -> Result<String> {
 	let title = title.trim().to_string();
 	if title.is_empty() {
-		return Err(CockpitError::msg("Une pull request a besoin d'un titre."));
+		return Err(CockpitError::msg(i18n::t("lib.github.prTitleRequired")));
 	}
 
 	let config = cfg();
@@ -974,14 +961,12 @@ async fn create_pr_on(
 		.github
 		.repo
 		.split_once('/')
-		.ok_or_else(|| CockpitError::msg("Renseigne `github.repo` (ex. acme/monorepo)."))?;
+		.ok_or_else(|| CockpitError::msg(i18n::t("lib.github.repoFormat")))?;
 	let token = integrations::github_token(&config).await?;
 
 	let folder = std::path::Path::new(path);
 	if branch == base {
-		return Err(CockpitError::msg(format!(
-			"`{branch}` est la branche de base : crée une branche dédiée avant d'ouvrir une PR."
-		)));
+		return Err(CockpitError::msg(i18n::tf("lib.github.prFromBase", &[("branch", &branch)])));
 	}
 
 	git::push_branch(folder, branch).await?;
@@ -1012,8 +997,8 @@ async fn create_pr_on(
 			.ok()
 			.and_then(|v| v.get("message").and_then(|m| m.as_str()).map(String::from))
 			.unwrap_or(raw);
-		let error = format!("PR refusée ({status}) : {message}");
-		journal::record("github", "Création de PR", &branch, false, &error);
+		let error = i18n::tf("lib.github.prRefused", &[("status", &status), ("message", &message)]);
+		journal::record("github", &i18n::t("lib.github.prCreation"), &branch, false, &error);
 		return Err(CockpitError::msg(error));
 	}
 
@@ -1021,7 +1006,7 @@ async fn create_pr_on(
 		.ok()
 		.and_then(|v| v.get("html_url").and_then(|u| u.as_str()).map(String::from))
 		.unwrap_or_default();
-	journal::record("github", "Création de PR", &branch, true, &url);
+	journal::record("github", &i18n::t("lib.github.prCreation"), &branch, true, &url);
 	Ok(url)
 }
 
@@ -1077,10 +1062,10 @@ fn permanence_allow_pr(number: u64, allowed: bool) -> Result<ConfigView> {
 	config.save()?;
 	journal::record(
 		"permanence",
-		if allowed {
-			"Commentaire autorisé sur une PR"
+		&if allowed {
+			i18n::t("lib.permanence.commentAllowed")
 		} else {
-			"Commentaire retiré sur une PR"
+			i18n::t("lib.permanence.commentWithdrawn")
 		},
 		&format!("#{number}"),
 		true,
@@ -1261,17 +1246,17 @@ async fn worktrees_hygiene() -> Result<Vec<WorktreeHygiene>> {
 				.and_then(|branch| pulls.get(branch).cloned());
 
 			let (removable, reason) = if tree.is_main {
-				(false, "dépôt principal".to_string())
+				(false, i18n::t("lib.hygiene.mainRepo"))
 			} else if dirty > 0 {
-				(false, format!("{dirty} modification(s) non commitées"))
+				(false, i18n::tf("lib.hygiene.dirty", &[("count", &dirty)]))
 			} else if tree.status.ahead > 0 {
-				(false, format!("{} commit(s) non poussés", tree.status.ahead))
+				(false, i18n::tf("lib.hygiene.unpushed", &[("count", &tree.status.ahead)]))
 			} else {
 				match pr.as_ref().map(|pr| pr.state.as_str()) {
-					Some("merged") => (true, "PR mergée".to_string()),
-					Some("closed") => (true, "PR fermée sans merge".to_string()),
-					Some("open") => (false, "PR ouverte".to_string()),
-					_ => (false, "aucune PR connue".to_string()),
+					Some("merged") => (true, i18n::t("lib.hygiene.prMerged")),
+					Some("closed") => (true, i18n::t("lib.hygiene.prClosed")),
+					Some("open") => (false, i18n::t("lib.hygiene.prOpen")),
+					_ => (false, i18n::t("lib.hygiene.noPr")),
 				}
 			};
 
@@ -1307,10 +1292,10 @@ async fn worktree_purge_builds(path: String, dependencies: bool) -> Result<u64> 
 	let libéré = git::purge_rebuildable(Path::new(&path), dependencies).await?;
 	journal::record(
 		"worktree",
-		"Builds effacés",
+		&i18n::t("lib.worktree.buildsPurged"),
 		&path,
 		true,
-		&format!("{} rendus au disque", human_bytes(libéré)),
+		&i18n::tf("lib.worktree.freed", &[("size", &human_bytes(libéré))]),
 	);
 	Ok(libéré)
 }
@@ -1320,11 +1305,11 @@ fn human_bytes(bytes: u64) -> String {
 	const KO: f64 = 1024.0;
 	let n = bytes as f64;
 	if n >= KO * KO * KO {
-		format!("{:.1} Go", n / (KO * KO * KO))
+		i18n::tf("lib.units.gb", &[("n", &format!("{:.1}", n / (KO * KO * KO)))])
 	} else if n >= KO * KO {
-		format!("{:.0} Mo", n / (KO * KO))
+		i18n::tf("lib.units.mb", &[("n", &format!("{:.0}", n / (KO * KO)))])
 	} else {
-		format!("{:.0} Ko", n / KO)
+		i18n::tf("lib.units.kb", &[("n", &format!("{:.0}", n / KO))])
 	}
 }
 
@@ -1375,7 +1360,7 @@ async fn pull_requests() -> Result<Vec<team::PullRequest>> {
 		.github
 		.repo
 		.split_once('/')
-		.ok_or_else(|| CockpitError::msg("Renseigne `github.repo` (ex. acme/monorepo)."))?;
+		.ok_or_else(|| CockpitError::msg(i18n::t("lib.github.repoFormat")))?;
 	team::fetch_open_prs(&token, owner, name, &config.linear.team_key).await
 }
 
@@ -1577,7 +1562,7 @@ async fn projects_health() -> Result<Vec<ProjectHealth>> {
 						}
 						Err(e) => error = Some(e.to_string()),
 					},
-					None => error = Some("`github.repo` doit être de la forme owner/repo.".into()),
+					None => error = Some(i18n::t("lib.github.repoOwnerFormat")),
 				},
 				Err(e) => error = Some(e.to_string()),
 			}
@@ -1634,13 +1619,13 @@ async fn pull_request_merge(number: i64, method: Option<String>) -> Result<()> {
 			.ok()
 			.and_then(|v| v.get("message").and_then(|m| m.as_str()).map(String::from))
 			.unwrap_or(body);
-		let error = format!("Merge refusé ({code}) : {message}");
-		journal::record("github", "Merge de PR", &format!("#{number}"), false, &error);
+		let error = i18n::tf("lib.github.mergeRefused", &[("status", &code), ("message", &message)]);
+		journal::record("github", &i18n::t("lib.github.prMerge"), &format!("#{number}"), false, &error);
 		return Err(CockpitError::msg(error));
 	}
 	// Irréversible et visible de toute l'équipe : c'est le premier geste qu'on
 	// veut retrouver dans le carnet de bord.
-	journal::record("github", "Merge de PR", &format!("#{number}"), true, "");
+	journal::record("github", &i18n::t("lib.github.prMerge"), &format!("#{number}"), true, "");
 	Ok(())
 }
 
@@ -1691,7 +1676,7 @@ async fn libre_inspect(path: String) -> libre::Inspection {
 async fn libre_prepare(path: String, place: String, branch: String) -> Result<libre::Prepared> {
 	let result = libre::prepare(&path, &place, &branch).await;
 	if place != "ici" {
-		logged("git", "Agent libre", &branch, result)
+		logged("git", &i18n::t("lib.git.freeAgent"), &branch, result)
 	} else {
 		result
 	}
@@ -1704,7 +1689,7 @@ async fn libre_archive(worktree: String, branch: String, action: String) -> Resu
 	if worktree.trim().is_empty() {
 		result
 	} else {
-		logged("git", "Rangement d'agent libre", &branch, result)
+		logged("git", &i18n::t("lib.git.freeAgentArchive"), &branch, result)
 	}
 }
 
@@ -2032,7 +2017,7 @@ async fn sessions_scan(limit_per_project: Option<usize>) -> Result<Vec<sessions:
 	// Le parsing est purement bloquant (I/O disque + JSON) : hors du runtime async.
 	tokio::task::spawn_blocking(move || sessions::scan_all(limit))
 		.await
-		.map_err(|e| CockpitError::msg(format!("Scan interrompu : {e}")))?
+		.map_err(|e| CockpitError::msg(i18n::tf("lib.interrupted.scan", &[("error", &e)])))?
 }
 
 #[tauri::command]
@@ -2040,7 +2025,7 @@ async fn session_timeline(file: String, max_events: Option<usize>) -> Result<Vec
 	let max = max_events.unwrap_or(400).clamp(20, 5000);
 	tokio::task::spawn_blocking(move || sessions::read_timeline(Path::new(&file), max))
 		.await
-		.map_err(|e| CockpitError::msg(format!("Lecture interrompue : {e}")))?
+		.map_err(|e| CockpitError::msg(i18n::tf("lib.interrupted.read", &[("error", &e)])))?
 }
 
 /// Les plafonds de l'abonnement, tels que le CLI les rapporte.
@@ -2107,14 +2092,11 @@ fn pause_missions_hors_budget() {
 		if total < budget {
 			continue;
 		}
-		let raison = format!(
-			"{total} jetons consommés, au-delà du plafond de {budget}. La mission est en \
-			 pause : son travail est intact, reprends-la si le dépassement était attendu."
-		);
+		let raison = i18n::tf("lib.budget.reason", &[("total", &total), ("budget", &budget)]);
 		if mission::set_paused(id, true).is_ok() {
 			journal::record(
 				"mission",
-				"Mission suspendue — plafond atteint",
+				&i18n::t("lib.budget.paused"),
 				titre,
 				false,
 				&raison,
@@ -2221,14 +2203,14 @@ async fn usage_report() -> Result<usage::UsageReport> {
 	// Relecture de tous les journaux : purement bloquant, hors du runtime async.
 	tokio::task::spawn_blocking(move || usage::report_for(&roots, &missions))
 		.await
-		.map_err(|e| CockpitError::msg(format!("Calcul interrompu : {e}")))?
+		.map_err(|e| CockpitError::msg(i18n::tf("lib.interrupted.compute", &[("error", &e)])))?
 }
 
 #[tauri::command]
 async fn session_subagents(file: String) -> Result<Vec<sessions::SubagentRun>> {
 	tokio::task::spawn_blocking(move || sessions::read_subagents(Path::new(&file)))
 		.await
-		.map_err(|e| CockpitError::msg(format!("Lecture interrompue : {e}")))?
+		.map_err(|e| CockpitError::msg(i18n::tf("lib.interrupted.read", &[("error", &e)])))?
 }
 
 // ──────────────────────────────── Docs ────────────────────────────────
@@ -2242,7 +2224,7 @@ async fn docs_scan(roots: Vec<(String, String)>, limit: Option<usize>) -> Result
 		.collect();
 	tokio::task::spawn_blocking(move || docs::scan_many(roots, limit))
 		.await
-		.map_err(|e| CockpitError::msg(format!("Scan interrompu : {e}")))?
+		.map_err(|e| CockpitError::msg(i18n::tf("lib.interrupted.scan", &[("error", &e)])))?
 }
 
 /// Les fichiers d'un worktree, pour en ouvrir un qu'aucun agent n'a nommé.
@@ -2252,7 +2234,7 @@ async fn files_list(root: String) -> Result<Vec<files::FileEntry>> {
 	// figeait à chaque ouverture du menu « Fichiers ».
 	tokio::task::spawn_blocking(move || files::list(root))
 		.await
-		.map_err(|e| CockpitError::msg(format!("Parcours des fichiers interrompu : {e}")))?
+		.map_err(|e| CockpitError::msg(i18n::tf("lib.interrupted.walk", &[("error", &e)])))?
 }
 
 /// Enregistre un fichier modifié dans l'éditeur intégré.
@@ -2584,7 +2566,7 @@ fn automation_run_now(app: AppHandle, id: String) -> Result<String> {
 	let automation = automations::list()
 		.into_iter()
 		.find(|entry| entry.id == id)
-		.ok_or_else(|| CockpitError::msg("Automatisation introuvable."))?;
+		.ok_or_else(|| CockpitError::msg(i18n::t("lib.automationNotFound")))?;
 	let occurrence = format!("manual-{}", chrono::Utc::now().timestamp_millis());
 	automations::start(app, automation, occurrence, automations::Trigger::Manual)
 }
@@ -2651,7 +2633,7 @@ async fn notify_desktop(app: AppHandle, title: String, body: String) -> Result<(
 		.title(title)
 		.body(body)
 		.show()
-		.map_err(|e| CockpitError::msg(format!("Notification : {e}")))
+		.map_err(|e| CockpitError::msg(i18n::tf("lib.window.notification", &[("error", &e)])))
 }
 
 #[tauri::command]
@@ -2676,17 +2658,17 @@ static ZOOM_MEMORY: std::sync::OnceLock<
 fn window_zoom_toggle(window: tauri::WebviewWindow) -> Result<()> {
 	let monitor = window
 		.current_monitor()
-		.map_err(|e| CockpitError::msg(format!("Moniteur : {e}")))?;
+		.map_err(|e| CockpitError::msg(i18n::tf("lib.window.monitor", &[("error", &e)])))?;
 	let Some(monitor) = monitor else {
 		return Ok(());
 	};
 	let area = monitor.work_area();
 	let size = window
 		.outer_size()
-		.map_err(|e| CockpitError::msg(format!("Fenêtre : {e}")))?;
+		.map_err(|e| CockpitError::msg(i18n::tf("lib.window.window", &[("error", &e)])))?;
 	let position = window
 		.outer_position()
-		.map_err(|e| CockpitError::msg(format!("Fenêtre : {e}")))?;
+		.map_err(|e| CockpitError::msg(i18n::tf("lib.window.window", &[("error", &e)])))?;
 
 	let memory = ZOOM_MEMORY.get_or_init(|| std::sync::Mutex::new(None));
 	// « Rempli » à quelques pixels près : l'ombre portée et les arrondis de macOS
@@ -2787,7 +2769,7 @@ async fn create_mission_from_ticket(
 	let config = cfg();
 	let identifier = mission::ticket_reference(reference);
 	if identifier.is_empty() {
-		return Err(CockpitError::msg("Colle l'adresse ou l'identifiant d'un ticket."));
+		return Err(CockpitError::msg(i18n::t("lib.mission.ticketReferenceRequired")));
 	}
 
 	let ticket = tickets::provider(&config)?.get(&identifier).await?;
@@ -2831,7 +2813,7 @@ fn ticket_brief(ticket: &tickets::TicketDetail) -> String {
 	let mut brief = String::new();
 	if !ticket.description.trim().is_empty() {
 		brief.push_str(&format!(
-			"── Le ticket, tel que lu à l'ouverture de la mission ──\n{}",
+			"── The ticket, as read when the mission was opened ──\n{}",
 			ticket.description.trim()
 		));
 	}
@@ -2839,10 +2821,10 @@ fn ticket_brief(ticket: &tickets::TicketDetail) -> String {
 		if !brief.is_empty() {
 			brief.push_str("\n\n");
 		}
-		brief.push_str("── Commentaires, du plus ancien au plus récent ──\n");
+		brief.push_str("── Comments, oldest to newest ──\n");
 		for comment in ticket.comments.iter().rev().take(5).rev() {
 			brief.push_str(&format!(
-				"- {} : {}\n",
+				"- {}: {}\n",
 				comment.author,
 				comment.body.trim()
 			));
@@ -2957,12 +2939,16 @@ fn mission_activity(app: AppHandle, id: String) -> Result<serde_json::Value> {
 			// Sans ça, un maître qui meurt en silence n'affiche jamais que
 			// « arrêté », sans un mot de plus à qui regarde après coup.
 			None => {
+				// Le titre traduit d'aujourd'hui, ou l'ancien libellé français
+				// des entrées écrites avant la traduction.
+				let died = i18n::t("agent.journal.diedBeforeFirstAnswer");
 				let cause = journal::list(200)
 					.into_iter()
 					.find(|entry| {
 						entry.kind == "agent"
 							&& entry.target == session
-							&& entry.label == "Agent arrêté avant sa première réponse"
+							&& (entry.label == died
+								|| entry.label == "Agent arrêté avant sa première réponse")
 					})
 					.map(|entry| entry.detail);
 				(cause.unwrap_or_default(), false)
@@ -3077,7 +3063,7 @@ async fn mission_task_rerun(app: AppHandle, id: String, task_id: String) -> Resu
 		.tasks
 		.iter()
 		.find(|task| task.id == task_id)
-		.ok_or_else(|| CockpitError::msg("Tâche inconnue."))?;
+		.ok_or_else(|| CockpitError::msg(i18n::t("lib.mission.unknownTask")))?;
 
 	// L'agent en place travaille sur l'ancienne consigne : on le coupe avant
 	// d'en lancer un autre, sinon les deux écrivent au même endroit.
@@ -3093,7 +3079,7 @@ async fn mission_task_rerun(app: AppHandle, id: String, task_id: String) -> Resu
 		&id,
 		&task_id,
 		mission::TaskState::Planned,
-		"Relecture complète demandée.",
+		&i18n::t("lib.mission.fullReviewRequested"),
 	)?;
 	launch_task_agent(app, &id, &task_id, journal::HUMAN).await
 }
@@ -3135,7 +3121,7 @@ fn stop_mission_agents(app: &AppHandle, id: &str) -> usize {
 				id,
 				&task.id,
 				mission::TaskState::Planned,
-				"Exécutant arrêté : la tâche repart quand la mission reprend.",
+				&i18n::t("lib.mission.workerStopped"),
 			);
 		}
 	}
@@ -3177,23 +3163,23 @@ fn resume_brief(mission: &mission::Mission) -> String {
 		.join("\n");
 
 	format!(
-		"── Reprise ──\n\
-		 Cette mission était déjà en cours : le cockpit a redémarré, pas elle. Son \
-		 état est `{:?}`{}.\n\n\
+		"── Resuming ──\n\
+		 This mission was already under way: Cockpit restarted, not the mission. Its \
+		 state is `{:?}`{}.\n\n\
 		 {}\n\n\
-		 Commence par `status` pour voir la mission telle qu'elle est maintenant, et \
-		 reprends de là. Ne replanifie pas ce qui est déjà découpé, et ne relance pas \
-		 ce qui tourne : le cockpit fait repartir de lui-même les tâches à faire.",
+		 Start with `status` to see the mission as it is now, and carry on from there. \
+		 Do not re-plan what is already broken down, and do not relaunch what is \
+		 running: Cockpit restarts the pending tasks by itself.",
 		mission.state,
 		if mission.plan.trim().is_empty() {
 			""
 		} else {
-			", son plan est posé"
+			", its plan is set"
 		},
 		if taches.is_empty() {
-			"Aucune tâche n'a encore été créée.".to_string()
+			"No task has been created yet.".to_string()
 		} else {
-			format!("Ses tâches, au dernier point connu :\n{taches}")
+			format!("Its tasks, as last known:\n{taches}")
 		},
 	)
 }
@@ -3264,7 +3250,7 @@ fn mission_stop(app: AppHandle, id: String) -> Result<mission::Mission> {
 	mission::set_state(
 		&id,
 		mission::MissionState::Failed,
-		"Mission arrêtée. Branches et worktrees sont conservés.",
+		&i18n::t("lib.mission.stopped"),
 	)
 }
 
@@ -3344,7 +3330,7 @@ pub async fn launch_task_agent(
 	use tauri::Manager;
 	let agents = app
 		.try_state::<agent::SharedAgents>()
-		.ok_or_else(|| CockpitError::msg("Registre des agents indisponible."))?
+		.ok_or_else(|| CockpitError::msg(i18n::t("lib.mission.agentsUnavailable")))?
 		.inner()
 		.clone();
 	let id = id.to_string();
@@ -3354,13 +3340,11 @@ pub async fn launch_task_agent(
 		.tasks
 		.iter()
 		.find(|task| task.id == task_id)
-		.ok_or_else(|| CockpitError::msg("Tâche inconnue."))?
+		.ok_or_else(|| CockpitError::msg(i18n::t("lib.mission.unknownTask")))?
 		.clone();
 
 	if !mission.can_launch() {
-		return Err(CockpitError::msg(
-			"Rien ne part avant ton accord sur le découpage : valide chaque étape d'abord.",
-		));
+		return Err(CockpitError::msg(i18n::t("lib.mission.awaitingAgreement")));
 	}
 
 	// Le catalogue du projet de la mission, pas celui de l'écran affiché : les
@@ -3368,7 +3352,7 @@ pub async fn launch_task_agent(
 	// c'est ainsi qu'une recette partait sans la commande `/self-qa` de son
 	// équipe.
 	let role = role_config(&mission.cwd, &task.role)
-		.ok_or_else(|| CockpitError::msg(format!("Rôle inconnu : {}", task.role)))?;
+		.ok_or_else(|| CockpitError::msg(i18n::tf("lib.mission.unknownRole", &[("role", &task.role)])))?;
 
 	// Sans worktree, on ne lance pas. Le repli d'avant envoyait l'exécutant dans
 	// `mission.cwd` — le dépôt principal, celui où l'utilisateur a sa propre
@@ -3383,10 +3367,7 @@ pub async fn launch_task_agent(
 				worktree
 			}
 			Err(error) => {
-				let raison = format!(
-					"Worktree impossible : {error}. L'exécutant n'est pas lancé — le \
-					 dépôt principal n'est pas un terrain de mission."
-				);
+				let raison = i18n::tf("lib.mission.workerWorktreeFailed", &[("error", &error)]);
 				let _ = mission::set_task_state(
 					&mission.id,
 					&task.id,
@@ -3410,9 +3391,9 @@ pub async fn launch_task_agent(
 		match orchestrator::sync_verifier_worktree(&mission, &task, &cwd).await {
 			Ok(rapport) if !rapport.conflicts.is_empty() => {
 				cohabitation = format!(
-					"\n\n── Cohabitation avec les autres lots ──\n\
-					 {} fusionné(s) sans accroc. En conflit, non fusionné(s) — signale-le, \
-					 c'est un fait à traiter, pas une supposition à vérifier toi-même : {}.",
+					"\n\n── Coexistence with the other batches ──\n\
+					 {} merged cleanly. In conflict, not merged — report it, it is a fact to \
+					 deal with, not an assumption for you to check yourself: {}.",
 					rapport.merged.len(),
 					rapport.conflicts.join(", "),
 				);
@@ -3421,7 +3402,7 @@ pub async fn launch_task_agent(
 			Err(error) => {
 				journal::record(
 					"mission",
-					"Cohabitation non vérifiée",
+					&i18n::t("lib.mission.coexistenceUnchecked"),
 					&task.title,
 					false,
 					&error.to_string(),
@@ -3431,10 +3412,10 @@ pub async fn launch_task_agent(
 	}
 
 	let scope = if task.scope.is_empty() {
-		"Aucun périmètre déclaré : reste malgré tout sur ta responsabilité.".to_string()
+		"No scope declared: still stay within your responsibility.".to_string()
 	} else {
 		format!(
-			"Tu ne modifies que ces chemins : {}. Toute écriture ailleurs sera refusée.",
+			"You only modify these paths: {}. Any write elsewhere will be refused.",
 			task.scope.join(", ")
 		)
 	};
@@ -3442,14 +3423,17 @@ pub async fn launch_task_agent(
 	let prompt = format!(
 		"{role_prompt}
 
-		 ── Mission : {mission_title}{ticket}
-		 ── Ta tâche : {task_title}
-		 ── Branche d'intégration : {branch}
+		 ── Mission: {mission_title}{ticket}
+		 ── Your task: {task_title}
+		 ── Integration branch: {branch}
 		 {scope}
 
 		 {brief}
 
-		 Les contrats partagés — types, routes, schémas — sont posés sur la branche 		 d'intégration : suis-les, et signale ce qui te manque plutôt que de l'inventer.",
+		 The shared contracts — types, routes, schemas — are set on the integration 		 branch: follow them, and report what you are missing rather than inventing it.
+
+		 {directive}",
+		directive = i18n::reply_directive(),
 		role_prompt = role.prompt,
 		mission_title = mission.title,
 		ticket = if mission.ticket.is_empty() {
@@ -3459,7 +3443,7 @@ pub async fn launch_task_agent(
 		},
 		task_title = task.title,
 		branch = if mission.branch.is_empty() {
-			"non définie".into()
+			"not set".into()
 		} else {
 			mission.branch.clone()
 		},
@@ -3476,10 +3460,10 @@ pub async fn launch_task_agent(
 	let prompt = if role.verifies {
 		format!(
 			"{prompt}\n\n\
-			 Dépose tes preuves — captures, sorties, relevés — sous `.claude/work/qa/` \
-			 dans ton worktree. Elles restent hors de la branche, git les ignore : le \
-			 cockpit les rassemble pour l'ouverture de la pull request. Le code des \
-			 autres, lui, ne se touche pas."
+			 Put your evidence — screenshots, outputs, readings — under `.claude/work/qa/` \
+			 in your worktree. It stays out of the branch, git ignores it: Cockpit \
+			 gathers it when opening the pull request. Other people's code, however, \
+			 is not to be touched."
 		)
 	} else {
 		prompt
@@ -3493,11 +3477,11 @@ pub async fn launch_task_agent(
 		prompt
 	} else {
 		format!(
-			"{prompt}\n\n── Tu as déjà vérifié ce travail ──\n\
-			 À ton dernier passage, les branches en étaient là : {}\n\
-			 Concentre-toi sur ce qui a changé depuis — `git diff <sha>..<branche>` te \
-			 le donne. Inutile de tout reprendre : ton verdict précédent tient pour le \
-			 reste, sauf si la correction le remet en cause.",
+			"{prompt}\n\n── You have already checked this work ──\n\
+			 On your last pass, the branches were here: {}\n\
+			 Focus on what has changed since — `git diff <sha>..<branch>` gives it to \
+			 you. No need to redo everything: your previous verdict holds for the rest, \
+			 unless the fix calls it into question.",
 			task.checkpoint
 		)
 	};
@@ -3558,7 +3542,7 @@ pub async fn launch_task_agent(
 	mission::attach_task(&id, &task_id, &session)?;
 	journal::record(
 		"mission",
-		"Exécutant lancé",
+		&i18n::t("lib.mission.workerLaunched"),
 		&task.title,
 		true,
 		&format!("{} · {}", mission.title, task.role),
@@ -3581,7 +3565,7 @@ pub async fn launch_task_agent(
 async fn mission_start_from_ticket(app: AppHandle, reference: String) -> Result<Value> {
 	let identifier = mission::ticket_reference(&reference);
 	if identifier.is_empty() {
-		return Err(CockpitError::msg("Ce ticket n'a pas d'identifiant lisible."));
+		return Err(CockpitError::msg(i18n::t("lib.mission.ticketNoId")));
 	}
 
 	let ouverte = mission::list().into_iter().find(|mission| {
@@ -3595,10 +3579,7 @@ async fn mission_start_from_ticket(app: AppHandle, reference: String) -> Result<
 		return Ok(serde_json::json!({
 			"mission": mission,
 			"started": false,
-			"message": format!(
-				"Une mission est déjà ouverte sur {identifier} : on y retourne plutôt que \
-				 d'en ouvrir une seconde."
-			),
+			"message": i18n::tf("lib.mission.alreadyOpen", &[("identifier", &identifier)]),
 		}));
 	}
 
@@ -3614,15 +3595,16 @@ async fn mission_start_from_ticket(app: AppHandle, reference: String) -> Result<
 		executions::Origin::human(),
 	)
 	.await?;
+	let message = if guided {
+		i18n::tf("lib.mission.openedGuided", &[("identifier", &identifier)])
+	} else {
+		i18n::tf("lib.mission.opened", &[("identifier", &identifier)])
+	};
 	Ok(serde_json::json!({
 		"mission": mission::get(&mission.id).unwrap_or(mission),
 		"started": true,
 		"session": session,
-		"message": if guided {
-			format!("Mission ouverte sur {identifier} : le maître lit le ticket, tu le lis avec lui.")
-		} else {
-			format!("Mission ouverte sur {identifier}, le maître analyse le ticket.")
-		},
+		"message": message,
 	}))
 }
 
@@ -3664,16 +3646,12 @@ async fn launch_master(
 	// exécutant. Mieux vaut ne pas le lancer et dire ce qui manque — c'est
 	// exactement l'échec qu'on voyait passer pour un problème d'agent.
 	if agent::node_binary().is_none() {
-		return Err(CockpitError::msg(
-			"Node est introuvable sur ce poste : les outils de mission passent par un pont \
-			 MCP qu'il fait tourner. Installe Node (`brew install node`), puis relance la \
-			 mission. Les agents ordinaires, eux, continuent de fonctionner.",
-		));
+		return Err(CockpitError::msg(i18n::t("lib.mission.nodeMissing")));
 	}
 
 	let agents = app
 		.try_state::<agent::SharedAgents>()
-		.ok_or_else(|| CockpitError::msg("Registre des agents indisponible."))?
+		.ok_or_else(|| CockpitError::msg(i18n::t("lib.mission.agentsUnavailable")))?
 		.inner()
 		.clone();
 
@@ -3688,12 +3666,12 @@ async fn launch_master(
 		.map(|role| {
 			if role.verifies {
 				format!(
-					"- `{}` : {} — juge le travail des autres, ne démarre qu'une fois \
-					 l'implémentation livrée",
+					"- `{}`: {} — judges the others' work, only starts once the \
+					 implementation is delivered",
 					role.id, role.label
 				)
 			} else {
-				format!("- `{}` : {}", role.id, role.label)
+				format!("- `{}`: {}", role.id, role.label)
 			}
 		})
 		.collect::<Vec<_>>()
@@ -3705,18 +3683,20 @@ async fn launch_master(
 		// revenait à piloter à sa place quelqu'un dont on attend du jugement.
 		// Ne restent que les contraintes qu'il ne peut pas deviner — l'accord
 		// humain, et le fait que les périmètres sont réellement appliqués.
-		"Tu es l'agent maître de la mission « {title} »{ticket}.\n\n\
-		 Tu découpes le travail, tu le confies à des exécutants, et tu recomposes \
-		 ce qu'ils livrent sur la branche d'intégration `{branch}`. Les outils de \
-		 mission sont à toi ; ils disent chacun ce qu'ils font.\n\n\
-		 Deux choses que tu ne décides pas. Ton plan attend l'accord de \
-		 l'utilisateur : rien ne démarre avant, quoi que tu en penses. Et les \
-		 périmètres de chemins que tu déclares sont appliqués — une écriture en \
-		 dehors sera refusée, ce n'est pas une consigne mais une barrière.\n\n\
-		 Rôles disponibles :\n{roles}\n\n\
-		 Un exécutant ne voit que sa consigne : ce que tu ne lui écris pas, il ne \
-		 l'a pas. Deux exécutants qui écrivent au même endroit se gêneront quoi que \
-		 tu leur dises.\n\n{guided}{lessons}{brief}",
+		"You are the master agent of the mission \"{title}\"{ticket}.\n\n\
+		 You break the work down, hand it to workers, and recombine what they \
+		 deliver on the integration branch `{branch}`. The mission tools are yours; \
+		 each one says what it does.\n\n\
+		 Two things you do not decide. Your plan waits for the user's agreement: \
+		 nothing starts before that, whatever you think of it. And the path scopes \
+		 you declare are enforced — a write outside them will be refused; it is not \
+		 an instruction but a barrier.\n\n\
+		 Available roles:\n{roles}\n\n\
+		 A worker only sees its own instructions: what you do not write to it, it \
+		 does not have. Two workers writing in the same place will get in each \
+		 other's way whatever you tell them.\n\n\
+		 {directive}\n\n{guided}{lessons}{brief}",
+		directive = i18n::reply_directive(),
 		guided = if mission.guided {
 			format!("{}\n\n", guided_brief(&mission))
 		} else {
@@ -3726,7 +3706,7 @@ async fn launch_master(
 		ticket = if mission.ticket.is_empty() {
 			String::new()
 		} else {
-			format!(" (ticket {})", mission.ticket)
+			format!(" (issue {})", mission.ticket)
 		},
 		branch = mission.branch,
 		roles = roles,
@@ -3756,10 +3736,9 @@ async fn launch_master(
 		// ses contrats, y commite, et transforme un dépôt propre en chantier.
 		// Mieux vaut refuser de démarrer et dire pourquoi.
 		Err(error) => {
-			return Err(CockpitError::msg(format!(
-				"Worktree d'intégration impossible pour `{}` : {error}. \
-				 Le maître ne sera pas lancé dans le dépôt principal.",
-				mission.branch
+			return Err(CockpitError::msg(i18n::tf(
+				"lib.mission.integrationWorktreeFailed",
+				&[("branch", &mission.branch), ("error", &error)],
 			)))
 		}
 	};
@@ -3828,7 +3807,7 @@ async fn launch_master(
 	.await?;
 
 	mission::attach_master(&id, &session)?;
-	journal::record("mission", "Maître lancé", &mission.title, true, "");
+	journal::record("mission", &i18n::t("lib.mission.masterLaunched"), &mission.title, true, "");
 	Ok(session)
 }
 
@@ -3842,23 +3821,22 @@ async fn launch_master(
 fn guided_brief(mission: &mission::Mission) -> String {
 	use mission::MissionState as S;
 	let mut text = String::from(
-		"Cette mission est guidée : l'utilisateur lit le ticket en même temps que toi, et trois \
-		 accords jalonnent ton travail. Tu n'avances d'une étape qu'après le sien — les outils \
-		 refusent sinon.\n\n\
-		 1. Compréhension (`understand`). Lis le ticket, ses commentaires, puis le code qu'il \
-		 touche, sans rien modifier. Rends ce que tu as compris en 10 lignes au plus, pour un \
-		 développeur qui découvre le ticket : ce qu'on demande, pourquoi, ce qui est hors \
-		 périmètre. Des mots simples, une idée par ligne, pas de plan. Ce que tu n'as pas su \
-		 trancher va dans `questions`, jamais dans le texte : une ambiguïté noyée dans une \
-		 synthèse se lit comme une certitude.\n\
-		 2. Approche (`approach`). Comment tu comptes t'y prendre : les étapes, les endroits du \
-		 code, l'ordre, les risques. 15 lignes au plus, lisibles par un humain, sans encore \
-		 répartir entre exécutants.\n\
-		 3. Découpage (`plan`). Les tâches confiées aux exécutants, fidèles à l'approche \
-		 validée.\n\n\
-		 Après chaque soumission, arrête-toi. La réponse de l'utilisateur t'arrive par message : \
-		 une validation, ou une correction dont tu tiens compte avant de soumettre une nouvelle \
-		 version.",
+		"This mission is guided: the user reads the issue at the same time as you, and three \
+		 agreements mark out your work. You only move on to the next step after theirs — the \
+		 tools refuse otherwise.\n\n\
+		 1. Understanding (`understand`). Read the issue, its comments, then the code it \
+		 touches, without modifying anything. Return what you understood in 10 lines at most, \
+		 for a developer discovering the issue: what is asked, why, what is out of scope. \
+		 Simple words, one idea per line, no plan. What you could not settle goes into \
+		 `questions`, never into the text: an ambiguity buried in a summary reads like a \
+		 certainty.\n\
+		 2. Approach (`approach`). How you intend to go about it: the steps, the places in the \
+		 code, the order, the risks. 15 lines at most, readable by a human, without splitting \
+		 between workers yet.\n\
+		 3. Breakdown (`plan`). The tasks handed to the workers, faithful to the approved \
+		 approach.\n\n\
+		 After each submission, stop. The user's answer reaches you by message: an approval, \
+		 or a correction you take into account before submitting a new version.",
 	);
 
 	let validated = |drafts: &[mission::Draft]| -> Option<String> {
@@ -3870,28 +3848,28 @@ fn guided_brief(mission: &mission::Mission) -> String {
 			block.push_str(&format!("\n{answers}"));
 		}
 		if !review.feedback.is_empty() {
-			block.push_str(&format!("\nPrécision de l'utilisateur : {}", review.feedback));
+			block.push_str(&format!("\nUser's clarification: {}", review.feedback));
 		}
 		Some(block)
 	};
 	if let Some(block) = validated(&mission.understanding) {
-		text.push_str(&format!("\n\n── Compréhension validée ──\n{block}"));
+		text.push_str(&format!("\n\n── Understanding approved ──\n{block}"));
 	}
 	if let Some(block) = validated(&mission.approach) {
-		text.push_str(&format!("\n\n── Approche validée ──\n{block}"));
+		text.push_str(&format!("\n\n── Approach approved ──\n{block}"));
 	}
 
 	let now = match mission.state {
-		S::Understanding => "commence par la compréhension.",
-		S::Approaching => "ta compréhension est validée : à toi l'approche.",
-		S::Planning => "ton approche est validée : à toi le découpage.",
+		S::Understanding => "start with the understanding.",
+		S::Approaching => "your understanding is approved: the approach is yours.",
+		S::Planning => "your approach is approved: the breakdown is yours.",
 		S::AwaitingUnderstanding | S::AwaitingApproach | S::AwaitingApproval => {
-			"ta dernière proposition attend la réponse de l'utilisateur : n'appelle rien, attends \
-			 son message."
+			"your last proposal is waiting for the user's answer: call nothing, wait for \
+			 their message."
 		}
-		_ => "le découpage est validé ; les exécutants travaillent.",
+		_ => "the breakdown is approved; the workers are working.",
 	};
-	text.push_str(&format!("\n\nOù en est la mission : {now}"));
+	text.push_str(&format!("\n\nWhere the mission stands: {now}"));
 	text
 }
 
@@ -3922,12 +3900,12 @@ fn review_message(mission: &mission::Mission, step: mission::Step, approved: boo
 	if let Some(review) = &review {
 		let answers = answered(&questions, &review.answers);
 		if !answers.is_empty() {
-			details.push_str(&format!("\n\nSes réponses à tes questions :\n{answers}"));
+			details.push_str(&format!("\n\nTheir answers to your questions:\n{answers}"));
 		}
 		if !review.feedback.is_empty() {
 			details.push_str(&format!(
-				"\n\n{} :\n{}",
-				if approved { "Ce qu'il ajoute" } else { "Ce qu'il corrige" },
+				"\n\n{}:\n{}",
+				if approved { "What they add" } else { "What they correct" },
 				review.feedback
 			));
 		}
@@ -3935,29 +3913,29 @@ fn review_message(mission: &mission::Mission, step: mission::Step, approved: boo
 
 	let next = match (step, approved) {
 		(mission::Step::Understanding, true) => {
-			"Passe à l'approche : comment tu comptes t'y prendre, puis `approach`. Ne découpe pas \
-			 encore."
+			"Move on to the approach: how you intend to go about it, then `approach`. Do not break \
+			 it down yet."
 		}
 		(mission::Step::Understanding, false) => {
-			"Reprends ta compréhension en tenant compte de ce qui précède, puis soumets une \
-			 nouvelle version avec `understand`."
+			"Rework your understanding taking the above into account, then submit a new \
+			 version with `understand`."
 		}
 		(mission::Step::Approach, true) => {
-			"Passe au découpage : les tâches des exécutants, fidèles à cette approche, puis `plan`."
+			"Move on to the breakdown: the workers' tasks, faithful to this approach, then `plan`."
 		}
 		(mission::Step::Approach, false) => {
-			"Reprends ton approche en tenant compte de ce qui précède, puis soumets une nouvelle \
-			 version avec `approach`."
+			"Rework your approach taking the above into account, then submit a new version \
+			 with `approach`."
 		}
 		(mission::Step::Split, _) => {
-			"Reprends ton découpage en tenant compte de ce qui précède, puis soumets-le à nouveau \
-			 avec `plan`."
+			"Rework your breakdown taking the above into account, then submit it again with \
+			 `plan`."
 		}
 	};
 	format!(
-		"L'utilisateur {} ta {}.{details}\n\n{next}",
-		if approved { "valide" } else { "corrige" },
-		step.label()
+		"The user {} your {}.{details}\n\n{next}",
+		if approved { "approves" } else { "corrects" },
+		step.protocol_label()
 	)
 }
 
@@ -4149,41 +4127,34 @@ async fn mission_pr(id: String, title: Option<String>, body: Option<String>) -> 
 	if !indecises.is_empty() {
 		let liste = indecises
 			.iter()
-			.map(|task| format!("« {} »", task.title))
+			.map(|task| i18n::tf("lib.quoted", &[("text", &task.title)]))
 			.collect::<Vec<_>>()
 			.join(", ");
-		return Err(CockpitError::msg(format!(
-			"{liste} a rendu son rapport sans verdict lisible : on ne sait pas si le \
-			 travail passe. Relance la vérification en lui demandant de conclure par \
-			 `VERDICT: ok`, `réserves` ou `bloquant`. Si tu renonces à son avis, \
-			 marque la tâche abandonnée — ce sera une décision, pas un oubli.",
-		)));
+		return Err(CockpitError::msg(i18n::tf("lib.mission.unclearVerdict", &[("tasks", &liste)])));
 	}
 
 	let refus = mission::blocking_verdicts(&mission, &verifiers);
 	if !refus.is_empty() {
 		let liste = refus
 			.iter()
-			.map(|task| format!("« {} »", task.title))
+			.map(|task| i18n::tf("lib.quoted", &[("text", &task.title)]))
 			.collect::<Vec<_>>()
 			.join(", ");
-		return Err(CockpitError::msg(format!(
-			"{liste} a rendu un verdict bloquant. Corrige ce qui est reproché, puis 			 relance la vérification : son nouveau verdict lèvera le refus. Si tu 			 juges le reproche infondé, renvoie-la avec `rework` en le disant.",
-		)));
+		return Err(CockpitError::msg(i18n::tf("lib.mission.blockingVerdict", &[("tasks", &liste)])));
 	}
 
 	let dehors = mission::unintegrated(&mission);
 	if !dehors.is_empty() {
 		let liste = dehors
 			.iter()
-			.map(|task| format!("« {} » ({:?})", task.title, task.state))
+			.map(|task| {
+				format!("{} ({:?})", i18n::tf("lib.quoted", &[("text", &task.title)]), task.state)
+			})
 			.collect::<Vec<_>>()
 			.join(", ");
-		return Err(CockpitError::msg(format!(
-			"{} tâche(s) ne sont pas dans `{}` : {liste}. Intègre-les, ou marque-les \
-			 abandonnées si tu renonces à leur travail.",
-			dehors.len(),
-			mission.branch,
+		return Err(CockpitError::msg(i18n::tf(
+			"lib.mission.unintegrated",
+			&[("count", &dehors.len()), ("branch", &mission.branch), ("tasks", &liste)],
 		)));
 	}
 
@@ -4282,7 +4253,7 @@ async fn remote_ntfy(server: String, topic: String, token: Option<String>) -> Re
 async fn remote_pair() -> Result<Value> {
 	let host = remote::dns_name()
 		.await
-		.ok_or_else(|| CockpitError::msg("Tailscale ne répond pas."))?;
+		.ok_or_else(|| CockpitError::msg(i18n::t("lib.tailscaleDown")))?;
 	let code = remote::open_pairing();
 	let url = format!("https://{host}/");
 	Ok(serde_json::json!({ "code": code, "url": url, "qr": remote::qr_svg(&url)? }))
@@ -4353,13 +4324,15 @@ async fn sentry_to_linear(
 		config.team.linear_team_id.clone()
 	};
 
-	let description = format!(
-		"Erreur remontée par Sentry.\n\n\
-		 **Projet** : {project}\n\
-		 **Origine** : {culprit}\n\
-		 **Impact** : {events} occurrence(s), {users} utilisateur(s)\n\n\
-		 [Ouvrir dans Sentry]({permalink})\n\n\
-		 _Ticket créé depuis le cockpit._"
+	let description = i18n::tf(
+		"lib.sentryIssue.description",
+		&[
+			("project", &project),
+			("culprit", &culprit),
+			("events", &events),
+			("users", &users),
+			("permalink", &permalink),
+		],
 	);
 
 	let (identifier, url) =
@@ -4367,12 +4340,8 @@ async fn sentry_to_linear(
 
 	// La note est un confort, pas une condition : si elle échoue, le ticket
 	// existe quand même et on ne veut pas faire croire à un échec.
-	let _ = integrations::sentry_add_comment(
-		&config,
-		&issue_id,
-		&format!("Ticket Linear {identifier} — {url}"),
-	)
-	.await;
+	let note = i18n::tf("lib.sentryIssue.note", &[("identifier", &identifier), ("url", &url)]);
+	let _ = integrations::sentry_add_comment(&config, &issue_id, &note).await;
 
 	Ok(url)
 }
@@ -4533,13 +4502,10 @@ async fn launch_ready_tasks(app: AppHandle, id: &str) {
 			*dit = Some(std::time::Instant::now());
 			journal::record(
 				"mission",
-				"Lancement suspendu — quota bas",
+				&i18n::t("lib.mission.launchSuspendedQuota"),
 				&mission.title,
 				false,
-				&format!(
-					"Sous {} % de quota restant, aucune nouvelle tâche ne démarre.",
-					config.missions.quota_floor()
-				),
+				&i18n::tf("lib.mission.quotaFloor", &[("floor", &config.missions.quota_floor())]),
 			);
 		}
 		return;
@@ -4568,10 +4534,10 @@ async fn launch_ready_tasks(app: AppHandle, id: &str) {
 		if running_tasks_everywhere() >= MAX_RUNNING_TASKS_TOTAL {
 			journal::record(
 				"mission",
-				"Lancement suspendu",
+				&i18n::t("lib.mission.launchSuspended"),
 				&mission.title,
 				false,
-				&format!("{MAX_RUNNING_TASKS_TOTAL} exécutants déjà en cours sur la machine"),
+				&i18n::tf("lib.mission.tooManyWorkers", &[("count", &MAX_RUNNING_TASKS_TOTAL)]),
 			);
 			return;
 		}
@@ -4583,7 +4549,7 @@ async fn launch_ready_tasks(app: AppHandle, id: &str) {
 				&mission.id,
 				&task.id,
 				mission::TaskState::Failed,
-				"Tâche sans identifiant : replanifie la mission.",
+				&i18n::t("lib.mission.taskWithoutId"),
 			);
 			continue;
 		}
@@ -4608,7 +4574,7 @@ async fn launch_ready_tasks(app: AppHandle, id: &str) {
 				mission::TaskState::Failed,
 				&raison,
 			);
-			journal::record("mission", "Tâche bloquée", &task.title, false, &raison);
+			journal::record("mission", &i18n::t("lib.mission.taskBlocked"), &task.title, false, &raison);
 			continue;
 		}
 		if !task.base.trim().is_empty() && task.base != mission.branch {
@@ -4640,7 +4606,7 @@ async fn launch_ready_tasks(app: AppHandle, id: &str) {
 					&mission.id,
 					&task.id,
 					mission::TaskState::Failed,
-					&format!("Worktree impossible : {error}"),
+					&i18n::tf("lib.mission.worktreeFailed", &[("error", &error)]),
 				);
 				running -= 1;
 				continue;
@@ -4777,8 +4743,7 @@ async fn collect_finished_tasks(app: &AppHandle, id: &str) -> bool {
 					id,
 					&task.id,
 					mission::TaskState::Failed,
-					"Aucun exécutant ne s'est rattaché : le lancement n'a pas abouti. \
-					 Relance la tâche.",
+					&i18n::t("lib.mission.noWorkerAttached"),
 				);
 				changed = true;
 			}
@@ -4795,7 +4760,7 @@ async fn collect_finished_tasks(app: &AppHandle, id: &str) -> bool {
 				id,
 				&task.id,
 				mission::TaskState::Failed,
-				"L'exécutant s'est arrêté sans rien produire — lancement refusé ?",
+				&i18n::t("lib.mission.workerDiedSilent"),
 			);
 			let _ = agent::stop(&agents, session);
 			changed = true;
@@ -4840,15 +4805,20 @@ async fn collect_finished_tasks(app: &AppHandle, id: &str) -> bool {
 					let _ = mission::set_task_actual_branch(id, &task.id, &dessus);
 					journal::record(
 						"mission",
-						"Exécutant parti sur une autre branche",
+						&i18n::t("lib.mission.workerOtherBranch"),
 						&task.title,
 						false,
-						&format!("{ailleurs} commit(s) sur `{dessus}`, pas sur `{}`.", task.branch),
+						&i18n::tf(
+							"lib.mission.workerOtherBranchDetail",
+							&[("count", &ailleurs), ("actual", &dessus), ("expected", &task.branch)],
+						),
 					);
 					derive = format!(
-						" Son travail est sur `{dessus}` ({ailleurs} commit(s)), pas sur \
-						 `{}` : c'est celle-là qu'il faut intégrer.",
-						task.branch,
+						" {}",
+						i18n::tf(
+							"lib.mission.workerOtherBranchNote",
+							&[("count", &ailleurs), ("actual", &dessus), ("expected", &task.branch)],
+						)
 					);
 				}
 			}
@@ -4859,9 +4829,9 @@ async fn collect_finished_tasks(app: &AppHandle, id: &str) -> bool {
 			&task.id,
 			mission::TaskState::Delivered,
 			&match commits {
-				0 => format!("Exécutant terminé, sans commit sur sa branche.{derive}"),
-				1 => "Exécutant terminé — 1 commit.".to_string(),
-				n => format!("Exécutant terminé — {n} commits."),
+				0 => format!("{}{derive}", i18n::t("lib.mission.workerDoneNoCommit")),
+				1 => i18n::t("lib.mission.workerDoneOneCommit"),
+				n => i18n::tf("lib.mission.workerDoneCommits", &[("count", &n)]),
 			},
 		);
 		// Capturé maintenant, tant que l'agent est encore vivant : une fois
@@ -4893,20 +4863,19 @@ async fn collect_finished_tasks(app: &AppHandle, id: &str) -> bool {
 				if verdict == mission::Verdict::Undecided {
 					journal::record(
 						"mission",
-						"Vérification sans verdict",
+						&i18n::t("lib.mission.checkNoVerdict"),
 						&task.title,
 						false,
-						"Son rapport ne conclut pas de façon lisible : le cockpit ne peut \
-						 pas dire si le travail passe. Relance-la, ou tranche à la main.",
+						&i18n::t("lib.mission.checkNoVerdictDetail"),
 					);
 				}
 				if verdict == mission::Verdict::Blocking {
 					journal::record(
 						"mission",
-						"Vérification bloquante",
+						&i18n::t("lib.mission.checkBlocking"),
 						&task.title,
 						false,
-						"La pull request reste fermée tant que ce refus n'est pas levé.",
+						&i18n::t("lib.mission.checkBlockingDetail"),
 					);
 				}
 			}
@@ -4953,13 +4922,12 @@ fn reap_stray_agents(app: &AppHandle) -> usize {
 						let _ = agent::stop(&agents, session);
 						journal::record(
 							"mission",
-							"Maître interrompu — tour trop long",
+							&i18n::t("lib.mission.masterTimedOut"),
 							&mission.title,
 							false,
-							&format!(
-								"Aucune réponse depuis {} minutes : coupé pour laisser la \
-								 reprise automatique relancer un maître neuf.",
-								age.as_secs() / 60,
+							&i18n::tf(
+								"lib.mission.masterTimedOutDetail",
+								&[("minutes", &(age.as_secs() / 60))],
 							),
 						);
 						reaped += 1;
@@ -5003,7 +4971,7 @@ async fn move_to_integration(app: &AppHandle, id: &str) {
 	let _ = mission::set_state(
 		id,
 		mission::MissionState::Integrating,
-		"Tous les exécutants ont rendu. Le maître recompose.",
+		&i18n::t("lib.mission.allDelivered"),
 	);
 
 	// Inutile d'en relancer un si le précédent travaille encore ; et s'il a
@@ -5022,12 +4990,12 @@ async fn move_to_integration(app: &AppHandle, id: &str) {
 	// verdict, et qu'un refus se traite en renvoyant la tâche plutôt qu'en
 	// corrigeant soi-même. La suite — intégrer, rendre compte, ouvrir la PR —
 	// est décrite par les outils.
-	let brief = "Tous les exécutants ont rendu. La recette et la relecture ont terminé \
-	             leur rapport par un verdict : lis-les avant tout le reste.\n\n\
-	             Sur un verdict bloquant, ne corrige pas toi-même — `rework` sur la tâche \
-	             fautive, en lui transmettant les points à reprendre. Elle repartira seule, \
-	             les vérifications rejugeront, et tu seras rappelé. Trois reprises au plus \
-	             par tâche ; au-delà, explique ce qui bloque et arrête-toi là."
+	let brief = "All workers have delivered. QA and review ended their report with a \
+	             verdict: read them before anything else.\n\n\
+	             On a blocking verdict, do not fix it yourself — `rework` the faulty task, \
+	             passing on the points to rework. It will restart on its own, the checks \
+	             will judge again, and you will be called back. Three reworks at most per \
+	             task; beyond that, explain what is blocking and stop there."
 		.to_string();
 	if let Err(error) = launch_master(
 		app.clone(),
@@ -5039,7 +5007,7 @@ async fn move_to_integration(app: &AppHandle, id: &str) {
 	{
 		journal::record(
 			"mission",
-			"Maître non relancé",
+			&i18n::t("lib.mission.masterNotRelaunched"),
 			&mission.title,
 			false,
 			&error.to_string(),
@@ -5088,18 +5056,18 @@ async fn revive_integration(app: &AppHandle, mission: &mission::Mission) {
 
 	journal::record(
 		"mission",
-		"Intégration reprise",
+		&i18n::t("lib.mission.integrationResumed"),
 		&mission.title,
 		true,
-		"Aucun maître ne tenait la mission ; il est relancé sur ce qu'il reste à faire.",
+		&i18n::t("lib.mission.integrationResumedDetail"),
 	);
 	let brief = format!(
-		"Tu reprends la mission « {} » à l'intégration : elle n'a plus bougé depuis \
-		 un moment et personne ne la tenait.\n\n\
-		 Commence par `status` pour voir où en sont les tâches, puis `integrate` — \
-		 fusionner une branche déjà fusionnée ne coûte rien, et c'est le seul moyen \
-		 de savoir ce qui reste dehors. Ouvre la pull request quand tout est \
-		 recomposé ; si un conflit t'arrête, dis-le et arrête-toi là.",
+		"You are taking over the mission \"{}\" at integration: it has not moved for \
+		 a while and nobody was holding it.\n\n\
+		 Start with `status` to see where the tasks stand, then `integrate` — merging \
+		 an already merged branch costs nothing, and it is the only way to know what \
+		 is still outside. Open the pull request once everything is recombined; if a \
+		 conflict stops you, say so and stop there.",
 		mission.title,
 	);
 	if let Err(error) = launch_master(
@@ -5112,7 +5080,7 @@ async fn revive_integration(app: &AppHandle, mission: &mission::Mission) {
 	{
 		journal::record(
 			"mission",
-			"Intégration non reprise",
+			&i18n::t("lib.mission.integrationNotResumed"),
 			&mission.title,
 			false,
 			&error.to_string(),
@@ -5220,8 +5188,8 @@ fn watch_scopes() {
 				// Une question à la personne, elle, passe.
 				if review::is_readonly(session) && request.tool != "AskUserQuestion" {
 					let reason = format!(
-						"Revue en lecture seule : « {} » n'est pas permis. Relis sans rien modifier, \
-						 avec `git diff`, `git log`, `git show` ou la lecture des fichiers.",
+						"Read-only review: \"{}\" is not allowed. Review without modifying anything, \
+						 with `git diff`, `git log`, `git show` or by reading the files.",
 						request.tool
 					);
 					let _ = permissions::answer(&request.id, false, Some(reason));
@@ -5238,13 +5206,13 @@ fn watch_scopes() {
 					continue;
 				}
 				let reason = format!(
-					"Hors du périmètre de « {task} » : {}. Chemins autorisés : {}. \
-					 Si ce fichier doit changer, signale-le au lieu de le modifier.",
+					"Outside the scope of \"{task}\": {}. Allowed paths: {}. \
+					 If this file needs to change, report it instead of modifying it.",
 					outside.join(", "),
 					scope.join(", ")
 				);
 				let _ = permissions::answer(&request.id, false, Some(reason));
-				journal::record("mission", "Écriture hors périmètre refusée", &outside.join(", "), false, &task);
+				journal::record("mission", &i18n::t("lib.mission.outOfScopeRefused"), &outside.join(", "), false, &task);
 			}
 		}
 	});
@@ -5907,8 +5875,8 @@ mod review_message_tests {
 	fn un_maitre_relance_retrouve_ce_qui_est_valide() {
 		let mission = mission_with(draft(true, "", vec!["oui, par mois"]));
 		let brief = guided_brief(&mission);
-		assert!(brief.contains("Compréhension validée"));
+		assert!(brief.contains("Understanding approved"));
 		assert!(brief.contains("On demande un export."));
-		assert!(brief.contains("à toi l'approche"));
+		assert!(brief.contains("the approach is yours"));
 	}
 }

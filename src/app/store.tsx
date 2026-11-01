@@ -24,6 +24,7 @@ import type {
 import { bumpProjectEpoch } from "@/lib/projectScope";
 import { useAsync } from "@/lib/useAsync";
 import { toast as sonner } from "sonner";
+import { t } from "@/i18n";
 
 export type ViewId =
 	// Tout le travail sur un plan : les projets en îles, le travail dans le
@@ -235,8 +236,10 @@ export function CockpitProvider({ children }: { children: ReactNode }) {
 					.notify(
 						status.label,
 						status.state === "succeeded"
-							? "Terminé"
-							: `Échec${status.exitCode !== null ? ` (code ${status.exitCode})` : ""}`,
+							? t("app:store.job.succeeded")
+							: status.exitCode !== null
+								? t("app:store.job.failedWithCode", { code: status.exitCode })
+								: t("app:store.job.failed"),
 					)
 					.catch(() => undefined);
 
@@ -244,9 +247,9 @@ export function CockpitProvider({ children }: { children: ReactNode }) {
 				// notification système qu'on rate en regardant ailleurs.
 				if (status.state === "failed") {
 					setToast(
-						`${status.label} — échec${
-							status.exitCode !== null ? ` (code ${status.exitCode})` : ""
-						}. Ouvre Scripts pour la sortie.`,
+						status.exitCode !== null
+							? t("app:store.job.failedToastWithCode", { label: status.label, code: status.exitCode })
+							: t("app:store.job.failedToast", { label: status.label }),
 					);
 				}
 
@@ -256,7 +259,7 @@ export function CockpitProvider({ children }: { children: ReactNode }) {
 				if (status.label.startsWith("worktree ")) {
 					worktreeState.reload();
 					if (status.state === "succeeded") {
-						setToast(`${status.label} — terminé.`);
+						setToast(t("app:store.job.worktreeDone", { label: status.label }));
 					}
 				}
 			}
@@ -320,7 +323,7 @@ export function CockpitProvider({ children }: { children: ReactNode }) {
 			void api.system
 				.notify(
 					session.gitBranch ?? session.cwd.split("/").pop() ?? "Agent",
-					`En attente de ta réponse — ${session.title}`,
+					t("app:store.notify.waitingReply", { title: session.title }),
 				)
 				.catch(() => undefined);
 		}
@@ -393,14 +396,14 @@ export function CockpitProvider({ children }: { children: ReactNode }) {
 			if (seenCiRed.current.has(number)) continue;
 			const pr = prs.find((entry) => entry.number === number);
 			void api.system
-				.notify(`CI en échec · #${number}`, pr?.title ?? "")
+				.notify(t("app:store.notify.ciFailed", { number }), pr?.title ?? "")
 				.catch(() => undefined);
 		}
 		for (const number of mergeable) {
 			if (seenMergeable.current?.has(number)) continue;
 			const pr = prs.find((entry) => entry.number === number);
 			void api.system
-				.notify(`Prête à merger · #${number}`, pr?.title ?? "")
+				.notify(t("app:store.notify.readyToMerge", { number }), pr?.title ?? "")
 				.catch(() => undefined);
 		}
 
@@ -423,7 +426,9 @@ export function CockpitProvider({ children }: { children: ReactNode }) {
 			if (seenIssues.current.has(issue.id)) continue;
 			void api.system
 				.notify(
-					`Erreur prod · ${issue.meta.find((field) => field.label === "projet")?.value ?? ""}`,
+					t("app:store.notify.prodError", {
+						project: issue.meta.find((field) => field.label === "projet")?.value ?? "",
+					}),
 					issue.title,
 				)
 				.catch(() => undefined);
@@ -635,7 +640,7 @@ export function CockpitProvider({ children }: { children: ReactNode }) {
 
 export function useCockpit(): CockpitStore {
 	const store = useContext(Context);
-	if (!store) throw new Error("useCockpit doit être utilisé dans CockpitProvider");
+	if (!store) throw new Error("useCockpit must be used inside CockpitProvider");
 	return store;
 }
 

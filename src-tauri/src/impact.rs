@@ -152,11 +152,11 @@ pub fn summary(key: &str) -> Option<Summary> {
 
 fn write(analysis: &Analysis) -> Result<()> {
 	std::fs::create_dir_all(impact_dir())
-		.map_err(|e| CockpitError::msg(format!("Dossier des analyses : {e}")))?;
+		.map_err(|e| CockpitError::msg(crate::i18n::tf("impact.errors.folder", &[("error", &e)])))?;
 	let raw = serde_json::to_string_pretty(analysis)
-		.map_err(|e| CockpitError::msg(format!("Analyse illisible : {e}")))?;
+		.map_err(|e| CockpitError::msg(crate::i18n::tf("impact.errors.unreadable", &[("error", &e)])))?;
 	std::fs::write(path_of(&analysis.summary.key), raw)
-		.map_err(|e| CockpitError::msg(format!("Écriture de l'analyse : {e}")))
+		.map_err(|e| CockpitError::msg(crate::i18n::tf("impact.errors.write", &[("error", &e)])))
 }
 
 /// Oublie une analyse — et le dossier qui l'a nourrie.
@@ -234,10 +234,10 @@ pub fn report_interrupted() {
 		let key = std::fs::read_to_string(&path).unwrap_or_default();
 		crate::journal::record(
 			"impact",
-			"Lecture interrompue par la fermeture du cockpit",
+			&crate::i18n::t("impact.interrupted.label"),
 			key.trim(),
 			false,
-			"L'agent qui la menait s'arrête avec l'application. Relance-la depuis l'écran Impact.",
+			&crate::i18n::t("impact.interrupted.detail"),
 		);
 		let _ = std::fs::remove_file(path);
 	}
@@ -263,23 +263,23 @@ pub(crate) async fn dossier(change: &crate::monitor::Change, config: &Config) ->
 	let mut out = String::new();
 	out.push_str(&format!("# {}\n\n", change.title));
 	out.push_str(&format!(
-		"- Dépôt : {} ({})\n- Branche : {} → {}\n- Auteur : {}\n",
+		"- Repository: {} ({})\n- Branch: {} → {}\n- Author: {}\n",
 		change.repo,
 		change.forge,
 		change.branch,
 		change.base,
 		if change.author.is_empty() {
-			"inconnu"
+			"unknown"
 		} else {
 			&change.author
 		}
 	));
 	if !change.url.is_empty() {
-		out.push_str(&format!("- Adresse : {}\n", change.url));
+		out.push_str(&format!("- URL: {}\n", change.url));
 	}
 	if !change.labels.is_empty() {
 		out.push_str(&format!(
-			"- Libellés : {}\n",
+			"- Labels: {}\n",
 			change
 				.labels
 				.iter()
@@ -289,18 +289,17 @@ pub(crate) async fn dossier(change: &crate::monitor::Change, config: &Config) ->
 		));
 	}
 	out.push_str(&format!(
-		"- État de l'intégration continue : {}\n",
+		"- Continuous integration status: {}\n",
 		match change.ci.as_str() {
-			"success" => "au vert",
-			"failing" => "en échec",
-			"pending" => "en cours",
-			_ => "inconnu ou absent",
+			"success" => "passing",
+			"failing" => "failing",
+			"pending" => "running",
+			_ => "unknown or missing",
 		}
 	));
 	if change.forge == "local" {
 		out.push_str(
-			"- Aucune demande de fusion n'a été ouverte : ce travail n'existe que sur cette \
-			 branche.\n",
+			"- No merge request has been opened: this work exists only on this branch.\n",
 		);
 	}
 	out.push('\n');
@@ -353,8 +352,8 @@ pub(crate) async fn dossier(change: &crate::monitor::Change, config: &Config) ->
 		Ok(None) => {}
 		Err(reason) => {
 			out.push_str(&format!(
-				"> Le ticket de cette branche n'a pas pu être lu ({reason}). Ce qui suit ne dit \
-				 donc pas ce qui était demandé.\n\n"
+				"> This branch's ticket could not be read ({reason}). What follows therefore does \
+				 not say what was asked for.\n\n"
 			));
 		}
 	}
@@ -375,7 +374,7 @@ pub(crate) async fn dossier(change: &crate::monitor::Change, config: &Config) ->
 		.await
 		{
 			if !log.trim().is_empty() {
-				out.push_str("## Commits de la branche\n\n");
+				out.push_str("## Branch commits\n\n");
 				out.push_str(log.trim());
 				out.push_str("\n\n");
 			}
@@ -386,8 +385,8 @@ pub(crate) async fn dossier(change: &crate::monitor::Change, config: &Config) ->
 	if diff.len() > MAX_DIFF_CHARS {
 		out.push_str(&diff.chars().take(MAX_DIFF_CHARS).collect::<String>());
 		out.push_str(
-			"\n```\n\n> Le diff a été coupé ici, il est trop volumineux pour être lu en entier. \
-			 Va lire les fichiers concernés dans le dépôt pour ce qui manque.\n",
+			"\n```\n\n> The diff was cut here, it is too large to be read in full. Read the \
+			 affected files in the repository for what is missing.\n",
 		);
 	} else {
 		out.push_str(&diff);
@@ -406,13 +405,13 @@ fn github_conversation(conversation: &serde_json::Value) -> String {
 		.unwrap_or_default()
 		.trim();
 	if !body.is_empty() {
-		out.push_str("## Description telle qu'elle a été écrite\n\n");
+		out.push_str("## Description as written\n\n");
 		out.push_str(body);
 		out.push_str("\n\n");
 	}
 
 	let mut echanges = Vec::new();
-	for (pointer, kind) in [("/reviews", "revue"), ("/comments", "commentaire")] {
+	for (pointer, kind) in [("/reviews", "review"), ("/comments", "comment")] {
 		if let Some(list) = conversation.pointer(pointer).and_then(|v| v.as_array()) {
 			for entry in list {
 				let text = entry
@@ -426,13 +425,13 @@ fn github_conversation(conversation: &serde_json::Value) -> String {
 				let author = entry
 					.pointer("/user/login")
 					.and_then(|v| v.as_str())
-					.unwrap_or("quelqu'un");
+					.unwrap_or("someone");
 				let state = entry
 					.get("state")
 					.and_then(|v| v.as_str())
 					.unwrap_or_default();
 				echanges.push(format!(
-					"- **{author}** ({kind}{}) : {}",
+					"- **{author}** ({kind}{}): {}",
 					if state.is_empty() {
 						String::new()
 					} else {
@@ -444,7 +443,7 @@ fn github_conversation(conversation: &serde_json::Value) -> String {
 		}
 	}
 	if !echanges.is_empty() {
-		out.push_str("## Ce qui s'est dit\n\n");
+		out.push_str("## What was said\n\n");
 		out.push_str(&echanges.join("\n"));
 		out.push_str("\n\n");
 	}
@@ -464,65 +463,69 @@ fn github_conversation(conversation: &serde_json::Value) -> String {
 fn consigne(dossier: &str, brief: &str) -> String {
 	let mut prompt = String::new();
 	prompt.push_str(
-		"Tu lis un changement de code pour quelqu'un qui décide, pas pour quelqu'un qui code.\n\
-		 Cette personne connaît le produit et pas ce diff. Elle veut comprendre ce que ce \
-		 changement implique, et repartir en sachant quoi faire.\n\n\
-		 Tu n'es pas en train de faire une revue de code. Ne relève pas les questions de style, \
-		 de nommage ou de mise en forme. Ne paraphrase pas le diff : « ajoute une fonction X » \
-		 n'apprend rien à personne. Chaque phrase doit dire une conséquence, une raison ou un \
-		 risque.\n\n\
-		 Écris en français courant. Pas de jargon quand un mot ordinaire existe. Si un terme \
-		 technique est inévitable, explique-le en trois mots entre parenthèses. Pas de \
-		 superlatifs, pas de « il convient de », pas de conclusion creuse.\n\n\
-		 Tu es dans le dépôt : va lire le code autour du diff. C'est ce qui te permettra de dire \
-		 ce que ce changement implique vraiment, et pas seulement ce qu'il montre. Tu ne peux \
-		 rien modifier, et ce n'est pas ce qu'on te demande.\n\n",
+		"You are reading a code change for someone who decides, not for someone who codes.\n\
+		 This person knows the product but not this diff. They want to understand what this \
+		 change implies, and walk away knowing what to do.\n\n\
+		 You are not doing a code review. Do not point out questions of style, naming or \
+		 formatting. Do not paraphrase the diff: \"adds a function X\" teaches nobody anything. \
+		 Every sentence must state a consequence, a reason or a risk.\n\n\
+		 Write in plain everyday language. No jargon when an ordinary word exists. If a technical \
+		 term is unavoidable, explain it in three words in parentheses. No superlatives, no \
+		 \"it is advisable to\", no hollow conclusion.\n\n\
+		 You are in the repository: go read the code around the diff. That is what will let you \
+		 say what this change really implies, and not only what it shows. You cannot modify \
+		 anything, and that is not what you are asked to do.\n\n",
 	);
+	prompt.push_str(&crate::i18n::reply_directive());
+	prompt.push_str("\n\n");
 
 	if !brief.trim().is_empty() {
-		prompt.push_str("## Ce que fait ce produit\n\n");
+		prompt.push_str("## What this product does\n\n");
 		prompt.push_str(brief.trim());
 		prompt.push_str("\n\n");
 	}
 
 	prompt.push_str(
-		"## Le rapport que tu dois rendre\n\n\
-		 Rends exactement ces sections, dans cet ordre, avec ces titres. Rien avant, rien après.\n\n\
-		 ## En clair\n\
-		 Une à deux phrases, pas plus. Ce que quelqu'un qui utilise le produit verra changer. \
-		 Si rien ne change pour lui, dis-le et dis ce que ça change pour l'équipe.\n\n\
-		 ## Pourquoi maintenant\n\
-		 Ce qui a provoqué ce travail : un bug subi, une limite atteinte, une demande, une dette \
-		 qui bloquait autre chose. Appuie-toi sur le ticket, les commits, la description et les \
-		 échanges. Si tu ne peux pas le savoir, écris-le franchement plutôt que d'inventer une \
-		 raison plausible.\n\
-		 Si le dossier contient un ticket et que le changement s'en écarte — il en fait moins, \
-		 plus, ou autre chose — dis-le ici en une phrase. C'est l'écart qu'un relecteur ne voit \
-		 pas quand il n'a que le diff sous les yeux.\n\n\
-		 ## Les choix faits\n\
-		 Les décisions techniques qui engagent la suite, et ce qu'elles coûtent. Pour chacune : \
-		 ce qui a été choisi, contre quoi, et ce que ça implique dans six mois. Ignore les \
-		 décisions sans conséquence.\n\n\
-		 ## Ce qui peut casser\n\
-		 Une puce par risque, la plus grave en premier. Commence chaque puce par [élevé], \
-		 [moyen] ou [faible], puis décris le scénario concret : quelle situation, quel \
-		 comportement obtenu. Un risque sans scénario n'est pas un risque, c'est une \
-		 impression — ne l'écris pas. S'il n'y en a aucun, écris « Rien de repéré. » et \
-		 explique en une phrase pourquoi le changement est sûr.\n\n\
-		 ## À vérifier avant de fusionner\n\
-		 Une puce par vérification, formulée comme un geste qu'on peut faire : quoi ouvrir, quoi \
-		 essayer, quoi regarder. Pas « tester le parcours » mais le parcours précis, avec le cas \
-		 qui le mettrait en défaut.\n\n\
-		 ## Ce qu'on pourrait faire mieux\n\
-		 Les améliorations possibles, séparées du reste parce qu'elles ne bloquent pas. Rien \
-		 d'obligatoire ici : s'il n'y a rien d'utile à dire, dis-le en une ligne.\n\n\
+		"## The report you must return\n\n\
+		 Return exactly these sections, in this order, with these titles. Nothing before, nothing \
+		 after. Keep the section titles, the `[high]`/`[medium]`/`[low]` tags and the `Verdict:` \
+		 and `Risk:` lines in English exactly — only the text under them follows the language \
+		 instruction.\n\n\
+		 ## In plain words\n\
+		 One or two sentences, no more. What someone who uses the product will see change. If \
+		 nothing changes for them, say so and say what it changes for the team.\n\n\
+		 ## Why now\n\
+		 What triggered this work: a bug suffered, a limit reached, a request, a debt that was \
+		 blocking something else. Rely on the ticket, the commits, the description and the \
+		 discussion. If you cannot know, say so frankly rather than inventing a plausible \
+		 reason.\n\
+		 If the dossier contains a ticket and the change departs from it — it does less, more, or \
+		 something else — say so here in one sentence. That is the gap a reviewer does not see \
+		 when they only have the diff in front of them.\n\n\
+		 ## Choices made\n\
+		 The technical decisions that commit what comes next, and what they cost. For each one: \
+		 what was chosen, over what, and what it implies six months from now. Ignore decisions \
+		 without consequence.\n\n\
+		 ## What can break\n\
+		 One bullet per risk, the most serious first. Start each bullet with [high], [medium] or \
+		 [low], then describe the concrete scenario: which situation, which resulting behavior. \
+		 A risk without a scenario is not a risk, it is an impression — do not write it. If there \
+		 are none, write \"Nothing found.\" and explain in one sentence why the change is \
+		 safe.\n\n\
+		 ## Check before merging\n\
+		 One bullet per check, phrased as an action one can take: what to open, what to try, \
+		 what to look at. Not \"test the flow\" but the precise flow, with the case that would \
+		 break it.\n\n\
+		 ## What could be better\n\
+		 Possible improvements, kept apart from the rest because they do not block. Nothing \
+		 mandatory here: if there is nothing useful to say, say so in one line.\n\n\
 		 ## Verdict\n\
-		 Une seule ligne, exactement de cette forme :\n\
-		 `Verdict: ok` si ça peut partir tel quel, `Verdict: réserves` s'il faut vérifier des \
-		 choses d'abord, `Verdict: bloquant` si fusionner en l'état causerait un problème.\n\
-		 Puis une deuxième ligne : `Risque: faible`, `Risque: moyen` ou `Risque: élevé`, selon \
-		 ce que ce changement met en jeu.\n\n\
-		 ## Le dossier\n\n",
+		 A single line, exactly in this form:\n\
+		 `Verdict: ok` if it can ship as is, `Verdict: concerns` if things must be checked \
+		 first, `Verdict: blocking` if merging as is would cause a problem.\n\
+		 Then a second line: `Risk: low`, `Risk: medium` or `Risk: high`, depending on what \
+		 this change puts at stake.\n\n\
+		 ## The dossier\n\n",
 	);
 	prompt.push_str(dossier);
 	prompt
@@ -538,9 +541,7 @@ fn consigne(dossier: &str, brief: &str) -> String {
 /// encore en mémoire courte, l'appel est donc gratuit.
 pub async fn analyze(key: String) -> Result<Analysis> {
 	if !claim(&key) {
-		return Err(CockpitError::msg(
-			"Une analyse de ce changement est déjà en cours.",
-		));
+		return Err(CockpitError::msg(crate::i18n::t("impact.errors.alreadyRunning")));
 	}
 	// Quoi qu'il arrive ensuite, la clé doit être libérée : une erreur qui
 	// laisserait le verrou posé rendrait le changement inanalysable jusqu'au
@@ -557,12 +558,7 @@ async fn analyze_inner(key: &str) -> Result<Analysis> {
 		.changes
 		.into_iter()
 		.find(|change| change.key == key)
-		.ok_or_else(|| {
-			CockpitError::msg(
-				"Ce changement n'existe plus : la pull request a été fermée, ou la branche a \
-				 disparu.",
-			)
-		})?;
+		.ok_or_else(|| CockpitError::msg(crate::i18n::t("impact.errors.changeGone")))?;
 
 	let base = Config::load();
 	let cloisonne = base.projects.len() > 1;
@@ -587,7 +583,7 @@ async fn analyze_inner(key: &str) -> Result<Analysis> {
 	]
 	.into_iter()
 	.find(|candidate| !candidate.is_empty() && std::path::Path::new(candidate).is_dir())
-	.ok_or_else(|| CockpitError::msg("Aucun dossier où faire travailler l'agent."))?;
+	.ok_or_else(|| CockpitError::msg(crate::i18n::t("impact.errors.noWorkdir")))?;
 
 	let settings = &config.impact;
 	let rendu = crate::agent::run_once(
@@ -620,7 +616,7 @@ async fn analyze_inner(key: &str) -> Result<Analysis> {
 	write(&analysis)?;
 	crate::journal::record(
 		"impact",
-		"Analyse d'un changement",
+		&crate::i18n::t("impact.journal.analysis"),
 		&format!("{} {}", change.repo, change.reference),
 		true,
 		&analysis.summary.headline,
@@ -807,7 +803,7 @@ pub fn parse(rapport: &str) -> Analysis {
 	if analysis.sections.is_empty() && !analysis.raw.is_empty() {
 		analysis.sections.push(Section {
 			id: "autre".into(),
-			title: "Le rapport".into(),
+			title: crate::i18n::t("impact.rawReportTitle"),
 			body: analysis.raw.clone(),
 			points: Vec::new(),
 		});
@@ -1006,6 +1002,39 @@ mod tests {
 			ligne_de("**Risque :** élevé", "risque").as_deref(),
 			Some("élevé")
 		);
+	}
+
+	/// Le rapport tel que la consigne anglaise le demande désormais : il doit se
+	/// relire comme l'ancien rapport français, mêmes identifiants et mêmes
+	/// valeurs gardées.
+	#[test]
+	fn lit_un_rapport_aux_marqueurs_anglais() {
+		let analysis = parse(
+			"## In plain words\n\
+			 Loyalty points are no longer lost when an order fails.\n\n\
+			 ## Why now\n\
+			 Three customers reported it.\n\n\
+			 ## Choices made\n\
+			 - A queue rather than a direct call.\n\n\
+			 ## What can break\n\
+			 - [high] A double refund if the webhook arrives twice.\n\
+			 - [medium] The receipt label is not translated.\n\n\
+			 ## Check before merging\n\
+			 - Replay an already processed webhook.\n\n\
+			 ## What could be better\n\
+			 Nothing useful.\n\n\
+			 ## Verdict\n\
+			 Verdict: concerns\n\
+			 Risk: medium\n",
+		);
+		let ids: Vec<&str> = analysis.sections.iter().map(|s| s.id.as_str()).collect();
+		assert_eq!(ids, vec!["produit", "pourquoi", "choix", "risques", "verifier", "mieux"]);
+		assert_eq!(analysis.summary.verdict, "réserves");
+		assert_eq!(analysis.summary.risk, "moyen");
+		assert_eq!(analysis.summary.risk_count, 2);
+		assert!(analysis.summary.headline.starts_with("Loyalty points"));
+		assert_eq!(parse("Verdict: blocking\n").summary.verdict, "bloquant");
+		assert_eq!(parse("Verdict: ok\nRisk: high\n").summary.risk, "élevé");
 	}
 
 	#[test]

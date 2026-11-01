@@ -60,10 +60,10 @@ fn catalogs() -> &'static HashMap<&'static str, Value> {
 			let Ok(Value::Object(entries)) = serde_json::from_str::<Value>(raw) else {
 				continue;
 			};
+			// Fusion profonde : deux espaces qui partagent une racine (`agent`…)
+			// ne doivent pas s'écraser l'un l'autre.
 			let tree = map.entry(lang).or_insert_with(|| Value::Object(Default::default()));
-			if let Value::Object(target) = tree {
-				target.extend(entries);
-			}
+			deep_merge(tree, &Value::Object(entries));
 		}
 		map
 	})

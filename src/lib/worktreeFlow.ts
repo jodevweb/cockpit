@@ -1,5 +1,6 @@
 import { withActivity } from "@/lib/activity";
 import { api } from "@/lib/ipc";
+import { t } from "@/i18n";
 
 /**
  * Lancer la création d'un worktree, telle que l'équipe l'a déclarée.
@@ -72,17 +73,17 @@ export async function createWorktreeTracked(
 	options: { title?: string; onReady?: (path: string) => void } = {},
 ): Promise<string> {
 	return withActivity(
-		options.title ?? `Worktree ${branch}`,
+		options.title ?? t("lib:worktreeFlow.title", { branch }),
 		async (activity) => {
 			await startWorktreeCreation(branch, runners);
-			activity.step("Création en cours — dépendances, base… ça peut prendre quelques minutes.");
+			activity.step(t("lib:worktreeFlow.creating"));
 			const path = await waitForWorktree(branch);
-			if (!path) throw new Error(`Le worktree de ${branch} n'est pas apparu après 15 minutes.`);
-			activity.step("Worktree prêt.");
+			if (!path) throw new Error(t("lib:worktreeFlow.timeout", { branch }));
+			activity.step(t("lib:worktreeFlow.ready"));
 			options.onReady?.(path);
 			return path;
 		},
-		{ firstStep: "Je lance la création du worktree…", result: () => "Worktree prêt, son workspace est ouvert." },
+		{ firstStep: t("lib:worktreeFlow.starting"), result: () => t("lib:worktreeFlow.readyOpen") },
 	);
 }
 

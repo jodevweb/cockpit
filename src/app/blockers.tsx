@@ -1,8 +1,10 @@
 import { AlertTriangle, Bot, ListChecks, ScanSearch, ShieldQuestion } from "lucide-react";
 import { useMemo } from "react";
+import { useTranslation } from "react-i18next";
 import { fromSeconds, shortPath } from "@/lib/format";
 import { api } from "@/lib/ipc";
 import { awaitedDecision, awaitsHuman } from "@/lib/missions";
+import { replyDirective } from "@/lib/language";
 import type { PullRequest } from "@/lib/types";
 import { useAgentGuard, useAgentRuns } from "./agents";
 import { movedSince, useReviewFlow, useReviews } from "./review";
@@ -38,6 +40,7 @@ export type Blocker = {
 
 export function useBlockers(prs: PullRequest[]): Blocker[] {
 	const { go, worktrees, missions } = useCockpit();
+	const { t } = useTranslation("app");
 	const sessions = useAllSessions();
 	const { show, runs } = useAgentRuns();
 	// Une demande d'autorisation arrête un agent net : c'est le seul cas où la
@@ -92,9 +95,12 @@ export function useBlockers(prs: PullRequest[]): Blocker[] {
 			key: `perm-${run.id}`,
 			icon: ShieldQuestion,
 			tone: "warning" as const,
-			title: `${asks[0]?.tool ?? "Un agent"} — ${asks.length} demande${asks.length > 1 ? "s" : ""}`,
+			title: t("blockers.permission.title", {
+				tool: asks[0]?.tool ?? t("blockers.permission.anAgent"),
+				count: asks.length,
+			}),
 			detail: shortPath(run.cwd, 2),
-			meta: "à décider",
+			meta: t("blockers.permission.meta"),
 			onClick: () => show(run.id),
 		})),
 		...toApprove.map((mission) => ({
@@ -103,18 +109,21 @@ export function useBlockers(prs: PullRequest[]): Blocker[] {
 			tone: "accent" as const,
 			title: mission.title,
 			detail: awaitedDecision(mission),
-			meta: "à relire",
+			meta: t("blockers.plan.meta"),
 			onClick: () => go("missions", { missionId: mission.id }),
 		})),
 		...toRecheck.map(({ review, pr }) => ({
 			key: `recheck-${review.number}`,
 			icon: ScanSearch,
 			tone: "accent" as const,
-			title: `${review.author || "L'auteur"} a poussé sur #${review.number}`,
+			title: t("blockers.recheck.title", {
+				author: review.author || t("blockers.recheck.theAuthor"),
+				number: review.number,
+			}),
 			detail: pr?.title ?? review.title,
-			meta: "à revérifier",
+			meta: t("blockers.recheck.meta"),
 			onClick: () => void startReview(review.number, "verification"),
-			fix: { label: "Revérifier", run: () => startReview(review.number, "verification") },
+			fix: { label: t("blockers.recheck.fix"), run: () => startReview(review.number, "verification") },
 		})),
 		...waiting.map((session) => {
 			// Un agent piloté ici se rouvre dans le panneau ; les autres s'ouvrent
@@ -135,10 +144,10 @@ export function useBlockers(prs: PullRequest[]): Blocker[] {
 			icon: AlertTriangle,
 			tone: "critical" as const,
 			title: task.title,
-			detail: `${mission.title} · ${task.note || "sans motif"}`,
+			detail: `${mission.title} · ${task.note || t("blockers.failedTask.noReason")}`,
 			onClick: () => go("missions"),
 			fix: {
-				label: "Relancer",
+				label: t("blockers.failedTask.fix"),
 				run: () => api.missions.rerun(mission.id, task.id),
 			},
 		})),
@@ -150,7 +159,7 @@ export function useBlockers(prs: PullRequest[]): Blocker[] {
 				tone: "critical" as const,
 				title: pr.title,
 				detail: `#${pr.number} · ${pr.headRef}`,
-				meta: "CI rouge",
+				meta: t("blockers.ci.meta"),
 				onClick: () => {
 					void api.system.openUrl(pr.url).catch(() => undefined);
 				},
@@ -159,14 +168,15 @@ export function useBlockers(prs: PullRequest[]): Blocker[] {
 				// d'ouvrir un agent dans un dossier au hasard.
 				fix: tree
 					? {
-							label: "Réparer",
+							label: t("blockers.ci.fix"),
 							run: () =>
 								api.prompts.launch(
 									tree.path,
-									`L'intégration continue échoue sur la pull request #${pr.number} ` +
-										`(branche ${pr.headRef}). Trouve quels travaux échouent, lis les ` +
-										`journaux, identifie la cause réelle plutôt que le symptôme, et ` +
-										`corrige. Rejoue les tests concernés en local avant de pousser.`,
+									`Continuous integration is failing on pull request #${pr.number} ` +
+										`(branch ${pr.headRef}). Find which jobs fail, read their ` +
+										`logs, identify the real cause rather than the symptom, and ` +
+										`fix it. Rerun the affected tests locally before pushing.\n\n` +
+										replyDirective(),
 								),
 						}
 					: undefined,

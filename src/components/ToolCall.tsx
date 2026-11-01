@@ -17,6 +17,8 @@ import { Spinner } from "@/components/ui";
 import { useFileViewer } from "@/lib/fileViewer";
 import { api } from "@/lib/ipc";
 import { hasTauri } from "@/lib/preview";
+import { t } from "@/i18n";
+import { useTranslation } from "react-i18next";
 import type { Turn } from "@/app/agents";
 
 /**
@@ -64,7 +66,7 @@ function count(value: unknown): number {
  */
 function describe(turn: Turn): Shape {
 	const input = turn.input ?? {};
-	const tool = turn.tool ?? "outil";
+	const tool = turn.tool ?? t("components1:toolCall.tool");
 	const file = text(input.file_path) || text(input.notebook_path);
 	const pattern = text(input.pattern);
 
@@ -85,37 +87,41 @@ function describe(turn: Turn): Shape {
 			const limit = input.limit ? Number(input.limit) : null;
 			return {
 				icon: FileText,
-				verb: "Lu",
+				verb: t("components1:toolCall.verb.read"),
 				target: file || turn.text,
 				isFile: true,
-				note: from ? `à partir de la ligne ${from}` : limit ? `${limit} lignes` : undefined,
+				note: from
+					? t("components1:toolCall.fromLine", { line: from })
+					: limit
+						? t("components1:toolCall.lines", { count: limit })
+						: undefined,
 			};
 		}
 		case "Write":
 			return {
 				icon: PenLine,
-				verb: "Écrit",
+				verb: t("components1:toolCall.verb.wrote"),
 				target: file || turn.text,
 				isFile: true,
-				note: `${count(input.content)} lignes`,
+				note: t("components1:toolCall.lines", { count: count(input.content) }),
 			};
 		case "Edit": {
 			const removed = count(input.old_string);
 			const added = count(input.new_string);
 			return {
 				icon: PenLine,
-				verb: "Modifié",
+				verb: t("components1:toolCall.verb.edited"),
 				target: file || turn.text,
 				isFile: true,
 				note: `+${added} −${removed}`,
 			};
 		}
 		case "NotebookEdit":
-			return { icon: PenLine, verb: "Modifié", target: file || turn.text, isFile: true };
+			return { icon: PenLine, verb: t("components1:toolCall.verb.edited"), target: file || turn.text, isFile: true };
 		case "Grep":
 			return {
 				icon: Search,
-				verb: "Cherché",
+				verb: t("components1:toolCall.verb.searched"),
 				target: pattern || turn.text,
 				isFile: false,
 				note: text(input.path) || undefined,
@@ -124,7 +130,7 @@ function describe(turn: Turn): Shape {
 		case "Glob":
 			return {
 				icon: Search,
-				verb: "Listé",
+				verb: t("components1:toolCall.verb.listed"),
 				target: pattern || turn.text,
 				isFile: false,
 				note: text(input.path) || undefined,
@@ -133,21 +139,26 @@ function describe(turn: Turn): Shape {
 		case "Task":
 			return {
 				icon: Bot,
-				verb: "Sous-agent",
+				verb: t("components1:toolCall.verb.subagent"),
 				target: text(input.description) || turn.text,
 				isFile: false,
 				note: text(input.subagent_type) || undefined,
 			};
 		case "WebFetch":
-			return { icon: Globe, verb: "Consulté", target: text(input.url), isFile: false };
+			return { icon: Globe, verb: t("components1:toolCall.verb.fetched"), target: text(input.url), isFile: false };
 		case "WebSearch":
-			return { icon: Globe, verb: "Recherché", target: text(input.query), isFile: false };
+			return { icon: Globe, verb: t("components1:toolCall.verb.webSearched"), target: text(input.query), isFile: false };
 		case "TodoWrite":
-			return { icon: ListTodo, verb: "Liste de tâches", target: "", isFile: false };
+			return { icon: ListTodo, verb: t("components1:toolCall.verb.todos"), target: "", isFile: false };
 		case "mcp__cockpit__etapes": {
 			const etapes = Array.isArray(input.etapes) ? (input.etapes as Array<Record<string, unknown>>) : [];
 			const faites = etapes.filter((etape) => etape.etat === "faite").length;
-			return { icon: ListTodo, verb: "Étapes", target: `${faites} / ${etapes.length} faites`, isFile: false };
+			return {
+				icon: ListTodo,
+				verb: t("components1:toolCall.verb.steps"),
+				target: t("components1:toolCall.stepsDone", { done: faites, total: etapes.length }),
+				isFile: false,
+			};
 		}
 		default:
 			return { icon: Wrench, verb: tool, target: turn.text, isFile: false };
@@ -183,7 +194,7 @@ export function toolIcon(tool: string | null | undefined) {
 function summarize(output: string): string {
 	const lines = output.split("\n").filter((line) => line.trim());
 	if (lines.length === 0) return "";
-	return lines.length === 1 ? lines[0].slice(0, 120) : `${lines.length} lignes`;
+	return lines.length === 1 ? lines[0].slice(0, 120) : t("components1:toolCall.lines", { count: lines.length });
 }
 
 export function ToolCall({
@@ -214,6 +225,7 @@ export function ToolCall({
 	 */
 	openOnDemand?: boolean;
 }) {
+	const { t } = useTranslation("components1");
 	const [open, setOpen] = useState(false);
 	useEffect(() => {
 		if (openOnDemand) setOpen(true);
@@ -247,8 +259,8 @@ export function ToolCall({
 	const étapes = turn.sub?.length ?? 0;
 	const summary =
 		summarize(output) ||
-		(returned.length > 0 ? "image" : "") ||
-		(étapes > 0 && !output ? `${étapes} étape${étapes > 1 ? "s" : ""}` : "");
+		(returned.length > 0 ? t("toolCall.image") : "") ||
+		(étapes > 0 && !output ? t("toolCall.stepCount", { count: étapes }) : "");
 
 	return (
 		<div
@@ -267,9 +279,9 @@ export function ToolCall({
 					disabled={!output && !sub}
 					title={
 						sub
-							? "Voir ce que fait ce sous-agent"
+							? t("toolCall.seeSubagent")
 							: output
-								? "Voir ce que l'outil a répondu"
+								? t("toolCall.seeOutput")
 								: undefined
 					}
 					className={clsx(
@@ -326,7 +338,7 @@ export function ToolCall({
 								<Spinner />
 							</span>
 						) : turn.outputError ? (
-							<span className="text-critical">échec</span>
+							<span className="text-critical">{t("toolCall.failed")}</span>
 						) : (
 							summary
 						)}
@@ -351,7 +363,7 @@ export function ToolCall({
 									? viewer.open(readFile)
 									: void api.system.openEditor(readFile).catch(() => undefined)
 							}
-							title={`${readFile}\nCliquer pour ouvrir`}
+							title={`${readFile}\n${t("toolCall.clickToOpen")}`}
 							className="focus-ring block overflow-hidden rounded-lg border border-line-soft bg-void transition-colors hover:border-line"
 						>
 							<LocalImage
@@ -369,7 +381,7 @@ export function ToolCall({
 							key={index}
 							type="button"
 							onClick={() => setZoomed(zoomed === index ? null : index)}
-							title={zoomed === index ? "Réduire" : "Agrandir"}
+							title={zoomed === index ? t("toolCall.shrink") : t("toolCall.enlarge")}
 							className="focus-ring block overflow-hidden rounded-lg border border-line-soft bg-void transition-colors hover:border-line"
 						>
 							<img
