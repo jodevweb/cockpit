@@ -1,1 +1,455 @@
-{}
+{
+	"error": {
+		"missingCredential": "{{service}} non è configurato — aggiungi il suo token nelle Impostazioni.",
+		"network": "Rete: {{error}}"
+	},
+	"accounts": {
+		"claudeNotFound": "La CLI `claude` non si trova su questa macchina.",
+		"cliLaunch": "Avvio della CLI: {{error}}",
+		"cliNoAnswer": "La CLI non ha risposto.",
+		"cliUnreadable": "Risposta della CLI illeggibile.",
+		"duplicateId": "Due account condividono l'identificatore “{{id}}”: è ciò che li distingue.",
+		"missingDir": "L'account “{{id}}” non ha una cartella: è ciò che lo separa dagli altri.",
+		"sameAsHome": "L'account “{{id}}” punta alla cartella di questa macchina: i due sarebbero la stessa cosa.",
+		"createDir": "Creazione di {{path}}: {{error}}",
+		"saveConfig": "Salvataggio della configurazione: {{error}}"
+	},
+	"libre": {
+		"folderNotFound": "Cartella non trovata: {{path}}",
+		"branchNameRequired": "Dai un nome al branch dell'agente.",
+		"unknownPlace": "Posizione sconosciuta: {{place}}",
+		"worktreeDirty": "Il worktree ha modifiche non committate: committale o scegli “Scarta tutto”. ({{error}})"
+	},
+	"mcp": {
+		"noServers": "Questo repository non dichiara alcun server MCP.",
+		"blockerLocal": "indirizzo locale: dentro un container, questo indirizzo punta al container, non alla macchina",
+		"blockerNotInImage": "`{{command}}` non è presente nell'immagine di isolamento",
+		"blockerOauth": "autorizzazione OAuth: risiede nel portachiavi della macchina, che il container non ha"
+	},
+	"tasks": {
+		"configDir": "Cartella di configurazione: {{error}}",
+		"serialize": "Serializzazione dei compiti: {{error}}",
+		"write": "Scrittura dei compiti: {{error}}",
+		"titleRequired": "Un compito ha bisogno di un titolo."
+	},
+	"qa": {
+		"fileUnreadable": "File illeggibile: {{error}}",
+		"fileTooLarge": "File troppo grande per l'anteprima ({{size}} MB).",
+		"readFailed": "Lettura impossibile: {{error}}"
+	},
+	"proof": {
+		"unavailable": "Prova filmata non disponibile",
+		"ffmpegMissing": "ffmpeg non trovato",
+		"ffmpegHint": "Gli screenshot della QA sono conservati, ma non viene montato alcun video. Installa ffmpeg (`brew install ffmpeg`) per riaverlo sotto i risultati."
+	},
+	"runner": {
+		"dirNotFound": "Cartella non trovata: {{path}}",
+		"launchFailed": "Avvio impossibile: {{error}}",
+		"unknownJob": "Processo sconosciuto"
+	},
+	"terminal": {
+		"folderNotFound": "Cartella non trovata: {{path}}",
+		"open": "Apertura del terminale: {{error}}",
+		"shellLaunch": "Avvio della shell {{shell}}: {{error}}",
+		"read": "Lettura del terminale: {{error}}",
+		"writeSetup": "Scrittore del terminale: {{error}}",
+		"inactive": "Questo terminale non è più attivo.",
+		"write": "Scrittura nel terminale: {{error}}",
+		"resize": "Ridimensionamento: {{error}}"
+	},
+	"tickets": {
+		"noTracker": "Nessun gestore di ticket configurato: inserisci un token Linear, un progetto GitLab o un repository GitHub.",
+		"linearTeamMissing": "Manca l'identificatore del team Linear: inseriscilo in Impostazioni → Team. È l'UUID visibile nell'URL delle impostazioni del team, non la chiave che prefissa i ticket."
+	},
+	"relay": {
+		"settingUnreadable": "Impostazione illeggibile: {{error}}",
+		"dir": "Cartella di relay: {{error}}",
+		"file": "File di relay: {{error}}",
+		"launch": "Avvio dell'agente distaccato: {{error}}"
+	},
+	"sandbox": {
+		"buildDir": "cartella di build: {{error}}",
+		"writeDockerfile": "scrittura del Dockerfile: {{error}}",
+		"imageMissing": "l'immagine “{{image}}” non è disponibile su questa macchina. Costruiscila o scaricala tu, oppure lascia il campo vuoto in Impostazioni → Missioni per usare quella che Cockpit sa costruire.",
+		"claudeNotFound": "La CLI `claude` non si trova su questa macchina."
+	},
+	"sessions": {
+		"todoUpdate": "aggiornamento della lista dei compiti",
+		"noPrompt": "Sessione senza prompt",
+		"notFound": "Sessione non trovata: {{path}}",
+		"unknownStatus": "sconosciuto"
+	},
+	"executions": {
+		"outputTruncated": "output di {{bytes}} byte, estratto qui sopra",
+		"turnEnded": "Turno terminato.",
+		"turnResumed": "Turno successivo rilanciato.",
+		"agentDone": "Agente terminato.",
+		"orphaned": "Cockpit si è fermato durante questa esecuzione."
+	},
+	"usage": {
+		"claudeNotFound": "La CLI `claude` non si trova.",
+		"cliRefused": "La CLI ha rifiutato la richiesta.",
+		"limitsRead": "Lettura dei limiti: {{error}}",
+		"limits": {
+			"session": "Sessione corrente",
+			"week": "Questa settimana"
+		}
+	},
+	"monitor": {
+		"localRepoSource": "{{label}} · repository locale",
+		"repoHere": "Qui è “{{slug}}”.",
+		"repoWrite": "Scrivi “{{slug}}”",
+		"repoFixInSettings": "Correggilo in Impostazioni → Progetti.",
+		"repoMissingOwner": "Il repository GitHub di questo progetto è impostato su “{{repo}}”: manca il proprietario. Atteso “proprietario/repository”, come appare nell'URL del repository."
+	},
+	"metrics": {
+		"noProperties": "Nessuna proprietà dichiarata: nulla di ciò che deve restare vero in questo repository viene verificato, e una lettura dell'impatto resta un'interpretazione.",
+		"uncalibrated": "Nessuna proprietà è stata messa alla prova sulle correzioni del repository: nulla mostra che possano fallire, e una proprietà che non può fallire rassicura senza garantire nulla.",
+		"decorative": "{{count}} proprietà non ha/hanno intercettato nulla sulle correzioni reali. Riformulale o rimuovile: un parapetto decorativo consuma un'attenzione che non viene più spesa altrove.",
+		"idleLessons": "{{idle}} lezione/i su {{total}} non è/sono mai partita/e con un agente. O il loro ambito è troppo ristretto, o non meritavano di essere conservate.",
+		"noTakeBack": "Nessuna ripresa registrata su decine di consegne. È possibile — ma è soprattutto il segno che forse nessuno rilegge più.",
+		"takeBackRate": "Una consegna su due viene ripresa a mano ({{rate}}%). Ciò che manca agli agenti si legge nel quaderno: è lì che guardare prima di aggiungere parapetti.",
+		"longHaul": "Il {{part}}% delle conversazioni ha richiesto più di dieci rilanci. Un agente che rilanci dieci volte è un agente partito senza sapere cosa ci si aspettava."
+	},
+	"tour": {
+		"since": "da {{ref}}",
+		"sinceBefore": "da prima di {{sha}}",
+		"sinceLastCommit": "dall'ultimo commit",
+		"notGit": "Questa cartella non è un repository git: niente da percorrere.",
+		"noChanges": "Nessuna modifica da percorrere.",
+		"unreadableStory": "Il percorso restituito è illeggibile — riprova."
+	},
+	"voiceInput": {
+		"noMic": "Nessun microfono su questa macchina.",
+		"mic": "Microfono: {{error}}",
+		"unsupportedFormat": "Formato del microfono non supportato: {{format}}",
+		"micDenied": "Microfono negato: {{error}} — controlla Impostazioni di Sistema → Privacy → Microfono.",
+		"notOpen": "Il microfono non era aperto.",
+		"noKey": "Nessuna chiave ElevenLabs: salvala nel menu vocale.",
+		"unreachable": "ElevenLabs irraggiungibile: {{error}}",
+		"refused": "Trascrizione rifiutata ({{status}}): {{body}}",
+		"unreadable": "Trascrizione illeggibile: {{error}}",
+		"saveShortcut": "Salvataggio della scorciatoia: {{error}}"
+	},
+	"speech": {
+		"invalidKey": "Questa chiave non sembra una chiave API di ElevenLabs.",
+		"keychainRefused": "Il portachiavi ha rifiutato la chiave: {{error}}",
+		"female": "femminile",
+		"male": "maschile",
+		"french": "Francese",
+		"noKey": "Nessuna chiave ElevenLabs nel portachiavi.",
+		"unreachable": "ElevenLabs irraggiungibile: {{error}}",
+		"keyRefused": "ElevenLabs ha rifiutato la chiave ({{status}}).",
+		"noVoice": "Nessuna voce su questo account ElevenLabs.",
+		"invalidVoice": "Voce ElevenLabs non valida: {{voice}}",
+		"refused": "ElevenLabs ha rifiutato ({{status}}): {{body}}",
+		"audioFile": "File audio: {{error}}"
+	},
+	"system": {
+		"pathNotFound": "Percorso non trovato: {{path}}",
+		"noEditor": "Nessun editor configurato: impostalo in Impostazioni → Postazione.",
+		"terminalFailed": "Impossibile controllare Terminal.app.",
+		"emptyPrompt": "Questo prompt è vuoto.",
+		"linkNotOpenable": "Link non apribile: {{url}}",
+		"linkFailed": "Non è stato possibile aprire il link: {{url}}",
+		"pathNotOpenable": "Percorso non apribile: {{path}}",
+		"fileNotFound": "File non trovato: {{path}}",
+		"noApp": "Nessuna applicazione può aprire questo file: {{path}}",
+		"pathNotRevealable": "Impossibile mostrare il percorso: {{path}}",
+		"packageJsonMissing": "package.json non trovato in questo repository.",
+		"packageJsonUnreadable": "package.json illeggibile: {{error}}",
+		"generalGroup": "generale",
+		"dockerDown": "Docker non risponde — il daemon è avviato?",
+		"unknownProcess": "Processo sconosciuto."
+	},
+	"notebook": {
+		"dir": "Cartella del quaderno: {{error}}",
+		"unreadable": "Quaderno illeggibile: {{error}}",
+		"write": "Scrittura del quaderno: {{error}}",
+		"emptyLesson": "Una lezione vuota non insegna nulla.",
+		"handbackGone": "Questa ripresa non c'è più.",
+		"nothingToLearn": "Niente da conservare da questa ripresa — era una correzione isolata."
+	},
+	"files": {
+		"folderNotFound": "Cartella non trovata: {{path}}",
+		"invalidPath": "Percorso del file non valido.",
+		"folderMissing": "La cartella non esiste: {{path}}",
+		"isFolder": "Questo percorso punta a una cartella.",
+		"writeFile": "Scrittura di {{path}}: {{error}}",
+		"replaceFile": "Sostituzione di {{path}}: {{error}}",
+		"attachmentsDir": "Cartella degli allegati: {{error}}",
+		"tooManySameName": "Troppi allegati con lo stesso nome in questa conversazione.",
+		"fileUnreadable": "File illeggibile: {{error}}",
+		"folderNotAttachable": "Non si può allegare una cartella: scegli i file.",
+		"fileTooLarge": "{{name}} pesa {{size}} MB — oltre {{max}} MB, meglio dare il suo percorso all'agente.",
+		"copyAttachment": "Copia dell'allegato: {{error}}",
+		"badEncoding": "Allegato illeggibile: codifica inattesa.",
+		"attachmentTooLarge": "Questo allegato pesa {{size}} MB — oltre {{max}} MB, salvalo e indica il suo percorso.",
+		"emptyAttachment": "Allegato vuoto.",
+		"writeAttachment": "Scrittura dell'allegato: {{error}}"
+	},
+	"git": {
+		"commandFailed": "git {{args}} non riuscito: {{error}}",
+		"detachedHead": "HEAD distaccato: nessun branch da pubblicare da questa cartella.",
+		"commitMessageRequired": "Un commit ha bisogno di un messaggio.",
+		"noWorktree": "git non segnala alcun worktree.",
+		"pathMissing": "{{path}} non esiste.",
+		"invalidBranchName": "“{{name}}” non è un nome di branch valido.",
+		"branchExists": "Il branch “{{name}}” esiste già.",
+		"branchCreated": "Branch {{name}} creato da {{base}}.",
+		"noCommonAncestor": "`{{branch}}` e `{{base}}` non hanno un antenato comune — niente da confrontare."
+	},
+	"browser": {
+		"unreachable": "Browser irraggiungibile: {{error}}",
+		"unreadable": "Risposta del browser illeggibile: {{error}}",
+		"notOpen": "Questo browser non è aperto.",
+		"closed": "Il browser si è chiuso.",
+		"notRunning": "Il browser di questo workspace non è in esecuzione.",
+		"noPage": "Nessuna pagina aperta.",
+		"pageConnection": "Connessione alla pagina rifiutata: {{error}}",
+		"pageQuery": "Richiesta alla pagina: {{error}}",
+		"pageNoAnswer": "La pagina non ha risposto.",
+		"noPort": "Impossibile riservare una porta per il browser.",
+		"notFound": "Nessun browser trovato: installa Chrome, Chromium, Edge o Brave, o indica il tuo nelle impostazioni del flusso di lavoro.",
+		"startFailed": "Il browser non si è avviato: {{error}}",
+		"startedNoAnswer": "Il browser si è avviato ma non risponde.",
+		"noDebugAddress": "Il browser non fornisce il suo indirizzo di debug.",
+		"connection": "Connessione al browser rifiutata: {{error}}"
+	},
+	"config": {
+		"connectorMissing": {
+			"github": "il repository (`github.repo`), e un token o una sessione `gh`",
+			"linear": "un token Linear",
+			"gitlab": "un token GitLab (ambito `api`) e il percorso del progetto",
+			"sentry": "un token Sentry",
+			"betterstack": "un token Better Stack",
+			"trigger": "una chiave segreta Trigger.dev",
+			"railway": "un token Railway",
+			"stripe": "una chiave Stripe"
+		},
+		"secretHint": {
+			"github": "Token classico `repo` — oppure lascia vuoto, Cockpit userà `gh auth token`.",
+			"sentry": "Token di autenticazione utente con gli ambiti `project:read`, `event:read`, `event:write`.",
+			"linear": "Chiave API personale (Settings → API → Personal API keys).",
+			"gitlab": "Token personale con ambito `api` — `read_api` basta per leggere, non per cambiare lo stato di un ticket.",
+			"trigger": "La chiave segreta di un ambiente — `tr_dev_…`, `tr_prod_…`, `tr_staging_…` a seconda dell'ambiente (progetto → API keys), non il Personal Access Token `tr_pat_…` della CLI.",
+			"railway": "Token di account o di workspace (Account Settings → Tokens) — un token limitato a un progetto richiede di inserire anche l'identificatore del progetto.",
+			"betterstack": "Token API Uptime (monitor e incidenti).",
+			"betterstackTelemetry": "“Global API token” (Better Stack → API tokens → Global API tokens). Un token di team può elencare le dashboard ma non può aprire l'accesso ai dati: i valori resterebbero vuoti.",
+			"betterstackClickhouseHost": "Facoltativo: compila solo se il token KPI non riesce ad aprire l'accesso da solo. Better Stack → Integrations → SQL API (es. eu-nbg-2-connect.betterstackdata.com).",
+			"betterstackClickhouseUsername": "Nome utente della SQL API, accanto all'host.",
+			"betterstackClickhousePassword": "Password della SQL API — Better Stack non la mostra più dopo la creazione.",
+			"stripe": "Chiave limitata in sola lettura `rk_…` (Developers → API keys → Restricted keys): una chiave pubblicabile `pk_…` viene rifiutata dall'API server.",
+			"sandboxOauthToken": "Esegui `claude setup-token` da Impostazioni → Isolamento e incolla il token mostrato — una volta sola, dura un anno. Mai quello dell'host: un container non può leggere il portachiavi di macOS."
+		},
+		"secretLabel": {
+			"sandboxOauthToken": "Account isolato (Claude)"
+		},
+		"homeAccount": "Account di questa macchina",
+		"defaultEnvironment": "Predefinito",
+		"worktreeHostileValue": "Valore rifiutato nel comando del worktree (carattere di shell): {{value}}",
+		"roles": {
+			"master": "Agente principale",
+			"backend": "Sviluppo back-end",
+			"frontend": "Sviluppo front-end",
+			"qa": "Test e QA",
+			"review": "Revisione"
+		}
+	},
+	"integrations": {
+		"githubRepoMissing": "`github.repo` non è configurato.",
+		"telemetryTokenMissing": "Token di telemetria mancante.",
+		"unreadableResponse": "Risposta illeggibile: {{error}}",
+		"unreadableResponseBody": "Risposta illeggibile ({{error}}): {{body}}",
+		"sentryNoOrg": "Questo token Sentry non dà accesso ad alcuna organizzazione.",
+		"sentrySeveralOrgs": "Sono accessibili più organizzazioni Sentry ({{orgs}}) — scegline una in Impostazioni → Organizzazione Sentry.",
+		"linearNotCreated": "Linear non ha creato il ticket.",
+		"sentryInvalidIssue": "Identificatore di issue Sentry non valido: {{id}}",
+		"kpiTokenMissing": "Le dashboard KPI si trovano su telemetry.betterstack.com, che il token Uptime non copre. Aggiungi il token “Better Stack · KPI” nelle Impostazioni.",
+		"telemetryTeamToken": "Questo token Telemetry è un token di team: elenca le dashboard ma non può aprire l'accesso ai dati. Serve un “Global API token” (Better Stack → API tokens → Global API tokens), con accesso in scrittura.",
+		"telemetryReadOnly": "Questo token globale è in sola lettura: aprire l'accesso ai dati conta come una scrittura. Due opzioni — ricrea il token senza la casella “read-only”, oppure incolla credenziali SQL API esistenti (Better Stack → Integrations → SQL API) nei tre campi ClickHouse delle Impostazioni.",
+		"betterstackConnection": "Connessione Better Stack {{status}} — {{body}}",
+		"betterstackNoCredentials": "Better Stack ha risposto senza credenziali di connessione utilizzabili.",
+		"chartNoQuery": "Questo grafico non espone alcuna query.",
+		"issueNotFound": "Ticket {{id}} non trovato.",
+		"linearUpdateRefused": "Linear ha rifiutato la modifica.",
+		"priority": {
+			"urgent": "Urgente",
+			"high": "Alta",
+			"medium": "Media",
+			"low": "Bassa",
+			"none": "Nessuna priorità"
+		},
+		"githubNoLogin": "GitHub non dice chi ha effettuato l'accesso.",
+		"githubRepoSet": "Imposta `github.repo` (es. acme/monorepo) nelle Impostazioni.",
+		"githubRepoFormat": "Imposta `github.repo` (es. acme/monorepo).",
+		"triggerUnknownEnv": "Ambiente Trigger.dev sconosciuto: {{name}}",
+		"triggerPatToken": "Trigger.dev si aspetta la chiave segreta di un ambiente, non un Personal Access Token `tr_pat_…` (quello della CLI). Dashboard → il tuo progetto → l'ambiente → API keys.",
+		"railwayNoProject": "Questo token Railway non elenca alcun progetto (come accade per i token limitati a un progetto). Apri il progetto nella dashboard e incolla l'identificatore dall'URL `railway.com/project/<identificatore>` in Impostazioni → Progetto Railway.",
+		"railwaySeveralProjects": "Sono accessibili più progetti Railway ({{projects}}) — scegline uno in Impostazioni → Progetto Railway.",
+		"stripePublishableKey": "Stripe rifiuta le chiavi pubblicabili (`pk_…`): l'API server richiede una chiave segreta. Crea una chiave limitata in sola lettura (`rk_…`) in Developers → API keys → Restricted keys, con accesso `read` su Events.",
+		"githubUpdateRefused": "GitHub ha rifiutato la modifica ({{status}}).",
+		"gitlabProjectSet": "Imposta il percorso del progetto GitLab (es. gruppo/progetto) nelle Impostazioni.",
+		"gitlabUpdateRefused": "GitLab ha rifiutato la modifica ({{status}}).",
+		"noCiRun": "Nessuna esecuzione CI su “{{branch}}”.",
+		"runNoId": "L'esecuzione restituita non ha un identificatore.",
+		"githubRerunRefused": "GitHub ha rifiutato la riesecuzione ({{status}}): {{body}}",
+		"githubLabelRefused": "GitHub ha rifiutato l'etichetta ({{status}}): {{body}}",
+		"githubUnlabelRefused": "GitHub ha rifiutato di rimuovere l'etichetta ({{status}}).",
+		"githubCommentRefused": "GitHub ha rifiutato il commento ({{status}}): {{body}}",
+		"prTitleRequired": "Una pull request ha bisogno di un titolo.",
+		"prSameAsBase": "`{{branch}}` è il branch di base: non c'è nulla da proporre.",
+		"prRefused": "PR rifiutata ({{status}}): {{message}}",
+		"githubCloseRefused": "GitHub ha rifiutato di chiuderla ({{status}})."
+	},
+	"lib": {
+		"connectorMissing": {
+			"claude": "la CLI `claude` su questa macchina",
+			"node": "Node — i ponti dei permessi e degli strumenti delle missioni dipendono da esso",
+			"docker": "Docker su questa macchina"
+		},
+		"config": {
+			"serialize": "Serializzazione della configurazione: {{error}}",
+			"invalid": "Configurazione non valida: {{error}}"
+		},
+		"trigger": {
+			"envNameRequired": "Dai un nome all'ambiente.",
+			"envKeyRequired": "Un nuovo ambiente ha bisogno della sua chiave segreta (`tr_prod_…` / `tr_dev_…`)."
+		},
+		"project": {
+			"unknown": "Progetto sconosciuto: {{id}}",
+			"notFound": "Progetto “{{id}}” non trovato.",
+			"serialize": "Serializzazione del progetto: {{error}}",
+			"invalid": "Progetto non valido: {{error}}",
+			"folderRequired": "Dai una cartella a questo progetto.",
+			"createDir": "Creazione della cartella: {{error}}",
+			"dirCreated": "Cartella creata",
+			"pathMissing": "`{{path}}` non esiste. Spunta “crea la cartella” se è ciò che vuoi.",
+			"gitInitialized": "Repository git inizializzato",
+			"repoNameRequired": "Dai un nome al repository da creare.",
+			"localRepoRequired": "Serve un repository git locale prima di dargli un server.",
+			"noGhSession": "Nessuna sessione `gh`: esegui `gh auth login`.",
+			"noGhToken": "Nessun token per l'account “{{account}}”. Esegui `gh auth login`.",
+			"publicRepoCreated": "Repository GitHub pubblico creato",
+			"privateRepoCreated": "Repository GitHub privato creato",
+			"mainRepoRequired": "Un progetto ha bisogno del suo repository principale.",
+			"notGitRepo": "`{{path}}` non è un repository git. Cockpit può crearlo per te: usa “Prepara” invece di farlo a mano.",
+			"keepOne": "Cockpit conserva almeno un progetto — modifica questo invece di rimuoverlo."
+		},
+		"git": {
+			"mainRepoInvalid": "`{{path}}` non è un repository git — correggi `general.main_repo` nelle Impostazioni.",
+			"branch": "Branch",
+			"freeAgent": "Agente libero",
+			"freeAgentArchive": "Pulizia dell'agente libero"
+		},
+		"shortcut": {
+			"unreadable": "Scorciatoia illeggibile: {{error}}",
+			"taken": "Già usata da un'altra applicazione, o rifiutata da macOS ({{error}}).",
+			"refused": "Scorciatoia rifiutata."
+		},
+		"github": {
+			"repoFormat": "Imposta `github.repo` (es. acme/monorepo).",
+			"prFromBase": "`{{branch}}` è il branch di base: crea un branch dedicato prima di aprire una PR.",
+			"prRefused": "PR rifiutata ({{status}}): {{message}}",
+			"prCreation": "Creazione della PR",
+			"repoOwnerFormat": "`github.repo` deve essere nella forma proprietario/repo.",
+			"mergeRefused": "Merge rifiutato ({{status}}): {{message}}",
+			"prMerge": "Merge della PR",
+			"prTitleRequired": "Una pull request ha bisogno di un titolo."
+		},
+		"permanence": {
+			"commentAllowed": "Commenti consentiti su una PR",
+			"commentWithdrawn": "Commenti revocati su una PR"
+		},
+		"hygiene": {
+			"mainRepo": "repository principale",
+			"dirty": "{{count}} modifica/che non committata/e",
+			"unpushed": "{{count}} commit non pushato/i",
+			"prMerged": "PR unita",
+			"prClosed": "PR chiusa senza merge",
+			"prOpen": "PR aperta",
+			"noPr": "nessuna PR nota"
+		},
+		"worktree": {
+			"buildsPurged": "Build eliminate",
+			"freed": "{{size}} restituiti al disco"
+		},
+		"units": {
+			"gb": "{{n}} GB",
+			"mb": "{{n}} MB",
+			"kb": "{{n}} KB"
+		},
+		"interrupted": {
+			"scan": "Scansione interrotta: {{error}}",
+			"read": "Lettura interrotta: {{error}}",
+			"compute": "Calcolo interrotto: {{error}}",
+			"walk": "Esplorazione dei file interrotta: {{error}}"
+		},
+		"window": {
+			"notification": "Notifica: {{error}}",
+			"monitor": "Monitor: {{error}}",
+			"window": "Finestra: {{error}}"
+		},
+		"budget": {
+			"reason": "{{total}} token consumati, oltre il tetto di {{budget}}. La missione è in pausa: il suo lavoro è intatto, riprendila se il superamento era previsto.",
+			"paused": "Missione in pausa — tetto raggiunto"
+		},
+		"automationNotFound": "Automazione non trovata.",
+		"mission": {
+			"ticketReferenceRequired": "Incolla l'URL o l'identificatore di un ticket.",
+			"unknownTask": "Compito sconosciuto.",
+			"fullReviewRequested": "Revisione completa richiesta.",
+			"workerStopped": "Esecutore fermato: il compito ripartirà quando la missione riprende.",
+			"stopped": "Missione fermata. Branch e worktree sono conservati.",
+			"agentsUnavailable": "Registro degli agenti non disponibile.",
+			"awaitingAgreement": "Niente parte prima che tu approvi la suddivisione: approva prima ogni fase.",
+			"unknownRole": "Ruolo sconosciuto: {{role}}",
+			"workerWorktreeFailed": "Worktree impossibile: {{error}}. L'esecutore non viene lanciato — il repository principale non è un terreno di missione.",
+			"coexistenceUnchecked": "Coesistenza non verificata",
+			"workerLaunched": "Esecutore lanciato",
+			"ticketNoId": "Questo ticket non ha un identificatore leggibile.",
+			"alreadyOpen": "Una missione è già aperta su {{identifier}}: torno a quella invece di aprirne una seconda.",
+			"openedGuided": "Missione aperta su {{identifier}}: l'agente principale legge il ticket, e tu lo leggi con lui.",
+			"opened": "Missione aperta su {{identifier}}, l'agente principale sta analizzando il ticket.",
+			"nodeMissing": "Node non si trova su questa macchina: gli strumenti di missione passano per un ponte MCP che esso esegue. Installa Node (`brew install node`), poi rilancia la missione. Gli agenti ordinari continuano a funzionare.",
+			"integrationWorktreeFailed": "Worktree di integrazione impossibile per `{{branch}}`: {{error}}. L'agente principale non verrà lanciato nel repository principale.",
+			"masterLaunched": "Agente principale lanciato",
+			"unclearVerdict": "{{tasks}} ha restituito un resoconto senza un verdetto leggibile: non si può sapere se il lavoro passa. Rilancia la verifica e chiedile di concludere con `VERDICT: ok`, `concerns` o `blocking`. Se rinunci al suo parere, segna il compito come abbandonato — sarà una decisione, non una svista.",
+			"blockingVerdict": "{{tasks}} ha restituito un verdetto bloccante. Correggi ciò che viene criticato, poi rilancia la verifica: il suo nuovo verdetto toglierà il rifiuto. Se ritieni la critica infondata, rimandala con `rework` e dillo.",
+			"unintegrated": "{{count}} compito/i non è/sono in `{{branch}}`: {{tasks}}. Integrali, o segnali come abbandonati se rinunci al loro lavoro.",
+			"launchSuspendedQuota": "Avvio sospeso — quota bassa",
+			"quotaFloor": "Sotto il {{floor}}% di quota rimanente, nessun nuovo compito parte.",
+			"launchSuspended": "Avvio sospeso",
+			"tooManyWorkers": "{{count}} esecutori già in corso sulla macchina",
+			"taskWithoutId": "Compito senza identificatore: ripianifica la missione.",
+			"taskBlocked": "Compito bloccato",
+			"worktreeFailed": "Worktree impossibile: {{error}}",
+			"noWorkerAttached": "Nessun esecutore collegato: l'avvio non è riuscito. Rilancia il compito.",
+			"workerDiedSilent": "L'esecutore si è fermato senza produrre nulla — avvio rifiutato?",
+			"workerOtherBranch": "L'esecutore è finito su un altro branch",
+			"workerOtherBranchDetail": "{{count}} commit su `{{actual}}`, non su `{{expected}}`.",
+			"workerOtherBranchNote": "Il suo lavoro è su `{{actual}}` ({{count}} commit), non su `{{expected}}`: è quello da integrare.",
+			"workerDoneNoCommit": "Esecutore terminato, senza commit sul suo branch.",
+			"workerDoneOneCommit": "Esecutore terminato — 1 commit.",
+			"workerDoneCommits": "Esecutore terminato — {{count}} commit.",
+			"checkNoVerdict": "Verifica senza verdetto",
+			"checkNoVerdictDetail": "Il suo resoconto non conclude in modo leggibile: Cockpit non può sapere se il lavoro passa. Rilanciala, o decidi a mano.",
+			"checkBlocking": "Verifica bloccante",
+			"checkBlockingDetail": "La pull request resta chiusa finché questo rifiuto non viene tolto.",
+			"masterTimedOut": "Agente principale interrotto — turno troppo lungo",
+			"masterTimedOutDetail": "Nessuna risposta per {{minutes}} minuti: interrotto perché il ripristino automatico possa rilanciare un agente principale nuovo.",
+			"allDelivered": "Tutti gli esecutori hanno consegnato. L'agente principale sta ricomponendo.",
+			"masterNotRelaunched": "Agente principale non rilanciato",
+			"integrationResumed": "Integrazione ripresa",
+			"integrationResumedDetail": "Nessun agente principale teneva la missione; ne viene rilanciato uno su ciò che resta da fare.",
+			"integrationNotResumed": "Integrazione non ripresa",
+			"outOfScopeRefused": "Scrittura fuori ambito rifiutata"
+		},
+		"quoted": "“{{text}}”",
+		"tailscaleDown": "Tailscale non risponde.",
+		"sentryIssue": {
+			"description": "Errore segnalato da Sentry.\n\n**Progetto**: {{project}}\n**Origine**: {{culprit}}\n**Impatto**: {{events}} occorrenza/e, {{users}} utente/i\n\n[Apri in Sentry]({{permalink}})\n\n_Ticket creato da Cockpit._",
+			"note": "Ticket Linear {{identifier}} — {{url}}"
+		}
+	}
+}

@@ -1,0 +1,1036 @@
+{
+	"activityCenter": {
+		"pulse": {
+			"asksQuestion": "ti sta facendo una domanda",
+			"asksPermission": "chiede un permesso · {{tool}}",
+			"tool": "strumento",
+			"using": "usa {{tool}}",
+			"thinking": "sta riflettendo",
+			"replied": "fatto — non è in corso niente, aspetta le tue istruzioni"
+		},
+		"chip": {
+			"collapse": "Comprimi",
+			"hint": "Cosa è in corso, e cosa aspetta te",
+			"working_one": "{{count}} al lavoro",
+			"working_other": "{{count}} al lavoro",
+			"yours": "Tocca a te",
+			"done": "Fatto",
+			"yoursCount_one": "tocca a te · {{count}}",
+			"yoursCount_other": "tocca a te · {{count}}"
+		},
+		"panel": {
+			"running": "In corso",
+			"yourTurn": "Tocca a te",
+			"idle": "Niente in corso",
+			"collapseHint": "Comprimi nella barra in alto",
+			"collapse": "Riduci",
+			"cockpit": "Cockpit ci sta lavorando",
+			"working": "Al lavoro",
+			"empty": "Nessun agente al lavoro, nessuna azione in corso: in background non succede niente."
+		},
+		"openAgent": "Apri l'agente",
+		"row": {
+			"working": "Ci lavoro…",
+			"failed": "Non riuscito.",
+			"done": "Fatto.",
+			"hideSteps": "Nascondi i passaggi",
+			"steps_one": "{{count}} passaggio",
+			"steps_other": "{{count}} passaggi",
+			"unfollow": "Smetti di seguire qui (l'azione continua)",
+			"dismiss": "Ignora"
+		}
+	},
+	"briefSettings": {
+		"saved": "Contesto degli agenti salvato.",
+		"intro": "Prima che un agente parta, il cockpit raccoglie ciò che sa già del branch: il ticket, i commenti di revisione, cosa è già stato tentato qui. Il dossier di contesto compare sopra il campo di input, e niente viene inviato senza passare sotto i tuoi occhi.",
+		"enable": "Raccogli il contesto all'avvio di un agente",
+		"enableHint": "Se deselezionato, il campo di input torna vuoto: niente viene composto, niente viene chiesto ai servizi collegati.",
+		"sourcesTitle": "Fonti consultate all'apertura",
+		"save": "Salva"
+	},
+	"browserAnnotator": {
+		"tool": {
+			"ellipse": "Cerchio",
+			"arrow": "Freccia",
+			"text": "Scrivi",
+			"point": "Indica un elemento: il cockpit dice all'agente di cosa si tratta"
+		},
+		"describe": {
+			"marker": "Segno {{index}}: <{{tag}}>",
+			"markerWithText": "Segno {{index}}: <{{tag}}> «{{text}}»",
+			"component": "componente {{name}}",
+			"componentWithSource": "componente {{name}} ({{source}})",
+			"selector": "selettore `{{selector}}`"
+		},
+		"nothingHere": "Niente da indicare in questo punto.",
+		"noImage": "La pagina non ha ancora un'immagine da allegare.",
+		"defaultNote": "Guarda lo screenshot allegato: quello che ho cerchiato va corretto.",
+		"pageUrl": "Pagina: {{url}}",
+		"noConversation": "Nessuna conversazione aperta in questo workspace: avvia un agente per mostrargli lo schermo.",
+		"attached": "Screenshot allegato al prompt: completalo e invia.",
+		"clear": "Cancella tutto",
+		"notePlaceholder": "Cosa vuoi che ne faccia",
+		"send": "Allega all'agente",
+		"close": "Chiudi l'annotazione",
+		"overlay": "Annotazioni sulla pagina",
+		"textPlaceholder": "Scrivi, poi Invio",
+		"quote": "«{{text}}»"
+	},
+	"browserView": {
+		"gesture": {
+			"navigate": "L'agente sta navigando",
+			"click": "L'agente sta cliccando",
+			"type": "L'agente sta scrivendo",
+			"screenshot": "L'agente sta facendo uno screenshot",
+			"read": "L'agente sta leggendo la pagina",
+			"wait": "L'agente sta aspettando",
+			"act": "L'agente sta agendo"
+		},
+		"back": "Pagina precedente",
+		"forward": "Pagina successiva",
+		"reload": "Ricarica",
+		"addressPlaceholder": "Un indirizzo — localhost:3000, o qualsiasi sito",
+		"annotateTitle": "Annota la pagina e mostrala all'agente: cerchia, disegna frecce, indica un elemento",
+		"annotate": "Annota",
+		"openExternal": "Apri questa pagina nel browser di sistema",
+		"stop": "Ferma questo browser — l'agente ne avvierà uno nuovo alla sua prossima azione",
+		"keyboardInput": "Digitazione nella pagina",
+		"starting": "Il browser si sta avviando…",
+		"notRunning": "Il browser di questo workspace non è attivo. Si avvierà da solo la prima volta che un agente agisce in una pagina — lo guarderai qui — oppure subito se lo apri.",
+		"open": "Apri il browser",
+		"openingServer": "Apertura del server di questo workspace…",
+		"serverStarting": "Il server di sviluppo si sta avviando — la pagina si aprirà appena risponde.",
+		"nothingListening": "Ancora niente in ascolto in questo workspace.",
+		"nothingListeningHint": "Niente in ascolto in questo workspace: scrivi un indirizzo, o dichiara il comando di sviluppo nelle impostazioni del flusso di lavoro."
+	},
+	"changeTour": {
+		"state": {
+			"added": "Aggiunto",
+			"untracked": "Nuovo",
+			"modified": "Modificato",
+			"deleted": "Eliminato"
+		},
+		"count": {
+			"added_one": "{{count}} aggiunto",
+			"added_other": "{{count}} aggiunti",
+			"untracked_one": "{{count}} nuovo",
+			"untracked_other": "{{count}} nuovi",
+			"modified_one": "{{count}} modificato",
+			"modified_other": "{{count}} modificati",
+			"deleted_one": "{{count}} eliminato",
+			"deleted_other": "{{count}} eliminati"
+		},
+		"title": "Giro delle modifiche",
+		"agent": "Agente",
+		"fileCount_one": "{{count}} file",
+		"fileCount_other": "{{count}} file",
+		"tellTitle": "Un modello scrive la storia di ogni file, nell'ordine in cui leggerli",
+		"telling": "Scrittura della storia…",
+		"tellAgain": "Racconta di nuovo",
+		"tell": "Racconta la storia",
+		"closeEsc": "Chiudi (Esc)",
+		"close": "Chiudi",
+		"stepAria": "Passaggio {{index}}",
+		"start": "Inizia il giro",
+		"empty": {
+			"title": "Niente da percorrere",
+			"body": "Nessun file differisce {{base}}. Forse l'agente ha annullato tutto, o ha lavorato in un'altra cartella."
+		},
+		"nav": {
+			"previous": "Precedente",
+			"intro": "Introduzione",
+			"end": "Fine",
+			"fileOf": "File {{step}} di {{total}}",
+			"finish": "Termina",
+			"next": "Successivo"
+		},
+		"intro": {
+			"heading_one": "{{count}} file da percorrere",
+			"heading_other": "{{count}} file da percorrere",
+			"telling": "Un modello legge il diff e scrive la storia di ogni file — una trentina di secondi.",
+			"hint": "Ogni file arriva con ciò che l'agente ne ha detto mentre lo modificava. «Racconta la storia» scrive un vero racconto, nell'ordine in cui leggere i file."
+		},
+		"file": {
+			"stepOf": "Passaggio {{index}} di {{total}}",
+			"open": "Apri il file",
+			"story": "La storia",
+			"said": "Cosa ne ha detto l'agente",
+			"quote": "«{{text}}»",
+			"silent": "L'agente non ha detto niente toccando questo file: probabilmente viene da un comando (un file generato, una dipendenza). «Racconta la storia» lo spiegherà."
+		},
+		"outro": {
+			"title": "Giro completato",
+			"body_one": "Hai percorso il file modificato.",
+			"body_other": "Hai percorso i {{count}} file modificati.",
+			"restart": "Ricomincia"
+		}
+	},
+	"commandsSettings": {
+		"saved": "Comandi salvati.",
+		"intro": "I comandi che non riscrivi a memoria: quelli con opzioni, quelli di cui dimentichi i flag. Compaiono nella schermata Script e nel menu del terminale. Gli script grezzi del repository compaiono già senza doverli dichiarare.",
+		"empty": "Nessun comando dichiarato.",
+		"emptyHint": "Il cockpit può leggere gli script di questo repository e proporti di aggiungerli.",
+		"detectHint": "Leggi gli script del repository e proponi quelli mancanti",
+		"detect": "Rileva dal repository",
+		"defaultGroup": "Comandi",
+		"defaultLabel": "Nuovo comando",
+		"write": "Scrivi un comando",
+		"found": "Trovati nel repository · {{count}}",
+		"addAll": "Aggiungi tutti",
+		"close": "Chiudi",
+		"nothingNew": "Niente di nuovo: tutto ciò che questo repository dichiara è già qui.",
+		"add": "Aggiungi",
+		"unnamed": "— senza nome —",
+		"sensitive": "sensibile",
+		"mainRepo": "repository principale",
+		"remove": "Rimuovi",
+		"options_one": "{{count}} opzione",
+		"options_other": "{{count}} opzioni",
+		"expectsArgument": "argomento atteso",
+		"requiredArgument": "argomento obbligatorio",
+		"argument": "argomento"
+	},
+	"confirm": {
+		"confirm": "Conferma",
+		"validate": "OK",
+		"cancel": "Annulla"
+	},
+	"dailyPresenter": {
+		"status": {
+			"done": "Fatto",
+			"ongoing": "In corso",
+			"postponed": "Rimandato"
+		},
+		"parts": {
+			"nothing": "Niente.",
+			"shipped": "Consegnato",
+			"shippedEmpty": "Niente di unito dall'ultimo daily.",
+			"openedSince_one": "{{count}} PR aperta da allora",
+			"openedSince_other": "{{count}} PR aperte da allora",
+			"ongoing": "In corso",
+			"ongoingEmpty": "Nessun ticket attivo.",
+			"ticketDetail": "{{id}} · {{progress}}% · {{days}} g",
+			"toHandle": "Da gestire",
+			"toHandleEmpty": "Niente di bloccato."
+		},
+		"recap": {
+			"heading": "# Daily — dal {{date}}",
+			"part": "- {{title}}: {{lines}}",
+			"shipped": "- Consegnato: {{items}}",
+			"commitment": "- Impegno: {{text}}",
+			"commitmentWithStatus": "- Impegno: {{text}} ({{status}})",
+			"parked": "## Argomenti in sospeso"
+		},
+		"title": "Daily",
+		"since": "dal {{date}}",
+		"total": "totale {{time}}",
+		"quit": "Esci (Esc)",
+		"done": {
+			"title": "Daily concluso",
+			"duration_one": "{{time}} per {{count}} persona",
+			"duration_other": "{{time}} per {{count}} persone",
+			"parked": "Da riprendere ora · {{count}}",
+			"noParked": "Nessun argomento in sospeso.",
+			"copyRecap": "Copia il riepilogo",
+			"close": "Chiudi"
+		},
+		"speakers": "Ordine di parola",
+		"speaker": {
+			"speaking": "parla",
+			"done": "fatto",
+			"ready": "pronto"
+		},
+		"preparedByAutomation": "La sua parte · preparata dalla sua automazione",
+		"silentSources": "Nessuna risposta questa volta: {{sources}}.",
+		"timeLeft": "Tempo di parola rimasto",
+		"pause": "Pausa (p)",
+		"partsLabel": "Parti",
+		"nav": {
+			"previous": "Precedente",
+			"nextPart": "Parte successiva",
+			"nextSpeaker": "Prossimo a parlare",
+			"finish": "Termina"
+		},
+		"sideLabel": "Impegni e argomenti",
+		"pledge": {
+			"title": "Cosa ha detto {{name}} l'ultima volta",
+			"status": "Stato",
+			"none": "Nessun impegno all'ultimo daily.",
+			"placeholder": "Impegno per il prossimo daily…"
+		},
+		"parked": {
+			"title": "In sospeso",
+			"placeholder": "Argomento da riprendere dopo…",
+			"add": "Metti da parte"
+		},
+		"shortcuts": "→ avanti · ← indietro · p pausa · Esc esci",
+		"noDevelopers": "Nessuno sviluppatore da presentare."
+	},
+	"diagram": {
+		"unreadable": "diagramma illeggibile — ecco il suo testo",
+		"caption": "diagramma come descritto dall'agente"
+	},
+	"engagementPanel": {
+		"nothingProduced": "Non è stato prodotto niente: non c'è niente da annullare.",
+		"cannotUndo": "Il cockpit non può annullare: {{items}}. Gestiscilo a mano.",
+		"undoConfirmTitle": "Annullare ciò che è stato fatto?",
+		"undoConfirm": "Annulla",
+		"undoFailed": "Impossibile annullare: {{items}}",
+		"undone": "Annullato: {{items}}",
+		"close": "Chiudi",
+		"trigger": "Innesco",
+		"triggerLine": "{{trigger}} · regola «{{rule}}»",
+		"noTrigger": "nessun innesco",
+		"oracle": "Oracolo",
+		"none": "nessuno",
+		"timeline": "Cronologia",
+		"nothingYet": "Ancora niente.",
+		"produced": "Prodotto",
+		"open": "Apri",
+		"cost": "Costo",
+		"costHint": "quanto costerebbe a tariffe API; con un abbonamento non si paga niente, si consuma la quota della finestra",
+		"undoHint": "Annulla ciò che è stato prodotto",
+		"undo": "Annulla ciò che è stato fatto"
+	},
+	"jobProgress": {
+		"starting": "avvio…",
+		"silentStop": "il comando si è fermato senza dire niente",
+		"exitCode": "codice di uscita {{code}}",
+		"cancelled": "annullato — {{reason}}",
+		"failed": "non riuscito — {{reason}}"
+	},
+	"notebookPanel": {
+		"kept": "Lezione conservata — partirà con i prossimi agenti interessati.",
+		"title": "Quaderno del progetto",
+		"subtitle": "cosa abbiamo dovuto rifare a mano, e cosa ne abbiamo imparato",
+		"reload": "Ricarica",
+		"close": "Chiudi",
+		"pending": "Rifacimenti da esaminare · {{count}}",
+		"pendingHint": "Un lavoro consegnato da un agente è stato corretto a mano subito dopo. È l'unico riscontro che non è né un voto né un'impressione — la domanda è se ne va tratta una regola, o se era specifico di questo caso.",
+		"lessons": "Lezioni conservate · {{count}}",
+		"write": "Scrivi una lezione",
+		"empty": "Il quaderno è vuoto.",
+		"emptyHint": "Si riempie da solo man mano che rifai ciò che un agente ha fatto — e mai senza che tu approvi cosa ci entra.",
+		"noBranch": "nessun branch",
+		"filesReworked_one": "{{count}} file rifatto",
+		"filesReworked_other": "{{count}} file rifatti",
+		"draftLesson": "Trarne una lezione",
+		"dismissHandback": "Ignora: questo rifacimento non insegna niente",
+		"collapse": "Comprimi",
+		"showPatch": "Mostra cosa è stato corretto",
+		"editLesson": "Modifica questa lezione",
+		"newLesson": "Nuova lezione",
+		"draftHint": "Scritta all'imperativo, per un agente che non è ancora partito: cosa fare, non cosa è successo.",
+		"textPlaceholder": "Es.: passa dal client condiviso invece di chiamare fetch direttamente.",
+		"scope": "Ambito — vuoto = tutto il repository",
+		"cancel": "Annulla",
+		"keep": "Conserva",
+		"wholeRepo": "tutto il repository",
+		"neverUsed": "mai usata",
+		"uses_one": "{{count}} uso",
+		"uses_other": "{{count}} usi",
+		"fromHandback": "tratta da un rifacimento",
+		"stale": "inutilizzata da due mesi — è ancora vera?",
+		"correct": "Correggi",
+		"edit": "Modifica",
+		"forget": "Dimentica"
+	},
+	"nowFeed": {
+		"state": {
+			"ciFailing": "CI in errore",
+			"changesRequested": "modifiche richieste",
+			"stacked": "PR impilata",
+			"ready": "pronta per il merge",
+			"draft": "bozza",
+			"inReview": "in revisione"
+		},
+		"empty": "Niente in corso",
+		"emptyHint": "Nessun ticket attivo né pull request aperta. Quello che arriva è elencato qui sotto.",
+		"noTicket": "nessun ticket",
+		"lastActivity": "Ultima attività {{when}}",
+		"today": "oggi",
+		"yesterday": "ieri",
+		"days_one": "{{count}} g",
+		"days_other": "{{count}} g"
+	},
+	"permanenceSettings": {
+		"intro": "Un operatore che tiene in piedi l'ecosistema mentre tu fai altro. Non decide cosa costruire: ripara, riprova, aggiorna — e può dimostrare di esserci riuscito, perché le operazioni hanno oracoli che il prodotto non ha. Gira solo mentre il cockpit è aperto. <strong>Tutto si applica senza pulsante</strong>: ciò che cambi viene salvato quando lasci il campo.",
+		"scope": {
+			"station": "questa macchina",
+			"project": "questo progetto"
+		},
+		"oracle": {
+			"groupCommand": "Comando del repository",
+			"groupProperty": "Proprietà del progetto",
+			"groupCi": "Stato della CI",
+			"groupGithub": "GitHub",
+			"ciGreen": "la CI diventa verde",
+			"commentPosted": "ha pubblicato un commento"
+		},
+		"service": {
+			"title": "Servizio",
+			"enabled": "Attivo",
+			"disabled": "Disattivato",
+			"disabledHint": "Quando è disattivato, la voce esce dalla barra laterale: una schermata che non può fare niente non resta nel menu. Riattivalo qui. Mettere in pausa, invece, è un gesto — fallo dalla schermata, o con <kbd>⇧P</kbd>.",
+			"hours": "Orari di servizio",
+			"hoursHint": "Vuoto = sempre. Un intervallo che scavalca la mezzanotte viene letto così com'è.",
+			"cadence": "Cadenza",
+			"cadenceHint": "Tempo tra due controlli. Vuoto = 2 minuti.",
+			"dailyTokens": "Tetto giornaliero di token",
+			"dailyTokensHint": "Quello che si impone da sola. Vuoto = 200.000.",
+			"dailyEngagements": "Tetto giornaliero di interventi",
+			"dailyEngagementsHint": "Vuoto = 20.",
+			"quotaFloor": "Si fa da parte sotto",
+			"quotaFloorHint": "Percentuale di quota dell'abbonamento rimanente. Vuoto = 15%. Lei lavora in background, tu in primo piano.",
+			"retention": "Conserva lo storico",
+			"retentionHint": "Interventi conclusi. Vuoto = 14 giorni.",
+			"catchUp": "Al risveglio, recupera ciò che si è accumulato",
+			"catchUpHint": "Se deselezionato, riparte da zero e dice cosa ha saltato. Recuperare in un colpo i segnali di un'intera notte è il modo più sicuro per bruciare un tetto.",
+			"notifyFailures": "Avvisami in caso di fallimento",
+			"notifyAll": "Avvisami a ogni intervento",
+			"notifyAllHint": "Il successo è silenzioso, il fallimento parla: notificare ogni intervento riapre una casella di posta, e leggere dodici resoconti non è meglio che fare il lavoro."
+		},
+		"unit": {
+			"minutes": "min",
+			"percentLeft": "% rimanente",
+			"days": "giorni",
+			"engagements": "interventi",
+			"hours": "ore",
+			"failures": "fallimenti",
+			"default": "predefinito"
+		},
+		"guards": {
+			"title": "Salvaguardie",
+			"intro": "Ognuna risponde a un modo preciso di andare fuori strada, e nessuna sostituisce le altre. Sono ciò che rende sopportabile accenderla.",
+			"maxRunning": "Interventi simultanei",
+			"maxRunningHint": "Uno di default. Un operatore di turno non gestisce otto incidenti in parallelo — e il tetto giornaliero non protegge da una raffica.",
+			"rehearsal": "Prova a vuoto",
+			"rehearsalHint": "Decide, scrive cosa avrebbe fatto, e non agisce. Il contatore si azzera appena cambi i suoi poteri. Vuoto = 10.",
+			"grace": "Quarantena per elemento",
+			"graceHint": "Dopo un intervento, la stessa PR viene lasciata in pace. È ciò che le impedisce di svegliarsi sul proprio commit, e di fissarsi. Vuoto = 6 h.",
+			"breaker": "Interruttore di sicurezza",
+			"breakerHint": "Fallimenti consecutivi dopo i quali si mette in pausa da sola. Riarmare è un gesto: un riavvio automatico rifarebbe proprio ciò che esiste per impedire. Vuoto = 3."
+		},
+		"role": {
+			"title": "Ruolo",
+			"intro": "Due modelli, non uno. Lo smistamento guarda ogni variazione — è il 95% delle chiamate, su input minuscoli; il lavoro parte solo quando parte un intervento.",
+			"engine": "Motore",
+			"engineHint": "Vuoto = il primo dichiarato.",
+			"engineFirst": "Il primo dichiarato",
+			"triageModel": "Smistamento — modello",
+			"triageModelHint": "Il più piccolo capace di dire «niente».",
+			"triageDepth": "Smistamento — profondità",
+			"workModel": "Lavoro — modello",
+			"workDepth": "Lavoro — profondità",
+			"prompt": "Istruzioni permanenti",
+			"promptHint": "Aggiunte al contesto di ogni intervento, oltre al dossier del repository.",
+			"promptPlaceholder": "Cosa deve sapere prima di agire, qualunque sia l'intervento."
+		},
+		"rules": {
+			"title": "Regole",
+			"add": "Aggiungi",
+			"intro": "Consegnate spente. Una regola senza un oracolo formulabile non parte, anche se accesa: è l'unica condizione di arresto per un agente che non ne ha.",
+			"empty": "Nessuna regola. La Permanence non farà niente finché non le dici cosa sorvegliare."
+		},
+		"powers": {
+			"title": "Poteri",
+			"enabledCount": "{{count}} / {{total}} attivi",
+			"intro": "Una lista consentita, vuota all'inizio, spuntata uno per uno. Il criterio: qualcuno oltre a te potrebbe accorgersene?",
+			"notImplemented": "non ancora implementato — il gesto verrà rifiutato",
+			"neverShared": "<b>Mai su un branch condiviso.</b> Qualunque cosa spunti, non scrive mai su {{branches}}, né sui branch di base dichiarati nel tuo flusso di lavoro. Lavora solo sui propri branch — toccare un branch condiviso non è un gesto da operatore, è un gesto che impegna tutti.",
+			"never": "<b>Mai:</b> {{list}}. Questi gesti non hanno strumento — sono quelli che impegnano una decisione, non un resoconto."
+		},
+		"comment": {
+			"title": "Commentare una pull request",
+			"readByHuman": "letto da un umano",
+			"intro": "Mai un obiettivo: solo il resoconto di un intervento che ha già il suo oracolo. Dice cosa ha fatto sul branch, non avvia una conversazione.",
+			"scopesTitle": "Scrive solo dove una di queste condizioni è vera",
+			"noScope": "Nessuna condizione spuntata: non commenterà da nessuna parte.",
+			"alwaysTitle": "E in ogni caso",
+			"perDayBefore": "Al massimo",
+			"perDayAfter": "commento/i per PR al giorno.",
+			"noMonologue": "Mai due di fila senza una risposta umana in mezzo — altrimenti è un monologo.",
+			"signature": "Firmato <mono>{{signature}}</mono> alla fine del messaggio. Non modificabile: su una PR, è il tuo account che i colleghi leggono.",
+			"optOut": "«Smetti di commentare qui» esclude una PR con un solo gesto, senza toccare l'impostazione."
+		},
+		"rule": {
+			"labelPlaceholder": "Cosa farà, in una riga",
+			"noOracle": "nessun oracolo",
+			"unknownTrigger": "innesco sconosciuto",
+			"remove": "Rimuovi questa regola",
+			"trigger": "Innesco",
+			"choose": "Scegli…",
+			"oracle": "Oracolo",
+			"oracleHint": "La prova a cui mira, scelta tra ciò che questo repository dichiara.",
+			"oracleNone": "Nessuno — la regola non partirà",
+			"condition": "Condizione",
+			"conditionHint": "In linguaggio naturale. Valutata allo smistamento, prima di qualsiasi intervento.",
+			"conditionPlaceholder": "l'autore dell'ultimo commit sono io",
+			"reaction": "Reazione",
+			"reactionHint": "Cosa tenta. L'obiettivo vero e proprio lo scrive lei.",
+			"reactionPlaceholder": "correggi, apri una PR in bozza",
+			"delay": "Intervallo",
+			"delayScheduleHint": "Tra due esecuzioni di questa regola. Vuoto = 24 h.",
+			"delayStaleHint": "Oltre questo, una modifica è considerata superata. Vuoto = 72 h.",
+			"tokenBudget": "Budget di token",
+			"tokenBudgetHint": "Per intervento di questa regola. Vuoto = il tetto giornaliero.",
+			"perHour": "Al massimo all'ora",
+			"perHourHint": "Vuoto = vale solo il tetto giornaliero.",
+			"needsApproval": "Chiedi la mia approvazione prima che il lavoro parta",
+			"needsApprovalHint": "Senza, approva da sola il piano della missione — questa regola è l'approvazione. Spuntalo per una regola ad alto rischio.",
+			"save": "Salva questa regola"
+		},
+		"depth": {
+			"engine": "Il predefinito del motore",
+			"fast": "Veloce",
+			"normal": "Normale",
+			"deep": "Approfondito"
+		}
+	},
+	"planche": {
+		"enlarge": "Ingrandisci",
+		"before": "prima",
+		"after": "dopo",
+		"slide": "Scorri per confrontare",
+		"filmed": "filmato dal cockpit · {{seconds}} s",
+		"test": {
+			"title": "Il test che ne ricaviamo",
+			"steps_one": "{{count}} azione rieseguita",
+			"steps_other": "{{count}} azioni rieseguite",
+			"skipped_one": "{{count}} saltata (screenshot, letture)",
+			"skipped_other": "{{count}} saltate (screenshot, letture)",
+			"copied": "Copiato",
+			"copy": "Copia",
+			"ask": "Fallo aggiungere all'agente"
+		},
+		"observed": "Osservato",
+		"files_one": "{{count}} file",
+		"files_other": "{{count}} file",
+		"foldDetail": "Comprimi i dettagli",
+		"readDetail_one": "Leggi i dettagli ({{chars}} carattere)",
+		"readDetail_other": "Leggi i dettagli ({{chars}} caratteri)"
+	},
+	"projectGround": {
+		"dirExists": "la cartella esiste",
+		"dirMissing": "la cartella non esiste",
+		"isRepo": "è un repository git",
+		"notRepo": "non è ancora un repository git",
+		"noRemote": "nessun repository remoto",
+		"createRemote": "Crea anche il repository su GitHub",
+		"createRemoteHint": "Il cockpit lo crea e lo imposta come «origin». Non fa push di niente: il primo push resta una tua decisione.",
+		"account": "Account",
+		"noGhSession": "nessuna sessione `gh`",
+		"repo": "Repository",
+		"repoPlaceholder": "mio-progetto",
+		"makePublic": "Rendilo pubblico",
+		"publicBadge": "visibile a tutti",
+		"ready": "Niente da preparare — il progetto può essere aggiunto.",
+		"preparing": "Preparazione…",
+		"step": {
+			"createDir": "creare la cartella",
+			"gitInit": "inizializzare git",
+			"createRemote": "creare il repository GitHub"
+		},
+		"nothingToPrepare": "Niente da preparare"
+	},
+	"projectsHealth": {
+		"title": "Progetti",
+		"openWorktrees": "Apri i worktree",
+		"switch": "Passa a questo progetto",
+		"active": "attivo",
+		"liveAgents": "agenti attivi",
+		"ciFailing": "CI in errore",
+		"readyToMerge": "pronte per il merge",
+		"openPrs": "PR aperte",
+		"worktrees": "worktree",
+		"dirtyHint": "worktree con lavoro non committato",
+		"dirty_one": "{{count}} con modifiche",
+		"dirty_other": "{{count}} con modifiche",
+		"unpushed": "worktree con commit non pushati",
+		"partial": "parziale"
+	},
+	"propertiesReport": {
+		"verdict": {
+			"broken": "violata",
+			"held": "regge",
+			"offTopic": "fuori tema",
+			"undecided": "indeciso"
+		},
+		"title": "Ciò che deve restare vero",
+		"allHeld_one": "{{count}} proprietà verificata · niente di violato",
+		"allHeld_other": "{{count}} proprietà verificate · niente di violato",
+		"someBroken_one": "{{count}} violata su {{total}}",
+		"someBroken_other": "{{count}} violate su {{total}}",
+		"costHint": "Quanto costerebbe questa verifica a tariffe API. Con un abbonamento non si paga niente: si consuma la quota della finestra.",
+		"stale": "Il branch è cambiato dopo questa verifica.",
+		"quiet": "{{held}} rispettate, {{unrelated}} non legate a questa modifica."
+	},
+	"propertiesSettings": {
+		"saved": "Proprietà salvate.",
+		"caughtNothing": "Questa proprietà non ha intercettato niente sulle tue correzioni.",
+		"caughtSome": "Avrebbe segnalato {{caught}} correzione/i su {{tried}}.",
+		"intro": "Cose che devono restare vere in questo repository, scritte in linguaggio naturale. Il cockpit le fa valutare rispetto a una modifica, una per una, con prove. Ciò che si può verificare meccanicamente non va qui — sono le regole che nessuno strumento enuncia, quelle tramandate a voce.",
+		"empty": "Nessuna proprietà dichiarata.",
+		"emptyHint": "Il cockpit può suggerirne alcune in base a ciò che questo repository ha già dovuto correggere — è ciò che romperà di nuovo.",
+		"proposeHint": "Leggi le correzioni del repository e ricavane delle proprietà",
+		"propose": "Suggerisci dallo storico",
+		"write": "Scrivi una proprietà",
+		"suggestions": "Suggerimenti · {{count}}",
+		"close": "Chiudi",
+		"comesFrom": "Viene da: {{why}}",
+		"wholeRepo": "tutto il repository",
+		"keep": "Conserva",
+		"textPlaceholder": "Es.: ogni route che scrive nel database ne valida il body prima di chiamarlo.",
+		"remove": "Rimuovi",
+		"scopePlaceholder": "ambito — vuoto = tutto il repository",
+		"neverTested": "mai testata",
+		"decorative_one": "decorativa — non ha intercettato niente su {{count}} correzione",
+		"decorative_other": "decorativa — non ha intercettato niente su {{count}} correzioni",
+		"wouldCatch_one": "avrebbe segnalato {{count}} correzione su {{tried}}",
+		"wouldCatch_other": "avrebbe segnalato {{count}} correzioni su {{tried}}",
+		"testHint": "Riesegui questa proprietà sulle correzioni passate del repository",
+		"retest": "Testa di nuovo",
+		"test": "Testa",
+		"collapse": "Comprimi",
+		"showSamples": "Mostra le correzioni rieseguite"
+	},
+	"pullRequestDetail": {
+		"noWorktree": "Nessun worktree locale per questo branch.",
+		"promptMissing": "Prompt «{{id}}» non trovato nella libreria.",
+		"draft": "bozza",
+		"open": "aperta",
+		"stacked": "impilata",
+		"author": "Autore",
+		"files": "File",
+		"additions": "Aggiunte",
+		"deletions": "Rimozioni",
+		"reviewers": "Da revisionare da parte di <name>{{names}}</name>",
+		"noReviewer": "Nessun revisore richiesto",
+		"assignee": "Assegnata a <name>{{name}}</name>",
+		"fixCiHint": "Avvia l'agente che ripara la CI",
+		"fixCi": "Ripara la CI",
+		"feedbackHint": "Gestisci i commenti di revisione con un agente",
+		"feedback": "Commenti",
+		"agentHint": "Apri un agente su questo branch",
+		"agent": "Agente",
+		"worktreeHint": "Apri il worktree di questo branch",
+		"worktree": "Worktree",
+		"mergeTitle": "Unire #{{id}} in {{base}}?",
+		"mergeMessage": "«{{title}}» — irreversibile e visibile a tutto il team.",
+		"merge": "Unisci",
+		"merged": "#{{id}} unita.",
+		"noDescription": "Nessuna descrizione."
+	},
+	"qaGallery": {
+		"empty": "Nessun materiale di QA",
+		"emptyHint": "Gli screenshot e i report depositati in .claude/work compariranno qui.",
+		"root": "radice",
+		"openFolder": "Apri la cartella nel Finder",
+		"reveal": "Mostra nel Finder",
+		"close": "Chiudi (Esc)",
+		"previous": "Precedente (←)",
+		"next": "Successivo (→)"
+	},
+	"sidePanel": {
+		"resize": "Trascina per allargare — doppio clic per la larghezza originale",
+		"exitFull": "Torna accanto alla mappa",
+		"full": "Schermo intero",
+		"close": "Chiudi"
+	},
+	"ui": {
+		"priority": {
+			"urgent": "Urgente",
+			"high": "Alta",
+			"medium": "Media",
+			"low": "Bassa"
+		},
+		"missingConnector": {
+			"title": "{{service}} non è collegato",
+			"hint": "Manca {{missing}}. Questa schermata comparirà appena sarà compilato.",
+			"openSettings": "Apri le Impostazioni"
+		},
+		"freshness": {
+			"never": "mai caricato",
+			"justNow": "proprio ora",
+			"seconds_one": "{{count}} s fa",
+			"seconds_other": "{{count}} s fa",
+			"minutes_one": "{{count}} min fa",
+			"minutes_other": "{{count}} min fa",
+			"hours_one": "{{count}} h fa",
+			"hours_other": "{{count}} h fa",
+			"reload": "Ricarica ora"
+		},
+		"errorNote": {
+			"retry": "Riprova"
+		},
+		"searchField": {
+			"placeholder": "Filtra…"
+		}
+	},
+	"updateBanner": {
+		"availableNotice": "Versione {{version}} disponibile.",
+		"upToDate": "Cockpit è aggiornato.",
+		"checkFailed": "Impossibile verificare: {{error}}",
+		"installFailedNotice": "Impossibile aggiornare: {{error}}",
+		"available": "Versione {{version}} disponibile",
+		"later": "Più tardi",
+		"restartWarning": "L'installazione riavvia il cockpit — gli agenti in esecuzione verranno fermati, e le loro attività riprese al riavvio.",
+		"update": "Aggiorna",
+		"downloading": "Download della versione {{version}}…",
+		"installed": "Installata — riavvio…",
+		"installFailed": "Aggiornamento non riuscito",
+		"close": "Chiudi",
+		"version": "versione {{version}}",
+		"install": "Installa {{version}}",
+		"check": "Cerca aggiornamenti"
+	},
+	"workflowSettings": {
+		"connectors": {
+			"intro": "Una schermata compare solo se il servizio su cui si basa può rispondere. Compila una chiave e la voce torna da sola nel menu.",
+			"ready": "pronto",
+			"missing": "manca {{missing}}",
+			"fill": "Compila"
+		},
+		"workflow": {
+			"saved": "Flusso di lavoro salvato.",
+			"intro": "Le colonne del tuo gestore di attività, chiamate come le chiama il tuo team. Determinano a che punto è un ticket e dove si colloca nel daily.",
+			"active": {
+				"label": "In corso",
+				"hint": "colonne di lavoro attivo"
+			},
+			"review": {
+				"label": "In revisione",
+				"hint": "revisione, QA"
+			},
+			"done": {
+				"label": "Fatto"
+			},
+			"blocked": {
+				"label": "Bloccato",
+				"hint": "la colonna che segnala un blocco"
+			},
+			"baseBranches": {
+				"label": "Branch di base",
+				"hint": "una PR che punta altrove conta come impilata"
+			},
+			"dailyWeekdays": {
+				"label": "Giorni del daily",
+				"hint": "1 = lunedì, 5 = venerdì"
+			},
+			"prCommand": {
+				"label": "Comando di apertura della PR",
+				"hint": "eseguito dall'agente principale a fine missione; vuoto = Cockpit apre la PR da sé"
+			},
+			"createWorktree": {
+				"label": "Creare un worktree",
+				"hint": "vuoto = `git worktree add`. Un comando che inizia con \"/\" è un comando del repository, eseguito da un agente."
+			},
+			"removeWorktree": {
+				"label": "Rimuovere un worktree",
+				"hint": "vuoto = `git worktree remove --force`. Assicurati che non possa bloccarsi su una richiesta di conferma: nessuno la leggerà."
+			},
+			"devServer": {
+				"label": "Avviare il server di sviluppo",
+				"hint": "vuoto = il pulsante Dev non viene proposto, invece di aprire un terminale su un comando che qui non esiste"
+			},
+			"malformed": "{{commands}}: un segnaposto va tra parentesi graffe. Scritto in altro modo, arriva alla shell così com'è — che rifiuta la riga senza dire niente.",
+			"testCommands": {
+				"label": "Comandi di test",
+				"hint": "oltre a vitest, jest, pytest, phpunit, php artisan test… — ciò che permette alla scheda di un agente di dire \"i test passano\""
+			},
+			"visualReports": {
+				"title": "Gli agenti rendono conto con immagini",
+				"detail": "Se spuntato: ogni agente è invitato a mostrare il proprio lavoro quando un'immagine dice più del testo — uno screenshot prima/dopo se ha cambiato lo schermo e può catturarlo, un diagramma se ha cambiato una struttura, niente per una semplice risposta. Vale per gli agenti avviati da ora in poi, non per quelli già in esecuzione."
+			},
+			"agentBrowser": {
+				"title": "Gli agenti guidano il browser del loro workspace",
+				"detail": "Se spuntato: ogni agente riceve ciò che serve per aprire una pagina, cliccare, scrivere e fare screenshot, in un browser separato — senza le tue sessioni né le tue password — che guardi in diretta nella scheda \"Browser\". Si avvia solo alla prima azione. Nessun effetto dentro un container di isolamento. Vale per gli agenti avviati da ora in poi."
+			},
+			"browser": {
+				"label": "Browser",
+				"hint": "vuoto = il primo trovato tra Chrome, Chromium, Edge e Brave"
+			},
+			"browserServer": {
+				"label": "Server delle azioni del browser",
+				"hint": "vuoto = quello di Playwright; il tuo riceve --cdp-endpoint <indirizzo> in coda"
+			},
+			"reviewReadOnly": {
+				"title": "L'agente di revisione è in sola lettura",
+				"detail": "Se spuntato: nessuna modifica, e nient'altro che letture (git diff, git log, gh pr view…) — tutto il resto viene rifiutato. Se deselezionato: può eseguire i test o modificare file; le sue istruzioni gli dicono comunque di non correggere la PR, ma niente glielo impedisce."
+			},
+			"themes_one": "{{count}} tema di business dichiarato — permette al daily di dire \"lei è sulla fatturazione\" invece di elencare identificativi. I temi si modificano nel file di configurazione.",
+			"themes_other": "{{count}} temi di business dichiarati — permettono al daily di dire \"lei è sulla fatturazione\" invece di elencare identificativi. I temi si modificano nel file di configurazione.",
+			"noThemes": "Nessun tema di business: il racconto del daily si baserà sui titoli stessi."
+		},
+		"replacedAtLaunch": "Sostituiti all'avvio:",
+		"saving": "Salvataggio…",
+		"save": "Salva",
+		"remove": "Rimuovi",
+		"defaultPlaceholder": "predefinito",
+		"fields": {
+			"key": "Chiave",
+			"displayName": "Nome visualizzato"
+		},
+		"depth": {
+			"fast": "Veloce",
+			"normal": "Normale",
+			"deep": "Approfondito"
+		},
+		"roles": {
+			"saved": "Ruoli salvati.",
+			"intro": "Cosa riceve un esecutore all'avvio: le sue istruzioni permanenti, il suo modello, e i percorsi in cui può scrivere. L'ambito è imposto — una scrittura fuori viene rifiutata, non solo sconsigliata.",
+			"masterNote": "Questo ruolo guida la missione: legge il ticket, propone la suddivisione e rimette tutto insieme alla fine. La sua chiave è riservata — i passaggi e gli strumenti di orchestrazione vengono da Cockpit; qui si impostano solo il comando, le istruzioni e il modello.",
+			"keyHint": "citato dalle attività",
+			"engine": {
+				"label": "Motore",
+				"hint": "il programma che lo esegue",
+				"default": "Predefinito"
+			},
+			"model": {
+				"label": "Modello",
+				"hint": "vuoto = il predefinito della macchina"
+			},
+			"depth": {
+				"label": "Profondità",
+				"hint": "quanto il ruolo può spendere",
+				"engine": "Motore",
+				"unsupported": "Questo motore non dichiara profondità — impostale in Motori."
+			},
+			"scope": {
+				"label": "Ambito",
+				"hint": "percorsi, separati da virgole"
+			},
+			"command": {
+				"label": "Comando di avvio",
+				"hint": "skill o comando del repository, eseguito prima delle istruzioni"
+			},
+			"prompt": "Istruzioni permanenti",
+			"verifies": "Verifica il lavoro degli altri — parte solo quando l'implementazione è consegnata",
+			"newLabel": "Nuovo ruolo",
+			"add": "Aggiungi un ruolo",
+			"save": "Salva i ruoli"
+		},
+		"team": {
+			"saved": "Team salvato.",
+			"intro": "Chi fa parte del team, e quali account lo identificano in ogni strumento. Queste corrispondenze alimentano il daily e la bacheca del team: un membro senza il suo login GitHub non comparirà su nessuna pull request.",
+			"soloWarning": "Questo progetto è segnato come <strong>solo</strong>: il suo team viene ignorato e il daily resta nascosto. Togli la spunta a \"solo\" nelle impostazioni del progetto perché quanto segue serva a qualcosa.",
+			"linearTeam": {
+				"label": "Team Linear",
+				"hint": "UUID del team di cui si legge il ciclo corrente — vuoto = nessun daily"
+			},
+			"empty": "Nessun membro dichiarato: il daily e la bacheca del team resteranno vuoti. Cockpit non propone nessuno di default — un team non si indovina.",
+			"name": "Nome",
+			"role": {
+				"label": "Ruolo",
+				"hint": "dev o product"
+			},
+			"roleLabel": {
+				"label": "Titolo visualizzato",
+				"hint": "come appare sullo schermo",
+				"placeholder": "Sviluppatore back-end"
+			},
+			"github": {
+				"hint": "login principale"
+			},
+			"linearId": {
+				"label": "ID Linear",
+				"hint": "UUID, visibile nell'URL del suo profilo"
+			},
+			"githubAliases": {
+				"label": "Altri login GitHub",
+				"hint": "account precedenti, separati da virgole"
+			},
+			"sentryEmails": {
+				"label": "Email Sentry",
+				"hint": "quelle dei suoi account, separate da virgole"
+			},
+			"sentryNames": {
+				"label": "Nomi Sentry",
+				"hint": "quando l'email manca dall'evento"
+			},
+			"add": "Aggiungi un membro",
+			"save": "Salva il team"
+		},
+		"engines": {
+			"saved": "Motori salvati.",
+			"intro": "Un motore è il programma che esegue un agente — non un fornitore di modelli. Per usarne un altro ci sono due strade: un binario che parla lo stesso protocollo, o un gateway compatibile indicato dalle variabili d'ambiente qui sotto. Ogni ruolo sceglie poi il suo motore.",
+			"keyHint": "citato dai ruoli",
+			"binary": {
+				"label": "Binario",
+				"hint": "vuoto = claude, cercato sulla macchina"
+			},
+			"protocol": {
+				"label": "Protocollo",
+				"hint": "claude-stream-json, codex-exec o gemini-stream-json"
+			},
+			"models": {
+				"label": "Modelli",
+				"hint": "alias o identificativi completi (claude-opus-5-5), separati da virgole"
+			},
+			"args": {
+				"label": "Argomenti",
+				"hint": "aggiunti in coda alla riga di comando"
+			},
+			"depthFastHint": "cosa aggiungere per andare veloce",
+			"depthDeepHint": "per ciò che merita lo sforzo in più",
+			"env": {
+				"label": "Ambiente",
+				"hint": "una coppia per riga: NOME=valore — l'indirizzo di un servizio, un token di accesso",
+				"placeholder": "ANTHROPIC_BASE_URL=https://gateway.example.com\nANTHROPIC_AUTH_TOKEN=sk-…"
+			},
+			"variables_one": "{{count}} variabile — scritta nel file di configurazione, con permessi 600.",
+			"variables_other": "{{count}} variabili — scritte nel file di configurazione, con permessi 600.",
+			"noVariables": "Nessuna variabile: il motore usa l'ambiente della macchina.",
+			"add": "Aggiungi un motore",
+			"save": "Salva i motori"
+		},
+		"missionMode": {
+			"guided": {
+				"title": "Guidata",
+				"detail": "Leggi il ticket con l'agente principale, poi approvi la sua comprensione, il suo approccio e la sua suddivisione — tre accordi, uno alla volta."
+			},
+			"autonomous": {
+				"title": "Autonoma",
+				"detail": "L'agente principale legge il ticket e propone subito la sua suddivisione. Un solo accordo prima che gli esecutori partano."
+			},
+			"default": "predefinita"
+		},
+		"budget": {
+			"intro": "Tre tetti, per tre modi di spendere più del previsto: una missione che va fuori controllo, una quota che si esaurisce, una macchina che si satura. Nessuno di loro uccide niente — il lavoro in corso arriva sempre a termine.",
+			"tokenBudget": {
+				"label": "Tetto per missione",
+				"hint": "Oltre, la missione va in pausa — branch e lavoro intatti, ripresa con un clic. Vuoto = 500.000.",
+				"unit": "token"
+			},
+			"quotaFloor": {
+				"label": "Nessun nuovo avvio sotto",
+				"hint": "Percentuale di quota dell'abbonamento rimanente. Le attività in corso proseguono. Vuoto = 15%.",
+				"unit": "% rimanente"
+			},
+			"memoryCeiling": {
+				"label": "Nessun nuovo lancio sopra",
+				"hint": "Percentuale di memoria della macchina in uso. Nessun nuovo agente parte — missione, esecutore o avvio manuale. Vuoto = 85%.",
+				"unit": "% memoria"
+			}
+		},
+		"sandbox": {
+			"terminalLabel": "Accesso dell'agente isolato",
+			"intro": "Ogni agente gira in un container, con la propria memoria limitata dal sistema invece che misurata a posteriori. Richiede Docker o OrbStack sulla macchina — nessuno dei due serve finché questa opzione è disattivata.",
+			"enable": "Isola ogni agente in un container",
+			"runtime": {
+				"hint": "orb o docker. Vuoto = rilevato sulla macchina.",
+				"placeholder": "rilevato"
+			},
+			"memory": {
+				"label": "Memoria per agente",
+				"hint": "Vuoto = 4096 MB.",
+				"unit": "MB"
+			},
+			"image": {
+				"hint": "Vuoto = l'immagine predefinita di Cockpit."
+			},
+			"loginNote": "Un account collegato tramite abbonamento conserva il suo token nel portachiavi della macchina, che un container non può leggere. Questo pulsante esegue <code>claude setup-token</code> in un terminale — poi incolla il token che mostra in Impostazioni → Token di accesso (\"Account isolato\"). Valido un anno; rifallo quando scade.",
+			"connect": "Collega l'account isolato"
+		}
+	},
+	"workspacePanel": {
+		"masterRole": "agente principale",
+		"tabs": {
+			"agent": "Agente",
+			"terminal": "Terminale",
+			"board": "Vista",
+			"boardTitle": "Tutto ciò che è legato a questo branch: PR, ticket, revisione, agenti, commit, documenti, screenshot",
+			"browser": "Browser",
+			"browserTitle": "Il browser di questo workspace: quello che l'agente guida per testare, in diretta — e dove puoi cliccare anche tu",
+			"closeAgent": "Chiudi e ferma l'agente",
+			"closeTerminal": "Chiudi il terminale e ciò che sta eseguendo"
+		},
+		"closeWorkspace": "Chiudi questo workspace — ferma tutto e lo dimentica",
+		"rail": {
+			"missionTitle_one": "{{title}}\n{{count}} workspace",
+			"missionTitle_other": "{{title}}\n{{count}} workspace",
+			"closeMission_one": "Chiudi il {{count}} workspace di questa missione",
+			"closeMission_other": "Chiudi i {{count}} workspace di questa missione",
+			"sleepingTitle": "{{cwd}}\n\n{{state}}\nClicca per riprendere",
+			"forgetSleeping": "Dimentica questo workspace addormentato",
+			"newWorkspace": "+ Workspace",
+			"openMission": "Apri la missione \"{{title}}\"",
+			"delivered": "· {{done}}/{{total}} consegnate",
+			"closeMissionWorkspace": "Chiudi questo workspace di missione"
+		},
+		"summary": {
+			"agents_one": "{{count}} agente",
+			"agents_other": "{{count}} agenti",
+			"terminals_one": "{{count}} term.",
+			"terminals_other": "{{count}} term."
+		},
+		"sleeping": {
+			"withParts": "Addormentato — {{parts}}",
+			"empty": "Addormentato"
+		},
+		"menu": {
+			"browseDialog": "Apri una cartella come workspace",
+			"browseGroup": "Sfoglia",
+			"browseLabel": "Apri una cartella…",
+			"browseHint": "ovunque sul disco, fuori dai worktree elencati",
+			"worktreesGroup": "Worktree",
+			"detachedHead": "HEAD staccato",
+			"alreadyOpen": "già aperto",
+			"openTerminalHere": "Apri un terminale qui (⇧Invio)",
+			"remoteBranchesGroup": "Branch da altrove, mai estratti qui",
+			"localBranchesGroup": "Branch senza worktree",
+			"remoteBranchHint": "su {{remote}} — estrailo qui, poi lavoraci",
+			"localBranchHint": "crea il worktree, poi lavoraci",
+			"creationNote": "crea",
+			"title": "Apri un workspace — un worktree esistente, o un branch il cui worktree è ancora da creare",
+			"empty": "Nessun worktree conosciuto.",
+			"prGroup": "Una pull request",
+			"prHint": "revisionala in sola lettura — ⇧Invio: apri solo il suo branch",
+			"prNote": "revisione",
+			"prOpenBranch": "Apri solo il workspace del suo branch",
+			"newBranchGroup": "Questo branch non è ancora qui",
+			"newBranchHint": "estrailo come worktree, poi apri il suo workspace"
+		},
+		"empty": {
+			"message": "Nessun workspace aperto",
+			"hint": "Un workspace è un branch estratto nella propria cartella, più tutto ciò che ci metti al lavoro.",
+			"stepBranch": "un branch",
+			"stepFolder": "la sua cartella",
+			"stepAgents": "i tuoi agenti e terminali",
+			"openBranch": "Apri un branch"
+		},
+		"confirm": {
+			"closeTitle": "Chiudere {{label}}?",
+			"message": "{{what}} — si ferma tutto, compreso ciò che è ancora in esecuzione.",
+			"closeLabel": "Chiudi il workspace",
+			"closeMissionTitle_one": "Chiudere il {{count}} workspace di \"{{title}}\"?",
+			"closeMissionTitle_other": "Chiudere i {{count}} workspace di \"{{title}}\"?",
+			"closeAll": "Chiudi tutti"
+		},
+		"toolbar": {
+			"addAgentTitle": "Un agente in più su questo workspace",
+			"addAgent": "+ Agente",
+			"addTerminalTitle": "Un terminale in più su questo workspace (⌘⇧T)",
+			"addTerminal": "+ Terminale",
+			"stop": "Ferma",
+			"interrupt": "Interrompi ciò che è in esecuzione (⌃C)",
+			"clear": "Pulisci lo schermo",
+			"sleep": "Metti da parte — i processi si fermano, il workspace torna al prossimo avvio",
+			"closeMission": "Chiudi la missione \"{{title}}\" — tutti i suoi workspace si fermano"
+		},
+		"status": {
+			"shell": "shell",
+			"finished": "terminato",
+			"shellOpen": "shell aperta",
+			"asking": "ti sta facendo una domanda",
+			"permission": "permesso?",
+			"thinking": "sta riflettendo",
+			"ready": "pronto"
+		},
+		"dock": {
+			"openTitle": "{{cwd}} — apri nella schermata Workspace",
+			"collapse": "Comprimi l'elenco",
+			"expand": "Mostra i dettagli del gruppo"
+		}
+	}
+}

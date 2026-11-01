@@ -1,0 +1,297 @@
+{
+	"format": {
+		"justNow": "gerade eben",
+		"bytes": "{{value}} B",
+		"kilobytes": "{{value}} KB",
+		"megabytes": "{{value}} MB"
+	},
+	"automations": {
+		"days": {
+			"mon": "Mo",
+			"tue": "Di",
+			"wed": "Mi",
+			"thu": "Do",
+			"fri": "Fr",
+			"sat": "Sa",
+			"sun": "So"
+		},
+		"stamp": {
+			"today": "heute {{time}}",
+			"tomorrow": "morgen {{time}}",
+			"yesterday": "gestern {{time}}"
+		},
+		"rhythm": {
+			"none": "Kein Tag ausgewählt",
+			"weekdays": "Montag bis Freitag um {{time}}",
+			"everyDay": "Jeden Tag um {{time}}",
+			"days": "{{days}} um {{time}}"
+		},
+		"run": {
+			"running": "Läuft",
+			"partial": "Teilweise",
+			"failed": "Fehlgeschlagen",
+			"missed": "Verpasst",
+			"caughtUp": "Nachgeholt",
+			"manual": "Manuell",
+			"onTime": "Pünktlich"
+		},
+		"source": {
+			"tracker": "Aufgaben-Tracker"
+		},
+		"event": {
+			"merged": "PR gemergt",
+			"opened": "PR geöffnet",
+			"updated": "PR aktualisiert",
+			"reviewed": "PR reviewt",
+			"done": "Ticket erledigt",
+			"started": "Ticket begonnen",
+			"moved": "Ticket verschoben",
+			"canceled": "Ticket abgebrochen",
+			"agent": "Agenten",
+			"git": "Git-Aktion",
+			"resolved": "Fehler behoben",
+			"assigned": "Fehler zugewiesen"
+		},
+		"markdown": {
+			"silent": "Diesmal keine Antwort: {{sources}}."
+		}
+	},
+	"world": {
+		"regions": {
+			"arrive": {
+				"label": "Eingang",
+				"hint": "zu sortieren"
+			},
+			"encours": {
+				"label": "In Arbeit",
+				"hint": "du behältst die Kontrolle oder delegierst"
+			},
+			"livrer": {
+				"label": "Ausliefern",
+				"hint": "reviewen und mergen"
+			},
+			"prod": {
+				"label": "In Produktion",
+				"hint": "was es verändert"
+			}
+		}
+	},
+	"missions": {
+		"awaited": {
+			"understanding": "der Hauptagent hat das Ticket gelesen · prüfe, was er verstanden hat",
+			"approach": "ein Ansatz wartet auf deine Freigabe",
+			"approval_one": "{{count}} Aufgabe · nichts startet vor deiner Freigabe",
+			"approval_other": "{{count}} Aufgaben · nichts startet vor deiner Freigabe"
+		},
+		"state": {
+			"understanding": "liest das Ticket",
+			"awaitingUnderstanding": "Verständnis zu bestätigen",
+			"approaching": "Ansatz",
+			"awaitingApproach": "Ansatz zu bestätigen",
+			"planning": "Aufteilung",
+			"awaitingApproval": "wartet auf deine Freigabe",
+			"running": "läuft",
+			"integrating": "Integration",
+			"done": "abgeschlossen",
+			"failed": "gestoppt"
+		}
+	},
+	"episodes": {
+		"gesture": {
+			"runs": "führt {{command}} aus",
+			"uses": "nutzt {{tool}}",
+			"usesATool": "nutzt ein Werkzeug",
+			"edits": "bearbeitet {{file}}",
+			"editsAFile": "bearbeitet eine Datei",
+			"delegated": "hat „{{description}}“ delegiert",
+			"launchedSubagent": "hat einen Subagenten gestartet",
+			"reads": "liest {{file}}",
+			"searches": "sucht {{query}}",
+			"browses": "durchsucht {{file}}"
+		}
+	},
+	"worktreeFlow": {
+		"title": "Worktree {{branch}}",
+		"creating": "Wird angelegt — Abhängigkeiten, Datenbank… das kann ein paar Minuten dauern.",
+		"timeout": "Der Worktree für {{branch}} ist nach 15 Minuten nicht erschienen.",
+		"ready": "Worktree bereit.",
+		"starting": "Starte das Anlegen des Worktree…",
+		"readyOpen": "Worktree bereit, sein Workspace ist offen."
+	},
+	"types": {
+		"triggers": {
+			"ci_red": {
+				"label": "CI wird rot",
+				"hint": "bei einer laufenden Änderung"
+			},
+			"review_changes_requested": {
+				"label": "Ein Review fordert Änderungen",
+				"hint": "bei einem offenen PR"
+			},
+			"pr_stale": {
+				"label": "Eine Änderung bewegt sich nicht mehr",
+				"hint": "nach Ablauf der Frist — Entwürfe werden ignoriert"
+			},
+			"schedule": {
+				"label": "In regelmäßigen Abständen",
+				"hint": "kein Signal, nach der Uhr — der einzige, der auslöst, ohne dass etwas passiert"
+			},
+			"linear_assigned": {
+				"label": "Mir wird ein Linear-Ticket zugewiesen",
+				"hint": "löst erneut aus, wenn sich seine Priorität später ändert — die Bedingung entscheidet, welche"
+			}
+		},
+		"commentScopes": {
+			"i_commented": "Ich habe diesen PR schon kommentiert",
+			"i_allowed": "Ich habe diesen PR ausdrücklich erlaubt",
+			"hers": "der PR wurde von der Permanence geöffnet",
+			"mine": "der PR ist meiner"
+		},
+		"powers": {
+			"rerun_pipeline": "Pipeline neu starten",
+			"create_branch": "Branch anlegen",
+			"open_draft_pr": "Entwurfs-PR öffnen",
+			"set_label": "Label hinzufügen",
+			"open_worktree": "Worktree öffnen",
+			"start_agent": "Agent starten",
+			"run_command": "Repository-Befehl ausführen",
+			"open_mission": "Mission öffnen, um Code zu schreiben"
+		},
+		"never": {
+			"review": "ein Review annehmen oder ablehnen",
+			"assign": "zuweisen",
+			"close": "schließen",
+			"merge": "mergen",
+			"deploy": "deployen"
+		}
+	},
+	"proof": {
+		"defaultTitle": "Rundgang des Agenten"
+	},
+	"remarks": {
+		"about": "Zu {{anchor}}: {{text}}",
+		"intro": "Ein paar Anmerkungen zu deiner Arbeit:",
+		"outro": "Behalte sie ab jetzt im Kopf; sag mir, wenn dir eine davon falsch erscheint."
+	},
+	"activity": {
+		"unexplainedFailure": "Ohne Erklärung fehlgeschlagen."
+	},
+	"ipc": {
+		"previewMissing": "Vorschau: „{{command}}“ hat keine Beispielantwort."
+	},
+	"footprint": {
+		"deleted_one": "{{count}} gelöscht",
+		"deleted_other": "{{count}} gelöscht",
+		"created_one": "{{count}} erstellt",
+		"created_other": "{{count}} erstellt",
+		"modified_one": "{{count}} geändert",
+		"modified_other": "{{count}} geändert"
+	},
+	"chantier": {
+		"slices": {
+			"messages": "Unterhaltung",
+			"memory": "Projektanweisungen",
+			"system": "CLI-Grundlast",
+			"other": "Sonstiges"
+		}
+	},
+	"illustrations": {
+		"source": {
+			"mesure": "gemessen",
+			"depot": "im Repository gefunden",
+			"capture": "aufgenommen",
+			"agent": "vom Agenten angegeben"
+		}
+	},
+	"film": {
+		"caption": {
+			"read_one": "Liest {{count}} Datei.",
+			"read_other": "Liest {{count}} Dateien.",
+			"think": "Was er annimmt.",
+			"edit": "Bearbeitet {{file}}.",
+			"testsPass": "Tests bestehen.",
+			"testsFail": "Einige Tests schlagen fehl.",
+			"fix": "Korrigiert {{file}}.",
+			"seeBrowser": "Prüft im Browser.",
+			"seeResult": "Sieht sich das Ergebnis an.",
+			"deliver": "Liefert.",
+			"handBack": "Gibt die Kontrolle zurück."
+		},
+		"deliver": {
+			"pushed": "Gepusht: {{branch}}",
+			"branch": "Branch {{branch}}"
+		},
+		"phase": {
+			"read": "lesen",
+			"edit": "bearbeiten",
+			"test": "testen",
+			"see": "am Bildschirm prüfen",
+			"run": "Befehle",
+			"agent": "Subagenten"
+		}
+	},
+	"narrator": {
+		"cloudModels": {
+			"natural": "Natürlich",
+			"fast": "Schnell"
+		},
+		"rates": {
+			"calm": "Ruhig",
+			"normal": "Normal",
+			"fast": "Schnell"
+		},
+		"then": "dann",
+		"wrapUp": {
+			"handsBack": "Er ist fertig und gibt an dich zurück.",
+			"changed_one": "er hat {{spoken}} Datei geändert",
+			"changed_other": "er hat {{spoken}} Dateien geändert",
+			"testsFail": "die Tests schlagen fehl",
+			"testsPass": "die Tests bestehen",
+			"doneBut": "Fertig: {{changed}}, aber {{tests}}.",
+			"doneAnd": "Fertig: {{changed}}, und {{tests}}.",
+			"done": "Fertig: {{what}}."
+		},
+		"progress": {
+			"changed_one": "Arbeitet noch. Er hat seit deiner Anweisung {{spoken}} Datei geändert.",
+			"changed_other": "Arbeitet noch. Er hat seit deiner Anweisung {{spoken}} Dateien geändert.",
+			"exploring": "Arbeitet noch, erkundet den Code."
+		},
+		"line": {
+			"subagent": "Er gibt einen Teil der Arbeit an einen Subagenten ab.",
+			"error": "Er ist auf einen Fehler gestoßen.",
+			"testsFail": "Die Tests schlagen fehl.",
+			"testsPass": "Die Tests bestehen.",
+			"question": "Er braucht dich: Er stellt dir eine Frage.",
+			"permission": "Er wartet auf deine Erlaubnis, um weiterzumachen."
+		}
+	},
+	"assistant": {
+		"keys": {
+			"space": "Leertaste",
+			"arrow": "Pfeil {{direction}}"
+		}
+	},
+	"feedMeta": {
+		"type": "Typ",
+		"level": "Stufe",
+		"project": "Projekt",
+		"author": "Autor",
+		"assignee": "Zuständig",
+		"deployment": "Deployment",
+		"attempt": "Versuch",
+		"version": "Version",
+		"run": "Lauf",
+		"task": "Aufgabe",
+		"environment": "Umgebung",
+		"commit": "Commit",
+		"event": "Ereignis",
+		"branch": "Branch",
+		"labels": "Labels",
+		"reviewers": "Reviewer",
+		"priority": "Priorität",
+		"origin": "Herkunft",
+		"url": "URL",
+		"occurrences": "Vorkommen",
+		"users": "Nutzer"
+	}
+}

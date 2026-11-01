@@ -1,0 +1,298 @@
+{
+	"store": {
+		"job": {
+			"succeeded": "完了",
+			"failed": "失敗",
+			"failedWithCode": "失敗（コード {{code}}）",
+			"failedToast": "{{label}} — 失敗しました。出力はスクリプト画面で確認できます。",
+			"failedToastWithCode": "{{label}} — 失敗しました（コード {{code}}）。出力はスクリプト画面で確認できます。",
+			"worktreeDone": "{{label}} — 完了しました。"
+		},
+		"notify": {
+			"waitingReply": "あなたの返答待ち — {{title}}",
+			"ciFailed": "CI 失敗 · #{{number}}",
+			"readyToMerge": "マージ可能 · #{{number}}",
+			"prodError": "本番エラー · {{project}}"
+		}
+	},
+	"commandPalette": {
+		"views": {
+			"map": "マップ",
+			"today": "今日",
+			"decisions": "判断待ち · あなたの回答を待っているもの",
+			"recap": "ビジュアル振り返り · 起きたこと",
+			"automations": "自動化 · 自動で準備されるミーティング",
+			"overview": "概要",
+			"team": "デイリー · チーム",
+			"agents": "AI エージェント",
+			"workspace": "ワークスペース · 開いているエージェントとターミナル",
+			"libres": "フリーエージェント · プロジェクト外で起動",
+			"worktrees": "Worktree",
+			"git": "Git",
+			"scripts": "スクリプト",
+			"docs": "ドキュメント",
+			"observability": "可観測性",
+			"delivery": "フロー · Linear、PR、CI、デプロイ",
+			"infra": "サーバーとコンテナ · このマシンで動いているもの",
+			"settings": "設定"
+		},
+		"hint": {
+			"goTo": "移動"
+		},
+		"group": {
+			"navigation": "ナビゲーション",
+			"libres": "フリーエージェント",
+			"projects": "プロジェクト",
+			"recentFolders": "最近のフォルダ",
+			"identifiers": "識別子"
+		},
+		"libre": {
+			"launch": "フリーエージェントを起動…",
+			"launchHint": "⌘N · 1 フォルダに 1 エージェント",
+			"launchIn": "{{folder}} でエージェントを起動",
+			"launchInHint": "前回の選択を入力済みのランチャー"
+		},
+		"project": {
+			"label": "プロジェクト · {{name}}"
+		},
+		"git": {
+			"behind_other": "{{count}} コミット遅れ",
+			"upToDate": "最新",
+			"pulled": "{{name}} — 最新になりました。",
+			"ahead_other": "未公開のコミット {{count}} 件",
+			"pushed": "{{name}} — プッシュしました。"
+		},
+		"worktree": {
+			"openEditor": "{{name}} をエディタで開く",
+			"launchAgent": "{{name}} でエージェントを起動",
+			"launchAgentHint": "Cockpit 内での会話",
+			"terminal": "{{name}} のターミナル",
+			"terminalHint": "Cockpit 内のシェル",
+			"terminalApp": "{{name}} を Terminal.app で開く"
+		},
+		"folder": {
+			"newAgent": "フォルダで新しいエージェント…",
+			"newAgentHint": "任意のフォルダ、ブランチや worktree なし",
+			"dialogTitle": "エージェントを起動する場所…",
+			"newAgentIn": "{{folder}} で新しいエージェント"
+		},
+		"openConfig": "設定ファイルを開く",
+		"identifiers": {
+			"openPr": "PR #{{number}} を開く",
+			"onGithub": "GitHub 上",
+			"openTicket": "{{ticket}} を開く",
+			"linearTicket": "Linear チケット"
+		},
+		"placeholder": "Worktree、セッション、スクリプト、画面、#PR、チケット…",
+		"noResults": "結果がありません。",
+		"keys": {
+			"navigate": "移動",
+			"run": "実行",
+			"close": "閉じる"
+		}
+	},
+	"review": {
+		"verdict": {
+			"merge": "マージ可能",
+			"blocking": "ブロッカーあり",
+			"changes": "修正が必要"
+		},
+		"next": {
+			"merge": "実行中のものはありません。マージできます。",
+			"changes": "現在実行中のものはありません。指摘を投稿し、作成者がプッシュしたら「再確認」してください。"
+		},
+		"delivered_other": "レビュー完了：指摘 {{count}} 件 · {{verdict}}。{{next}}",
+		"see": "表示",
+		"activity": {
+			"verification": "PR #{{number}} を確認中",
+			"review": "PR #{{number}} をレビュー中",
+			"askedReview": "指示がレビューを求めているため、「レビュー」を通してカードとして届けます。GitHub で PR を読んでいます…",
+			"reading": "GitHub で PR を読み、ブランチを取得しています…",
+			"launching": "レビューエージェントを起動しています。PR を読み、完了したら通知します。",
+			"updating": "{{branch}} を更新中…",
+			"updateFailed": "更新できませんでした（{{error}}）。ローカル版をレビューします。",
+			"creatingWorktree": "{{branch}} の worktree を作成しています。数分かかる場合があります。"
+		},
+		"label": {
+			"verification": "確認 #{{number}}",
+			"review": "レビュー #{{number}}"
+		},
+		"error": {
+			"noMainRepo": "このプロジェクトにはメインリポジトリが設定されていません。",
+			"worktreeTimeout": "{{branch}} の worktree が 15 分経っても作成されませんでした。"
+		}
+	},
+	"blockers": {
+		"permission": {
+			"title_other": "{{tool}} — リクエスト {{count}} 件",
+			"anAgent": "エージェント",
+			"meta": "判断が必要"
+		},
+		"plan": {
+			"meta": "確認が必要"
+		},
+		"recheck": {
+			"title": "{{author}} が #{{number}} にプッシュしました",
+			"theAuthor": "作成者",
+			"meta": "再確認が必要",
+			"fix": "再確認"
+		},
+		"failedTask": {
+			"noReason": "理由の記載なし",
+			"fix": "再実行"
+		},
+		"ci": {
+			"meta": "CI 失敗",
+			"fix": "修正"
+		}
+	},
+	"decisions": {
+		"waited": {
+			"now": "たった今",
+			"minutes": "{{minutes}} 分前から",
+			"hours": "{{hours}} 時間 {{minutes}} 分前から",
+			"days": "{{days}} 日前から"
+		}
+	},
+	"terminals": {
+		"exited": "シェルが終了しました",
+		"exitedWithCode": "シェルが終了しました（コード {{code}}）"
+	},
+	"sidebar": {
+		"views": {
+			"map": "マップ",
+			"today": "今日",
+			"decisions": "判断待ち",
+			"recap": "ビジュアル振り返り",
+			"automations": "自動化",
+			"permanence": "Permanence",
+			"overview": "概要",
+			"team": "デイリー",
+			"missions": "ミッション",
+			"workspace": "ワークスペース",
+			"libres": "フリーエージェント",
+			"agents": "AI エージェント",
+			"docs": "ドキュメント",
+			"delivery": "フロー",
+			"impact": "インパクト",
+			"observability": "可観測性",
+			"worktrees": "Worktree",
+			"git": "Git",
+			"scripts": "スクリプト",
+			"infra": "サーバーとコンテナ",
+			"settings": "設定"
+		},
+		"groups": {
+			"pilot": "操縦",
+			"produce": "制作",
+			"deliver": "デリバリー",
+			"tooling": "ツール"
+		},
+		"project": "プロジェクト",
+		"recapFresh_other": "前回の訪問以降の新着 {{count}} 件",
+		"automations": {
+			"running": "自動化が出力を準備しています",
+			"nextToday": "次の出力は今日準備されます"
+		},
+		"launch": {
+			"placeHere": "その場で",
+			"placeBranch": "新しいブランチ",
+			"placeWorktree": "新しい worktree",
+			"defaultModel": "マシンのデフォルトモデル",
+			"title": "1 フォルダに 1 エージェント — cd してから claude と同じ（⌘N）",
+			"button": "エージェントを起動",
+			"again": "前回と同じ設定で再起動",
+			"noneYet": "まだ何もありません。最初の起動内容が次回のために記憶されます。",
+			"other": "別のフォルダ、別の設定…"
+		},
+		"top": {
+			"mapTitle": "すべての作業のマップ（⌘⇧C）",
+			"workspaceTitle": "開いているエージェントとターミナル（⌘⇧A）",
+			"libresTitle": "ターミナルのように、プロジェクト外で起動したエージェント",
+			"decisionsTitle": "あなたの判断を待っているもの。解除されるものの大きさ順（⌘⇧D）",
+			"recapTitle": "起きたことを画像で：エージェントのターンごとに 1 つのストーリー（⌘⇧J）",
+			"recap": "振り返り",
+			"automationsTitle": "デイリーのように、自動で準備されるミーティング（⌘⇧R）"
+		},
+		"search": "移動、起動、質問…",
+		"atelier": {
+			"title": "すべての画面、プロジェクト、設定",
+			"name": "工房",
+			"close": "工房を閉じる",
+			"subtitle": "すべての画面 · ⌘K で検索"
+		},
+		"live": {
+			"missions_other": "ミッション {{count}} 件",
+			"missionsOngoing": "{{missions}} 進行中（⌘⇧M）",
+			"missionsWaiting_other": "{{missions}} 進行中、{{count}} 件があなたの承認待ち（⌘⇧M）",
+			"scripts_other": "スクリプト {{count}} 件実行中"
+		}
+	},
+	"agents": {
+		"turn": {
+			"hookReminder": "自動リマインダー（フック {{hook}}）— あなたからの指示ではありません：{{text}}",
+			"ended": "エージェントが終了しました。",
+			"proofFilmed": "受け入れテストを録画しました：ワークスペースのブラウザで {{seconds}} 秒。",
+			"compactedManual": "リクエストに応じてコンテキストを圧縮しました。",
+			"compactedAuto": "コンテキストを圧縮しました：空きを作るために会話を要約しました。",
+			"resumed": "会話を再開しました。",
+			"relaunchedModeKept": "{{mode}} モードで再起動しました — スレッドは維持されています。",
+			"relaunchedModeFresh": "{{mode}} モードで再起動しました — 新しい会話です（エージェントにはまだセッションがありませんでした）。",
+			"relaunchedModelKept": "{{model}} で再起動しました — スレッドは維持されています。",
+			"relaunchedModelFresh": "{{model}} で再起動しました — 新しい会話です。"
+		},
+		"modes": {
+			"plan": {
+				"label": "計画",
+				"hint": "何も実行せずに提案する"
+			},
+			"default": {
+				"label": "慎重",
+				"hint": "ツールごとに確認する"
+			},
+			"acceptEdits": {
+				"label": "編集",
+				"hint": "確認せずにファイルを編集する"
+			},
+			"bypassPermissions": {
+				"label": "制限なし",
+				"hint": "確認も制限もなし — 使い捨ての worktree 専用に"
+			}
+		},
+		"models": {
+			"default": {
+				"label": "デフォルト",
+				"hint": "このマシンで設定されているモデル"
+			},
+			"fable": {
+				"hint": "最も高性能 — 思考は常にオン"
+			},
+			"opus": {
+				"hint": "負荷の高い作業の定番"
+			},
+			"sonnet": {
+				"hint": "性能と速度のバランス"
+			},
+			"haiku": {
+				"hint": "高速、シンプルなタスク向け"
+			}
+		},
+		"review": {
+			"delivered_other": "PR #{{number}} のレビュー完了：指摘 {{count}} 件",
+			"recordFailed": "レビューを保存できませんでした：{{error}}"
+		},
+		"see": "表示",
+		"notify": {
+			"ended": "エージェントが終了しました",
+			"replied": "エージェントが返答しました",
+			"question": "エージェントから質問があります",
+			"permission": "権限のリクエスト · {{tool}}"
+		},
+		"survivors": {
+			"title_one": "エージェントがあなたなしで作業を続けました",
+			"title_other": "{{count}} 件のエージェントがあなたなしで作業を続けました",
+			"detail_other": "Cockpit は閉じられていましたが、リレーで作業を続けていました",
+			"done_other": "ワークスペースに戻り、会話を再読み込みしました。"
+		}
+	}
+}

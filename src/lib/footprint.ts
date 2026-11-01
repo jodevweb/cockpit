@@ -42,7 +42,8 @@ export interface Footprint {
 
 /** Au-delà, les zones les plus légères se rangent ensemble. */
 const MAX_ZONES = 4;
-const ROOT = "racine";
+// Les fichiers posés à la racine du dépôt : `./` se lit dans toutes les langues.
+const ROOT = "./";
 const ELSEWHERE = "ailleurs";
 
 function fateOf(state: string): Fate {

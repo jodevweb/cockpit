@@ -1,1 +1,455 @@
-{}
+{
+	"error": {
+		"missingCredential": "{{service}} 尚未配置 — 请在设置中添加其令牌。",
+		"network": "网络：{{error}}"
+	},
+	"accounts": {
+		"claudeNotFound": "在本机上找不到 `claude` CLI。",
+		"cliLaunch": "启动 CLI：{{error}}",
+		"cliNoAnswer": "CLI 没有响应。",
+		"cliUnreadable": "无法读取 CLI 的响应。",
+		"duplicateId": "有两个账户共用标识符“{{id}}”：而标识符正是区分它们的依据。",
+		"missingDir": "账户“{{id}}”没有文件夹：文件夹正是将它与其他账户区分开的依据。",
+		"sameAsHome": "账户“{{id}}”指向本机的文件夹：两者将变成同一个账户。",
+		"createDir": "创建 {{path}}：{{error}}",
+		"saveConfig": "保存配置：{{error}}"
+	},
+	"libre": {
+		"folderNotFound": "找不到文件夹：{{path}}",
+		"branchNameRequired": "请为智能体的分支命名。",
+		"unknownPlace": "未知位置：{{place}}",
+		"worktreeDirty": "该 worktree 有未提交的更改：请提交它们，或选择“全部丢弃”。（{{error}}）"
+	},
+	"mcp": {
+		"noServers": "此仓库未声明任何 MCP 服务器。",
+		"blockerLocal": "本地地址：在容器内，此地址指向容器而非本机",
+		"blockerNotInImage": "`{{command}}` 不在隔离镜像中",
+		"blockerOauth": "OAuth 授权：它存储在本机的钥匙串中，而容器无法访问"
+	},
+	"tasks": {
+		"configDir": "配置文件夹：{{error}}",
+		"serialize": "序列化子任务：{{error}}",
+		"write": "写入子任务：{{error}}",
+		"titleRequired": "子任务需要一个标题。"
+	},
+	"qa": {
+		"fileUnreadable": "无法读取的文件：{{error}}",
+		"fileTooLarge": "文件过大，无法预览（{{size}} MB）。",
+		"readFailed": "无法读取：{{error}}"
+	},
+	"proof": {
+		"unavailable": "录制的证据不可用",
+		"ffmpegMissing": "找不到 ffmpeg",
+		"ffmpegHint": "QA 截图已保留，但不会合成视频。请安装 ffmpeg（`brew install ffmpeg`），以便在发现结果下方重新看到视频。"
+	},
+	"runner": {
+		"dirNotFound": "找不到目录：{{path}}",
+		"launchFailed": "无法启动：{{error}}",
+		"unknownJob": "未知作业"
+	},
+	"terminal": {
+		"folderNotFound": "找不到文件夹：{{path}}",
+		"open": "打开终端：{{error}}",
+		"shellLaunch": "启动 shell {{shell}}：{{error}}",
+		"read": "读取终端：{{error}}",
+		"writeSetup": "终端写入器：{{error}}",
+		"inactive": "该终端已不再活动。",
+		"write": "写入终端：{{error}}",
+		"resize": "调整大小：{{error}}"
+	},
+	"tickets": {
+		"noTracker": "未配置任何问题跟踪工具：请填写 Linear 令牌、GitLab 项目或 GitHub 仓库。",
+		"linearTeamMissing": "缺少 Linear 团队标识符：请在“设置 → 团队”中填写。它是团队设置页面 URL 中可见的 UUID，而不是作为工单前缀的键。"
+	},
+	"relay": {
+		"settingUnreadable": "无法读取的设置：{{error}}",
+		"dir": "中继文件夹：{{error}}",
+		"file": "中继文件：{{error}}",
+		"launch": "启动分离的智能体：{{error}}"
+	},
+	"sandbox": {
+		"buildDir": "构建文件夹：{{error}}",
+		"writeDockerfile": "写入 Dockerfile：{{error}}",
+		"imageMissing": "镜像“{{image}}”在本机上不可用。请自行构建或拉取，或在“设置 → 任务”中将该字段留空，以使用 Cockpit 能自行构建的镜像。",
+		"claudeNotFound": "在本机上找不到 `claude` CLI。"
+	},
+	"sessions": {
+		"todoUpdate": "待办列表更新",
+		"noPrompt": "没有提示词的会话",
+		"notFound": "找不到会话：{{path}}",
+		"unknownStatus": "未知"
+	},
+	"executions": {
+		"outputTruncated": "输出共 {{bytes}} 字节，上方为摘录",
+		"turnEnded": "回合已结束。",
+		"turnResumed": "已重新启动下一回合。",
+		"agentDone": "智能体已结束。",
+		"orphaned": "Cockpit 在本次运行期间停止了。"
+	},
+	"usage": {
+		"claudeNotFound": "找不到 `claude` CLI。",
+		"cliRefused": "CLI 拒绝了该请求。",
+		"limitsRead": "读取限额：{{error}}",
+		"limits": {
+			"session": "当前会话",
+			"week": "本周"
+		}
+	},
+	"monitor": {
+		"localRepoSource": "{{label}} · 本地仓库",
+		"repoHere": "此处为“{{slug}}”。",
+		"repoWrite": "填写“{{slug}}”",
+		"repoFixInSettings": "请在“设置 → 项目”中修正。",
+		"repoMissingOwner": "该项目的 GitHub 仓库被设置为“{{repo}}”：缺少所有者。应为“所有者/仓库”，与仓库 URL 中的形式一致。"
+	},
+	"metrics": {
+		"noProperties": "未声明任何属性：此仓库中没有任何必须始终成立的内容受到检查，影响分析仍然只是一种解读。",
+		"uncalibrated": "没有任何属性经过仓库修复记录的检验：没有证据表明它们可能失效，而一个不可能失效的属性只能让人安心，却无法保证任何事。",
+		"decorative": "{{count}} 个属性在真实修复上什么都没捕获到。请改写或删除它们：装饰性的护栏会消耗注意力，而这些注意力本可用在别处。",
+		"idleLessons": "{{total}} 条经验中有 {{idle}} 条从未随智能体一起发出。要么是它们的范围太窄，要么是它们本就不值得保留。",
+		"noTakeBack": "在数十次交付中没有记录任何返修。这是可能的 — 但更可能意味着已经没人在审查了。",
+		"takeBackRate": "每两次交付就有一次被手动返修（{{rate}}%）。智能体缺少的东西可以在笔记中找到：在增加护栏之前，应先看那里。",
+		"longHaul": "{{part}}% 的对话需要超过十次追问。一个需要重启十次的智能体，是一个出发时就不知道要做什么的智能体。"
+	},
+	"tour": {
+		"since": "自 {{ref}} 以来",
+		"sinceBefore": "自 {{sha}} 之前以来",
+		"sinceLastCommit": "自上次提交以来",
+		"notGit": "此文件夹不是 git 仓库：没有可浏览的内容。",
+		"noChanges": "没有可浏览的更改。",
+		"unreadableStory": "返回的导览无法读取 — 请重试。"
+	},
+	"voiceInput": {
+		"noMic": "本机没有麦克风。",
+		"mic": "麦克风：{{error}}",
+		"unsupportedFormat": "不支持的麦克风格式：{{format}}",
+		"micDenied": "麦克风访问被拒绝：{{error}} — 请检查“系统设置 → 隐私与安全性 → 麦克风”。",
+		"notOpen": "麦克风未打开。",
+		"noKey": "没有 ElevenLabs 密钥：请在语音菜单中保存。",
+		"unreachable": "无法连接 ElevenLabs：{{error}}",
+		"refused": "转写被拒绝（{{status}}）：{{body}}",
+		"unreadable": "无法读取的转写：{{error}}",
+		"saveShortcut": "保存快捷键：{{error}}"
+	},
+	"speech": {
+		"invalidKey": "该密钥看起来不像 ElevenLabs API 密钥。",
+		"keychainRefused": "钥匙串拒绝了该密钥：{{error}}",
+		"female": "女声",
+		"male": "男声",
+		"french": "法语",
+		"noKey": "钥匙串中没有 ElevenLabs 密钥。",
+		"unreachable": "无法连接 ElevenLabs：{{error}}",
+		"keyRefused": "ElevenLabs 拒绝了该密钥（{{status}}）。",
+		"noVoice": "此 ElevenLabs 账户中没有语音。",
+		"invalidVoice": "无效的 ElevenLabs 语音：{{voice}}",
+		"refused": "ElevenLabs 拒绝（{{status}}）：{{body}}",
+		"audioFile": "音频文件：{{error}}"
+	},
+	"system": {
+		"pathNotFound": "找不到路径：{{path}}",
+		"noEditor": "未配置编辑器：请在“设置 → 工作站”中设置。",
+		"terminalFailed": "无法控制 Terminal.app。",
+		"emptyPrompt": "该提示词为空。",
+		"linkNotOpenable": "无法打开链接：{{url}}",
+		"linkFailed": "未能打开链接：{{url}}",
+		"pathNotOpenable": "无法打开路径：{{path}}",
+		"fileNotFound": "找不到文件：{{path}}",
+		"noApp": "没有应用程序可以打开此文件：{{path}}",
+		"pathNotRevealable": "无法显示路径：{{path}}",
+		"packageJsonMissing": "在此仓库中找不到 package.json。",
+		"packageJsonUnreadable": "无法读取的 package.json：{{error}}",
+		"generalGroup": "通用",
+		"dockerDown": "Docker 没有响应 — 守护进程是否在运行？",
+		"unknownProcess": "未知进程。"
+	},
+	"notebook": {
+		"dir": "笔记文件夹：{{error}}",
+		"unreadable": "无法读取的笔记：{{error}}",
+		"write": "写入笔记：{{error}}",
+		"emptyLesson": "空的经验教不了任何东西。",
+		"handbackGone": "该返修记录已不存在。",
+		"nothingToLearn": "这次返修没有值得保留的内容 — 只是一次性修复。"
+	},
+	"files": {
+		"folderNotFound": "找不到文件夹：{{path}}",
+		"invalidPath": "无效的文件路径。",
+		"folderMissing": "文件夹不存在：{{path}}",
+		"isFolder": "此路径指向一个文件夹。",
+		"writeFile": "写入 {{path}}：{{error}}",
+		"replaceFile": "替换 {{path}}：{{error}}",
+		"attachmentsDir": "附件文件夹：{{error}}",
+		"tooManySameName": "此对话中同名附件过多。",
+		"fileUnreadable": "无法读取的文件：{{error}}",
+		"folderNotAttachable": "无法附加文件夹：请选择文件。",
+		"fileTooLarge": "{{name}} 大小为 {{size}} MB — 超过 {{max}} MB，最好将其路径提供给智能体。",
+		"copyAttachment": "复制附件：{{error}}",
+		"badEncoding": "无法读取的附件：意外的编码。",
+		"attachmentTooLarge": "该附件大小为 {{size}} MB — 超过 {{max}} MB，请保存后提供其路径。",
+		"emptyAttachment": "空附件。",
+		"writeAttachment": "写入附件：{{error}}"
+	},
+	"git": {
+		"commandFailed": "git {{args}} 失败：{{error}}",
+		"detachedHead": "分离的 HEAD：此文件夹中没有可发布的分支。",
+		"commitMessageRequired": "提交需要一条消息。",
+		"noWorktree": "git 未报告任何 worktree。",
+		"pathMissing": "{{path}} 不存在。",
+		"invalidBranchName": "“{{name}}”不是有效的分支名称。",
+		"branchExists": "分支“{{name}}”已存在。",
+		"branchCreated": "已基于 {{base}} 创建分支 {{name}}。",
+		"noCommonAncestor": "`{{branch}}` 与 `{{base}}` 没有共同祖先 — 无法比较。"
+	},
+	"browser": {
+		"unreachable": "无法连接浏览器：{{error}}",
+		"unreadable": "无法读取浏览器响应：{{error}}",
+		"notOpen": "该浏览器未打开。",
+		"closed": "浏览器已关闭。",
+		"notRunning": "此工作区的浏览器没有运行。",
+		"noPage": "没有打开的页面。",
+		"pageConnection": "页面连接被拒绝：{{error}}",
+		"pageQuery": "查询页面：{{error}}",
+		"pageNoAnswer": "页面没有响应。",
+		"noPort": "无法为浏览器预留端口。",
+		"notFound": "找不到浏览器：请安装 Chrome、Chromium、Edge 或 Brave，或在工作流设置中指定你的浏览器。",
+		"startFailed": "浏览器未能启动：{{error}}",
+		"startedNoAnswer": "浏览器已启动，但没有响应。",
+		"noDebugAddress": "浏览器未提供其调试地址。",
+		"connection": "浏览器连接被拒绝：{{error}}"
+	},
+	"config": {
+		"connectorMissing": {
+			"github": "仓库（`github.repo`），以及令牌或 `gh` 会话",
+			"linear": "Linear 令牌",
+			"gitlab": "GitLab 令牌（`api` 权限范围）以及项目路径",
+			"sentry": "Sentry 令牌",
+			"betterstack": "Better Stack 令牌",
+			"trigger": "Trigger.dev 密钥",
+			"railway": "Railway 令牌",
+			"stripe": "Stripe 密钥"
+		},
+		"secretHint": {
+			"github": "经典 `repo` 令牌 — 或留空，Cockpit 将使用 `gh auth token`。",
+			"sentry": "具有 `project:read`、`event:read`、`event:write` 权限范围的用户认证令牌。",
+			"linear": "个人 API 密钥（Settings → API → Personal API keys）。",
+			"gitlab": "具有 `api` 权限范围的个人令牌 — `read_api` 足以读取，但不能更改工单状态。",
+			"trigger": "某个环境的密钥 — 根据环境为 `tr_dev_…`、`tr_prod_…`、`tr_staging_…`（项目 → API keys），而不是 CLI 使用的 `tr_pat_…` 个人访问令牌。",
+			"railway": "账户或工作区令牌（Account Settings → Tokens）— 项目范围的令牌需要同时填写项目标识符。",
+			"betterstack": "Uptime API 令牌（监控和事件）。",
+			"betterstackTelemetry": "“Global API token”（Better Stack → API tokens → Global API tokens）。团队令牌可以列出仪表板，但无法开通数据访问：数值将保持为空。",
+			"betterstackClickhouseHost": "可选：仅当 KPI 令牌无法自行开通访问时才填写。Better Stack → Integrations → SQL API（例如 eu-nbg-2-connect.betterstackdata.com）。",
+			"betterstackClickhouseUsername": "SQL API 用户名，位于主机旁边。",
+			"betterstackClickhousePassword": "SQL API 密码 — 创建后 Better Stack 不会再次显示。",
+			"stripe": "只读受限密钥 `rk_…`（Developers → API keys → Restricted keys）：服务器 API 会拒绝可发布的 `pk_…` 密钥。",
+			"sandboxOauthToken": "在“设置 → 隔离”中运行 `claude setup-token`，并粘贴显示的令牌 — 只需一次，有效期一年。切勿使用主机的令牌：容器无法读取 macOS 钥匙串。"
+		},
+		"secretLabel": {
+			"sandboxOauthToken": "隔离账户（Claude）"
+		},
+		"homeAccount": "本机账户",
+		"defaultEnvironment": "默认",
+		"worktreeHostileValue": "worktree 命令中的值被拒绝（含 shell 字符）：{{value}}",
+		"roles": {
+			"master": "主智能体",
+			"backend": "后端开发",
+			"frontend": "前端开发",
+			"qa": "测试与 QA",
+			"review": "代码审查"
+		}
+	},
+	"integrations": {
+		"githubRepoMissing": "未配置 `github.repo`。",
+		"telemetryTokenMissing": "缺少 Telemetry 令牌。",
+		"unreadableResponse": "无法读取的响应：{{error}}",
+		"unreadableResponseBody": "无法读取的响应（{{error}}）：{{body}}",
+		"sentryNoOrg": "此 Sentry 令牌无法访问任何组织。",
+		"sentrySeveralOrgs": "可访问多个 Sentry 组织（{{orgs}}）— 请在“设置 → Sentry 组织”中选择一个。",
+		"linearNotCreated": "Linear 未创建该工单。",
+		"sentryInvalidIssue": "无效的 Sentry 问题标识符：{{id}}",
+		"kpiTokenMissing": "KPI 仪表板位于 telemetry.betterstack.com，Uptime 令牌无法覆盖。请在设置中添加“Better Stack · KPI”令牌。",
+		"telemetryTeamToken": "此 Telemetry 令牌是团队令牌：它可以列出仪表板，但无法开通数据访问。你需要一个具有写入权限的“Global API token”（Better Stack → API tokens → Global API tokens）。",
+		"telemetryReadOnly": "此全局令牌为只读：开通数据访问属于写入操作。有两种选择 — 重新创建令牌并取消勾选“read-only”，或将现有的 SQL API 凭据（Better Stack → Integrations → SQL API）粘贴到设置中的三个 ClickHouse 字段。",
+		"betterstackConnection": "Better Stack 连接 {{status}} — {{body}}",
+		"betterstackNoCredentials": "Better Stack 的回应中没有可用的连接凭据。",
+		"chartNoQuery": "此图表未提供任何查询。",
+		"issueNotFound": "找不到工单 {{id}}。",
+		"linearUpdateRefused": "Linear 拒绝了该更改。",
+		"priority": {
+			"urgent": "紧急",
+			"high": "高",
+			"medium": "中",
+			"low": "低",
+			"none": "无优先级"
+		},
+		"githubNoLogin": "GitHub 未告知当前登录的是谁。",
+		"githubRepoSet": "请在设置中设置 `github.repo`（例如 acme/monorepo）。",
+		"githubRepoFormat": "请设置 `github.repo`（例如 acme/monorepo）。",
+		"triggerUnknownEnv": "未知的 Trigger.dev 环境：{{name}}",
+		"triggerPatToken": "Trigger.dev 需要的是某个环境的密钥，而不是 `tr_pat_…` 个人访问令牌（CLI 使用的）。仪表板 → 你的项目 → 环境 → API keys。",
+		"railwayNoProject": "此 Railway 令牌未列出任何项目（项目范围的令牌就是如此）。请在仪表板中打开项目，并将 URL `railway.com/project/<标识符>` 中的标识符粘贴到“设置 → Railway 项目”中。",
+		"railwaySeveralProjects": "可访问多个 Railway 项目（{{projects}}）— 请在“设置 → Railway 项目”中选择一个。",
+		"stripePublishableKey": "Stripe 拒绝可发布密钥（`pk_…`）：服务器 API 需要密钥。请在 Developers → API keys → Restricted keys 中创建一个只读受限密钥（`rk_…`），并授予 Events 的 `read` 权限。",
+		"githubUpdateRefused": "GitHub 拒绝了该更改（{{status}}）。",
+		"gitlabProjectSet": "请在设置中设置 GitLab 项目路径（例如 group/project）。",
+		"gitlabUpdateRefused": "GitLab 拒绝了该更改（{{status}}）。",
+		"noCiRun": "“{{branch}}”上没有 CI 运行。",
+		"runNoId": "返回的运行没有标识符。",
+		"githubRerunRefused": "GitHub 拒绝了重新运行（{{status}}）：{{body}}",
+		"githubLabelRefused": "GitHub 拒绝了该标签（{{status}}）：{{body}}",
+		"githubUnlabelRefused": "GitHub 拒绝移除该标签（{{status}}）。",
+		"githubCommentRefused": "GitHub 拒绝了该评论（{{status}}）：{{body}}",
+		"prTitleRequired": "pull request 需要一个标题。",
+		"prSameAsBase": "`{{branch}}` 是基础分支：没有可提议的内容。",
+		"prRefused": "PR 被拒绝（{{status}}）：{{message}}",
+		"githubCloseRefused": "GitHub 拒绝关闭（{{status}}）。"
+	},
+	"lib": {
+		"connectorMissing": {
+			"claude": "本机上的 `claude` CLI",
+			"node": "Node — 任务的权限桥接和工具桥接都依赖它",
+			"docker": "本机上的 Docker"
+		},
+		"config": {
+			"serialize": "序列化配置：{{error}}",
+			"invalid": "无效的配置：{{error}}"
+		},
+		"trigger": {
+			"envNameRequired": "请为该环境命名。",
+			"envKeyRequired": "新环境需要其密钥（`tr_prod_…` / `tr_dev_…`）。"
+		},
+		"project": {
+			"unknown": "未知项目：{{id}}",
+			"notFound": "找不到项目“{{id}}”。",
+			"serialize": "序列化项目：{{error}}",
+			"invalid": "无效的项目：{{error}}",
+			"folderRequired": "请为该项目指定一个文件夹。",
+			"createDir": "创建文件夹：{{error}}",
+			"dirCreated": "文件夹已创建",
+			"pathMissing": "`{{path}}` 不存在。如果你希望创建它，请勾选“创建文件夹”。",
+			"gitInitialized": "Git 仓库已初始化",
+			"repoNameRequired": "请为要创建的仓库命名。",
+			"localRepoRequired": "在为其指定服务器之前，需要先有本地 git 仓库。",
+			"noGhSession": "没有 `gh` 会话：请运行 `gh auth login`。",
+			"noGhToken": "账户“{{account}}”没有令牌。请运行 `gh auth login`。",
+			"publicRepoCreated": "已创建公开 GitHub 仓库",
+			"privateRepoCreated": "已创建私有 GitHub 仓库",
+			"mainRepoRequired": "项目需要其主仓库。",
+			"notGitRepo": "`{{path}}` 不是 git 仓库。Cockpit 可以为你创建：请使用“准备”，而不要手动操作。",
+			"keepOne": "Cockpit 至少保留一个项目 — 请编辑此项目，而不是删除它。"
+		},
+		"git": {
+			"mainRepoInvalid": "`{{path}}` 不是 git 仓库 — 请在设置中修正 `general.main_repo`。",
+			"branch": "分支",
+			"freeAgent": "自由智能体",
+			"freeAgentArchive": "自由智能体清理"
+		},
+		"shortcut": {
+			"unreadable": "无法读取的快捷键：{{error}}",
+			"taken": "已被其他应用占用，或被 macOS 拒绝（{{error}}）。",
+			"refused": "快捷键被拒绝。"
+		},
+		"github": {
+			"repoFormat": "请设置 `github.repo`（例如 acme/monorepo）。",
+			"prFromBase": "`{{branch}}` 是基础分支：请先创建专用分支，再创建 PR。",
+			"prRefused": "PR 被拒绝（{{status}}）：{{message}}",
+			"prCreation": "创建 PR",
+			"repoOwnerFormat": "`github.repo` 必须采用 owner/repo 的形式。",
+			"mergeRefused": "合并被拒绝（{{status}}）：{{message}}",
+			"prMerge": "合并 PR",
+			"prTitleRequired": "pull request 需要一个标题。"
+		},
+		"permanence": {
+			"commentAllowed": "已允许在 PR 上评论",
+			"commentWithdrawn": "已撤回 PR 上的评论权限"
+		},
+		"hygiene": {
+			"mainRepo": "主仓库",
+			"dirty": "{{count}} 处未提交的更改",
+			"unpushed": "{{count}} 个未推送的提交",
+			"prMerged": "PR 已合并",
+			"prClosed": "PR 已关闭且未合并",
+			"prOpen": "PR 已打开",
+			"noPr": "没有已知的 PR"
+		},
+		"worktree": {
+			"buildsPurged": "构建产物已删除",
+			"freed": "已释放 {{size}} 磁盘空间"
+		},
+		"units": {
+			"gb": "{{n}} GB",
+			"mb": "{{n}} MB",
+			"kb": "{{n}} KB"
+		},
+		"interrupted": {
+			"scan": "扫描中断：{{error}}",
+			"read": "读取中断：{{error}}",
+			"compute": "计算中断：{{error}}",
+			"walk": "文件遍历中断：{{error}}"
+		},
+		"window": {
+			"notification": "通知：{{error}}",
+			"monitor": "显示器：{{error}}",
+			"window": "窗口：{{error}}"
+		},
+		"budget": {
+			"reason": "已消耗 {{total}} 个 token，超过 {{budget}} 的上限。任务已暂停：其工作完好无损，如果超支在预期之内，可以恢复它。",
+			"paused": "任务已暂停 — 已达上限"
+		},
+		"automationNotFound": "找不到该自动化。",
+		"mission": {
+			"ticketReferenceRequired": "请粘贴工单的 URL 或标识符。",
+			"unknownTask": "未知子任务。",
+			"fullReviewRequested": "已请求完整审查。",
+			"workerStopped": "执行者已停止：任务恢复时该子任务会重新开始。",
+			"stopped": "任务已停止。分支和 worktree 均已保留。",
+			"agentsUnavailable": "智能体注册表不可用。",
+			"awaitingAgreement": "在你同意拆分之前不会开始任何工作：请先批准每个步骤。",
+			"unknownRole": "未知角色：{{role}}",
+			"workerWorktreeFailed": "无法创建 worktree：{{error}}。执行者未启动 — 主仓库不是任务的工作场地。",
+			"coexistenceUnchecked": "未检查共存性",
+			"workerLaunched": "执行者已启动",
+			"ticketNoId": "该工单没有可读取的标识符。",
+			"alreadyOpen": "{{identifier}} 上已有一个打开的任务：将返回该任务，而不是再创建一个。",
+			"openedGuided": "已在 {{identifier}} 上创建任务：主智能体阅读工单，你和它一起阅读。",
+			"opened": "已在 {{identifier}} 上创建任务，主智能体正在分析工单。",
+			"nodeMissing": "在本机上找不到 Node：任务工具通过由它运行的 MCP 桥接工作。请安装 Node（`brew install node`），然后重新启动任务。普通智能体仍可继续工作。",
+			"integrationWorktreeFailed": "无法为 `{{branch}}` 创建集成 worktree：{{error}}。主智能体不会在主仓库中启动。",
+			"masterLaunched": "主智能体已启动",
+			"unclearVerdict": "{{tasks}} 返回的报告没有可读取的结论：无法判断工作是否通过。请重新启动检查，并要求它以 `VERDICT: ok`、`concerns` 或 `blocking` 作结。如果你放弃它的意见，请将该子任务标记为已放弃 — 这将是一个决定，而不是疏忽。",
+			"blockingVerdict": "{{tasks}} 返回了阻塞性结论。请修复被指出的问题，然后重新启动检查：新的结论将解除拒绝。如果你认为批评没有依据，请用 `rework` 退回并说明理由。",
+			"unintegrated": "{{count}} 个子任务不在 `{{branch}}` 中：{{tasks}}。请集成它们，或者如果你放弃它们的工作，将其标记为已放弃。",
+			"launchSuspendedQuota": "启动已暂缓 — 配额不足",
+			"quotaFloor": "剩余配额低于 {{floor}}% 时，不会开始新的子任务。",
+			"launchSuspended": "启动已暂缓",
+			"tooManyWorkers": "本机上已有 {{count}} 个执行者在运行",
+			"taskWithoutId": "子任务没有标识符：请重新规划任务。",
+			"taskBlocked": "子任务被阻塞",
+			"worktreeFailed": "无法创建 worktree：{{error}}",
+			"noWorkerAttached": "没有分配执行者：启动未成功。请重新启动该子任务。",
+			"workerDiedSilent": "执行者停止了，没有产出任何内容 — 启动被拒绝了？",
+			"workerOtherBranch": "执行者跑到了另一个分支上",
+			"workerOtherBranchDetail": "{{count}} 个提交在 `{{actual}}` 上，而不是 `{{expected}}`。",
+			"workerOtherBranchNote": "它的工作在 `{{actual}}` 上（{{count}} 个提交），而不是 `{{expected}}`：应集成的是前者。",
+			"workerDoneNoCommit": "执行者已完成，其分支上没有任何提交。",
+			"workerDoneOneCommit": "执行者已完成 — 1 个提交。",
+			"workerDoneCommits": "执行者已完成 — {{count}} 个提交。",
+			"checkNoVerdict": "检查没有结论",
+			"checkNoVerdictDetail": "其报告没有给出可读取的结论：Cockpit 无法判断工作是否通过。请重新启动，或手动决定。",
+			"checkBlocking": "阻塞性检查",
+			"checkBlockingDetail": "在此拒绝解除之前，pull request 将保持关闭。",
+			"masterTimedOut": "主智能体已中断 — 回合过长",
+			"masterTimedOutDetail": "{{minutes}} 分钟没有响应：已切断，以便自动恢复机制重新启动一个新的主智能体。",
+			"allDelivered": "所有执行者都已交付。主智能体正在重新整合。",
+			"masterNotRelaunched": "主智能体未重新启动",
+			"integrationResumed": "集成已恢复",
+			"integrationResumedDetail": "没有主智能体在负责该任务；已针对剩余工作重新启动一个。",
+			"integrationNotResumed": "集成未恢复",
+			"outOfScopeRefused": "超出范围的写入被拒绝"
+		},
+		"quoted": "“{{text}}”",
+		"tailscaleDown": "Tailscale 没有响应。",
+		"sentryIssue": {
+			"description": "Sentry 报告的错误。\n\n**项目**：{{project}}\n**来源**：{{culprit}}\n**影响**：{{events}} 次出现，{{users}} 个用户\n\n[在 Sentry 中打开]({{permalink}})\n\n_工单由 Cockpit 创建。_",
+			"note": "Linear 工单 {{identifier}} — {{url}}"
+		}
+	}
+}

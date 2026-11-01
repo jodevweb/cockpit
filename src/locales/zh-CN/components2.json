@@ -1,0 +1,990 @@
+{
+	"agentMap": {
+		"genre": {
+			"frise": "时间线",
+			"avant_apres": "前后对比",
+			"mesure": "测量",
+			"table": "表格",
+			"capture": "带注释的截图",
+			"matrice": "矩阵"
+		},
+		"eyebrow": {
+			"ask": "你的指令",
+			"explore": "探索",
+			"subagent": "子智能体",
+			"changed": "已更改的文件",
+			"andAlso": "以及",
+			"tests": "测试",
+			"commands": "命令",
+			"visuals": "图像",
+			"review": "代码审查已完成",
+			"reviewPr": "代码审查已完成 · PR #{{pr}}",
+			"footprint": "更改内容 · {{base}}",
+			"earlier": "此前",
+			"asking": "在向你提问",
+			"conclusion": "它的结论",
+			"said": "它说",
+			"yours": "轮到你了",
+			"now": "此刻",
+			"error": "错误",
+			"delivered": "已交付",
+			"pastAsk": "之前的指令"
+		},
+		"ask": {
+			"replies_other": "+ 你的 {{count}} 条回复"
+		},
+		"explore": {
+			"files_other": "浏览了 {{count}} 个文件",
+			"searches_other": "{{count}} 次搜索"
+		},
+		"agent": {
+			"gestures": "{{count}} 个操作"
+		},
+		"change": {
+			"others_other": "其他 {{count}} 个文件"
+		},
+		"tests": {
+			"running": "测试正在运行",
+			"noResult": "测试没有结果",
+			"failing": "测试未通过",
+			"passing": "测试通过",
+			"failuresSoFar_other": "目前失败 {{count}} 次",
+			"failuresBefore_other": "通过前失败了 {{count}} 次",
+			"runs_other": "运行 {{count}} 次"
+		},
+		"commands": {
+			"ran_other": "运行了 {{count}} 条命令"
+		},
+		"failedCount": "{{count}} 个失败",
+		"review": {
+			"blocking_other": "{{count}} 个阻塞",
+			"important_other": "{{count}} 个重要",
+			"suggestion_other": "{{count}} 条建议",
+			"merge": "可以合并",
+			"blockingVerdict": "阻塞",
+			"changes": "需要修改",
+			"delivered": "代码审查已完成",
+			"nothing": "没有需要指出的问题",
+			"open": "逐条打开代码审查",
+			"loading": "正在读取已保存的代码审查…"
+		},
+		"severity": {
+			"bloquant": "阻塞",
+			"important": "重要",
+			"suggestion": "建议"
+		},
+		"said": {
+			"earlier_other": "之前的 {{count}} 条消息"
+		},
+		"waiting": {
+			"title": "智能体正在等待你的回复",
+			"detail": "请查看顶部的卡片"
+		},
+		"live": {
+			"using": "正在使用 {{tool}}",
+			"thinking": "正在思考"
+		},
+		"delivered": {
+			"pr": "PR {{list}}",
+			"commits_other": "{{count}} 个提交",
+			"pushed": "已推送到 {{branches}}"
+		},
+		"media": {
+			"images_other": "{{count}} 张图片",
+			"pdfs": "{{count}} 个 PDF",
+			"videos_other": "{{count}} 个视频"
+		},
+		"warn": {
+			"edits": "已返工 {{count}} 次",
+			"editsDuring": "在 {{duration}} 内返工 {{count}} 次",
+			"tests": "连续 {{count}} 次出现相同失败",
+			"testsDuring": "在 {{duration}} 内连续 {{count}} 次出现相同失败",
+			"repeat": "“{{command}}”重复运行了 {{count}} 次"
+		},
+		"loop": {
+			"edits": "{{file}} 已返工 {{count}} 次",
+			"tests": "{{target}} 连续失败 {{count}} 次",
+			"repeat": "{{target}} 重复运行了 {{count}} 次"
+		},
+		"folded": {
+			"changed_other": "更改了 {{count}} 个文件",
+			"testsKo": "测试未通过",
+			"testsOk": "测试通过",
+			"nothingChanged": "没有更改",
+			"resumed": "已恢复",
+			"circled": "陷入了循环：{{loop}}"
+		},
+		"empty": "写下你的指令：智能体所做工作的地图会在这里随着进展一步步绘制出来。",
+		"backToNow": "回到当前",
+		"needsYou": "智能体需要你",
+		"panel": {
+			"fullText": "完整文本",
+			"terminal": "它的终端",
+			"gone": "此步骤已不在地图上：你正在查看它的最后一个版本。",
+			"thinking": "它正在思考：它运行的任何内容一运行就会显示在这里。",
+			"nothing": "此步骤没有可详述的内容。"
+		},
+		"remark": {
+			"anchor": "步骤“{{title}}”",
+			"placeholder": "关于此步骤的备注 — 智能体会知道你指的是哪一步。",
+			"later": "稍后",
+			"laterTitle": "与其他备注一起保留，稍后一并发送",
+			"send": "发送"
+		},
+		"strip": {
+			"episodes": "片段"
+		},
+		"state": {
+			"subagents_other": "{{count}} 个子智能体",
+			"waiting": "等待你的回复",
+			"working": "工作中",
+			"awaiting": "等待 {{agents}}",
+			"thinking": "思考中",
+			"asks": "在向你提问",
+			"done": "已完成",
+			"background": "{{agents}} 在后台运行",
+			"idle": "没有运行中的操作 · 轮到你了",
+			"quietTitle": "一段时间没有新动态：可能是一条耗时的命令，或者智能体卡住了。",
+			"since": "已持续 {{duration}}",
+			"loopTitle": "值得一看的重复：智能体不一定卡住了，但它一直在回到同一处。",
+			"circling": "正在兜圈子",
+			"circled": "兜过圈子",
+			"compactedTitle": "CLI 已总结对话以腾出空间。对于智能体之前读过的内容，它只保留了摘要：如果它依赖某个细节，应该重新读取。",
+			"compacted": "{{ago}}记忆已总结",
+			"sinceAsk": "自你的指令以来 {{duration}}",
+			"total": "总计 {{duration}}",
+			"tour": "浏览更改"
+		},
+		"node": {
+			"remarkPending": "有一条备注等待发送",
+			"took": "此步骤耗时",
+			"expandTitle": "展开此片段",
+			"collapseTitle": "折叠此片段",
+			"expand": "展开",
+			"collapse": "折叠"
+		},
+		"viewLarge": "查看大图",
+		"since": {
+			"longTitle": "耗时较长：一条没有返回的命令，或者智能体卡住了。",
+			"title": "自此步骤开始以来"
+		},
+		"stage": {
+			"before": "之前",
+			"after": "之后"
+		},
+		"fate": {
+			"deleted": "已删除",
+			"created": "已创建",
+			"modified": "已修改"
+		},
+		"fateCount": {
+			"deleted_other": "已删除 {{count}} 个",
+			"created_other": "已创建 {{count}} 个",
+			"modified_other": "已修改 {{count}} 个"
+		},
+		"footprint": {
+			"lede": "读取自仓库，{{base}} — 而非智能体的说法。请与它的结论进行比较。"
+		},
+		"tourFiles": "逐个文件浏览更改",
+		"deliveredSections": {
+			"pullRequests": "Pull request",
+			"commits": "提交",
+			"pushed": "已推送",
+			"files": "生成的文件"
+		},
+		"gallery": {
+			"enlarge": "放大"
+		}
+	},
+	"missionJourney": {
+		"journey": {
+			"understanding": "理解",
+			"approach": "方案",
+			"split": "拆分",
+			"execution": "执行",
+			"delivery": "交付"
+		},
+		"copy": {
+			"understanding": {
+				"working": "主智能体正在阅读工单",
+				"workingHint": "你也可以同时在左侧阅读。稍后，它会告诉你它的理解 — 最多十行，问题单独列出。",
+				"proposal": "主智能体的理解",
+				"approve": "批准 — 进入方案阶段"
+			},
+			"approach": {
+				"working": "主智能体正在准备方案",
+				"workingHint": "它打算如何着手：步骤、代码中的位置、顺序、风险。此时尚未在执行者之间分工。",
+				"proposal": "提出的方案",
+				"approve": "批准 — 进入拆分阶段"
+			},
+			"split": {
+				"working": "主智能体正在拆分工作",
+				"workingHint": "谁做什么、在哪里做、按什么顺序 — 忠实于你批准的方案。在你同意之前不会开始任何工作。",
+				"proposal": "提出的拆分",
+				"approve": "批准 — 启动执行者"
+			}
+		},
+		"stop": {
+			"title": "放弃“{{title}}”？",
+			"message": "主智能体将被停止，任务将被关闭。已批准的内容仍可在其历史记录中查看。",
+			"confirm": "放弃",
+			"done": "任务已放弃。"
+		},
+		"back": "任务",
+		"noBranch": "无分支",
+		"stepper": {
+			"yours": "轮到你了",
+			"stopped": "已停止",
+			"masterStopped": "主智能体已停止",
+			"tasksProgress": "{{done}}/{{total}} 个子任务",
+			"integrating": "正在集成…",
+			"masterWriting": "主智能体正在撰写…",
+			"approvedVersion": "已批准 · v{{version}}",
+			"approved": "已批准",
+			"tasks_other": "{{count}} 个子任务",
+			"prOpen": "PR 已打开",
+			"closed": "已结束"
+		},
+		"nothingProposed": "此步骤没有提出任何内容。",
+		"yourMove": "轮到你了",
+		"working": {
+			"relaunched": "主智能体已重新启动：它将从已批准的内容继续。",
+			"starting": "主智能体正在启动…",
+			"stopped": "主智能体已停止",
+			"startingHint": "它会读取工单，并从已批准的内容继续。只需几秒钟。",
+			"stoppedHint": "目前没有人在处理此步骤：在重新启动之前不会有任何提案。",
+			"correction": "你的修正，正在被纳入考虑",
+			"plusAnswers": "+ 你对其问题的回答",
+			"now": "它此刻在做什么",
+			"notRunning": "主智能体没有运行。请重新启动它：它会从已批准的内容继续，不会再次询问你已确认的内容。",
+			"relaunch": "重新启动主智能体"
+		},
+		"proposal": {
+			"maxTitle": "Cockpit 会拒绝更长的提案",
+			"lines": "{{count}}/{{max}} 行"
+		},
+		"split": {
+			"executors_other": "{{count}} 个执行者",
+			"estimate_other": "约 {{duration}} 的工作量，基于 {{count}} 个规模相近的任务",
+			"failureRate": "{{percent}}% 失败"
+		},
+		"task": {
+			"verifies": "评判其他人的工作",
+			"wholeRepoRead": "整个仓库，只读",
+			"wholeRepoNoScope": "整个仓库 — 未声明范围",
+			"after": "在“{{title}}”之后开始",
+			"hideBrief": "隐藏背景资料",
+			"readBrief": "阅读其完整背景资料"
+		},
+		"decision": {
+			"splitApproved": "拆分已批准 — 执行者已出发。",
+			"approved": "已批准 — 主智能体继续推进。",
+			"correctionSent": "修正已发送 — 主智能体正在修改其提案。",
+			"needsYou_other": "它需要你 · {{count}} 个问题",
+			"answerPlaceholder": "你的回答…",
+			"feedbackLabel": "补充说明或修正？",
+			"placeholder": {
+				"understanding": "例如：针对的不是管理界面，而是客户区。",
+				"approach": "例如：复用现有的导出服务，而不是新建一个。",
+				"split": "例如：合并两个前端子任务，它们涉及相同的文件。"
+			},
+			"unanswered_other": "{{count}} 个问题未回答：如果你批准，主智能体将自行决定。",
+			"withFeedback": "批准时也会一并传达你的补充说明。",
+			"nothingWithoutYou": "未经你批准，不会发出任何内容。",
+			"correctTitle": "请写明哪里不对：如果没有理由，主智能体会再次提出同样的提案。",
+			"requestVersion": "请求新版本"
+		},
+		"verdict": {
+			"approved": "已批准",
+			"corrected": "已修正"
+		},
+		"quoted": "“{{text}}”",
+		"versions": {
+			"hide": "隐藏之前的版本 · {{count}}",
+			"show": "显示之前的版本 · {{count}}"
+		},
+		"ticket": {
+			"title": "工单",
+			"openExternal": "在服务提供方处打开",
+			"noTicket": "此任务并非来自工单：“{{title}}”。",
+			"assignee": "分配给 {{name}}",
+			"noDescription": "没有描述。",
+			"comments": "评论 · {{count}}"
+		}
+	},
+	"workspaceTiles": {
+		"tiles": {
+			"progress": {
+				"eyebrow": "进度",
+				"title": "此智能体在其指令中进行到哪一步"
+			},
+			"branch": {
+				"eyebrow": "视图",
+				"title": "与分支相关的一切"
+			},
+			"pr": {
+				"eyebrow": "pull request",
+				"title": "此分支的 pull request"
+			},
+			"mission": {
+				"eyebrow": "任务",
+				"title": "打开此文件夹的任务"
+			},
+			"agents": {
+				"eyebrow": "智能体",
+				"title": "此文件夹的智能体和终端"
+			},
+			"commits": {
+				"eyebrow": "提交",
+				"title": "提交，以及尚未提交的内容"
+			},
+			"docs": {
+				"eyebrow": "文档",
+				"title": "worktree 中的文档"
+			},
+			"captures": {
+				"eyebrow": "QA",
+				"title": "QA 截图"
+			},
+			"ports": {
+				"eyebrow": "服务器",
+				"title": "此文件夹中正在运行的内容"
+			},
+			"ticket": {
+				"eyebrow": "工单",
+				"title": "此分支的工单"
+			},
+			"review": {
+				"eyebrow": "代码审查",
+				"title": "PR 的代码审查"
+			},
+			"territory": {
+				"eyebrow": "领地",
+				"title": "工地的智能体，叠加在代码之上"
+			},
+			"browser": {
+				"eyebrow": "浏览器",
+				"title": "智能体正在操控的页面，实时显示"
+			}
+		},
+		"progress": {
+			"label": "进度",
+			"title": "智能体的步骤、子智能体，以及已工作的时长",
+			"silent": "已沉默 {{duration}}",
+			"steps_other": "{{done}} / {{count}} 个步骤",
+			"helpers_other": "{{back}} / {{count}} 个子智能体已返回",
+			"busyNoSteps": "工作中 — 它没有维护步骤列表",
+			"idle": "没有运行中的操作"
+		},
+		"board": {
+			"workingFor": "已工作",
+			"launchedAgo": "指令发送于",
+			"lastActionAgo": "最后操作",
+			"toolCalls": "工具调用",
+			"filesWritten": "写入的文件",
+			"brief": "当前指令",
+			"steps": "它的步骤",
+			"countNotPercent": "这是计数而非百分比：智能体发现更多工作时会扩展其列表。",
+			"noSteps": "此智能体没有维护步骤列表：无法得知工作完成了多少。以下内容只表明它在推进。",
+			"helpers": "它的子智能体",
+			"helpersBack_other": "{{back}} / {{count}} 已返回",
+			"helperRunning": "运行中",
+			"helperFailed": "失败",
+			"helperDone": "已返回",
+			"lastAction": "它的最后操作"
+		},
+		"verdict": {
+			"merge": "可以合并",
+			"corrections": "需要修改",
+			"bloquant": "阻塞"
+		},
+		"branch": {
+			"prDraft": "草稿",
+			"prOpen": "已打开",
+			"prMerged": "已合并",
+			"prClosed": "已关闭",
+			"headerTitle": "PR、工单、代码审查、提交、文档",
+			"label": "视图",
+			"seeAll": "查看全部",
+			"ciRed": "CI 失败",
+			"ciGreen": "CI 通过",
+			"ciPending": "CI…",
+			"searchingPr": "正在查找 PR…",
+			"noPr": "尚无 PR",
+			"noTicket": "无工单",
+			"reviewTitle": "PR 的代码审查",
+			"recheck": "待复查",
+			"reviewRound": "代码审查 · 第 {{number}} 轮",
+			"notReviewed": "尚未审查",
+			"mission": "任务",
+			"agentsTitle": "此文件夹的智能体和终端，及其上下文",
+			"working_other": "{{count}} 个工作中",
+			"agents_other": "{{count}} 个智能体",
+			"terminals_other": "{{count}} 个终端",
+			"commitsTitle": "分支的提交，以及尚未提交的内容",
+			"uncommitted_other": "{{count}} 个未提交",
+			"commits_other": "{{count}} 个提交",
+			"commitsLabel": "提交",
+			"documents_other": "{{count}} 个文档",
+			"captures_other": "{{count}} 张截图",
+			"portsTitle": "此文件夹中正在监听的内容",
+			"servers_other": "{{count}} 个服务器"
+		},
+		"territory": {
+			"label": "领地",
+			"title": "此智能体读取和写入的位置、冲突以及过时的读取",
+			"collisions_other": "{{count}} 处冲突",
+			"stale_other": "{{count}} 个已过时",
+			"files_other": "{{count}} 个文件",
+			"written_other": "已写入 {{count}} 个",
+			"read_other": "已读取 {{count}} 个",
+			"untouched": "尚未处理任何文件",
+			"agentsHere_other": "此处有 {{count}} 个智能体"
+		},
+		"browser": {
+			"label": "浏览器",
+			"title": "此文件夹的智能体正在操控的页面 — 点击即可实时打开",
+			"live": "实时",
+			"drivingSelf": "正在操控",
+			"drivingOther": "{{name}} 正在操控",
+			"openRight": "在右侧打开",
+			"blank": "没有打开的页面 — 点击即可打开"
+		}
+	},
+	"assistant": {
+		"shortcutTaken": "{{shortcut}} 已被占用：语音助手将听不到你",
+		"chooseShortcut": "选择快捷键",
+		"see": "查看",
+		"doneSentence": "完成。",
+		"quoted": "“{{text}}”",
+		"close": "关闭",
+		"placeholder": "打开购物车工作区，从 NW-3050 开始一个任务…",
+		"hint": "按住 {{shortcut}} 说话 · ⌘J 输入文字",
+		"errors": {
+			"worktreeNotFound": "找不到 worktree“{{name}}”。",
+			"agentNotFound": "找不到智能体“{{name}}”。",
+			"viewUnknown": "不认识界面“{{name}}”。",
+			"projectNotFound": "找不到项目“{{name}}”。",
+			"workspaceNotFound": "找不到工作区“{{name}}”。",
+			"whichTicket": "你想从哪个工单开始？",
+			"missionNotFound": "找不到任务“{{name}}”。",
+			"noMainRepo": "该项目未设置主仓库。",
+			"whichBranch": "针对哪个分支？",
+			"whichPr": "你想让我审查哪个 PR？",
+			"whatToAsk": "我应该问它什么？",
+			"noWorkspace": "没有打开的工作区：请告诉我在哪个文件夹中工作。",
+			"folderNotFound": "找不到文件夹“{{name}}”。",
+			"notUnderstood": "我没有理解你的请求。"
+		},
+		"mission": {
+			"activity": "来自 {{ticket}} 的任务",
+			"firstStep": "正在阅读工单并启动主智能体…",
+			"started": "任务已开始：{{title}}。",
+			"existed": "该任务已存在。",
+			"existedOpening": "该任务已存在：{{title}}。正在为你打开。"
+		},
+		"branch": {
+			"activity": "分支 {{name}}",
+			"firstStep": "正在创建分支…"
+		},
+		"tell": {
+			"activity": "给 {{name}} 的指令",
+			"sent": "指令已发送：智能体正在处理。",
+			"launched": "已带着指令启动新的智能体。"
+		},
+		"git": {
+			"pullStep": "正在获取最新提交…",
+			"pulled": "分支已是最新。",
+			"pushStep": "正在推送分支…",
+			"pushed": "分支已推送。"
+		},
+		"phase": {
+			"listening": "正在聆听… 说完后松开 {{shortcut}}",
+			"transcribing": "正在转写…",
+			"thinking": "正在思考…",
+			"error": "我没能做到",
+			"done": "完成",
+			"answered": "Cockpit 的回答",
+			"idle": "询问 Cockpit"
+		},
+		"settings": {
+			"nothingHeard": "（没有听到声音 — 请靠近麦克风说话）",
+			"hold": "按住、说话、松开：助手会理解、执行并大声回答 — 即使 Cockpit 位于其他窗口之后。",
+			"keyboard": "通过键盘也能使用，前提是 Cockpit 在前台。",
+			"cost": "你说的话会先由 ElevenLabs 转写（即上方的语音密钥），再由 Claude 通过你的订阅理解：每次请求消耗 ElevenLabs 套餐的几秒钟，以及少量 Claude 配额。操作会直接执行；找不到的内容，它不会去猜。",
+			"noKey": "没有 ElevenLabs 密钥，助手就听不到你 — ⌘J 仍然可用。请在“语音”部分保存密钥。",
+			"speak": "请说话…（4 秒）",
+			"testMic": "测试麦克风",
+			"appOnly": "仅在应用内。",
+			"heard": "听到的内容：",
+			"micDenied": "如果麦克风被拒绝：系统设置 → 隐私与安全性 → 麦克风 → Cockpit。"
+		},
+		"shortcut": {
+			"active": "{{shortcut}} 已生效，在所有应用中可用。",
+			"failed": "无法注册 {{shortcut}}。请选择其他快捷键。",
+			"failedWithError": "无法注册 {{shortcut}}：{{error}} 请选择其他快捷键。",
+			"recording": "请按下组合键…（Esc 取消）",
+			"record": "录制快捷键…"
+		}
+	},
+	"branchBoard": {
+		"gathering": "正在收集与 {{branch}} 相关的所有内容…",
+		"new": "新",
+		"pr": {
+			"draft": "草稿",
+			"open": "已打开",
+			"merged": "已合并",
+			"closed": "已关闭",
+			"number": "PR #{{number}}",
+			"title": "Pull request",
+			"ciRed": "CI 失败",
+			"ciGreen": "CI 通过",
+			"ciRunning": "CI 运行中",
+			"approved": "已批准",
+			"changesRequested": "被要求修改",
+			"notApproved": "尚未批准",
+			"byAuthor": "作者 <author>{{author}}</author>",
+			"reviewRequested": "已请求 {{logins}} 审查",
+			"searching": "正在查找此分支的 PR…",
+			"none": "{{branch}} 没有 PR。"
+		},
+		"review": {
+			"notYet": "PR #{{number}} 尚未审查。",
+			"noPr": "此分支没有 PR：目前没有可审查的内容。",
+			"reviewPr": "审查 PR",
+			"recheck": "复查修复",
+			"reviewThisPr": "审查此 PR"
+		},
+		"ticket": {
+			"none": "分支或 PR 中没有工单标识符。",
+			"title_other": "工单",
+			"notFound": "{{id}}：未找到。"
+		},
+		"mission": {
+			"title": "任务",
+			"tasks_other": "{{count}} 个子任务"
+		},
+		"agents": {
+			"title": "智能体",
+			"none": "此 worktree 上没有智能体。",
+			"reviewReadOnly": "代码审查 · 只读",
+			"review": "代码审查",
+			"working": "工作中",
+			"waiting": "等待中",
+			"stopped": "已停止",
+			"terminal": "终端"
+		},
+		"commits": {
+			"title": "提交",
+			"aheadBehind": "领先 {{ahead}} · 落后 {{behind}}",
+			"none": "没有提交。"
+		},
+		"changes": {
+			"title": "已修改，尚未提交",
+			"none": "没有待处理的内容：所有内容都已提交。"
+		},
+		"captures": {
+			"title": "QA · 截图",
+			"none": "此文件夹中没有 QA 截图。",
+			"count_other": "{{count}} 张截图，最新的在前",
+			"more_other": "还有 {{count}} 张截图…"
+		},
+		"ports": {
+			"title": "正在运行的内容",
+			"memory": "{{mb}} MB"
+		},
+		"docs": {
+			"title_other": "文档 · {{count}}"
+		}
+	},
+	"missionGraph": {
+		"working": "工作中…",
+		"sentBack": "已退回修改",
+		"ticket": {
+			"eyebrow": "工单",
+			"none": "无工单"
+		},
+		"master": {
+			"eyebrow": "主智能体",
+			"title": "统筹任务",
+			"awaitingYou": "等待你的决定",
+			"idle": "待命"
+		},
+		"task": {
+			"asksPermission": "正在请求你的许可",
+			"rejected": "否决了该工作",
+			"delivered": "已提交其工作",
+			"failed": "失败",
+			"waiting": "等待轮到它"
+		},
+		"pr": {
+			"eyebrow": "pull request",
+			"open": "打开",
+			"toOpen": "待创建",
+			"recomposing": "主智能体正在重新整合",
+			"onceVerified": "待全部验证后"
+		},
+		"phase": {
+			"done": "已完成",
+			"live": "工作中",
+			"wait": "等待中",
+			"failed": "失败",
+			"yours": "轮到你了"
+		},
+		"detail": {
+			"close": "关闭",
+			"reproaches_other": "返工 · {{count}}",
+			"fullBrief": "它的完整指令",
+			"follow": "跟进它的对话",
+			"noAgent": "此子任务尚无智能体。"
+		}
+	},
+	"actions": {
+		"openTicket": "在浏览器中打开工单",
+		"openWorktreeNamed": "打开 worktree {{name}}",
+		"permanenceRevoked": "Permanence 将不再在 #{{number}} 上评论。",
+		"permanenceAllowed": "Permanence 可以在 #{{number}} 上报告。每天一条评论，并署名。",
+		"noPrompt": "提示词库中没有此操作的提示词：智能体将在没有指令的情况下启动。",
+		"openPr": "打开 pull request #{{number}}",
+		"fixCiHint": "启动修复 CI 的智能体",
+		"fixCi": "修复 CI",
+		"feedbackHint": "用智能体处理代码审查反馈",
+		"feedback": "反馈",
+		"agentHint": "在此分支上打开智能体",
+		"agent": "智能体",
+		"openWorktree": "打开此分支的 worktree",
+		"allowedHint": "Permanence 可以在此报告。点击撤销。",
+		"allowHint": "允许 Permanence 在此报告，每天一次，并署名。",
+		"allowed": "已允许",
+		"allow": "允许"
+	},
+	"accounts": {
+		"notLoggedIn": "尚未在本机登录。",
+		"loggedIn": "已登录",
+		"nameRequired": "请为账户命名：名称是区分它的依据。",
+		"nameTaken": "已有一个名为“{{label}}”的账户。",
+		"loginTerminal": "登录 — {{label}}",
+		"intro": "账户是智能体工作时使用的身份 — 而不是运行它们的程序，那是引擎的作用。每个账户都有自己的配置文件夹：Cockpit 指向它，CLI 自行在那里登录，没有任何令牌经过这里。关联到某个账户的项目会将一切交给它 — 它的智能体、终端和限额。",
+		"loading": "正在向每个账户确认其身份…",
+		"openProject": "打开的项目",
+		"reconnect": "重新登录",
+		"connect": "登录",
+		"attach": "关联“{{name}}”",
+		"remove": "移除",
+		"new": "新建",
+		"nameLabel": "名称",
+		"nameHint": "将显示在屏幕上的名称",
+		"namePlaceholder": "工作账户",
+		"dirLabel": "文件夹",
+		"dirHint": "留空 = ~/.claude-<名称>",
+		"dirPlaceholder": "~/.claude-work",
+		"add": "添加",
+		"footer": "添加账户时会创建该文件夹；随后在终端中登录，就像你手动操作一样。",
+		"reading": "正在读取…",
+		"reload": "重新加载账户"
+	},
+	"briefBar": {
+		"chars": "{{value}} 个字符",
+		"kchars": "{{value}}k 个字符",
+		"loading": "Cockpit 正在收集它对此分支所了解的信息…",
+		"agentWillKnow": "智能体将会知道",
+		"nothing": "除你的指令外一无所知 — 没有任何声明的来源作出回应。",
+		"collapse": "收起",
+		"expand": "逐字阅读将要附加的内容",
+		"refresh": "重新收集 — 分支可能已有变动",
+		"missing": "无法读取：{{sources}}",
+		"clickToDetach": "{{detail}} — 点击排除",
+		"clickToAttach": "{{detail}} — 点击附加"
+	},
+	"fileFinder": {
+		"recent": "最近打开",
+		"writtenByAgents": "由智能体写入",
+		"uncommitted": "已修改，尚未提交",
+		"files_other": "{{count}} 个文件",
+		"buttonHint": "按名称打开此 worktree 中的文件（⌘P）",
+		"button": "文件",
+		"placeholder": "文件名 — “agentmap”、“panel work”、“apps/web env”",
+		"scanning": "正在扫描仓库…",
+		"noMatch": "没有该名称的文件。",
+		"typeToSearch": "输入名称的一部分以搜索整个仓库。",
+		"total_other": "{{formatted}} 个文件",
+		"scanningShort": "正在扫描仓库…",
+		"keys": "↑↓ 选择 · Enter 打开 · ⌘P",
+		"whyAgent": "由智能体写入",
+		"whyChanged": "已修改"
+	},
+	"feedPanel": {
+		"sort": {
+			"recent": "最新",
+			"oldest": "最早",
+			"severity": "严重程度",
+			"status": "状态",
+			"title": "标题"
+		},
+		"severity": {
+			"critical": "严重",
+			"warning": "警告",
+			"info": "信息",
+			"success": "正常"
+		},
+		"sortHint": "显示顺序",
+		"filters": "筛选",
+		"clearAll": "全部清除",
+		"empty": "没有可显示的内容",
+		"selectItem": "选择一项"
+	},
+	"illustration": {
+		"genre": {
+			"frise": "事件链",
+			"avant_apres": "之前与之后",
+			"mesure": "实测",
+			"table": "发生变化的表格",
+			"capture": "带注释的截图",
+			"matrice": "方案对比"
+		},
+		"source": {
+			"mesure": "实测",
+			"depot": "来自仓库",
+			"capture": "截取",
+			"agent": "智能体所述"
+		},
+		"beforeGraph": "之前：{{nodes}}",
+		"afterGraph": "之后：{{nodes}}",
+		"before": "之前",
+		"after": "之后",
+		"beforeShort": "之前",
+		"afterShort": "之后",
+		"percent": "{{sign}}{{value}}%",
+		"noCommand": "未引用任何命令：这些数字无法复现。",
+		"enlarge": "查看大图",
+		"captureLabel": "截图"
+	},
+	"linearIssue": {
+		"state": "状态",
+		"priority": "优先级",
+		"priorities": {
+			"urgent": "紧急",
+			"high": "高",
+			"medium": "中",
+			"low": "低",
+			"none": "—"
+		},
+		"priorityChanged": "优先级 {{priority}}",
+		"assignee": "负责人",
+		"unassigned": "未分配",
+		"nobody": "无人",
+		"assignedTo": "已分配给 {{name}}",
+		"labels": "标签",
+		"labelRemoved": "已移除标签 {{name}}",
+		"labelAdded": "已添加标签 {{name}}",
+		"noDescription": "没有描述。",
+		"comments": "评论 · {{count}}"
+	},
+	"missionHistory": {
+		"whatHappened": "发生了什么",
+		"agents_other": "{{count}} 个智能体",
+		"loading": "正在读取…",
+		"empty": "此任务没有记录任何智能体。Cockpit 从 0.54 版本起才保留此日志：之前运行的内容不在其中。",
+		"outcome": {
+			"running": "运行中",
+			"answered": "已交付",
+			"failed": "失败",
+			"lostAtLaunch": "启动时丢失",
+			"stopped": "已停止",
+			"orphaned": "Cockpit 已关闭"
+		},
+		"actor": {
+			"me": "你",
+			"master": "主智能体",
+			"cockpit": "Cockpit",
+			"permanence": "Permanence"
+		},
+		"retry": "第 {{attempt}} 次重试",
+		"launchedBy": "{{model}} · 由{{who}}启动",
+		"reportedHint": "引擎报告的数值 — 并非实际支出。\n输入 {{input}} 个 token，输出 {{output}} 个",
+		"unknownHint": "{{engine}} 不报告其回合的成本。这不代表成本为零：只是我们没有这个数字。",
+		"unknownCost": "未报告成本",
+		"totalReported": "引擎报告的数值，并非实际支出",
+		"totalLost": "其中 {{amount}} $ 花在了没有交付任何内容的智能体上",
+		"totalUnknown_other": "{{count}} 个回合未报告成本"
+	},
+	"viewBoundary": {
+		"failed": "无法显示“{{view}}”界面。",
+		"rest": "Cockpit 的其余部分正常工作 — 其他界面可以从菜单进入，正在运行的内容会继续运行。",
+		"retry": "重试"
+	},
+	"lightbox": {
+		"openInViewer": "在查看器中打开文件",
+		"close": "关闭",
+		"previous": "上一张图片",
+		"next": "下一张图片"
+	},
+	"shellView": {
+		"pondering": "没有运行中的命令 — 它正在阅读输出并思考下一步",
+		"noCommand": "此指令没有运行任何命令。",
+		"runningSince": "运行中<elapsed/> — 命令返回时会显示输出",
+		"running": "运行中 — 命令返回时会显示输出",
+		"interrupted": "在回答前被中断",
+		"linesAbove_other": "… 上方还有 {{count}} 行",
+		"noOutput": "（无输出）",
+		"since": "已持续 {{duration}}"
+	},
+	"pdfView": {
+		"page": "第 {{current}} / {{total}} 页",
+		"zoomOut": "缩小",
+		"percent": "{{value}}%",
+		"zoomIn": "放大",
+		"fitWidth": "适应窗口宽度"
+	},
+	"markdown": {
+		"loadImageFrom": "从 <host>{{host}}</host> 加载图片",
+		"enlarge": "查看大图"
+	},
+	"charts": {
+		"trend_other": "{{count}} 个数据点的趋势",
+		"segment": "{{label}}：{{value}}"
+	},
+	"narration": {
+		"waitingForYou": "它在等待你的回复。",
+		"stopped": "它已停止。",
+		"thisAgent": "此智能体",
+		"intro": "我来告诉你 {{name}} 在做什么。{{where}}",
+		"mute": "关闭语音",
+		"listenLive": "实时收听智能体在做什么",
+		"listening": "正在收听",
+		"listen": "收听",
+		"elevenLabsFailed": "ElevenLabs 出错，已切换为 Mac 语音：{{reason}}",
+		"voiceAndRate": "语音与语速"
+	},
+	"voiceSettings": {
+		"engine": "引擎",
+		"macVoice": "Mac 语音",
+		"elevenLabsHint": "最接近真人的语音，按 ElevenLabs 套餐的字符数计费。Claude 或 ChatGPT 的订阅都不会向其他应用提供语音。",
+		"systemHint": "免费且离线可用。使用高级语音效果会好得多。",
+		"elevenLabsKey": "ElevenLabs 密钥",
+		"createKey": "创建密钥",
+		"keyStored": "已保存在 Mac 钥匙串中",
+		"removeKey": "移除",
+		"storeKey": "保存",
+		"voice": "语音",
+		"loadingVoices": "正在加载账户的语音…",
+		"libraryHint": "你 ElevenLabs 库中的语音，使用你的语言的排在前面。可在其网站（Voice Library）添加更多语音，然后在这里看到它们。",
+		"model": "模型",
+		"browserVoice": "浏览器语音，用于预览。",
+		"noPremiumVoice": "未安装高级语音。请下载一个：系统设置 → 辅助功能 → 朗读内容 → 系统语音 → 管理语音。",
+		"rate": "语速",
+		"fallback": "已切换为 Mac 语音：{{reason}}",
+		"sample": "它修复了购物车的舍入问题并重新运行了测试。完成了：它修改了三个文件，测试通过。",
+		"tryVoice": "试听此语音",
+		"allSettings": "所有语音和助手设置"
+	},
+	"promptLauncher": {
+		"myPrompts": "我的提示词",
+		"openedInTerminal": "已在终端中打开：{{label}}",
+		"saved": "提示词已保存。",
+		"deleteTitle": "删除“{{label}}”？",
+		"delete": "删除",
+		"title": "启动智能体",
+		"reset": "恢复默认提示词库",
+		"label": "标签",
+		"labelPlaceholder": "检查，然后 commit + push",
+		"group": "分组",
+		"groupHint": "交付、代码审查、质量…",
+		"text": "发送给智能体的提示词",
+		"cancel": "取消",
+		"save": "保存",
+		"openInTerminal": "改为在 Terminal.app 中打开",
+		"new": "新建提示词",
+		"footer": "点击即在此处启动智能体，对话和回复框都在 Cockpit 中。终端图标则改为在 Terminal.app 中打开，适用于需要真实 TTY 的情况。提示词库位于 <path>{{path}}</path>。"
+	},
+	"panelReport": {
+		"verdict": {
+			"ok": "通过",
+			"reserves": "有保留意见",
+			"blocking": "阻塞"
+		},
+		"noVerdict": "无结论",
+		"title": "交叉质询",
+		"angles_other": "{{count}} 个视角",
+		"agreed": "意见一致",
+		"disputes_other": "{{count}} 处分歧",
+		"costHint": "按 API 价格计算这次交叉质询的成本。订阅模式下不会产生费用：它消耗的是时间窗口内的配额。",
+		"severestWins": "只需一个视角就能决定结论：两个什么都没发现的解读并不能证明第三个是错的。",
+		"stale": "自这次交叉质询以来，分支已有变动。",
+		"silent": "无回应：{{names}}",
+		"collapse": "收起意见",
+		"expand": "阅读每个视角",
+		"heldBy": "支持者",
+		"against": "反对者"
+	},
+	"reviewPanel": {
+		"title": "代码审查",
+		"verdict": {
+			"merge": "可以合并",
+			"corrections": "需要修改",
+			"bloquant": "阻塞"
+		},
+		"severity": {
+			"bloquant": "阻塞",
+			"important": "重要",
+			"suggestion": "建议"
+		},
+		"check": {
+			"corrige": "已修复",
+			"partiel": "部分修复",
+			"non_corrige": "未修复"
+		},
+		"round": "第 {{number}} 轮",
+		"roundVerification": "第 {{number}} 轮 · 检查",
+		"commit": "提交",
+		"recheck": "再次检查",
+		"reviewAgainHint": "从头开始的完整审查",
+		"reviewAgain": "重新审查",
+		"pushedSince": "{{author}} 在本轮之后推送了代码：PR 已不是被审查时的状态。",
+		"theAuthor": "作者",
+		"understand": "理解 PR",
+		"previousPoints": "之前的意见",
+		"earlierPoint": "之前轮次的意见",
+		"nothing": "本轮没有需要指出的问题。",
+		"openFileAtLine": "在此行打开文件",
+		"openOnGitHub": "在 GitHub 上于此行打开 PR 以发布评论",
+		"posted": "已发布",
+		"fix": "修复",
+		"quoted": "“{{text}}”",
+		"copyComment": "复制评论",
+		"copied": "已复制",
+		"copy": "复制"
+	},
+	"resources": {
+		"gigabytes": "{{value}} GB",
+		"megabytes": "{{value}} MB",
+		"heaviest": "此子树中最重的进程：{{name}}",
+		"processesShort_other": "{{count}} 个进程",
+		"percent": "{{value}}%",
+		"title": "资源使用情况",
+		"subtitle": "Cockpit 及其运行的所有内容",
+		"close": "关闭（Esc）",
+		"appOnly": "仅 Cockpit",
+		"cpu": "{{value}}% CPU",
+		"withChildren": "含子进程",
+		"processes_other": "{{count}} 个进程 · {{cpu}}%",
+		"machine": "本机",
+		"machineShare": "Cockpit 占用其中 {{value}}%",
+		"agents": "智能体",
+		"terminals": "终端",
+		"footnote": "内存数字是直接相加的，未考虑进程之间的共享：因此总数是上限，而非精确值。界面本身运行在一个 WebKit 进程中，macOS 在没有特权的情况下不会将其归属给任何人 — 大约还需再加六十兆字节。",
+		"spendNoQuota": "今天使用的 token。CLI 未报告配额。",
+		"spendLeft": "“{{window}}”剩余 {{left}}%",
+		"spendLeftResets": "“{{window}}”剩余 {{left}}%，{{resets}}重置",
+		"tickerHint": "Cockpit 对本机造成的负载"
+	},
+	"terminalView": {
+		"typeOnly": "输入但不运行",
+		"runAsIs": "直接运行",
+		"mainRepo": "主仓库",
+		"scripts": "脚本",
+		"scriptsHint": "仓库脚本和自定义命令",
+		"noScripts": "此文件夹中没有脚本。",
+		"footer": "命令会在此 shell 中输入并运行 — ⇧Enter 执行与所选项相反的操作。"
+	}
+}

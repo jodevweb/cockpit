@@ -1301,8 +1301,16 @@ fn escape(text: &str) -> String {
 }
 
 fn local_stamp(at: &str) -> String {
+	// L'ordre jour/mois et son séparateur suivent la langue du rendu.
+	let pattern = match crate::i18n::lang().as_str() {
+		"en" => "%b %-d, %H:%M",
+		"de" => "%d.%m. %H:%M",
+		"ru" => "%d.%m %H:%M",
+		"ja" | "zh-CN" | "ko" => "%m/%d %H:%M",
+		_ => "%d/%m %H:%M",
+	};
 	DateTime::parse_from_rfc3339(at)
-		.map(|at| at.with_timezone(&Local).format("%d/%m %H:%M").to_string())
+		.map(|at| at.with_timezone(&Local).format(pattern).to_string())
 		.unwrap_or_default()
 }
 

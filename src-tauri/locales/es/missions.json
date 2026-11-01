@@ -1,1 +1,183 @@
-{}
+{
+	"orchestrator": {
+		"notAGitRepo": "`{{path}}` no es un repositorio git.",
+		"branchInMainRepo": "`{{branch}}` está activa en el repositorio principal (`{{path}}`). Cockpit nunca escribe ahí: cambia ese repositorio a otra rama y la misión se reanudará en su propio worktree.",
+		"folderOnOtherBranch": "`{{path}}` ya existe pero está en `{{current}}`, no en `{{branch}}`. Aparta esta carpeta o vuelve a ponerla en la rama correcta: Cockpit no lanzará nada ahí hasta que lleve la rama de la tarea.",
+		"noBranch": "sin rama",
+		"noIntegrationBranch": "La misión no tiene rama de integración."
+	},
+	"mission": {
+		"step": {
+			"understanding": "comprensión",
+			"approach": "enfoque",
+			"split": "desglose"
+		},
+		"unknown": "Misión desconocida: {{id}}",
+		"unreadable": "Misión ilegible: {{error}}",
+		"folderError": "Carpeta de misiones: {{error}}",
+		"writeError": "Escritura de la misión: {{error}}",
+		"titleRequired": "Una misión necesita un título.",
+		"deleteFailed": "No se pudo eliminar {{path}}: {{error}}",
+		"reworkNeedsReason": "Una corrección sin motivo no dice qué arreglar.",
+		"unknownTask": "Tarea desconocida: {{id}}",
+		"reworkLimit": "«{{title}}» ya se ha devuelto a corregir {{count}} veces. Tómala tú en lugar de relanzarla.",
+		"note": {
+			"rework": "Corrección {{count}}: {{reason}}",
+			"redoAfterRework": "Por rehacer: se devolvió una tarea a corregir.",
+			"workFoundAtStartup": "Trabajo encontrado al arrancar: su rama tiene commits.",
+			"resumedAfterRestart": "Reanudada tras reiniciar Cockpit."
+		},
+		"journal": {
+			"taskReworked": "Tarea devuelta a corregir",
+			"paused": "Misión en pausa",
+			"resumed": "Misión reanudada",
+			"tasksRecovered": "Tareas recuperadas",
+			"tasksRecoveredDetail": "{{relaunch}} por relanzar, {{delivered}} ya entregadas",
+			"planApproved": "Plan aprobado",
+			"proposal": "Propuesta · {{step}}",
+			"stepApproved": "Aprobado · {{step}}",
+			"stepCorrected": "Corregido · {{step}}",
+			"worktreesCleaned": "Worktrees limpiados",
+			"worktreesCleanedDetail": "{{count}} carpeta(s) eliminada(s), {{size}} GB liberados en disco",
+			"deleted": "Misión eliminada",
+			"deletedDetail": "{{count}} elemento(s) borrado(s)",
+			"opened": "Misión abierta",
+			"planSubmitted": "Plan enviado",
+			"planSubmittedDetail": "{{count}} tarea(s)",
+			"closed": "Misión cerrada"
+		},
+		"nothingAwaitsDecision": "Nada espera tu decisión sobre el {{step}}: la misión está en «{{state}}».",
+		"correctionNeedsReason": "Di qué está mal: sin motivo, el agente principal volvería a hacer la misma propuesta.",
+		"taskWithoutId": "Tarea sin identificador: no se le puede asignar ningún ejecutor.",
+		"blocked": {
+			"unknownBase": "Parte de `{{base}}`, que no es la rama de ninguna tarea de este plan. Vuelve a planificarla para que parta de la rama de integración.",
+			"baseExhausted": "La tarea de la que parte (`{{base}}`) ha agotado sus correcciones: no entregará."
+		}
+	},
+	"panel": {
+		"lens": {
+			"breaks": "Qué se rompe",
+			"deployed": "Una vez desplegado",
+			"users": "Quién lo usa"
+		},
+		"folderError": "Carpeta de careos: {{error}}",
+		"unreadable": "Careo ilegible: {{error}}",
+		"writeError": "Escritura del careo: {{error}}",
+		"alreadyRunning": "Ya hay un careo en curso para este cambio.",
+		"changeGone": "Este cambio ya no existe: la solicitud de fusión se cerró o la rama ha desaparecido.",
+		"noFolder": "No hay carpeta donde ejecutar los agentes.",
+		"silentVoice": "{{lens}}: {{error}}",
+		"noVoice": "Ningún ángulo respondió. {{details}}",
+		"journal": {
+			"title": "Careo sobre un cambio",
+			"detail": "{{verdict}} · {{count}} desacuerdo(s)"
+		},
+		"mergeFailed": "La síntesis no terminó ({{error}}). Las opiniones en bruto siguen siendo legibles."
+	},
+	"review": {
+		"noReview": "No hay revisión para esta PR.",
+		"noRepo": "Indica el repositorio GitHub del proyecto en Ajustes.",
+		"prNotFound": "No encuentro la PR #{{number}} en {{repo}}.",
+		"noNewCommit": "Ningún commit desde la ronda {{round}}: la PR no se ha movido.",
+		"noPreviousReview": "No hay revisión anterior: se hace una revisión completa.",
+		"noPrNumber": "La revisión no dice qué PR está revisando."
+	},
+	"prompts": {
+		"group": {
+			"review": "Revisión",
+			"visual": "Informe visual",
+			"delivery": "Entrega",
+			"fixes": "Correcciones",
+			"quality": "Calidad",
+			"investigation": "Investigación",
+			"mine": "Mis prompts"
+		},
+		"label": {
+			"review": "Revisión de código completa de una PR",
+			"reviewFollowup": "Comprobar las correcciones de una PR",
+			"visual": "Informe con imágenes",
+			"ship": "Comprobar y luego commit + push",
+			"reviewThenShip": "Revisar y luego commit + push",
+			"openPr": "Abrir la pull request",
+			"reviewComments": "Atender los comentarios de revisión",
+			"prHealth": "Chequeo de salud de la PR",
+			"ciRed": "La CI está en rojo",
+			"conflicts": "Resolver conflictos con la base",
+			"selfQa": "Hacer QA de lo hecho",
+			"conventions": "Comprobar las convenciones",
+			"tests": "Completar los tests",
+			"prodError": "Investigar un error en producción",
+			"ticket": "Implementar un ticket"
+		},
+		"configFolderError": "Carpeta de configuración: {{error}}",
+		"serializeError": "Serialización: {{error}}",
+		"writeError": "Escritura de prompts.toml: {{error}}",
+		"labelAndTextRequired": "Un prompt necesita una etiqueta y un texto."
+	},
+	"permissions": {
+		"unreadableAnswer": "Respuesta ilegible: {{error}}",
+		"writeError": "Escritura de la respuesta: {{error}}"
+	},
+	"codex": {
+		"turnFailed": "El turno falló."
+	},
+	"agent": {
+		"notActive": "Este agente ya no está activo.",
+		"inputUnavailable": "La entrada del agente no está disponible.",
+		"outputUnavailable": "La salida del agente no está disponible.",
+		"emptyMessage": "Mensaje vacío.",
+		"claudeNotFound": "No se encuentra la CLI `claude` en esta máquina.",
+		"claudeTimeout": "Claude no respondió en {{seconds}} s.",
+		"claudeLaunchError": "Lanzamiento de Claude: {{error}}",
+		"claudeError": "Claude: {{error}}",
+		"claudeStopped": "Claude se detuvo: {{detail}}",
+		"claudeUnreadable": "Respuesta ilegible de Claude.",
+		"folderNotFound": "Carpeta no encontrada: {{path}}",
+		"oneShotProtocol": "El motor «{{engine}}» declara el protocolo `{{protocol}}`: una pregunta puntual solo se puede hacer con el protocolo por defecto.",
+		"launchError": "Lanzamiento del agente: {{error}}",
+		"agentError": "Agente: {{error}}",
+		"oneShotTimeout": "El agente no devolvió nada tras veinte minutos; se abandona el análisis.",
+		"agentStopped": "El agente se detuvo: {{detail}}",
+		"agentUnreadable": "Respuesta ilegible del agente: {{output}}",
+		"noReason": "sin motivo indicado",
+		"agentFailed": "El agente falló: {{reason}}",
+		"agentWroteNothing": "El agente no escribió nada.",
+		"memoryCeiling": "Memoria de la máquina por encima del {{ceiling}} %: no arranca ningún agente nuevo hasta que vuelva a bajar. Cierra lo que ya no sirva o sube el límite en Ajustes → Misiones.",
+		"memoryCeilingTurn": "Memoria de la máquina por encima del {{ceiling}} %: el siguiente turno espera a que vuelva a bajar.",
+		"unknownProtocol": "El motor «{{engine}}» declara el protocolo `{{protocol}}`, que Cockpit aún no sabe hablar. Implementados: {{known}}.",
+		"protocolNoMission": "El protocolo `{{protocol}}` aún no admite las herramientas de misión: este motor todavía no se puede usar en una misión, ni como agente principal ni como ejecutor.",
+		"claudeNotFoundHint": "No se encuentra la CLI `claude`. Instálala o comprueba que esté en ~/.local/bin, ~/.claude/local o /opt/homebrew/bin.",
+		"noBinary": "El motor «{{engine}}» no declara ningún binario, y Cockpit solo sabe encontrar `claude` por sí mismo.",
+		"codexNeedsMessage": "`codex-exec` necesita un mensaje para arrancar: no puede abrirse en silencio.",
+		"geminiNeedsMessage": "`gemini-stream-json` necesita un mensaje para arrancar: no puede abrirse en silencio.",
+		"geminiNoResume": "`gemini-stream-json` no puede reanudar una conversación: ninguna fuente documenta cómo. Lanza un agente nuevo.",
+		"bridgeUnavailable": {
+			"title": "Puente de permisos no disponible",
+			"subject": "Node no encontrado",
+			"detail": "Las solicitudes de permiso y las preguntas de los agentes no llegarán a la interfaz. Instala Node (`brew install node`) para recuperarlas; los agentes siguen funcionando según su modo."
+		},
+		"sandboxNoRuntimeHint": "El aislamiento en contenedor está activado, pero no hay ningún runtime (`orb` o `docker`) instalado. Desactívalo en Ajustes → Misiones o instala uno.",
+		"sandboxNoRuntime": "El aislamiento en contenedor está activado, pero no hay ningún runtime (`orb` o `docker`) instalado.",
+		"sandboxImageFailed": "El aislamiento en contenedor está activado, pero no se pudo preparar la imagen: {{error}}",
+		"firstMessageError": "Envío del primer mensaje: {{error}}",
+		"silentDeath": "El proceso se detuvo sin escribir ninguna respuesta y sin dejar nada en su salida ni en su salida de error.",
+		"journal": {
+			"diedBeforeFirstAnswer": "Agente detenido antes de su primera respuesta"
+		},
+		"sendError": "Envío del mensaje: {{error}}",
+		"noThreadYet": "Este agente aún no tiene identificador de conversación; puede que su primera respuesta no haya llegado.",
+		"resumeTurnError": "Reanudación del turno: {{error}}",
+		"cannotInterrupt": "Este motor no puede interrumpir un turno sin terminarlo. Usa Detener.",
+		"interruptError": "Interrupción: {{error}}",
+		"noControlChannel": "Este motor no tiene canal de control.",
+		"step": {
+			"stoppedFromCockpit": "Detenido desde Cockpit.",
+			"detached": "Cockpit cerrado; el agente sigue sin ventana.",
+			"cockpitClosed": "Cockpit cerrado.",
+			"detachedFinished": "El agente separado terminó mientras Cockpit estaba cerrado.",
+			"detachedStopped": "El agente separado se detuvo mientras Cockpit estaba cerrado.",
+			"reattached": "Encontrado vivo al arrancar Cockpit.",
+			"lastTurnFailed": "El motor devolvió su último turno como error."
+		}
+	}
+}

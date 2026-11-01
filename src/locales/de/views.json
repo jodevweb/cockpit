@@ -1,0 +1,1458 @@
+{
+	"agents": {
+		"activity": {
+			"active": "aktiv",
+			"recent": "kürzlich",
+			"dormant": "ruhend"
+		},
+		"row": {
+			"waiting": "wartet",
+			"error": "Fehler",
+			"exchanges": "Wechsel",
+			"toolCallsHint": "Werkzeugaufrufe",
+			"tools_one": "{{count}} Werkzeug",
+			"tools_other": "{{count}} Werkzeuge",
+			"subagentsHint": "Subagenten",
+			"subagents_one": "{{count}} Agent",
+			"subagents_other": "{{count}} Agenten",
+			"tokensHint": "Tokens (Eingabe + Ausgabe + Cache-Schreiben)"
+		},
+		"event": {
+			"user": "Du",
+			"assistant": "Agent",
+			"thinking": "Denken",
+			"tool": "Werkzeug",
+			"toolResult": "Ergebnis",
+			"toolError": "Fehler",
+			"thinkingInternal": "Internes Denken",
+			"collapse": "Einklappen",
+			"expand": "Alles zeigen"
+		},
+		"goToConversation": "Zur Unterhaltung",
+		"context": {
+			"goHint": "Diese Unterhaltung läuft bereits — sieh sie dir in ihrem Workspace an",
+			"resumeHint": "Öffnet die Unterhaltung erneut in einem Cockpit-Workspace",
+			"resume": "Unterhaltung fortsetzen",
+			"resumeTerminalHint": "Öffnet die Unterhaltung erneut in Terminal.app",
+			"resumeTerminal": "Im Terminal fortsetzen",
+			"editor": "Editor",
+			"terminal": "Terminal",
+			"title": "Kontext",
+			"directory": "Verzeichnis",
+			"branch": "Branch",
+			"models": "Modelle",
+			"started": "Gestartet",
+			"lastWrite": "Zuletzt geschrieben",
+			"cliVersion": "CLI-Version",
+			"id": "Kennung",
+			"tools": "Werkzeuge",
+			"subagents": "Subagenten",
+			"agentFallback": "Agent",
+			"filesWritten": "Geschriebene Dateien"
+		},
+		"usage": {
+			"title": "Verbrauch",
+			"input": "Eingabe",
+			"output": "Ausgabe",
+			"cacheRead": "Cache-Lesen",
+			"cacheWrite": "Cache-Schreiben",
+			"total": "Insgesamt {{total}} abrechenbare Tokens (ohne Cache-Lesen)."
+		},
+		"liveElsewhere": {
+			"message": "Unterhaltung in ihrem Workspace offen",
+			"hint": "Dort läuft sie live weiter. Hier würdest du nur ihr Protokoll lesen — eingefroren beim letzten Schreiben, ohne Antwortmöglichkeit.",
+			"readLog": "Protokoll lesen"
+		},
+		"title": "KI-Agenten",
+		"liveCount_one": "{{count}} Agent aktiv",
+		"liveCount_other": "{{count}} Agenten aktiv",
+		"noneActive": "Keine aktiven Agenten",
+		"indexed_one": "{{count}} Sitzung indiziert",
+		"indexed_other": "{{count}} Sitzungen indiziert",
+		"toolbar": {
+			"toolsHint": "Werkzeugaufrufe zeigen",
+			"tools": "Werkzeuge",
+			"thinkingHint": "Internes Denken zeigen",
+			"thinking": "Denken",
+			"notebookHint": "Was dieses Repository hinter einem Agenten schon korrigieren musste",
+			"notebook": "Notizbuch",
+			"loopHint": "Was Agenten liefern, was nachgebessert werden muss, was die Leitplanken noch abfangen",
+			"loop": "Kreislauf",
+			"usageHint": "Token-Verbrauch — Mengen, nicht Kontingent",
+			"usage": "Verbrauch",
+			"rescan": "Neu scannen"
+		},
+		"filterPlaceholder": "Sitzungen filtern…",
+		"scope": {
+			"live": "Laufend",
+			"recent": "Kürzlich",
+			"all": "Alle"
+		},
+		"hiddenDormant_one": "{{count}} ruhende Sitzung ausgeblendet — alle zeigen",
+		"hiddenDormant_other": "{{count}} ruhende Sitzungen ausgeblendet — alle zeigen",
+		"empty": {
+			"message": "Keine Sitzungen",
+			"hint": "Sitzungen erscheinen, sobald ein Claude-Code-Agent in ~/.claude/projects schreibt."
+		},
+		"actionsHint": "Einen Agenten mit einem fertigen Prompt auf diesem Ordner starten",
+		"actions": "Aktionen",
+		"toBottomHint": "Zurück zu den neuesten Ereignissen",
+		"toBottom": "Nach unten",
+		"eventCount_one": "{{count}} Ereignis",
+		"eventCount_other": "{{count}} Ereignisse",
+		"running": "läuft",
+		"nothingWithFilters": "Mit diesen Filtern nichts anzuzeigen.",
+		"select": {
+			"message": "Wähle eine Sitzung",
+			"hint": "Jede Sitzung ist ein in einem Worktree gestarteter Agent."
+		}
+	},
+	"automations": {
+		"title": "Automatisierungen",
+		"new": "Neu",
+		"whenItRuns": "Eine Automatisierung läuft, während Cockpit offen ist. Schläft der Mac zur festgelegten Zeit, holt sie es beim Öffnen von Cockpit nach, solange der Termin noch nicht vorbei ist.",
+		"paused": "Pausiert",
+		"nextRun": "Nächster: {{when}}",
+		"noUpcoming": "Kein anstehender Termin",
+		"started": "{{name}}: läuft",
+		"startedHint": "Von Hand gestartet: Das verschiebt den Startpunkt des nächsten nicht.",
+		"active": "Aktiv",
+		"running": "Läuft…",
+		"runNow": "Jetzt ausführen",
+		"pause": "Pausieren",
+		"resume": "Fortsetzen",
+		"edit": "Bearbeiten",
+		"openLatest": "Letztes Ergebnis öffnen",
+		"tab": {
+			"overview": "Übersicht",
+			"runs": "Läufe · {{count}}"
+		},
+		"recentRuns": "Letzte Läufe",
+		"noRuns": "Noch keine Läufe.",
+		"run": {
+			"reading": "Liest die Quellen und schreibt…",
+			"lines_one": "{{count}} Zeile",
+			"lines_other": "{{count}} Zeilen",
+			"startedAt": "gestartet um {{when}}",
+			"silent": "keine Antwort: {{sources}}",
+			"manual": "Von Hand",
+			"scheduled": "Geplant",
+			"duration": "{{minutes}} Min. {{seconds}}"
+		},
+		"what": {
+			"title": "Was sie tut",
+			"reads": "Liest",
+			"noSource": "Keine Quelle",
+			"ready": "Fertig",
+			"leadMinutes": "{{minutes}} Min. vor dem Termin",
+			"onTime": "Zur Terminzeit",
+			"sincePrevious": ", deckt alles seit dem vorherigen ab",
+			"last24h": ", deckt die letzten 24 Std. ab",
+			"delivers": "Liefert",
+			"notification": "eine Benachrichtigung",
+			"dailyPart": "deinen Teil in der Ansicht Daily",
+			"renderHere": "ein Ergebnis hier",
+			"pdf": "ein PDF",
+			"slack": "Slack mit einem Klick",
+			"readOnly": "Nur lesend: Der Agent liest und schreibt zusammen, er pusht, kommentiert oder verschiebt nie etwas."
+		},
+		"week": {
+			"planned": "Geplant",
+			"title": "Die Woche",
+			"hint": "Jedes Band ist der Zeitraum, den ein Lauf abdeckt: Nichts fällt dazwischen.",
+			"pausedNothing": "Pausiert: Nichts ist geplant",
+			"missed": "verpasst",
+			"untilNext": "Bis zum nächsten Termin, nächste Woche",
+			"done": "Erledigt",
+			"partial": "Teilweise",
+			"now": "Jetzt",
+			"readyBefore": "Fertig {{minutes}} Min. vor dem Termin"
+		},
+		"empty": {
+			"title": "Termine, die sich selbst vorbereiten",
+			"body": "Vor jedem Daily liest Cockpit, was du auf GitHub, in deinem Aufgaben-Tracker und in seinen eigenen Agenten getan hast, lässt deinen Teil aufschreiben und sagt dir Bescheid, wenn er fertig ist. Nur lesend: Nichts wird gepusht, kommentiert oder verschoben.",
+			"create": "Die erste anlegen"
+		}
+	},
+	"decisions": {
+		"kind": {
+			"question": "stellt dir eine Frage",
+			"permission": "bittet um Erlaubnis",
+			"reply": "wartet auf deine Antwort",
+			"plan": "Plan freizugeben"
+		},
+		"aQuestion": "Eine Frage",
+		"useTool": "{{tool}} nutzen",
+		"mission": "Mission",
+		"title": "Entscheidungen",
+		"nothingWaiting": "Nichts wartet auf dich.",
+		"summary_one": "{{count}} Entscheidung · die älteste wartet {{since}}",
+		"summary_other": "{{count}} Entscheidungen · die älteste wartet {{since}}",
+		"keys": "<up>↑</up><down>↓</down> wechseln · <one>1</one>…<nine>9</nine> wählen · <back>⌘⇧D</back> zurückkehren",
+		"empty": "Kein Agent wartet auf dich. Fragen, Berechtigungsanfragen, erwartete Antworten und freizugebende Pläne landen hier, sortiert nach dem, was sie freigeben.",
+		"blocksTasks_one": "blockiert {{count}} Aufgabe",
+		"blocksTasks_other": "blockiert {{count}} Aufgaben",
+		"agentStopped": "Agent gestoppt",
+		"openMission": "Mission öffnen",
+		"openConversation": "Unterhaltung öffnen",
+		"beforeAsking": "Was er getan hat, bevor er dich gefragt hat:",
+		"question": {
+			"step": "Frage {{step}} von {{total}} · {{header}}",
+			"customPlaceholder": "Eine andere Antwort oder eine Präzisierung — Enter zum Senden",
+			"skipHint": "Der Agent macht ohne deine Antwort weiter",
+			"skip": "Überspringen"
+		},
+		"permission": {
+			"label": "Berechtigung",
+			"wantsTool": "Der Agent möchte <tool>{{tool}}</tool> nutzen",
+			"allow": "Erlauben",
+			"allowHint": "Er macht mit diesem Werkzeug weiter.",
+			"deny": "Ablehnen",
+			"denyHint": "Er sucht einen anderen Weg oder sagt es dir."
+		},
+		"reply": {
+			"option": "Option {{number}}: {{option}}",
+			"label": "Er hat die Kontrolle mit einer Frage zurückgegeben",
+			"collapse": "Seine Nachricht einklappen",
+			"expand": "Seine ganze Nachricht lesen",
+			"placeholder": "Deine Antwort — ⌘↵ zum Senden",
+			"send": "Antworten"
+		}
+	},
+	"delivery": {
+		"title": "Feeds",
+		"tickets": "Tickets",
+		"openWorktree": "Worktree öffnen",
+		"localTracking": "lokal verfolgt",
+		"yes": "ja",
+		"no": "nein",
+		"noLocalWorktree": "Kein lokaler Worktree für diesen Branch.",
+		"emptyHint": "Fehlende Tokens werden in den Einstellungen angezeigt."
+	},
+	"docs": {
+		"title": "Dokumente",
+		"subtitle": "Ergebnisse der Agenten: Pläne, Reviews, QA, Wiki — über alle Worktrees.",
+		"backToGrid": "Zurück zum Raster (Esc)",
+		"openWorktree": "Quell-Worktree öffnen",
+		"reveal": "Im Finder zeigen",
+		"grid": "Raster",
+		"list": "Liste",
+		"search": "Suchen…",
+		"all": "Alle · {{count}}",
+		"groupByTypeTitle": "Nach Dokumenttyp gruppieren",
+		"groupByType": "Nach Typ",
+		"groupByWorktreeTitle": "Nach Quell-Worktree gruppieren",
+		"groupByWorktree": "Nach Worktree",
+		"empty": "Keine Dokumente",
+		"emptyHint": "Dateien aus .claude/work, .claude/reviews, docs/ und Markdown auf oberster Ebene erscheinen hier.",
+		"untracked": "nicht versioniert",
+		"noPreview": "Keine Vorschau"
+	},
+	"git": {
+		"state": {
+			"added": "hinzugefügt",
+			"modified": "geändert",
+			"deleted": "gelöscht",
+			"renamed": "umbenannt",
+			"copied": "kopiert"
+		},
+		"branch": {
+			"base": "Basis",
+			"commitsAhead_one": "{{count}} Commit / {{base}}",
+			"commitsAhead_other": "{{count}} Commits / {{base}}",
+			"upToDate": "aktuell mit {{base}}",
+			"worktree": "Worktree"
+		},
+		"actions": {
+			"done": "{{label}} erledigt.",
+			"pr": {
+				"title": "Pull Request aus {{branch}} öffnen",
+				"message": "Der Branch wird vor dem Öffnen gepusht — GitHub lehnt einen PR ab, dessen Head es nicht kennt.",
+				"placeholder": "feat: Fair-Use-Kontingente",
+				"confirm": "PR erstellen",
+				"opened": "Pull Request für {{branch}} geöffnet.",
+				"hint": "Pusht den Branch und öffnet einen Pull Request"
+			},
+			"stash": {
+				"title": "Laufende Arbeit auf {{branch}} stashen",
+				"message": "Nicht versionierte Dateien inklusive: Der Baum ist danach wirklich wieder sauber.",
+				"placeholder": "wip: Redesign-Versuch",
+				"confirm": "Stashen",
+				"hint": "Legt die laufende Arbeit beiseite"
+			},
+			"commit": {
+				"title": "Commit auf {{branch}}",
+				"message": "Die gesamte laufende Arbeit wird in einem einzigen Commit gesichert.",
+				"placeholder": "fix: Kontingentberechnung korrigieren",
+				"confirm": "Committen",
+				"hint": "Sichert die gesamte laufende Arbeit"
+			},
+			"push": {
+				"title": "{{branch}} pushen?",
+				"messageAhead_one": "{{count}} Commit geht nach origin, sichtbar für das ganze Team.",
+				"messageAhead_other": "{{count}} Commits gehen nach origin, sichtbar für das ganze Team.",
+				"messageNew": "Der Branch wird auf origin veröffentlicht.",
+				"confirm": "Pushen",
+				"hint": "Veröffentlicht den Branch auf origin"
+			},
+			"pull": {
+				"hintBehind_one": "{{count}} Commit zurück — Fast-Forward-Pull",
+				"hintBehind_other": "{{count}} Commits zurück — Fast-Forward-Pull",
+				"hintUpToDate": "Aktuell; Fast-Forward-Pull"
+			}
+		},
+		"noBranchSelected": "Kein Branch ausgewählt",
+		"subtitle_one": "{{count}} Branch · verglichen mit {{base}}",
+		"subtitle_other": "{{count}} Branches · verglichen mit {{base}}",
+		"reading": "Lese das Repository…",
+		"compareTo": "Vergleichen mit",
+		"filterPlaceholder": "Branches filtern…",
+		"scope": {
+			"all": "Alle",
+			"worktree": "Mit Worktree",
+			"ahead": "Nicht gemergt",
+			"unpushed": "Zu pushen"
+		},
+		"sort": {
+			"activity": "Aktivität",
+			"commits": "Commits",
+			"name": "Name"
+		},
+		"noBranch": "Keine Branches",
+		"fileCount_one": "{{count}} Datei",
+		"fileCount_other": "{{count}} Dateien",
+		"since": "seit {{sha}} ({{base}})",
+		"editor": "Editor",
+		"terminal": "Terminal",
+		"openWorktree": "Zugehörigen Worktree öffnen",
+		"worktree": "Worktree",
+		"panel": {
+			"files": "Dateien",
+			"commits": "Commits",
+			"graph": "Graph"
+		},
+		"noDifference": "Nichts unterscheidet {{branch}} von {{base}}",
+		"noDifferenceHint": "Keine eigenen Commits auf diesem Branch.",
+		"noOwnCommit": "Keine eigenen Commits",
+		"close": "Schließen",
+		"pickFile": "Wähle eine Datei",
+		"pickFileHint": "Der Diff erscheint hier, verglichen mit dem Punkt, an dem er von {{base}} abgezweigt ist.",
+		"nothingToShow": "Kein Branch anzuzeigen"
+	},
+	"impact": {
+		"title": "Wirkung",
+		"forge": {
+			"github": "GitHub",
+			"gitlab": "GitLab",
+			"local": "lokaler Branch"
+		},
+		"filter": {
+			"tous": {
+				"label": "Alle",
+				"hint": "Alles, was sich bewegt"
+			},
+			"aLire": {
+				"label": "Noch nicht gelesen",
+				"hint": "Bisher keine Analyse"
+			},
+			"risque": {
+				"label": "Hohes Risiko",
+				"hint": "Was die Analyse als ernst eingestuft hat"
+			},
+			"perimes": {
+				"label": "Veraltet",
+				"hint": "Der Branch hat sich seit dem Lesen bewegt"
+			}
+		},
+		"card": {
+			"risk": "Risiko {{risk}}",
+			"unread": "Noch nicht gelesen",
+			"draft": "Entwurf",
+			"noPr": "kein PR",
+			"project": "Projekt {{name}}",
+			"files_one": "{{count}} Datei",
+			"files_other": "{{count}} Dateien",
+			"ciFailing": "CI scheitert",
+			"ciSuccess": "CI grün",
+			"ciPending": "CI läuft",
+			"notRead": "Was diese Änderung bedeutet, wurde noch nicht gelesen.",
+			"read": "gelesen",
+			"risks_one": "{{count}} Risiko",
+			"risks_other": "{{count}} Risiken",
+			"checks_one": "{{count}} zu prüfen",
+			"checks_other": "{{count}} zu prüfen",
+			"openOn": "Auf {{forge}} öffnen",
+			"reading": "Lese…",
+			"reread": "Neu lesen",
+			"stale": "Der Branch hat sich seit diesem Lesen bewegt."
+		},
+		"understand": "Verstehen",
+		"notify": {
+			"fixed": "Konfiguration korrigiert.",
+			"readBlocking": "Lesen fertig — es meldet ein Hindernis.",
+			"read": "Lesen fertig.",
+			"confrontAgree": "Kreuzverhör fertig — die drei Blickwinkel sind sich einig.",
+			"confrontDisputes_one": "Kreuzverhör fertig — {{count}} Meinungsverschiedenheit zu klären.",
+			"confrontDisputes_other": "Kreuzverhör fertig — {{count}} Meinungsverschiedenheiten zu klären.",
+			"auditClean": "Prüfung fertig — nichts verletzt.",
+			"auditBroken_one": "Prüfung fertig — {{count}} Eigenschaft verletzt.",
+			"auditBroken_other": "Prüfung fertig — {{count}} Eigenschaften verletzt.",
+			"repoMissing": "Dieses Repository ist nicht auf diesem Rechner: Darin kann kein Agent geöffnet werden.",
+			"forgotten": "Lesen verworfen."
+		},
+		"subtitle": {
+			"inFlight_one": "{{count}} unterwegs",
+			"inFlight_other": "{{count}} unterwegs",
+			"read_one": "{{count}} gelesen",
+			"read_other": "{{count}} gelesen",
+			"stale_one": "{{count}} veraltet",
+			"stale_other": "{{count}} veraltet",
+			"default": "Was sich bewegt und was es bedeutet"
+		},
+		"allProjects": "Alle Projekte",
+		"rescan": "Erhebung neu starten",
+		"filterPlaceholder": "Filtern…",
+		"empty": {
+			"nothing": "In den deklarierten Repositorys bewegt sich nichts.",
+			"noMatch": "Keine Änderung passt zu diesem Filter.",
+			"nothingHint": "Der Monitor verfolgt Pull Requests, Merge Requests und lokale Branches, die ihrer Basis voraus sind."
+		},
+		"changes": "Laufende Änderungen",
+		"panel": {
+			"reading": "Lesen läuft…",
+			"unread": "Diese Änderung wurde noch nicht gelesen.",
+			"readingHint": "Ein Agent geht den Diff und den umgebenden Code durch — ein paar Minuten. Du kannst woanders im Cockpit hin, das Lesen läuft weiter und wartet hier auf dich. Das Schließen des Cockpits unterbricht es jedoch.",
+			"unreadHint": "Die Analyse sagt, was sich für das Produkt ändert, warum diese Arbeit jetzt kommt und was kaputtgehen kann."
+		}
+	},
+	"infra": {
+		"title": "Server & Container",
+		"subtitle": "Was auf diesem Rechner läuft: Entwicklungsserver und Container.",
+		"portFreed": "Port {{port}} freigegeben.",
+		"runningContainers": "Laufende Container",
+		"stoppedContainers": "Gestoppte Container",
+		"devPorts": "Dev-Ports",
+		"worktrees": "Worktrees",
+		"noContainers": "Keine Container",
+		"viewLogs": "Logs ansehen",
+		"logs": "Logs",
+		"listening": "Lauschende Server",
+		"noServers": "Kein Entwicklungsserver läuft",
+		"unknownFolder": "unbekannter Ordner",
+		"memoryTitle": "belegter Speicher, Unterprozesse eingeschlossen",
+		"memoryGb": "{{value}} GB",
+		"memoryMb": "{{value}} MB",
+		"pid": "PID {{pid}}",
+		"open": "Öffnen",
+		"stopServer": "Diesen Server stoppen"
+	},
+	"libres": {
+		"state": {
+			"attend": "wartet auf deine Antwort",
+			"travaille": "arbeitet",
+			"pret": "du bist dran",
+			"arrete": "gestoppt",
+			"ferme": "geschlossen"
+		},
+		"ago": {
+			"now": "gerade eben",
+			"minutes_one": "{{count}} Min.",
+			"minutes_other": "{{count}} Min.",
+			"hours_one": "{{count}} Std.",
+			"hours_other": "{{count}} Std.",
+			"days_one": "{{count}} T.",
+			"days_other": "{{count}} T."
+		},
+		"line": {
+			"closed": "Unterhaltung geschlossen — Fortsetzen öffnet sie wieder",
+			"question": "eine Frage an dich",
+			"asks": "fragt: {{tool}}",
+			"thinking": "denkt nach",
+			"firstMessage": "wartet auf deine erste Nachricht"
+		},
+		"title": "Freie Agenten",
+		"open_one": "{{count}} offen",
+		"open_other": "{{count}} offen",
+		"filter": {
+			"all": "Alle",
+			"yours": "Du bist dran",
+			"running": "Laufend",
+			"finished": "Fertig"
+		},
+		"oneMore": "Noch ein Agent in diesem Ordner",
+		"inPlace": "vor Ort",
+		"defaultModel": "Modell des Rechners",
+		"detail": {
+			"nothingToResume": "Dieser Agent hat nie eine Sitzung geöffnet: Es gibt nichts fortzusetzen.",
+			"openTerminal": "Hier ein Terminal öffnen",
+			"reveal": "Im Finder zeigen",
+			"stop": "Stoppen",
+			"resume": "Fortsetzen",
+			"archive": "Archivieren",
+			"conversation": "Unterhaltung",
+			"changes": "Änderungen",
+			"closed": "Die Unterhaltung ist geschlossen. Fortsetzen öffnet sie wieder im selben Verlauf, unter demselben Konto.",
+			"noChanges": "Noch keine Änderungen in diesem Ordner."
+		},
+		"archive": {
+			"keep": "Branch behalten, Worktree wegräumen",
+			"keepHint": "Committete Arbeit bleibt in Git, der Ordner verschwindet.",
+			"leave": "Worktree an Ort und Stelle lassen",
+			"leaveHint": "Auf der Festplatte ändert sich nichts; nur die Unterhaltung wird weggeräumt.",
+			"discard": "Alles verwerfen",
+			"discardHint": "Worktree und Branch gelöscht. Alles nicht Gepushte geht verloren.",
+			"title": "„{{label}}“ archivieren?",
+			"worktreeQuestion": "Er hat in einem Worktree gearbeitet, auf <branch>{{branch}}</branch>. Was soll mit dem passieren, was er hinterlässt?",
+			"inPlace": "Er hat vor Ort gearbeitet: Auf der Festplatte gibt es nichts aufzuräumen. Der Agent stoppt und die Unterhaltung verlässt die Liste.",
+			"cancel": "Abbrechen",
+			"confirm": "Archivieren"
+		},
+		"empty": {
+			"projectFolder": "mein-projekt",
+			"becomes": "— wird zu —",
+			"shortcut": "<key>⌘N</key>, der Ordner, <key>⌘↵</key>",
+			"title": "Ein Agent, ein Ordner, das ist alles.",
+			"body": "Keine Baustelle, keine Mission, kein Branch, wenn du keinen willst. Deine freien Agenten werden hier nach Ordner abgelegt, bis du sie archivierst.",
+			"launch": "Agent starten",
+			"orProject": "Oder sofort, in einem deklarierten Projekt"
+		}
+	},
+	"map": {
+		"more": {
+			"tickets_one": "{{count}} weiteres Ticket",
+			"tickets_other": "{{count}} weitere Tickets",
+			"errors_one": "{{count}} weiterer Fehler",
+			"errors_other": "{{count}} weitere Fehler",
+			"prs_one": "{{count}} weiterer PR",
+			"prs_other": "{{count}} weitere PRs"
+		},
+		"defaultProject": "Projekt",
+		"allProjects": "Alle Projekte",
+		"chantier": "Baustelle",
+		"openWorkspace": "Workspace öffnen",
+		"backToMap": "Zurück zur Karte",
+		"summary": {
+			"tickets_one": "{{count}} Ticket",
+			"tickets_other": "{{count}} Tickets",
+			"errorsToTriage_one": "{{count}} Fehler zu sichten",
+			"errorsToTriage_other": "{{count}} Fehler zu sichten",
+			"agents_one": "{{count}} Agent",
+			"agents_other": "{{count}} Agenten",
+			"collisions_one": "{{count}} Kollision",
+			"collisions_other": "{{count}} Kollisionen",
+			"missions_one": "{{count}} Mission",
+			"missions_other": "{{count}} Missionen",
+			"chantiers_one": "{{count}} Baustelle",
+			"chantiers_other": "{{count}} Baustellen",
+			"prs_one": "{{count}} PR",
+			"prs_other": "{{count}} PRs",
+			"redCi_one": "{{count}} rote CI",
+			"redCi_other": "{{count}} rote CIs",
+			"down_one": "{{count}} ausgefallen",
+			"down_other": "{{count}} ausgefallen",
+			"online": "online"
+		},
+		"waiting": "Wartet auf dich",
+		"island": {
+			"open": "{{name}} öffnen",
+			"agentsWord_one": "Agent",
+			"agentsWord_other": "Agenten",
+			"working_one": "{{count}} arbeitet",
+			"working_other": "{{count}} arbeiten",
+			"missionsWord_one": "Mission",
+			"missionsWord_other": "Missionen",
+			"awaiting_one": "{{count}} wartet auf dich",
+			"awaiting_other": "{{count}} warten auf dich",
+			"calm": "ruhig",
+			"openProject": "Dieses Projekt öffnen →",
+			"thingsWaiting_one": "{{count}} Sache wartet auf dich",
+			"thingsWaiting_other": "{{count}} Sachen warten auf dich",
+			"prodErrors_one": "{{count}} Fehler in Produktion",
+			"prodErrors_other": "{{count}} Fehler in Produktion"
+		},
+		"region": {
+			"frame": "Diese Region einrahmen",
+			"empty": {
+				"arrive": "Keine Tickets für dich, keine Fehler zu sichten.",
+				"encours": "Es läuft nichts. Starte einen Agenten oder eine Mission aus einem Ticket.",
+				"livrer": "Keine offenen PRs.",
+				"prod": "Verbinde das Monitoring (Better Stack) in den Einstellungen, um die Produktion hier zu sehen."
+			}
+		},
+		"card": {
+			"sentry": "Sentry · zu sichten",
+			"deploy": "Deployment",
+			"monitor": "Monitoring"
+		},
+		"ticket": {
+			"inMission": "in einer Mission"
+		},
+		"mission": {
+			"eyebrow": "Mission",
+			"tasksDelivered_one": "{{done}} / {{count}} Aufgabe geliefert",
+			"tasksDelivered_other": "{{done}} / {{count}} Aufgaben geliefert",
+			"awaitingApproval": "wartet auf dein Startsignal",
+			"planning": "der Hauptagent bereitet die Aufteilung vor"
+		},
+		"agent": {
+			"stopped": "gestoppt",
+			"working": "arbeitet",
+			"workingOn": "arbeitet · {{activity}}",
+			"waiting": "wartet"
+		},
+		"chantierCard": {
+			"open": "Karte der Baustelle öffnen",
+			"agentsOnWorktree_one": "{{count}} Agent auf diesem Worktree",
+			"agentsOnWorktree_other": "{{count}} Agenten auf diesem Worktree",
+			"others_one": "+ {{count}} weiterer",
+			"others_other": "+ {{count}} weitere",
+			"terminals_one": "{{count}} Terminal",
+			"terminals_other": "{{count}} Terminals"
+		},
+		"pr": {
+			"ciFailing": "CI scheitert",
+			"ciPassing": "CI besteht",
+			"ciRunning": "CI läuft",
+			"approved": "freigegeben",
+			"changesRequested": "Änderungen angefordert",
+			"reviewRequested": "Review: {{logins}}",
+			"notReviewed": "noch nicht reviewt",
+			"fromHere": "von hier",
+			"draft": "Entwurf",
+			"recheck": "Erneut prüfen",
+			"review": "Review",
+			"reviewRound": "Review · Runde {{round}} · {{verdict}}",
+			"toMerge": "bereit zum Mergen",
+			"findings_one": "{{count}} Punkt",
+			"findings_other": "{{count}} Punkte"
+		}
+	},
+	"missions": {
+		"title": "Missionen",
+		"subtitle": "Ein Ticket, ein Plan, mehrere Ausführer",
+		"rerun": "Neu starten",
+		"follow": "Verfolgen",
+		"situation": {
+			"masterIdle": "Der Hauptagent läuft nicht — öffne den Verlauf, dann macht er von selbst weiter.",
+			"masterDrafting": "Der Hauptagent formuliert seinen Vorschlag — verfolge ihn im Verlauf, mit dem Ticket daneben.",
+			"paused": "Pausiert",
+			"pausedDetail": "Nichts startet neu, bis du die Mission fortsetzt.",
+			"splitting": "Aufteilung",
+			"splittingDetail": "Der Hauptagent liest das Ticket und teilt die Arbeit in Aufgaben auf. Du prüfst seinen Plan, bevor ein Ausführer startet.",
+			"integrating": "Integration",
+			"integratingDetail": "Der Hauptagent führt die gelieferten Branches im Integrations-Branch zusammen und öffnet dann den Pull Request."
+		},
+		"steps": {
+			"planning": {
+				"label": "Analyse",
+				"waiting": "Starte den Hauptagenten: Er liest das Ticket und schlägt eine Aufteilung vor."
+			},
+			"awaitingApproval": {
+				"label": "Plan",
+				"waiting": "Eine Aufteilung wurde vorgeschlagen. Prüfe sie: Ohne deine Freigabe startet nichts."
+			},
+			"running": {
+				"label": "Ausführung",
+				"waiting": "Ausführer starten, sobald ihre Basis existiert, jeder in seinem eigenen Worktree."
+			},
+			"integrating": {
+				"label": "Integration",
+				"waiting": "Alles ist geliefert. Der Hauptagent führt die Branches zusammen und öffnet dann den PR."
+			},
+			"done": {
+				"label": "Geliefert",
+				"waiting": "Mission abgeschlossen."
+			}
+		},
+		"verdicts": {
+			"blocking": "abgelehnt",
+			"reserves": "Vorbehalte",
+			"ok": "geprüft",
+			"undecided": "kein Urteil"
+		},
+		"taskStates": {
+			"planned": "zu starten",
+			"running": "läuft",
+			"delivered": "geliefert",
+			"integrated": "integriert",
+			"failed": "fehlgeschlagen"
+		},
+		"open": {
+			"title": "Mission eröffnen",
+			"confirmTitle": "Mission auf {{source}} starten?",
+			"confirmMessage": "Der Hauptagent startet sofort und liest das Ticket. Alles andere startet nur mit deiner Freigabe.",
+			"confirmLabel": "Mission starten",
+			"activity": "Mission aus {{source}}",
+			"firstStep": "Lese das Ticket und starte den Hauptagenten…",
+			"placeholder": "oder füge einen Link ein — {{key}}-42, #317…",
+			"reading": "Lese das Ticket…",
+			"submit": "Öffnen",
+			"hint": "Titel und Integrations-Branch kommen aus dem Ticket: Sonst ist nichts auszufüllen."
+		},
+		"remove": {
+			"confirmTitle": "Alles zu „{{title}}“ löschen?",
+			"confirmMessage_one": "Die Agenten werden gestoppt, dann werden {{count}} Worktree, die Branches der Mission — inklusive Integrations-Branch — und die Unterhaltungen der Ausführer gelöscht. Nicht gepushte Arbeit geht verloren.",
+			"confirmMessage_other": "Die Agenten werden gestoppt, dann werden {{count}} Worktrees, die Branches der Mission — inklusive Integrations-Branch — und die Unterhaltungen der Ausführer gelöscht. Nicht gepushte Arbeit geht verloren.",
+			"confirmLabel": "Alles löschen",
+			"done_one": "Mission gelöscht — {{count}} Element entfernt.",
+			"done_other": "Mission gelöscht — {{count}} Elemente entfernt."
+		},
+		"intro": {
+			"title": "Was eine Mission tut",
+			"how": "Du übergibst ein Ticket. Ein Hauptagent liest es, schlägt eine Aufteilung in Aufgaben vor und wartet auf deine Freigabe — vorher startet nichts. Ist der Plan freigegeben, bekommt jede Aufgabe ihren eigenen Ausführer, Branch und Worktree; am Ende führt der Hauptagent ihre Arbeit zusammen und öffnet den Pull Request.",
+			"why": "Das ist der Unterschied zu einem Agenten, den du von Hand startest: Hier behält das Cockpit das Ticket, den Plan, die Branches und das Gelieferte im Blick — und findet alles intakt wieder, selbst wenn es mittendrin neu startet.",
+			"missingTitle": "Was hier fehlt",
+			"missing": "Ein Aufgaben-Tracker, um das ursprüngliche Ticket zu lesen: {{missing}}. Die Rollen der Ausführer haben bereits Standardwerte — du kannst sie später unter „Agentenrollen“ anpassen.",
+			"missingDefault": "ein Linear-, GitLab- oder GitHub-Token",
+			"openSettings": "Einstellungen öffnen"
+		},
+		"empty": {
+			"title": "Keine laufende Mission",
+			"hint": "Wähle oben ein Ticket: Ein Hauptagent liest es, schlägt eine Aufteilung vor und wartet auf deine Freigabe, bevor er etwas startet. Jede Aufgabe läuft dann auf ihrem eigenen Branch, und der Hauptagent führt am Ende alles zusammen."
+		},
+		"card": {
+			"noBranch": "kein Branch",
+			"fromTo": "Von {{from}} nach {{to}}",
+			"startedAt": "Gestartet {{at}}",
+			"yourTurn": "Du bist dran — öffnen",
+			"journey": "Verlauf",
+			"remove": "Löschen",
+			"delivered_one": "{{count}} von {{total}} Aufgaben geliefert",
+			"delivered_other": "{{count}} von {{total}} Aufgaben geliefert",
+			"reworked_one": " · {{count}} ging durch eine Nacharbeit",
+			"reworked_other": " · {{count}} gingen durch eine Nacharbeit",
+			"masterLaunched": "Hauptagent gestartet.",
+			"launching": "Starte…",
+			"launchMaster": "Hauptagent starten",
+			"estimateTitle_one": "Median von {{count}} abgeschlossenen Mission ähnlicher Größe",
+			"estimateTitle_other": "Median von {{count}} abgeschlossenen Missionen ähnlicher Größe",
+			"estimate": "≈ {{duration}} Arbeit",
+			"estimateFailed": " · {{percent}} % gescheitert",
+			"estimateThin": " · grobe Schätzung",
+			"planApproved": "Plan freigegeben — die Ausführer starten.",
+			"launchingRunners": "Starte Ausführer…",
+			"approvePlan": "Plan freigeben",
+			"outsideTitle": "Der Pull Request geht erst raus, wenn diese Arbeit gemergt oder aufgegeben ist.",
+			"allInsideTitle": "Alle gelieferte Arbeit ist im Integrations-Branch.",
+			"integrated": "{{done}}/{{total}} integriert",
+			"outside_one": " · {{count}} noch außerhalb",
+			"outside_other": " · {{count}} noch außerhalb",
+			"refusedTitle": "{{tasks}} — behebe, was bemängelt wird, und starte die Prüfung dann neu: Ihr neues Urteil hebt die Ablehnung auf.",
+			"refused_one": "{{count}} Prüfung lehnt ab",
+			"refused_other": "{{count}} Prüfungen lehnen ab",
+			"undecidedTitle": "Ihr Bericht kommt zu keinem lesbaren Schluss. Ein Neustart lässt sie alles erneut prüfen und mit einem klaren Urteil enden: ok, Vorbehalte oder blockierend.",
+			"undecided": "Kein Urteil: {{title}}",
+			"rerunDone": "{{title}} — neu gestartet.",
+			"prBlockedRefused": "Eine Prüfung lehnt noch ab: Hebe ihr Urteil auf, bevor du den Pull Request öffnest.",
+			"prBlockedUndecided": "Eine Prüfung ist zu keinem Schluss gekommen: Es lässt sich nicht sagen, ob die Arbeit besteht. Starte sie neu, bevor du den Pull Request öffnest.",
+			"prOpened": "Pull Request geöffnet.",
+			"opening": "Öffne…",
+			"openPr": "PR öffnen",
+			"viewPr": "PR ansehen",
+			"resumeTitle": "Startet den Hauptagenten und alles, was laufen sollte, neu",
+			"resumed": "Mission fortgesetzt.",
+			"resuming": "Setze fort…",
+			"resume": "Fortsetzen",
+			"pauseTitle": "Stoppt die Agenten und setzt den Starter aus — die Arbeit bleibt erhalten",
+			"paused": "Mission pausiert.",
+			"pause": "Pausieren",
+			"stopTitle": "Stoppt alles und gibt die Mission auf",
+			"stopped": "Mission gestoppt.",
+			"stop": "Stoppen",
+			"master": "Hauptagent",
+			"summary": "So funktioniert es",
+			"summaryPr": "Pull Request: {{url}}",
+			"summaryCopied": "Bericht kopiert.",
+			"copy": "Kopieren",
+			"proposedPlan": "Vorgeschlagener Plan",
+			"addTask": "Aufgabe von Hand hinzufügen"
+		},
+		"base": {
+			"set": "Der PR basiert auf {{branch}}.",
+			"cleared": "Der PR zielt auf den Standard-Branch.",
+			"title": "Branch, auf dem der Pull Request basieren soll",
+			"default": "Standard-Branch",
+			"stacking": "Offene PRs — der Stapel wird erkannt",
+			"others": "Andere Branches"
+		},
+		"pending": {
+			"wantsToUse": "Möchte nutzen",
+			"deny": "Ablehnen",
+			"allow": "Erlauben"
+		},
+		"agent": {
+			"permissions_one": "{{count}} Berechtigung zu erteilen",
+			"permissions_other": "{{count}} Berechtigungen zu erteilen",
+			"working": "arbeitet…",
+			"waiting": "wartet",
+			"stopped": "gestoppt",
+			"openConversation": "Unterhaltung öffnen"
+		},
+		"task": {
+			"noScopeTitle": "Kein Bereich: Diese Aufgabe kann überall schreiben",
+			"noScope": "kein Bereich",
+			"actualBranchTitle": "Der Ausführer hat auf „{{actual}}“ statt auf „{{expected}}“ gearbeitet. Diesen Branch wird die Integration mergen.",
+			"overrunTitle": "Diese Aufgabe läuft seit {{spent}}, während eine Aufgabe üblicherweise {{expected}} dauert. Nichts wird gestoppt: Du entscheidest, ob du sie fortsetzt, neu aufteilst oder stoppst.",
+			"workedAcross_one": "Gesamte Arbeitszeit über {{count}} Durchgang",
+			"workedAcross_other": "Gesamte Arbeitszeit über {{count}} Durchgänge",
+			"worked": "Arbeitszeit",
+			"sentBack_one": "{{count}}-mal von höchstens 3 zur Korrektur zurückgeschickt",
+			"sentBack_other": "{{count}}-mal von höchstens 3 zur Korrektur zurückgeschickt",
+			"reworks_one": "{{count}} Nacharbeit",
+			"reworks_other": "{{count}} Nacharbeiten",
+			"reworkOf": "Nacharbeit {{count}}/3",
+			"held": "wartet, bis sie dran ist",
+			"forceTitle": "Start erzwingen, ohne auf die Basis zu warten",
+			"runnerLaunched": "{{title}} — Ausführer gestartet.",
+			"force": "Erzwingen",
+			"fullReviewTitle": "Vergessen, was bereits freigegeben wurde, und alles erneut prüfen",
+			"fullReviewLaunched": "{{title}} — vollständiges Review gestartet.",
+			"fullReview": "Alles prüfen",
+			"orphanTitle": "Kein Ausführer an dieser Aufgabe: Starte sie von vorn",
+			"runnerRelaunched": "{{title}} — Ausführer neu gestartet."
+		},
+		"form": {
+			"role": "Rolle",
+			"title": "Titel",
+			"titlePlaceholder": "Einstiegspunkte der Abrechnung",
+			"scope": "Bereich",
+			"scopeHint": "kommagetrennte Pfade",
+			"cancel": "Abbrechen",
+			"submit": "Aufgabe hinzufügen"
+		},
+		"picker": {
+			"tickets": "Tickets",
+			"title": "Ticket aus dem Tracker wählen",
+			"assigned": "Zugewiesen",
+			"others": "Andere",
+			"empty": "Kein offenes Ticket vorzuschlagen."
+		}
+	},
+	"observability": {
+		"title": "Beobachtbarkeit",
+		"subtitle": "Sentry und Better Stack",
+		"ticket": "Ticket",
+		"ticketTitle": "Linear-Ticket anlegen und in Sentry vermerken",
+		"ticketCreated": "Linear-Ticket angelegt.",
+		"resolve": "Beheben",
+		"resolved": "Issue behoben.",
+		"ignore": "Ignorieren",
+		"ignored": "Issue ignoriert.",
+		"regressions": "Regressionen",
+		"incidents": "Vorfälle",
+		"monitors": "Monitore",
+		"errorsAndIncidents": "Fehler & Vorfälle",
+		"emptyHint": "Prüfe Token und Organisation in den Einstellungen, wenn du Ergebnisse erwartet hast."
+	},
+	"overview": {
+		"prSegments": {
+			"ready": "bereit",
+			"ciFailing": "CI ✗",
+			"stacked": "gestapelt",
+			"inReview": "im Review",
+			"drafts": "Entwürfe"
+		},
+		"title": "Übersicht",
+		"subtitle": "Der Zustand des Produkts, der Flotte und der Missionen",
+		"refreshing": "aktualisiere…",
+		"sourcesLoading_one": "{{count}} Quelle lädt…",
+		"sourcesLoading_other": "{{count}} Quellen laden…",
+		"waitingBanner_one": "{{count}} Agent wartet auf deine Antwort",
+		"waitingBanner_other": "{{count}} Agenten warten auf deine Antwort",
+		"tiles": {
+			"liveAgents": "Aktive Agenten",
+			"waiting": "{{count}} wartend",
+			"readyToMerge": "Bereit zum Mergen",
+			"ciFailing": "Rote CI",
+			"dailyBlockers": "Daily-Blocker",
+			"prodErrors": "Produktionsfehler",
+			"activeWorktrees": "Aktive Worktrees",
+			"total": "{{count}} insgesamt"
+		},
+		"usage": {
+			"title": "Claude-Verbrauch",
+			"dayLabel": "{{day}}: {{tokens}} Tokens",
+			"summary": "{{today}} heute · {{week}} in 7 Tagen · letzte 21 Tage",
+			"none": "Noch keine Messungen."
+		},
+		"prState": "PR-Status",
+		"cycle": {
+			"title": "Aktueller Zyklus",
+			"ticketsDone": "Tickets erledigt",
+			"reviewLoad": "PRs zu reviewen",
+			"none": "Kein aktiver Zyklus."
+		},
+		"missions": {
+			"title": "Missionen",
+			"none": "Keine laufenden Missionen. Eine Mission teilt ein Ticket in Aufgaben auf, die an Agenten gehen.",
+			"delivered": "{{done}}/{{total}} geliefert",
+			"splitting": "wird aufgeteilt",
+			"running": "{{count}} laufen"
+		},
+		"production": {
+			"title": "Produktion",
+			"none": "Keine kritischen Fehler in 14 Tagen."
+		},
+		"prFlow": {
+			"title": "PR-Fluss",
+			"see": "Ansehen",
+			"stackedOn": "gestapelt auf {{base}}",
+			"ready_one": "{{count}} PR bereit zum Mergen, nichts kaputt.",
+			"ready_other": "{{count}} PRs bereit zum Mergen, nichts kaputt.",
+			"noneFailing": "Keine fehlschlagenden PRs."
+		},
+		"fleet": {
+			"title": "Flotte",
+			"allClean": "Alle Bäume sind sauber.",
+			"changes_one": "{{count}} Änderung",
+			"changes_other": "{{count}} Änderungen"
+		},
+		"daily": {
+			"title": "Daily-Blocker",
+			"button": "Daily"
+		},
+		"docs": {
+			"title": "Neueste Ergebnisse",
+			"none": "Keine aktuellen Dokumente."
+		},
+		"githubError": "GitHub: {{error}}",
+		"empty": {
+			"message": "Nichts anzuzeigen",
+			"hint": "Prüfe `general.main_repo` in den Einstellungen."
+		}
+	},
+	"permanence": {
+		"title": "Permanence",
+		"resume": "Fortsetzen",
+		"suspend": "Aussetzen",
+		"lookNow": "Jetzt nachsehen, ohne auf den Takt zu warten",
+		"settings": "Einstellungen der Permanence",
+		"halt": {
+			"confirmTitle": "Alles stoppen?",
+			"confirmMessage_one": "{{count}} laufende Sache wird abgebrochen: {{items}}. Missionen werden pausiert, ihre Arbeit bleibt erhalten. Sie startet erst wieder, wenn du sie neu scharf schaltest.",
+			"confirmMessage_other": "{{count}} laufende Sachen werden abgebrochen: {{items}}. Missionen werden pausiert, ihre Arbeit bleibt erhalten. Sie startet erst wieder, wenn du sie neu scharf schaltest.",
+			"button": "Alles stoppen",
+			"rest": "Rest abbrechen",
+			"hint": "Schließt die Türen und bricht alles ab, was sie hält",
+			"reason": "Stopp über die Ansicht angefordert.",
+			"partial": "Gestoppt: {{stopped}}. Nicht abzubrechen: {{failed}}",
+			"done": "Alles ist gestoppt ({{items}}).",
+			"nothing": "Es lief nichts. Sie startet erst wieder, wenn du sie neu scharf schaltest."
+		},
+		"release": {
+			"confirmTitle": "Freilassen?",
+			"confirmMessage": "Ab dem nächsten Einsatz führt sie die in den Einstellungen angehakten Aktionen wirklich aus. Sie rührt nie einen geteilten Branch an, und „Alles stoppen“ bleibt in Reichweite.",
+			"button": "Freilassen",
+			"hint": "Sie handelt ab dem nächsten Einsatz wirklich"
+		},
+		"tripped": {
+			"title": "Sicherung: Sie hat sich selbst gestoppt.",
+			"holds_one": "{{count}} Sache konnte nicht abgebrochen werden: {{items}}",
+			"holds_other": "{{count}} Sachen konnten nicht abgebrochen werden: {{items}}",
+			"rearm": "Neu scharf schalten"
+		},
+		"rehearsal": {
+			"title": "Probelauf — sie entscheidet, sie handelt nicht.",
+			"left_one": "{{count}} Trockenlauf-Einsatz übrig",
+			"left_other": "{{count}} Trockenlauf-Einsätze übrig",
+			"during": "<label>Während des Probelaufs:</label> Sie liest die Signale, schreibt ihr Ziel und die Liste der Aktionen, die sie ausführen würde — und hört dort auf. In deinen Repositorys wird nichts angerührt. Öffne einen abgeschlossenen Einsatz, um zu lesen, was sie getan hätte.",
+			"release": "<label>Freilassen:</label> Ab dem nächsten Einsatz führt sie die angehakten Aktionen wirklich aus — und nur diese. Du kannst auch den Zähler ablaufen lassen.",
+			"reset": "<label>Der Zähler startet neu</label>, sobald du ihre Befugnisse änderst: Wer mehr darf, ist eine andere Konfiguration, und die wird beobachtet, bevor sie freigelassen wird."
+		},
+		"live": "Sie handelt wirklich. Die in den Einstellungen angehakten Aktionen sind die einzigen, die sie ausführt, und nie auf einem geteilten Branch.",
+		"suspended": {
+			"message": "In Ruhe. Laufende Einsätze werden zu Ende geführt; kein neuer beginnt.",
+			"hint": "mit einem Klick oder ⌘⇧P fortsetzen"
+		},
+		"inFlight": {
+			"title": "Laufend",
+			"noRule": "Keine aktive Regel.",
+			"noRuleHint": "Die Permanence tut nichts, bis du ihr sagst, was sie beobachten soll — und sie tut nur, was du angehakt hast.",
+			"openSettings": "Einstellungen öffnen",
+			"idle_one": "{{count}} Regel einsatzbereit, nichts läuft. Das ist meistens die erwartete Antwort.",
+			"idle_other": "{{count}} Regeln einsatzbereit, nichts läuft. Das ist meistens die erwartete Antwort."
+		},
+		"finished": "Abgeschlossen",
+		"queue": {
+			"title": "In der Warteschlange",
+			"unknownRule": "unbekannte Regel",
+			"retained": "vorgemerkt {{when}}",
+			"single": "Ein Einsatz nach dem anderen: Diese warten, bis sie dran sind.",
+			"multiple_one": "Höchstens {{count}} Einsatz gleichzeitig: Diese warten, bis sie dran sind.",
+			"multiple_other": "Höchstens {{count}} Einsätze gleichzeitig: Diese warten, bis sie dran sind."
+		},
+		"closed": {
+			"disabled": "deaktiviert",
+			"suspended": "in Ruhe",
+			"offHours": "außerhalb der Dienstzeiten",
+			"capped": "Tageslimit erreicht",
+			"quota": "geteiltes Kontingent unter der Untergrenze",
+			"tripped": "hat sich selbst gestoppt"
+		},
+		"heartbeat": {
+			"tripped": "gestoppt — Sicherung",
+			"ready_one": "{{count}} Regel einsatzbereit",
+			"ready_other": "{{count}} Regeln einsatzbereit",
+			"noneReady": "keine Regel einsatzbereit",
+			"never": "noch nie nachgesehen",
+			"lastLook": "zuletzt nachgesehen {{when}}",
+			"blind_one": "{{count}} stumme Quelle",
+			"blind_other": "{{count}} stumme Quellen",
+			"cold": "setzt den Cursor"
+		},
+		"dropped": {
+			"title": "Verworfen",
+			"cold": "Erster Blick: Der Cursor wird gesetzt. Was sich danach ändert, wird gemeldet.",
+			"nothing": "Seit dem letzten Blick nichts Neues.",
+			"seenPending_one": "{{count}} Signal gesehen, davon {{pending}} wartend auf Triage.",
+			"seenPending_other": "{{count}} Signale gesehen, davon {{pending}} wartend auf Triage.",
+			"seen_one": "{{count}} Signal gesehen, keine Regel trifft zu.",
+			"seen_other": "{{count}} Signale gesehen, keine Regel trifft zu.",
+			"compared_one": "{{count}} Änderung verglichen",
+			"compared_other": "{{count}} Änderungen verglichen",
+			"pending": "wartet auf Triage",
+			"retry": "Triage für dieses Signal erneut ausführen",
+			"more_one": "+ {{count}} weiteres",
+			"more_other": "+ {{count}} weitere"
+		},
+		"reserve": {
+			"title": "Reserve",
+			"grounded": "in Ruhe",
+			"refresh": "Die CLI erneut nach den Limits fragen",
+			"ceiling": "Ihr Tageslimit",
+			"ceilingHint_one": "max. Tokens · höchstens {{count}} Einsatz",
+			"ceilingHint_other": "max. Tokens · höchstens {{count}} Einsätze",
+			"shared": "Was du teilst",
+			"limitResets": "{{label}} · setzt sich {{when}} zurück",
+			"noLimits": "Limits nicht gemeldet",
+			"floor": "Sie macht dir Platz unterhalb von",
+			"floorHint": "des verbleibenden Kontingents",
+			"floorMark": "Sie stoppt unter {{floor}} % verbleibend",
+			"belowFloor": "Unter der Untergrenze: Sie startet keinen Einsatz, bis sich das Kontingent erholt hat.",
+			"willStop": "Sie stoppt von selbst unter {{floor}} % verbleibend."
+		}
+	},
+	"recap": {
+		"period": {
+			"1h": "Letzte Stunde",
+			"3h": "Letzte 3 Stunden",
+			"day": "Heute"
+		},
+		"caption": {
+			"video": "Der Abnahmelauf, gefilmt vom Cockpit.",
+			"after": "Nachher.",
+			"before": "Vorher."
+		},
+		"status": {
+			"waiting": "wartet auf deine Antwort",
+			"prReady": "PR {{label}} bereit",
+			"testsGreen": "Tests grün",
+			"testsRed": "Tests rot",
+			"handedBack": "hat die Kontrolle zurückgegeben"
+		},
+		"title": "Was passiert ist",
+		"noTurns": "Keine abgeschlossenen Runden in diesem Zeitraum.",
+		"turns_one": "{{count}} Runde",
+		"turns_other": "{{count}} Runden",
+		"agents_one": "{{count}} Agent",
+		"agents_other": "{{count}} Agenten",
+		"prsReady_one": "{{count}} PR bereit",
+		"prsReady_other": "{{count}} PRs bereit",
+		"decisionsWaiting_one": "{{count}} Entscheidung wartet auf dich",
+		"decisionsWaiting_other": "{{count}} Entscheidungen warten auf dich",
+		"watchAll": "Alles ansehen",
+		"empty": "Jede Runde, die ein Agent beendet, wird hier zu einer kurzen Geschichte: was er geändert, gezeigt, gefilmt hat. Erweitere den Zeitraum oder komm wieder, nachdem du Arbeit gestartet hast.",
+		"images_one": "{{count}} Bild",
+		"images_other": "{{count}} Bilder",
+		"player": {
+			"story": "Geschichte {{index}} von {{total}}",
+			"voiceOff": "Stimme stummschalten",
+			"voiceOn": "Vorlesen",
+			"resume": "Fortsetzen",
+			"pause": "Pause",
+			"close": "Schließen",
+			"workTime": "{{duration}} Arbeit",
+			"previous": "Vorheriges Bild",
+			"next": "Nächstes Bild",
+			"openConversation": "Unterhaltung öffnen"
+		}
+	},
+	"scripts": {
+		"sensitive": "heikel",
+		"options": "Optionen",
+		"defaultChoice": "— Standard —",
+		"command": "Befehl",
+		"in": "in {{path}}",
+		"run": "Ausführen",
+		"openInTerminal": "In Terminal.app statt im Cockpit öffnen",
+		"required": "{{label}} ist erforderlich.",
+		"title": "Skripte",
+		"subtitle": "Konfigurierbare hauseigene Befehle und Repository-Skripte, mit Live-Ausgabe ausgeführt.",
+		"targetWorktree": "Ziel-Worktree",
+		"search": "Suchen…",
+		"noCommands": "Für dieses Projekt sind keine Befehle deklariert.",
+		"noCommandsHint": "Einstellungen → Agenten → Repository-Befehle: Das Cockpit kann sie aus den Skripten des Repositorys erkennen, oder du schreibst sie selbst.",
+		"noRuns": "Noch keine Läufe.",
+		"state": {
+			"running": "läuft",
+			"succeeded": "fertig",
+			"cancelled": "abgebrochen",
+			"failed": "fehlgeschlagen {{code}}"
+		},
+		"stop": "Stoppen",
+		"clearOutput": "Ausgabe leeren",
+		"replayInTerminal": "In Terminal.app erneut abspielen",
+		"launchPrompt": "Befehl ausführen",
+		"launchHint": "Die Ausgabe erscheint hier live, mit den Farben des Terminals."
+	},
+	"settings": {
+		"tabs": {
+			"projects": {
+				"label": "Projekte",
+				"hint": "die Repositorys, die das Cockpit steuert"
+			},
+			"services": {
+				"label": "Dienste",
+				"hint": "was verbunden ist, und mit welchen Schlüsseln"
+			},
+			"team": {
+				"label": "Team & Workflow",
+				"hint": "wer arbeitet, und wie"
+			},
+			"agents": {
+				"label": "Agenten",
+				"hint": "die Rollen der Ausführer"
+			},
+			"voice": {
+				"label": "Stimme & Assistent",
+				"hint": "die Stimme, das Zuhören, ElevenLabs"
+			},
+			"permanence": {
+				"label": "Permanence",
+				"hint": "was sie beobachtet, und was sie sich erlaubt"
+			},
+			"workstation": {
+				"label": "Arbeitsplatz",
+				"hint": "Ordner, Editor, Erscheinungsbild, Start"
+			},
+			"mobile": {
+				"label": "Mobiler Zugriff",
+				"hint": "die Agenten vom Handy aus verfolgen"
+			},
+			"version": {
+				"label": "Version",
+				"hint": "Updates"
+			}
+		},
+		"common": {
+			"remove": "Entfernen",
+			"add": "Hinzufügen",
+			"name": "Name"
+		},
+		"sentry": {
+			"unavailable": "Liste nicht verfügbar ({{error}}) — gib die Slugs von Hand ein."
+		},
+		"trigger": {
+			"saved": "Umgebung „{{name}}“ gespeichert.",
+			"removeTitle": "Umgebung „{{name}}“ entfernen?",
+			"removed": "Umgebung „{{name}}“ entfernt.",
+			"defaultProject": "Standardprojekt",
+			"mainKey": "Hauptschlüssel",
+			"namePlaceholder": "Production",
+			"secretKey": "Geheimer Schlüssel",
+			"project": "Projekt",
+			"projectHint": "Leer = das obige.",
+			"help": "Ein geheimer Schlüssel gilt nur für ein Projekt und eine Umgebung: Füge einen Eintrag pro zu verfolgender Umgebung hinzu (Production, Staging, Test…). Jeder wird zu einem Tab in Auslieferung."
+		},
+		"projects": {
+			"added": "Projekt „{{name}}“ hinzugefügt.",
+			"removeTitle": "Projekt „{{name}}“ entfernen?",
+			"removeMessage": "Nur die Konfiguration des Cockpits ändert sich — das Repository bleibt unberührt.",
+			"activate": "Dieses Projekt aktivieren",
+			"soloBadge": "solo",
+			"new": "Neu",
+			"namePlaceholder": "Nebenprojekt",
+			"folder": "Ordner",
+			"folderHint": "Ein Pfad, ein „~“ oder nur ein Name unter deinem Projektordner.",
+			"folderPlaceholder": "~/Sites/mein-projekt",
+			"githubHint": "Leer = aus dem Repository abgeleitet, falls vorhanden.",
+			"githubPlaceholder": "ich/mein-projekt",
+			"solo": "Solo",
+			"soloTitle": "Projekt ohne Team: blendet das Daily aus",
+			"prepareFirst": "Bereite zuerst den Boden vor — der Block unten kümmert sich darum"
+		},
+		"saved": "Konfiguration gespeichert.",
+		"title": "Einstellungen",
+		"revealFile": "Datei zeigen",
+		"saving": "Speichere…",
+		"save": "Speichern",
+		"saveConfig": "Konfiguration speichern",
+		"scope": {
+			"projectTitle": "Die folgenden Einstellungen gelten für „{{name}}“",
+			"thisProject": "dieses Projekt",
+			"globalTitle": "Die folgenden Einstellungen sind die Standardwerte, die jedes Projekt erbt",
+			"projectHintIsolated": "Du siehst hier nur, was dieses Projekt deklariert. Ein leeres Feld ist für dieses Projekt nicht konfiguriert: Sobald es mehrere Projekte gibt, leiht sich keines das Repository oder Team eines anderen. Nur Zugriffstokens bleiben geteilt.",
+			"projectHint": "Ein leeres Feld erbt die Standardwerte. Fülle es aus, um diesem Projekt eigene zu geben — ein anderes GitHub-Konto, einen anderen Sentry-Schlüssel.",
+			"globalHintIsolated": "Diese Werte sind der Rückfall für Zugriffstokens. Repositorys und Teams werden Projekt für Projekt deklariert.",
+			"globalHint": "Diese Werte gelten überall dort, wo ein Projekt nichts festlegt. Wechsle zum Projekt, um ihm eigene Einstellungen zu geben.",
+			"project": "Projekt",
+			"defaults": "Standardwerte"
+		},
+		"sections": {
+			"projects": "Projekte",
+			"services": "Verbundene Dienste",
+			"workflow": "Workflow",
+			"team": "Team",
+			"accounts": "Konten",
+			"engines": "Agenten-Engines",
+			"mcp": "Repository-Werkzeuge (MCP)",
+			"roles": "Agentenrollen",
+			"missionMode": "Wie eine Mission startet",
+			"missionBudget": "Was eine Mission kosten darf",
+			"sandbox": "Isolierung der Agenten",
+			"properties": "Was wahr bleiben muss",
+			"commands": "Repository-Befehle",
+			"brief": "Kontext der Agenten",
+			"impact": "Lesen von Änderungen",
+			"voice": "Stimme",
+			"assistant": "Sprachassistent",
+			"mobile": "Mobiler Zugriff",
+			"version": "Version",
+			"language": "Sprache",
+			"appearance": "Erscheinungsbild",
+			"onClose": "Beim Schließen",
+			"onStart": "Beim Start",
+			"dock": "Workspace-Erinnerung",
+			"workstation": "Arbeitsplatz",
+			"identifiers": "Projektkennungen",
+			"triggerEnvironments": "Trigger.dev-Umgebungen",
+			"secrets": "Zugriffstokens",
+			"links": "Nützliche Links"
+		},
+		"voice": {
+			"intro": "Die Stimme, die erzählt, was ein Agent tut, wenn du zuhörst, und die dir antwortet, wenn du mit dem Assistenten sprichst. Der ElevenLabs-Schlüssel dient beidem: sprechen und dich hören."
+		},
+		"version": {
+			"intro": "Das Cockpit prüft selbst, ein paar Mal am Tag. Nichts wird ohne deine Zustimmung installiert: Ein Update startet die Anwendung neu. Workspace-Agenten laufen währenddessen weiter, außer du hast das unter Arbeitsplatz → Beim Schließen ausgeschaltet; Missionsagenten werden beim Neustart fortgesetzt."
+		},
+		"workstation": {
+			"projectsRoot": "Projektordner",
+			"projectsRootHint": "Wurzel, die das Monorepo und die Worktrees enthält.",
+			"mainRepo": "Haupt-Repository",
+			"mainRepoHint": "Maßgebliche Quelle für die Git-Worktrees.",
+			"editor": "Editor"
+		},
+		"services": {
+			"githubRepo": "GitHub-Repository",
+			"sentryOrg": "Sentry-Organisation",
+			"sentryProjects": "Sentry-Projekte",
+			"sentryProjectsHint": "Keines angehakt = die ganze Organisation.",
+			"ticketKey": "Ticket-Schlüssel",
+			"ticketKeyHint": "Linear-Präfix, z. B. ABC — das Team des Daily wird weiter unten festgelegt",
+			"gitlabProject": "GitLab-Projekt",
+			"gitlabProjectHint": "Pfad mit seiner Gruppe, z. B. group/product",
+			"gitlabProjectPlaceholder": "group/product",
+			"gitlabHost": "GitLab-Instanz",
+			"gitlabHostHint": "leer = gitlab.com; sonst die Wurzel deiner Instanz",
+			"gitlabHostPlaceholder": "https://gitlab.example.com",
+			"triggerProject": "Trigger.dev-Projekt",
+			"railwayProject": "Railway-Projekt"
+		},
+		"secrets": {
+			"override": "projektspezifisch",
+			"inherited": "geerbt",
+			"configured": "konfiguriert",
+			"missing": "fehlt",
+			"keepPlaceholder": "•••••••• — leer lassen zum Behalten",
+			"pastePlaceholder": "Token einfügen",
+			"storage": "Tokens werden mit den Rechten 600 in {{path}} geschrieben und kommen nie zur Oberfläche zurück. Jeder Wert kann auch über eine Umgebungsvariable geliefert werden (COCKPIT_SENTRY_TOKEN, COCKPIT_LINEAR_TOKEN…), die dann Vorrang vor der Datei hat."
+		},
+		"theme": {
+			"dark": "Dunkel",
+			"darkHint": "das ursprüngliche Theme",
+			"light": "Hell",
+			"lightHint": "gleiche Rollen, andere Werte",
+			"system": "System",
+			"systemHint": "folgt macOS, Umschalten inklusive",
+			"help": "Die Wahl gilt für diesen Arbeitsplatz und wirkt sofort — sie wartet nicht auf „Konfiguration speichern“, das nur die Projekteinstellungen betrifft. Offene Terminals werden mit allem anderen neu gezeichnet."
+		},
+		"relay": {
+			"continue": "Agenten laufen weiter",
+			"stop": "Agenten stoppen",
+			"continueHelp": "Das Schließen oder Aktualisieren des Cockpits stoppt die von Hand gestarteten Workspace-Agenten nicht mehr: Sie beenden ihre Runde ohne Fenster, und du findest sie beim nächsten Start wieder, mit neu geladener Unterhaltung. Der Workspace-Browser schließt sich jedoch mit der App. Missionen, Reviews und container-isolierte Agenten behalten ihr Verhalten: Sie stoppen und werden fortgesetzt.",
+			"stopHelp": "Das Schließen des Cockpits stoppt alle laufenden Agenten; beim nächsten Start werden sie gemäß der Einstellung „Beim Start“ fortgesetzt.",
+			"note": "Die Wahl gilt für ab jetzt gestartete Agenten."
+		},
+		"resume": {
+			"resume": "Arbeit fortsetzen",
+			"resumeHint": "öffnet alles wieder und bittet jeden Agenten, dort weiterzumachen, wo er aufgehört hat",
+			"reopen": "Wieder öffnen ohne Neustart",
+			"reopenHint": "die Unterhaltungen sind da, neu geladen, aber niemand legt von selbst wieder los",
+			"off": "Nichts wieder öffnen",
+			"offHint": "Workspaces warten in der Leiste; ein Klick weckt sie",
+			"resumeHelp": "Jeder wieder geöffnete Agent bekommt eine Fortsetzungsanweisung: den tatsächlichen Zustand des Repositorys prüfen, bevor er weitermacht, statt bei seiner letzten Aktion neu anzusetzen. Sein Kontext ist intakt — die CLI setzt die Unterhaltung über ihre Kennung fort.",
+			"reopenHelp": "Unterhaltungen werden wieder geöffnet und sind lesbar; die Arbeit startest du selbst neu.",
+			"offHelp": "Nichts startet neu: Was gestern lief, erscheint in der Workspace-Leiste als schlafend.",
+			"note": "Diese Wahl gilt beim nächsten Start des Cockpits. Laufende Missionen werden immer fortgesetzt — ihre Ausführer ebenso wie ihr Hauptagent."
+		},
+		"dock": {
+			"show": "Zeigen",
+			"hide": "Ausblenden",
+			"showHelp": "Laufende Workspaces bleiben unten rechts angeheftet, außerhalb ihrer Ansicht: Das ist ihre einzige Spur, wenn du woanders hinschaust.",
+			"hideHelp": "Über den anderen Ansichten erscheint nichts. Was läuft, bleibt in der Ansicht Workspaces sichtbar, und Benachrichtigungen informieren dich weiter."
+		}
+	},
+	"team": {
+		"title": "Daily",
+		"loading": "Lade…",
+		"subtitle": "seit dem Daily vom {{since}}",
+		"subtitleCycle": "Zyklus {{number}} · seit dem Daily vom {{since}}",
+		"present": "Daily im Vollbild durchführen",
+		"currentCycle": "Aktueller Zyklus",
+		"all": "Alle",
+		"githubError": "Auf GitHub-Seite: {{error}} — Linear-Tickets werden weiterhin angezeigt.",
+		"wholeTeam": "Ganzes Team",
+		"draft": "Entwurf",
+		"ageDays_one": "{{count}} T.",
+		"ageDays_other": "{{count}} T.",
+		"decision": {
+			"approved": "freigegeben",
+			"changesRequested": "Änderungen angefordert",
+			"reviewRequired": "zu reviewen"
+		},
+		"chip": {
+			"wip": "WIP",
+			"review": "Review",
+			"prs": "PR",
+			"toReview": "zu reviewen",
+			"merged": "gemergt",
+			"blocking": "blockierend",
+			"toChallenge": "zu hinterfragen",
+			"inReview": "im Review",
+			"readyToMerge": "bereit zum Mergen"
+		},
+		"member": {
+			"cycle": "Zyklus {{done}}/{{total}}",
+			"more_one": "+{{count}} weiteres",
+			"more_other": "+{{count}} weitere",
+			"openPrs": "Ihre offenen PRs",
+			"reviewInbox": "Für andere zu reviewen",
+			"reviewFrom": "von {{author}} · {{age}}",
+			"shipped": "Seit dem letzten Daily ausgeliefert",
+			"next": "Als Nächstes"
+		},
+		"noTracker": {
+			"subtitle": "Aufgaben-Tracker nicht verbunden",
+			"service": "Der Aufgaben-Tracker",
+			"token": "ein Token"
+		},
+		"noTeam": {
+			"subtitle": "Team nicht deklariert",
+			"title": "Das Daily muss wissen, wer im Team ist",
+			"missingId": "Die Team-ID fehlt: Es ist die UUID des Linear-Teams, sichtbar in der URL seiner Einstellungen — nicht der Schlüssel, der den Tickets vorangestellt ist.",
+			"noMembers": "Kein Mitglied deklariert: Jedes braucht seine Linear-ID, damit ihm seine Tickets zugeordnet werden, und seinen GitHub-Login für seine Pull Requests.",
+			"open": "Einstellungen → Team öffnen"
+		},
+		"flags": {
+			"title": "Im Daily anzusprechen",
+			"urgentOnly": "Nur Blockierendes",
+			"empty": "Nichts zu melden",
+			"emptyHint": "Keine offene Frage in diesem Bereich."
+		},
+		"flow": {
+			"title": "PR-Fluss",
+			"ready": "Bereit zum Mergen ({{count}})",
+			"ciFailing": "CI scheitert ({{count}})",
+			"stacked": "Gestapelte PRs ({{count}})",
+			"blockedBy": "blockiert durch #{{number}}"
+		},
+		"focus": "Team-Fokus",
+		"product": "Produkt · Linear-Tracking",
+		"noMember": "Keine Mitglieder",
+		"noMemberHint": "Fülle `[team]` in der Konfiguration aus."
+	},
+	"today": {
+		"title": "Heute",
+		"clearDoneHint": "Erledigte Aufgaben entfernen",
+		"clearDone": "Aufräumen",
+		"nothing": "Nichts wartet auf dich",
+		"nothingHint": "Kein wartender Agent, kein blockierter PR, nichts aufzuräumen.",
+		"myTickets": "Meine Tickets",
+		"todo": "Zu erledigen",
+		"readyToMerge": "Bereit zum Mergen",
+		"toReview": "Zu reviewen",
+		"activity": "Cockpit-Aktivität",
+		"permanence": "Permanence",
+		"worktreesToClean": "Aufzuräumende Worktrees",
+		"waitingForYou": "Wartet auf dich",
+		"fixStarted": "{{label}} — läuft.",
+		"task": {
+			"placeholder": "Eine Aufgabe, die du nicht vergessen willst…",
+			"markUrgent": "Als dringend markieren",
+			"urgent": "Dringend",
+			"add": "Hinzufügen",
+			"reopen": "Wieder öffnen",
+			"complete": "Erledigen",
+			"delete": "Löschen"
+		}
+	},
+	"worktrees": {
+		"row": {
+			"dirty_one": "{{count}} Änderung",
+			"dirty_other": "{{count}} Änderungen",
+			"clean": "sauber",
+			"conflicts_one": "{{count}} Konflikt",
+			"conflicts_other": "{{count}} Konflikte",
+			"usageHint": "{{total}} insgesamt, davon {{builds}} Build-Ausgabe und {{dependencies}} Abhängigkeiten — letztere werden aus dem pnpm-Store geklont und kosten fast nichts.",
+			"builds": "{{size}} Build",
+			"main": "Haupt"
+		},
+		"detail": {
+			"editor": "Editor",
+			"terminalHint": "Shell auf diesem Worktree, im Arbeitsbereich (⌘⇧T)",
+			"terminal": "Terminal",
+			"agentHint": "Hier einen Agenten starten, ohne das Cockpit zu verlassen",
+			"agent": "Agent",
+			"devHint": "{{command}} in einem Terminal im Arbeitsbereich — ⌃C zum Stoppen",
+			"dev": "Dev",
+			"changes": "Änderungen",
+			"cleanTree": "Sauberer Baum — nichts zu vergleichen.",
+			"new": "neu",
+			"recentCommits": "Letzte Commits",
+			"selfQa": "Selbst-QA",
+			"agentSessions": "Agentensitzungen",
+			"close": "Schließen",
+			"untracked": "Nicht versionierte Datei — kein Diff.",
+			"pickFile": "Wähle eine Datei",
+			"pickFileHint": "Der Diff erscheint hier, verglichen mit HEAD."
+		},
+		"fleet": "Flotte",
+		"title": "Worktrees",
+		"trees_one": "{{count}} Baum",
+		"trees_other": "{{count}} Bäume",
+		"erasableBuilds": "{{size}} löschbare Builds",
+		"list": "Liste",
+		"create": {
+			"title": "Neuer Worktree",
+			"message": "Branch-Name. Vorhanden oder nicht — sein Workspace öffnet sich, sobald er bereit ist.",
+			"placeholder": "feat/mein-feature",
+			"hint": "Einen Branch als Worktree auschecken — der Befehl kommt aus den Einstellungen",
+			"button": "Neu"
+		},
+		"filter": "Filtern…",
+		"purge": {
+			"title": "Builds von {{name}} leeren?",
+			"message": "{{size}} Build-Ausgabe und Caches werden gelöscht — sonst nichts. Code, Historie und nicht committete Dateien bleiben unberührt: Ein Build-Befehl erzeugt sie identisch neu.",
+			"confirm": "Leeren",
+			"done": "{{size}} Speicher freigegeben.",
+			"button": "{{size}} Builds leeren"
+		},
+		"remove": {
+			"title": "Worktree {{name}} löschen?",
+			"message": "Der Ordner und seine lokale Infrastruktur werden entfernt — Datenbanken, Buckets und Docker-Stack, was oft ein bis zwei Minuten dauert. Der Remote-Branch bleibt bestehen.",
+			"confirm": "Löschen",
+			"button": "{{name}} löschen"
+		},
+		"none": "Kein Worktree"
+	}
+}

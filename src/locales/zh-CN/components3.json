@@ -1,0 +1,1002 @@
+{
+	"activityCenter": {
+		"pulse": {
+			"asksQuestion": "在向你提问",
+			"asksPermission": "正在请求权限 · {{tool}}",
+			"tool": "工具",
+			"using": "正在使用 {{tool}}",
+			"thinking": "正在思考",
+			"replied": "已完成 — 没有运行中的操作，等待你的指令"
+		},
+		"chip": {
+			"collapse": "收起",
+			"hint": "正在运行的内容，以及等待你处理的事项",
+			"working_other": "{{count}} 个工作中",
+			"yours": "轮到你了",
+			"done": "已完成",
+			"yoursCount_other": "轮到你了 · {{count}}"
+		},
+		"panel": {
+			"running": "正在运行",
+			"yourTurn": "轮到你了",
+			"idle": "没有运行中的操作",
+			"collapseHint": "收起到顶栏",
+			"collapse": "最小化",
+			"cockpit": "Cockpit 正在处理",
+			"working": "工作中",
+			"empty": "没有智能体在工作，也没有进行中的操作：后台没有任何动作。"
+		},
+		"openAgent": "打开智能体",
+		"row": {
+			"working": "处理中…",
+			"failed": "失败。",
+			"done": "完成。",
+			"hideSteps": "隐藏步骤",
+			"steps_other": "{{count}} 个步骤",
+			"unfollow": "停止在此处跟踪（操作会继续）",
+			"dismiss": "忽略"
+		}
+	},
+	"briefSettings": {
+		"saved": "智能体上下文已保存。",
+		"intro": "在智能体启动之前，Cockpit 会收集它对该分支已掌握的信息：工单、代码审查反馈、此处已尝试过的内容。背景资料会显示在输入框上方，任何内容都会先经过你的确认才会发送。",
+		"enable": "智能体启动时收集上下文",
+		"enableHint": "取消勾选后，输入框恢复为空白：不会组装任何内容，也不会向已连接的服务请求任何数据。",
+		"sourcesTitle": "打开时检查的来源",
+		"save": "保存"
+	},
+	"browserAnnotator": {
+		"tool": {
+			"ellipse": "圈选",
+			"arrow": "箭头",
+			"text": "文字",
+			"point": "指向某个元素：Cockpit 会告诉智能体它是什么"
+		},
+		"describe": {
+			"marker": "标记 {{index}}：<{{tag}}>",
+			"markerWithText": "标记 {{index}}：<{{tag}}>“{{text}}”",
+			"component": "组件 {{name}}",
+			"componentWithSource": "组件 {{name}}（{{source}}）",
+			"selector": "选择器 `{{selector}}`"
+		},
+		"nothingHere": "此处下方没有可指向的元素。",
+		"noImage": "页面还没有可附加的图像。",
+		"defaultNote": "请看附上的截图：我圈出的地方需要修复。",
+		"pageUrl": "页面：{{url}}",
+		"noConversation": "此工作区中没有打开的对话：请启动一个智能体以便向它展示屏幕。",
+		"attached": "截图已附加到提示词：请补充后发送。",
+		"clear": "全部清除",
+		"notePlaceholder": "你希望它怎么处理",
+		"send": "附加给智能体",
+		"close": "关闭标注",
+		"overlay": "页面上的标注",
+		"textPlaceholder": "输入文字，然后按 Enter",
+		"quote": "“{{text}}”"
+	},
+	"browserView": {
+		"gesture": {
+			"navigate": "智能体正在导航",
+			"click": "智能体正在点击",
+			"type": "智能体正在输入",
+			"screenshot": "智能体正在截图",
+			"read": "智能体正在阅读页面",
+			"wait": "智能体正在等待",
+			"act": "智能体正在操作"
+		},
+		"back": "上一页",
+		"forward": "下一页",
+		"reload": "重新加载",
+		"addressPlaceholder": "地址 — localhost:3000，或任意网站",
+		"annotateTitle": "标注页面并展示给智能体：圈选、画箭头、指向某个元素",
+		"annotate": "标注",
+		"openExternal": "在系统浏览器中打开此页面",
+		"stop": "停止此浏览器 — 智能体会在下一次操作时启动一个新的",
+		"keyboardInput": "正在向页面输入",
+		"starting": "浏览器正在启动…",
+		"notRunning": "此工作区的浏览器没有运行。智能体第一次在页面中操作时它会自动启动 — 你可以在这里观看 — 或者你现在打开它也会立即启动。",
+		"open": "打开浏览器",
+		"openingServer": "正在打开此工作区的服务器…",
+		"serverStarting": "开发服务器正在启动 — 一旦响应，页面就会打开。",
+		"nothingListening": "此工作区中尚无任何服务在监听。",
+		"nothingListeningHint": "此工作区中没有任何服务在监听：请输入地址，或在工作流设置中声明开发命令。"
+	},
+	"changeTour": {
+		"state": {
+			"added": "已添加",
+			"untracked": "新文件",
+			"modified": "已修改",
+			"deleted": "已删除"
+		},
+		"count": {
+			"added_other": "已添加 {{count}} 个",
+			"untracked_other": "{{count}} 个新文件",
+			"modified_other": "已修改 {{count}} 个",
+			"deleted_other": "已删除 {{count}} 个"
+		},
+		"title": "更改导览",
+		"agent": "智能体",
+		"fileCount_other": "{{count}} 个文件",
+		"tellTitle": "由模型按阅读顺序撰写每个文件的故事",
+		"telling": "正在撰写故事…",
+		"tellAgain": "重新讲述",
+		"tell": "讲述故事",
+		"closeEsc": "关闭（Esc）",
+		"close": "关闭",
+		"stepAria": "第 {{index}} 步",
+		"start": "开始导览",
+		"empty": {
+			"title": "没有可浏览的内容",
+			"body": "没有文件与 {{base}} 存在差异。智能体可能撤销了所有更改，或者在另一个文件夹中工作。"
+		},
+		"nav": {
+			"previous": "上一个",
+			"intro": "简介",
+			"end": "结束",
+			"fileOf": "第 {{step}} / {{total}} 个文件",
+			"finish": "完成",
+			"next": "下一个"
+		},
+		"intro": {
+			"heading_other": "需要浏览 {{count}} 个文件",
+			"telling": "模型正在阅读 diff 并撰写每个文件的故事 — 大约三十秒。",
+			"hint": "每个文件都附有智能体在编辑时对它的说明。“讲述故事”会按阅读顺序写出一段真正的叙述。"
+		},
+		"file": {
+			"stepOf": "第 {{index}} / {{total}} 步",
+			"open": "打开文件",
+			"story": "故事",
+			"said": "智能体对它的说明",
+			"quote": "“{{text}}”",
+			"silent": "智能体在改动此文件时什么都没说：它可能来自某条命令（生成的文件、依赖）。“讲述故事”会对此进行解释。"
+		},
+		"outro": {
+			"title": "导览完成",
+			"body_one": "你已浏览完这个更改的文件。",
+			"body_other": "你已浏览完 {{count}} 个更改的文件。",
+			"restart": "重新开始"
+		}
+	},
+	"commandsSettings": {
+		"saved": "命令已保存。",
+		"intro": "那些你不会凭记忆重新输入的命令：带选项的、总是忘记参数的。它们会出现在“脚本”界面和终端菜单中。仓库的原始脚本无需声明就已经显示。",
+		"empty": "未声明任何命令。",
+		"emptyHint": "Cockpit 可以读取此仓库的脚本并建议添加。",
+		"detectHint": "读取仓库的脚本并建议缺少的命令",
+		"detect": "从仓库检测",
+		"defaultGroup": "命令",
+		"defaultLabel": "新命令",
+		"write": "编写命令",
+		"found": "在仓库中找到 · {{count}}",
+		"addAll": "全部添加",
+		"close": "关闭",
+		"nothingNew": "没有新内容：此仓库声明的所有内容都已在这里。",
+		"add": "添加",
+		"unnamed": "— 未命名 —",
+		"sensitive": "敏感",
+		"mainRepo": "主仓库",
+		"remove": "移除",
+		"options_other": "{{count}} 个选项",
+		"expectsArgument": "需要参数",
+		"requiredArgument": "必需参数",
+		"argument": "参数"
+	},
+	"confirm": {
+		"confirm": "确认",
+		"validate": "好",
+		"cancel": "取消"
+	},
+	"dailyPresenter": {
+		"status": {
+			"done": "已完成",
+			"ongoing": "进行中",
+			"postponed": "已推迟"
+		},
+		"parts": {
+			"nothing": "无。",
+			"shipped": "已交付",
+			"shippedEmpty": "自上次站会以来没有合并任何内容。",
+			"openedSince_other": "此后新建了 {{count}} 个 PR",
+			"ongoing": "进行中",
+			"ongoingEmpty": "没有活跃工单。",
+			"ticketDetail": "{{id}} · {{progress}}% · {{days}} 天",
+			"toHandle": "待处理",
+			"toHandleEmpty": "没有卡住的事项。"
+		},
+		"recap": {
+			"heading": "# 每日站会 — 自 {{date}} 以来",
+			"part": "- {{title}}：{{lines}}",
+			"shipped": "- 已交付：{{items}}",
+			"commitment": "- 承诺：{{text}}",
+			"commitmentWithStatus": "- 承诺：{{text}}（{{status}}）",
+			"parked": "## 搁置的议题"
+		},
+		"title": "每日站会",
+		"since": "自 {{date}} 以来",
+		"total": "总计 {{time}}",
+		"quit": "退出（Esc）",
+		"done": {
+			"title": "每日站会结束",
+			"duration_other": "{{count}} 人用时 {{time}}",
+			"parked": "现在需跟进 · {{count}}",
+			"noParked": "没有搁置的议题。",
+			"copyRecap": "复制总结",
+			"close": "关闭"
+		},
+		"speakers": "发言顺序",
+		"speaker": {
+			"speaking": "发言中",
+			"done": "已完成",
+			"ready": "就绪"
+		},
+		"preparedByAutomation": "其部分 · 由其自动化准备",
+		"silentSources": "本次没有回应：{{sources}}。",
+		"timeLeft": "剩余发言时间",
+		"pause": "暂停（p）",
+		"partsLabel": "部分",
+		"nav": {
+			"previous": "上一个",
+			"nextPart": "下一部分",
+			"nextSpeaker": "下一位发言人",
+			"finish": "结束"
+		},
+		"sideLabel": "承诺与议题",
+		"pledge": {
+			"title": "{{name}} 上次说的",
+			"status": "状态",
+			"none": "上次站会没有承诺。",
+			"placeholder": "下次站会前的承诺…"
+		},
+		"parked": {
+			"title": "已搁置",
+			"placeholder": "会后跟进的议题…",
+			"add": "搁置"
+		},
+		"shortcuts": "→ 下一个 · ← 返回 · p 暂停 · Esc 退出",
+		"noDevelopers": "没有需要汇报的开发者。"
+	},
+	"diagram": {
+		"unreadable": "无法读取的图表 — 以下是其文本",
+		"caption": "智能体所述的图表"
+	},
+	"engagementPanel": {
+		"nothingProduced": "没有产生任何内容：无需撤销。",
+		"cannotUndo": "Cockpit 无法撤销：{{items}}。请手动处理。",
+		"undoConfirmTitle": "撤销已执行的操作？",
+		"undoConfirm": "撤销",
+		"undoFailed": "无法撤销：{{items}}",
+		"undone": "已撤销：{{items}}",
+		"close": "关闭",
+		"trigger": "触发条件",
+		"triggerLine": "{{trigger}} · 规则“{{rule}}”",
+		"noTrigger": "无触发条件",
+		"oracle": "判定依据",
+		"none": "无",
+		"timeline": "时间线",
+		"nothingYet": "暂无内容。",
+		"produced": "产出",
+		"open": "打开",
+		"cost": "成本",
+		"costHint": "按 API 价格计算的成本；订阅模式下不会产生费用，消耗的是时间窗口内的配额",
+		"undoHint": "撤销已产出的内容",
+		"undo": "撤销已执行的操作"
+	},
+	"jobProgress": {
+		"starting": "正在启动…",
+		"silentStop": "命令停止了，没有任何输出",
+		"exitCode": "退出码 {{code}}",
+		"cancelled": "已取消 — {{reason}}",
+		"failed": "失败 — {{reason}}"
+	},
+	"notebookPanel": {
+		"kept": "经验已保留 — 它会随下一批相关的智能体一起发出。",
+		"title": "项目笔记",
+		"subtitle": "我们不得不手动重做的内容，以及从中学到的东西",
+		"reload": "重新加载",
+		"close": "关闭",
+		"pending": "待审阅的返修 · {{count}}",
+		"pendingHint": "智能体交还的工作随后被手动修正了。这是唯一既非评分也非印象的反馈 — 问题在于能否从中提炼出一条规则，还是它只针对这一个案例。",
+		"lessons": "已保留的经验 · {{count}}",
+		"write": "编写经验",
+		"empty": "笔记为空。",
+		"emptyHint": "随着你返修智能体的工作，它会自动填充 — 但未经你批准，不会写入任何内容。",
+		"noBranch": "无分支",
+		"filesReworked_other": "返修了 {{count}} 个文件",
+		"draftLesson": "从中提炼经验",
+		"dismissHandback": "忽略：这次返修没有可借鉴之处",
+		"collapse": "收起",
+		"showPatch": "显示修正的内容",
+		"editLesson": "编辑此经验",
+		"newLesson": "新经验",
+		"draftHint": "以祈使语气书写，面向尚未开始的智能体：应该做什么，而不是发生了什么。",
+		"textPlaceholder": "例如：通过共享客户端调用，而不是直接调用 fetch。",
+		"scope": "范围 — 留空 = 整个仓库",
+		"cancel": "取消",
+		"keep": "保留",
+		"wholeRepo": "整个仓库",
+		"neverUsed": "从未使用",
+		"uses_other": "使用 {{count}} 次",
+		"fromHandback": "提炼自返修",
+		"stale": "两个月未使用 — 是否仍然成立？",
+		"correct": "修正",
+		"edit": "编辑",
+		"forget": "忘记"
+	},
+	"nowFeed": {
+		"state": {
+			"ciFailing": "CI 失败",
+			"changesRequested": "被要求修改",
+			"stacked": "堆叠的 PR",
+			"ready": "可以合并",
+			"draft": "草稿",
+			"inReview": "审查中"
+		},
+		"empty": "没有进行中的工作",
+		"emptyHint": "没有活跃工单或打开的 pull request。接下来的工作列在下方。",
+		"noTicket": "无工单",
+		"lastActivity": "最后活动 {{when}}",
+		"today": "今天",
+		"yesterday": "昨天",
+		"days_other": "{{count}} 天"
+	},
+	"permanenceSettings": {
+		"intro": "一个在你做其他事情时维持生态系统运转的值守者。它不决定要构建什么：它负责修复、重试、更新 — 并且能证明自己成功了，因为运维有判定依据，而产品没有。它只在 Cockpit 打开时运行。<strong>所有设置无需按钮即可生效</strong>：你修改的内容在离开字段时即会保存。",
+		"scope": {
+			"station": "本机",
+			"project": "此项目"
+		},
+		"oracle": {
+			"groupCommand": "仓库命令",
+			"groupProperty": "项目属性",
+			"groupCi": "CI 状态",
+			"groupGithub": "GitHub",
+			"ciGreen": "CI 变为通过",
+			"commentPosted": "它发表了评论"
+		},
+		"service": {
+			"title": "值守",
+			"enabled": "已启用",
+			"disabled": "已禁用",
+			"disabledHint": "禁用后，该入口会从侧边栏中移除：一个什么都做不了的界面不应留在菜单中。可在此处重新启用。而暂停则是一个操作 — 请在界面中进行，或按 <kbd>⇧P</kbd>。",
+			"hours": "值守时间",
+			"hoursHint": "留空 = 始终。跨越午夜的时间段会按原样理解。",
+			"cadence": "频率",
+			"cadenceHint": "两次查看之间的间隔。留空 = 2 分钟。",
+			"dailyTokens": "每日 token 上限",
+			"dailyTokensHint": "它为自己设定的上限。留空 = 200,000。",
+			"dailyEngagements": "每日介入上限",
+			"dailyEngagementsHint": "留空 = 20。",
+			"quotaFloor": "低于此值时让位",
+			"quotaFloorHint": "剩余订阅配额的百分比。留空 = 15%。它在后台工作，你在前台。",
+			"retention": "保留历史",
+			"retentionHint": "已结束的介入。留空 = 14 天。",
+			"catchUp": "唤醒时补上积压的内容",
+			"catchUpHint": "取消勾选后，它会从零开始，并说明跳过了哪些内容。一次性补上一整晚的信号，是最快耗尽上限的方式。",
+			"notifyFailures": "失败时通知我",
+			"notifyAll": "每次介入都通知我",
+			"notifyAllHint": "成功时保持沉默，失败时才发声：每次介入都通知会重新制造一个收件箱，而阅读十二份报告并不比亲自做这些工作更好。"
+		},
+		"unit": {
+			"minutes": "分钟",
+			"percentLeft": "% 剩余",
+			"days": "天",
+			"engagements": "次介入",
+			"hours": "小时",
+			"failures": "次失败",
+			"default": "默认"
+		},
+		"guards": {
+			"title": "保护措施",
+			"intro": "每一项都针对一种特定的失控情况，彼此不可替代。正是它们让开启它变得可以接受。",
+			"maxRunning": "同时进行的介入",
+			"maxRunningHint": "默认为一个。值守人员不会同时处理八起事故 — 而每日上限无法防止突发情况。",
+			"rehearsal": "试运行",
+			"rehearsalHint": "它会做出决定，写下它本会执行的操作，但不实际执行。一旦你更改其权限，计数器就会重置。留空 = 10。",
+			"grace": "单项隔离期",
+			"graceHint": "介入之后，同一个 PR 会被暂时放过。这样可以防止它被自己的提交唤醒，也防止它钻牛角尖。留空 = 6 小时。",
+			"breaker": "熔断器",
+			"breakerHint": "连续失败达到此次数后，它会自行暂停。重新启用需要手动操作：自动重启只会重蹈它本要防止的覆辙。留空 = 3。"
+		},
+		"role": {
+			"title": "角色",
+			"intro": "两个模型，而非一个。分诊会查看每一个变化 — 占调用的 95%，输入都很小；只有在发起介入时才开始真正的工作。",
+			"engine": "引擎",
+			"engineHint": "留空 = 第一个声明的引擎。",
+			"engineFirst": "第一个声明的引擎",
+			"triageModel": "分诊 — 模型",
+			"triageModelHint": "能说出“什么都不做”的最小模型。",
+			"triageDepth": "分诊 — 深度",
+			"workModel": "工作 — 模型",
+			"workDepth": "工作 — 深度",
+			"prompt": "常驻指令",
+			"promptHint": "附加到每次介入的上下文中，位于仓库资料之上。",
+			"promptPlaceholder": "无论哪次介入，它在行动前都应了解的内容。"
+		},
+		"rules": {
+			"title": "规则",
+			"add": "添加",
+			"intro": "默认关闭。没有可陈述判定依据的规则不会启动，即使已开启：对于一个本身没有停止条件的智能体，这是唯一的停止条件。",
+			"empty": "没有规则。在你告诉 Permanence 要监视什么之前，它什么都不会做。"
+		},
+		"powers": {
+			"title": "权限",
+			"enabledCount": "已启用 {{count}} / {{total}}",
+			"intro": "一份允许列表，初始为空，逐项勾选。检验标准：除了你之外，还有其他人会注意到吗？",
+			"notImplemented": "尚未实现 — 该操作将被拒绝",
+			"neverShared": "<b>绝不在共享分支上操作。</b>无论你勾选什么，它都绝不会写入 {{branches}}，也不会写入你工作流中声明的基础分支。它只在自己的分支上工作 — 改动共享分支不是值守者该做的事，而是会牵连所有人的事。",
+			"never": "<b>绝不：</b>{{list}}。这些操作没有对应的工具 — 它们是做出决定的操作，而不是报告。"
+		},
+		"comment": {
+			"title": "在 pull request 上评论",
+			"readByHuman": "由人阅读",
+			"intro": "绝不作为目标：只是对一次已有判定依据的介入的报告。它说明自己在分支上做了什么，而不是发起对话。",
+			"scopesTitle": "只有在以下条件之一成立时才会写入",
+			"noScope": "没有勾选任何条件：它不会在任何地方评论。",
+			"alwaysTitle": "并且在任何情况下",
+			"perDayBefore": "每个 PR 每天最多",
+			"perDayAfter": "条评论。",
+			"noMonologue": "在没有人回复的情况下，绝不连续评论两次 — 否则就成了独白。",
+			"signature": "在消息末尾署名 <mono>{{signature}}</mono>。不可编辑：在 PR 上，你的同事读到的是你的账户。",
+			"optOut": "“停止在此评论”可一键移除某个 PR，而无需更改设置。"
+		},
+		"rule": {
+			"labelPlaceholder": "它要做什么，用一行描述",
+			"noOracle": "无判定依据",
+			"unknownTrigger": "未知触发条件",
+			"remove": "移除此规则",
+			"trigger": "触发条件",
+			"choose": "选择…",
+			"oracle": "判定依据",
+			"oracleHint": "它追求的证明，从此仓库声明的内容中选择。",
+			"oracleNone": "无 — 规则不会启动",
+			"condition": "条件",
+			"conditionHint": "用自然语言描述。在分诊时、任何介入之前进行判断。",
+			"conditionPlaceholder": "最后一次提交的作者是我",
+			"reaction": "反应",
+			"reactionHint": "它尝试做的事情。目标本身由它来撰写。",
+			"reactionPlaceholder": "修复它，创建草稿 PR",
+			"delay": "间隔",
+			"delayScheduleHint": "此规则两次运行之间的间隔。留空 = 24 小时。",
+			"delayStaleHint": "超过此时间，变更即被视为停滞。留空 = 72 小时。",
+			"tokenBudget": "Token 预算",
+			"tokenBudgetHint": "此规则每次介入的预算。留空 = 每日上限。",
+			"perHour": "每小时最多",
+			"perHourHint": "留空 = 仅适用每日上限。",
+			"needsApproval": "在工作开始前征求我的批准",
+			"needsApprovalHint": "不勾选时，它会自行批准任务计划 — 这条规则本身就是批准。对于高风险的规则请勾选。",
+			"save": "保存此规则"
+		},
+		"depth": {
+			"engine": "引擎默认",
+			"fast": "快速",
+			"normal": "正常",
+			"deep": "深入"
+		}
+	},
+	"planche": {
+		"enlarge": "查看大图",
+		"before": "之前",
+		"after": "之后",
+		"slide": "滑动以比较",
+		"filmed": "由 Cockpit 录制 · {{seconds}} 秒",
+		"test": {
+			"title": "由此得出的测试",
+			"steps_other": "重放了 {{count}} 个操作",
+			"skipped_other": "跳过 {{count}} 个（截图、读取）",
+			"copied": "已复制",
+			"copy": "复制",
+			"ask": "让智能体添加它"
+		},
+		"observed": "观察到",
+		"files_other": "{{count}} 个文件",
+		"foldDetail": "收起详情",
+		"readDetail_other": "阅读详情（{{chars}} 个字符）"
+	},
+	"projectGround": {
+		"dirExists": "文件夹已存在",
+		"dirMissing": "文件夹不存在",
+		"isRepo": "是 git 仓库",
+		"notRepo": "尚不是 git 仓库",
+		"noRemote": "没有远程仓库",
+		"createRemote": "同时在 GitHub 上创建仓库",
+		"createRemoteHint": "Cockpit 会创建它并将其设为“origin”。不会推送任何内容：第一次推送由你决定。",
+		"account": "账户",
+		"noGhSession": "没有 `gh` 会话",
+		"repo": "仓库",
+		"repoPlaceholder": "my-project",
+		"makePublic": "设为公开",
+		"publicBadge": "所有人可见",
+		"ready": "无需准备 — 可以添加该项目。",
+		"preparing": "正在准备…",
+		"step": {
+			"createDir": "创建文件夹",
+			"gitInit": "初始化 git",
+			"createRemote": "创建 GitHub 仓库"
+		},
+		"nothingToPrepare": "无需准备"
+	},
+	"projectsHealth": {
+		"title": "项目",
+		"openWorktrees": "打开 worktree",
+		"switch": "切换到此项目",
+		"active": "当前",
+		"liveAgents": "活跃的智能体",
+		"ciFailing": "CI 失败",
+		"readyToMerge": "可以合并",
+		"openPrs": "打开的 PR",
+		"worktrees": "worktree",
+		"dirtyHint": "有未提交工作的 worktree",
+		"dirty_other": "{{count}} 个有改动",
+		"unpushed": "有未推送提交的 worktree",
+		"partial": "部分"
+	},
+	"propertiesReport": {
+		"verdict": {
+			"broken": "被破坏",
+			"held": "成立",
+			"offTopic": "无关",
+			"undecided": "未判定"
+		},
+		"title": "必须始终成立的内容",
+		"allHeld_other": "检查了 {{count}} 个属性 · 没有被破坏的",
+		"someBroken_other": "{{total}} 个中有 {{count}} 个被破坏",
+		"costHint": "按 API 价格计算这次检查的成本。订阅模式下不会产生费用：消耗的是时间窗口内的配额。",
+		"stale": "自这次检查以来，分支已有变动。",
+		"quiet": "{{held}} 个成立，{{unrelated}} 个与此变更无关。"
+	},
+	"propertiesSettings": {
+		"saved": "属性已保存。",
+		"caughtNothing": "此属性在你自己的修复上什么都没捕获到。",
+		"caughtSome": "它本可以在 {{tried}} 个修复中标记出 {{caught}} 个。",
+		"intro": "此仓库中必须始终成立的事项，用自然语言写成。Cockpit 会让它们针对某个变更逐条接受评判，并附上证据。可以机械检查的内容不属于这里 — 这里是没有任何工具会说明、只靠口口相传的规则。",
+		"empty": "未声明任何属性。",
+		"emptyHint": "Cockpit 可以根据此仓库过去不得不修复的问题提出建议 — 那正是它会再次破坏的地方。",
+		"proposeHint": "读取仓库的修复记录并从中推导属性",
+		"propose": "根据历史建议",
+		"write": "编写属性",
+		"suggestions": "建议 · {{count}}",
+		"close": "关闭",
+		"comesFrom": "来源：{{why}}",
+		"wholeRepo": "整个仓库",
+		"keep": "保留",
+		"textPlaceholder": "例如：每个写入数据库的路由在调用之前都会验证其请求体。",
+		"remove": "移除",
+		"scopePlaceholder": "范围 — 留空 = 整个仓库",
+		"neverTested": "从未测试",
+		"decorative_other": "装饰性 — 在 {{count}} 个修复上什么都没捕获到",
+		"wouldCatch_other": "本可在 {{tried}} 个修复中标记出 {{count}} 个",
+		"testHint": "针对仓库过去的修复重放此属性",
+		"retest": "重新测试",
+		"test": "测试",
+		"collapse": "收起",
+		"showSamples": "显示重放的修复"
+	},
+	"pullRequestDetail": {
+		"noWorktree": "此分支没有本地 worktree。",
+		"promptMissing": "在提示词库中找不到提示词“{{id}}”。",
+		"draft": "草稿",
+		"open": "已打开",
+		"stacked": "堆叠",
+		"author": "作者",
+		"files": "文件",
+		"additions": "新增",
+		"deletions": "删除",
+		"reviewers": "待 <name>{{names}}</name> 审查",
+		"noReviewer": "未请求审查者",
+		"assignee": "分配给 <name>{{name}}</name>",
+		"fixCiHint": "启动修复 CI 的智能体",
+		"fixCi": "修复 CI",
+		"feedbackHint": "用智能体处理代码审查反馈",
+		"feedback": "反馈",
+		"agentHint": "在此分支上打开智能体",
+		"agent": "智能体",
+		"worktreeHint": "打开此分支的 worktree",
+		"worktree": "Worktree",
+		"mergeTitle": "将 #{{id}} 合并到 {{base}}？",
+		"mergeMessage": "“{{title}}” — 不可撤销，且整个团队都能看到。",
+		"merge": "合并",
+		"merged": "#{{id}} 已合并。",
+		"noDescription": "没有描述。"
+	},
+	"qaGallery": {
+		"empty": "没有 QA 交付物",
+		"emptyHint": "放在 .claude/work 中的截图和报告会显示在这里。",
+		"root": "根目录",
+		"openFolder": "在访达中打开文件夹",
+		"reveal": "在访达中显示",
+		"close": "关闭（Esc）",
+		"previous": "上一个（←）",
+		"next": "下一个（→）"
+	},
+	"sidePanel": {
+		"resize": "拖动以加宽 — 双击恢复原始宽度",
+		"exitFull": "回到地图旁边",
+		"full": "全屏",
+		"close": "关闭"
+	},
+	"ui": {
+		"priority": {
+			"urgent": "紧急",
+			"high": "高",
+			"medium": "中",
+			"low": "低"
+		},
+		"missingConnector": {
+			"title": "{{service}} 未连接",
+			"hint": "缺少{{missing}}。填写后此界面即会出现。",
+			"openSettings": "打开设置"
+		},
+		"freshness": {
+			"never": "从未加载",
+			"justNow": "刚刚",
+			"seconds_other": "{{count}} 秒前",
+			"minutes_other": "{{count}} 分钟前",
+			"hours_other": "{{count}} 小时前",
+			"reload": "立即重新加载"
+		},
+		"errorNote": {
+			"retry": "重试"
+		},
+		"searchField": {
+			"placeholder": "筛选…"
+		}
+	},
+	"updateBanner": {
+		"availableNotice": "版本 {{version}} 可用。",
+		"upToDate": "Cockpit 已是最新版本。",
+		"checkFailed": "无法检查：{{error}}",
+		"installFailedNotice": "无法更新：{{error}}",
+		"available": "版本 {{version}} 可用",
+		"later": "稍后",
+		"restartWarning": "安装会重启 Cockpit — 运行中的智能体将被停止，其子任务会在重启后恢复。",
+		"update": "更新",
+		"downloading": "正在下载版本 {{version}}…",
+		"installed": "已安装 — 正在重启…",
+		"installFailed": "更新失败",
+		"close": "关闭",
+		"version": "版本 {{version}}",
+		"install": "安装 {{version}}",
+		"check": "检查更新"
+	},
+	"workflowSettings": {
+		"connectors": {
+			"intro": "只有当界面依赖的服务能够响应时，该界面才会出现。填写密钥后，入口会自动回到菜单中。",
+			"ready": "就绪",
+			"missing": "缺少{{missing}}",
+			"fill": "填写"
+		},
+		"workflow": {
+			"saved": "工作流已保存。",
+			"intro": "你的任务跟踪工具中的列，按你的团队的叫法命名。它们决定工单的进展程度以及它在每日站会中的位置。",
+			"active": {
+				"label": "进行中",
+				"hint": "活跃的工作列"
+			},
+			"review": {
+				"label": "审查中",
+				"hint": "代码审查、QA"
+			},
+			"done": {
+				"label": "已完成"
+			},
+			"blocked": {
+				"label": "受阻",
+				"hint": "表示阻塞的列"
+			},
+			"baseBranches": {
+				"label": "基础分支",
+				"hint": "指向其他分支的 PR 会被视为堆叠的 PR"
+			},
+			"dailyWeekdays": {
+				"label": "站会日期",
+				"hint": "1 = 周一，5 = 周五"
+			},
+			"prCommand": {
+				"label": "创建 PR 的命令",
+				"hint": "由主智能体在任务结束时运行；留空 = 由 Cockpit 自行创建 PR"
+			},
+			"createWorktree": {
+				"label": "创建 worktree",
+				"hint": "留空 = `git worktree add`。以“/”开头的命令是仓库命令，由智能体运行。"
+			},
+			"removeWorktree": {
+				"label": "删除 worktree",
+				"hint": "留空 = `git worktree remove --force`。请确保它不会卡在确认提示上：没有人会去看。"
+			},
+			"devServer": {
+				"label": "启动开发服务器",
+				"hint": "留空 = 不提供“Dev”按钮，而不是在一个此处不存在的命令上打开终端"
+			},
+			"malformed": "{{commands}}：占位符应放在花括号中。以其他方式书写时，它会原样传给 shell — 而 shell 会一声不响地拒绝这一行。",
+			"testCommands": {
+				"label": "测试命令",
+				"hint": "在 vitest、jest、pytest、phpunit、php artisan test… 之外 — 让智能体卡片能显示“测试通过”的依据"
+			},
+			"visualReports": {
+				"title": "智能体用图像汇报",
+				"detail": "勾选后：当图像比文字更能说明问题时，每个智能体都会被要求展示其工作 — 如果改动了界面且能截图，就提供前后对比截图；如果改动了结构，就提供图表；简单的回答则不需要。适用于此后启动的智能体，而非已在运行的智能体。"
+			},
+			"agentBrowser": {
+				"title": "智能体操控其工作区的浏览器",
+				"detail": "勾选后：每个智能体都会获得打开页面、点击、输入和截图所需的能力，在一个独立的浏览器中进行 — 不含你的会话或密码 — 你可以在“浏览器”标签页中实时观看。它只在第一次操作时启动。在隔离容器内无效。适用于此后启动的智能体。"
+			},
+			"browser": {
+				"label": "浏览器",
+				"hint": "留空 = 在 Chrome、Chromium、Edge 和 Brave 中找到的第一个"
+			},
+			"browserServer": {
+				"label": "浏览器操作服务器",
+				"hint": "留空 = 使用 Playwright 的；你的服务器会收到附加的 --cdp-endpoint <地址>"
+			},
+			"reviewReadOnly": {
+				"title": "代码审查智能体为只读",
+				"detail": "勾选后：不能编辑，只能读取（git diff、git log、gh pr view…）— 其他一切都会被拒绝。取消勾选后：它可以运行测试或修改文件；它的指令仍会告诉它不要修复 PR，但没有任何东西阻止它这样做。"
+			},
+			"themes_other": "已声明 {{count}} 个业务主题 — 它们让每日站会可以说“她在做计费”，而不是列出一串标识符。主题在配置文件中编辑。",
+			"noThemes": "没有业务主题：每日站会的叙述将直接依赖标题本身。"
+		},
+		"replacedAtLaunch": "启动时替换：",
+		"saving": "正在保存…",
+		"save": "保存",
+		"remove": "移除",
+		"defaultPlaceholder": "默认",
+		"fields": {
+			"key": "键",
+			"displayName": "显示名称"
+		},
+		"depth": {
+			"fast": "快速",
+			"normal": "正常",
+			"deep": "深入"
+		},
+		"roles": {
+			"saved": "角色已保存。",
+			"intro": "执行者在启动时收到的内容：常驻指令、模型，以及允许写入的路径。范围是强制执行的 — 范围之外的写入会被拒绝，而不仅仅是不鼓励。",
+			"masterNote": "此角色主导任务：它阅读工单、提出拆分，并在最后将所有内容重新整合。它的键是保留的 — 步骤和编排工具由 Cockpit 提供；此处只设置其命令、指令和模型。",
+			"keyHint": "被子任务引用",
+			"engine": {
+				"label": "引擎",
+				"hint": "运行它的程序",
+				"default": "默认"
+			},
+			"model": {
+				"label": "模型",
+				"hint": "留空 = 本机默认"
+			},
+			"depth": {
+				"label": "深度",
+				"hint": "该角色允许投入的程度",
+				"engine": "引擎",
+				"unsupported": "该引擎未声明任何深度 — 请在“引擎”中设置。"
+			},
+			"scope": {
+				"label": "范围",
+				"hint": "路径，以逗号分隔"
+			},
+			"command": {
+				"label": "启动命令",
+				"hint": "仓库技能或命令，在指令之前运行"
+			},
+			"prompt": "常驻指令",
+			"verifies": "检查其他人的工作 — 只在实现交付后才开始",
+			"newLabel": "新角色",
+			"add": "添加角色",
+			"save": "保存角色"
+		},
+		"team": {
+			"saved": "团队已保存。",
+			"intro": "团队中有谁，以及在每个工具中识别他们的账户。这些映射驱动每日站会和团队看板：没有填写 GitHub 登录名的成员不会出现在任何 pull request 上。",
+			"soloWarning": "该项目被标记为<strong>单人</strong>：其团队会被忽略，每日站会保持隐藏。请在项目设置中取消勾选“单人”，以下内容才会有用。",
+			"linearTeam": {
+				"label": "Linear 团队",
+				"hint": "读取其当前迭代的团队 UUID — 留空 = 无每日站会"
+			},
+			"empty": "未声明任何成员：每日站会和团队看板将保持为空。Cockpit 默认不会推荐任何人 — 团队是猜不出来的。",
+			"name": "姓名",
+			"role": {
+				"label": "角色",
+				"hint": "dev 或 product"
+			},
+			"roleLabel": {
+				"label": "显示头衔",
+				"hint": "在屏幕上显示的样子",
+				"placeholder": "后端开发者"
+			},
+			"github": {
+				"hint": "主登录名"
+			},
+			"linearId": {
+				"label": "Linear ID",
+				"hint": "UUID，可在其个人资料 URL 中看到"
+			},
+			"githubAliases": {
+				"label": "其他 GitHub 登录名",
+				"hint": "以前的账户，以逗号分隔"
+			},
+			"sentryEmails": {
+				"label": "Sentry 邮箱",
+				"hint": "其账户的邮箱，以逗号分隔"
+			},
+			"sentryNames": {
+				"label": "Sentry 名称",
+				"hint": "当事件中缺少邮箱时使用"
+			},
+			"add": "添加成员",
+			"save": "保存团队"
+		},
+		"engines": {
+			"saved": "引擎已保存。",
+			"intro": "引擎是运行智能体的程序 — 而不是模型提供商。要使用其他引擎，有两种方式：使用相同协议的可执行文件，或通过下方环境变量指定的兼容网关。然后每个角色选择自己的引擎。",
+			"keyHint": "被角色引用",
+			"binary": {
+				"label": "可执行文件",
+				"hint": "留空 = claude，在本机上查找"
+			},
+			"protocol": {
+				"label": "协议",
+				"hint": "claude-stream-json、codex-exec 或 gemini-stream-json"
+			},
+			"models": {
+				"label": "模型",
+				"hint": "别名或完整标识符（claude-opus-5-5），以逗号分隔"
+			},
+			"args": {
+				"label": "参数",
+				"hint": "附加到命令行"
+			},
+			"depthFastHint": "为求快速需要添加的内容",
+			"depthDeepHint": "用于值得额外投入的工作",
+			"env": {
+				"label": "环境",
+				"hint": "每行一对：NAME=value — 服务地址、访问令牌",
+				"placeholder": "ANTHROPIC_BASE_URL=https://gateway.example.com\nANTHROPIC_AUTH_TOKEN=sk-…"
+			},
+			"variables_other": "{{count}} 个变量 — 写入配置文件，权限为 600。",
+			"noVariables": "没有变量：引擎使用本机的环境。",
+			"add": "添加引擎",
+			"save": "保存引擎"
+		},
+		"missionMode": {
+			"guided": {
+				"title": "引导式",
+				"detail": "你与主智能体一起阅读工单，然后依次批准它的理解、方案和拆分 — 三次确认，一次一个。"
+			},
+			"autonomous": {
+				"title": "自主式",
+				"detail": "主智能体阅读工单并立即提出拆分。在执行者出发前只需一次确认。"
+			},
+			"default": "默认"
+		},
+		"budget": {
+			"intro": "三个上限，对应三种超出预期花费的情况：任务失控、配额耗尽、机器饱和。它们都不会终止任何东西 — 进行中的工作总会运行完毕。",
+			"tokenBudget": {
+				"label": "每个任务的上限",
+				"hint": "超过后任务会暂停 — 分支和工作完好无损，一键即可恢复。留空 = 500,000。",
+				"unit": "个 token"
+			},
+			"quotaFloor": {
+				"label": "低于此值时不再开始新工作",
+				"hint": "剩余订阅配额的百分比。进行中的子任务会继续。留空 = 15%。",
+				"unit": "% 剩余"
+			},
+			"memoryCeiling": {
+				"label": "高于此值时不再启动",
+				"hint": "本机内存使用百分比。不会启动新的智能体 — 无论是任务、执行者还是手动启动。留空 = 85%。",
+				"unit": "% 内存"
+			}
+		},
+		"sandbox": {
+			"terminalLabel": "隔离智能体登录",
+			"intro": "每个智能体都在一个容器中运行，其内存由系统限制，而不是事后测量。需要本机安装 Docker 或 OrbStack — 关闭此功能时两者都不需要。",
+			"enable": "将每个智能体隔离在容器中",
+			"runtime": {
+				"hint": "orb 或 docker。留空 = 在本机上检测。",
+				"placeholder": "自动检测"
+			},
+			"memory": {
+				"label": "每个智能体的内存",
+				"hint": "留空 = 4096 MB。",
+				"unit": "MB"
+			},
+			"image": {
+				"hint": "留空 = Cockpit 的默认镜像。"
+			},
+			"loginNote": "通过订阅登录的账户会将其令牌存储在本机钥匙串中，而容器无法读取。此按钮会在终端中运行 <code>claude setup-token</code> — 然后将显示的令牌粘贴到“设置 → 访问令牌”（“隔离账户”）中。有效期一年；过期后请重新操作。",
+			"connect": "连接隔离账户"
+		}
+	},
+	"workspacePanel": {
+		"masterRole": "主智能体",
+		"tabs": {
+			"agent": "智能体",
+			"terminal": "终端",
+			"board": "视图",
+			"boardTitle": "与此分支相关的一切：PR、工单、代码审查、智能体、提交、文档、截图",
+			"browser": "浏览器",
+			"browserTitle": "此工作区的浏览器：智能体用来实时测试的浏览器 — 你也可以在其中点击",
+			"closeAgent": "关闭并停止智能体",
+			"closeTerminal": "关闭终端及其运行的内容"
+		},
+		"closeWorkspace": "关闭此工作区 — 停止一切并将其遗忘",
+		"rail": {
+			"missionTitle_other": "{{title}}\n{{count}} 个工作区",
+			"closeMission_other": "关闭此任务的 {{count}} 个工作区",
+			"sleepingTitle": "{{cwd}}\n\n{{state}}\n点击恢复",
+			"forgetSleeping": "忘记此休眠的工作区",
+			"newWorkspace": "+ 工作区",
+			"openMission": "打开任务“{{title}}”",
+			"delivered": "· 已交付 {{done}}/{{total}}",
+			"closeMissionWorkspace": "关闭此任务工作区"
+		},
+		"summary": {
+			"agents_other": "{{count}} 个智能体",
+			"terminals_other": "{{count}} 个终端"
+		},
+		"sleeping": {
+			"withParts": "休眠中 — {{parts}}",
+			"empty": "休眠中"
+		},
+		"menu": {
+			"browseDialog": "将文件夹作为工作区打开",
+			"browseGroup": "浏览",
+			"browseLabel": "打开文件夹…",
+			"browseHint": "磁盘上的任意位置，在列出的 worktree 之外",
+			"worktreesGroup": "Worktree",
+			"detachedHead": "分离的 HEAD",
+			"alreadyOpen": "已打开",
+			"openTerminalHere": "在此处打开终端（⇧Enter）",
+			"remoteBranchesGroup": "来自其他地方、从未在此检出的分支",
+			"localBranchesGroup": "没有 worktree 的分支",
+			"remoteBranchHint": "位于 {{remote}} — 在此检出，然后开始工作",
+			"localBranchHint": "创建 worktree，然后开始工作",
+			"creationNote": "创建",
+			"title": "打开工作区 — 现有的 worktree，或尚未创建 worktree 的分支",
+			"empty": "没有已知的 worktree。",
+			"prGroup": "Pull request",
+			"prHint": "以只读方式审查 — ⇧Enter：仅打开其分支",
+			"prNote": "审查",
+			"prOpenBranch": "仅打开其分支的工作区",
+			"newBranchGroup": "此分支尚不在这里",
+			"newBranchHint": "将其检出为 worktree，然后打开其工作区"
+		},
+		"empty": {
+			"message": "没有打开的工作区",
+			"hint": "工作区是检出到独立文件夹中的分支，加上你在其中投入工作的一切。",
+			"stepBranch": "一个分支",
+			"stepFolder": "它的文件夹",
+			"stepAgents": "你的智能体和终端",
+			"openBranch": "打开分支"
+		},
+		"confirm": {
+			"closeTitle": "关闭 {{label}}？",
+			"message": "{{what}} — 一切都会停止，包括仍在运行的内容。",
+			"closeLabel": "关闭工作区",
+			"closeMissionTitle_other": "关闭“{{title}}”的 {{count}} 个工作区？",
+			"closeAll": "全部关闭"
+		},
+		"toolbar": {
+			"addAgentTitle": "在此工作区中再添加一个智能体",
+			"addAgent": "+ 智能体",
+			"addTerminalTitle": "在此工作区中再添加一个终端（⌘⇧T）",
+			"addTerminal": "+ 终端",
+			"stop": "停止",
+			"interrupt": "中断正在运行的内容（⌃C）",
+			"clear": "清屏",
+			"sleep": "暂时搁置 — 进程会停止，工作区在下次启动时恢复",
+			"closeMission": "关闭任务“{{title}}” — 其所有工作区都会停止"
+		},
+		"status": {
+			"shell": "shell",
+			"finished": "已结束",
+			"shellOpen": "shell 已打开",
+			"asking": "在向你提问",
+			"permission": "需要权限？",
+			"thinking": "思考中",
+			"ready": "就绪"
+		},
+		"dock": {
+			"openTitle": "{{cwd}} — 在“工作区”界面中打开",
+			"collapse": "收起列表",
+			"expand": "显示该组的详情"
+		}
+	}
+}

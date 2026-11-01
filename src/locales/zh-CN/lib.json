@@ -1,0 +1,290 @@
+{
+	"format": {
+		"justNow": "刚刚",
+		"bytes": "{{value}} B",
+		"kilobytes": "{{value}} KB",
+		"megabytes": "{{value}} MB"
+	},
+	"automations": {
+		"days": {
+			"mon": "周一",
+			"tue": "周二",
+			"wed": "周三",
+			"thu": "周四",
+			"fri": "周五",
+			"sat": "周六",
+			"sun": "周日"
+		},
+		"stamp": {
+			"today": "今天 {{time}}",
+			"tomorrow": "明天 {{time}}",
+			"yesterday": "昨天 {{time}}"
+		},
+		"rhythm": {
+			"none": "未选择任何一天",
+			"weekdays": "周一至周五 {{time}}",
+			"everyDay": "每天 {{time}}",
+			"days": "{{days}} {{time}}"
+		},
+		"run": {
+			"running": "运行中",
+			"partial": "部分完成",
+			"failed": "失败",
+			"missed": "已错过",
+			"caughtUp": "已补跑",
+			"manual": "手动",
+			"onTime": "准时"
+		},
+		"source": {
+			"tracker": "任务跟踪工具"
+		},
+		"event": {
+			"merged": "PR 已合并",
+			"opened": "PR 已创建",
+			"updated": "PR 已更新",
+			"reviewed": "PR 已审查",
+			"done": "工单已完成",
+			"started": "工单已开始",
+			"moved": "工单已移动",
+			"canceled": "工单已取消",
+			"agent": "智能体",
+			"git": "Git 操作",
+			"resolved": "错误已解决",
+			"assigned": "错误已分配"
+		},
+		"markdown": {
+			"silent": "本次没有回应：{{sources}}。"
+		}
+	},
+	"world": {
+		"regions": {
+			"arrive": {
+				"label": "待处理",
+				"hint": "待分拣"
+			},
+			"encours": {
+				"label": "进行中",
+				"hint": "自己掌控或委派"
+			},
+			"livrer": {
+				"label": "交付",
+				"hint": "审查并合并"
+			},
+			"prod": {
+				"label": "已上线",
+				"hint": "带来了哪些变化"
+			}
+		}
+	},
+	"missions": {
+		"awaited": {
+			"understanding": "主智能体已阅读工单 · 请审阅它的理解",
+			"approach": "有一个方案等待你批准",
+			"approval_other": "{{count}} 个子任务 · 在你批准前不会开始"
+		},
+		"state": {
+			"understanding": "正在阅读工单",
+			"awaitingUnderstanding": "理解待确认",
+			"approaching": "方案",
+			"awaitingApproach": "方案待确认",
+			"planning": "拆分",
+			"awaitingApproval": "等待你批准",
+			"running": "进行中",
+			"integrating": "集成",
+			"done": "已结束",
+			"failed": "已停止"
+		}
+	},
+	"episodes": {
+		"gesture": {
+			"runs": "运行 {{command}}",
+			"uses": "使用 {{tool}}",
+			"usesATool": "使用工具",
+			"edits": "编辑 {{file}}",
+			"editsAFile": "编辑文件",
+			"delegated": "委派了“{{description}}”",
+			"launchedSubagent": "启动了子智能体",
+			"reads": "读取 {{file}}",
+			"searches": "搜索 {{query}}",
+			"browses": "浏览 {{file}}"
+		}
+	},
+	"worktreeFlow": {
+		"title": "Worktree {{branch}}",
+		"creating": "正在创建 — 依赖、数据库… 可能需要几分钟。",
+		"timeout": "{{branch}} 的 worktree 在 15 分钟后仍未出现。",
+		"ready": "Worktree 已就绪。",
+		"starting": "正在开始创建 worktree…",
+		"readyOpen": "Worktree 已就绪，其工作区已打开。"
+	},
+	"types": {
+		"triggers": {
+			"ci_red": {
+				"label": "CI 变红",
+				"hint": "针对进行中的变更"
+			},
+			"review_changes_requested": {
+				"label": "代码审查要求修改",
+				"hint": "针对已打开的 PR"
+			},
+			"pr_stale": {
+				"label": "某个变更停滞不前",
+				"hint": "超过时限 — 草稿会被忽略"
+			},
+			"schedule": {
+				"label": "按固定间隔",
+				"hint": "没有信号，按时钟触发 — 唯一一个在没有任何事件时也会触发的条件"
+			},
+			"linear_assigned": {
+				"label": "有 Linear 工单分配给我",
+				"hint": "如果之后优先级变化会再次触发 — 由条件判断是哪一个"
+			}
+		},
+		"commentScopes": {
+			"i_commented": "我已在此 PR 上评论过",
+			"i_allowed": "我已明确允许此 PR",
+			"hers": "此 PR 由 Permanence 创建",
+			"mine": "此 PR 是我的"
+		},
+		"powers": {
+			"rerun_pipeline": "重新运行流水线",
+			"create_branch": "创建分支",
+			"open_draft_pr": "创建草稿 PR",
+			"set_label": "添加标签",
+			"open_worktree": "打开 worktree",
+			"start_agent": "启动智能体",
+			"run_command": "运行仓库命令",
+			"open_mission": "创建编写代码的任务"
+		},
+		"never": {
+			"review": "批准或拒绝代码审查",
+			"assign": "分配",
+			"close": "关闭",
+			"merge": "合并",
+			"deploy": "部署"
+		}
+	},
+	"proof": {
+		"defaultTitle": "智能体的演示"
+	},
+	"remarks": {
+		"about": "关于 {{anchor}}：{{text}}",
+		"intro": "关于你的工作，有几点意见：",
+		"outro": "从现在起请记住这些意见；如果你觉得其中有不对的，请告诉我。"
+	},
+	"activity": {
+		"unexplainedFailure": "失败，且没有说明原因。"
+	},
+	"ipc": {
+		"previewMissing": "预览：“{{command}}”没有示例响应。"
+	},
+	"footprint": {
+		"deleted_other": "已删除 {{count}} 个",
+		"created_other": "已创建 {{count}} 个",
+		"modified_other": "已修改 {{count}} 个"
+	},
+	"chantier": {
+		"slices": {
+			"messages": "对话",
+			"memory": "项目指令",
+			"system": "CLI 基础内容",
+			"other": "其他"
+		}
+	},
+	"illustrations": {
+		"source": {
+			"mesure": "实测",
+			"depot": "来自仓库",
+			"capture": "截取",
+			"agent": "智能体所述"
+		}
+	},
+	"film": {
+		"caption": {
+			"read_other": "读取 {{count}} 个文件。",
+			"think": "它的假设。",
+			"edit": "编辑 {{file}}。",
+			"testsPass": "测试通过。",
+			"testsFail": "部分测试失败。",
+			"fix": "修复 {{file}}。",
+			"seeBrowser": "在浏览器中检查。",
+			"seeResult": "查看结果。",
+			"deliver": "交付。",
+			"handBack": "交还控制权。"
+		},
+		"deliver": {
+			"pushed": "已推送：{{branch}}",
+			"branch": "分支 {{branch}}"
+		},
+		"phase": {
+			"read": "读取",
+			"edit": "编辑",
+			"test": "测试",
+			"see": "屏幕检查",
+			"run": "命令",
+			"agent": "子智能体"
+		}
+	},
+	"narrator": {
+		"cloudModels": {
+			"natural": "自然",
+			"fast": "快速"
+		},
+		"rates": {
+			"calm": "舒缓",
+			"normal": "正常",
+			"fast": "快速"
+		},
+		"then": "然后",
+		"wrapUp": {
+			"handsBack": "完成了，正在把控制权交还给你。",
+			"changed_other": "它修改了 {{spoken}} 个文件",
+			"testsFail": "测试未通过",
+			"testsPass": "测试通过",
+			"doneBut": "完成了：{{changed}}，但{{tests}}。",
+			"doneAnd": "完成了：{{changed}}，而且{{tests}}。",
+			"done": "完成了：{{what}}。"
+		},
+		"progress": {
+			"changed_other": "仍在工作。自你下达指令以来，它已修改了 {{spoken}} 个文件。",
+			"exploring": "仍在工作，正在探索代码。"
+		},
+		"line": {
+			"subagent": "它正在把部分工作交给子智能体。",
+			"error": "它遇到了一个错误。",
+			"testsFail": "测试未通过。",
+			"testsPass": "测试通过。",
+			"question": "它需要你：它在向你提问。",
+			"permission": "它在等待你的许可以继续。"
+		}
+	},
+	"assistant": {
+		"keys": {
+			"space": "空格",
+			"arrow": "方向键 {{direction}}"
+		}
+	},
+	"feedMeta": {
+		"type": "类型",
+		"level": "级别",
+		"project": "项目",
+		"author": "作者",
+		"assignee": "负责人",
+		"deployment": "部署",
+		"attempt": "尝试",
+		"version": "版本",
+		"run": "运行",
+		"task": "任务",
+		"environment": "环境",
+		"commit": "提交",
+		"event": "事件",
+		"branch": "分支",
+		"labels": "标签",
+		"reviewers": "审查者",
+		"priority": "优先级",
+		"origin": "来源",
+		"url": "URL",
+		"occurrences": "出现次数",
+		"users": "用户"
+	}
+}

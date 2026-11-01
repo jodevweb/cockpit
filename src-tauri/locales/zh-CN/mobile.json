@@ -1,1 +1,238 @@
-{}
+{
+	"mobile": {
+		"common": {
+			"connecting": "正在连接…",
+			"back": "返回",
+			"thisDevice": "本设备",
+			"agent": "智能体",
+			"error": "错误 {{status}}"
+		},
+		"tabs": {
+			"you": "待你处理",
+			"agents": "智能体",
+			"missions": "任务"
+		},
+		"pairing": {
+			"notPaired": "本设备尚未配对",
+			"title": "配对这部手机",
+			"help": "在电脑上打开“设置 → 移动端访问”，然后输入显示的代码。",
+			"codePlaceholder": "代码",
+			"submit": "配对"
+		},
+		"enroll": {
+			"done": "Face ID 已启用。",
+			"failed": "通行密钥：{{error}}"
+		},
+		"state": {
+			"toDecide_one": "等待你处理",
+			"toDecide_other": "{{count}} 项待决定",
+			"working": "工作中",
+			"idle": "空闲",
+			"done": "已完成"
+		},
+		"tools": {
+			"bash": "运行命令",
+			"write": "写入文件",
+			"edit": "编辑文件",
+			"webFetch": "读取网页",
+			"mcp": "使用 {{name}}（{{server}}）",
+			"other": "使用 {{tool}}"
+		},
+		"decision": {
+			"agentAsks": "{{agent}} 请求",
+			"anAgentAsks": "某个智能体请求",
+			"agentQuestion": "{{agent}} 有问题要问你",
+			"questionWaiting": "有一个问题等待你回答",
+			"answer": "回答",
+			"deny": "拒绝",
+			"allow": "允许"
+		},
+		"mission": {
+			"state": {
+				"planning": "分析中",
+				"awaitingApproval": "等待你批准",
+				"running": "运行中",
+				"integrating": "集成中",
+				"failed": "失败",
+				"other": "进行中"
+			},
+			"task": {
+				"planned": "待开始",
+				"running": "进行中",
+				"delivered": "已交付",
+				"integrated": "已集成",
+				"failed": "失败"
+			},
+			"progress_other": "{{count}} 个子任务中已交付 {{done}} 个",
+			"approve": "批准计划",
+			"paused": "已暂停 — 可以在电脑上恢复。",
+			"pause": "暂停",
+			"stopAll": "全部停止"
+		},
+		"agents": {
+			"browserOpen": "浏览器已打开",
+			"emptyTitle": "没有打开的智能体",
+			"emptyHelp": "智能体需要在电脑上启动。"
+		},
+		"missions": {
+			"emptyTitle": "没有进行中的任务",
+			"emptyHelp": "任务需要在电脑上启动。"
+		},
+		"home": {
+			"decisions_other": "有 {{count}} 项决策等待你处理",
+			"working_other": "{{count}} 个智能体正在工作",
+			"noneWorking": "没有智能体在工作",
+			"noneOpen": "没有打开的智能体",
+			"failedSection": "失败",
+			"emptyTitle": "没有等待你处理的事项",
+			"emptyWorking": "你的智能体正在自行推进。",
+			"emptyCalm": "一切平静。",
+			"fleet": "智能体总览",
+			"unreachable": "电脑没有响应",
+			"unreachableTitle": "无法连接"
+		},
+		"faceId": {
+			"off": "Face ID 未启用",
+			"offHelp": "未启用时，这部手机只能查看和拒绝，无法允许。",
+			"enable": "启用 Face ID",
+			"expired": "激活时限已过：请在电脑上撤销这部手机，然后重新配对。"
+		},
+		"toast": {
+			"copied": "已复制。",
+			"denied": "已拒绝。",
+			"allowed": "已允许。",
+			"approved": "计划已批准 — 执行者可以开始了。",
+			"paused": "任务已暂停 — 执行者已停止。",
+			"stopped": "任务已停止。已产出的工作保留原处。",
+			"answered": "已回答。",
+			"sent": "已发送。"
+		},
+		"device": {
+			"label": "设备",
+			"notPaired": "未配对",
+			"armed": "Face ID 已启用：这部手机可以允许、回答以及紧急刹停。",
+			"unarmed": "Face ID 未启用：这部手机只能查看和拒绝，无法允许。",
+			"notifications": "通知",
+			"ntfyHelp": "在 ntfy 应用中，订阅此服务器上的这个主题。",
+			"copyTopic": "复制主题",
+			"copyServer": "复制服务器",
+			"capabilities": "这部手机可以做什么",
+			"canDo": "查看、允许或拒绝操作，回复智能体，批准计划，暂停或停止任务。",
+			"cannotDo": "启动智能体、恢复任务和更改设置需要在电脑上进行。"
+		},
+		"agent": {
+			"summary": "摘要",
+			"thread": "对话",
+			"screen": "屏幕",
+			"jump": "↓ 新动态",
+			"placeholder": "回复智能体…",
+			"send": "发送"
+		},
+		"changes": {
+			"title": "仓库显示的内容 · {{base}}",
+			"help": "读取自仓库，而非智能体的说法。",
+			"root": "根目录",
+			"deleted_other": "已删除 {{count}} 个",
+			"created_other": "已创建 {{count}} 个",
+			"modified_other": "已修改 {{count}} 个",
+			"moreZones_other": "以及其他 {{count}} 个区域"
+		},
+		"summary": {
+			"diagram": "一张图表 — 请在电脑上查看。",
+			"before": "之前",
+			"after": "之后",
+			"justSaid": "它刚刚说的",
+			"conclusion": "它的结论",
+			"working": "它正在工作",
+			"nothing": "没有可显示的内容",
+			"silent": "它还什么都没说。",
+			"yourPrompt": "你的指令"
+		},
+		"thread": {
+			"actions_other": "{{count}} 个操作",
+			"failed": "{{count}} 个失败",
+			"empty": "对话尚未开始。"
+		},
+		"screen": {
+			"live": "实时",
+			"help": "该智能体正在查看的页面，每两到三秒刷新一次。你只能观看；如需点击，请使用电脑。",
+			"stopped": "它的浏览器已不再运行。"
+		},
+		"errors": {
+			"publicAccessDenied": "公共访问被拒绝。",
+			"unexpectedHost": "意外的主机。",
+			"notPaired": "设备未配对。",
+			"unknownDevice": "未知或已撤销的设备。",
+			"tooManyRequests": "请求过多。",
+			"pairingTailnetOnly": "配对只能在 tailnet 内进行。",
+			"noPairing": "没有进行中的配对。",
+			"codeExpired": "代码已过期。",
+			"codeInvalid": "代码无效。",
+			"passkeyExists": "本设备已有通行密钥。请在电脑上撤销它，然后重新配对。",
+			"passkeyAlreadySet": "本设备已有通行密钥。",
+			"enrollExpired": "启用 Face ID 的时限已过。请在电脑上撤销本设备，然后重新配对。",
+			"noRegistration": "没有进行中的注册。",
+			"challengeExpired": "质询已过期。",
+			"agentGone": "该智能体已不再活动。",
+			"imagesOnly": "此处只能读取图片。",
+			"imageNotFound": "找不到图片。",
+			"outsideFolder": "超出该智能体的文件夹范围。",
+			"imageTooLarge": "找不到图片或图片过大。",
+			"browserNotRunning": "它的浏览器没有运行。",
+			"denyLinkExpired": "拒绝链接已过期。",
+			"noPasskey": "本设备没有通行密钥：只能查看和拒绝。",
+			"challengeUnknown": "未知或已使用的质询。",
+			"challengeOtherDevice": "该质询由另一台设备发起。",
+			"invalidSignature": "签名无效。",
+			"noAgents": "没有正在运行的智能体。",
+			"stateUnreadable": "无法读取移动端状态：{{error}}",
+			"stateWrite": "写入移动端状态：{{error}}",
+			"ntfyTokenFormat": "ntfy 令牌以“tk_”开头：这个不是。该字段可能被自动填充了。",
+			"disabled": "移动端访问已关闭。",
+			"noTopic": "未配置 ntfy 主题。",
+			"nothingSent": "未发送任何内容。",
+			"qr": "二维码：{{error}}",
+			"funnelActive": "Tailscale Funnel 已启用：它会将 Cockpit 暴露到互联网。请先关闭它（`tailscale funnel off`），再启用移动端访问。",
+			"invalidOrigin": "无效的来源：{{error}}",
+			"webauthn": "WebAuthn：{{error}}",
+			"port": "端口 {{port}}：{{error}}"
+		},
+		"journal": {
+			"enabled": "移动端访问已启用",
+			"disabled": "移动端访问已关闭 — 设备已撤销",
+			"deviceRevoked": "设备已撤销",
+			"devicePaired": "设备已配对",
+			"passkeyRegistered": "通行密钥已注册",
+			"toolDenied": "工具已拒绝",
+			"toolAllowed": "工具已允许",
+			"signatureRejected": "签名被拒绝",
+			"planApproved": "已从移动端批准计划",
+			"missionPaused": "已从移动端暂停任务",
+			"missionStopped": "已从移动端停止任务",
+			"questionAnswered": "问题已回答",
+			"messageSent": "已向智能体发送消息"
+		},
+		"remote": {
+			"missionStoppedNote": "已从移动端停止任务。分支和 worktree 均已保留。",
+			"quickDenied": "已拒绝。"
+		},
+		"wake": {
+			"understandingTitle": "主智能体已阅读工单",
+			"understandingDetail": "{{title}} — 它的理解等待你审阅",
+			"approachTitle": "有一个方案等待你批准",
+			"approachDetail": "{{title}} — 在拆分之前",
+			"planTitle": "有一个计划等待你批准",
+			"planDetail": "{{title}} — {{count}} 个子任务",
+			"agentWaiting": "有一个智能体在等待",
+			"request": "请求：{{tool}}",
+			"deny": "拒绝",
+			"open": "打开",
+			"testBody": "来自设置的中继测试。",
+			"published": "已发布（{{status}}）。",
+			"rejectedToken": "被拒绝（{{status}}）— 发布令牌无效。",
+			"rejectedRate": "被拒绝（{{status}}）— 尝试次数过多，服务器正在限流。",
+			"rejected": "被拒绝（{{status}}）。",
+			"unreachable": "无法连接 ntfy 服务器：{{error}}"
+		}
+	}
+}

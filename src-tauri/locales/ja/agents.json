@@ -1,1 +1,376 @@
-{}
+{
+	"brief": {
+		"sources": {
+			"conventions": {
+				"label": "リポジトリのルール",
+				"hint": "リポジトリが規約を書いている場所と、保存しているスキル — エンジンは自分の系統のファイルしか読みません"
+			},
+			"product": {
+				"label": "プロダクトの内容",
+				"hint": "変更を読み解くために宣言された一文 — これがないと、エージェントはコードの話しかしません"
+			},
+			"lessons": {
+				"label": "プロジェクトノート",
+				"hint": "これまで手作業でやり直す必要があったこと。関係するファイルで絞り込み済み"
+			},
+			"place": {
+				"label": "ブランチとその状態",
+				"hint": "ベース、乖離、未コミットのファイル、最新のコミット — リポジトリから読み取るため常に利用可能"
+			},
+			"ticket": {
+				"label": "ブランチのチケット",
+				"hint": "宣言されたトラッカーからのリクエストとそのコメント"
+			},
+			"review": {
+				"label": "レビューの指摘",
+				"hint": "このブランチで作成されたマージリクエストの説明と議論"
+			},
+			"attempts": {
+				"label": "これまでに試したこと",
+				"hint": "このフォルダでの過去の会話、1 件につき 1 行"
+			}
+		},
+		"missing": {
+			"noFolder": "フォルダが存在しません",
+			"ticket": "チケット {{id}} を読み取れません（{{error}}）",
+			"pullRequests": "プルリクエストを読み取れません（{{error}}）",
+			"pullRequest": "プルリクエスト #{{number}} を読み取れません（{{error}}）",
+			"mergeRequests": "マージリクエストを読み取れません（{{error}}）",
+			"mergeRequestNotes": "MR !{{iid}} の議論を読み取れません（{{error}}）"
+		},
+		"sections": {
+			"product": {
+				"label": "プロダクト",
+				"detail": "チームが宣言した内容"
+			},
+			"lessons": {
+				"label": "ノート"
+			},
+			"place": {
+				"label": "ブランチ",
+				"detail": "リポジトリの状態"
+			},
+			"ticket": {
+				"label": "チケット {{identifier}}"
+			},
+			"review": {
+				"label": "レビュー {{reference}}",
+				"descriptionOnly": "説明のみ"
+			},
+			"attempts": {
+				"label": "試行"
+			}
+		},
+		"count": {
+			"lessons_other": "教訓 {{count}} 件",
+			"feedback_other": "コメント {{count}} 件",
+			"conversations_other": "会話 {{count}} 件",
+			"skills_other": "スキル {{count}} 件",
+			"files_other": "ファイル {{count}} 件"
+		}
+	},
+	"impact": {
+		"errors": {
+			"folder": "分析フォルダ：{{error}}",
+			"unreadable": "分析を読み取れません：{{error}}",
+			"write": "分析の書き込み：{{error}}",
+			"alreadyRunning": "この変更の分析はすでに実行中です。",
+			"changeGone": "この変更はもう存在しません：プルリクエストがクローズされたか、ブランチが削除されました。",
+			"noWorkdir": "エージェントが作業するフォルダがありません。"
+		},
+		"interrupted": {
+			"label": "Cockpit が閉じられたため読み取りが中断されました",
+			"detail": "実行中のエージェントはアプリケーションとともに停止します。インパクト画面から再開してください。"
+		},
+		"journal": {
+			"analysis": "変更の分析"
+		},
+		"rawReportTitle": "レポート"
+	},
+	"properties": {
+		"errors": {
+			"folder": "プロパティフォルダ：{{error}}",
+			"serialize": "シリアライズ：{{error}}",
+			"write": "書き込み：{{error}}",
+			"changeGone": "この変更はもう存在しません。",
+			"noneDeclared": "このプロジェクトはプロパティを宣言していません。常に成り立つべきことを「設定 → エージェント」に書くか、あなた自身の修正をもとに Cockpit に提案させてください。",
+			"noneApplicable": "宣言されたプロパティのいずれも、この変更のファイルに関係しません。",
+			"noWorkdir": "エージェントが作業するフォルダがありません。",
+			"propertyGone": "このプロパティはもう存在しません。",
+			"repoMissing": "このプロジェクトのメインリポジトリがこのマシンに見つかりません。",
+			"noFixesCalibration": "直近 400 件のコミットに識別できる修正がありません。キャリブレーションは何かを修正したコミットに基づきます。それがないと、このプロパティが破られうるかどうか判断できません。",
+			"noFixesSuggest": "最近の履歴に識別できる修正がありません：このリポジトリ固有のプロパティを提案する手がかりがありません。",
+			"nothingUsable": "エージェントは使えるものを何も提案しませんでした。もう一度試すか、最初のプロパティを自分で書いてください。"
+		},
+		"judgeSilent": "判定役が応答しませんでした：{{error}}",
+		"journal": {
+			"label": "プロパティの確認",
+			"broken": "{{count}} 件が不成立"
+		}
+	},
+	"team": {
+		"priority": {
+			"urgent": "緊急",
+			"high": "高",
+			"medium": "中",
+			"low": "低"
+		},
+		"errors": {
+			"unknown": "エラー",
+			"linear": "Linear：{{message}}",
+			"github": "GitHub：{{message}}",
+			"noMembers": "メンバーが宣言されていません：「設定 → チーム」でチームを追加してください。各メンバーには、チケットを紐づけるためのタスクトラッカーの識別子と、プルリクエスト用の GitHub ログインが必要です。",
+			"githubRepoMissing": "設定で `github.repo`（例：acme/monorepo）を入力してください。"
+		},
+		"narrative": {
+			"theirTopics": "担当トピック",
+			"and": "{{list}}と{{last}}",
+			"activeTickets_other": "アクティブなチケット {{count}} 件",
+			"reviewTickets_other": "レビュー中のチケット {{count}} 件",
+			"openPrs_other": "オープン中の PR {{count}} 件",
+			"newOpenPrs_other": "新しい PR {{count}} 件を作成",
+			"prs_other": "PR {{count}} 件",
+			"blockingPoints_other": "ブロッカー {{count}} 件",
+			"nothingActiveDev": "{{name}} には現在、アクティブなものもオープン中の PR もありません。",
+			"nothingActive": "{{name}} にはここで追跡しているアクティブなトピックがありません。",
+			"variedTopics": "{{name}} はさまざまなトピックを進めています{{load}}。",
+			"alsoOn": "（ほかに{{themes}}も）",
+			"mostlyOn": "{{name}} は主に{{theme}}{{tail}}に取り組んでいます{{load}}。",
+			"workingOn": "{{name}} は{{themes}}に取り組んでいます{{load}}。",
+			"nothingMerged": "前回のデイリー以降、マージされたものはありません。",
+			"openedNothingMerged": "前回のデイリー以降、{{opened}}。まだマージはありません。",
+			"shippedOn": "{{themes}}の",
+			"andOpened": "。さらに{{opened}}",
+			"shipped": "前回のデイリー以降、{{themes}}{{prs}}を出荷しました{{opened}}。",
+			"toChallenge": "{{count}} 件を要確認",
+			"toReview": "他のメンバーのレビュー待ち {{prs}}",
+			"nothingStuck": "本人側で止まっているものはありません。",
+			"toWatch": "注意点：{{items}}。"
+		},
+		"days": "{{count}}日",
+		"flags": {
+			"blockedOne": "{{id}} が Blocked になっています — 何があれば解除できますか？",
+			"blockedMany": "{{count}} 件のチケットが Blocked になっています（{{ids}}）— 何があれば解除できますか？",
+			"stacked": "PR #{{number}} は（dev ではなく）`{{base}}` をベースにしています — 先にベースをマージしますか？",
+			"ciFailing": "PR #{{number}} は CI が失敗しています — レビュー／マージの前に修正してください。",
+			"approved": "PR #{{number}} は承認済みですがマージされていません — 何がマージを妨げていますか？",
+			"changesRequested": "PR #{{number}}：修正が求められています — 作成者の対応待ちです。",
+			"reviewStaleOne": "PR #{{number}} が {{age}} 日間レビュー待ちです — レビューの時間を取れますか？",
+			"reviewStaleMany": "{{count}} 件の PR が {{days}} 日以上レビュー待ちです（{{numbers}}、最長 {{age}} 日）— レビューを計画しますか？",
+			"draftStale": "{{count}} 件の PR が {{days}} 日以上ドラフトのままです（{{numbers}}）— まだ必要ですか？",
+			"inProgressNoPrOne": "{{id}} は PR がないまま {{days}} 日以上 In Progress です — 状況はどうですか？",
+			"inProgressNoPrMany": "{{count}} 件のチケットが PR のないまま {{days}} 日以上 In Progress です（{{ids}}）— 状況はどうですか？",
+			"reviewStale": "{{count}} 件のチケットが {{days}} 日以上レビュー中です（{{ids}}）— 誰待ちですか？",
+			"wip": "{{count}} 件のチケットが並行して In Progress です — 優先順位をつけて絞りますか？",
+			"assigneeMismatch": "{{issue}} は {{name}} に割り当てられていますが、コードは @{{author}} が書いています（PR #{{number}}）— 割り当て直しますか？",
+			"idleNothing": "オープン中の PR もアクティブなチケットもありません — 何に取り組んでいますか？",
+			"idleStale": "オープン中の PR がなく、アクティブなチケットにも最近の動きがありません — 手が空いていますか？ブロックされていますか？"
+		}
+	},
+	"automations": {
+		"errors": {
+			"serialize": "自動化：{{error}}",
+			"noName": "名前を付けてください。",
+			"badTime": "時刻は HH:MM の形式で書きます（例：14:00）。",
+			"unreadableAnswer": "エージェントの回答を読み取れませんでした。",
+			"alreadyRunning": "すでに実行中です。",
+			"emptyCorrection": "修正内容が空です。",
+			"notFound": "自動化が見つかりません。",
+			"runNotFound": "実行が見つかりません。",
+			"noOutput": "この実行には出力がありません。",
+			"noChromium": "PDF を作成するには Chrome（または Chromium 系ブラウザ）が必要です。Markdown はいつでもコピーできます。",
+			"pdfTimeout": "ブラウザが 1 分以内に PDF をレンダリングしませんでした。",
+			"pdfNotProduced": "PDF が作成されませんでした。{{detail}}",
+			"noSlackWebhook": "この自動化の設定で Slack webhook を入力してください。",
+			"slack": "Slack：{{error}}",
+			"slackRefused": "Slack に拒否されました：{{status}}"
+		},
+		"missed": {
+			"closedNoCatchUp": "予定時刻に Cockpit が閉じられており、後からの実行はオフになっています。",
+			"closedUntilAfter": "ミーティングの時刻を過ぎるまで Cockpit が閉じられていました。"
+		},
+		"items": {
+			"draft": "ドラフト",
+			"agentsIn": "{{name}} のエージェント",
+			"turns_other": "{{count}} ターン",
+			"minutes": "{{count}} 分"
+		},
+		"sources": {
+			"noLinearToken": "設定に Linear トークンがありません",
+			"noSentryToken": "設定に Sentry トークンがありません",
+			"tracker": "タスクトラッカー"
+		},
+		"nothingFound": "読み取ったソースでは、期間中に何も見つかりませんでした。",
+		"notify": {
+			"linesReady_other": "{{count}} 行の準備ができました。",
+			"silent": "応答なし：{{sources}}。",
+			"ready": "{{name}} の準備ができました",
+			"failed": "{{name}} が完了しませんでした"
+		},
+		"render": {
+			"silent": "今回は応答がありませんでした：{{sources}}。",
+			"period": "{{from}} から {{to}} まで",
+			"slackPeriod": "{{from}} から {{to}} まで"
+		}
+	},
+	"permanence": {
+		"closed": {
+			"disabled": "設定で無効になっています。",
+			"suspended": "一時停止中です。実行中の対応は完了しますが、新しい対応は開始しません。",
+			"offHours": "宣言されたサービス時間外です。",
+			"capped": "1 日の上限に達しました。明日また開始します。",
+			"quota": "共有クォータが下限を下回っています：あなたのために余裕を残します。",
+			"tripped": "サーキットブレーカー：連続で失敗しすぎたため、自ら停止しました。"
+		},
+		"verdict": {
+			"pending": "実行中",
+			"reached": "達成",
+			"missed": "未達",
+			"offTopic": "対象外",
+			"undecided": "判定不能",
+			"rehearsed": "リハーサル"
+		},
+		"tripped": "{{count}} 回連続で失敗。最後：{{last}}",
+		"journal": {
+			"breakerTripped": "サーキットブレーカーが作動",
+			"emergencyStop": "緊急停止",
+			"undo": "対応を取り消し",
+			"act": "アクション：{{tool}}",
+			"missionOpened": "Permanence がミッションを開始",
+			"rule": "ルール「{{rule}}」",
+			"ruleAwaiting": "ルール「{{rule}}」— 計画があなたの承認を待っています"
+		},
+		"halt": {
+			"requested": "停止をリクエストしました。",
+			"cannotStop": "{{kind}} · {{what}} — Cockpit はこれを停止する方法を知りません",
+			"summary": "停止 {{stopped}} 件、失敗 {{failed}} 件"
+		},
+		"undo": {
+			"nothingProduced": "何も作成されていないため、取り消すものはありません。",
+			"cannotUndo": "Cockpit は次のものを取り消す方法を知りません：{{items}}。手作業で対応してください。",
+			"engagementGone": "この対応はもう存在しません。",
+			"missionPaused": "ミッション「{{name}}」を一時停止",
+			"missionFailed": "ミッション「{{name}}」— {{error}}",
+			"labelRemoved": "ラベル「{{label}}」を削除",
+			"labelFailed": "ラベル「{{label}}」— {{error}}",
+			"labelNoTarget": "ラベル「{{label}}」— 対象を読み取れません",
+			"cannotUndoKind": "{{kind}} · {{what}} — Cockpit はこれを取り消す方法を知りません",
+			"step": "実施内容を取り消します",
+			"stepResult": "取り消し {{undone}} 件、取り消し不可 {{failed}} 件",
+			"summary": "取り消し {{undone}} 件、失敗 {{failed}} 件"
+		},
+		"signals": {
+			"clock": "時計",
+			"every": "{{rule}} — {{hours}} 時間ごと",
+			"author": "作成者：{{author}}",
+			"reviewRequested": "レビュー依頼先：{{people}}",
+			"noPriority": "優先度なし",
+			"assignedToMe": "自分に割り当て · 優先度：{{priority}}"
+		},
+		"dropped": {
+			"noTrigger": "認識できるトリガーがありません",
+			"noActiveRule": "有効なルールがありません",
+			"noNode": "トリアージを利用できません：Node が見つかりません",
+			"noAnswer": "トリアージから応答がありません：{{error}}",
+			"notDecided": "トリアージが判断しませんでした",
+			"byTriage": "トリアージで除外",
+			"ruleGone": "ルール「{{rule}}」はもう存在しません"
+		},
+		"blind": {
+			"linear": "Linear：{{error}}",
+			"source": "{{source}}：{{message}}"
+		},
+		"cannotOpen": {
+			"running": "対応がすでに実行中です（同時に最大 {{max}} 件）",
+			"quarantined": "この項目は対応したばかりです。{{hours}} 時間はそのままにします",
+			"dailyCap": "1 日の上限に達しました（対応 {{max}} 件）"
+		},
+		"oracle": {
+			"none": "オラクルが宣言されていません：目標が達成されたかを判断する手段がありません。",
+			"unknownKind": "Cockpit は種類「{{kind}}」のオラクルを照会する方法を知りません。",
+			"commandGone": "コマンド「{{id}}」はこのリポジトリでもう宣言されていません。",
+			"commandSensitive": "「{{name}}」は要注意とマークされています：証拠としては使えません。確認によって何かが変わってはいけません。",
+			"noRepo": "コマンドを実行するローカルリポジトリがありません。",
+			"commandOk": "`{{line}}` は 0 で終了しました。",
+			"commandFailed": "`{{line}}` が失敗しました（{{code}}）。{{tail}}",
+			"commandNotLaunched": "`{{line}}` を起動できませんでした：{{error}}",
+			"commandTimeout": "`{{line}}` は 10 分経っても何も返しませんでした。",
+			"forgesSilent": "フォージが応答しませんでした：{{error}}",
+			"changeGone": "この変更はもう存在しません：マージまたはクローズされました。",
+			"ciGreen": "CI は成功しています。",
+			"ciRed": "CI はまだ失敗しています。",
+			"ciPending": "CI の結果がまだ出ていません（状態：{{state}}）。",
+			"noGithubAccount": "GitHub アカウントを特定できませんでした（`gh` がないか、サインインしていません）。",
+			"commented": "{{me}} のコメントが #{{number}} に投稿されました。",
+			"notCommented": "#{{number}} に {{me}} のコメントはありません。",
+			"githubSilent": "GitHub が応答しませんでした：{{error}}",
+			"checkFailed": "確認に失敗しました：{{error}}",
+			"propertyNotApplicable": "プロパティ「{{id}}」はこの変更には該当しません。"
+		},
+		"errors": {
+			"notPullRequest": "この変更はプルリクエストではありません。"
+		},
+		"engagement": {
+			"noNode": "Node が見つかりません：エージェントが意図を宣言できませんでした。テキストから読み取った計画は計画ではありません。",
+			"agentSilent": "エージェントが応答しませんでした：{{error}}",
+			"agentSilentShort": "エージェントが応答しませんでした",
+			"noIntent": "エージェントは意図を宣言しませんでした。明示できる目標がなければ、何も実行しません。",
+			"noIntentShort": "意図の宣言なし",
+			"planned": "計画のみ、未実行",
+			"plannedWhy": "計画済み — {{why}}",
+			"openMissionStep": "ミッションを開く",
+			"openMissionWhy": "コードを書く必要があります：作業はミッションを通して行われます",
+			"rehearsed": "リハーサル：計画は書かれましたが、何も実行していません。",
+			"missionNotAllowed": "コードを書く必要がありましたが、「ミッションを開く」が許可リストにありません。何も実行していません。",
+			"sharedBranch": "統合ブランチが共有ブランチの「{{branch}}」になってしまいます。何も実行していません。",
+			"missionOpenedStep": "ミッションを開きます",
+			"missionName": "ミッション「{{name}}」",
+			"awaitingApprovalStep": "あなたの承認を待っています",
+			"awaitingApprovalWhy": "このルールは再度人による確認を求めています：計画は待機中です",
+			"missionFailed": "ミッションを開けませんでした：{{error}}",
+			"missionFailedShort": "ミッションを開けませんでした",
+			"resolvedWithoutActs": "{{why}} アクションは要求されませんでした：状況はそれなしで解決しました。",
+			"resolvedAllRefused": "{{why}} アクションは実行できませんでした：解決をもたらしたのはそれではありません。",
+			"someRefused": "{{why}} {{count}} 件のアクションが拒否されました。",
+			"missionGone": "ミッションが消えました：どうなったかは判断できません。",
+			"missionGoneShort": "ミッションが消失",
+			"missionFailedNote": "ミッションが失敗しました。{{note}}",
+			"askOracle": "オラクルに照会します"
+		},
+		"acts": {
+			"notAllowed": "「{{power}}」は許可リストにないため、アクションは実行されませんでした。",
+			"sharedBranch": "「{{branch}}」は共有ブランチです：Permanence は決してそこに書き込みません。自分専用のブランチでのみ作業します。",
+			"noBranch": "この変更のブランチが見つかりません。",
+			"rerun": "実行 #{{id}} を再開しました",
+			"noLabel": "ラベルが指定されていません。",
+			"labelSet": "ラベル「{{label}}」を設定しました",
+			"labelOn": "#{{number}} に {{label}}",
+			"commandUnknown": "コマンド「{{id}}」は宣言されていません。",
+			"commandSensitive": "「{{name}}」は要注意とマークされています：あなたなしでは実行しません。",
+			"noBranchName": "ブランチ名が指定されていません。",
+			"sharedBranchName": "「{{name}}」は共有ブランチ名です：使用しません。",
+			"noRepo": "ローカルリポジトリがありません。",
+			"branchCreated": "ブランチ「{{name}}」を作成しました",
+			"noWorktreeBranch": "worktree 用のブランチがありません。",
+			"sharedWorktree": "「{{branch}}」は共有ブランチです：worktree としてチェックアウトしません。そうしないと、次のアクションでエージェントがそこに書き込んでしまいます。",
+			"worktreeByAgent": "worktree の作成はエージェントのコマンドを通して行われます：誰かがその場にいる必要があります。",
+			"worktreeOpened": "「{{branch}}」の worktree をチェックアウトしました",
+			"lineFailed": "`{{line}}` が失敗しました：{{error}}",
+			"draftOpened": "ドラフト PR を作成しました：{{url}}",
+			"draftLabel": "ドラフト · {{branch}}",
+			"noWorktree": "ブランチ「{{branch}}」は worktree としてチェックアウトされていません：メインリポジトリで起動したエージェントは、あなたが作業している場所に書き込んでしまいます。",
+			"needsApp": "エージェントの起動にはアプリケーションが必要です：テスト環境からは起動しません。",
+			"agentOn": "{{branch}} のエージェント",
+			"agentStarted": "{{worktree}} でエージェントを起動しました",
+			"noText": "書き込むテキストがありません。",
+			"commented": "署名付きでコメントを投稿しました",
+			"commentOn": "#{{number}} へのコメント",
+			"unknown": "Cockpit は「{{tool}}」を実行する方法を知りません。"
+		},
+		"comment": {
+			"disabled": "コメントの権限が有効になっていません。",
+			"noScopes": "条件が 1 つもチェックされていません：設計上、どこにもコメントしません。",
+			"noCondition": "#{{number}} で真になる条件がありません：そこへの書き込みは許可されていません。"
+		}
+	}
+}

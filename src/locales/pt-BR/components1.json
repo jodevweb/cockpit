@@ -1,0 +1,1147 @@
+{
+	"agentChat": {
+		"builtIn": {
+			"agents": "Gerenciar os subagentes disponíveis",
+			"clear": "Recomeçar com uma conversa vazia",
+			"compact": "Resumir a conversa para liberar contexto",
+			"config": "Configurações da CLI",
+			"context": "Detalhamento do uso de contexto",
+			"doctor": "Verificar a instalação",
+			"effort": "Definir o esforço de raciocínio",
+			"fast": "Alternar o modo rápido",
+			"init": "Criar o CLAUDE.md do repositório",
+			"insights": "Estatísticas de uso",
+			"mcp": "Status dos servidores MCP",
+			"model": "Trocar de modelo",
+			"recap": "Resumo do que acabou de ser feito",
+			"reloadSkills": "Recarregar as skills do disco",
+			"rename": "Renomear a conversa",
+			"review": "Revisar um pull request",
+			"securityReview": "Revisão de segurança das alterações pendentes",
+			"usage": "Uso e limites",
+			"usageCredits": "Créditos restantes"
+		},
+		"scope": {
+			"project": "repo",
+			"user": "pessoal",
+			"plugin": "plugin",
+			"cli": "CLI"
+		},
+		"commandMenu": {
+			"loading": "Lendo os comandos…",
+			"empty": "Nenhum comando neste worktree.",
+			"emptyHint": "Um arquivo <mono>.claude/commands/review.md</mono> no repo dá a você <mono>/review</mono>; em <mono>~/.claude/commands/</mono>, o comando acompanha você em todo lugar.",
+			"help": "↑↓ para escolher · Tab ou ⏎ para completar · Esc para digitar livremente"
+		},
+		"attachment": {
+			"open": "{{target}}\nClique para abrir"
+		},
+		"finished": "{{label}} terminou",
+		"tour": {
+			"visit": "Percorrer as alterações",
+			"title": "Percorrer as alterações, arquivo por arquivo",
+			"label": "Percurso"
+		},
+		"permission": {
+			"asks": "O agente quer usar <tool>{{tool}}</tool>",
+			"deny": "Negar",
+			"allow": "Permitir",
+			"allowAll": "Tudo",
+			"allowAllTitle": "Não perguntar de novo"
+		},
+		"guard": {
+			"onTitle": "Tudo é permitido sem perguntar — clique para voltar a perguntar",
+			"offTitle": "Permitir ferramentas automaticamente",
+			"on": "Sem proteção",
+			"off": "Perguntar"
+		},
+		"thinking": {
+			"using": "O agente está usando {{tool}}…",
+			"idle": "O agente está pensando…"
+		},
+		"starting": "Iniciando o agente…",
+		"ready": "Agente pronto. Escreva sua mensagem para continuar.",
+		"film": {
+			"empty": "Nada para filmar ainda: o filme é feito a partir das ações do agente."
+		},
+		"attachments": {
+			"size": "{{size}} KB",
+			"remove": "Remover",
+			"add": "Anexar um arquivo — ou arraste-o para cá, ou cole-o"
+		},
+		"composer": {
+			"placeholder": "Responda ao agente — “/” para comandos…",
+			"ended": "Agente concluído",
+			"send": "Enviar"
+		},
+		"interrupt": {
+			"done": "Agente interrompido — corrija e envie de novo.",
+			"title": "Parar o que o agente está fazendo, sem fechar a conversa",
+			"label": "Parar"
+		},
+		"follow": {
+			"of": "Continuação de",
+			"quoted": "“{{text}}”",
+			"currentFallback": "a instrução atual",
+			"new": "Nova instrução — uma nova linha no mapa",
+			"flipTitle": "Alternar — ou ⌥Enter para enviar do outro jeito",
+			"toNew": "nova instrução",
+			"toFollow": "continuação"
+		},
+		"question": {
+			"placeholder": "Outra resposta, ou um esclarecimento…",
+			"skipTitle": "O agente continua sem a sua resposta",
+			"skip": "Pular",
+			"answer": "Responder"
+		},
+		"userTurn": {
+			"context": "Contexto anexado: {{context}}"
+		},
+		"lecture": {
+			"map": "Mapa",
+			"mapHint": "O que merece um olhar, desenhado: etapas, arquivos, testes, conclusão",
+			"thread": "Conversa",
+			"threadHint": "A conversa inteira, cada conclusão como um quadro: a imagem primeiro, o texto recolhido",
+			"film": "Filme",
+			"filmHint": "O último turno em imagens, reproduzido em sequência como um vídeo curto"
+		},
+		"turn": {
+			"leadInstruction": "Instrução do agente principal"
+		},
+		"prompts": {
+			"group": "Meus prompts",
+			"sendNow": "Enviar agora",
+			"label": "Ações",
+			"title": "Prompts prontos para este agente",
+			"empty": "Nenhum prompt salvo.",
+			"footer": "O prompt vai para o campo de resposta — ⇧Enter envia direto. Biblioteca: <mono>~/.config/cockpit/prompts.toml</mono>"
+		},
+		"model": {
+			"currentTitle": "Modelo atual: {{model}}\nTrocar reinicia o agente na mesma conversa.",
+			"chooseTitle": "Escolha o modelo — o agente reinicia na mesma conversa",
+			"customPlaceholder": "Outro identificador — claude-opus-5-5…",
+			"customTitle": "Um modelo que o motor conhece, mas que a lista ainda não oferece. Para mantê-lo, adicione-o aos modelos do motor nas configurações.",
+			"mismatch": "Solicitado no lançamento: {{requested}} — mas quem está respondendo é {{answering}}. A escolha pode ter mudado durante a conversa, ou o motor trocou sozinho.",
+			"restartNote": "Trocar de modelo reinicia o agente na mesma sessão: a conversa é mantida."
+		},
+		"cost": {
+			"dedicated": "contador dedicado",
+			"price": "${{in}}/${{out}} por M"
+		},
+		"quota": {
+			"common": "Contador semanal compartilhado: <tone>{{percent}}% usado</tone>. Em uma assinatura nada é cobrado — é esta cota que decide. Os preços exibidos só valem para um motor conectado com chave de API.",
+			"none": "Cotas nunca lidas nesta máquina — o painel de recursos consegue lê-las. Os preços exibidos só valem para um motor conectado com chave de API."
+		},
+		"spend": {
+			"summary": "{{total}} tokens consumidos por esta conversa desde a primeira mensagem — {{share}}% de tudo o que foi consumido nas últimas cinco horas, cache incluído.",
+			"noQuota": "A cota da assinatura não é informada pela CLI.",
+			"left": "{{left}}% restante em “{{limit}}”.",
+			"leftResets": "{{left}}% restante em “{{limit}}”, que reinicia {{when}}."
+		},
+		"percent": "{{value}}%",
+		"context": {
+			"breakdown": "{{used}} tokens de {{max}}, contados pela CLI:",
+			"part": "· {{label}}: {{tokens}}",
+			"autoCompact": "Compactação automática em {{percent}}%.",
+			"unknownWindow": "{{tokens}} tokens no último turno. A fração usada aparecerá quando o motor informar o tamanho da janela, no fim deste turno.",
+			"window": "{{tokens}} tokens de {{limit}} — tudo o que o modelo tinha à vista no último turno: mensagens, arquivos lidos e saídas de ferramentas, cache incluído. Além disso, o início da conversa sai da janela."
+		},
+		"mode": {
+			"restartNote": "Trocar de modo reinicia o agente, retomando a conversa."
+		},
+		"mcpState": {
+			"connected": "conectado",
+			"connectedHelp": "As ferramentas dele estão disponíveis.",
+			"pending": "conectando",
+			"pendingHelp": "A conexão ainda não se completou.",
+			"needsAuth": "precisa de autorização",
+			"needsAuthHelp": "O servidor está aguardando autorização: nenhuma das ferramentas dele está disponível para o agente.",
+			"failed": "falhou",
+			"failedHelp": "O servidor não respondeu: nenhuma das ferramentas dele está disponível para o agente.",
+			"unknownHelp": "Um estado que o Cockpit não sabe nomear."
+		},
+		"equipment": {
+			"connectedTitle_one": "{{count}} servidor MCP conectado",
+			"connectedTitle_other": "{{count}} servidores MCP conectados",
+			"unavailableTitle_one": "{{count}} servidor MCP indisponível: {{names}}",
+			"unavailableTitle_other": "{{count}} servidores MCP indisponíveis: {{names}}",
+			"title": "O que este agente tem à mão",
+			"close": "Fechar",
+			"servers": "Servidores MCP",
+			"connectedCount": "{{connected}}/{{total}} conectados",
+			"noServers": "Nenhum servidor declarado para esta pasta.",
+			"probing": "Pedindo o status à sessão…",
+			"reconnect": "Reconectar {{name}}",
+			"skills": "Skills",
+			"subagents": "Subagentes",
+			"plugins": "Plugins"
+		},
+		"duration": {
+			"seconds": "{{count}} s",
+			"minutes": "{{count}} min",
+			"hours": "{{count}} h"
+		},
+		"subagents": {
+			"count_one": "{{count}} subagente",
+			"count_other": "{{count}} subagentes",
+			"defaultRole": "subagente",
+			"openTitle": "{{role}} · {{mission}}\nClique para ver o que ele está fazendo",
+			"starting": "{{role}} · iniciando",
+			"steps_one": "{{count}} etapa",
+			"steps_other": "{{count}} etapas"
+		},
+		"runState": {
+			"done": "concluído",
+			"thinking": "pensando",
+			"ready": "pronto"
+		}
+	},
+	"agentDay": {
+		"permanence": "Permanence",
+		"title": "O dia dos agentes",
+		"summary": {
+			"none": "Nenhum agente rodou nas últimas horas.",
+			"busy_one": "{{busy}} trabalhando agora · {{count}} desde hoje cedo",
+			"busy_other": "{{busy}} trabalhando agora · {{count}} desde hoje cedo",
+			"idle_one": "{{count}} agente nas últimas horas, nenhum trabalhando",
+			"idle_other": "{{count}} agentes nas últimas horas, nenhum trabalhando"
+		},
+		"legend": {
+			"working": "trabalhando",
+			"done": "concluído",
+			"failed": "falhou"
+		},
+		"now": "agora",
+		"turns_one": "{{count}} turno",
+		"turns_other": "{{count}} turnos",
+		"cost": "${{amount}}",
+		"openConversation": "Abrir a conversa dele"
+	},
+	"automationEditor": {
+		"models": {
+			"daily": {
+				"name": "Minha daily",
+				"description": "O que fiz desde a última, em quatro partes, colocado na tela Daily",
+				"prompt": "Resuma o que fiz no período, para a daily da equipe. Quatro partes: Entregue, Em andamento, Bloqueado, Próximos passos. Uma linha por assunto; agrupe um PR com o ticket que ele trata. Sem jargão interno de código: o time de produto também está ouvindo."
+			},
+			"revue": {
+				"name": "Revisão da manhã",
+				"description": "PRs aguardando minha revisão, e o que mudou durante a noite",
+				"prompt": "Liste os PRs que revisei ou que mudaram desde ontem, do mais antigo ao mais recente. Duas partes: A revisar, Já revisados. Uma linha por PR, com o que mudou."
+			},
+			"sprint": {
+				"name": "Balanço da semana",
+				"description": "O que entreguei esta semana, para a retro",
+				"prompt": "Faça o balanço da minha semana para a retro. Três partes: Entregue, O que nos atrasou, A retomar. Agrupe por assunto, não por ferramenta."
+			},
+			"sentry": {
+				"name": "Vigilância de erros",
+				"description": "Erros atribuídos a mim que mudaram desde ontem",
+				"prompt": "Resuma os erros atribuídos a mim que mudaram desde ontem. Duas partes: Novos ou em alta, Resolvidos. Uma linha por erro, com o que ele afeta."
+			},
+			"blank": {
+				"name": "Em branco",
+				"description": "Uma instrução, um ritmo, um relatório"
+			}
+		},
+		"leads": {
+			"onTime": "No horário",
+			"minutes_one": "{{count}} min antes",
+			"minutes_other": "{{count}} min antes",
+			"hour": "1 h antes"
+		},
+		"sources": {
+			"github": {
+				"what": "Meus PRs abertos, com merge ou atualizados, e os que revisei"
+			},
+			"tracker": {
+				"name": "Gerenciador de tickets",
+				"what": "Meus tickets que mudaram, incluindo os concluídos"
+			},
+			"cockpit": {
+				"what": "Turnos de agente concluídos, por pasta, e as ações git do registro"
+			},
+			"sentry": {
+				"what": "Erros atribuídos a mim que mudaram durante o período"
+			}
+		},
+		"sentence": {
+			"noDay": "Nenhum dia selecionado: nada vai rodar.",
+			"noSource": "nenhuma fonte",
+			"outputDaily": "sua parte da daily",
+			"output": "um relatório",
+			"ahead": "Toda(s) {{days}} às {{time}}, o Cockpit lê {{sources}} e entrega {{output}}, {{minutes}} min antes.",
+			"onTime": "Toda(s) {{days}} às {{time}}, o Cockpit lê {{sources}} e entrega {{output}}, no horário."
+		},
+		"toast": {
+			"created": "{{name}} está configurada",
+			"saved": "Configurações salvas"
+		},
+		"remove": {
+			"title": "Excluir “{{name}}”?",
+			"message": "Ela não vai mais rodar. As execuções anteriores continuam no disco.",
+			"confirm": "Excluir"
+		},
+		"back": "Automações",
+		"title": {
+			"new": "Nova automação",
+			"edit": "Configurar “{{name}}”"
+		},
+		"cancel": "Cancelar",
+		"close": "Fechar",
+		"save": "Salvar",
+		"saveAndEnable": "Salvar e ativar",
+		"startFrom": "Partir de um modelo",
+		"covers": "cobre {{from}} → {{to}}",
+		"when": {
+			"title": "Quando",
+			"name": "Nome",
+			"occurs": "Ela roda em",
+			"days": "Dias",
+			"at": "às",
+			"ready": "Relatório pronto",
+			"lead": "Antecedência",
+			"window": "Período coberto"
+		},
+		"window": {
+			"since": {
+				"name": "Desde a última execução",
+				"description": "A segunda cobre o fim de semana; nada se perde entre duas execuções, mesmo após uma recuperação."
+			},
+			"day": {
+				"name": "As últimas 24 horas",
+				"description": "Uma janela fixa, para uma vigilância que volta todo dia."
+			}
+		},
+		"reads": {
+			"title": "O que ela lê",
+			"description": "As contas configuradas nas configurações, filtradas em você. Uma fonte que não responde gera uma parte ausente e sinalizada — nunca uma falha."
+		},
+		"asks": {
+			"title": "O que ela pede",
+			"prompt": "Instrução",
+			"placeholder": "O que você espera do relatório, para quem é, o que ele deve deixar de fora.",
+			"context": "O agente também recebe o período, os itens lidos e o relatório anterior, para poder dizer o que mudou desde então. Ele cita cada item que usa: uma referência inventada é descartada.",
+			"corrections_one": "Correções pedidas após relatórios · {{count}}",
+			"corrections_other": "Correções pedidas após relatórios · {{count}}",
+			"removeCorrection": "Remover esta correção"
+		},
+		"delivery": {
+			"title": "Onde ela chega",
+			"notify": "Me avisar quando estiver pronta",
+			"catchUp": "Recuperar ao abrir se uma execução foi perdida",
+			"daily": "Colocar minha parte na tela Daily",
+			"pdf": "Exportar cada relatório em PDF",
+			"enabled": "Ativada",
+			"slack": "Webhook do Slack, para publicar um relatório revisado",
+			"slackHint": "Nada é enviado sozinho: o botão “Enviar para o Slack” aparece em um relatório, após revisão. O endereço fica no Cockpit e não é mais exibido depois de salvo.",
+			"readOnly": "<strong>Somente leitura</strong>, sem configuração para mudar isso: o agente não tem ferramentas, não pode fazer push, comentar nem mover nada."
+		},
+		"preview": {
+			"title": "O que vai acontecer",
+			"ready": "pronta {{time}}",
+			"pickDay": "Escolha pelo menos um dia."
+		},
+		"steps": {
+			"title": "Em cada execução",
+			"period": {
+				"title": "O período é calculado",
+				"description": "Do fim da última execução bem-sucedida até agora, anotado no relatório"
+			},
+			"read": {
+				"title": "O Cockpit lê as fontes",
+				"description": "O Cockpit, não o agente: cada item mantém seu link e sua origem"
+			},
+			"write": {
+				"title": "Um agente escreve",
+				"description": "Sem nenhuma ferramenta, com sua instrução e os itens, nada mais"
+			},
+			"store": {
+				"title": "O relatório é arquivado",
+				"description": "Uma execução a mais no histórico, nunca reescrita"
+			},
+			"notify": {
+				"title": "Você é avisado",
+				"description": "Uma notificação, depois sua parte na tela Daily"
+			}
+		},
+		"trial": {
+			"button": "Ensaio",
+			"hint": "O mesmo trabalho de uma execução, no período que ela cobriria agora, sem arquivar nem notificar nada",
+			"title": "Ensaio",
+			"subtitle": "Nada foi arquivado nem enviado: isto é o que ela produziria agora.",
+			"running": "Lendo as fontes, depois escrevendo — um a dois minutos.",
+			"partial": "Parcial",
+			"ready": "Pronto",
+			"silent": "sem resposta",
+			"unplugged": "não conectado",
+			"nothing": "Nada.",
+			"unsourced": "sem fonte"
+		}
+	},
+	"automationRunView": {
+		"empty": "Nada para mostrar.",
+		"copied": "Copiado como Markdown",
+		"rerun": "Relançada",
+		"rerunDescription": "A nova execução vai aparecer no histórico.",
+		"slackConfirmTitle": "Publicar este relatório no Slack?",
+		"slackConfirmMessage_one": "{{count}} linha vai para o canal do webhook, visível para toda a equipe. As linhas descartadas ficam aqui.",
+		"slackConfirmMessage_other": "{{count}} linhas vão para o canal do webhook, visíveis para toda a equipe. As linhas descartadas ficam aqui.",
+		"publish": "Publicar",
+		"postedSlack": "Publicado no Slack",
+		"correctionAdded": "Correção adicionada",
+		"correctionAddedDescription": "A próxima execução vai levá-la em conta.",
+		"breadcrumb": "Trilha de navegação",
+		"automations": "Automações",
+		"previous": "Execução anterior",
+		"next": "Próxima execução",
+		"without": "sem {{sources}}",
+		"covers": "cobre {{from}} → {{to}}",
+		"readyAt": "pronta às {{time}}",
+		"copyMarkdown": "Copiar como Markdown",
+		"redoPdf": "Refazer o PDF",
+		"exportPdf": "Exportar em PDF",
+		"pdfFolderTitle": "A pasta dos PDFs desta automação",
+		"folder": "Pasta",
+		"postedOn": "Publicado em {{date}}",
+		"publishTitle": "Publicar o relatório revisado",
+		"sendSlack": "Enviar para o Slack",
+		"presentDaily": "Apresentar na daily",
+		"failed": "Esta execução não foi concluída: {{reason}}",
+		"kept": "{{kept}} / {{total}} linhas mantidas",
+		"clickHint": "Clique em uma linha para tirá-la da apresentação. Ela continua na execução, riscada.",
+		"nothing": "Nada.",
+		"restore": "Recolocar na apresentação",
+		"drop": "Tirar da apresentação",
+		"unsourced": "sem fonte",
+		"dropped": "descartada",
+		"sourcesTitle": "De onde vêm os itens",
+		"sourcesChart": "Distribuição dos itens por fonte",
+		"trace": "O rastro",
+		"period": "Período calculado",
+		"source": {
+			"read": "{{source}} lido",
+			"silent": "{{source}} sem resposta",
+			"unconfigured": "{{source}} não conectado",
+			"items_one": "{{count}} item",
+			"items_other": "{{count}} itens",
+			"noAnswer": "sem resposta",
+			"silentNote": "{{note}}. A seção dele está ausente, e o cabeçalho diz isso.",
+			"unconfiguredNote": "{{note}}. Isso não é uma falha: não há nada para ler."
+		},
+		"writing": "Escrita",
+		"nothingToWrite": "Nada a escrever: nenhum item no período",
+		"toollessAgent": "Agente sem ferramentas · {{valuation}}",
+		"valued": "avaliado em ${{cost}} a preço de API",
+		"unknownValuation": "valor desconhecido",
+		"rerunButton": "Executar de novo",
+		"correctTitle": "Não gostou deste relatório?",
+		"correctHint": "Diga o que está errado: a correção é adicionada às instruções, datada, e a próxima execução a leva em conta.",
+		"correction": "Correção",
+		"correctionPlaceholder": "Ex.: não mencionar PRs de dependências",
+		"addCorrection": "Adicionar às instruções",
+		"correctionsInPlace_one": "{{count}} correção já em vigor",
+		"correctionsInPlace_other": "{{count}} correções já em vigor"
+	},
+	"chantierMap": {
+		"state": {
+			"stopped": "parado",
+			"working": "trabalhando",
+			"waiting": "aguardando"
+		},
+		"files_one": "{{formatted}} arquivo",
+		"files_other": "{{formatted}} arquivos",
+		"truncated": "(repositório truncado)",
+		"folderAction": {
+			"hint": "Observação ou novo agente nesta pasta",
+			"label": "Esta pasta"
+		},
+		"noTerritory": "Nada para mapear: {{error}}",
+		"readingRepo": "Lendo o repositório…",
+		"allClear": "Nenhum agente está pisando no pé de outro, e nenhum depende de uma versão desatualizada de um arquivo.",
+		"agentFallback": "agente",
+		"close": "Fechar",
+		"send": "Enviar",
+		"alerts": {
+			"writtenBy": "escrito por",
+			"and": "e",
+			"warn": "Avisar",
+			"warnAgent": "Avisá-lo",
+			"reliesOn_one": "depende de um arquivo que mudou:",
+			"reliesOn_other": "depende de {{count}} arquivos que mudaram:"
+		},
+		"legend": {
+			"read": "lido",
+			"written": "escrito",
+			"collision": "colisão",
+			"stale": "desatualizado"
+		},
+		"emptyFolder": "Pasta vazia.",
+		"selection": {
+			"multipleWriters": "Escrito por vários agentes.",
+			"openFile": "Abrir o arquivo",
+			"wrote": "escreveu {{ago}}",
+			"read": "leu {{ago}}",
+			"summarized": "resumido",
+			"untouched": "Nenhum agente mexeu nele ainda.",
+			"stale": "{{agent}} o leu {{ago}}; ele mudou desde então.",
+			"staleBy": "{{agent}} o leu {{ago}}; ele mudou desde então (por {{by}}).",
+			"for": "Para",
+			"newAgent": "Um novo agente, confinado aqui",
+			"newAgentPlaceholder": "O que ele deve fazer dentro deste escopo…",
+			"remarkPlaceholder": "Uma observação sobre este arquivo — o agente vai saber do que você está falando.",
+			"laterHint": "Adicionar às observações deste agente, para enviar todas juntas",
+			"later": "Depois",
+			"launch": "Lançar"
+		},
+		"agent": {
+			"openConversation": "Abrir a conversa dele",
+			"known_one": "{{count}} arquivo em mente",
+			"known_other": "{{count}} arquivos em mente",
+			"writes_one": "{{count}} escrito",
+			"writes_other": "{{count}} escritos",
+			"stale_one": "Um arquivo mudou desde que foi lido",
+			"stale_other": "{{count}} arquivos mudaram desde que foram lidos",
+			"deleted": "excluído",
+			"outsideAgents": "fora dos agentes"
+		},
+		"remarks": {
+			"pending_one": "{{count}} observação a enviar",
+			"pending_other": "{{count}} observações a enviar",
+			"remove": "Remover",
+			"discard": "Descartar"
+		},
+		"context": {
+			"noDetail": "Este motor não detalha o seu contexto.",
+			"pending": "{{tokens}} tokens — detalhamento na próxima medição",
+			"pendingOfWindow": "{{tokens}} tokens / {{window}} — detalhamento na próxima medição",
+			"notMeasured": "Contexto ainda não medido.",
+			"detail": "Detalhamento do contexto",
+			"partTitle": "{{label}} · {{tokens}} tokens",
+			"ofMax": "/ {{max}} tokens",
+			"percent": "{{percent}}%",
+			"compactedHint": "A CLI resumiu a conversa para liberar espaço",
+			"compacted": "resumido {{ago}}",
+			"heavy": "O que pesa na conversa: {{list}}",
+			"memory": "Instruções: {{list}}",
+			"mcp": "MCP: {{list}}",
+			"mcpServer": "{{name}} ({{loaded}} carregadas, {{deferred}} adiadas)",
+			"autoCompact": "Compactação automática em {{percent}}% — a marca na barra.",
+			"countedAt": "Contado pela CLI {{ago}}."
+		}
+	},
+	"engagementCard": {
+		"noTrigger": "sem gatilho",
+		"oracle": "Oráculo",
+		"noOracle": "nenhum — não deveria ter começado",
+		"steps_one": "{{count}} etapa",
+		"steps_other": "{{count}} etapas",
+		"costHint": "o que isso custaria a preço de API; em uma assinatura nada é cobrado, é a cota da janela que é consumida",
+		"cost": "${{amount}}",
+		"started": "iniciado {{when}}",
+		"verdict": {
+			"pending": "em andamento",
+			"reached": "atingido",
+			"missed": "não atingido",
+			"offTopic": "fora do assunto",
+			"undecided": "indecidível",
+			"rehearsed": "ensaio"
+		}
+	},
+	"fileLink": {
+		"hint": "Clique: ler no Cockpit\n⌘-clique: abrir no editor\n⌥-clique: mostrar no Finder\n⇧-clique: copiar o caminho"
+	},
+	"fileViewer": {
+		"opaque": {
+			"unplayable": "O Cockpit não consegue reproduzir este formato. O app do próprio Mac quase certamente consegue.",
+			"unknown": "O Cockpit não exibe este tipo de arquivo. Abra {{name}} com o app do Mac.",
+			"openDefault": "Abrir com o app padrão",
+			"showInFinder": "Mostrar no Finder"
+		},
+		"unsaved": "não salvo",
+		"saveTitle": "Salvar (⌘S)",
+		"save": "Salvar",
+		"discardTitle": "Descartar as alterações",
+		"cancel": "Cancelar",
+		"editTitle": "Editar este arquivo no Cockpit",
+		"edit": "Editar",
+		"copyPath": "Copiar o caminho",
+		"reveal": "Mostrar no Finder",
+		"openWithTitle": "Abrir com o app do Mac",
+		"openWith": "Abrir com…",
+		"externalEditorTitle": "Editar no editor externo",
+		"externalEditor": "Editor",
+		"close": "Fechar (Esc)",
+		"searchPlaceholder": "Buscar no arquivo… (⌘F)",
+		"noMatch": "nenhum",
+		"previousMatch": "Ocorrência anterior (⇧⏎)",
+		"nextMatch": "Próxima ocorrência (⏎)",
+		"truncated": "Arquivo truncado em {{size}} — abra-o no editor para ver o resto."
+	},
+	"film": {
+		"quote": "“{{quote}}”",
+		"title": "O filme do turno",
+		"calls_one": "{{count}} chamada",
+		"calls_other": "{{count}} chamadas",
+		"empty": "Nada para filmar ainda: o filme é montado a partir das ações do agente.",
+		"pause": "Pausar",
+		"play": "Reproduzir",
+		"frame": "Quadro {{position}}: {{caption}}"
+	},
+	"fleetGrid": {
+		"main": "principal",
+		"changes_one": "{{count}} alteração",
+		"changes_other": "{{count}} alterações",
+		"clean": "limpo",
+		"conflicts_one": "{{count}} conflito",
+		"conflicts_other": "{{count}} conflitos",
+		"awaitingReply": "aguardando sua resposta",
+		"running": "rodando",
+		"idle": "ocioso",
+		"subagents_one": "{{count}} subagente",
+		"subagents_other": "{{count}} subagentes",
+		"openEditor": "Abrir no editor",
+		"openTerminal": "Terminal neste worktree, dentro do Cockpit",
+		"launchAgent": "Lançar um agente aqui, dentro do Cockpit",
+		"detail": "Detalhes",
+		"remove": "Excluir",
+		"confirmTitle": "Excluir o worktree {{folder}}?",
+		"confirmMessage": "A pasta e a infraestrutura local dela são removidas — bancos de dados, buckets e stack Docker, o que muitas vezes leva um ou dois minutos. A branch remota continua no lugar.",
+		"removable_one": "{{count}} worktree sem PR aberto — pode ser excluído",
+		"removable_other": "{{count}} worktrees sem PR aberto — podem ser excluídos",
+		"hide": "ocultar",
+		"show": "mostrar",
+		"group": {
+			"waiting": "Aguardando você",
+			"flight": "Em andamento",
+			"recent": "Recentes",
+			"resting": "Em repouso"
+		},
+		"empty": "Nenhum worktree."
+	},
+	"impactReport": {
+		"ago": {
+			"now": "agora mesmo",
+			"minutes_one": "há {{count}} min",
+			"minutes_other": "há {{count}} min",
+			"hours_one": "há {{count}} h",
+			"hours_other": "há {{count}} h",
+			"days_one": "há {{count}} d",
+			"days_other": "há {{count}} d"
+		},
+		"noVerdict": "sem veredito",
+		"verdict": {
+			"ok": "ok",
+			"reserves": "ressalvas",
+			"blocking": "bloqueante"
+		},
+		"risk": "risco {{level}}",
+		"riskLevel": {
+			"low": "baixo",
+			"medium": "médio",
+			"high": "alto",
+			"unknown": "desconhecido"
+		},
+		"workOnTitle": "Abrir um agente nesta branch, com esta leitura em mãos",
+		"workOn": "Tratar",
+		"openForge": "Abrir na forja",
+		"stale": "A branch mudou desde esta leitura — ela descreve um estado que não existe mais.",
+		"readingMinutes_one": "{{count}} min de leitura",
+		"readingMinutes_other": "{{count}} min de leitura",
+		"apiCostTitle": "O que esta leitura custaria a preço de API. Em uma assinatura nada é cobrado: ela consome a cota da janela.",
+		"apiCost": "≈ ${{cost}} a preço de API",
+		"briefTitle": "Abrir o dossiê de fatos enviado ao agente",
+		"brief": "O dossiê",
+		"auditTitle": "Julgar esta alteração contra as propriedades declaradas do projeto — uma por uma, com evidências",
+		"audit": "Verificar",
+		"reaudit": "Verificar de novo",
+		"reconfrontTitle": "Fazer esta alteração ser lida de novo por três ângulos — quatro agentes, alguns minutos",
+		"confrontTitle": "Fazer esta alteração ser lida por três ângulos independentes, e guardar só onde eles discordam. Quatro agentes, alguns minutos.",
+		"confront": "Confrontar",
+		"reconfront": "Confrontar de novo",
+		"forget": "Esquecer",
+		"reread": "Ler de novo"
+	},
+	"impactSettings": {
+		"saved": "Configurações de revisão de alterações salvas.",
+		"intro": "A tela Impacto entrega cada alteração a um agente que não pode escrever nada, e guarda o que ele entendeu até a branch mudar.",
+		"brief": {
+			"label": "O que {{name}} faz",
+			"labelFallback": "O que este produto faz",
+			"hint": "Duas ou três frases: para que serve o produto, quem o usa, o que importa para essas pessoas. Sem isso, a análise só consegue falar do código.",
+			"placeholder": "Ex.: loja online para consumidores. O que importa: o total do carrinho está certo, e um pedido pago é enviado no mesmo dia."
+		},
+		"engine": {
+			"label": "Motor",
+			"hint": "Vazio = o primeiro declarado."
+		},
+		"model": {
+			"label": "Modelo",
+			"hint": "Vazio = a configuração desta máquina."
+		},
+		"depth": {
+			"label": "Profundidade",
+			"hint": "O que o motor consegue fazer com isso.",
+			"none": "Sem instrução",
+			"fast": "Rápida",
+			"normal": "Normal",
+			"deep": "Máxima"
+		},
+		"default": "Padrão",
+		"localBranches": {
+			"label": "Acompanhar também branches locais sem merge request",
+			"hint": "Trabalho iniciado há três dias que nenhuma forja vê ainda."
+		},
+		"save": "Salvar"
+	},
+	"kpiBoard": {
+		"noSection": "Sem seção",
+		"filter": "Filtrar indicadores…",
+		"dashboards_one": "{{count}} dashboard",
+		"dashboards_other": "{{count}} dashboards",
+		"indicators_one": "{{count}} indicador",
+		"indicators_other": "{{count}} indicadores",
+		"empty": {
+			"message": "Nenhum dashboard",
+			"hint": "Os dashboards de KPI vêm do Better Stack Telemetry."
+		},
+		"hide": "ocultar",
+		"show": "mostrar valores",
+		"hours_one": "{{count}} h",
+		"hours_other": "{{count}} h",
+		"days_one": "{{count}} d",
+		"days_other": "{{count}} d",
+		"openExternal": "Abrir no Better Stack"
+	},
+	"libreLauncher": {
+		"places": {
+			"ici": {
+				"label": "Aqui mesmo, como está",
+				"hint": "Exatamente o seu terminal: a branch atual, seu trabalho em andamento. Nada é criado."
+			},
+			"branche": {
+				"label": "Nova branch",
+				"hint": "Mesma pasta, mas o agente começa em uma branch própria. Seu trabalho em andamento vai junto."
+			},
+			"worktree": {
+				"label": "Worktree isolado",
+				"hint": "Uma cópia separada, ao lado do repositório, em uma branch nova. Sua pasta não é tocada."
+			}
+		},
+		"depths": {
+			"engine": "Padrão do motor",
+			"fast": "Rápida",
+			"normal": "Normal",
+			"deep": "Profunda"
+		},
+		"launchFailed": "O agente não conseguiu iniciar: {{error}}",
+		"machineAccount": "A conta desta máquina",
+		"machineModel": "o modelo desta máquina",
+		"summary": {
+			"whereHere": "{{folder}}, como está",
+			"whereBranch": "{{folder}}, em uma nova branch {{branch}}",
+			"whereWorktree": "uma cópia isolada de {{repo}}, em {{branch}}",
+			"sentence": "{{engine}} ({{model}}) abre em {{where}}, com a conta {{account}}, no modo {{mode}} — {{hint}}."
+		},
+		"browseTitle": "Lançar um agente nesta pasta",
+		"steps": {
+			"label": "Etapas",
+			"folder": "Pasta",
+			"toPick": "a escolher",
+			"place": "Onde trabalhar",
+			"agent": "Agente",
+			"launch": "Lançar",
+			"remembered": "lembrado para esta pasta",
+			"thisTime": "só desta vez"
+		},
+		"title": "Lançar um agente",
+		"subtitle": "Uma pasta, um agente. Sem projeto, sem missão.",
+		"close": "Fechar",
+		"allSet": "Tudo já está preenchido. Escolha uma pasta e depois <key>⌘↵</key>: o agente começa.",
+		"folder": {
+			"noteLibre": "agente livre",
+			"noteRecent": "agente recente",
+			"title": "Qual pasta?",
+			"description": "É o <code>cd</code>: o agente vai trabalhar ali como se você a tivesse aberto no seu terminal.",
+			"path": "Caminho da pasta",
+			"placeholder": "~/Sites/meu-projeto",
+			"browse": "Escolher no Finder…",
+			"missing": "Esta pasta não existe.",
+			"gitRepo": "Repositório git · {{branch}} · {{state}}",
+			"detached": "HEAD destacado",
+			"clean": "limpo",
+			"dirty_one": "{{count}} arquivo modificado",
+			"dirty_other": "{{count}} arquivos modificados",
+			"notGit": "Não é um repositório git: o agente vai trabalhar no lugar.",
+			"recent": "Recentes",
+			"projects": "Projetos declarados nas configurações"
+		},
+		"place": {
+			"title": "Onde ele trabalha?",
+			"in": "Em <code>{{folder}}</code>",
+			"notGit": "Esta pasta não é um repositório git: o agente trabalha no lugar. Branch e worktree não se aplicam.",
+			"busy": "Já há um agente trabalhando nesta pasta. Dois agentes no mesmo lugar escrevem nos mesmos arquivos.",
+			"useWorktree": "Usar um worktree",
+			"branchName": "Nome da branch",
+			"branchHint": "Derivado da sua primeira instrução, se você der uma.",
+			"from": "Baseado em",
+			"copyIn": "Cópia criada em <code>{{path}}</code>",
+			"fullFlow": "Quer a configuração completa — projeto, terminais, navegador, servidores?",
+			"openWorkspace": "Abrir um workspace em vez disso →"
+		},
+		"agent": {
+			"title": "Qual agente?",
+			"description": "Motor, modelos e contas vêm das configurações. Nada é declarado aqui.",
+			"engine": "Motor",
+			"firstEngine": " — o primeiro declarado",
+			"onlyEngine": " — o único motor declarado",
+			"model": "Modelo",
+			"machineSetting": "Configuração da máquina",
+			"account": "Conta",
+			"loggedIn": "conectada",
+			"loggedOut": "desconectada",
+			"projectAccount": "a do projeto desta pasta",
+			"permissions": "Permissões",
+			"depth": "Profundidade",
+			"depthUnsupported": "Este motor não diz como obtê-la — Configurações → Motores",
+			"bypassWarning": "Bypass, no lugar, na sua branch atual: o agente pode executar qualquer comando sem perguntar a você. Um worktree limita os estragos."
+		},
+		"launch": {
+			"title": "Pronto para começar",
+			"prompt": "Primeira instrução <muted>— opcional</muted>",
+			"placeholder": "Vazio: o agente espera sua primeira frase, igual ao “claude” puro.",
+			"remember": "Lembrar estas escolhas para <code>{{folder}}</code> — da próxima vez, ⌘N e depois ⌘↵ bastam",
+			"button": "Lançar"
+		},
+		"command": "O que você teria digitado",
+		"back": "Voltar",
+		"next": "Configurar a seguir"
+	},
+	"logView": {
+		"empty": "Nenhuma saída ainda.",
+		"noDiff": "Nenhuma alteração para mostrar."
+	},
+	"mcpSettings": {
+		"loading": "lendo o repositório…",
+		"empty": "Este repositório não declara nenhum servidor MCP. Os agentes só terão as ferramentas da conta deles. Um repositório que queira compartilhar os seus os escreve em um <code>.mcp.json</code> na raiz, com commit junto com o resto — é esse arquivo que o cockpit anexa a cada agente que lança.",
+		"approved": "Aprovado: declarado pelo <code>.mcp.json</code> e anexado a cada agente lançado neste repositório, worktrees incluídos — enquanto o arquivo não mudar.",
+		"revoke": "Revogar",
+		"changedSinceApproval": "O .mcp.json mudou desde que você o aprovou.",
+		"notApproved": "Ainda não aprovado.",
+		"pendingExplanation": "Os agentes começam sem estes servidores: são comandos que o repositório executa na sua máquina. Revise-os antes de aprovar.",
+		"approve": "Aprovar",
+		"unreachable_one": "{{count}} servidor não vai responder nas condições atuais. O agente vai saber e dizer isso, em vez de fingir que a ferramenta existe — mas, se você depende dele, desative o isolamento para este trabalho, ou dê ao servidor um token que ele mesmo carregue.",
+		"unreachable_other": "{{count}} servidores não vão responder nas condições atuais. O agente vai saber e dizer isso, em vez de fingir que a ferramenta existe — mas, se você depende deles, desative o isolamento para este trabalho, ou dê aos servidores um token que eles mesmos carreguem."
+	},
+	"payloadView": {
+		"yes": "sim",
+		"no": "não",
+		"items_one": "{{count}} item",
+		"items_other": "{{count}} itens",
+		"empty": "Nenhum detalhe utilizável.",
+		"raw": "Dados brutos"
+	},
+	"portsMonitor": {
+		"buttonHint": "O que está escutando neste worktree — portas, memória, parada",
+		"button": "Monitor",
+		"stopConfirm": {
+			"title": "Parar {{process}} na porta {{port}}?",
+			"message": "O processo e seus filhos são parados. O que ele servia fica inacessível até ser reiniciado.",
+			"confirm": "Parar"
+		},
+		"stopped": "{{process}} parado (porta {{port}}).",
+		"title": "O que está escutando em {{label}}",
+		"reload": "Recarregar as portas",
+		"empty": {
+			"message": "Nada está escutando neste worktree.",
+			"hint": "Servidores iniciados a partir desta pasta aparecerão aqui, com a memória que ocupam."
+		},
+		"memory": "{{mb}} MB",
+		"open": "Abrir {{url}}",
+		"stop": "Parar este servidor",
+		"footer": "Só os servidores iniciados a partir deste worktree são listados. Os outros — e os contêineres Docker — ficam em “Servidores e contêineres”."
+	},
+	"producedFiles": {
+		"count_one": "{{count}} arquivo tocado",
+		"count_other": "{{count}} arquivos tocados",
+		"reveal": {
+			"title": "Abrir o worktree no Finder",
+			"label": "A pasta"
+		}
+	},
+	"quickMenu": {
+		"search": "Buscar…",
+		"noMatch": "Nada com esse nome.",
+		"extraHint": "{{title}} (⇧Enter)"
+	},
+	"reliabilityPanel": {
+		"title": "Estado do ciclo",
+		"window_one": "em {{count}} dia",
+		"window_other": "em {{count}} dias",
+		"notGoals": "nenhum destes números é uma meta",
+		"nothing": "Nada a relatar. Não é um tapinha nas costas: é a ausência de sinal, e a ausência de sinal precisa ser verificada de vez em quando.",
+		"percent": "{{value}}%",
+		"handbacks": {
+			"title": "O que os agentes devolvem",
+			"hint": "Uma devolutiva retomada à mão é o único retorno que não é nem uma nota nem uma impressão.",
+			"delivered": "devolvidas",
+			"takenBack": "retomadas à mão",
+			"rate": "taxa de retomada",
+			"pending": "retomadas a ler"
+		},
+		"context": {
+			"title": "O contexto anexado faz diferença?",
+			"with": "com contexto",
+			"without": "sem contexto",
+			"caveat": "Isto não é um experimento: o Cockpit anexa contexto quando há algum, então as duas colunas não descrevem o mesmo trabalho — uma branch com ticket e revisão é mais bem enquadrada que uma branch nua. Uma diferença clara é um sinal; uma diferença pequena não diz nada.",
+			"notComparable": "Ainda não comparável — são necessárias pelo menos cinco devolutivas de cada lado. Até agora: {{briefed}} com contexto, {{plain}} sem.",
+			"side_one": "retomadas — {{takenBack}} de {{count}} devolutiva",
+			"side_other": "retomadas — {{takenBack}} de {{count}} devolutivas"
+		},
+		"turns": {
+			"title": "Quantas tentativas são necessárias",
+			"hint": "Um agente que você precisa relançar dez vezes é um agente que partiu sem saber o que se esperava dele.",
+			"sessions": "conversas",
+			"median": "retornos, tipicamente",
+			"longHaul": "relançadas mais de dez vezes",
+			"withError": "terminaram em erro"
+		},
+		"guardrails": {
+			"title": "Quanto valem as proteções",
+			"hint": "Uma propriedade que nunca pegou nada tranquiliza sem garantir nada.",
+			"properties": "propriedades",
+			"calibrated": "comprovadas",
+			"decorative": "decorativas"
+		},
+		"memory": {
+			"title": "O que o caderno guarda",
+			"hint": "Uma lição que nunca sai com um agente tem o escopo errado, ou não deveria ter existido.",
+			"lessons": "lições",
+			"uses": "usos",
+			"idle": "nunca usadas",
+			"stale": "adormecidas"
+		},
+		"deeds": {
+			"titleMixed": "O que o Cockpit fez, e em nome de quem",
+			"titleMine": "O que o Cockpit fez em seu nome",
+			"empty": "Nada registrado no período.",
+			"permanence": "Permanence",
+			"failed_one": "{{count}} com falha",
+			"failed_other": "{{count}} com falha"
+		}
+	},
+	"remoteAccess": {
+		"disableConfirm": {
+			"title": "Desativar o acesso móvel?",
+			"message": "Todos os dispositivos pareados são revogados, chaves de acesso incluídas. Eles terão de ser pareados de novo."
+		},
+		"disable": "Desativar",
+		"enable": "Ativar",
+		"enabled": "Acesso móvel ativado.",
+		"disabled": "Acesso móvel desativado.",
+		"revokeConfirm": {
+			"title": "Revogar {{name}}?",
+			"message": "Este dispositivo não poderá mais ler nem decidir nada."
+		},
+		"revoke": "Revogar",
+		"intro": {
+			"title": "Responda às solicitações de um agente pelo seu iPhone, via Tailscale.",
+			"detail": "O servidor só escuta na interface de loopback; é o <code>tailscale serve</code> que o expõe na tailnet, com o certificado dela. Aprovar uma ferramenta exige Face ID. O celular não pode mudar o modo de permissão de um agente, executar um script nem mexer na configuração."
+		},
+		"tailscale": {
+			"offline": "offline — a tailnet fornece o endereço e o certificado"
+		},
+		"funnel": {
+			"on": "ativo: o Cockpit se recusa a iniciar, desative-o com `{{command}}`",
+			"off": "desativado — nada é publicado na Internet"
+		},
+		"setup": {
+			"title": "A fazer uma vez neste Mac",
+			"detail": "O script configura o servidor ntfy local, publica-o na tailnet ao lado desta página e mostra o tópico e o token para colar abaixo. O relay da Apple só vê um hash do tópico; o conteúdo vem daqui."
+		},
+		"ntfy": {
+			"server": "Servidor ntfy",
+			"serverHint": "local, nunca exposto",
+			"topic": "Tópico",
+			"topicHint": "secreto: quem o conhece pode fazê-lo tocar",
+			"token": "Token de publicação",
+			"tokenSaved": "salvo — vazio = inalterado",
+			"tokenRequired": "obrigatório",
+			"saved": "salvo"
+		},
+		"wake": {
+			"last": "Último despertar: {{detail}}",
+			"failed": "O último despertar falhou: {{detail}}",
+			"none": "Nenhum despertar tentado desde a abertura."
+		},
+		"relay": {
+			"result": "Relay: {{detail}}",
+			"test": "Testar o relay",
+			"saved": "Relay salvo.",
+			"save": "Salvar o relay"
+		},
+		"devices": {
+			"title_one": "Dispositivos pareados · {{count}}",
+			"title_other": "Dispositivos pareados · {{count}}",
+			"pair": "Parear um iPhone",
+			"pairing": "Escaneie o QR code para abrir a página, adicione-a à tela de início e depois digite este código — válido por dois minutos, uso único:",
+			"empty": "Nenhum dispositivo.",
+			"seen": "visto {{when}}"
+		},
+		"check": {
+			"ok": "ok",
+			"todo": "a configurar"
+		}
+	},
+	"startMission": {
+		"confirm": {
+			"title": "Iniciar uma missão em {{reference}}?",
+			"ticketPrefix": "“{{title}}” — ",
+			"guided": "o agente principal lê o ticket com você. Você aprova o que ele entendeu, depois a abordagem, depois a divisão: nada começa antes disso.",
+			"autonomous": "o agente principal lê o ticket, propõe uma divisão, e nada começa até você aprovar o plano dele.",
+			"action": "Iniciar a missão"
+		},
+		"activity": {
+			"title": "Missão a partir de {{reference}}",
+			"firstStep": "Lendo o ticket e iniciando o agente principal…"
+		},
+		"button": {
+			"title": "Abrir a missão deste ticket e iniciar o agente principal dela",
+			"label": "Iniciar como missão"
+		}
+	},
+	"teamWorkGrid": {
+		"view": {
+			"all": {
+				"label": "Tudo",
+				"hint": "Tickets do ciclo e PRs abertos"
+			},
+			"blocked": {
+				"label": "Bloqueados",
+				"hint": "CI falhando, alterações solicitadas, PRs empilhados"
+			},
+			"review": {
+				"label": "Aguardando revisão",
+				"hint": "Nem aprovados nem em draft: a bola está com os revisores"
+			},
+			"ready": {
+				"label": "Prontos para merge",
+				"hint": "Aprovados, CI verde, em uma branch base"
+			}
+		},
+		"prState": {
+			"ciFailing": "CI falhando",
+			"changesRequested": "alterações solicitadas",
+			"stacked": "empilhado em {{base}}",
+			"ready": "pronto para merge",
+			"ciPending": "CI rodando",
+			"draft": "draft",
+			"awaitingReview": "aguardando revisão"
+		},
+		"noWorktree": "Nenhum worktree local para esta branch.",
+		"wholeTeam": "A equipe toda",
+		"everyone": "Todos",
+		"memberTitle_one": "{{name}} — {{prs}} PR, {{count}} ticket ativo",
+		"memberTitle_other": "{{name}} — {{prs}} PR, {{count}} tickets ativos",
+		"cycleTitle": "Limitar aos tickets do ciclo atual",
+		"cycle": "Ciclo",
+		"emptyFor": "Nada para {{name}} em “{{view}}”",
+		"empty": "Nada em “{{view}}”",
+		"seeAll": "Ver tudo",
+		"days_one": "{{count}} d",
+		"days_other": "{{count}} d",
+		"openAgent": "Abrir um agente nesta branch",
+		"openWorktree": "Abrir o worktree",
+		"activeTickets": "tickets ativos",
+		"wip_one": "{{count}} WIP",
+		"wip_other": "{{count}} WIP",
+		"openPrs": "PRs abertos",
+		"prs_one": "{{count}} PR",
+		"prs_other": "{{count}} PRs",
+		"toReviewTitle": "PRs de outras pessoas para revisar",
+		"toReview_one": "{{count}} a revisar",
+		"toReview_other": "{{count}} a revisar",
+		"mergedTitle": "com merge desde a última daily",
+		"merged_one": "{{count}} entregue",
+		"merged_other": "{{count}} entregues",
+		"now": "Agora",
+		"next": "A seguir",
+		"nothingNext": "Nada pronto para começar em seguida.",
+		"pullRequests": "Pull requests · {{count}}",
+		"noOpenPr": "Nenhum PR aberto.",
+		"reviewInbox": "Precisa revisar para outros",
+		"onlyMember": "Mostrar só {{name}}",
+		"blocked_one": "{{count}} bloqueado",
+		"blocked_other": "{{count}} bloqueados",
+		"nothingInProgress": "Nada em andamento."
+	},
+	"toolCall": {
+		"tool": "ferramenta",
+		"verb": {
+			"read": "Leu",
+			"wrote": "Escreveu",
+			"edited": "Editou",
+			"searched": "Buscou",
+			"listed": "Listou",
+			"subagent": "Subagente",
+			"fetched": "Baixou",
+			"webSearched": "Buscou na web",
+			"todos": "Lista de tarefas",
+			"steps": "Etapas"
+		},
+		"fromLine": "a partir da linha {{line}}",
+		"lines_one": "{{count}} linha",
+		"lines_other": "{{count}} linhas",
+		"stepsDone": "{{done}} / {{total}} feitas",
+		"image": "imagem",
+		"stepCount_one": "{{count}} etapa",
+		"stepCount_other": "{{count}} etapas",
+		"seeSubagent": "Ver o que este subagente está fazendo",
+		"seeOutput": "Ver o que a ferramenta retornou",
+		"failed": "falhou",
+		"clickToOpen": "Clique para abrir",
+		"shrink": "Reduzir",
+		"enlarge": "Ampliar"
+	},
+	"usagePanel": {
+		"limits": {
+			"unavailable": "Limites indisponíveis — {{error}}",
+			"loading": "Lendo os limites…",
+			"none": "Nenhum limite informado.",
+			"title": "Assinatura",
+			"refresh": "Perguntar de novo à CLI",
+			"remaining": "{{percent}}% restante",
+			"usedResets": "{{percent}}% usado · reinicia {{resetsAt}}",
+			"used": "{{percent}}% usado"
+		},
+		"stat_one": "{{output}} de saída · {{count}} resposta",
+		"stat_other": "{{output}} de saída · {{count}} respostas",
+		"title": "Uso do Claude",
+		"source": "a partir dos logs em {{path}}",
+		"periods": {
+			"last5h": "Últimas 5 horas",
+			"today": "Hoje",
+			"last7Days": "7 dias",
+			"last30Days": "30 dias"
+		},
+		"volumesNote": "Volumes medidos em tokens, não confundir com os limites acima: o total soma entrada, saída e escritas em cache; as leituras de cache são contadas à parte porque não são cobradas como texto gerado.",
+		"byDay": {
+			"title": "Por dia (últimos 30 dias)",
+			"empty": "Nenhuma atividade."
+		},
+		"byWorktree": {
+			"title": "Por worktree",
+			"empty": "Nenhuma pasta identificada."
+		},
+		"byMission": {
+			"title": "Por missão",
+			"empty": "Nenhuma missão medida."
+		},
+		"byModel": {
+			"title": "Por modelo",
+			"empty": "Nenhum modelo identificado."
+		},
+		"allTime_one": "Desde sempre: {{tokens}} tokens em {{count}} resposta · leitura de cache {{cacheRead}}.",
+		"allTime_other": "Desde sempre: {{tokens}} tokens em {{count}} respostas · leitura de cache {{cacheRead}}."
+	}
+}

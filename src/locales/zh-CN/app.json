@@ -1,0 +1,298 @@
+{
+	"store": {
+		"job": {
+			"succeeded": "已完成",
+			"failed": "失败",
+			"failedWithCode": "失败（代码 {{code}}）",
+			"failedToast": "{{label}} — 失败。打开“脚本”查看输出。",
+			"failedToastWithCode": "{{label}} — 失败（代码 {{code}}）。打开“脚本”查看输出。",
+			"worktreeDone": "{{label}} — 已完成。"
+		},
+		"notify": {
+			"waitingReply": "等待你的回复 — {{title}}",
+			"ciFailed": "CI 失败 · #{{number}}",
+			"readyToMerge": "可以合并 · #{{number}}",
+			"prodError": "生产环境错误 · {{project}}"
+		}
+	},
+	"commandPalette": {
+		"views": {
+			"map": "地图",
+			"today": "今日",
+			"decisions": "决策 · 等待你答复的事项",
+			"recap": "图像回顾 · 发生了什么",
+			"automations": "自动化 · 自动准备的会议",
+			"overview": "概览",
+			"team": "每日站会 · 团队",
+			"agents": "AI 智能体",
+			"workspace": "工作区 · 打开的智能体和终端",
+			"libres": "自由智能体 · 在项目之外启动",
+			"worktrees": "Worktree",
+			"git": "Git",
+			"scripts": "脚本",
+			"docs": "文档",
+			"observability": "可观测性",
+			"delivery": "流程 · Linear、PR、CI、部署",
+			"infra": "服务器与容器 · 本机正在运行的内容",
+			"settings": "设置"
+		},
+		"hint": {
+			"goTo": "前往"
+		},
+		"group": {
+			"navigation": "导航",
+			"libres": "自由智能体",
+			"projects": "项目",
+			"recentFolders": "最近的文件夹",
+			"identifiers": "标识符"
+		},
+		"libre": {
+			"launch": "启动自由智能体…",
+			"launchHint": "⌘N · 一个文件夹，一个智能体",
+			"launchIn": "在 {{folder}} 中启动智能体",
+			"launchInHint": "启动器，已预填你上次的选择"
+		},
+		"project": {
+			"label": "项目 · {{name}}"
+		},
+		"git": {
+			"behind_other": "落后 {{count}} 个提交",
+			"upToDate": "已是最新",
+			"pulled": "{{name}} — 已是最新。",
+			"ahead_other": "{{count}} 个提交待推送",
+			"pushed": "{{name}} — 已推送。"
+		},
+		"worktree": {
+			"openEditor": "在编辑器中打开 {{name}}",
+			"launchAgent": "在 {{name}} 上启动智能体",
+			"launchAgentHint": "在 Cockpit 中对话",
+			"terminal": "{{name}} 的终端",
+			"terminalHint": "Cockpit 中的 shell",
+			"terminalApp": "在 Terminal.app 中打开 {{name}}"
+		},
+		"folder": {
+			"newAgent": "在文件夹中新建智能体…",
+			"newAgentHint": "任意文件夹，无需分支或 worktree",
+			"dialogTitle": "在以下位置启动智能体…",
+			"newAgentIn": "在 {{folder}} 中新建智能体"
+		},
+		"openConfig": "打开配置文件",
+		"identifiers": {
+			"openPr": "打开 PR #{{number}}",
+			"onGithub": "在 GitHub 上",
+			"openTicket": "打开 {{ticket}}",
+			"linearTicket": "Linear 工单"
+		},
+		"placeholder": "Worktree、会话、脚本、界面、#PR、工单…",
+		"noResults": "没有结果。",
+		"keys": {
+			"navigate": "导航",
+			"run": "执行",
+			"close": "关闭"
+		}
+	},
+	"review": {
+		"verdict": {
+			"merge": "可以合并",
+			"blocking": "有阻塞问题",
+			"changes": "需要修改"
+		},
+		"next": {
+			"merge": "没有正在进行的操作：可以合并。",
+			"changes": "目前没有正在进行的操作：请由你发布这些意见，待作者推送后再点“复查”。"
+		},
+		"delivered_other": "代码审查已完成：{{count}} 条意见 · {{verdict}}。{{next}}",
+		"see": "查看",
+		"activity": {
+			"verification": "正在检查 PR #{{number}}",
+			"review": "正在审查 PR #{{number}}",
+			"askedReview": "你的指令要求进行代码审查：我将通过“审查”来处理，以便结果以卡片形式交付。正在 GitHub 上读取 PR…",
+			"reading": "正在 GitHub 上读取 PR 并获取其分支…",
+			"launching": "正在启动审查智能体 — 它会阅读 PR，交付时会通知你。",
+			"updating": "正在更新 {{branch}}…",
+			"updateFailed": "无法更新（{{error}}）：将审查本地版本。",
+			"creatingWorktree": "正在为 {{branch}} 创建 worktree — 可能需要几分钟。"
+		},
+		"label": {
+			"verification": "检查 #{{number}}",
+			"review": "审查 #{{number}}"
+		},
+		"error": {
+			"noMainRepo": "该项目未设置主仓库。",
+			"worktreeTimeout": "{{branch}} 的 worktree 在 15 分钟后仍未出现。"
+		}
+	},
+	"blockers": {
+		"permission": {
+			"title_other": "{{tool}} — {{count}} 个请求",
+			"anAgent": "某个智能体",
+			"meta": "待决定"
+		},
+		"plan": {
+			"meta": "待审阅"
+		},
+		"recheck": {
+			"title": "{{author}} 推送到了 #{{number}}",
+			"theAuthor": "作者",
+			"meta": "待复查",
+			"fix": "复查"
+		},
+		"failedTask": {
+			"noReason": "未给出原因",
+			"fix": "重新运行"
+		},
+		"ci": {
+			"meta": "CI 失败",
+			"fix": "修复"
+		}
+	},
+	"decisions": {
+		"waited": {
+			"now": "刚刚",
+			"minutes": "已等待 {{minutes}} 分钟",
+			"hours": "已等待 {{hours}} 小时 {{minutes}} 分",
+			"days": "已等待 {{days}} 天"
+		}
+	},
+	"terminals": {
+		"exited": "shell 已退出",
+		"exitedWithCode": "shell 已退出（代码 {{code}}）"
+	},
+	"sidebar": {
+		"views": {
+			"map": "地图",
+			"today": "今日",
+			"decisions": "决策",
+			"recap": "图像回顾",
+			"automations": "自动化",
+			"permanence": "Permanence",
+			"overview": "概览",
+			"team": "每日站会",
+			"missions": "任务",
+			"workspace": "工作区",
+			"libres": "自由智能体",
+			"agents": "AI 智能体",
+			"docs": "文档",
+			"delivery": "流程",
+			"impact": "影响",
+			"observability": "可观测性",
+			"worktrees": "Worktree",
+			"git": "Git",
+			"scripts": "脚本",
+			"infra": "服务器与容器",
+			"settings": "设置"
+		},
+		"groups": {
+			"pilot": "指挥",
+			"produce": "生产",
+			"deliver": "交付",
+			"tooling": "工具"
+		},
+		"project": "项目",
+		"recapFresh_other": "自上次访问以来有 {{count}} 条新内容",
+		"automations": {
+			"running": "有一个自动化正在准备输出",
+			"nextToday": "下一份输出今天就绪"
+		},
+		"launch": {
+			"placeHere": "原地",
+			"placeBranch": "新分支",
+			"placeWorktree": "新 worktree",
+			"defaultModel": "本机默认模型",
+			"title": "一个文件夹，一个智能体 — 就像 cd 后运行 claude（⌘N）",
+			"button": "启动智能体",
+			"again": "按上次的设置重新启动",
+			"noneYet": "暂无记录：你的第一次启动会被记住，供下次使用。",
+			"other": "其他文件夹、其他设置…"
+		},
+		"top": {
+			"mapTitle": "所有工作的地图（⌘⇧C）",
+			"workspaceTitle": "打开的智能体和终端（⌘⇧A）",
+			"libresTitle": "在项目之外启动的智能体，就像在终端中一样",
+			"decisionsTitle": "等待你决定的事项，按其解除阻塞的影响排序（⌘⇧D）",
+			"recapTitle": "以图像呈现发生的事：每个智能体回合一个故事（⌘⇧J）",
+			"recap": "回顾",
+			"automationsTitle": "自动准备的会议，例如每日站会（⌘⇧R）"
+		},
+		"search": "前往、启动、提问…",
+		"atelier": {
+			"title": "所有界面、项目、设置",
+			"name": "工坊",
+			"close": "关闭工坊",
+			"subtitle": "所有界面 · ⌘K 搜索"
+		},
+		"live": {
+			"missions_other": "{{count}} 个任务",
+			"missionsOngoing": "{{missions}}进行中（⌘⇧M）",
+			"missionsWaiting_other": "{{missions}}进行中，{{count}} 个等待你批准（⌘⇧M）",
+			"scripts_other": "{{count}} 个脚本正在运行"
+		}
+	},
+	"agents": {
+		"turn": {
+			"hookReminder": "自动提醒（hook {{hook}}）— 并非你的指令：{{text}}",
+			"ended": "智能体已结束。",
+			"proofFilmed": "验收测试已录制：在工作区浏览器中 {{seconds}} 秒。",
+			"compactedManual": "已按你的要求压缩上下文。",
+			"compactedAuto": "上下文已压缩：对话已被总结以腾出空间。",
+			"resumed": "对话已恢复。",
+			"relaunchedModeKept": "已以 {{mode}} 模式重新启动 — 对话线程保留。",
+			"relaunchedModeFresh": "已以 {{mode}} 模式重新启动 — 新对话，该智能体此前尚无会话。",
+			"relaunchedModelKept": "已在 {{model}} 上重新启动 — 对话线程保留。",
+			"relaunchedModelFresh": "已在 {{model}} 上重新启动 — 新对话。"
+		},
+		"modes": {
+			"plan": {
+				"label": "计划",
+				"hint": "只提出方案，不执行任何操作"
+			},
+			"default": {
+				"label": "谨慎",
+				"hint": "每次使用工具前都会询问"
+			},
+			"acceptEdits": {
+				"label": "编辑",
+				"hint": "直接修改文件，无需询问"
+			},
+			"bypassPermissions": {
+				"label": "绕过",
+				"hint": "不提问、无限制 — 仅用于可丢弃的 worktree"
+			}
+		},
+		"models": {
+			"default": {
+				"label": "默认",
+				"hint": "本机设置的模型"
+			},
+			"fable": {
+				"hint": "能力最强 — 始终开启思考"
+			},
+			"opus": {
+				"hint": "高要求工作的常用选择"
+			},
+			"sonnet": {
+				"hint": "能力与速度的平衡"
+			},
+			"haiku": {
+				"hint": "快速，适合简单任务"
+			}
+		},
+		"review": {
+			"delivered_other": "PR #{{number}} 的代码审查已完成：{{count}} 条意见",
+			"recordFailed": "无法保存代码审查：{{error}}"
+		},
+		"see": "查看",
+		"notify": {
+			"ended": "智能体已结束",
+			"replied": "智能体已回复",
+			"question": "智能体有问题要问你",
+			"permission": "请求权限 · {{tool}}"
+		},
+		"survivors": {
+			"title_one": "有一个智能体在你离开时继续工作",
+			"title_other": "{{count}} 个智能体在你离开时继续工作",
+			"detail_other": "Cockpit 已关闭期间，工作在中继中继续进行",
+			"done_other": "已回到工作区，对话已重新加载。"
+		}
+	}
+}

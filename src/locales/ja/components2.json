@@ -1,0 +1,990 @@
+{
+	"agentMap": {
+		"genre": {
+			"frise": "タイムライン",
+			"avant_apres": "変更前／変更後",
+			"mesure": "計測",
+			"table": "表",
+			"capture": "注釈付きスクリーンショット",
+			"matrice": "マトリクス"
+		},
+		"eyebrow": {
+			"ask": "あなたの指示",
+			"explore": "探索",
+			"subagent": "サブエージェント",
+			"changed": "変更されたファイル",
+			"andAlso": "その他",
+			"tests": "テスト",
+			"commands": "コマンド",
+			"visuals": "ビジュアル",
+			"review": "レビュー完了",
+			"reviewPr": "レビュー完了 · PR #{{pr}}",
+			"footprint": "変更内容 · {{base}}",
+			"earlier": "以前",
+			"asking": "あなたに質問しています",
+			"conclusion": "結論",
+			"said": "発言",
+			"yours": "あなたの番",
+			"now": "現在",
+			"error": "エラー",
+			"delivered": "納品",
+			"pastAsk": "過去の指示"
+		},
+		"ask": {
+			"replies_other": "+ あなたの返信 {{count}} 件"
+		},
+		"explore": {
+			"files_other": "{{count}} 個のファイルを閲覧",
+			"searches_other": "{{count}} 回の検索"
+		},
+		"agent": {
+			"gestures": "{{count}} 件のアクション"
+		},
+		"change": {
+			"others_other": "ほか {{count}} 個のファイル"
+		},
+		"tests": {
+			"running": "テスト実行中",
+			"noResult": "結果のないテスト",
+			"failing": "テスト失敗",
+			"passing": "テスト成功",
+			"failuresSoFar_other": "これまでに {{count}} 件失敗",
+			"failuresBefore_other": "成功までに {{count}} 回失敗",
+			"runs_other": "{{count}} 回実行"
+		},
+		"commands": {
+			"ran_other": "{{count}} 件のコマンドを実行"
+		},
+		"failedCount": "{{count}} 件失敗",
+		"review": {
+			"blocking_other": "ブロッキング {{count}} 件",
+			"important_other": "重要 {{count}} 件",
+			"suggestion_other": "提案 {{count}} 件",
+			"merge": "マージできます",
+			"blockingVerdict": "ブロッキング",
+			"changes": "修正依頼",
+			"delivered": "レビュー完了",
+			"nothing": "指摘なし",
+			"open": "レビューを項目ごとに開く",
+			"loading": "保存されたレビューを読み込み中…"
+		},
+		"severity": {
+			"bloquant": "ブロッキング",
+			"important": "重要",
+			"suggestion": "提案"
+		},
+		"said": {
+			"earlier_other": "前のメッセージ {{count}} 件"
+		},
+		"waiting": {
+			"title": "エージェントがあなたの返答を待っています",
+			"detail": "上部のカードを確認してください"
+		},
+		"live": {
+			"using": "{{tool}} を使用中",
+			"thinking": "思考中"
+		},
+		"delivered": {
+			"pr": "PR {{list}}",
+			"commits_other": "コミット {{count}} 件",
+			"pushed": "{{branches}} にプッシュ"
+		},
+		"media": {
+			"images_other": "画像 {{count}} 枚",
+			"pdfs": "PDF {{count}} 件",
+			"videos_other": "動画 {{count}} 本"
+		},
+		"warn": {
+			"edits": "{{count}} 回やり直し",
+			"editsDuring": "{{duration}} で {{count}} 回やり直し",
+			"tests": "同じ失敗が {{count}} 回連続",
+			"testsDuring": "{{duration}} で同じ失敗が {{count}} 回連続",
+			"repeat": "「{{command}}」を {{count}} 回再実行"
+		},
+		"loop": {
+			"edits": "{{file}} を {{count}} 回やり直し",
+			"tests": "{{target}} が {{count}} 回連続で失敗",
+			"repeat": "{{target}} を {{count}} 回再実行"
+		},
+		"folded": {
+			"changed_other": "{{count}} 個のファイルを変更",
+			"testsKo": "テスト失敗",
+			"testsOk": "テスト成功",
+			"nothingChanged": "変更なし",
+			"resumed": "再開",
+			"circled": "堂々巡り：{{loop}}"
+		},
+		"empty": "指示を書いてください：エージェントの作業内容のマップが、進行に合わせてここに一歩ずつ描かれます。",
+		"backToNow": "現在に戻る",
+		"needsYou": "エージェントがあなたを必要としています",
+		"panel": {
+			"fullText": "全文",
+			"terminal": "ターミナル",
+			"gone": "このステップはもうマップにありません：最後のバージョンを表示しています。",
+			"thinking": "思考中です：実行するものはすぐにここに表示されます。",
+			"nothing": "このステップには詳細がありません。"
+		},
+		"remark": {
+			"anchor": "ステップ「{{title}}」",
+			"placeholder": "このステップへのコメント — どのステップのことかエージェントに伝わります。",
+			"later": "後で",
+			"laterTitle": "他のコメントと一緒に保持して、まとめて送信",
+			"send": "送信"
+		},
+		"strip": {
+			"episodes": "エピソード"
+		},
+		"state": {
+			"subagents_other": "サブエージェント {{count}} 件",
+			"waiting": "あなたの返答待ち",
+			"working": "作業中",
+			"awaiting": "{{agents}} を待機中",
+			"thinking": "思考中",
+			"asks": "あなたに質問しています",
+			"done": "完了",
+			"background": "{{agents}} がバックグラウンドで実行中",
+			"idle": "実行中のものなし · あなたの番",
+			"quietTitle": "しばらく動きがありません：長いコマンドか、止まっているエージェントです。",
+			"since": "{{duration}} 経過",
+			"loopTitle": "確認すべき繰り返し：エージェントが止まっているとは限りませんが、同じところに戻り続けています。",
+			"circling": "堂々巡り中",
+			"circled": "堂々巡りした",
+			"compactedTitle": "空きを作るために CLI が会話を要約しました。エージェントは以前に読んだ内容を要約としてしか保持していません：細部に依存する場合は読み直すべきです。",
+			"compacted": "{{ago}}にメモリを要約",
+			"sinceAsk": "指示から {{duration}}",
+			"total": "合計 {{duration}}",
+			"tour": "変更を見て回る"
+		},
+		"node": {
+			"remarkPending": "送信待ちのコメントがあります",
+			"took": "このステップの所要時間",
+			"expandTitle": "このエピソードを展開",
+			"collapseTitle": "このエピソードを折りたたむ",
+			"expand": "展開",
+			"collapse": "折りたたむ"
+		},
+		"viewLarge": "原寸で表示",
+		"since": {
+			"longTitle": "長時間：戻ってこないコマンドか、止まっているエージェントです。",
+			"title": "このステップの開始から"
+		},
+		"stage": {
+			"before": "変更前",
+			"after": "変更後"
+		},
+		"fate": {
+			"deleted": "削除",
+			"created": "作成",
+			"modified": "変更"
+		},
+		"fateCount": {
+			"deleted_other": "{{count}} 件削除",
+			"created_other": "{{count}} 件作成",
+			"modified_other": "{{count}} 件変更"
+		},
+		"footprint": {
+			"lede": "エージェントの発言ではなく、リポジトリ（{{base}}）から読み取った内容です。結論と比べてください。"
+		},
+		"tourFiles": "変更をファイルごとに見て回る",
+		"deliveredSections": {
+			"pullRequests": "プルリクエスト",
+			"commits": "コミット",
+			"pushed": "プッシュ済み",
+			"files": "作成されたファイル"
+		},
+		"gallery": {
+			"enlarge": "拡大"
+		}
+	},
+	"missionJourney": {
+		"journey": {
+			"understanding": "理解",
+			"approach": "アプローチ",
+			"split": "分割",
+			"execution": "実行",
+			"delivery": "納品"
+		},
+		"copy": {
+			"understanding": {
+				"working": "リードがチケットを読んでいます",
+				"workingHint": "同時に左側でチケットを読んでください。まもなく、理解した内容を伝えます — 最大 10 行で、質問は分けて示されます。",
+				"proposal": "リードが理解した内容",
+				"approve": "承認 — アプローチへ進む"
+			},
+			"approach": {
+				"working": "リードがアプローチを準備しています",
+				"workingHint": "どう進めるか：ステップ、コード上の場所、順序、リスク。実行役への割り振りはまだありません。",
+				"proposal": "提案されたアプローチ",
+				"approve": "承認 — 分割へ進む"
+			},
+			"split": {
+				"working": "リードが作業を分割しています",
+				"workingHint": "誰が何を、どこで、どの順序で行うか — 承認したアプローチに沿って。あなたが合意するまで何も開始されません。",
+				"proposal": "提案された分割",
+				"approve": "承認 — 実行役を起動"
+			}
+		},
+		"stop": {
+			"title": "「{{title}}」を放棄しますか？",
+			"message": "リードは停止され、ミッションはクローズされます。承認済みの内容は履歴で読めます。",
+			"confirm": "放棄",
+			"done": "ミッションを放棄しました。"
+		},
+		"back": "ミッション",
+		"noBranch": "ブランチなし",
+		"stepper": {
+			"yours": "あなたの番",
+			"stopped": "停止",
+			"masterStopped": "リード停止",
+			"tasksProgress": "{{done}}/{{total}} タスク",
+			"integrating": "統合中…",
+			"masterWriting": "リードが執筆中…",
+			"approvedVersion": "承認済み · v{{version}}",
+			"approved": "承認済み",
+			"tasks_other": "タスク {{count}} 件",
+			"prOpen": "PR オープン",
+			"closed": "クローズ"
+		},
+		"nothingProposed": "このステップでは何も提案されませんでした。",
+		"yourMove": "あなたの番です",
+		"working": {
+			"relaunched": "リードを再起動しました：承認済みの内容から再開します。",
+			"starting": "リードを起動中…",
+			"stopped": "リードは停止しています",
+			"startingHint": "チケットを受け取り、承認済みの内容から再開します。数秒かかります。",
+			"stoppedHint": "現在このステップで作業している者はいません：再起動するまで提案は届きません。",
+			"correction": "あなたの修正（反映中）",
+			"plusAnswers": "+ 質問へのあなたの回答",
+			"now": "現在の作業",
+			"notRunning": "リードは動いていません。再起動してください：承認済みの内容から再開し、承認したことを再度尋ねることはありません。",
+			"relaunch": "リードを再起動"
+		},
+		"proposal": {
+			"maxTitle": "これより長い提案は Cockpit が拒否します",
+			"lines": "{{count}}/{{max}} 行"
+		},
+		"split": {
+			"executors_other": "実行役 {{count}} 体",
+			"estimate_other": "≈ {{duration}} の作業（同規模のミッション {{count}} 件に基づく）",
+			"failureRate": "{{percent}}% が失敗"
+		},
+		"task": {
+			"verifies": "他の作業を判定する",
+			"wholeRepoRead": "リポジトリ全体、読み取り専用",
+			"wholeRepoNoScope": "リポジトリ全体 — 範囲の宣言なし",
+			"after": "「{{title}}」の後に開始",
+			"hideBrief": "ブリーフを隠す",
+			"readBrief": "ブリーフ全文を読む"
+		},
+		"decision": {
+			"splitApproved": "分割を承認しました — 実行役が動き始めました。",
+			"approved": "承認しました — リードが次へ進みます。",
+			"correctionSent": "修正を送信しました — リードが提案を作り直しています。",
+			"needsYou_other": "あなたの対応が必要です · 質問 {{count}} 件",
+			"answerPlaceholder": "あなたの回答…",
+			"feedbackLabel": "補足、または修正は？",
+			"placeholder": {
+				"understanding": "例：対象は管理画面ではなく、顧客エリアです。",
+				"approach": "例：新しく作るのではなく、既存のエクスポートサービスを再利用してください。",
+				"split": "例：2 つのフロントエンドタスクは同じファイルを触るので、まとめてください。"
+			},
+			"unanswered_other": "未回答の質問が {{count}} 件あります：承認すると、リードが自分で判断します。",
+			"withFeedback": "承認すると補足も一緒に伝わります。",
+			"nothingWithoutYou": "あなたの承認なしには何も実行されません。",
+			"correctTitle": "何が間違っているかを書いてください：理由がないと、リードは同じ提案を繰り返します。",
+			"requestVersion": "新しいバージョンを依頼"
+		},
+		"verdict": {
+			"approved": "承認",
+			"corrected": "修正"
+		},
+		"quoted": "「{{text}}」",
+		"versions": {
+			"hide": "以前のバージョンを隠す · {{count}}",
+			"show": "以前のバージョンを表示 · {{count}}"
+		},
+		"ticket": {
+			"title": "チケット",
+			"openExternal": "提供元で開く",
+			"noTicket": "このミッションはチケットから作られていません：「{{title}}」。",
+			"assignee": "担当：{{name}}",
+			"noDescription": "説明なし。",
+			"comments": "コメント · {{count}}"
+		}
+	},
+	"workspaceTiles": {
+		"tiles": {
+			"progress": {
+				"eyebrow": "進捗",
+				"title": "このエージェントが指示のどこまで進んでいるか"
+			},
+			"branch": {
+				"eyebrow": "ビュー",
+				"title": "ブランチに関連するすべて"
+			},
+			"pr": {
+				"eyebrow": "プルリクエスト",
+				"title": "このブランチのプルリクエスト"
+			},
+			"mission": {
+				"eyebrow": "ミッション",
+				"title": "このフォルダを開いたミッション"
+			},
+			"agents": {
+				"eyebrow": "エージェント",
+				"title": "このフォルダのエージェントとターミナル"
+			},
+			"commits": {
+				"eyebrow": "コミット",
+				"title": "コミットと、まだコミットされていないもの"
+			},
+			"docs": {
+				"eyebrow": "ドキュメント",
+				"title": "worktree のドキュメント"
+			},
+			"captures": {
+				"eyebrow": "QA",
+				"title": "QA のキャプチャ"
+			},
+			"ports": {
+				"eyebrow": "サーバー",
+				"title": "このフォルダで動いているもの"
+			},
+			"ticket": {
+				"eyebrow": "チケット",
+				"title": "このブランチのチケット"
+			},
+			"review": {
+				"eyebrow": "コードレビュー",
+				"title": "PR のレビュー"
+			},
+			"territory": {
+				"eyebrow": "テリトリー",
+				"title": "作業場のエージェントをコード上に重ねて表示"
+			},
+			"browser": {
+				"eyebrow": "ブラウザ",
+				"title": "エージェントが操作しているページ（ライブ）"
+			}
+		},
+		"progress": {
+			"label": "進捗",
+			"title": "エージェントのステップ、サブエージェント、作業時間",
+			"silent": "{{duration}} 応答なし",
+			"steps_other": "{{done}} / {{count}} ステップ",
+			"helpers_other": "{{count}} 件中 {{back}} 件のサブエージェントが完了",
+			"busyNoSteps": "作業中 — ステップリストは保持していません",
+			"idle": "実行中のものなし"
+		},
+		"board": {
+			"workingFor": "作業時間",
+			"launchedAgo": "指示の送信",
+			"lastActionAgo": "最後のアクション",
+			"toolCalls": "ツール呼び出し",
+			"filesWritten": "書き込んだファイル",
+			"brief": "現在の指示",
+			"steps": "ステップ",
+			"countNotPercent": "割合ではなく件数です：エージェントは作業が増えるとリストを延ばします。",
+			"noSteps": "このエージェントはステップリストを保持していません：作業がどこまで終わったかは分かりません。以下は動いていることを示すだけです。",
+			"helpers": "サブエージェント",
+			"helpersBack_other": "{{count}} 件中 {{back}} 件完了",
+			"helperRunning": "実行中",
+			"helperFailed": "失敗",
+			"helperDone": "完了",
+			"lastAction": "最後のアクション"
+		},
+		"verdict": {
+			"merge": "マージ可能",
+			"corrections": "修正あり",
+			"bloquant": "ブロッキング"
+		},
+		"branch": {
+			"prDraft": "ドラフト",
+			"prOpen": "オープン",
+			"prMerged": "マージ済み",
+			"prClosed": "クローズ",
+			"headerTitle": "PR、チケット、レビュー、コミット、ドキュメント",
+			"label": "ビュー",
+			"seeAll": "すべて表示",
+			"ciRed": "CI 失敗",
+			"ciGreen": "CI 成功",
+			"ciPending": "CI…",
+			"searchingPr": "PR を検索中…",
+			"noPr": "まだ PR はありません",
+			"noTicket": "チケットなし",
+			"reviewTitle": "PR のコードレビュー",
+			"recheck": "再確認が必要",
+			"reviewRound": "レビュー · ラウンド {{number}}",
+			"notReviewed": "まだレビューされていません",
+			"mission": "ミッション",
+			"agentsTitle": "このフォルダのエージェントとターミナル、およびそのコンテキスト",
+			"working_other": "{{count}} 件作業中",
+			"agents_other": "エージェント {{count}} 件",
+			"terminals_other": "ターミナル {{count}} 件",
+			"commitsTitle": "ブランチのコミットと、まだコミットされていないもの",
+			"uncommitted_other": "未コミット {{count}} 件",
+			"commits_other": "コミット {{count}} 件",
+			"commitsLabel": "コミット",
+			"documents_other": "ドキュメント {{count}} 件",
+			"captures_other": "キャプチャ {{count}} 件",
+			"portsTitle": "このフォルダで待ち受けているもの",
+			"servers_other": "サーバー {{count}} 件"
+		},
+		"territory": {
+			"label": "テリトリー",
+			"title": "このエージェントが読み書きした場所、衝突、古い読み込み",
+			"collisions_other": "衝突 {{count}} 件",
+			"stale_other": "古い {{count}} 件",
+			"files_other": "ファイル {{count}} 個",
+			"written_other": "{{count}} 件書き込み",
+			"read_other": "{{count}} 件読み込み",
+			"untouched": "まだどのファイルにも触れていません",
+			"agentsHere_other": "ここにエージェント {{count}} 件"
+		},
+		"browser": {
+			"label": "ブラウザ",
+			"title": "このフォルダのエージェントが操作しているページ — クリックでライブ表示",
+			"live": "ライブ",
+			"drivingSelf": "操作中",
+			"drivingOther": "{{name}} が操作中",
+			"openRight": "右側で開く",
+			"blank": "開いているページなし — クリックで開きます"
+		}
+	},
+	"assistant": {
+		"shortcutTaken": "{{shortcut}} はすでに使われています：音声アシスタントにあなたの声が届きません",
+		"chooseShortcut": "ショートカットを選択",
+		"see": "表示",
+		"doneSentence": "完了しました。",
+		"quoted": "「{{text}}」",
+		"close": "閉じる",
+		"placeholder": "カートのワークスペースを開いて、NW-3050 からミッションを開始…",
+		"hint": "{{shortcut}} を長押しで話す · ⌘J で入力",
+		"errors": {
+			"worktreeNotFound": "worktree「{{name}}」が見つかりません。",
+			"agentNotFound": "エージェント「{{name}}」が見つかりません。",
+			"viewUnknown": "画面「{{name}}」が分かりません。",
+			"projectNotFound": "プロジェクト「{{name}}」が見つかりません。",
+			"workspaceNotFound": "ワークスペース「{{name}}」が見つかりません。",
+			"whichTicket": "どのチケットから始めますか？",
+			"missionNotFound": "ミッション「{{name}}」が見つかりません。",
+			"noMainRepo": "このプロジェクトにはメインリポジトリが設定されていません。",
+			"whichBranch": "どのブランチですか？",
+			"whichPr": "どの PR をレビューしますか？",
+			"whatToAsk": "何を依頼しますか？",
+			"noWorkspace": "開いているワークスペースがありません：どのフォルダで作業するか教えてください。",
+			"folderNotFound": "フォルダ「{{name}}」が見つかりません。",
+			"notUnderstood": "リクエストを理解できませんでした。"
+		},
+		"mission": {
+			"activity": "{{ticket}} からのミッション",
+			"firstStep": "チケットを読み、リードエージェントを起動しています…",
+			"started": "ミッションを開始しました：{{title}}。",
+			"existed": "ミッションはすでに存在していました。",
+			"existedOpening": "ミッションはすでに存在していました：{{title}}。開きます。"
+		},
+		"branch": {
+			"activity": "ブランチ {{name}}",
+			"firstStep": "ブランチを作成中…"
+		},
+		"tell": {
+			"activity": "{{name}} への指示",
+			"sent": "指示を送信しました：エージェントが対応中です。",
+			"launched": "指示付きで新しいエージェントを起動しました。"
+		},
+		"git": {
+			"pullStep": "最新のコミットを取得中…",
+			"pulled": "ブランチは最新です。",
+			"pushStep": "ブランチをプッシュ中…",
+			"pushed": "ブランチをプッシュしました。"
+		},
+		"phase": {
+			"listening": "聞いています… 話し終えたら {{shortcut}} を離してください",
+			"transcribing": "文字起こし中…",
+			"thinking": "考え中…",
+			"error": "実行できませんでした",
+			"done": "完了",
+			"answered": "Cockpit の返答",
+			"idle": "Cockpit に聞く"
+		},
+		"settings": {
+			"nothingHeard": "（何も聞こえませんでした — マイクに近づいて話してください）",
+			"hold": "押したまま話して離すだけ：アシスタントが理解し、実行し、声で返答します — Cockpit が他のウィンドウの後ろにあっても動作します。",
+			"keyboard": "Cockpit が前面にあるときは、キーボードでも同じことができます。",
+			"cost": "話した内容は ElevenLabs（上の音声キー）で文字起こしされ、あなたのサブスクリプションの Claude が理解します：1 リクエストにつき ElevenLabs プランの数秒分と、Claude クォータの少量を消費します。アクションは直接実行されます。見つからないものを推測することはありません。",
+			"noKey": "ElevenLabs キーがないと、アシスタントはあなたの声を聞けません — ⌘J は引き続き使えます。音声セクションで保存してください。",
+			"speak": "話してください…（4 秒）",
+			"testMic": "マイクをテスト",
+			"appOnly": "アプリ内のみ。",
+			"heard": "聞き取った内容：",
+			"micDenied": "マイクが拒否されている場合：システム設定 → プライバシーとセキュリティ → マイク → Cockpit。"
+		},
+		"shortcut": {
+			"active": "{{shortcut}} はすべてのアプリケーションで有効です。",
+			"failed": "{{shortcut}} を登録できませんでした。別のものを選んでください。",
+			"failedWithError": "{{shortcut}} を登録できませんでした：{{error}} 別のものを選んでください。",
+			"recording": "組み合わせを入力…（Esc でキャンセル）",
+			"record": "ショートカットを記録…"
+		}
+	},
+	"branchBoard": {
+		"gathering": "{{branch}} に関連するものを集めています…",
+		"new": "新規",
+		"pr": {
+			"draft": "ドラフト",
+			"open": "オープン",
+			"merged": "マージ済み",
+			"closed": "クローズ",
+			"number": "PR #{{number}}",
+			"title": "プルリクエスト",
+			"ciRed": "CI 失敗",
+			"ciGreen": "CI 成功",
+			"ciRunning": "CI 実行中",
+			"approved": "承認済み",
+			"changesRequested": "修正依頼",
+			"notApproved": "未承認",
+			"byAuthor": "作成者：<author>{{author}}</author>",
+			"reviewRequested": "{{logins}} にレビューを依頼",
+			"searching": "このブランチの PR を検索中…",
+			"none": "{{branch}} の PR はありません。"
+		},
+		"review": {
+			"notYet": "PR #{{number}} はまだレビューされていません。",
+			"noPr": "このブランチには PR がありません：今のところレビューするものはありません。",
+			"reviewPr": "PR をレビュー",
+			"recheck": "修正を再確認",
+			"reviewThisPr": "この PR をレビュー"
+		},
+		"ticket": {
+			"none": "ブランチにも PR にもチケットの識別子がありません。",
+			"title_other": "チケット",
+			"notFound": "{{id}}：見つかりません。"
+		},
+		"mission": {
+			"title": "ミッション",
+			"tasks_other": "タスク {{count}} 件"
+		},
+		"agents": {
+			"title": "エージェント",
+			"none": "この worktree にエージェントはいません。",
+			"reviewReadOnly": "レビュー · 読み取り専用",
+			"review": "レビュー",
+			"working": "作業中",
+			"waiting": "待機中",
+			"stopped": "停止",
+			"terminal": "ターミナル"
+		},
+		"commits": {
+			"title": "コミット",
+			"aheadBehind": "{{ahead}} 件先行 · {{behind}} 件遅れ",
+			"none": "コミットはありません。"
+		},
+		"changes": {
+			"title": "変更済み、未コミット",
+			"none": "保留中のものはありません：すべてコミット済みです。"
+		},
+		"captures": {
+			"title": "QA · キャプチャ",
+			"none": "このフォルダに QA のキャプチャはありません。",
+			"count_other": "キャプチャ {{count}} 件、新しい順",
+			"more_other": "ほかにキャプチャ {{count}} 件…"
+		},
+		"ports": {
+			"title": "動いているもの",
+			"memory": "{{mb}} MB"
+		},
+		"docs": {
+			"title_other": "ドキュメント · {{count}}"
+		}
+	},
+	"missionGraph": {
+		"working": "作業中…",
+		"sentBack": "修正のため差し戻し",
+		"ticket": {
+			"eyebrow": "チケット",
+			"none": "チケットなし"
+		},
+		"master": {
+			"eyebrow": "リード",
+			"title": "ミッションを統括",
+			"awaitingYou": "あなたの判断待ち",
+			"idle": "待機中"
+		},
+		"task": {
+			"asksPermission": "あなたの許可を求めています",
+			"rejected": "作業を却下しました",
+			"delivered": "作業を提出しました",
+			"failed": "失敗",
+			"waiting": "順番待ち"
+		},
+		"pr": {
+			"eyebrow": "プルリクエスト",
+			"open": "オープン",
+			"toOpen": "作成予定",
+			"recomposing": "リードが統合中",
+			"onceVerified": "すべての確認が済んだら"
+		},
+		"phase": {
+			"done": "完了",
+			"live": "作業中",
+			"wait": "待機中",
+			"failed": "失敗",
+			"yours": "あなたの番"
+		},
+		"detail": {
+			"close": "閉じる",
+			"reproaches_other": "差し戻し · {{count}}",
+			"fullBrief": "指示の全文",
+			"follow": "会話を追う",
+			"noAgent": "このタスクにはまだエージェントがいません。"
+		}
+	},
+	"actions": {
+		"openTicket": "ブラウザでチケットを開く",
+		"openWorktreeNamed": "worktree {{name}} を開く",
+		"permanenceRevoked": "Permanence は今後 #{{number}} にコメントしません。",
+		"permanenceAllowed": "Permanence は #{{number}} で報告できます。1 日 1 回、署名付き。",
+		"noPrompt": "ライブラリにこのアクション用のプロンプトがありません：エージェントは指示なしで起動します。",
+		"openPr": "プルリクエスト #{{number}} を開く",
+		"fixCiHint": "CI を修正するエージェントを起動",
+		"fixCi": "CI を修正",
+		"feedbackHint": "エージェントでレビューの指摘に対応",
+		"feedback": "指摘対応",
+		"agentHint": "このブランチでエージェントを開く",
+		"agent": "エージェント",
+		"openWorktree": "このブランチの worktree を開く",
+		"allowedHint": "Permanence はここで報告できます。クリックで取り消し。",
+		"allowHint": "Permanence がここで報告することを許可（1 日 1 回、署名付き）。",
+		"allowed": "許可済み",
+		"allow": "許可"
+	},
+	"accounts": {
+		"notLoggedIn": "このマシンではまだサインインしていません。",
+		"loggedIn": "サインイン済み",
+		"nameRequired": "アカウントに名前を付けてください：それが区別になります。",
+		"nameTaken": "「{{label}}」という名前のアカウントがすでにあります。",
+		"loginTerminal": "サインイン — {{label}}",
+		"intro": "アカウントは、エージェントが作業するときの身元です — エージェントを動かすプログラムではありません（それはエンジンの役割です）。各アカウントには専用の設定フォルダがあり、Cockpit はそこを指し、CLI がそこで自らサインインします。トークンはここを通りません。アカウントに紐づいたプロジェクトは、エージェント、ターミナル、上限のすべてをそのアカウントで扱います。",
+		"loading": "各アカウントに身元を問い合わせ中…",
+		"openProject": "プロジェクトを開く",
+		"reconnect": "再度サインイン",
+		"connect": "サインイン",
+		"attach": "「{{name}}」を紐づける",
+		"remove": "削除",
+		"new": "新規",
+		"nameLabel": "名前",
+		"nameHint": "画面に表示される名前",
+		"namePlaceholder": "仕事用アカウント",
+		"dirLabel": "フォルダ",
+		"dirHint": "空欄 = ~/.claude-<名前>",
+		"dirPlaceholder": "~/.claude-work",
+		"add": "追加",
+		"footer": "フォルダはアカウント追加時に作成されます。その後のサインインは、手作業と同じくターミナルで行います。",
+		"reading": "読み取り中…",
+		"reload": "アカウントを再読み込み"
+	},
+	"briefBar": {
+		"chars": "{{value}} 文字",
+		"kchars": "{{value}}k 文字",
+		"loading": "Cockpit がこのブランチについて知っていることを集めています…",
+		"agentWillKnow": "エージェントが知ること",
+		"nothing": "あなたの指示以外には何もありません — 宣言されたソースはどれも応答しませんでした。",
+		"collapse": "折りたたむ",
+		"expand": "添付される内容を一字一句読む",
+		"refresh": "再度集める — ブランチが動いた可能性があります",
+		"missing": "読み取れませんでした：{{sources}}",
+		"clickToDetach": "{{detail}} — クリックで除外",
+		"clickToAttach": "{{detail}} — クリックで添付"
+	},
+	"fileFinder": {
+		"recent": "最近開いたもの",
+		"writtenByAgents": "エージェントが書き込んだもの",
+		"uncommitted": "変更済み、未コミット",
+		"files_other": "ファイル {{count}} 個",
+		"buttonHint": "この worktree のファイルを名前で開く（⌘P）",
+		"button": "ファイル",
+		"placeholder": "ファイル名 —「agentmap」「panel work」「apps/web env」",
+		"scanning": "リポジトリをスキャン中…",
+		"noMatch": "その名前のファイルはありません。",
+		"typeToSearch": "名前の一部を入力すると、リポジトリ全体を検索します。",
+		"total_other": "{{formatted}} ファイル",
+		"scanningShort": "リポジトリをスキャン中…",
+		"keys": "↑↓ で選択 · Enter で開く · ⌘P",
+		"whyAgent": "エージェントが書き込み",
+		"whyChanged": "変更済み"
+	},
+	"feedPanel": {
+		"sort": {
+			"recent": "新しい順",
+			"oldest": "古い順",
+			"severity": "重大度",
+			"status": "状態",
+			"title": "タイトル"
+		},
+		"severity": {
+			"critical": "重大",
+			"warning": "警告",
+			"info": "情報",
+			"success": "OK"
+		},
+		"sortHint": "表示順",
+		"filters": "フィルター",
+		"clearAll": "すべてクリア",
+		"empty": "表示するものはありません",
+		"selectItem": "項目を選択してください"
+	},
+	"illustration": {
+		"genre": {
+			"frise": "出来事の流れ",
+			"avant_apres": "変更前と変更後",
+			"mesure": "計測値",
+			"table": "変化する表",
+			"capture": "注釈付きスクリーンショット",
+			"matrice": "選択肢の比較"
+		},
+		"source": {
+			"mesure": "計測値",
+			"depot": "リポジトリで確認",
+			"capture": "キャプチャ",
+			"agent": "エージェントの申告"
+		},
+		"beforeGraph": "変更前：{{nodes}}",
+		"afterGraph": "変更後：{{nodes}}",
+		"before": "変更前",
+		"after": "変更後",
+		"beforeShort": "前",
+		"afterShort": "後",
+		"percent": "{{sign}}{{value}}%",
+		"noCommand": "コマンドが示されていません：これらの数値は再現できません。",
+		"enlarge": "原寸で表示",
+		"captureLabel": "スクリーンショット"
+	},
+	"linearIssue": {
+		"state": "状態",
+		"priority": "優先度",
+		"priorities": {
+			"urgent": "緊急",
+			"high": "高",
+			"medium": "中",
+			"low": "低",
+			"none": "—"
+		},
+		"priorityChanged": "優先度 {{priority}}",
+		"assignee": "担当者",
+		"unassigned": "未割り当て",
+		"nobody": "なし",
+		"assignedTo": "{{name}} に割り当て",
+		"labels": "ラベル",
+		"labelRemoved": "ラベル {{name}} を削除",
+		"labelAdded": "ラベル {{name}} を追加",
+		"noDescription": "説明なし。",
+		"comments": "コメント · {{count}}"
+	},
+	"missionHistory": {
+		"whatHappened": "起きたこと",
+		"agents_other": "エージェント {{count}} 件",
+		"loading": "読み取り中…",
+		"empty": "このミッションに記録されたエージェントはありません。Cockpit がこのログを保持しているのはバージョン 0.54 以降のみです：それ以前に実行されたものは含まれていません。",
+		"outcome": {
+			"running": "実行中",
+			"answered": "納品",
+			"failed": "失敗",
+			"lostAtLaunch": "起動時に消失",
+			"stopped": "停止",
+			"orphaned": "Cockpit 終了"
+		},
+		"actor": {
+			"me": "あなた",
+			"master": "リード",
+			"cockpit": "Cockpit",
+			"permanence": "Permanence"
+		},
+		"retry": "再試行 {{attempt}}",
+		"launchedBy": "{{model}} · {{who}} が起動",
+		"reportedHint": "エンジンが報告した値 — 支出ではありません。\n入力 {{input}} トークン、出力 {{output}}",
+		"unknownHint": "{{engine}} はターンのコストを報告しません。コストがゼロという意味ではなく、数値がないということです。",
+		"unknownCost": "コスト未報告",
+		"totalReported": "エンジンが報告した値であり、支出ではありません",
+		"totalLost": "うち {{amount}} $ は何も納品しなかったエージェントの分",
+		"totalUnknown_other": "コストが報告されていないターン {{count}} 件"
+	},
+	"viewBoundary": {
+		"failed": "「{{view}}」画面を表示できませんでした。",
+		"rest": "Cockpit の他の部分は動作しています — 他の画面にはメニューから移動でき、実行中のものは実行され続けます。",
+		"retry": "再試行"
+	},
+	"lightbox": {
+		"openInViewer": "ビューアでファイルを開く",
+		"close": "閉じる",
+		"previous": "前の画像",
+		"next": "次の画像"
+	},
+	"shellView": {
+		"pondering": "実行中のものなし — 出力を読んで次を考えています",
+		"noCommand": "この指示で実行されたコマンドはありません。",
+		"runningSince": "実行中<elapsed/> — コマンドが戻ると出力が届きます",
+		"running": "実行中 — コマンドが戻ると出力が届きます",
+		"interrupted": "応答前に中断されました",
+		"linesAbove_other": "… 上に {{count}} 行",
+		"noOutput": "（出力なし）",
+		"since": "{{duration}} 経過"
+	},
+	"pdfView": {
+		"page": "{{current}} / {{total}} ページ",
+		"zoomOut": "縮小",
+		"percent": "{{value}}%",
+		"zoomIn": "拡大",
+		"fitWidth": "ウィンドウ幅に合わせる"
+	},
+	"markdown": {
+		"loadImageFrom": "<host>{{host}}</host> から画像を読み込む",
+		"enlarge": "原寸で表示"
+	},
+	"charts": {
+		"trend_other": "{{count}} 点の推移",
+		"segment": "{{label}}：{{value}}"
+	},
+	"narration": {
+		"waitingForYou": "あなたの返答を待っています。",
+		"stopped": "停止しています。",
+		"thisAgent": "このエージェント",
+		"intro": "{{name}} の作業内容をお伝えします。{{where}}",
+		"mute": "音声をミュート",
+		"listenLive": "エージェントの作業をライブで聞く",
+		"listening": "再生中",
+		"listen": "聞く",
+		"elevenLabsFailed": "ElevenLabs が失敗したため、Mac の音声に切り替えました：{{reason}}",
+		"voiceAndRate": "音声と速度"
+	},
+	"voiceSettings": {
+		"engine": "エンジン",
+		"macVoice": "Mac の音声",
+		"elevenLabsHint": "最も人間らしい音声。ElevenLabs プランの文字数から消費されます。Claude や ChatGPT のサブスクリプションは、他のアプリケーションに音声を提供しません。",
+		"systemHint": "無料でオフライン。Premium 音声ならはるかに良くなります。",
+		"elevenLabsKey": "ElevenLabs キー",
+		"createKey": "キーを作成",
+		"keyStored": "Mac のキーチェーンに保存済み",
+		"removeKey": "削除",
+		"storeKey": "保存",
+		"voice": "音声",
+		"loadingVoices": "アカウントの音声を読み込み中…",
+		"libraryHint": "ElevenLabs ライブラリの音声で、あなたの言語のものが先に表示されます。ここに表示するには、ElevenLabs のサイト（Voice Library）で追加してください。",
+		"model": "モデル",
+		"browserVoice": "プレビューではブラウザの音声を使用。",
+		"noPremiumVoice": "Premium 音声がインストールされていません。ダウンロードしてください：システム設定 → アクセシビリティ → 読み上げコンテンツ → システムの声 → 声を管理。",
+		"rate": "速度",
+		"fallback": "Mac の音声に切り替えました：{{reason}}",
+		"sample": "カートの端数処理を修正して、テストを再実行しました。完了です：3 つのファイルを変更し、テストは通っています。",
+		"tryVoice": "この音声を試す",
+		"allSettings": "音声とアシスタントのすべての設定"
+	},
+	"promptLauncher": {
+		"myPrompts": "自分のプロンプト",
+		"openedInTerminal": "ターミナルで開きました：{{label}}",
+		"saved": "プロンプトを保存しました。",
+		"deleteTitle": "「{{label}}」を削除しますか？",
+		"delete": "削除",
+		"title": "エージェントを起動",
+		"reset": "デフォルトのライブラリに戻す",
+		"label": "ラベル",
+		"labelPlaceholder": "確認してからコミット + プッシュ",
+		"group": "グループ",
+		"groupHint": "デリバリー、レビュー、品質…",
+		"text": "エージェントに送るプロンプト",
+		"cancel": "キャンセル",
+		"save": "保存",
+		"openInTerminal": "代わりに Terminal.app で開く",
+		"new": "新しいプロンプト",
+		"footer": "クリックすると、ここでエージェントが起動し、会話と返信欄は Cockpit 内に表示されます。ターミナルアイコンなら Terminal.app で開きます（本物の TTY が必要な場合）。ライブラリは <path>{{path}}</path> にあります。"
+	},
+	"panelReport": {
+		"verdict": {
+			"ok": "OK",
+			"reserves": "留保あり",
+			"blocking": "ブロッキング"
+		},
+		"noVerdict": "判定なし",
+		"title": "相互検証",
+		"angles_other": "観点 {{count}} 件",
+		"agreed": "意見一致",
+		"disputes_other": "意見の相違 {{count}} 件",
+		"costHint": "この相互検証を API 料金で換算した場合のコスト。サブスクリプションでは課金されず、ウィンドウのクォータが消費されます。",
+		"severestWins": "1 つの観点だけで判定を決められます：何も見つけなかった 2 つの読み取りは、3 つ目が間違っていた証明にはなりません。",
+		"stale": "この相互検証以降にブランチが動きました。",
+		"silent": "応答なし：{{names}}",
+		"collapse": "意見を折りたたむ",
+		"expand": "各観点を読む",
+		"heldBy": "支持",
+		"against": "異議"
+	},
+	"reviewPanel": {
+		"title": "コードレビュー",
+		"verdict": {
+			"merge": "マージできます",
+			"corrections": "修正依頼",
+			"bloquant": "ブロッキング"
+		},
+		"severity": {
+			"bloquant": "ブロッキング",
+			"important": "重要",
+			"suggestion": "提案"
+		},
+		"check": {
+			"corrige": "修正済み",
+			"partiel": "一部修正",
+			"non_corrige": "未修正"
+		},
+		"round": "ラウンド {{number}}",
+		"roundVerification": "ラウンド {{number}} · 確認",
+		"commit": "コミット",
+		"recheck": "再確認",
+		"reviewAgainHint": "最初からの全体レビュー",
+		"reviewAgain": "再レビュー",
+		"pushedSince": "このラウンド以降に {{author}} がプッシュしました：PR はレビュー時のものではなくなっています。",
+		"theAuthor": "作成者",
+		"understand": "PR の理解",
+		"previousPoints": "以前の指摘",
+		"earlierPoint": "以前のラウンドの指摘",
+		"nothing": "このラウンドでは指摘はありません。",
+		"openFileAtLine": "この行でファイルを開く",
+		"openOnGitHub": "コメントを投稿するため、GitHub でこの行の PR を開く",
+		"posted": "投稿済み",
+		"fix": "修正",
+		"quoted": "「{{text}}」",
+		"copyComment": "コメントをコピー",
+		"copied": "コピーしました",
+		"copy": "コピー"
+	},
+	"resources": {
+		"gigabytes": "{{value}} GB",
+		"megabytes": "{{value}} MB",
+		"heaviest": "このサブツリーで最も重いプロセス：{{name}}",
+		"processesShort_other": "{{count}} プロセス",
+		"percent": "{{value}}%",
+		"title": "リソース使用量",
+		"subtitle": "Cockpit と、Cockpit が実行しているすべて",
+		"close": "閉じる（Esc）",
+		"appOnly": "Cockpit のみ",
+		"cpu": "CPU {{value}}%",
+		"withChildren": "子プロセスを含む",
+		"processes_other": "{{count}} プロセス · {{cpu}}%",
+		"machine": "マシン",
+		"machineShare": "Cockpit が {{value}}% を使用",
+		"agents": "エージェント",
+		"terminals": "ターミナル",
+		"footnote": "メモリの数値はプロセス間の共有分を考慮せずに合算しています：合計は正確な値ではなく上限です。インターフェース自体は、権限なしでは macOS が誰にも帰属させない WebKit プロセスで動いています — さらに約 60 MB を見込んでください。",
+		"spendNoQuota": "今日使用したトークン。CLI はクォータを報告しません。",
+		"spendLeft": "「{{window}}」の残り {{left}}%",
+		"spendLeftResets": "「{{window}}」の残り {{left}}%、{{resets}}にリセット",
+		"tickerHint": "Cockpit がマシンにかけている負荷"
+	},
+	"terminalView": {
+		"typeOnly": "実行せずに入力",
+		"runAsIs": "そのまま実行",
+		"mainRepo": "メインリポジトリ",
+		"scripts": "スクリプト",
+		"scriptsHint": "リポジトリのスクリプトとカスタムコマンド",
+		"noScripts": "このフォルダにスクリプトはありません。",
+		"footer": "コマンドはこのシェルに入力されてから実行されます — ⇧Enter は選んだ項目と逆の動作をします。"
+	}
+}

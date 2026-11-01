@@ -1,0 +1,297 @@
+{
+	"format": {
+		"justNow": "agora mesmo",
+		"bytes": "{{value}} B",
+		"kilobytes": "{{value}} KB",
+		"megabytes": "{{value}} MB"
+	},
+	"automations": {
+		"days": {
+			"mon": "Seg",
+			"tue": "Ter",
+			"wed": "Qua",
+			"thu": "Qui",
+			"fri": "Sex",
+			"sat": "Sáb",
+			"sun": "Dom"
+		},
+		"stamp": {
+			"today": "hoje {{time}}",
+			"tomorrow": "amanhã {{time}}",
+			"yesterday": "ontem {{time}}"
+		},
+		"rhythm": {
+			"none": "Nenhum dia selecionado",
+			"weekdays": "De segunda a sexta às {{time}}",
+			"everyDay": "Todos os dias às {{time}}",
+			"days": "{{days}} às {{time}}"
+		},
+		"run": {
+			"running": "Em execução",
+			"partial": "Parcial",
+			"failed": "Falhou",
+			"missed": "Perdida",
+			"caughtUp": "Recuperada",
+			"manual": "Manual",
+			"onTime": "No horário"
+		},
+		"source": {
+			"tracker": "Gerenciador de tarefas"
+		},
+		"event": {
+			"merged": "PR com merge",
+			"opened": "PR aberto",
+			"updated": "PR atualizado",
+			"reviewed": "PR revisado",
+			"done": "Ticket concluído",
+			"started": "Ticket iniciado",
+			"moved": "Ticket movido",
+			"canceled": "Ticket cancelado",
+			"agent": "Agentes",
+			"git": "Ação Git",
+			"resolved": "Erro resolvido",
+			"assigned": "Erro atribuído"
+		},
+		"markdown": {
+			"silent": "Sem resposta desta vez: {{sources}}."
+		}
+	},
+	"world": {
+		"regions": {
+			"arrive": {
+				"label": "Chegando",
+				"hint": "a triar"
+			},
+			"encours": {
+				"label": "Em andamento",
+				"hint": "você mantém o controle ou delega"
+			},
+			"livrer": {
+				"label": "Entregar",
+				"hint": "revisar e fazer o merge"
+			},
+			"prod": {
+				"label": "Em produção",
+				"hint": "o que isso muda"
+			}
+		}
+	},
+	"missions": {
+		"awaited": {
+			"understanding": "o agente principal leu o ticket · revise o que ele entendeu",
+			"approach": "uma abordagem aguarda sua aprovação",
+			"approval_one": "{{count}} tarefa · nada começa antes da sua aprovação",
+			"approval_other": "{{count}} tarefas · nada começa antes da sua aprovação"
+		},
+		"state": {
+			"understanding": "lendo o ticket",
+			"awaitingUnderstanding": "entendimento a confirmar",
+			"approaching": "abordagem",
+			"awaitingApproach": "abordagem a confirmar",
+			"planning": "divisão",
+			"awaitingApproval": "aguardando sua aprovação",
+			"running": "em andamento",
+			"integrating": "integração",
+			"done": "encerrada",
+			"failed": "interrompida"
+		}
+	},
+	"episodes": {
+		"gesture": {
+			"runs": "executa {{command}}",
+			"uses": "usa {{tool}}",
+			"usesATool": "usa uma ferramenta",
+			"edits": "edita {{file}}",
+			"editsAFile": "edita um arquivo",
+			"delegated": "delegou “{{description}}”",
+			"launchedSubagent": "lançou um subagente",
+			"reads": "lê {{file}}",
+			"searches": "busca {{query}}",
+			"browses": "navega em {{file}}"
+		}
+	},
+	"worktreeFlow": {
+		"title": "Worktree {{branch}}",
+		"creating": "Criando — dependências, banco de dados… isso pode levar alguns minutos.",
+		"timeout": "O worktree de {{branch}} não apareceu após 15 minutos.",
+		"ready": "Worktree pronto.",
+		"starting": "Iniciando a criação do worktree…",
+		"readyOpen": "Worktree pronto, seu workspace está aberto."
+	},
+	"types": {
+		"triggers": {
+			"ci_red": {
+				"label": "A CI fica vermelha",
+				"hint": "em uma alteração em andamento"
+			},
+			"review_changes_requested": {
+				"label": "Uma revisão pede alterações",
+				"hint": "em um PR aberto"
+			},
+			"pr_stale": {
+				"label": "Uma alteração parou de avançar",
+				"hint": "passado o prazo — drafts são ignorados"
+			},
+			"schedule": {
+				"label": "Em intervalo regular",
+				"hint": "sem sinal, pelo relógio — o único que dispara sem que nada aconteça"
+			},
+			"linear_assigned": {
+				"label": "Um ticket do Linear é atribuído a mim",
+				"hint": "dispara de novo se a prioridade mudar depois — a condição julga qual"
+			}
+		},
+		"commentScopes": {
+			"i_commented": "Já comentei neste PR",
+			"i_allowed": "Autorizei explicitamente este PR",
+			"hers": "o PR foi aberto pela Permanence",
+			"mine": "o PR é meu"
+		},
+		"powers": {
+			"rerun_pipeline": "Relançar um pipeline",
+			"create_branch": "Criar uma branch",
+			"open_draft_pr": "Abrir um PR em draft",
+			"set_label": "Adicionar um label",
+			"open_worktree": "Abrir um worktree",
+			"start_agent": "Lançar um agente",
+			"run_command": "Executar um comando do repositório",
+			"open_mission": "Abrir uma missão para escrever código"
+		},
+		"never": {
+			"review": "aprovar ou rejeitar uma revisão",
+			"assign": "atribuir",
+			"close": "fechar",
+			"merge": "fazer merge",
+			"deploy": "fazer deploy"
+		}
+	},
+	"proof": {
+		"defaultTitle": "demonstração do agente"
+	},
+	"remarks": {
+		"about": "Sobre {{anchor}}: {{text}}",
+		"intro": "Algumas observações sobre o seu trabalho:",
+		"outro": "Leve-as em conta daqui em diante; me diga se alguma delas parecer errada para você."
+	},
+	"activity": {
+		"unexplainedFailure": "Falhou sem explicação."
+	},
+	"ipc": {
+		"previewMissing": "Prévia: “{{command}}” não tem resposta de exemplo."
+	},
+	"footprint": {
+		"deleted_one": "{{count}} excluído",
+		"deleted_other": "{{count}} excluídos",
+		"created_one": "{{count}} criado",
+		"created_other": "{{count}} criados",
+		"modified_one": "{{count}} modificado",
+		"modified_other": "{{count}} modificados"
+	},
+	"chantier": {
+		"slices": {
+			"messages": "Conversa",
+			"memory": "Instruções do projeto",
+			"system": "Base da CLI",
+			"other": "Outros"
+		}
+	},
+	"illustrations": {
+		"source": {
+			"mesure": "medido",
+			"depot": "encontrado no repositório",
+			"capture": "capturado",
+			"agent": "declarado pelo agente"
+		}
+	},
+	"film": {
+		"caption": {
+			"read_one": "Lê {{count}} arquivo.",
+			"read_other": "Lê {{count}} arquivos.",
+			"think": "O que ele supõe.",
+			"edit": "Edita {{file}}.",
+			"testsPass": "Os testes passam.",
+			"testsFail": "Alguns testes falham.",
+			"fix": "Corrige {{file}}.",
+			"seeBrowser": "Verifica no navegador.",
+			"seeResult": "Olha o resultado.",
+			"deliver": "Entrega.",
+			"handBack": "Devolve o controle."
+		},
+		"deliver": {
+			"pushed": "Enviado: {{branch}}",
+			"branch": "branch {{branch}}"
+		},
+		"phase": {
+			"read": "leitura",
+			"edit": "edição",
+			"test": "teste",
+			"see": "verificação na tela",
+			"run": "comandos",
+			"agent": "subagentes"
+		}
+	},
+	"narrator": {
+		"cloudModels": {
+			"natural": "Natural",
+			"fast": "Rápido"
+		},
+		"rates": {
+			"calm": "Calmo",
+			"normal": "Normal",
+			"fast": "Rápido"
+		},
+		"then": "depois",
+		"wrapUp": {
+			"handsBack": "Pronto, ele está devolvendo para você.",
+			"changed_one": "ele alterou {{spoken}} arquivo",
+			"changed_other": "ele alterou {{spoken}} arquivos",
+			"testsFail": "os testes falham",
+			"testsPass": "os testes passam",
+			"doneBut": "Pronto: {{changed}}, mas {{tests}}.",
+			"doneAnd": "Pronto: {{changed}}, e {{tests}}.",
+			"done": "Pronto: {{what}}."
+		},
+		"progress": {
+			"changed_one": "Ainda trabalhando. Ele alterou {{spoken}} arquivo desde a sua instrução.",
+			"changed_other": "Ainda trabalhando. Ele alterou {{spoken}} arquivos desde a sua instrução.",
+			"exploring": "Ainda trabalhando, explorando o código."
+		},
+		"line": {
+			"subagent": "Ele está passando parte do trabalho para um subagente.",
+			"error": "Ele encontrou um erro.",
+			"testsFail": "Os testes falham.",
+			"testsPass": "Os testes passam.",
+			"question": "Ele precisa de você: está fazendo uma pergunta.",
+			"permission": "Ele está aguardando sua permissão para continuar."
+		}
+	},
+	"assistant": {
+		"keys": {
+			"space": "Espaço",
+			"arrow": "Seta {{direction}}"
+		}
+	},
+	"feedMeta": {
+		"type": "tipo",
+		"level": "nível",
+		"project": "projeto",
+		"author": "autor",
+		"assignee": "responsável",
+		"deployment": "deploy",
+		"attempt": "tentativa",
+		"version": "versão",
+		"run": "execução",
+		"task": "tarefa",
+		"environment": "ambiente",
+		"commit": "commit",
+		"event": "evento",
+		"branch": "branch",
+		"labels": "labels",
+		"reviewers": "revisores",
+		"priority": "prioridade",
+		"origin": "origem",
+		"url": "url",
+		"occurrences": "ocorrências",
+		"users": "usuários"
+	}
+}

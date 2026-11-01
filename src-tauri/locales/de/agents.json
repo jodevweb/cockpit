@@ -1,1 +1,389 @@
-{}
+{
+	"brief": {
+		"sources": {
+			"conventions": {
+				"label": "Die Regeln des Repositorys",
+				"hint": "wo das Repository seine Konventionen festhält, und die Skills, die es ablegt — eine Engine liest nur die Datei ihrer eigenen Familie"
+			},
+			"product": {
+				"label": "Was das Produkt tut",
+				"hint": "der Satz, der zum Lesen von Änderungen deklariert ist — ohne ihn spricht ein Agent nur über den Code"
+			},
+			"lessons": {
+				"label": "Das Projektnotizbuch",
+				"hint": "was schon von Hand nachgebessert werden musste, gefiltert auf die betroffenen Dateien"
+			},
+			"place": {
+				"label": "Der Branch und sein Zustand",
+				"hint": "Basis, Abweichung, nicht committete Dateien, letzte Commits — aus dem Repository gelesen, immer verfügbar"
+			},
+			"ticket": {
+				"label": "Das Ticket des Branch",
+				"hint": "die Anfrage und ihre Kommentare, aus dem deklarierten Tracker"
+			},
+			"review": {
+				"label": "Review-Feedback",
+				"hint": "Beschreibung und Diskussion des Merge Requests, der auf diesem Branch offen ist"
+			},
+			"attempts": {
+				"label": "Was schon versucht wurde",
+				"hint": "frühere Unterhaltungen in diesem Ordner, je eine Zeile"
+			}
+		},
+		"missing": {
+			"noFolder": "der Ordner existiert nicht",
+			"ticket": "Ticket {{id}} unlesbar ({{error}})",
+			"pullRequests": "Pull Requests unlesbar ({{error}})",
+			"pullRequest": "Pull Request #{{number}} unlesbar ({{error}})",
+			"mergeRequests": "Merge Requests unlesbar ({{error}})",
+			"mergeRequestNotes": "Diskussion von MR !{{iid}} unlesbar ({{error}})"
+		},
+		"sections": {
+			"product": {
+				"label": "Das Produkt",
+				"detail": "was das Team deklariert hat"
+			},
+			"lessons": {
+				"label": "Das Notizbuch"
+			},
+			"place": {
+				"label": "Der Branch",
+				"detail": "Zustand des Repositorys"
+			},
+			"ticket": {
+				"label": "Ticket {{identifier}}"
+			},
+			"review": {
+				"label": "Review {{reference}}",
+				"descriptionOnly": "nur Beschreibung"
+			},
+			"attempts": {
+				"label": "Versuche"
+			}
+		},
+		"count": {
+			"lessons_one": "{{count}} Lektion",
+			"lessons_other": "{{count}} Lektionen",
+			"feedback_one": "{{count}} Kommentar",
+			"feedback_other": "{{count}} Kommentare",
+			"conversations_one": "{{count}} Unterhaltung",
+			"conversations_other": "{{count}} Unterhaltungen",
+			"skills_one": "{{count}} Skill",
+			"skills_other": "{{count}} Skills",
+			"files_one": "{{count}} Datei",
+			"files_other": "{{count}} Dateien"
+		}
+	},
+	"impact": {
+		"errors": {
+			"folder": "Analyseordner: {{error}}",
+			"unreadable": "Analyse unlesbar: {{error}}",
+			"write": "Schreiben der Analyse: {{error}}",
+			"alreadyRunning": "Für diese Änderung läuft bereits eine Analyse.",
+			"changeGone": "Diese Änderung existiert nicht mehr: Der Pull Request wurde geschlossen oder der Branch ist weg.",
+			"noWorkdir": "Kein Ordner, in dem der Agent arbeiten kann."
+		},
+		"interrupted": {
+			"label": "Lesen durch das Schließen des Cockpits unterbrochen",
+			"detail": "Der Agent, der sie ausführt, stoppt mit der Anwendung. Starte sie in der Ansicht Wirkung neu."
+		},
+		"journal": {
+			"analysis": "Analyse einer Änderung"
+		},
+		"rawReportTitle": "Der Bericht"
+	},
+	"properties": {
+		"errors": {
+			"folder": "Eigenschaftenordner: {{error}}",
+			"serialize": "Serialisierung: {{error}}",
+			"write": "Schreiben: {{error}}",
+			"changeGone": "Diese Änderung existiert nicht mehr.",
+			"noneDeclared": "Dieses Projekt hat keine Eigenschaften deklariert. Schreib unter Einstellungen → Agenten, was wahr bleiben muss, oder lass dir vom Cockpit welche anhand deiner eigenen Korrekturen vorschlagen.",
+			"noneApplicable": "Keine der deklarierten Eigenschaften betrifft die Dateien dieser Änderung.",
+			"noWorkdir": "Kein Ordner, in dem die Agenten arbeiten können.",
+			"propertyGone": "Diese Eigenschaft existiert nicht mehr.",
+			"repoMissing": "Das Haupt-Repository dieses Projekts ist auf diesem Rechner nicht zu finden.",
+			"noFixesCalibration": "Keine erkennbare Korrektur in den letzten vierhundert Commits. Die Kalibrierung stützt sich auf Commits, die etwas beheben: Ohne sie lässt sich nicht sagen, ob diese Eigenschaft verletzt werden kann.",
+			"noFixesSuggest": "Keine erkennbare Korrektur in der jüngeren Historie: nichts, worauf sich repository-spezifische Eigenschaften stützen ließen.",
+			"nothingUsable": "Der Agent hat nichts Brauchbares vorgeschlagen. Versuch es erneut oder schreib die erste Eigenschaft selbst."
+		},
+		"judgeSilent": "Der Richter hat nicht geantwortet: {{error}}",
+		"journal": {
+			"label": "Eigenschaftsprüfung",
+			"broken": "{{count}} verletzt"
+		}
+	},
+	"team": {
+		"priority": {
+			"urgent": "Dringend",
+			"high": "Hoch",
+			"medium": "Mittel",
+			"low": "Niedrig"
+		},
+		"errors": {
+			"unknown": "Fehler",
+			"linear": "Linear: {{message}}",
+			"github": "GitHub: {{message}}",
+			"noMembers": "Keine Mitglieder deklariert: Füge das Team unter Einstellungen → Team hinzu. Jede Person braucht ihre Kennung im Aufgaben-Tracker, damit ihr die Tickets zugeordnet werden, und ihren GitHub-Login für ihre Pull Requests.",
+			"githubRepoMissing": "Trage `github.repo` (z. B. acme/monorepo) in den Einstellungen ein."
+		},
+		"narrative": {
+			"theirTopics": "ihre Themen",
+			"and": "{{list}} und {{last}}",
+			"activeTickets_one": "{{count}} aktives Ticket",
+			"activeTickets_other": "{{count}} aktive Tickets",
+			"reviewTickets_one": "{{count}} Ticket im Review",
+			"reviewTickets_other": "{{count}} Tickets im Review",
+			"openPrs_one": "{{count}} offener PR",
+			"openPrs_other": "{{count}} offene PRs",
+			"newOpenPrs_one": "{{count}} neuer PR geöffnet",
+			"newOpenPrs_other": "{{count}} neue PRs geöffnet",
+			"prs_one": "{{count}} PR",
+			"prs_other": "{{count}} PRs",
+			"blockingPoints_one": "{{count}} blockierender Punkt",
+			"blockingPoints_other": "{{count}} blockierende Punkte",
+			"nothingActiveDev": "{{name}} hat gerade nichts Aktives und keinen offenen PR.",
+			"nothingActive": "{{name}} hat hier kein aktives Thema erfasst.",
+			"variedTopics": "{{name}} kommt bei verschiedenen Themen voran{{load}}.",
+			"alsoOn": ", und außerdem {{themes}}",
+			"mostlyOn": "{{name}} arbeitet vor allem an {{theme}}{{tail}}{{load}}.",
+			"workingOn": "{{name}} arbeitet an {{themes}}{{load}}.",
+			"nothingMerged": "Seit dem letzten Daily nichts gemergt.",
+			"openedNothingMerged": "{{opened}} seit dem letzten Daily, noch nichts gemergt.",
+			"shippedOn": " zu {{themes}}",
+			"andOpened": ", und {{opened}}",
+			"shipped": "{{prs}}{{themes}} seit dem letzten Daily ausgeliefert{{opened}}.",
+			"toChallenge": "{{count}} zu hinterfragen",
+			"toReview": "{{prs}} für andere zu reviewen",
+			"nothingStuck": "Bei ihnen hängt nichts.",
+			"toWatch": "Im Blick behalten: {{items}}."
+		},
+		"days": "{{count}} T.",
+		"flags": {
+			"blockedOne": "{{id}} als Blocked markiert — was würde es freigeben?",
+			"blockedMany": "{{count}} Tickets als Blocked markiert ({{ids}}) — was würde sie freigeben?",
+			"stacked": "PR #{{number}} basiert auf `{{base}}` (nicht dev) — zuerst die Basis mergen?",
+			"ciFailing": "PR #{{number}} scheitert in der CI — vor Review/Merge beheben.",
+			"approved": "PR #{{number}} freigegeben, aber nicht gemergt — was blockiert den Merge?",
+			"changesRequested": "PR #{{number}}: Änderungen angefordert — Sache des Autors.",
+			"reviewStaleOne": "PR #{{number}} wartet seit {{age}} T. auf ein Review — einen Review-Slot finden?",
+			"reviewStaleMany": "{{count}} PRs warten seit >{{days}} T. auf ein Review ({{numbers}}, ältester {{age}} T.) — ein Review einplanen?",
+			"draftStale": "{{count}} PR(s) seit >{{days}} T. im Entwurf ({{numbers}}) — noch relevant?",
+			"inProgressNoPrOne": "{{id}} ist seit >{{days}} T. In Progress ohne PR — wie ist der Stand?",
+			"inProgressNoPrMany": "{{count}} Tickets seit >{{days}} T. In Progress ohne PR ({{ids}}) — wie ist der Stand?",
+			"reviewStale": "{{count}} Ticket(s) seit >{{days}} T. im Review ({{ids}}) — wartet auf wen?",
+			"wip": "{{count}} Tickets parallel In Progress — priorisieren / fokussieren?",
+			"assigneeMismatch": "{{issue}} ist {{name}} zugewiesen, aber von @{{author}} programmiert (PR #{{number}}) — neu zuweisen?",
+			"idleNothing": "kein offener PR und kein aktives Ticket — woran arbeitest du?",
+			"idleStale": "kein offener PR und aktive Tickets ohne jüngste Aktivität — verfügbar? blockiert?"
+		}
+	},
+	"automations": {
+		"errors": {
+			"serialize": "Automatisierungen: {{error}}",
+			"noName": "Gib ihr einen Namen.",
+			"badTime": "Die Uhrzeit wird HH:MM geschrieben, zum Beispiel 14:00.",
+			"unreadableAnswer": "Die Antwort des Agenten war nicht lesbar.",
+			"alreadyRunning": "Sie läuft bereits.",
+			"emptyCorrection": "Die Korrektur ist leer.",
+			"notFound": "Automatisierung nicht gefunden.",
+			"runNotFound": "Lauf nicht gefunden.",
+			"noOutput": "Dieser Lauf hat kein Ergebnis.",
+			"noChromium": "Für das PDF wird Chrome (oder ein Chromium-Browser) benötigt. Das Markdown lässt sich immer kopieren.",
+			"pdfTimeout": "Der Browser hat das PDF nicht innerhalb einer Minute gerendert.",
+			"pdfNotProduced": "PDF nicht erzeugt. {{detail}}",
+			"noSlackWebhook": "Trage den Slack-Webhook dieser Automatisierung in ihren Einstellungen ein.",
+			"slack": "Slack: {{error}}",
+			"slackRefused": "Slack hat abgelehnt: {{status}}"
+		},
+		"missed": {
+			"closedNoCatchUp": "Das Cockpit war zum geplanten Zeitpunkt geschlossen, und das Nachholen ist ausgeschaltet.",
+			"closedUntilAfter": "Das Cockpit war bis nach dem Termin geschlossen."
+		},
+		"items": {
+			"draft": "Entwurf",
+			"agentsIn": "Agenten in {{name}}",
+			"turns_one": "{{count}} Runde",
+			"turns_other": "{{count}} Runden",
+			"minutes": "{{count}} Min."
+		},
+		"sources": {
+			"noLinearToken": "kein Linear-Token in den Einstellungen",
+			"noSentryToken": "kein Sentry-Token in den Einstellungen",
+			"tracker": "Aufgaben-Tracker"
+		},
+		"nothingFound": "Im Zeitraum in den gelesenen Quellen nichts gefunden.",
+		"notify": {
+			"linesReady_one": "{{count}} Zeile fertig.",
+			"linesReady_other": "{{count}} Zeilen fertig.",
+			"silent": "Keine Antwort: {{sources}}.",
+			"ready": "{{name}} ist fertig",
+			"failed": "{{name}} wurde nicht abgeschlossen"
+		},
+		"render": {
+			"silent": "Diesmal keine Antwort: {{sources}}.",
+			"period": "Vom {{from}} bis {{to}}",
+			"slackPeriod": "vom {{from}} bis {{to}}"
+		}
+	},
+	"permanence": {
+		"closed": {
+			"disabled": "In den Einstellungen deaktiviert.",
+			"suspended": "Ausgesetzt. Laufende Einsätze werden beendet; kein neuer beginnt.",
+			"offHours": "Außerhalb der deklarierten Dienstzeiten.",
+			"capped": "Tageslimit erreicht. Morgen geht es weiter.",
+			"quota": "Geteiltes Kontingent unter der Untergrenze: Sie lässt dir Platz.",
+			"tripped": "Sicherung ausgelöst: zu viele Fehlschläge in Folge. Sie hat sich selbst gestoppt."
+		},
+		"verdict": {
+			"pending": "läuft",
+			"reached": "erreicht",
+			"missed": "verfehlt",
+			"offTopic": "am Thema vorbei",
+			"undecided": "nicht entscheidbar",
+			"rehearsed": "Probelauf"
+		},
+		"tripped": "{{count}} Fehlschläge in Folge. Letzter: {{last}}",
+		"journal": {
+			"breakerTripped": "Sicherung ausgelöst",
+			"emergencyStop": "Notstopp",
+			"undo": "Einsatz rückgängig gemacht",
+			"act": "Aktion: {{tool}}",
+			"missionOpened": "Mission von der Permanence eröffnet",
+			"rule": "Regel „{{rule}}“",
+			"ruleAwaiting": "Regel „{{rule}}“ — der Plan wartet auf deine Freigabe"
+		},
+		"halt": {
+			"requested": "Stopp angefordert.",
+			"cannotStop": "{{kind}} · {{what}} — das Cockpit weiß nicht, wie es das stoppen soll",
+			"summary": "{{stopped}} gestoppt, {{failed}} fehlgeschlagen"
+		},
+		"undo": {
+			"nothingProduced": "Es wurde nichts erzeugt: Es gibt nichts rückgängig zu machen.",
+			"cannotUndo": "Das Cockpit weiß nicht, wie es rückgängig machen soll: {{items}}. Von Hand zu erledigen.",
+			"engagementGone": "Dieser Einsatz existiert nicht mehr.",
+			"missionPaused": "Mission „{{name}}“ pausiert",
+			"missionFailed": "Mission „{{name}}“ — {{error}}",
+			"labelRemoved": "Label „{{label}}“ entfernt",
+			"labelFailed": "Label „{{label}}“ — {{error}}",
+			"labelNoTarget": "Label „{{label}}“ — Ziel unlesbar",
+			"cannotUndoKind": "{{kind}} · {{what}} — das Cockpit weiß nicht, wie es das rückgängig machen soll",
+			"step": "macht rückgängig, was getan wurde",
+			"stepResult": "{{undone}} rückgängig gemacht, {{failed}} widerstanden",
+			"summary": "{{undone}} rückgängig gemacht, {{failed}} fehlgeschlagen"
+		},
+		"signals": {
+			"clock": "Uhr",
+			"every": "{{rule}} — alle {{hours}} Std.",
+			"author": "Autor: {{author}}",
+			"reviewRequested": "Review angefragt bei: {{people}}",
+			"noPriority": "keine Priorität",
+			"assignedToMe": "mir zugewiesen · Priorität: {{priority}}"
+		},
+		"dropped": {
+			"noTrigger": "kein erkannter Auslöser",
+			"noActiveRule": "keine aktive Regel",
+			"noNode": "Triage nicht verfügbar: Node nicht gefunden",
+			"noAnswer": "die Triage hat nicht geantwortet: {{error}}",
+			"notDecided": "die Triage hat nicht entschieden",
+			"byTriage": "von der Triage verworfen",
+			"ruleGone": "die Regel „{{rule}}“ existiert nicht mehr"
+		},
+		"blind": {
+			"linear": "Linear: {{error}}",
+			"source": "{{source}}: {{message}}"
+		},
+		"cannotOpen": {
+			"running": "ein Einsatz läuft bereits (höchstens {{max}} gleichzeitig)",
+			"quarantined": "dieses Element wurde gerade behandelt; es wird {{hours}} Std. in Ruhe gelassen",
+			"dailyCap": "Tageslimit erreicht ({{max}} Einsätze)"
+		},
+		"oracle": {
+			"none": "Kein Orakel deklariert: Nichts kann sagen, ob das Ziel erreicht ist.",
+			"unknownKind": "Das Cockpit weiß nicht, wie es ein Orakel vom Typ „{{kind}}“ abfragen soll.",
+			"commandGone": "Der Befehl „{{id}}“ ist in diesem Repository nicht mehr deklariert.",
+			"commandSensitive": "„{{name}}“ ist als heikel markiert: Er kann nicht als Beweis dienen. Das Prüfen darf nichts verändern.",
+			"noRepo": "Kein lokales Repository, in dem der Befehl laufen kann.",
+			"commandOk": "`{{line}}` mit 0 beendet.",
+			"commandFailed": "`{{line}}` fehlgeschlagen ({{code}}). {{tail}}",
+			"commandNotLaunched": "`{{line}}` konnte nicht gestartet werden: {{error}}",
+			"commandTimeout": "`{{line}}` hat nach zehn Minuten nichts zurückgegeben.",
+			"forgesSilent": "Die Forges haben nicht geantwortet: {{error}}",
+			"changeGone": "Diese Änderung existiert nicht mehr: Sie wurde gemergt oder geschlossen.",
+			"ciGreen": "CI ist grün.",
+			"ciRed": "CI ist noch rot.",
+			"ciPending": "CI ist noch nicht abgeschlossen (Zustand: {{state}}).",
+			"noGithubAccount": "Das GitHub-Konto konnte nicht ermittelt werden (`gh` fehlt oder nicht angemeldet).",
+			"commented": "Ein Kommentar von {{me}} wurde auf #{{number}} gepostet.",
+			"notCommented": "Kein Kommentar von {{me}} auf #{{number}}.",
+			"githubSilent": "GitHub hat nicht geantwortet: {{error}}",
+			"checkFailed": "Die Prüfung ist fehlgeschlagen: {{error}}",
+			"propertyNotApplicable": "Die Eigenschaft „{{id}}“ gilt nicht für diese Änderung."
+		},
+		"errors": {
+			"notPullRequest": "Diese Änderung ist kein Pull Request."
+		},
+		"engagement": {
+			"noNode": "Node ist nicht zu finden: Der Agent konnte seine Absicht nicht deklarieren, und ein aus Text gelesener Plan ist kein Plan.",
+			"agentSilent": "Der Agent hat nicht geantwortet: {{error}}",
+			"agentSilentShort": "der Agent hat nicht geantwortet",
+			"noIntent": "Der Agent hat keine Absicht deklariert. Ohne formulierbares Ziel geht nichts raus.",
+			"noIntentShort": "keine Absicht deklariert",
+			"planned": "geplant, nicht ausgeführt",
+			"plannedWhy": "geplant — {{why}}",
+			"openMissionStep": "eine Mission eröffnen",
+			"openMissionWhy": "es muss Code geschrieben werden: Die Arbeit läuft über eine Mission",
+			"rehearsed": "Probelauf: Der Plan ist geschrieben, nichts wurde getan.",
+			"missionNotAllowed": "Es hätte Code geschrieben werden müssen, und „eine Mission eröffnen“ steht nicht auf der Erlaubnisliste. Nichts wurde getan.",
+			"sharedBranch": "Der Integrations-Branch wäre „{{branch}}“, der geteilt ist. Nichts wurde getan.",
+			"missionOpenedStep": "eröffnet eine Mission",
+			"missionName": "Mission „{{name}}“",
+			"awaitingApprovalStep": "wartet auf deine Freigabe",
+			"awaitingApprovalWhy": "diese Regel verlangt erneut die menschliche Freigabe: Der Plan wartet",
+			"missionFailed": "Die Mission konnte nicht eröffnet werden: {{error}}",
+			"missionFailedShort": "Mission konnte nicht eröffnet werden",
+			"resolvedWithoutActs": "{{why}} Keine Aktion wurde angefordert: Die Lage hat sich ohne sie gelöst.",
+			"resolvedAllRefused": "{{why}} Keine Aktion konnte ausgeführt werden: Nicht sie hat das erledigt.",
+			"someRefused": "{{why}} {{count}} Aktion(en) abgelehnt.",
+			"missionGone": "Die Mission ist verschwunden: unmöglich zu sagen, was aus ihr wurde.",
+			"missionGoneShort": "Mission verschwunden",
+			"missionFailedNote": "Die Mission ist gescheitert. {{note}}",
+			"askOracle": "fragt das Orakel ab"
+		},
+		"acts": {
+			"notAllowed": "„{{power}}“ steht nicht auf der Erlaubnisliste: Die Aktion wurde nicht ausgeführt.",
+			"sharedBranch": "„{{branch}}“ ist ein geteilter Branch: Die Permanence schreibt nie darauf. Sie arbeitet nur auf eigenen Branches.",
+			"noBranch": "Der Branch dieser Änderung ist nicht zu finden.",
+			"rerun": "Lauf #{{id}} neu gestartet",
+			"noLabel": "Kein Label angefordert.",
+			"labelSet": "Label „{{label}}“ gesetzt",
+			"labelOn": "{{label}} auf #{{number}}",
+			"commandUnknown": "Der Befehl „{{id}}“ ist nicht deklariert.",
+			"commandSensitive": "„{{name}}“ ist als heikel markiert: Er läuft nicht ohne dich.",
+			"noBranchName": "Kein Branch-Name angefordert.",
+			"sharedBranchName": "„{{name}}“ ist ein geteilter Branch-Name: Sie nimmt ihn nicht.",
+			"noRepo": "Kein lokales Repository.",
+			"branchCreated": "Branch „{{name}}“ angelegt",
+			"noWorktreeBranch": "Kein Branch für den Worktree.",
+			"sharedWorktree": "„{{branch}}“ ist ein geteilter Branch: Sie checkt ihn nicht als Worktree aus, sonst würde ein Agent bei der nächsten Aktion darauf schreiben.",
+			"worktreeByAgent": "Das Anlegen eines Worktree läuft über einen Agenten-Befehl: Es braucht jemanden vor Ort.",
+			"worktreeOpened": "Worktree von „{{branch}}“ ausgecheckt",
+			"lineFailed": "`{{line}}` fehlgeschlagen: {{error}}",
+			"draftOpened": "Entwurfs-PR geöffnet: {{url}}",
+			"draftLabel": "Entwurf · {{branch}}",
+			"noWorktree": "Der Branch „{{branch}}“ ist nicht als Worktree ausgecheckt: Ein im Haupt-Repository gestarteter Agent würde dort schreiben, wo du arbeitest.",
+			"needsApp": "Einen Agenten zu starten braucht die Anwendung: Er startet nicht von einem Prüfstand aus.",
+			"agentOn": "Agent auf {{branch}}",
+			"agentStarted": "Agent in {{worktree}} gestartet",
+			"noText": "Kein Text zu schreiben.",
+			"commented": "Kommentar gepostet, signiert",
+			"commentOn": "Kommentar auf #{{number}}",
+			"unknown": "Das Cockpit weiß nicht, wie es „{{tool}}“ ausführen soll."
+		},
+		"comment": {
+			"disabled": "Die Befugnis zu kommentieren ist nicht aktiviert.",
+			"noScopes": "Keine Bedingung ist angehakt: Sie kommentiert absichtlich nirgends.",
+			"noCondition": "Keine Bedingung ist auf #{{number}} erfüllt: Sie darf dort nicht schreiben."
+		}
+	}
+}

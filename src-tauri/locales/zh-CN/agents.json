@@ -1,1 +1,376 @@
-{}
+{
+	"brief": {
+		"sources": {
+			"conventions": {
+				"label": "仓库的规则",
+				"hint": "仓库记录其规范的位置，以及它存放的技能 — 每个引擎只读取属于自己体系的文件"
+			},
+			"product": {
+				"label": "产品做什么",
+				"hint": "为解读变更而声明的一句话 — 没有它，智能体只会谈论代码"
+			},
+			"lessons": {
+				"label": "项目笔记",
+				"hint": "过去不得不手动重做的内容，按涉及的文件筛选"
+			},
+			"place": {
+				"label": "分支及其状态",
+				"hint": "基础分支、分歧、未提交的文件、最近的提交 — 读取自仓库，始终可用"
+			},
+			"ticket": {
+				"label": "分支对应的工单",
+				"hint": "需求及其评论，来自声明的任务跟踪工具"
+			},
+			"review": {
+				"label": "代码审查反馈",
+				"hint": "在此分支上创建的合并请求的描述和讨论"
+			},
+			"attempts": {
+				"label": "已经尝试过的内容",
+				"hint": "此文件夹中过去的对话，每个一行"
+			}
+		},
+		"missing": {
+			"noFolder": "文件夹不存在",
+			"ticket": "无法读取工单 {{id}}（{{error}}）",
+			"pullRequests": "无法读取 pull request（{{error}}）",
+			"pullRequest": "无法读取 pull request #{{number}}（{{error}}）",
+			"mergeRequests": "无法读取合并请求（{{error}}）",
+			"mergeRequestNotes": "无法读取 MR !{{iid}} 的讨论（{{error}}）"
+		},
+		"sections": {
+			"product": {
+				"label": "产品",
+				"detail": "团队的声明"
+			},
+			"lessons": {
+				"label": "笔记"
+			},
+			"place": {
+				"label": "分支",
+				"detail": "仓库状态"
+			},
+			"ticket": {
+				"label": "工单 {{identifier}}"
+			},
+			"review": {
+				"label": "代码审查 {{reference}}",
+				"descriptionOnly": "仅描述"
+			},
+			"attempts": {
+				"label": "尝试记录"
+			}
+		},
+		"count": {
+			"lessons_other": "{{count}} 条经验",
+			"feedback_other": "{{count}} 条评论",
+			"conversations_other": "{{count}} 个对话",
+			"skills_other": "{{count}} 个技能",
+			"files_other": "{{count}} 个文件"
+		}
+	},
+	"impact": {
+		"errors": {
+			"folder": "分析文件夹：{{error}}",
+			"unreadable": "无法读取的分析：{{error}}",
+			"write": "写入分析：{{error}}",
+			"alreadyRunning": "针对此变更的分析已在运行。",
+			"changeGone": "此变更已不存在：pull request 已关闭，或分支已被删除。",
+			"noWorkdir": "没有可供智能体工作的文件夹。"
+		},
+		"interrupted": {
+			"label": "由于 Cockpit 关闭，阅读已中断",
+			"detail": "执行该分析的智能体会随应用一起停止。请在“影响”界面中重新启动。"
+		},
+		"journal": {
+			"analysis": "变更分析"
+		},
+		"rawReportTitle": "报告"
+	},
+	"properties": {
+		"errors": {
+			"folder": "属性文件夹：{{error}}",
+			"serialize": "序列化：{{error}}",
+			"write": "写入：{{error}}",
+			"changeGone": "此变更已不存在。",
+			"noneDeclared": "该项目尚未声明任何属性。请在“设置 → 智能体”中写下必须始终成立的内容，或让 Cockpit 根据你自己的修复提出建议。",
+			"noneApplicable": "声明的属性都与此变更中的文件无关。",
+			"noWorkdir": "没有可供智能体工作的文件夹。",
+			"propertyGone": "该属性已不存在。",
+			"repoMissing": "在本机上找不到该项目的主仓库。",
+			"noFixesCalibration": "最近四百个提交中没有可识别的修复。校准依赖于修复问题的提交：没有它们，就无法判断该属性是否可能失效。",
+			"noFixesSuggest": "最近的历史中没有可识别的修复：没有依据来建议特定于此仓库的属性。",
+			"nothingUsable": "智能体没有给出可用的建议。请重试，或自己写下第一个属性。"
+		},
+		"judgeSilent": "评判者没有回应：{{error}}",
+		"journal": {
+			"label": "属性检查",
+			"broken": "{{count}} 个被破坏"
+		}
+	},
+	"team": {
+		"priority": {
+			"urgent": "紧急",
+			"high": "高",
+			"medium": "中",
+			"low": "低"
+		},
+		"errors": {
+			"unknown": "错误",
+			"linear": "Linear：{{message}}",
+			"github": "GitHub：{{message}}",
+			"noMembers": "未声明任何成员：请在“设置 → 团队”中添加团队。每个人都需要其任务跟踪工具的标识符，以便关联其工单，以及其 GitHub 登录名，以便关联其 pull request。",
+			"githubRepoMissing": "请在设置中填写 `github.repo`（例如 acme/monorepo）。"
+		},
+		"narrative": {
+			"theirTopics": "其负责的主题",
+			"and": "{{list}}和{{last}}",
+			"activeTickets_other": "{{count}} 个活跃工单",
+			"reviewTickets_other": "{{count}} 个审查中的工单",
+			"openPrs_other": "{{count}} 个打开的 PR",
+			"newOpenPrs_other": "新创建了 {{count}} 个 PR",
+			"prs_other": "{{count}} 个 PR",
+			"blockingPoints_other": "{{count}} 个阻塞问题",
+			"nothingActiveDev": "{{name}} 目前没有活跃的工作，也没有打开的 PR。",
+			"nothingActive": "{{name}} 在此没有被跟踪的活跃主题。",
+			"variedTopics": "{{name}} 正在推进多个不同主题{{load}}。",
+			"alsoOn": "，同时还有{{themes}}",
+			"mostlyOn": "{{name}} 主要在做{{theme}}{{tail}}{{load}}。",
+			"workingOn": "{{name}} 正在做{{themes}}{{load}}。",
+			"nothingMerged": "自上次站会以来没有合并任何内容。",
+			"openedNothingMerged": "自上次站会以来{{opened}}，尚未合并任何内容。",
+			"shippedOn": "，涉及{{themes}}",
+			"andOpened": "，并且{{opened}}",
+			"shipped": "自上次站会以来交付了 {{prs}}{{themes}}{{opened}}。",
+			"toChallenge": "{{count}} 项待质询",
+			"toReview": "{{prs}} 待为他人审查",
+			"nothingStuck": "其这边没有卡住的事项。",
+			"toWatch": "需关注：{{items}}。"
+		},
+		"days": "{{count}}天",
+		"flags": {
+			"blockedOne": "{{id}} 被标记为“已阻塞” — 怎样才能解除阻塞？",
+			"blockedMany": "{{count}} 个工单被标记为“已阻塞”（{{ids}}）— 怎样才能解除阻塞？",
+			"stacked": "PR #{{number}} 基于 `{{base}}`（而非 dev）— 先合并基础分支？",
+			"ciFailing": "PR #{{number}} 的 CI 失败 — 请在审查/合并前修复。",
+			"approved": "PR #{{number}} 已批准但未合并 — 是什么阻碍了合并？",
+			"changesRequested": "PR #{{number}}：被要求修改 — 待作者处理。",
+			"reviewStaleOne": "PR #{{number}} 已等待审查 {{age}} 天 — 能否安排时间审查？",
+			"reviewStaleMany": "{{count}} 个 PR 等待审查超过 {{days}} 天（{{numbers}}，最久 {{age}} 天）— 安排一次审查？",
+			"draftStale": "{{count}} 个 PR 处于草稿状态超过 {{days}} 天（{{numbers}}）— 是否仍然需要？",
+			"inProgressNoPrOne": "{{id}} 处于“进行中”超过 {{days}} 天且没有 PR — 进展如何？",
+			"inProgressNoPrMany": "{{count}} 个工单处于“进行中”超过 {{days}} 天且没有 PR（{{ids}}）— 进展如何？",
+			"reviewStale": "{{count}} 个工单处于审查中超过 {{days}} 天（{{ids}}）— 在等谁？",
+			"wip": "{{count}} 个工单同时处于“进行中” — 需要排优先级 / 重新聚焦吗？",
+			"assigneeMismatch": "{{issue}} 分配给了 {{name}}，但由 @{{author}} 编写代码（PR #{{number}}）— 是否重新分配？",
+			"idleNothing": "没有打开的 PR，也没有活跃工单 — 你在做什么？",
+			"idleStale": "没有打开的 PR，活跃工单近期也没有动态 — 有空吗？被阻塞了吗？"
+		}
+	},
+	"automations": {
+		"errors": {
+			"serialize": "自动化：{{error}}",
+			"noName": "请为其命名。",
+			"badTime": "时间格式为 HH:MM，例如 14:00。",
+			"unreadableAnswer": "无法读取智能体的回答。",
+			"alreadyRunning": "它已在运行。",
+			"emptyCorrection": "修正内容为空。",
+			"notFound": "找不到该自动化。",
+			"runNotFound": "找不到该次运行。",
+			"noOutput": "该次运行没有输出。",
+			"noChromium": "生成 PDF 需要 Chrome（或基于 Chromium 的浏览器）。Markdown 始终可以复制。",
+			"pdfTimeout": "浏览器在一分钟内未能生成 PDF。",
+			"pdfNotProduced": "未生成 PDF。{{detail}}",
+			"noSlackWebhook": "请在此自动化的设置中填写 Slack webhook。",
+			"slack": "Slack：{{error}}",
+			"slackRefused": "Slack 拒绝：{{status}}"
+		},
+		"missed": {
+			"closedNoCatchUp": "预定时间时 Cockpit 处于关闭状态，且补跑已关闭。",
+			"closedUntilAfter": "Cockpit 一直关闭到会议结束之后。"
+		},
+		"items": {
+			"draft": "草稿",
+			"agentsIn": "{{name}} 中的智能体",
+			"turns_other": "{{count}} 个回合",
+			"minutes": "{{count}} 分钟"
+		},
+		"sources": {
+			"noLinearToken": "设置中没有 Linear 令牌",
+			"noSentryToken": "设置中没有 Sentry 令牌",
+			"tracker": "任务跟踪工具"
+		},
+		"nothingFound": "在所读取的来源中，该时段内没有发现任何内容。",
+		"notify": {
+			"linesReady_other": "{{count}} 行已就绪。",
+			"silent": "没有回应：{{sources}}。",
+			"ready": "{{name}} 已就绪",
+			"failed": "{{name}} 未能完成"
+		},
+		"render": {
+			"silent": "本次没有回应：{{sources}}。",
+			"period": "从 {{from}} 到 {{to}}",
+			"slackPeriod": "从 {{from}} 到 {{to}}"
+		}
+	},
+	"permanence": {
+		"closed": {
+			"disabled": "已在设置中禁用。",
+			"suspended": "已暂停。进行中的介入会完成；不会开始新的介入。",
+			"offHours": "不在声明的值守时间内。",
+			"capped": "已达到每日上限。明天将重新开始。",
+			"quota": "共享配额低于下限：为你留出余量。",
+			"tripped": "熔断：连续失败次数过多。它已自行停止。"
+		},
+		"verdict": {
+			"pending": "进行中",
+			"reached": "已达成",
+			"missed": "未达成",
+			"offTopic": "偏题",
+			"undecided": "无法判定",
+			"rehearsed": "演练"
+		},
+		"tripped": "连续 {{count}} 次失败。最后一次：{{last}}",
+		"journal": {
+			"breakerTripped": "熔断已触发",
+			"emergencyStop": "紧急停止",
+			"undo": "介入已撤销",
+			"act": "操作：{{tool}}",
+			"missionOpened": "Permanence 创建了任务",
+			"rule": "规则“{{rule}}”",
+			"ruleAwaiting": "规则“{{rule}}”— 计划等待你批准"
+		},
+		"halt": {
+			"requested": "已请求停止。",
+			"cannotStop": "{{kind}} · {{what}} — Cockpit 不知道如何停止它",
+			"summary": "{{stopped}} 个已停止，{{failed}} 个失败"
+		},
+		"undo": {
+			"nothingProduced": "没有产生任何内容：无需撤销。",
+			"cannotUndo": "Cockpit 不知道如何撤销：{{items}}。需手动处理。",
+			"engagementGone": "该介入已不存在。",
+			"missionPaused": "任务“{{name}}”已暂停",
+			"missionFailed": "任务“{{name}}”— {{error}}",
+			"labelRemoved": "标签“{{label}}”已移除",
+			"labelFailed": "标签“{{label}}”— {{error}}",
+			"labelNoTarget": "标签“{{label}}”— 无法读取目标",
+			"cannotUndoKind": "{{kind}} · {{what}} — Cockpit 不知道如何撤销它",
+			"step": "撤销已执行的操作",
+			"stepResult": "{{undone}} 个已撤销，{{failed}} 个无法撤销",
+			"summary": "{{undone}} 个已撤销，{{failed}} 个失败"
+		},
+		"signals": {
+			"clock": "时钟",
+			"every": "{{rule}} — 每 {{hours}} 小时",
+			"author": "作者：{{author}}",
+			"reviewRequested": "请求审查：{{people}}",
+			"noPriority": "无优先级",
+			"assignedToMe": "分配给我 · 优先级：{{priority}}"
+		},
+		"dropped": {
+			"noTrigger": "没有可识别的触发条件",
+			"noActiveRule": "没有生效的规则",
+			"noNode": "无法分诊：找不到 Node",
+			"noAnswer": "分诊没有给出回答：{{error}}",
+			"notDecided": "分诊未作出决定",
+			"byTriage": "已被分诊排除",
+			"ruleGone": "规则“{{rule}}”已不存在"
+		},
+		"blind": {
+			"linear": "Linear：{{error}}",
+			"source": "{{source}}：{{message}}"
+		},
+		"cannotOpen": {
+			"running": "已有一个介入在进行中（同时最多 {{max}} 个）",
+			"quarantined": "该项刚刚处理过；接下来 {{hours}} 小时内不会再处理",
+			"dailyCap": "已达到每日上限（{{max}} 次介入）"
+		},
+		"oracle": {
+			"none": "未声明判定依据：无法判断目标是否达成。",
+			"unknownKind": "Cockpit 不知道如何查询“{{kind}}”类型的判定依据。",
+			"commandGone": "命令“{{id}}”已不再在此仓库中声明。",
+			"commandSensitive": "“{{name}}”被标记为敏感：它不能作为证据。检查不得改变任何东西。",
+			"noRepo": "没有可运行命令的本地仓库。",
+			"commandOk": "`{{line}}` 以 0 退出。",
+			"commandFailed": "`{{line}}` 失败（{{code}}）。{{tail}}",
+			"commandNotLaunched": "无法启动 `{{line}}`：{{error}}",
+			"commandTimeout": "`{{line}}` 在十分钟后仍未返回任何内容。",
+			"forgesSilent": "代码托管平台没有回应：{{error}}",
+			"changeGone": "此变更已不存在：它已被合并或关闭。",
+			"ciGreen": "CI 已通过。",
+			"ciRed": "CI 仍然失败。",
+			"ciPending": "CI 尚未得出结论（状态：{{state}}）。",
+			"noGithubAccount": "无法确定 GitHub 账户（缺少 `gh` 或未登录）。",
+			"commented": "{{me}} 已在 #{{number}} 上发表评论。",
+			"notCommented": "{{me}} 未在 #{{number}} 上发表评论。",
+			"githubSilent": "GitHub 没有回应：{{error}}",
+			"checkFailed": "检查失败：{{error}}",
+			"propertyNotApplicable": "属性“{{id}}”不适用于此变更。"
+		},
+		"errors": {
+			"notPullRequest": "此变更不是 pull request。"
+		},
+		"engagement": {
+			"noNode": "找不到 Node：智能体无法声明其意图，而从文本中读出的计划不算计划。",
+			"agentSilent": "智能体没有回应：{{error}}",
+			"agentSilentShort": "智能体没有回应",
+			"noIntent": "智能体没有声明意图。没有可陈述的目标，就不会对外执行任何操作。",
+			"noIntentShort": "未声明意图",
+			"planned": "已计划，未执行",
+			"plannedWhy": "已计划 — {{why}}",
+			"openMissionStep": "创建任务",
+			"openMissionWhy": "需要编写代码：工作将通过任务进行",
+			"rehearsed": "演练：计划已写好，未执行任何操作。",
+			"missionNotAllowed": "本需要编写代码，但“创建任务”不在允许列表中。未执行任何操作。",
+			"sharedBranch": "集成分支将是“{{branch}}”，而它是共享分支。未执行任何操作。",
+			"missionOpenedStep": "创建任务",
+			"missionName": "任务“{{name}}”",
+			"awaitingApprovalStep": "等待你批准",
+			"awaitingApprovalWhy": "该规则要求再次经过人工把关：计划正在等待",
+			"missionFailed": "无法创建任务：{{error}}",
+			"missionFailedShort": "无法创建任务",
+			"resolvedWithoutActs": "{{why}} 没有请求任何操作：情况已自行解决。",
+			"resolvedAllRefused": "{{why}} 无法执行任何操作：解决问题的并不是它。",
+			"someRefused": "{{why}} {{count}} 个操作被拒绝。",
+			"missionGone": "任务已消失：无法得知其结果。",
+			"missionGoneShort": "任务已消失",
+			"missionFailedNote": "任务失败。{{note}}",
+			"askOracle": "查询判定依据"
+		},
+		"acts": {
+			"notAllowed": "“{{power}}”不在允许列表中：未执行该操作。",
+			"sharedBranch": "“{{branch}}”是共享分支：Permanence 从不向其写入。它只在自己的分支上工作。",
+			"noBranch": "找不到此变更的分支。",
+			"rerun": "运行 #{{id}} 已重新启动",
+			"noLabel": "未请求任何标签。",
+			"labelSet": "已设置标签“{{label}}”",
+			"labelOn": "#{{number}} 上的 {{label}}",
+			"commandUnknown": "命令“{{id}}”未声明。",
+			"commandSensitive": "“{{name}}”被标记为敏感：没有你在场就不会运行。",
+			"noBranchName": "未请求分支名称。",
+			"sharedBranchName": "“{{name}}”是共享分支名称：不会使用它。",
+			"noRepo": "没有本地仓库。",
+			"branchCreated": "已创建分支“{{name}}”",
+			"noWorktreeBranch": "worktree 没有分支。",
+			"sharedWorktree": "“{{branch}}”是共享分支：不会将其检出为 worktree，否则智能体会在下一次操作时向其写入。",
+			"worktreeByAgent": "创建 worktree 需通过智能体命令：需要有人在场。",
+			"worktreeOpened": "已检出“{{branch}}”的 worktree",
+			"lineFailed": "`{{line}}` 失败：{{error}}",
+			"draftOpened": "已创建草稿 PR：{{url}}",
+			"draftLabel": "草稿 · {{branch}}",
+			"noWorktree": "分支“{{branch}}”未检出为 worktree：在主仓库中启动的智能体会写入你正在工作的地方。",
+			"needsApp": "启动智能体需要应用程序：无法从测试台启动。",
+			"agentOn": "{{branch}} 上的智能体",
+			"agentStarted": "已在 {{worktree}} 中启动智能体",
+			"noText": "没有要写入的文本。",
+			"commented": "评论已发布，已署名",
+			"commentOn": "#{{number}} 上的评论",
+			"unknown": "Cockpit 不知道如何执行“{{tool}}”。"
+		},
+		"comment": {
+			"disabled": "评论权限未启用。",
+			"noScopes": "没有勾选任何条件：按设计，它不会在任何地方评论。",
+			"noCondition": "#{{number}} 上没有任何条件成立：不允许在此处写入。"
+		}
+	}
+}

@@ -1,0 +1,1098 @@
+{
+	"agentChat": {
+		"builtIn": {
+			"agents": "利用可能なサブエージェントを管理",
+			"clear": "空の会話からやり直す",
+			"compact": "スレッドを要約してコンテキストを空ける",
+			"config": "CLI の設定",
+			"context": "コンテキスト使用量の内訳",
+			"doctor": "インストールを確認",
+			"effort": "推論の強度を設定",
+			"fast": "高速モードを切り替え",
+			"init": "リポジトリの CLAUDE.md を作成",
+			"insights": "使用状況の統計",
+			"mcp": "MCP サーバーの状態",
+			"model": "モデルを切り替え",
+			"recap": "直前に行ったことの要約",
+			"reloadSkills": "ディスクからスキルを再読み込み",
+			"rename": "会話の名前を変更",
+			"review": "プルリクエストをレビュー",
+			"securityReview": "保留中の変更のセキュリティレビュー",
+			"usage": "使用量と上限",
+			"usageCredits": "残りのクレジット"
+		},
+		"scope": {
+			"project": "リポジトリ",
+			"user": "個人",
+			"plugin": "プラグイン",
+			"cli": "CLI"
+		},
+		"commandMenu": {
+			"loading": "コマンドを読み込み中…",
+			"empty": "この worktree にはコマンドがありません。",
+			"emptyHint": "リポジトリに <mono>.claude/commands/review.md</mono> ファイルを置くと <mono>/review</mono> が使えます。<mono>~/.claude/commands/</mono> に置くと、どこでも使えます。",
+			"help": "↑↓ で選択 · Tab または ⏎ で補完 · Esc で自由入力"
+		},
+		"attachment": {
+			"open": "{{target}}\nクリックして開く"
+		},
+		"finished": "{{label}} が終了しました",
+		"tour": {
+			"visit": "変更を見て回る",
+			"title": "変更をファイルごとに見て回る",
+			"label": "ツアー"
+		},
+		"permission": {
+			"asks": "エージェントが <tool>{{tool}}</tool> を使おうとしています",
+			"deny": "拒否",
+			"allow": "許可",
+			"allowAll": "すべて",
+			"allowAllTitle": "今後は確認しない"
+		},
+		"guard": {
+			"onTitle": "すべて確認なしで許可されています — クリックすると再び確認します",
+			"offTitle": "ツールを自動で許可",
+			"on": "保護なし",
+			"off": "確認する"
+		},
+		"thinking": {
+			"using": "エージェントが {{tool}} を使用中…",
+			"idle": "エージェントが考えています…"
+		},
+		"starting": "エージェントを起動中…",
+		"ready": "エージェントの準備ができました。続けるにはメッセージを書いてください。",
+		"film": {
+			"empty": "まだ録画するものがありません：フィルムはエージェントの操作から作られます。"
+		},
+		"attachments": {
+			"size": "{{size}} KB",
+			"remove": "削除",
+			"add": "ファイルを添付 — ここにドラッグ、または貼り付けも可能"
+		},
+		"composer": {
+			"placeholder": "エージェントに返信 —「/」でコマンド…",
+			"ended": "エージェントは終了しました",
+			"send": "送信"
+		},
+		"interrupt": {
+			"done": "エージェントを中断しました — 修正して再送信してください。",
+			"title": "会話を閉じずに、エージェントの作業を止める",
+			"label": "停止"
+		},
+		"follow": {
+			"of": "続き：",
+			"quoted": "「{{text}}」",
+			"currentFallback": "現在の指示",
+			"new": "新しい指示 — マップに新しい線を追加",
+			"flipTitle": "切り替え — または ⌥Enter でもう一方として送信",
+			"toNew": "新しい指示",
+			"toFollow": "続き"
+		},
+		"question": {
+			"placeholder": "別の回答、または補足…",
+			"skipTitle": "エージェントは回答なしで続行します",
+			"skip": "スキップ",
+			"answer": "回答"
+		},
+		"userTurn": {
+			"context": "添付されたコンテキスト：{{context}}"
+		},
+		"lecture": {
+			"map": "マップ",
+			"mapHint": "見るべきものを図で：ステップ、ファイル、テスト、結論",
+			"thread": "スレッド",
+			"threadHint": "スレッド全体。各結論をボードとして表示：まず画像、テキストは折りたたみ",
+			"film": "フィルム",
+			"filmHint": "最後のターンを画像で、短い動画のように順に再生"
+		},
+		"turn": {
+			"leadInstruction": "リードエージェントの指示"
+		},
+		"prompts": {
+			"group": "自分のプロンプト",
+			"sendNow": "すぐに送信",
+			"label": "アクション",
+			"title": "このエージェント用の既成プロンプト",
+			"empty": "保存されたプロンプトはありません。",
+			"footer": "プロンプトは返信欄に入ります — ⇧Enter で直接送信。ライブラリ：<mono>~/.config/cockpit/prompts.toml</mono>"
+		},
+		"model": {
+			"currentTitle": "現在のモデル：{{model}}\n切り替えると、同じスレッドでエージェントが再起動します。",
+			"chooseTitle": "モデルを選択 — エージェントは同じスレッドで再起動します",
+			"customPlaceholder": "その他の識別子 — claude-opus-5-5…",
+			"customTitle": "エンジンは知っているが、一覧にはまだないモデル。残すには、設定でエンジンのモデルに追加してください。",
+			"mismatch": "起動時のリクエスト：{{requested}} — しかし応答しているのは {{answering}} です。会話中に選択が変わったか、エンジンが自動で切り替えた可能性があります。",
+			"restartNote": "モデルを切り替えると、同じセッションでエージェントが再起動します：スレッドは維持されます。"
+		},
+		"cost": {
+			"dedicated": "専用カウンター",
+			"price": "100 万あたり ${{in}}/${{out}}"
+		},
+		"quota": {
+			"common": "共有の週間カウンター：<tone>{{percent}}% 使用済み</tone>。サブスクリプションでは課金されません — 判断基準はこのクォータです。表示価格は API キーで接続したエンジンにのみ適用されます。",
+			"none": "このマシンではクォータが一度も読み取られていません — リソースパネルで読み取れます。表示価格は API キーで接続したエンジンにのみ適用されます。"
+		},
+		"spend": {
+			"summary": "この会話が最初のメッセージ以降に消費したトークンは {{total}} — 直近 5 時間の全消費量の {{share}}%（キャッシュを含む）です。",
+			"noQuota": "サブスクリプションのクォータは CLI から報告されていません。",
+			"left": "「{{limit}}」の残り {{left}}%。",
+			"leftResets": "「{{limit}}」の残り {{left}}%、{{when}}にリセットされます。"
+		},
+		"percent": "{{value}}%",
+		"context": {
+			"breakdown": "{{max}} 中 {{used}} トークン（CLI の集計）：",
+			"part": "· {{label}}：{{tokens}}",
+			"autoCompact": "{{percent}}% で自動圧縮。",
+			"unknownWindow": "直近のターンで {{tokens}} トークン。使用割合は、このターンの終わりにエンジンがウィンドウサイズを報告すると表示されます。",
+			"window": "{{limit}} 中 {{tokens}} トークン — 直近のターンでモデルが参照したすべて：メッセージ、読み込んだファイル、ツールの出力（キャッシュを含む）。これを超えると、会話の冒頭がウィンドウから外れます。"
+		},
+		"mode": {
+			"restartNote": "モードを切り替えると、会話を引き継いでエージェントが再起動します。"
+		},
+		"mcpState": {
+			"connected": "接続済み",
+			"connectedHelp": "ツールが利用可能です。",
+			"pending": "接続中",
+			"pendingHelp": "まだ接続が完了していません。",
+			"needsAuth": "認可が必要",
+			"needsAuthHelp": "サーバーが認可を待っています：エージェントはこのサーバーのツールを使えません。",
+			"failed": "失敗",
+			"failedHelp": "サーバーが応答しませんでした：エージェントはこのサーバーのツールを使えません。",
+			"unknownHelp": "Cockpit が名前を付けられない状態です。"
+		},
+		"equipment": {
+			"connectedTitle_other": "{{count}} 件の MCP サーバーが接続済み",
+			"unavailableTitle_other": "{{count}} 件の MCP サーバーが利用不可：{{names}}",
+			"title": "このエージェントが使えるもの",
+			"close": "閉じる",
+			"servers": "MCP サーバー",
+			"connectedCount": "{{connected}}/{{total}} 接続済み",
+			"noServers": "このフォルダに宣言されたサーバーはありません。",
+			"probing": "セッションに状態を問い合わせ中…",
+			"reconnect": "{{name}} に再接続",
+			"skills": "スキル",
+			"subagents": "サブエージェント",
+			"plugins": "プラグイン"
+		},
+		"duration": {
+			"seconds": "{{count}} 秒",
+			"minutes": "{{count}} 分",
+			"hours": "{{count}} 時間"
+		},
+		"subagents": {
+			"count_other": "サブエージェント {{count}} 件",
+			"defaultRole": "サブエージェント",
+			"openTitle": "{{role}} · {{mission}}\nクリックして作業内容を見る",
+			"starting": "{{role}} · 起動中",
+			"steps_other": "{{count}} ステップ"
+		},
+		"runState": {
+			"done": "終了",
+			"thinking": "思考中",
+			"ready": "準備完了"
+		}
+	},
+	"agentDay": {
+		"permanence": "Permanence",
+		"title": "エージェントの一日",
+		"summary": {
+			"none": "ここ数時間、実行されたエージェントはありません。",
+			"busy_other": "現在 {{busy}} 件が作業中 · 今朝から {{count}} 件",
+			"idle_other": "ここ数時間で {{count}} 件のエージェント、作業中のものはなし"
+		},
+		"legend": {
+			"working": "作業中",
+			"done": "完了",
+			"failed": "失敗"
+		},
+		"now": "現在",
+		"turns_other": "{{count}} ターン",
+		"cost": "${{amount}}",
+		"openConversation": "会話を開く"
+	},
+	"automationEditor": {
+		"models": {
+			"daily": {
+				"name": "自分のデイリー",
+				"description": "前回以降にやったことを 4 つのパートで、デイリー画面に配置",
+				"prompt": "チームのデイリー向けに、期間中に私がやったことを要約してください。4 つのパート：出荷済み、進行中、ブロック中、次にやること。トピックごとに 1 行。PR は対応するチケットとまとめてください。コード内部の専門用語は使わないでください：プロダクトチームも聞いています。"
+			},
+			"revue": {
+				"name": "朝のレビュー",
+				"description": "自分のレビュー待ちの PR と、夜の間に動いたもの",
+				"prompt": "昨日以降に私がレビューした PR、または動きのあった PR を古い順に一覧にしてください。2 つのパート：レビュー待ち、レビュー済み。PR ごとに 1 行で、何が変わったかを添えてください。"
+			},
+			"sprint": {
+				"name": "週の振り返り",
+				"description": "今週出荷したもの、レトロ向け",
+				"prompt": "レトロ向けに私の 1 週間を振り返ってください。3 つのパート：出荷済み、遅れの原因、引き継ぐこと。ツールごとではなくトピックごとにまとめてください。"
+			},
+			"sentry": {
+				"name": "エラー監視",
+				"description": "自分に割り当てられ、昨日以降に動きのあったエラー",
+				"prompt": "私に割り当てられ、昨日以降に動きのあったエラーを要約してください。2 つのパート：新規または増加中、解決済み。エラーごとに 1 行で、何に影響しているかを添えてください。"
+			},
+			"blank": {
+				"name": "空白",
+				"description": "指示、リズム、レポート"
+			}
+		},
+		"leads": {
+			"onTime": "定刻",
+			"minutes_other": "{{count}} 分前",
+			"hour": "1 時間前"
+		},
+		"sources": {
+			"github": {
+				"what": "自分が作成・マージ・更新した PR と、レビューした PR"
+			},
+			"tracker": {
+				"name": "課題トラッカー",
+				"what": "動きのあった自分のチケット（完了したものを含む）"
+			},
+			"cockpit": {
+				"what": "終了したエージェントのターン（フォルダ別）と、ログ上の git 操作"
+			},
+			"sentry": {
+				"what": "期間中に動きのあった、自分に割り当てられたエラー"
+			}
+		},
+		"sentence": {
+			"noDay": "曜日が選択されていません：何も実行されません。",
+			"noSource": "ソースなし",
+			"outputDaily": "デイリーの自分のパート",
+			"output": "レポート",
+			"ahead": "毎週{{days}}の {{time}} に、Cockpit が{{sources}}を読み取り、{{minutes}} 分前に{{output}}をお届けします。",
+			"onTime": "毎週{{days}}の {{time}} に、Cockpit が{{sources}}を読み取り、定刻に{{output}}をお届けします。"
+		},
+		"toast": {
+			"created": "{{name}} を設定しました",
+			"saved": "設定を保存しました"
+		},
+		"remove": {
+			"title": "「{{name}}」を削除しますか？",
+			"message": "今後は実行されません。過去の実行結果はディスクに残ります。",
+			"confirm": "削除"
+		},
+		"back": "自動化",
+		"title": {
+			"new": "新しい自動化",
+			"edit": "「{{name}}」を設定"
+		},
+		"cancel": "キャンセル",
+		"close": "閉じる",
+		"save": "保存",
+		"saveAndEnable": "保存して有効化",
+		"startFrom": "テンプレートから始める",
+		"covers": "対象期間 {{from}} → {{to}}",
+		"when": {
+			"title": "いつ",
+			"name": "名前",
+			"occurs": "実行日",
+			"days": "曜日",
+			"at": "時刻",
+			"ready": "レポートの準備完了",
+			"lead": "前倒し時間",
+			"window": "対象期間"
+		},
+		"window": {
+			"since": {
+				"name": "前回の実行以降",
+				"description": "月曜は週末をカバーします。後からの実行があっても、2 回の実行の間で何も失われません。"
+			},
+			"day": {
+				"name": "直近 24 時間",
+				"description": "固定の期間。毎日行う監視向けです。"
+			}
+		},
+		"reads": {
+			"title": "読み取るもの",
+			"description": "設定で登録したアカウントを、あなたで絞り込んだもの。応答しないソースは欠落したパートとして示されます — 失敗にはなりません。"
+		},
+		"asks": {
+			"title": "依頼内容",
+			"prompt": "指示",
+			"placeholder": "レポートに期待すること、誰向けか、何を省くべきか。",
+			"context": "エージェントは期間、読み取った項目、前回のレポートも受け取るため、その後の変化を伝えられます。使用した項目はすべて引用します：でっち上げの参照は破棄されます。",
+			"corrections_other": "レポート後に求めた修正 · {{count}}",
+			"removeCorrection": "この修正を削除"
+		},
+		"delivery": {
+			"title": "届け先",
+			"notify": "準備ができたら通知する",
+			"catchUp": "実行を逃した場合は起動時に後から実行する",
+			"daily": "自分のパートをデイリー画面に配置する",
+			"pdf": "各レポートを PDF で書き出す",
+			"enabled": "有効",
+			"slack": "確認済みのレポートを公開するための Slack webhook",
+			"slackHint": "自動では何も送信されません：確認後のレポートに「Slack に送信」ボタンが表示されます。アドレスは Cockpit 内に保存され、保存後は表示されません。",
+			"readOnly": "<strong>読み取り専用</strong>で、変更する設定はありません：エージェントはツールを持たず、プッシュ、コメント、移動は一切できません。"
+		},
+		"preview": {
+			"title": "実行される内容",
+			"ready": "{{time}} に準備完了",
+			"pickDay": "少なくとも 1 つの曜日を選んでください。"
+		},
+		"steps": {
+			"title": "毎回の実行で",
+			"period": {
+				"title": "期間を計算",
+				"description": "前回の成功した実行の終了時から現在まで。レポートに記載されます"
+			},
+			"read": {
+				"title": "Cockpit がソースを読み取る",
+				"description": "エージェントではなく Cockpit が読み取ります：各項目はリンクと出所を保持します"
+			},
+			"write": {
+				"title": "エージェントが執筆",
+				"description": "ツールなしで、あなたの指示と項目だけを使います"
+			},
+			"store": {
+				"title": "レポートを保管",
+				"description": "履歴に実行が 1 件追加され、書き換えられることはありません"
+			},
+			"notify": {
+				"title": "通知が届く",
+				"description": "通知のあと、デイリー画面にあなたのパートが表示されます"
+			}
+		},
+		"trial": {
+			"button": "試行",
+			"hint": "実行と同じ処理を、現時点で対象となる期間で行います。保管も通知もしません",
+			"title": "試行",
+			"subtitle": "何も保管・送信されていません：今実行した場合の出力です。",
+			"running": "ソースを読み取ってから執筆します — 1〜2 分かかります。",
+			"partial": "一部のみ",
+			"ready": "準備完了",
+			"silent": "応答なし",
+			"unplugged": "未接続",
+			"nothing": "なし。",
+			"unsourced": "ソースなし"
+		}
+	},
+	"automationRunView": {
+		"empty": "表示するものはありません。",
+		"copied": "Markdown としてコピーしました",
+		"rerun": "再実行しました",
+		"rerunDescription": "新しい実行は履歴に表示されます。",
+		"slackConfirmTitle": "このレポートを Slack に投稿しますか？",
+		"slackConfirmMessage_other": "{{count}} 行が webhook のチャンネルに送られ、チーム全員に表示されます。除外した行はここに残ります。",
+		"publish": "投稿",
+		"postedSlack": "Slack に投稿しました",
+		"correctionAdded": "修正を追加しました",
+		"correctionAddedDescription": "次回の実行で反映されます。",
+		"breadcrumb": "パンくずリスト",
+		"automations": "自動化",
+		"previous": "前の実行",
+		"next": "次の実行",
+		"without": "{{sources}} なし",
+		"covers": "対象期間 {{from}} → {{to}}",
+		"readyAt": "{{time}} に準備完了",
+		"copyMarkdown": "Markdown としてコピー",
+		"redoPdf": "PDF を作り直す",
+		"exportPdf": "PDF で書き出す",
+		"pdfFolderTitle": "この自動化の PDF フォルダ",
+		"folder": "フォルダ",
+		"postedOn": "{{date}} に投稿",
+		"publishTitle": "確認済みのレポートを投稿",
+		"sendSlack": "Slack に送信",
+		"presentDaily": "デイリーで発表",
+		"failed": "この実行は完了しませんでした：{{reason}}",
+		"kept": "{{total}} 行中 {{kept}} 行を採用",
+		"clickHint": "行をクリックすると発表から除外されます。実行結果には取り消し線付きで残ります。",
+		"nothing": "なし。",
+		"restore": "発表に戻す",
+		"drop": "発表から除外",
+		"unsourced": "ソースなし",
+		"dropped": "除外",
+		"sourcesTitle": "項目の出所",
+		"sourcesChart": "ソース別の項目の内訳",
+		"trace": "トレース",
+		"period": "期間を計算",
+		"source": {
+			"read": "{{source}} を読み取り",
+			"silent": "{{source}} 応答なし",
+			"unconfigured": "{{source}} 未接続",
+			"items_other": "{{count}} 項目",
+			"noAnswer": "応答なし",
+			"silentNote": "{{note}}。このセクションは欠落しており、ヘッダーにその旨が記載されます。",
+			"unconfiguredNote": "{{note}}。これは失敗ではありません：読み取るものがないだけです。"
+		},
+		"writing": "執筆",
+		"nothingToWrite": "書くことがありません：期間中に項目がありません",
+		"toollessAgent": "ツールなしのエージェント · {{valuation}}",
+		"valued": "API 料金換算で ${{cost}}",
+		"unknownValuation": "換算額不明",
+		"rerunButton": "もう一度実行",
+		"correctTitle": "このレポートに不満がありますか？",
+		"correctHint": "何が問題かを書いてください：修正は日付付きで指示に追加され、次回の実行で反映されます。",
+		"correction": "修正",
+		"correctionPlaceholder": "例：依存関係の PR には触れない",
+		"addCorrection": "指示に追加",
+		"correctionsInPlace_other": "適用済みの修正 {{count}} 件"
+	},
+	"chantierMap": {
+		"state": {
+			"stopped": "停止",
+			"working": "作業中",
+			"waiting": "待機中"
+		},
+		"files_other": "{{formatted}} ファイル",
+		"truncated": "（リポジトリは省略表示）",
+		"folderAction": {
+			"hint": "このフォルダへのメモ、または新しいエージェント",
+			"label": "このフォルダ"
+		},
+		"noTerritory": "マップにするものがありません：{{error}}",
+		"readingRepo": "リポジトリを読み取り中…",
+		"allClear": "他のエージェントの作業を邪魔しているエージェントはなく、古いバージョンのファイルに依存しているエージェントもありません。",
+		"agentFallback": "エージェント",
+		"close": "閉じる",
+		"send": "送信",
+		"alerts": {
+			"writtenBy": "書き込み：",
+			"and": "と",
+			"warn": "警告",
+			"warnAgent": "警告する",
+			"reliesOn_one": "変更されたファイルに依存しています：",
+			"reliesOn_other": "変更された {{count}} 個のファイルに依存しています："
+		},
+		"legend": {
+			"read": "読み込み",
+			"written": "書き込み",
+			"collision": "衝突",
+			"stale": "古い"
+		},
+		"emptyFolder": "空のフォルダです。",
+		"selection": {
+			"multipleWriters": "複数のエージェントが書き込んでいます。",
+			"openFile": "ファイルを開く",
+			"wrote": "{{ago}}に書き込み",
+			"read": "{{ago}}に読み込み",
+			"summarized": "要約済み",
+			"untouched": "まだどのエージェントも触れていません。",
+			"stale": "{{agent}} が{{ago}}に読みましたが、その後変更されています。",
+			"staleBy": "{{agent}} が{{ago}}に読みましたが、その後 {{by}} によって変更されています。",
+			"for": "宛先",
+			"newAgent": "ここに限定した新しいエージェント",
+			"newAgentPlaceholder": "この範囲内で何をすべきか…",
+			"remarkPlaceholder": "このファイルへのメモ — エージェントには意図が伝わります。",
+			"laterHint": "このエージェントのメモに追加して、まとめて送信",
+			"later": "後で",
+			"launch": "起動"
+		},
+		"agent": {
+			"openConversation": "会話を開く",
+			"known_other": "把握しているファイル {{count}} 個",
+			"writes_other": "{{count}} 個書き込み",
+			"stale_one": "読み込み後に変更されたファイルがあります",
+			"stale_other": "{{count}} 個のファイルが読み込み後に変更されています",
+			"deleted": "削除済み",
+			"outsideAgents": "エージェント以外"
+		},
+		"remarks": {
+			"pending_other": "送信待ちのメモ {{count}} 件",
+			"remove": "削除",
+			"discard": "破棄"
+		},
+		"context": {
+			"noDetail": "このエンジンはコンテキストの内訳を出しません。",
+			"pending": "{{tokens}} トークン — 内訳は次回の計測時に表示",
+			"pendingOfWindow": "{{tokens}} トークン / {{window}} — 内訳は次回の計測時に表示",
+			"notMeasured": "コンテキストはまだ計測されていません。",
+			"detail": "コンテキストの内訳",
+			"partTitle": "{{label}} · {{tokens}} トークン",
+			"ofMax": "/ {{max}} トークン",
+			"percent": "{{percent}}%",
+			"compactedHint": "空きを作るために CLI が会話を要約しました",
+			"compacted": "{{ago}}に要約",
+			"heavy": "会話を重くしているもの：{{list}}",
+			"memory": "指示：{{list}}",
+			"mcp": "MCP：{{list}}",
+			"mcpServer": "{{name}}（読み込み済み {{loaded}}、遅延 {{deferred}}）",
+			"autoCompact": "{{percent}}% で自動圧縮 — バー上の目印です。",
+			"countedAt": "{{ago}}に CLI が集計。"
+		}
+	},
+	"engagementCard": {
+		"noTrigger": "トリガーなし",
+		"oracle": "オラクル",
+		"noOracle": "なし — 開始すべきではありませんでした",
+		"steps_other": "{{count}} ステップ",
+		"costHint": "API 料金で換算した場合のコスト。サブスクリプションでは課金されず、ウィンドウのクォータが消費されます",
+		"cost": "${{amount}}",
+		"started": "{{when}}に開始",
+		"verdict": {
+			"pending": "進行中",
+			"reached": "達成",
+			"missed": "未達",
+			"offTopic": "対象外",
+			"undecided": "判定不能",
+			"rehearsed": "試行"
+		}
+	},
+	"fileLink": {
+		"hint": "クリック：Cockpit で読む\n⌘-クリック：エディタで開く\n⌥-クリック：Finder で表示\n⇧-クリック：パスをコピー"
+	},
+	"fileViewer": {
+		"opaque": {
+			"unplayable": "Cockpit はこの形式を再生できません。Mac 標準のアプリならほぼ確実に再生できます。",
+			"unknown": "Cockpit はこの種類のファイルを表示しません。{{name}} を Mac のアプリで開いてください。",
+			"openDefault": "デフォルトのアプリで開く",
+			"showInFinder": "Finder で表示"
+		},
+		"unsaved": "未保存",
+		"saveTitle": "保存（⌘S）",
+		"save": "保存",
+		"discardTitle": "変更を破棄",
+		"cancel": "キャンセル",
+		"editTitle": "このファイルを Cockpit で編集",
+		"edit": "編集",
+		"copyPath": "パスをコピー",
+		"reveal": "Finder で表示",
+		"openWithTitle": "Mac のアプリで開く",
+		"openWith": "このアプリで開く…",
+		"externalEditorTitle": "外部エディタで編集",
+		"externalEditor": "エディタ",
+		"close": "閉じる（Esc）",
+		"searchPlaceholder": "ファイル内を検索…（⌘F）",
+		"noMatch": "なし",
+		"previousMatch": "前の一致（⇧⏎）",
+		"nextMatch": "次の一致（⏎）",
+		"truncated": "ファイルは {{size}} で切り詰められています — 残りを見るにはエディタで開いてください。"
+	},
+	"film": {
+		"quote": "「{{quote}}」",
+		"title": "ターンのフィルム",
+		"calls_other": "{{count}} 回の呼び出し",
+		"empty": "まだ録画するものがありません：フィルムはエージェントの操作から作られます。",
+		"pause": "一時停止",
+		"play": "再生",
+		"frame": "フレーム {{position}}：{{caption}}"
+	},
+	"fleetGrid": {
+		"main": "メイン",
+		"changes_other": "{{count}} 件の変更",
+		"clean": "クリーン",
+		"conflicts_other": "{{count}} 件のコンフリクト",
+		"awaitingReply": "あなたの返答待ち",
+		"running": "実行中",
+		"idle": "待機中",
+		"subagents_other": "サブエージェント {{count}} 件",
+		"openEditor": "エディタで開く",
+		"openTerminal": "Cockpit 内で、この worktree のターミナル",
+		"launchAgent": "Cockpit 内で、ここでエージェントを起動",
+		"detail": "詳細",
+		"remove": "削除",
+		"confirmTitle": "worktree {{folder}} を削除しますか？",
+		"confirmMessage": "フォルダとそのローカルインフラ（データベース、バケット、Docker スタック）が削除されます。通常 1〜2 分かかります。リモートブランチはそのまま残ります。",
+		"removable_other": "オープン中の PR がない worktree {{count}} 件 — 削除可能",
+		"hide": "隠す",
+		"show": "表示",
+		"group": {
+			"waiting": "あなた待ち",
+			"flight": "進行中",
+			"recent": "最近",
+			"resting": "休止中"
+		},
+		"empty": "worktree はありません。"
+	},
+	"impactReport": {
+		"ago": {
+			"now": "たった今",
+			"minutes_other": "{{count}} 分前",
+			"hours_other": "{{count}} 時間前",
+			"days_other": "{{count}} 日前"
+		},
+		"noVerdict": "判定なし",
+		"verdict": {
+			"ok": "OK",
+			"reserves": "留保あり",
+			"blocking": "ブロッキング"
+		},
+		"risk": "リスク：{{level}}",
+		"riskLevel": {
+			"low": "低",
+			"medium": "中",
+			"high": "高",
+			"unknown": "不明"
+		},
+		"workOnTitle": "この読み取り結果を持たせて、このブランチでエージェントを開く",
+		"workOn": "対応",
+		"openForge": "フォージで開く",
+		"stale": "この読み取り以降にブランチが動きました — もう存在しない状態を説明しています。",
+		"readingMinutes_other": "読み取り {{count}} 分",
+		"apiCostTitle": "この読み取りを API 料金で換算した場合のコスト。サブスクリプションでは課金されず、ウィンドウのクォータが消費されます。",
+		"apiCost": "API 料金換算で ≈ ${{cost}}",
+		"briefTitle": "エージェントに送ったファクトファイルを開く",
+		"brief": "ファイル",
+		"auditTitle": "この変更を、プロジェクトで宣言されたプロパティに照らして 1 つずつ証拠付きで判定する",
+		"audit": "確認",
+		"reaudit": "再確認",
+		"reconfrontTitle": "この変更を 3 つの観点から再度読ませる — エージェント 4 体、数分",
+		"confrontTitle": "この変更を 3 つの独立した観点から読ませ、意見が分かれた点だけを残します。エージェント 4 体、数分。",
+		"confront": "相互検証",
+		"reconfront": "再度相互検証",
+		"forget": "破棄",
+		"reread": "再読み取り"
+	},
+	"impactSettings": {
+		"saved": "変更レビューの設定を保存しました。",
+		"intro": "インパクト画面は、各変更を何も書き込めないエージェントに渡し、ブランチが動くまでその理解内容を保持します。",
+		"brief": {
+			"label": "{{name}} の内容",
+			"labelFallback": "このプロダクトの内容",
+			"hint": "2〜3 文で：プロダクトの用途、利用者、利用者にとって重要なこと。これがないと、分析はコードの話しかできません。",
+			"placeholder": "例：一般消費者向けのオンラインストア。重要なのは、カートの合計が正しいことと、支払い済みの注文が当日に発送されること。"
+		},
+		"engine": {
+			"label": "エンジン",
+			"hint": "空欄 = 最初に宣言されたもの。"
+		},
+		"model": {
+			"label": "モデル",
+			"hint": "空欄 = このマシンの設定。"
+		},
+		"depth": {
+			"label": "深さ",
+			"hint": "エンジンがこれをどう扱えるか。",
+			"none": "指示なし",
+			"fast": "高速",
+			"normal": "標準",
+			"deep": "最大"
+		},
+		"default": "デフォルト",
+		"localBranches": {
+			"label": "マージリクエストのないローカルブランチも追跡する",
+			"hint": "3 日前に始めた、まだどのフォージにも見えていない作業。"
+		},
+		"save": "保存"
+	},
+	"kpiBoard": {
+		"noSection": "セクションなし",
+		"filter": "指標を絞り込む…",
+		"dashboards_other": "ダッシュボード {{count}} 件",
+		"indicators_other": "指標 {{count}} 件",
+		"empty": {
+			"message": "ダッシュボードはありません",
+			"hint": "KPI ダッシュボードは Better Stack Telemetry から取得します。"
+		},
+		"hide": "隠す",
+		"show": "値を表示",
+		"hours_other": "{{count}} 時間",
+		"days_other": "{{count}} 日",
+		"openExternal": "Better Stack で開く"
+	},
+	"libreLauncher": {
+		"places": {
+			"ici": {
+				"label": "ここで、そのまま",
+				"hint": "ターミナルとまったく同じ：現在のブランチ、作業中の変更。何も作成されません。"
+			},
+			"branche": {
+				"label": "新しいブランチ",
+				"hint": "同じフォルダですが、エージェントは専用のブランチで開始します。作業中の変更も引き継がれます。"
+			},
+			"worktree": {
+				"label": "分離された worktree",
+				"hint": "リポジトリの隣に、新しいブランチで別のコピーを作ります。あなたのフォルダには触れません。"
+			}
+		},
+		"depths": {
+			"engine": "エンジンのデフォルト",
+			"fast": "高速",
+			"normal": "標準",
+			"deep": "深く"
+		},
+		"launchFailed": "エージェントを起動できませんでした：{{error}}",
+		"machineAccount": "このマシンのアカウント",
+		"machineModel": "このマシンのモデル",
+		"summary": {
+			"whereHere": "{{folder}}（そのまま）",
+			"whereBranch": "{{folder}}（新しいブランチ {{branch}}）",
+			"whereWorktree": "{{repo}} の分離コピー（{{branch}}）",
+			"sentence": "{{engine}}（{{model}}）が {{where}} で、アカウント {{account}}、{{mode}} モードで開きます — {{hint}}。"
+		},
+		"browseTitle": "このフォルダでエージェントを起動",
+		"steps": {
+			"label": "ステップ",
+			"folder": "フォルダ",
+			"toPick": "未選択",
+			"place": "作業場所",
+			"agent": "エージェント",
+			"launch": "起動",
+			"remembered": "このフォルダ用に記憶済み",
+			"thisTime": "今回のみ"
+		},
+		"title": "エージェントを起動",
+		"subtitle": "1 フォルダに 1 エージェント。プロジェクトもミッションもなし。",
+		"close": "閉じる",
+		"allSet": "すべて入力済みです。フォルダを選んで <key>⌘↵</key> を押すと、エージェントが起動します。",
+		"folder": {
+			"noteLibre": "フリーエージェント",
+			"noteRecent": "最近のエージェント",
+			"title": "どのフォルダ？",
+			"description": "これは <code>cd</code> にあたります：ターミナルで開いたのと同じように、エージェントはそこで作業します。",
+			"path": "フォルダのパス",
+			"placeholder": "~/Sites/my-project",
+			"browse": "Finder で選択…",
+			"missing": "このフォルダは存在しません。",
+			"gitRepo": "Git リポジトリ · {{branch}} · {{state}}",
+			"detached": "切り離された HEAD",
+			"clean": "クリーン",
+			"dirty_other": "変更されたファイル {{count}} 個",
+			"notGit": "git リポジトリではありません：エージェントはその場で作業します。",
+			"recent": "最近",
+			"projects": "設定で宣言されたプロジェクト"
+		},
+		"place": {
+			"title": "どこで作業する？",
+			"in": "<code>{{folder}}</code> 内",
+			"notGit": "このフォルダは git リポジトリではありません：エージェントはその場で作業します。ブランチと worktree は使えません。",
+			"busy": "このフォルダではすでにエージェントが作業しています。同じ場所の 2 つのエージェントは同じファイルに書き込みます。",
+			"useWorktree": "worktree を使う",
+			"branchName": "ブランチ名",
+			"branchHint": "最初の指示を書いた場合は、そこから生成されます。",
+			"from": "ベース",
+			"copyIn": "<code>{{path}}</code> にコピーを作成",
+			"fullFlow": "プロジェクト、ターミナル、ブラウザ、サーバーまで揃えたいですか？",
+			"openWorkspace": "代わりにワークスペースを開く →"
+		},
+		"agent": {
+			"title": "どのエージェント？",
+			"description": "エンジン、モデル、アカウントは設定から取得します。ここでは何も宣言しません。",
+			"engine": "エンジン",
+			"firstEngine": " — 最初に宣言されたもの",
+			"onlyEngine": " — 唯一宣言されたエンジン",
+			"model": "モデル",
+			"machineSetting": "マシンの設定",
+			"account": "アカウント",
+			"loggedIn": "サインイン済み",
+			"loggedOut": "サインアウト",
+			"projectAccount": "このフォルダのプロジェクトのアカウント",
+			"permissions": "権限",
+			"depth": "深さ",
+			"depthUnsupported": "このエンジンは指定方法を示していません — 設定 → エンジン",
+			"bypassWarning": "制限なしモードを、その場で、現在のブランチで：エージェントは確認なしで任意のコマンドを実行できます。worktree なら被害を抑えられます。"
+		},
+		"launch": {
+			"title": "準備完了",
+			"prompt": "最初の指示 <muted>— 任意</muted>",
+			"placeholder": "空欄：ただの「claude」と同じく、エージェントはあなたの最初の一文を待ちます。",
+			"remember": "<code>{{folder}}</code> 用にこの選択を記憶する — 次回は ⌘N のあと ⌘↵ だけで済みます",
+			"button": "起動"
+		},
+		"command": "入力するはずだったコマンド",
+		"back": "戻る",
+		"next": "次を設定"
+	},
+	"logView": {
+		"empty": "まだ出力はありません。",
+		"noDiff": "表示する変更はありません。"
+	},
+	"mcpSettings": {
+		"loading": "リポジトリを読み取り中…",
+		"empty": "このリポジトリは MCP サーバーを宣言していません。エージェントはアカウントのツールのみを使えます。独自のサーバーを共有したいリポジトリは、ルートの <code>.mcp.json</code> に書いて一緒にコミットします — Cockpit が起動するすべてのエージェントに添付するのはこのファイルです。",
+		"approved": "承認済み：<code>.mcp.json</code> で宣言され、このリポジトリで起動するすべてのエージェント（worktree を含む）に添付されます — ファイルが変更されない限り有効です。",
+		"revoke": "取り消す",
+		"changedSinceApproval": "承認後に .mcp.json が変更されました。",
+		"notApproved": "まだ承認されていません。",
+		"pendingExplanation": "エージェントはこれらのサーバーなしで起動します：これらはリポジトリがあなたのマシン上で実行するコマンドです。承認する前に確認してください。",
+		"approve": "承認",
+		"unreachable_other": "{{count}} 件のサーバーは現在の条件では応答しません。エージェントはそれを把握し、ツールがあるふりはせずにその旨を伝えます — ただし、それに依存する場合は、この作業で分離をオフにするか、サーバー自身が保持するトークンを渡してください。"
+	},
+	"payloadView": {
+		"yes": "はい",
+		"no": "いいえ",
+		"items_other": "{{count}} 項目",
+		"empty": "使える詳細はありません。",
+		"raw": "生データ"
+	},
+	"portsMonitor": {
+		"buttonHint": "この worktree で待ち受けているもの — ポート、メモリ、停止",
+		"button": "モニター",
+		"stopConfirm": {
+			"title": "ポート {{port}} の {{process}} を停止しますか？",
+			"message": "プロセスとその子プロセスが停止されます。再起動するまで、提供していたものにはアクセスできなくなります。",
+			"confirm": "停止"
+		},
+		"stopped": "{{process}} を停止しました（ポート {{port}}）。",
+		"title": "{{label}} で待ち受けているもの",
+		"reload": "ポートを再読み込み",
+		"empty": {
+			"message": "この worktree で待ち受けているものはありません。",
+			"hint": "このフォルダから起動したサーバーが、使用中のメモリとともにここに表示されます。"
+		},
+		"memory": "{{mb}} MB",
+		"open": "{{url}} を開く",
+		"stop": "このサーバーを停止",
+		"footer": "この worktree から起動したサーバーのみ表示されます。それ以外と Docker コンテナは「サーバーとコンテナ」に表示されます。"
+	},
+	"producedFiles": {
+		"count_other": "変更したファイル {{count}} 個",
+		"reveal": {
+			"title": "worktree を Finder で開く",
+			"label": "フォルダ"
+		}
+	},
+	"quickMenu": {
+		"search": "検索…",
+		"noMatch": "その名前のものはありません。",
+		"extraHint": "{{title}}（⇧Enter）"
+	},
+	"reliabilityPanel": {
+		"title": "ループの状態",
+		"window_other": "直近 {{count}} 日間",
+		"notGoals": "これらの数値はどれも目標ではありません",
+		"nothing": "報告することはありません。これは褒め言葉ではありません：シグナルがないということであり、シグナルがないことは時々確認が必要です。",
+		"percent": "{{value}}%",
+		"handbacks": {
+			"title": "エージェントが返したもの",
+			"hint": "手作業でやり直された納品物は、評価でも印象でもない唯一のフィードバックです。",
+			"delivered": "納品",
+			"takenBack": "手作業でやり直し",
+			"rate": "やり直し率",
+			"pending": "未読のやり直し"
+		},
+		"context": {
+			"title": "添付したコンテキストは効果があるか",
+			"with": "コンテキストあり",
+			"without": "コンテキストなし",
+			"caveat": "これは実験ではありません：Cockpit はコンテキストがあれば添付するため、2 つの列は同じ作業を表していません — チケットとレビューのあるブランチは、何もないブランチよりも枠組みが明確です。明らかな差はシグナルですが、小さな差は何も意味しません。",
+			"notComparable": "まだ比較できません — 両側にそれぞれ少なくとも 5 件の納品が必要です。現時点：コンテキストあり {{briefed}} 件、なし {{plain}} 件。",
+			"side_other": "やり直し — {{count}} 件中 {{takenBack}} 件"
+		},
+		"turns": {
+			"title": "何回の試行が必要か",
+			"hint": "10 回やり直させるエージェントは、何を期待されているか分からないまま出発したエージェントです。",
+			"sessions": "会話",
+			"median": "通常のフォローアップ回数",
+			"longHaul": "10 回を超えてやり直し",
+			"withError": "エラーで終了"
+		},
+		"guardrails": {
+			"title": "ガードレールの価値",
+			"hint": "一度も何かを検出したことのないプロパティは、何も保証せずに安心感だけを与えます。",
+			"properties": "プロパティ",
+			"calibrated": "実証済み",
+			"decorative": "飾り"
+		},
+		"memory": {
+			"title": "ノートに残っているもの",
+			"hint": "一度もエージェントに渡されない教訓は、範囲が間違っているか、そもそも存在すべきではありませんでした。",
+			"lessons": "教訓",
+			"uses": "使用",
+			"idle": "未使用",
+			"stale": "休眠中"
+		},
+		"deeds": {
+			"titleMixed": "Cockpit が行ったこと、そして誰の代わりに行ったか",
+			"titleMine": "Cockpit があなたの代わりに行ったこと",
+			"empty": "期間中に記録されたものはありません。",
+			"permanence": "Permanence",
+			"failed_other": "{{count}} 件失敗"
+		}
+	},
+	"remoteAccess": {
+		"disableConfirm": {
+			"title": "モバイルアクセスをオフにしますか？",
+			"message": "ペアリング済みのすべてのデバイスが、アクセスキーを含めて取り消されます。再度ペアリングが必要になります。"
+		},
+		"disable": "オフにする",
+		"enable": "オンにする",
+		"enabled": "モバイルアクセスをオンにしました。",
+		"disabled": "モバイルアクセスをオフにしました。",
+		"revokeConfirm": {
+			"title": "{{name}} を取り消しますか？",
+			"message": "このデバイスでは今後、何も閲覧・判断できなくなります。"
+		},
+		"revoke": "取り消す",
+		"intro": {
+			"title": "Tailscale を通じて、iPhone からエージェントのリクエストに応答できます。",
+			"detail": "サーバーはループバックインターフェースでのみ待ち受けます。証明書付きで tailnet に公開するのは <code>tailscale serve</code> です。ツールの承認には Face ID が必要です。スマートフォンからは、エージェントの権限モードの変更、スクリプトの実行、設定の変更はできません。"
+		},
+		"tailscale": {
+			"offline": "オフライン — アドレスと証明書は tailnet が提供します"
+		},
+		"funnel": {
+			"on": "オン：Cockpit は起動を拒否します。`{{command}}` でオフにしてください",
+			"off": "オフ — インターネットには何も公開されていません"
+		},
+		"setup": {
+			"title": "この Mac で一度だけ行うこと",
+			"detail": "スクリプトがローカルの ntfy サーバーを設定し、このページと同じく tailnet に公開して、下に貼り付けるトピックとトークンを表示します。Apple のリレーが見るのはトピックのハッシュだけで、内容はここから送られます。"
+		},
+		"ntfy": {
+			"server": "ntfy サーバー",
+			"serverHint": "ローカル、外部には公開しない",
+			"topic": "トピック",
+			"topicHint": "秘密：知っている人は誰でも通知を鳴らせます",
+			"token": "公開トークン",
+			"tokenSaved": "保存済み — 空欄 = 変更なし",
+			"tokenRequired": "必須",
+			"saved": "保存しました"
+		},
+		"wake": {
+			"last": "最後の起動通知：{{detail}}",
+			"failed": "最後の起動通知に失敗：{{detail}}",
+			"none": "起動以降、起動通知は試行されていません。"
+		},
+		"relay": {
+			"result": "リレー：{{detail}}",
+			"test": "リレーをテスト",
+			"saved": "リレーを保存しました。",
+			"save": "リレーを保存"
+		},
+		"devices": {
+			"title_other": "ペアリング済みのデバイス · {{count}}",
+			"pair": "iPhone をペアリング",
+			"pairing": "QR コードをスキャンしてページを開き、ホーム画面に追加してから、このコードを入力してください — 有効期限 2 分、1 回限り：",
+			"empty": "デバイスはありません。",
+			"seen": "{{when}}に確認"
+		},
+		"check": {
+			"ok": "OK",
+			"todo": "設定が必要"
+		}
+	},
+	"startMission": {
+		"confirm": {
+			"title": "{{reference}} でミッションを開始しますか？",
+			"ticketPrefix": "「{{title}}」— ",
+			"guided": "リードエージェントがあなたと一緒にチケットを読みます。理解内容、アプローチ、分割の順に承認します：それまで何も開始されません。",
+			"autonomous": "リードエージェントがチケットを読んで分割を提案し、あなたが計画を承認するまで何も開始されません。",
+			"action": "ミッションを開始"
+		},
+		"activity": {
+			"title": "{{reference}} からのミッション",
+			"firstStep": "チケットを読み、リードエージェントを起動しています…"
+		},
+		"button": {
+			"title": "このチケットのミッションを開き、リードエージェントを起動",
+			"label": "ミッションとして開始"
+		}
+	},
+	"teamWorkGrid": {
+		"view": {
+			"all": {
+				"label": "すべて",
+				"hint": "サイクルのチケットとオープン中の PR"
+			},
+			"blocked": {
+				"label": "ブロック中",
+				"hint": "CI 失敗、修正依頼、スタックされた PR"
+			},
+			"review": {
+				"label": "レビュー待ち",
+				"hint": "承認済みでもドラフトでもない：レビュアー側の対応待ち"
+			},
+			"ready": {
+				"label": "マージ可能",
+				"hint": "承認済み、CI 成功、ベースブランチ上"
+			}
+		},
+		"prState": {
+			"ciFailing": "CI 失敗",
+			"changesRequested": "修正依頼",
+			"stacked": "{{base}} にスタック",
+			"ready": "マージ可能",
+			"ciPending": "CI 実行中",
+			"draft": "ドラフト",
+			"awaitingReview": "レビュー待ち"
+		},
+		"noWorktree": "このブランチのローカル worktree はありません。",
+		"wholeTeam": "チーム全体",
+		"everyone": "全員",
+		"memberTitle_other": "{{name}} — PR {{prs}} 件、アクティブなチケット {{count}} 件",
+		"cycleTitle": "現在のサイクルのチケットに限定",
+		"cycle": "サイクル",
+		"emptyFor": "「{{view}}」に {{name}} のものはありません",
+		"empty": "「{{view}}」には何もありません",
+		"seeAll": "すべて表示",
+		"days_other": "{{count}} 日",
+		"openAgent": "このブランチでエージェントを開く",
+		"openWorktree": "worktree を開く",
+		"activeTickets": "アクティブなチケット",
+		"wip_other": "{{count}} 件 WIP",
+		"openPrs": "オープン中の PR",
+		"prs_other": "PR {{count}} 件",
+		"toReviewTitle": "レビューすべき他メンバーの PR",
+		"toReview_other": "{{count}} 件レビュー待ち",
+		"mergedTitle": "前回のデイリー以降にマージ",
+		"merged_other": "{{count}} 件出荷",
+		"now": "現在",
+		"next": "次",
+		"nothingNext": "次に開始できるものはありません。",
+		"pullRequests": "プルリクエスト · {{count}}",
+		"noOpenPr": "オープン中の PR はありません。",
+		"reviewInbox": "他メンバーのレビューが必要",
+		"onlyMember": "{{name}} のみ表示",
+		"blocked_other": "{{count}} 件ブロック中",
+		"nothingInProgress": "進行中のものはありません。"
+	},
+	"toolCall": {
+		"tool": "ツール",
+		"verb": {
+			"read": "読み込み",
+			"wrote": "書き込み",
+			"edited": "編集",
+			"searched": "検索",
+			"listed": "一覧",
+			"subagent": "サブエージェント",
+			"fetched": "取得",
+			"webSearched": "Web 検索",
+			"todos": "タスクリスト",
+			"steps": "ステップ"
+		},
+		"fromLine": "{{line}} 行目から",
+		"lines_other": "{{count}} 行",
+		"stepsDone": "{{total}} 件中 {{done}} 件完了",
+		"image": "画像",
+		"stepCount_other": "{{count}} ステップ",
+		"seeSubagent": "このサブエージェントの作業を見る",
+		"seeOutput": "ツールが返した内容を見る",
+		"failed": "失敗",
+		"clickToOpen": "クリックして開く",
+		"shrink": "縮小",
+		"enlarge": "拡大"
+	},
+	"usagePanel": {
+		"limits": {
+			"unavailable": "上限を取得できません — {{error}}",
+			"loading": "上限を読み取り中…",
+			"none": "報告された上限はありません。",
+			"title": "サブスクリプション",
+			"refresh": "CLI に再度問い合わせる",
+			"remaining": "残り {{percent}}%",
+			"usedResets": "{{percent}}% 使用済み · {{resetsAt}} にリセット",
+			"used": "{{percent}}% 使用済み"
+		},
+		"stat_other": "出力 {{output}} · 応答 {{count}} 件",
+		"title": "Claude の使用量",
+		"source": "{{path}} のログより",
+		"periods": {
+			"last5h": "直近 5 時間",
+			"today": "今日",
+			"last7Days": "7 日間",
+			"last30Days": "30 日間"
+		},
+		"volumesNote": "トークン単位で計測した量で、上の上限とは別物です：合計は入力、出力、キャッシュ書き込みの和です。キャッシュ読み込みは生成テキストと同じようには課金されないため、別に数えています。",
+		"byDay": {
+			"title": "日別（直近 30 日）",
+			"empty": "アクティビティはありません。"
+		},
+		"byWorktree": {
+			"title": "worktree 別",
+			"empty": "特定されたフォルダはありません。"
+		},
+		"byMission": {
+			"title": "ミッション別",
+			"empty": "計測されたミッションはありません。"
+		},
+		"byModel": {
+			"title": "モデル別",
+			"empty": "特定されたモデルはありません。"
+		},
+		"allTime_other": "全期間：応答 {{count}} 件で {{tokens}} トークン · キャッシュ読み込み {{cacheRead}}。"
+	}
+}

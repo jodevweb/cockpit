@@ -1,0 +1,298 @@
+{
+	"store": {
+		"job": {
+			"succeeded": "완료",
+			"failed": "실패",
+			"failedWithCode": "실패 (코드 {{code}})",
+			"failedToast": "{{label}} — 실패했습니다. 출력을 보려면 스크립트를 여세요.",
+			"failedToastWithCode": "{{label}} — 실패했습니다 (코드 {{code}}). 출력을 보려면 스크립트를 여세요.",
+			"worktreeDone": "{{label}} — 완료."
+		},
+		"notify": {
+			"waitingReply": "답변을 기다리는 중 — {{title}}",
+			"ciFailed": "CI 실패 · #{{number}}",
+			"readyToMerge": "병합 준비 완료 · #{{number}}",
+			"prodError": "프로덕션 오류 · {{project}}"
+		}
+	},
+	"commandPalette": {
+		"views": {
+			"map": "지도",
+			"today": "오늘",
+			"decisions": "결정 · 답변을 기다리는 항목",
+			"recap": "시각적 요약 · 지금까지 일어난 일",
+			"automations": "자동화 · 스스로 준비되는 회의",
+			"overview": "개요",
+			"team": "데일리 · 팀",
+			"agents": "AI 에이전트",
+			"workspace": "워크스페이스 · 열린 에이전트와 터미널",
+			"libres": "자유 에이전트 · 프로젝트 밖에서 실행",
+			"worktrees": "Worktree",
+			"git": "Git",
+			"scripts": "스크립트",
+			"docs": "문서",
+			"observability": "관측성",
+			"delivery": "흐름 · Linear, PR, CI, 배포",
+			"infra": "서버 및 컨테이너 · 이 머신에서 실행 중인 것",
+			"settings": "설정"
+		},
+		"hint": {
+			"goTo": "이동"
+		},
+		"group": {
+			"navigation": "탐색",
+			"libres": "자유 에이전트",
+			"projects": "프로젝트",
+			"recentFolders": "최근 폴더",
+			"identifiers": "식별자"
+		},
+		"libre": {
+			"launch": "자유 에이전트 실행…",
+			"launchHint": "⌘N · 폴더 하나, 에이전트 하나",
+			"launchIn": "{{folder}}에서 에이전트 실행",
+			"launchInHint": "마지막 선택으로 미리 채워진 실행기"
+		},
+		"project": {
+			"label": "프로젝트 · {{name}}"
+		},
+		"git": {
+			"behind_other": "커밋 {{count}}개 뒤처짐",
+			"upToDate": "최신 상태",
+			"pulled": "{{name}} — 최신 상태입니다.",
+			"ahead_other": "게시할 커밋 {{count}}개",
+			"pushed": "{{name}} — 푸시했습니다."
+		},
+		"worktree": {
+			"openEditor": "에디터에서 {{name}} 열기",
+			"launchAgent": "{{name}}에서 에이전트 실행",
+			"launchAgentHint": "Cockpit 안의 대화",
+			"terminal": "{{name}} 터미널",
+			"terminalHint": "Cockpit 안의 셸",
+			"terminalApp": "Terminal.app에서 {{name}} 열기"
+		},
+		"folder": {
+			"newAgent": "폴더에서 새 에이전트…",
+			"newAgentHint": "아무 폴더, 브랜치나 worktree 없음",
+			"dialogTitle": "에이전트를 실행할 위치…",
+			"newAgentIn": "{{folder}}에서 새 에이전트"
+		},
+		"openConfig": "설정 파일 열기",
+		"identifiers": {
+			"openPr": "PR #{{number}} 열기",
+			"onGithub": "GitHub에서",
+			"openTicket": "{{ticket}} 열기",
+			"linearTicket": "Linear 티켓"
+		},
+		"placeholder": "Worktree, 세션, 스크립트, 화면, #PR, 티켓…",
+		"noResults": "결과가 없습니다.",
+		"keys": {
+			"navigate": "이동",
+			"run": "실행",
+			"close": "닫기"
+		}
+	},
+	"review": {
+		"verdict": {
+			"merge": "병합 가능",
+			"blocking": "차단 사항 있음",
+			"changes": "변경 필요"
+		},
+		"next": {
+			"merge": "실행 중인 작업이 없습니다. 병합해도 됩니다.",
+			"changes": "지금은 실행 중인 작업이 없습니다. 지적 사항을 게시한 뒤, 작성자가 푸시하면 “재확인”을 누르세요."
+		},
+		"delivered_other": "리뷰 완료: 지적 {{count}}건 · {{verdict}}. {{next}}",
+		"see": "보기",
+		"activity": {
+			"verification": "PR #{{number}} 확인 중",
+			"review": "PR #{{number}} 리뷰 중",
+			"askedReview": "지시에 리뷰 요청이 있어 “리뷰”를 통해 카드로 전달합니다. GitHub에서 PR을 읽는 중…",
+			"reading": "GitHub에서 PR을 읽고 브랜치를 가져오는 중…",
+			"launching": "리뷰 에이전트를 실행합니다 — PR을 읽고, 완료되면 알려 드립니다.",
+			"updating": "{{branch}} 업데이트 중…",
+			"updateFailed": "업데이트하지 못했습니다 ({{error}}): 로컬 버전을 리뷰합니다.",
+			"creatingWorktree": "{{branch}}의 worktree를 생성하는 중 — 몇 분 정도 걸릴 수 있습니다."
+		},
+		"label": {
+			"verification": "확인 #{{number}}",
+			"review": "리뷰 #{{number}}"
+		},
+		"error": {
+			"noMainRepo": "이 프로젝트에 주 저장소가 설정되어 있지 않습니다.",
+			"worktreeTimeout": "15분이 지나도 {{branch}}의 worktree가 나타나지 않았습니다."
+		}
+	},
+	"blockers": {
+		"permission": {
+			"title_other": "{{tool}} — 요청 {{count}}건",
+			"anAgent": "에이전트",
+			"meta": "결정 필요"
+		},
+		"plan": {
+			"meta": "검토 필요"
+		},
+		"recheck": {
+			"title": "{{author}}님이 #{{number}}에 푸시했습니다",
+			"theAuthor": "작성자",
+			"meta": "재확인 필요",
+			"fix": "재확인"
+		},
+		"failedTask": {
+			"noReason": "사유 없음",
+			"fix": "다시 실행"
+		},
+		"ci": {
+			"meta": "CI 실패",
+			"fix": "수정"
+		}
+	},
+	"decisions": {
+		"waited": {
+			"now": "방금",
+			"minutes": "{{minutes}}분째",
+			"hours": "{{hours}}시간 {{minutes}}분째",
+			"days": "{{days}}일째"
+		}
+	},
+	"terminals": {
+		"exited": "셸 종료됨",
+		"exitedWithCode": "셸 종료됨 (코드 {{code}})"
+	},
+	"sidebar": {
+		"views": {
+			"map": "지도",
+			"today": "오늘",
+			"decisions": "결정",
+			"recap": "시각적 요약",
+			"automations": "자동화",
+			"permanence": "Permanence",
+			"overview": "개요",
+			"team": "데일리",
+			"missions": "미션",
+			"workspace": "워크스페이스",
+			"libres": "자유 에이전트",
+			"agents": "AI 에이전트",
+			"docs": "문서",
+			"delivery": "흐름",
+			"impact": "영향",
+			"observability": "관측성",
+			"worktrees": "Worktree",
+			"git": "Git",
+			"scripts": "스크립트",
+			"infra": "서버 및 컨테이너",
+			"settings": "설정"
+		},
+		"groups": {
+			"pilot": "지휘",
+			"produce": "생산",
+			"deliver": "배포",
+			"tooling": "도구"
+		},
+		"project": "프로젝트",
+		"recapFresh_other": "마지막 방문 이후 새 항목 {{count}}개",
+		"automations": {
+			"running": "자동화가 결과물을 준비하고 있습니다",
+			"nextToday": "다음 결과물이 오늘 준비됩니다"
+		},
+		"launch": {
+			"placeHere": "현재 위치",
+			"placeBranch": "새 브랜치",
+			"placeWorktree": "새 worktree",
+			"defaultModel": "이 머신의 기본 모델",
+			"title": "폴더 하나, 에이전트 하나 — cd 후 claude처럼 (⌘N)",
+			"button": "에이전트 실행",
+			"again": "지난번처럼 다시 실행",
+			"noneYet": "아직 없습니다. 첫 실행이 다음을 위해 기억됩니다.",
+			"other": "다른 폴더, 다른 설정…"
+		},
+		"top": {
+			"mapTitle": "모든 작업의 지도 (⌘⇧C)",
+			"workspaceTitle": "열린 에이전트와 터미널 (⌘⇧A)",
+			"libresTitle": "터미널에서처럼 프로젝트 밖에서 실행한 에이전트",
+			"decisionsTitle": "결정을 기다리는 항목, 해소되는 영향 순 정렬 (⌘⇧D)",
+			"recapTitle": "그림으로 보는 지금까지의 일: 에이전트 턴마다 하나의 이야기 (⌘⇧J)",
+			"recap": "요약",
+			"automationsTitle": "데일리처럼 스스로 준비되는 회의 (⌘⇧R)"
+		},
+		"search": "이동, 실행, 질문…",
+		"atelier": {
+			"title": "모든 화면, 프로젝트, 설정",
+			"name": "공방",
+			"close": "공방 닫기",
+			"subtitle": "모든 화면 · ⌘K로 검색"
+		},
+		"live": {
+			"missions_other": "미션 {{count}}개",
+			"missionsOngoing": "{{missions}} 진행 중 (⌘⇧M)",
+			"missionsWaiting_other": "{{missions}} 진행 중, {{count}}개 승인 대기 (⌘⇧M)",
+			"scripts_other": "스크립트 {{count}}개 실행 중"
+		}
+	},
+	"agents": {
+		"turn": {
+			"hookReminder": "자동 알림 (훅 {{hook}}) — 사용자의 지시가 아닙니다: {{text}}",
+			"ended": "에이전트가 종료되었습니다.",
+			"proofFilmed": "인수 테스트 촬영: 워크스페이스 브라우저에서 {{seconds}}초.",
+			"compactedManual": "요청에 따라 컨텍스트를 압축했습니다.",
+			"compactedAuto": "컨텍스트 압축: 공간 확보를 위해 대화를 요약했습니다.",
+			"resumed": "대화를 재개했습니다.",
+			"relaunchedModeKept": "{{mode}} 모드로 다시 실행했습니다 — 대화 흐름은 유지됩니다.",
+			"relaunchedModeFresh": "{{mode}} 모드로 다시 실행했습니다 — 에이전트에 아직 세션이 없어 새 대화로 시작합니다.",
+			"relaunchedModelKept": "{{model}}(으)로 다시 실행했습니다 — 대화 흐름은 유지됩니다.",
+			"relaunchedModelFresh": "{{model}}(으)로 다시 실행했습니다 — 새 대화."
+		},
+		"modes": {
+			"plan": {
+				"label": "계획",
+				"hint": "아무것도 실행하지 않고 제안만 함"
+			},
+			"default": {
+				"label": "신중",
+				"hint": "도구를 쓸 때마다 확인"
+			},
+			"acceptEdits": {
+				"label": "편집",
+				"hint": "묻지 않고 파일 편집"
+			},
+			"bypassPermissions": {
+				"label": "우회",
+				"hint": "질문도 제한도 없음 — 버려도 되는 worktree에서만 사용"
+			}
+		},
+		"models": {
+			"default": {
+				"label": "기본값",
+				"hint": "이 머신에 설정된 모델"
+			},
+			"fable": {
+				"hint": "가장 뛰어난 모델 — 사고 기능 항상 켜짐"
+			},
+			"opus": {
+				"hint": "까다로운 작업에 일반적으로 쓰는 모델"
+			},
+			"sonnet": {
+				"hint": "성능과 속도의 균형"
+			},
+			"haiku": {
+				"hint": "빠름, 간단한 작업용"
+			}
+		},
+		"review": {
+			"delivered_other": "PR #{{number}} 리뷰 완료: 지적 {{count}}건",
+			"recordFailed": "리뷰를 저장하지 못했습니다: {{error}}"
+		},
+		"see": "보기",
+		"notify": {
+			"ended": "에이전트 종료",
+			"replied": "에이전트가 답변했습니다",
+			"question": "에이전트가 질문이 있습니다",
+			"permission": "권한 요청 · {{tool}}"
+		},
+		"survivors": {
+			"title_one": "에이전트 하나가 사용자 없이 계속 작업했습니다",
+			"title_other": "에이전트 {{count}}개가 사용자 없이 계속 작업했습니다",
+			"detail_other": "Cockpit이 닫혀 있는 동안 릴레이에서 작업했습니다",
+			"done_other": "워크스페이스로 돌아왔고, 대화를 다시 불러왔습니다."
+		}
+	}
+}

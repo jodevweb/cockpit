@@ -1,1 +1,183 @@
-{}
+{
+	"orchestrator": {
+		"notAGitRepo": "`{{path}}` は git リポジトリではありません。",
+		"branchInMainRepo": "`{{branch}}` がメインリポジトリ（`{{path}}`）でチェックアウトされています。Cockpit はそこには決して書き込みません。そのリポジトリを別のブランチに切り替えれば、ミッションは専用の worktree で再開されます。",
+		"folderOnOtherBranch": "`{{path}}` はすでに存在しますが、`{{branch}}` ではなく `{{current}}` 上にあります。このフォルダを移動するか、正しいブランチに戻してください。タスクのブランチになるまで、Cockpit はそこで何も起動しません。",
+		"noBranch": "ブランチなし",
+		"noIntegrationBranch": "このミッションには統合ブランチがありません。"
+	},
+	"mission": {
+		"step": {
+			"understanding": "理解",
+			"approach": "アプローチ",
+			"split": "分割"
+		},
+		"unknown": "不明なミッション：{{id}}",
+		"unreadable": "ミッションを読み取れません：{{error}}",
+		"folderError": "ミッションフォルダ：{{error}}",
+		"writeError": "ミッションの書き込み：{{error}}",
+		"titleRequired": "ミッションにはタイトルが必要です。",
+		"deleteFailed": "{{path}} を削除できませんでした：{{error}}",
+		"reworkNeedsReason": "理由のない差し戻しでは、何を直すべきかが伝わりません。",
+		"unknownTask": "不明なタスク：{{id}}",
+		"reworkLimit": "「{{title}}」はすでに {{count}} 回差し戻されています。再起動せず、自分で引き継いでください。",
+		"note": {
+			"rework": "差し戻し {{count}}：{{reason}}",
+			"redoAfterRework": "やり直し：タスクが差し戻されました。",
+			"workFoundAtStartup": "起動時に作業が見つかりました：ブランチにコミットがあります。",
+			"resumedAfterRestart": "Cockpit の再起動後に再開しました。"
+		},
+		"journal": {
+			"taskReworked": "タスクを差し戻し",
+			"paused": "ミッションを一時停止",
+			"resumed": "ミッションを再開",
+			"tasksRecovered": "タスクを復旧",
+			"tasksRecoveredDetail": "再起動 {{relaunch}} 件、納品済み {{delivered}} 件",
+			"planApproved": "計画を承認",
+			"proposal": "提案 — {{step}}",
+			"stepApproved": "承認 — {{step}}",
+			"stepCorrected": "修正 — {{step}}",
+			"worktreesCleaned": "Worktree を整理",
+			"worktreesCleanedDetail": "{{count}} 個のフォルダを削除、ディスクを {{size}} GB 解放",
+			"deleted": "ミッションを削除",
+			"deletedDetail": "{{count}} 個の項目を消去",
+			"opened": "ミッションを開始",
+			"planSubmitted": "計画を提出",
+			"planSubmittedDetail": "タスク {{count}} 件",
+			"closed": "ミッションを完了"
+		},
+		"nothingAwaitsDecision": "{{step}}について判断待ちのものはありません：ミッションは「{{state}}」の段階です。",
+		"correctionNeedsReason": "何が間違っているかを書いてください。理由がないと、リードエージェントは同じ提案を繰り返します。",
+		"taskWithoutId": "識別子のないタスクです：実行役を割り当てられません。",
+		"blocked": {
+			"unknownBase": "このタスクは `{{base}}` から始まっていますが、これはこの計画のどのタスクのブランチでもありません。統合ブランチから始まるように計画し直してください。",
+			"baseExhausted": "起点となるタスク（`{{base}}`）は差し戻し回数を使い切りました：納品されることはありません。"
+		}
+	},
+	"panel": {
+		"lens": {
+			"breaks": "何が壊れるか",
+			"deployed": "デプロイ後",
+			"users": "誰が使うか"
+		},
+		"folderError": "レビューパネルフォルダ：{{error}}",
+		"unreadable": "レビューパネルを読み取れません：{{error}}",
+		"writeError": "レビューパネルの書き込み：{{error}}",
+		"alreadyRunning": "この変更のレビューパネルはすでに実行中です。",
+		"changeGone": "この変更はもう存在しません：マージリクエストがクローズされたか、ブランチが削除されました。",
+		"noFolder": "エージェントを実行するフォルダがありません。",
+		"silentVoice": "{{lens}}：{{error}}",
+		"noVoice": "どの観点からも応答がありませんでした。{{details}}",
+		"journal": {
+			"title": "変更に対するレビューパネル",
+			"detail": "{{verdict}} — 意見の相違 {{count}} 件"
+		},
+		"mergeFailed": "統合が完了しませんでした（{{error}}）。個々の意見はそのまま読めます。"
+	},
+	"review": {
+		"noReview": "この PR のレビューはありません。",
+		"noRepo": "設定でプロジェクトの GitHub リポジトリを入力してください。",
+		"prNotFound": "{{repo}} に PR #{{number}} が見つかりません。",
+		"noNewCommit": "ラウンド {{round}} 以降コミットがありません：PR は動いていません。",
+		"noPreviousReview": "以前のレビューがありません：全体レビューを行います。",
+		"noPrNumber": "レビュー対象の PR が示されていません。"
+	},
+	"prompts": {
+		"group": {
+			"review": "レビュー",
+			"visual": "ビジュアルレポート",
+			"delivery": "デリバリー",
+			"fixes": "修正",
+			"quality": "品質",
+			"investigation": "調査",
+			"mine": "自分のプロンプト"
+		},
+		"label": {
+			"review": "PR の全体コードレビュー",
+			"reviewFollowup": "PR の修正を確認",
+			"visual": "画像付きレポート",
+			"ship": "確認してからコミット + プッシュ",
+			"reviewThenShip": "レビューしてからコミット + プッシュ",
+			"openPr": "プルリクエストを作成",
+			"reviewComments": "レビュー指摘に対応",
+			"prHealth": "PR のヘルスチェック",
+			"ciRed": "CI が失敗している",
+			"conflicts": "ベースとのコンフリクトを解消",
+			"selfQa": "実施内容の QA",
+			"conventions": "規約を確認",
+			"tests": "テストを補完",
+			"prodError": "本番エラーを調査",
+			"ticket": "チケットを実装"
+		},
+		"configFolderError": "設定フォルダ：{{error}}",
+		"serializeError": "シリアライズ：{{error}}",
+		"writeError": "prompts.toml の書き込み：{{error}}",
+		"labelAndTextRequired": "プロンプトにはラベルと本文が必要です。"
+	},
+	"permissions": {
+		"unreadableAnswer": "回答を読み取れません：{{error}}",
+		"writeError": "回答の書き込み：{{error}}"
+	},
+	"codex": {
+		"turnFailed": "ターンが失敗しました。"
+	},
+	"agent": {
+		"notActive": "このエージェントはもう有効ではありません。",
+		"inputUnavailable": "エージェントの入力が利用できません。",
+		"outputUnavailable": "エージェントの出力が利用できません。",
+		"emptyMessage": "メッセージが空です。",
+		"claudeNotFound": "このマシンに `claude` CLI が見つかりません。",
+		"claudeTimeout": "Claude が {{seconds}} 秒以内に応答しませんでした。",
+		"claudeLaunchError": "Claude の起動：{{error}}",
+		"claudeError": "Claude：{{error}}",
+		"claudeStopped": "Claude が停止しました：{{detail}}",
+		"claudeUnreadable": "Claude の応答を読み取れません。",
+		"folderNotFound": "フォルダが見つかりません：{{path}}",
+		"oneShotProtocol": "エンジン「{{engine}}」は `{{protocol}}` プロトコルを宣言しています：単発の質問はデフォルトのプロトコルでのみ可能です。",
+		"launchError": "エージェントの起動：{{error}}",
+		"agentError": "エージェント：{{error}}",
+		"oneShotTimeout": "20 分経ってもエージェントから何も返ってこなかったため、分析を中止しました。",
+		"agentStopped": "エージェントが停止しました：{{detail}}",
+		"agentUnreadable": "エージェントの応答を読み取れません：{{output}}",
+		"noReason": "理由の記載なし",
+		"agentFailed": "エージェントが失敗しました：{{reason}}",
+		"agentWroteNothing": "エージェントは何も書きませんでした。",
+		"memoryCeiling": "マシンのメモリ使用率が {{ceiling}} % を超えています：下回るまで新しいエージェントは起動しません。不要なものを閉じるか、「設定 → ミッション」で上限を引き上げてください。",
+		"memoryCeilingTurn": "マシンのメモリ使用率が {{ceiling}} % を超えています：下回るまで次のターンは待機します。",
+		"unknownProtocol": "エンジン「{{engine}}」は `{{protocol}}` プロトコルを宣言していますが、Cockpit はまだこれに対応していません。実装済み：{{known}}。",
+		"protocolNoMission": "`{{protocol}}` プロトコルはまだミッションツールに対応していません：このエンジンはリードとしても実行役としても、まだミッションで使えません。",
+		"claudeNotFoundHint": "`claude` CLI が見つかりません。インストールするか、~/.local/bin、~/.claude/local、/opt/homebrew/bin のいずれかにあるか確認してください。",
+		"noBinary": "エンジン「{{engine}}」はバイナリを宣言していません。Cockpit が自動で見つけられるのは `claude` のみです。",
+		"codexNeedsMessage": "`codex-exec` を開始するにはメッセージが必要です：空のままでは開始できません。",
+		"geminiNeedsMessage": "`gemini-stream-json` を開始するにはメッセージが必要です：空のままでは開始できません。",
+		"geminiNoResume": "`gemini-stream-json` は会話を再開できません：その方法を記した資料がありません。新しいエージェントを起動してください。",
+		"bridgeUnavailable": {
+			"title": "権限ブリッジを利用できません",
+			"subject": "Node が見つかりません",
+			"detail": "エージェントの権限リクエストや質問がインターフェースに届きません。復旧するには Node をインストールしてください（`brew install node`）。エージェントはモードに従って動作し続けます。"
+		},
+		"sandboxNoRuntimeHint": "コンテナ分離が有効ですが、ランタイム（`orb` または `docker`）がインストールされていません。「設定 → ミッション」で無効にするか、いずれかをインストールしてください。",
+		"sandboxNoRuntime": "コンテナ分離が有効ですが、ランタイム（`orb` または `docker`）がインストールされていません。",
+		"sandboxImageFailed": "コンテナ分離が有効ですが、イメージを準備できませんでした：{{error}}",
+		"firstMessageError": "最初のメッセージの送信：{{error}}",
+		"silentDeath": "プロセスが応答を書かずに停止しました。出力にも標準エラーにも何も残っていません。",
+		"journal": {
+			"diedBeforeFirstAnswer": "最初の応答前にエージェントが停止"
+		},
+		"sendError": "メッセージの送信：{{error}}",
+		"noThreadYet": "このエージェントにはまだ会話の識別子がありません — 最初の応答がまだ届いていない可能性があります。",
+		"resumeTurnError": "ターンの再開：{{error}}",
+		"cannotInterrupt": "このエンジンはターンを終了せずに中断できません。「停止」を使ってください。",
+		"interruptError": "中断：{{error}}",
+		"noControlChannel": "このエンジンには制御チャネルがありません。",
+		"step": {
+			"stoppedFromCockpit": "Cockpit から停止しました。",
+			"detached": "Cockpit を閉じました。エージェントはウィンドウなしで作業を続けます。",
+			"cockpitClosed": "Cockpit を閉じました。",
+			"detachedFinished": "Cockpit が閉じている間に、切り離されたエージェントが終了しました。",
+			"detachedStopped": "Cockpit が閉じている間に、切り離されたエージェントが停止しました。",
+			"reattached": "Cockpit の起動時に動作中のものが見つかりました。",
+			"lastTurnFailed": "エンジンが最後のターンをエラーとして返しました。"
+		}
+	}
+}

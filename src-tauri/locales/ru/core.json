@@ -1,1 +1,455 @@
-{}
+{
+	"error": {
+		"missingCredential": "{{service}} не настроен — добавьте его токен в настройках.",
+		"network": "Сеть: {{error}}"
+	},
+	"accounts": {
+		"claudeNotFound": "CLI `claude` не найден на этой машине.",
+		"cliLaunch": "Запуск CLI: {{error}}",
+		"cliNoAnswer": "CLI не ответил.",
+		"cliUnreadable": "Не удаётся прочитать ответ CLI.",
+		"duplicateId": "Два аккаунта используют один идентификатор «{{id}}»: именно он их различает.",
+		"missingDir": "У аккаунта «{{id}}» нет папки: именно она отделяет его от остальных.",
+		"sameAsHome": "Аккаунт «{{id}}» указывает на папку этой машины: два аккаунта оказались бы одним и тем же.",
+		"createDir": "Создание {{path}}: {{error}}",
+		"saveConfig": "Сохранение конфигурации: {{error}}"
+	},
+	"libre": {
+		"folderNotFound": "Папка не найдена: {{path}}",
+		"branchNameRequired": "Дайте ветке агента название.",
+		"unknownPlace": "Неизвестное расположение: {{place}}",
+		"worktreeDirty": "В worktree есть незакоммиченные изменения: закоммитьте их или выберите «Отбросить всё». ({{error}})"
+	},
+	"mcp": {
+		"noServers": "Этот репозиторий не объявляет ни одного MCP-сервера.",
+		"blockerLocal": "локальный адрес: внутри контейнера этот адрес указывает на контейнер, а не на машину",
+		"blockerNotInImage": "`{{command}}` нет в образе изоляции",
+		"blockerOauth": "авторизация OAuth: она хранится в связке ключей машины, которой нет в контейнере"
+	},
+	"tasks": {
+		"configDir": "Папка конфигурации: {{error}}",
+		"serialize": "Сериализация задач: {{error}}",
+		"write": "Запись задач: {{error}}",
+		"titleRequired": "У задачи должно быть название."
+	},
+	"qa": {
+		"fileUnreadable": "Не удаётся прочитать файл: {{error}}",
+		"fileTooLarge": "Файл слишком большой для предпросмотра ({{size}} МБ).",
+		"readFailed": "Не удаётся прочитать: {{error}}"
+	},
+	"proof": {
+		"unavailable": "Видеодоказательство недоступно",
+		"ffmpegMissing": "ffmpeg не найден",
+		"ffmpegHint": "Скриншоты QA сохранены, но видео из них не собирается. Установите ffmpeg (`brew install ffmpeg`), чтобы оно снова появилось под находками."
+	},
+	"runner": {
+		"dirNotFound": "Каталог не найден: {{path}}",
+		"launchFailed": "Не удаётся запустить: {{error}}",
+		"unknownJob": "Неизвестное задание"
+	},
+	"terminal": {
+		"folderNotFound": "Папка не найдена: {{path}}",
+		"open": "Открытие терминала: {{error}}",
+		"shellLaunch": "Запуск оболочки {{shell}}: {{error}}",
+		"read": "Чтение терминала: {{error}}",
+		"writeSetup": "Запись в терминал: {{error}}",
+		"inactive": "Этот терминал больше не активен.",
+		"write": "Запись в терминал: {{error}}",
+		"resize": "Изменение размера: {{error}}"
+	},
+	"tickets": {
+		"noTracker": "Трекер задач не настроен: укажите токен Linear, проект GitLab или репозиторий GitHub.",
+		"linearTeamMissing": "Не указан идентификатор команды Linear: введите его в Настройки → Команда. Это UUID, видимый в URL настроек команды, а не ключ-префикс задач."
+	},
+	"relay": {
+		"settingUnreadable": "Не удаётся прочитать настройку: {{error}}",
+		"dir": "Папка ретранслятора: {{error}}",
+		"file": "Файл ретранслятора: {{error}}",
+		"launch": "Запуск отсоединённого агента: {{error}}"
+	},
+	"sandbox": {
+		"buildDir": "папка сборки: {{error}}",
+		"writeDockerfile": "запись Dockerfile: {{error}}",
+		"imageMissing": "образ «{{image}}» недоступен на этой машине. Соберите или скачайте его сами либо оставьте поле пустым в Настройки → Миссии, чтобы использовать образ, который Cockpit умеет собирать.",
+		"claudeNotFound": "CLI `claude` не найден на этой машине."
+	},
+	"sessions": {
+		"todoUpdate": "обновление списка задач",
+		"noPrompt": "Сессия без промпта",
+		"notFound": "Сессия не найдена: {{path}}",
+		"unknownStatus": "неизвестно"
+	},
+	"executions": {
+		"outputTruncated": "вывод размером {{bytes}} байт, выдержка выше",
+		"turnEnded": "Ход завершён.",
+		"turnResumed": "Следующий ход перезапущен.",
+		"agentDone": "Агент завершил работу.",
+		"orphaned": "Cockpit остановился во время этого запуска."
+	},
+	"usage": {
+		"claudeNotFound": "CLI `claude` не найден.",
+		"cliRefused": "CLI отклонил запрос.",
+		"limitsRead": "Чтение лимитов: {{error}}",
+		"limits": {
+			"session": "Текущая сессия",
+			"week": "Эта неделя"
+		}
+	},
+	"monitor": {
+		"localRepoSource": "{{label}} · локальный репозиторий",
+		"repoHere": "Здесь это «{{slug}}».",
+		"repoWrite": "Напишите «{{slug}}»",
+		"repoFixInSettings": "Исправьте в Настройки → Проекты.",
+		"repoMissingOwner": "GitHub-репозиторий этого проекта указан как «{{repo}}»: не хватает владельца. Ожидается «владелец/репозиторий», как в URL репозитория."
+	},
+	"metrics": {
+		"noProperties": "Не заявлено ни одного свойства: ничто из того, что должно оставаться верным в этом репозитории, не проверяется, и оценка влияния остаётся интерпретацией.",
+		"uncalibrated": "Ни одно свойство не проверено на исправлениях репозитория: ничто не показывает, что они могут нарушиться, а свойство, которое не может нарушиться, успокаивает, ничего не гарантируя.",
+		"decorative": "Свойств, не поймавших ничего на реальных исправлениях: {{count}}. Переформулируйте или удалите их: декоративное ограждение отнимает внимание, которого потом не хватает в другом месте.",
+		"idleLessons": "Уроков, ни разу не переданных агенту: {{idle}} из {{total}}. Либо их область слишком узкая, либо их не стоило сохранять.",
+		"noTakeBack": "За десятки поставок не зафиксировано ни одной переделки вручную. Это возможно — но скорее признак того, что, возможно, никто больше не проверяет.",
+		"takeBackRate": "Каждая вторая поставка переделывается вручную ({{rate}}%). Чего не хватает агентам, можно прочитать в блокноте: смотрите туда, прежде чем добавлять ограждения.",
+		"longHaul": "{{part}}% диалогов потребовали более десяти уточнений. Агент, которого перезапускают десять раз, — это агент, который начал, не зная, чего от него ждут."
+	},
+	"tour": {
+		"since": "с {{ref}}",
+		"sinceBefore": "с момента до {{sha}}",
+		"sinceLastCommit": "с последнего коммита",
+		"notGit": "Эта папка не является git-репозиторием: обходить нечего.",
+		"noChanges": "Нет изменений для обхода.",
+		"unreadableStory": "Не удаётся прочитать полученный обход — попробуйте ещё раз."
+	},
+	"voiceInput": {
+		"noMic": "На этой машине нет микрофона.",
+		"mic": "Микрофон: {{error}}",
+		"unsupportedFormat": "Неподдерживаемый формат микрофона: {{format}}",
+		"micDenied": "Доступ к микрофону запрещён: {{error}} — проверьте Системные настройки → Конфиденциальность → Микрофон.",
+		"notOpen": "Микрофон не был открыт.",
+		"noKey": "Нет ключа ElevenLabs: сохраните его в голосовом меню.",
+		"unreachable": "ElevenLabs недоступен: {{error}}",
+		"refused": "Транскрипция отклонена ({{status}}): {{body}}",
+		"unreadable": "Не удаётся прочитать транскрипцию: {{error}}",
+		"saveShortcut": "Сохранение сочетания клавиш: {{error}}"
+	},
+	"speech": {
+		"invalidKey": "Этот ключ не похож на API-ключ ElevenLabs.",
+		"keychainRefused": "Связка ключей отклонила ключ: {{error}}",
+		"female": "женский",
+		"male": "мужской",
+		"french": "Французский",
+		"noKey": "В связке ключей нет ключа ElevenLabs.",
+		"unreachable": "ElevenLabs недоступен: {{error}}",
+		"keyRefused": "ElevenLabs отклонил ключ ({{status}}).",
+		"noVoice": "В этом аккаунте ElevenLabs нет голосов.",
+		"invalidVoice": "Недопустимый голос ElevenLabs: {{voice}}",
+		"refused": "ElevenLabs отказал ({{status}}): {{body}}",
+		"audioFile": "Аудиофайл: {{error}}"
+	},
+	"system": {
+		"pathNotFound": "Путь не найден: {{path}}",
+		"noEditor": "Редактор не настроен: укажите его в Настройки → Рабочее место.",
+		"terminalFailed": "Не удалось управлять Terminal.app.",
+		"emptyPrompt": "Этот промпт пуст.",
+		"linkNotOpenable": "Ссылку нельзя открыть: {{url}}",
+		"linkFailed": "Не удалось открыть ссылку: {{url}}",
+		"pathNotOpenable": "Путь нельзя открыть: {{path}}",
+		"fileNotFound": "Файл не найден: {{path}}",
+		"noApp": "Нет приложения, которое может открыть этот файл: {{path}}",
+		"pathNotRevealable": "Путь нельзя показать: {{path}}",
+		"packageJsonMissing": "package.json не найден в этом репозитории.",
+		"packageJsonUnreadable": "Не удаётся прочитать package.json: {{error}}",
+		"generalGroup": "общее",
+		"dockerDown": "Docker не отвечает — демон запущен?",
+		"unknownProcess": "Неизвестный процесс."
+	},
+	"notebook": {
+		"dir": "Папка блокнота: {{error}}",
+		"unreadable": "Не удаётся прочитать блокнот: {{error}}",
+		"write": "Запись блокнота: {{error}}",
+		"emptyLesson": "Пустой урок ничему не учит.",
+		"handbackGone": "Этой переделки здесь больше нет.",
+		"nothingToLearn": "Из этой переделки нечего сохранить — это было разовое исправление."
+	},
+	"files": {
+		"folderNotFound": "Папка не найдена: {{path}}",
+		"invalidPath": "Недопустимый путь к файлу.",
+		"folderMissing": "Папка не существует: {{path}}",
+		"isFolder": "Этот путь указывает на папку.",
+		"writeFile": "Запись {{path}}: {{error}}",
+		"replaceFile": "Замена {{path}}: {{error}}",
+		"attachmentsDir": "Папка вложений: {{error}}",
+		"tooManySameName": "Слишком много вложений с одинаковым именем в этом диалоге.",
+		"fileUnreadable": "Не удаётся прочитать файл: {{error}}",
+		"folderNotAttachable": "Папку нельзя прикрепить: выберите файлы.",
+		"fileTooLarge": "{{name}} весит {{size}} МБ — больше {{max}} МБ лучше передать агенту путь к файлу.",
+		"copyAttachment": "Копирование вложения: {{error}}",
+		"badEncoding": "Не удаётся прочитать вложение: неожиданная кодировка.",
+		"attachmentTooLarge": "Это вложение весит {{size}} МБ — больше {{max}} МБ сохраните его и передайте путь.",
+		"emptyAttachment": "Пустое вложение.",
+		"writeAttachment": "Запись вложения: {{error}}"
+	},
+	"git": {
+		"commandFailed": "git {{args}} завершился с ошибкой: {{error}}",
+		"detachedHead": "Detached HEAD: из этой папки нечего публиковать — нет ветки.",
+		"commitMessageRequired": "Коммиту нужно сообщение.",
+		"noWorktree": "git не сообщает ни одного worktree.",
+		"pathMissing": "{{path}} не существует.",
+		"invalidBranchName": "«{{name}}» — недопустимое имя ветки.",
+		"branchExists": "Ветка «{{name}}» уже существует.",
+		"branchCreated": "Ветка {{name}} создана от {{base}}.",
+		"noCommonAncestor": "У `{{branch}}` и `{{base}}` нет общего предка — сравнивать нечего."
+	},
+	"browser": {
+		"unreachable": "Браузер недоступен: {{error}}",
+		"unreadable": "Не удаётся прочитать ответ браузера: {{error}}",
+		"notOpen": "Этот браузер не открыт.",
+		"closed": "Браузер закрылся.",
+		"notRunning": "Браузер этого рабочего пространства не запущен.",
+		"noPage": "Нет открытых страниц.",
+		"pageConnection": "Подключение к странице отклонено: {{error}}",
+		"pageQuery": "Запрос к странице: {{error}}",
+		"pageNoAnswer": "Страница не ответила.",
+		"noPort": "Не удаётся зарезервировать порт для браузера.",
+		"notFound": "Браузер не найден: установите Chrome, Chromium, Edge или Brave либо укажите свой в настройках рабочего процесса.",
+		"startFailed": "Браузер не запустился: {{error}}",
+		"startedNoAnswer": "Браузер запустился, но не отвечает.",
+		"noDebugAddress": "Браузер не сообщает свой адрес отладки.",
+		"connection": "Подключение к браузеру отклонено: {{error}}"
+	},
+	"config": {
+		"connectorMissing": {
+			"github": "репозиторий (`github.repo`) и токен или сессия `gh`",
+			"linear": "токен Linear",
+			"gitlab": "токен GitLab (область `api`) и путь к проекту",
+			"sentry": "токен Sentry",
+			"betterstack": "токен Better Stack",
+			"trigger": "секретный ключ Trigger.dev",
+			"railway": "токен Railway",
+			"stripe": "ключ Stripe"
+		},
+		"secretHint": {
+			"github": "Классический токен `repo` — или оставьте пустым, Cockpit использует `gh auth token`.",
+			"sentry": "User auth token с областями `project:read`, `event:read`, `event:write`.",
+			"linear": "Личный API-ключ (Settings → API → Personal API keys).",
+			"gitlab": "Личный токен с областью `api` — `read_api` достаточно для чтения, но не для изменения состояния задачи.",
+			"trigger": "Секретный ключ окружения — `tr_dev_…`, `tr_prod_…`, `tr_staging_…` в зависимости от окружения (проект → API keys), а не Personal Access Token `tr_pat_…` от CLI.",
+			"railway": "Токен аккаунта или рабочего пространства (Account Settings → Tokens) — для токена уровня проекта нужно также указать идентификатор проекта.",
+			"betterstack": "API-токен Uptime (мониторы и инциденты).",
+			"betterstackTelemetry": "«Global API token» (Better Stack → API tokens → Global API tokens). Токен команды может перечислять дашборды, но не может открыть доступ к данным: значения останутся пустыми.",
+			"betterstackClickhouseHost": "Необязательно: заполняйте, только если токен KPI не может сам открыть доступ. Better Stack → Integrations → SQL API (например, eu-nbg-2-connect.betterstackdata.com).",
+			"betterstackClickhouseUsername": "Имя пользователя SQL API, рядом с хостом.",
+			"betterstackClickhousePassword": "Пароль SQL API — Better Stack больше не показывает его после создания.",
+			"stripe": "Ограниченный ключ только для чтения `rk_…` (Developers → API keys → Restricted keys): публикуемый ключ `pk_…` серверный API отклоняет.",
+			"sandboxOauthToken": "Выполните `claude setup-token` из Настройки → Изоляция и вставьте показанный токен — один раз, он действует год. Никогда не используйте токен хоста: контейнер не может читать связку ключей macOS."
+		},
+		"secretLabel": {
+			"sandboxOauthToken": "Изолированный аккаунт (Claude)"
+		},
+		"homeAccount": "Аккаунт этой машины",
+		"defaultEnvironment": "По умолчанию",
+		"worktreeHostileValue": "Значение отклонено в команде worktree (символ оболочки): {{value}}",
+		"roles": {
+			"master": "Ведущий агент",
+			"backend": "Бэкенд-разработка",
+			"frontend": "Фронтенд-разработка",
+			"qa": "Тестирование и QA",
+			"review": "Ревью"
+		}
+	},
+	"integrations": {
+		"githubRepoMissing": "`github.repo` не настроен.",
+		"telemetryTokenMissing": "Нет токена телеметрии.",
+		"unreadableResponse": "Не удаётся прочитать ответ: {{error}}",
+		"unreadableResponseBody": "Не удаётся прочитать ответ ({{error}}): {{body}}",
+		"sentryNoOrg": "Этот токен Sentry не даёт доступа ни к одной организации.",
+		"sentrySeveralOrgs": "Доступно несколько организаций Sentry ({{orgs}}) — выберите одну в Настройки → Организация Sentry.",
+		"linearNotCreated": "Linear не создал задачу.",
+		"sentryInvalidIssue": "Недопустимый идентификатор задачи Sentry: {{id}}",
+		"kpiTokenMissing": "Дашборды KPI находятся на telemetry.betterstack.com, который токен Uptime не покрывает. Добавьте токен «Better Stack · KPI» в настройках.",
+		"telemetryTeamToken": "Этот токен Telemetry — токен команды: он перечисляет дашборды, но не может открыть доступ к данным. Нужен «Global API token» (Better Stack → API tokens → Global API tokens) с правом записи.",
+		"telemetryReadOnly": "Этот глобальный токен только для чтения: открытие доступа к данным считается записью. Два варианта — пересоздайте токен без флажка «read-only» или вставьте существующие учётные данные SQL API (Better Stack → Integrations → SQL API) в три поля ClickHouse в настройках.",
+		"betterstackConnection": "Подключение Better Stack {{status}} — {{body}}",
+		"betterstackNoCredentials": "Better Stack ответил без пригодных учётных данных для подключения.",
+		"chartNoQuery": "Этот график не предоставляет запроса.",
+		"issueNotFound": "Задача {{id}} не найдена.",
+		"linearUpdateRefused": "Linear отклонил изменение.",
+		"priority": {
+			"urgent": "Срочно",
+			"high": "Высокий",
+			"medium": "Средний",
+			"low": "Низкий",
+			"none": "Без приоритета"
+		},
+		"githubNoLogin": "GitHub не сообщает, кто вошёл в систему.",
+		"githubRepoSet": "Укажите `github.repo` (например, acme/monorepo) в настройках.",
+		"githubRepoFormat": "Укажите `github.repo` (например, acme/monorepo).",
+		"triggerUnknownEnv": "Неизвестное окружение Trigger.dev: {{name}}",
+		"triggerPatToken": "Trigger.dev ожидает секретный ключ окружения, а не Personal Access Token `tr_pat_…` (от CLI). Dashboard → ваш проект → окружение → API keys.",
+		"railwayNoProject": "Этот токен Railway не перечисляет ни одного проекта (так бывает с токенами уровня проекта). Откройте проект в дашборде и вставьте идентификатор из URL `railway.com/project/<идентификатор>` в Настройки → Проект Railway.",
+		"railwaySeveralProjects": "Доступно несколько проектов Railway ({{projects}}) — выберите один в Настройки → Проект Railway.",
+		"stripePublishableKey": "Stripe отклоняет публикуемые ключи (`pk_…`): серверному API нужен секретный ключ. Создайте ограниченный ключ только для чтения (`rk_…`) в Developers → API keys → Restricted keys с доступом `read` к Events.",
+		"githubUpdateRefused": "GitHub отклонил изменение ({{status}}).",
+		"gitlabProjectSet": "Укажите путь к проекту GitLab (например, group/project) в настройках.",
+		"gitlabUpdateRefused": "GitLab отклонил изменение ({{status}}).",
+		"noCiRun": "Нет запусков CI на «{{branch}}».",
+		"runNoId": "У полученного запуска нет идентификатора.",
+		"githubRerunRefused": "GitHub отклонил перезапуск ({{status}}): {{body}}",
+		"githubLabelRefused": "GitHub отклонил метку ({{status}}): {{body}}",
+		"githubUnlabelRefused": "GitHub отказался снять метку ({{status}}).",
+		"githubCommentRefused": "GitHub отклонил комментарий ({{status}}): {{body}}",
+		"prTitleRequired": "У pull request должно быть название.",
+		"prSameAsBase": "`{{branch}}` — базовая ветка: предлагать нечего.",
+		"prRefused": "PR отклонён ({{status}}): {{message}}",
+		"githubCloseRefused": "GitHub отказался закрыть ({{status}})."
+	},
+	"lib": {
+		"connectorMissing": {
+			"claude": "CLI `claude` на этой машине",
+			"node": "Node — от него зависят мосты разрешений и инструментов миссий",
+			"docker": "Docker на этой машине"
+		},
+		"config": {
+			"serialize": "Сериализация конфигурации: {{error}}",
+			"invalid": "Недопустимая конфигурация: {{error}}"
+		},
+		"trigger": {
+			"envNameRequired": "Дайте окружению название.",
+			"envKeyRequired": "Новому окружению нужен секретный ключ (`tr_prod_…` / `tr_dev_…`)."
+		},
+		"project": {
+			"unknown": "Неизвестный проект: {{id}}",
+			"notFound": "Проект «{{id}}» не найден.",
+			"serialize": "Сериализация проекта: {{error}}",
+			"invalid": "Недопустимый проект: {{error}}",
+			"folderRequired": "Укажите папку для этого проекта.",
+			"createDir": "Создание папки: {{error}}",
+			"dirCreated": "Папка создана",
+			"pathMissing": "`{{path}}` не существует. Отметьте «создать папку», если вы этого хотите.",
+			"gitInitialized": "Git-репозиторий инициализирован",
+			"repoNameRequired": "Дайте создаваемому репозиторию название.",
+			"localRepoRequired": "Прежде чем подключать сервер, нужен локальный git-репозиторий.",
+			"noGhSession": "Нет сессии `gh`: выполните `gh auth login`.",
+			"noGhToken": "Нет токена для аккаунта «{{account}}». Выполните `gh auth login`.",
+			"publicRepoCreated": "Публичный репозиторий GitHub создан",
+			"privateRepoCreated": "Приватный репозиторий GitHub создан",
+			"mainRepoRequired": "Проекту нужен основной репозиторий.",
+			"notGitRepo": "`{{path}}` не является git-репозиторием. Cockpit может создать его за вас: используйте «Подготовить», а не делайте это вручную.",
+			"keepOne": "В Cockpit должен остаться хотя бы один проект — отредактируйте этот, а не удаляйте его."
+		},
+		"git": {
+			"mainRepoInvalid": "`{{path}}` не является git-репозиторием — исправьте `general.main_repo` в настройках.",
+			"branch": "Ветка",
+			"freeAgent": "Свободный агент",
+			"freeAgentArchive": "Очистка свободного агента"
+		},
+		"shortcut": {
+			"unreadable": "Не удаётся прочитать сочетание клавиш: {{error}}",
+			"taken": "Уже занято другим приложением или отклонено macOS ({{error}}).",
+			"refused": "Сочетание клавиш отклонено."
+		},
+		"github": {
+			"repoFormat": "Укажите `github.repo` (например, acme/monorepo).",
+			"prFromBase": "`{{branch}}` — базовая ветка: создайте отдельную ветку, прежде чем открывать PR.",
+			"prRefused": "PR отклонён ({{status}}): {{message}}",
+			"prCreation": "Создание PR",
+			"repoOwnerFormat": "`github.repo` должен иметь вид owner/repo.",
+			"mergeRefused": "Слияние отклонено ({{status}}): {{message}}",
+			"prMerge": "Слияние PR",
+			"prTitleRequired": "У pull request должно быть название."
+		},
+		"permanence": {
+			"commentAllowed": "Комментарии в PR разрешены",
+			"commentWithdrawn": "Разрешение комментировать PR отозвано"
+		},
+		"hygiene": {
+			"mainRepo": "основной репозиторий",
+			"dirty": "незакоммиченных изменений: {{count}}",
+			"unpushed": "неотправленных коммитов: {{count}}",
+			"prMerged": "PR слит",
+			"prClosed": "PR закрыт без слияния",
+			"prOpen": "PR открыт",
+			"noPr": "нет известного PR"
+		},
+		"worktree": {
+			"buildsPurged": "Сборки удалены",
+			"freed": "{{size}} возвращено на диск"
+		},
+		"units": {
+			"gb": "{{n}} ГБ",
+			"mb": "{{n}} МБ",
+			"kb": "{{n}} КБ"
+		},
+		"interrupted": {
+			"scan": "Сканирование прервано: {{error}}",
+			"read": "Чтение прервано: {{error}}",
+			"compute": "Вычисление прервано: {{error}}",
+			"walk": "Обход файлов прерван: {{error}}"
+		},
+		"window": {
+			"notification": "Уведомление: {{error}}",
+			"monitor": "Монитор: {{error}}",
+			"window": "Окно: {{error}}"
+		},
+		"budget": {
+			"reason": "Израсходовано {{total}} токенов при лимите {{budget}}. Миссия приостановлена: её работа цела, возобновите её, если превышение было ожидаемым.",
+			"paused": "Миссия приостановлена — достигнут лимит"
+		},
+		"automationNotFound": "Автоматизация не найдена.",
+		"mission": {
+			"ticketReferenceRequired": "Вставьте URL или идентификатор задачи.",
+			"unknownTask": "Неизвестная задача.",
+			"fullReviewRequested": "Запрошено полное ревью.",
+			"workerStopped": "Исполнитель остановлен: задача перезапустится, когда миссия возобновится.",
+			"stopped": "Миссия остановлена. Ветки и worktrees сохранены.",
+			"agentsUnavailable": "Реестр агентов недоступен.",
+			"awaitingAgreement": "Ничего не начнётся, пока вы не согласуете декомпозицию: сначала одобрите каждый этап.",
+			"unknownRole": "Неизвестная роль: {{role}}",
+			"workerWorktreeFailed": "Невозможно создать worktree: {{error}}. Исполнитель не запущен — основной репозиторий не место для миссии.",
+			"coexistenceUnchecked": "Совместимость не проверена",
+			"workerLaunched": "Исполнитель запущен",
+			"ticketNoId": "У этой задачи нет читаемого идентификатора.",
+			"alreadyOpen": "Миссия по {{identifier}} уже открыта: возвращаемся к ней, а не открываем вторую.",
+			"openedGuided": "Миссия по {{identifier}} открыта: ведущий агент читает задачу, а вы читаете её вместе с ним.",
+			"opened": "Миссия по {{identifier}} открыта, ведущий агент анализирует задачу.",
+			"nodeMissing": "Node не найден на этой машине: инструменты миссий работают через MCP-мост, который он запускает. Установите Node (`brew install node`), затем перезапустите миссию. Обычные агенты продолжают работать.",
+			"integrationWorktreeFailed": "Невозможно создать интеграционный worktree для `{{branch}}`: {{error}}. Ведущий агент не будет запущен в основном репозитории.",
+			"masterLaunched": "Ведущий агент запущен",
+			"unclearVerdict": "{{tasks}} вернули отчёт без читаемого вердикта: нельзя сказать, проходит ли работа. Перезапустите проверку и попросите завершить её `VERDICT: ok`, `concerns` или `blocking`. Если вы отказываетесь от её мнения, отметьте задачу как заброшенную — это будет решение, а не недосмотр.",
+			"blockingVerdict": "{{tasks}} вернули блокирующий вердикт. Исправьте то, что критикуется, затем перезапустите проверку: её новый вердикт снимет отказ. Если считаете критику необоснованной, отправьте задачу обратно через `rework` и скажите об этом.",
+			"unintegrated": "Задач не в `{{branch}}`: {{count}} — {{tasks}}. Интегрируйте их или отметьте как заброшенные, если отказываетесь от их работы.",
+			"launchSuspendedQuota": "Запуск приостановлен — мало квоты",
+			"quotaFloor": "При остатке квоты ниже {{floor}}% новые задачи не запускаются.",
+			"launchSuspended": "Запуск приостановлен",
+			"tooManyWorkers": "На машине уже работают исполнители: {{count}}",
+			"taskWithoutId": "Задача без идентификатора: перепланируйте миссию.",
+			"taskBlocked": "Задача заблокирована",
+			"worktreeFailed": "Невозможно создать worktree: {{error}}",
+			"noWorkerAttached": "Исполнитель не привязан: запуск не удался. Перезапустите задачу.",
+			"workerDiedSilent": "Исполнитель остановился, ничего не сделав — запуск отклонён?",
+			"workerOtherBranch": "Исполнитель ушёл на другую ветку",
+			"workerOtherBranchDetail": "Коммитов: {{count}} на `{{actual}}`, а не на `{{expected}}`.",
+			"workerOtherBranchNote": "Его работа на `{{actual}}` (коммитов: {{count}}), а не на `{{expected}}`: интегрировать нужно её.",
+			"workerDoneNoCommit": "Исполнитель завершил работу без коммитов в своей ветке.",
+			"workerDoneOneCommit": "Исполнитель завершил работу — 1 коммит.",
+			"workerDoneCommits": "Исполнитель завершил работу — коммитов: {{count}}.",
+			"checkNoVerdict": "Проверка без вердикта",
+			"checkNoVerdictDetail": "Её отчёт не содержит читаемого вывода: Cockpit не может сказать, проходит ли работа. Перезапустите её или решите вручную.",
+			"checkBlocking": "Блокирующая проверка",
+			"checkBlockingDetail": "Pull request останется закрытым, пока этот отказ не будет снят.",
+			"masterTimedOut": "Ведущий агент прерван — слишком долгий ход",
+			"masterTimedOutDetail": "Нет ответа {{minutes}} минут: прерван, чтобы автоматическое восстановление могло запустить нового ведущего агента.",
+			"allDelivered": "Все исполнители сдали работу. Ведущий агент собирает результат.",
+			"masterNotRelaunched": "Ведущий агент не перезапущен",
+			"integrationResumed": "Интеграция возобновлена",
+			"integrationResumedDetail": "Миссию не держал ни один ведущий агент; новый запущен на оставшейся работе.",
+			"integrationNotResumed": "Интеграция не возобновлена",
+			"outOfScopeRefused": "Запись за пределами области отклонена"
+		},
+		"quoted": "«{{text}}»",
+		"tailscaleDown": "Tailscale не отвечает.",
+		"sentryIssue": {
+			"description": "Ошибка, о которой сообщил Sentry.\n\n**Проект**: {{project}}\n**Источник**: {{culprit}}\n**Влияние**: вхождений — {{events}}, пользователей — {{users}}\n\n[Открыть в Sentry]({{permalink}})\n\n_Задача создана из Cockpit._",
+			"note": "Задача Linear {{identifier}} — {{url}}"
+		}
+	}
+}

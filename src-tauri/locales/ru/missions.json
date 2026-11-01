@@ -1,1 +1,183 @@
-{}
+{
+	"orchestrator": {
+		"notAGitRepo": "`{{path}}` не является git-репозиторием.",
+		"branchInMainRepo": "`{{branch}}` извлечена в основном репозитории (`{{path}}`). Cockpit никогда туда не пишет: переключите этот репозиторий на другую ветку, и миссия продолжится в собственном worktree.",
+		"folderOnOtherBranch": "`{{path}}` уже существует, но находится на `{{current}}`, а не на `{{branch}}`. Переместите эту папку или верните её на нужную ветку: Cockpit ничего там не запустит, пока она не будет на ветке задачи.",
+		"noBranch": "нет ветки",
+		"noIntegrationBranch": "У миссии нет интеграционной ветки."
+	},
+	"mission": {
+		"step": {
+			"understanding": "понимание",
+			"approach": "подход",
+			"split": "декомпозиция"
+		},
+		"unknown": "Неизвестная миссия: {{id}}",
+		"unreadable": "Не удаётся прочитать миссию: {{error}}",
+		"folderError": "Папка миссий: {{error}}",
+		"writeError": "Запись миссии: {{error}}",
+		"titleRequired": "У миссии должно быть название.",
+		"deleteFailed": "Не удалось удалить {{path}}: {{error}}",
+		"reworkNeedsReason": "Доработка без причины не говорит, что исправить.",
+		"unknownTask": "Неизвестная задача: {{id}}",
+		"reworkLimit": "«{{title}}» уже отправлялась на доработку {{count}} раз. Возьмите её на себя вместо перезапуска.",
+		"note": {
+			"rework": "Доработка {{count}}: {{reason}}",
+			"redoAfterRework": "Переделать: задача была отправлена на доработку.",
+			"workFoundAtStartup": "Работа найдена при запуске: в её ветке есть коммиты.",
+			"resumedAfterRestart": "Возобновлено после перезапуска Cockpit."
+		},
+		"journal": {
+			"taskReworked": "Задача отправлена на доработку",
+			"paused": "Миссия приостановлена",
+			"resumed": "Миссия возобновлена",
+			"tasksRecovered": "Задачи восстановлены",
+			"tasksRecoveredDetail": "к перезапуску: {{relaunch}}, уже выполнено: {{delivered}}",
+			"planApproved": "План одобрен",
+			"proposal": "Предложение — {{step}}",
+			"stepApproved": "Одобрено — {{step}}",
+			"stepCorrected": "Исправлено — {{step}}",
+			"worktreesCleaned": "Worktrees очищены",
+			"worktreesCleanedDetail": "удалено папок: {{count}}, освобождено {{size}} ГБ на диске",
+			"deleted": "Миссия удалена",
+			"deletedDetail": "стёрто элементов: {{count}}",
+			"opened": "Миссия открыта",
+			"planSubmitted": "План представлен",
+			"planSubmittedDetail": "задач: {{count}}",
+			"closed": "Миссия закрыта"
+		},
+		"nothingAwaitsDecision": "На этапе «{{step}}» ничто не ждёт вашего решения: миссия находится в состоянии «{{state}}».",
+		"correctionNeedsReason": "Скажите, что не так: без причины ведущий агент сделает то же предложение снова.",
+		"taskWithoutId": "Задача без идентификатора: к ней нельзя привязать исполнителя.",
+		"blocked": {
+			"unknownBase": "Она начинается от `{{base}}`, которая не является веткой ни одной задачи этого плана. Перепланируйте её от интеграционной ветки.",
+			"baseExhausted": "Задача, от которой она начинается (`{{base}}`), исчерпала лимит доработок: она ничего не поставит."
+		}
+	},
+	"panel": {
+		"lens": {
+			"breaks": "Что ломается",
+			"deployed": "После деплоя",
+			"users": "Кто этим пользуется"
+		},
+		"folderError": "Папка панелей ревью: {{error}}",
+		"unreadable": "Не удаётся прочитать панель ревью: {{error}}",
+		"writeError": "Запись панели ревью: {{error}}",
+		"alreadyRunning": "Панель ревью для этого изменения уже запущена.",
+		"changeGone": "Этого изменения больше нет: merge request закрыт или ветка удалена.",
+		"noFolder": "Нет папки для запуска агентов.",
+		"silentVoice": "{{lens}}: {{error}}",
+		"noVoice": "Ни один ракурс не ответил. {{details}}",
+		"journal": {
+			"title": "Панель ревью изменения",
+			"detail": "{{verdict}} — разногласий: {{count}}"
+		},
+		"mergeFailed": "Синтез не завершился ({{error}}). Исходные мнения по-прежнему доступны."
+	},
+	"review": {
+		"noReview": "Для этого PR нет ревью.",
+		"noRepo": "Укажите GitHub-репозиторий проекта в настройках.",
+		"prNotFound": "Не могу найти PR #{{number}} в {{repo}}.",
+		"noNewCommit": "Нет коммитов с раунда {{round}}: PR не изменился.",
+		"noPreviousReview": "Предыдущего ревью нет: выполняю полное ревью.",
+		"noPrNumber": "В ревью не указано, какой PR проверяется."
+	},
+	"prompts": {
+		"group": {
+			"review": "Ревью",
+			"visual": "Визуальный отчёт",
+			"delivery": "Поставка",
+			"fixes": "Исправления",
+			"quality": "Качество",
+			"investigation": "Расследование",
+			"mine": "Мои промпты"
+		},
+		"label": {
+			"review": "Полное код-ревью PR",
+			"reviewFollowup": "Проверить исправления в PR",
+			"visual": "Отчёт с изображениями",
+			"ship": "Проверить, затем commit + push",
+			"reviewThenShip": "Ревью, затем commit + push",
+			"openPr": "Открыть pull request",
+			"reviewComments": "Учесть замечания ревью",
+			"prHealth": "Проверка состояния PR",
+			"ciRed": "CI красный",
+			"conflicts": "Разрешить конфликты с базовой веткой",
+			"selfQa": "QA сделанного",
+			"conventions": "Проверить соглашения",
+			"tests": "Дописать тесты",
+			"prodError": "Расследовать ошибку в продакшене",
+			"ticket": "Реализовать тикет"
+		},
+		"configFolderError": "Папка конфигурации: {{error}}",
+		"serializeError": "Сериализация: {{error}}",
+		"writeError": "Запись prompts.toml: {{error}}",
+		"labelAndTextRequired": "У промпта должны быть название и текст."
+	},
+	"permissions": {
+		"unreadableAnswer": "Не удаётся прочитать ответ: {{error}}",
+		"writeError": "Запись ответа: {{error}}"
+	},
+	"codex": {
+		"turnFailed": "Ход завершился ошибкой."
+	},
+	"agent": {
+		"notActive": "Этот агент больше не активен.",
+		"inputUnavailable": "Ввод агента недоступен.",
+		"outputUnavailable": "Вывод агента недоступен.",
+		"emptyMessage": "Пустое сообщение.",
+		"claudeNotFound": "CLI `claude` не найден на этой машине.",
+		"claudeTimeout": "Claude не ответил за {{seconds}} с.",
+		"claudeLaunchError": "Запуск Claude: {{error}}",
+		"claudeError": "Claude: {{error}}",
+		"claudeStopped": "Claude остановился: {{detail}}",
+		"claudeUnreadable": "Не удаётся прочитать ответ Claude.",
+		"folderNotFound": "Папка не найдена: {{path}}",
+		"oneShotProtocol": "Движок «{{engine}}» объявляет протокол `{{protocol}}`: разовый вопрос можно задать только через протокол по умолчанию.",
+		"launchError": "Запуск агента: {{error}}",
+		"agentError": "Агент: {{error}}",
+		"oneShotTimeout": "Агент ничего не вернул за двадцать минут; анализ прерван.",
+		"agentStopped": "Агент остановился: {{detail}}",
+		"agentUnreadable": "Не удаётся прочитать ответ агента: {{output}}",
+		"noReason": "причина не указана",
+		"agentFailed": "Агент завершился с ошибкой: {{reason}}",
+		"agentWroteNothing": "Агент ничего не написал.",
+		"memoryCeiling": "Память машины занята более чем на {{ceiling}} %: новые агенты не запускаются, пока она не опустится ниже. Закройте ненужное или поднимите порог в Настройки → Миссии.",
+		"memoryCeilingTurn": "Память машины занята более чем на {{ceiling}} %: следующий ход ждёт, пока она не опустится ниже.",
+		"unknownProtocol": "Движок «{{engine}}» объявляет протокол `{{protocol}}`, который Cockpit пока не поддерживает. Реализованы: {{known}}.",
+		"protocolNoMission": "Протокол `{{protocol}}` пока не поддерживает инструменты миссий: этот движок пока нельзя использовать в миссии ни как ведущего, ни как исполнителя.",
+		"claudeNotFoundHint": "CLI `claude` не найден. Установите его или проверьте, что он находится в ~/.local/bin, ~/.claude/local или /opt/homebrew/bin.",
+		"noBinary": "Движок «{{engine}}» не объявляет бинарный файл, а Cockpit умеет сам находить только `claude`.",
+		"codexNeedsMessage": "`codex-exec` нужно сообщение для старта: он не может начать с пустого.",
+		"geminiNeedsMessage": "`gemini-stream-json` нужно сообщение для старта: он не может начать с пустого.",
+		"geminiNoResume": "`gemini-stream-json` не умеет возобновлять диалог: ни один источник не описывает, как это сделать. Запустите нового агента.",
+		"bridgeUnavailable": {
+			"title": "Мост разрешений недоступен",
+			"subject": "Node не найден",
+			"detail": "Запросы разрешений и вопросы агентов не будут доходить до интерфейса. Установите Node (`brew install node`), чтобы вернуть их; агенты продолжат работать согласно своему режиму."
+		},
+		"sandboxNoRuntimeHint": "Изоляция в контейнере включена, но среда выполнения (`orb` или `docker`) не установлена. Отключите её в Настройки → Миссии или установите одну из них.",
+		"sandboxNoRuntime": "Изоляция в контейнере включена, но среда выполнения (`orb` или `docker`) не установлена.",
+		"sandboxImageFailed": "Изоляция в контейнере включена, но образ не удалось подготовить: {{error}}",
+		"firstMessageError": "Отправка первого сообщения: {{error}}",
+		"silentDeath": "Процесс остановился, не написав ответа и ничего не оставив ни в выводе, ни в стандартном потоке ошибок.",
+		"journal": {
+			"diedBeforeFirstAnswer": "Агент остановился до первого ответа"
+		},
+		"sendError": "Отправка сообщения: {{error}}",
+		"noThreadYet": "У этого агента ещё нет идентификатора диалога — возможно, его первый ответ ещё не пришёл.",
+		"resumeTurnError": "Возобновление хода: {{error}}",
+		"cannotInterrupt": "Этот движок не умеет прерывать ход, не завершая его. Используйте «Остановить».",
+		"interruptError": "Прерывание: {{error}}",
+		"noControlChannel": "У этого движка нет канала управления.",
+		"step": {
+			"stoppedFromCockpit": "Остановлен из Cockpit.",
+			"detached": "Cockpit закрыт; агент продолжает работу без окна.",
+			"cockpitClosed": "Cockpit закрыт.",
+			"detachedFinished": "Отсоединённый агент завершил работу, пока Cockpit был закрыт.",
+			"detachedStopped": "Отсоединённый агент остановился, пока Cockpit был закрыт.",
+			"reattached": "Найден работающим при запуске Cockpit.",
+			"lastTurnFailed": "Движок вернул свой последний ход как ошибку."
+		}
+	}
+}

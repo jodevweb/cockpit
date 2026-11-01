@@ -1,1 +1,246 @@
-{}
+{
+	"mobile": {
+		"common": {
+			"connecting": "Conectando…",
+			"back": "Voltar",
+			"thisDevice": "Este dispositivo",
+			"agent": "Agente",
+			"error": "Erro {{status}}"
+		},
+		"tabs": {
+			"you": "Para você",
+			"agents": "Agentes",
+			"missions": "Missões"
+		},
+		"pairing": {
+			"notPaired": "Este dispositivo ainda não está pareado",
+			"title": "Parear este celular",
+			"help": "No computador, abra Configurações → Acesso móvel e digite o código exibido.",
+			"codePlaceholder": "CÓDIGO",
+			"submit": "Parear"
+		},
+		"enroll": {
+			"done": "Face ID ativado.",
+			"failed": "Passkey: {{error}}"
+		},
+		"state": {
+			"toDecide_one": "aguardando você",
+			"toDecide_other": "{{count}} a decidir",
+			"working": "trabalhando",
+			"idle": "ocioso",
+			"done": "concluído"
+		},
+		"tools": {
+			"bash": "Executar um comando",
+			"write": "Escrever um arquivo",
+			"edit": "Editar um arquivo",
+			"webFetch": "Ler uma página web",
+			"mcp": "Usar {{name}} ({{server}})",
+			"other": "Usar {{tool}}"
+		},
+		"decision": {
+			"agentAsks": "{{agent}} pergunta",
+			"anAgentAsks": "Um agente pergunta",
+			"agentQuestion": "{{agent}} tem uma pergunta para você",
+			"questionWaiting": "Uma pergunta aguarda você",
+			"answer": "Responder",
+			"deny": "Negar",
+			"allow": "Permitir"
+		},
+		"mission": {
+			"state": {
+				"planning": "Análise",
+				"awaitingApproval": "Aguardando sua aprovação",
+				"running": "Em execução",
+				"integrating": "Integrando",
+				"failed": "Falhou",
+				"other": "Em andamento"
+			},
+			"task": {
+				"planned": "a iniciar",
+				"running": "em andamento",
+				"delivered": "entregue",
+				"integrated": "integrada",
+				"failed": "falhou"
+			},
+			"progress_one": "{{done}} de {{count}} tarefa entregue",
+			"progress_other": "{{done}} de {{count}} tarefas entregues",
+			"approve": "Aprovar o plano",
+			"paused": "Pausada — pode ser retomada pelo computador.",
+			"pause": "Pausar",
+			"stopAll": "Parar tudo"
+		},
+		"agents": {
+			"browserOpen": "navegador aberto",
+			"emptyTitle": "Nenhum agente aberto",
+			"emptyHelp": "Eles são lançados pelo computador."
+		},
+		"missions": {
+			"emptyTitle": "Nenhuma missão em andamento",
+			"emptyHelp": "Elas são lançadas pelo computador."
+		},
+		"home": {
+			"decisions_one": "{{count}} decisão aguarda você",
+			"decisions_other": "{{count}} decisões aguardam você",
+			"working_one": "{{count}} agente trabalhando",
+			"working_other": "{{count}} agentes trabalhando",
+			"noneWorking": "nenhum agente está trabalhando",
+			"noneOpen": "nenhum agente aberto",
+			"failedSection": "Falharam",
+			"emptyTitle": "Nada aguarda você",
+			"emptyWorking": "Seus agentes estão avançando sem você.",
+			"emptyCalm": "Tudo tranquilo.",
+			"fleet": "A frota",
+			"unreachable": "O computador não está respondendo",
+			"unreachableTitle": "Inacessível"
+		},
+		"faceId": {
+			"off": "O Face ID não está ativado",
+			"offHelp": "Sem ele, este celular pode ler e negar, nunca permitir.",
+			"enable": "Ativar o Face ID",
+			"expired": "O prazo de ativação passou: revogue este celular no computador e depois pareie-o de novo."
+		},
+		"toast": {
+			"copied": "Copiado.",
+			"denied": "Negado.",
+			"allowed": "Permitido.",
+			"approved": "Plano aprovado — os executores podem começar.",
+			"paused": "Missão pausada — os executores foram parados.",
+			"stopped": "Missão parada. O trabalho produzido continua no lugar.",
+			"answered": "Respondido.",
+			"sent": "Enviado."
+		},
+		"device": {
+			"label": "Dispositivo",
+			"notPaired": "Não pareado",
+			"armed": "O Face ID está ativado: este celular pode permitir, responder e puxar o freio.",
+			"unarmed": "O Face ID não está ativado: este celular pode ler e negar, nunca permitir.",
+			"notifications": "Notificações",
+			"ntfyHelp": "No app ntfy, assine este tópico, neste servidor.",
+			"copyTopic": "Copiar o tópico",
+			"copyServer": "Copiar o servidor",
+			"capabilities": "O que este celular pode fazer",
+			"canDo": "Ler, permitir ou negar uma ação, responder a um agente, aprovar um plano, pausar ou parar uma missão.",
+			"cannotDo": "Lançar um agente, retomar uma missão e mudar uma configuração são feitos no computador."
+		},
+		"agent": {
+			"summary": "Resumo",
+			"thread": "Conversa",
+			"screen": "Tela",
+			"jump": "↓ nova atividade",
+			"placeholder": "Responder ao agente…",
+			"send": "Enviar"
+		},
+		"changes": {
+			"title": "O que o repositório mostra · {{base}}",
+			"help": "Lido do repositório, não do que ele diz.",
+			"root": "raiz",
+			"deleted_one": "{{count}} excluído",
+			"deleted_other": "{{count}} excluídos",
+			"created_one": "{{count}} criado",
+			"created_other": "{{count}} criados",
+			"modified_one": "{{count}} modificado",
+			"modified_other": "{{count}} modificados",
+			"moreZones_one": "e {{count}} outra área",
+			"moreZones_other": "e {{count}} outras áreas"
+		},
+		"summary": {
+			"diagram": "Um diagrama — ele é desenhado no computador.",
+			"before": "antes",
+			"after": "depois",
+			"justSaid": "O que ele acabou de dizer",
+			"conclusion": "A conclusão dele",
+			"working": "Ele está trabalhando",
+			"nothing": "Nada para mostrar",
+			"silent": "Ele ainda não disse nada.",
+			"yourPrompt": "Sua instrução"
+		},
+		"thread": {
+			"actions_one": "{{count}} ação",
+			"actions_other": "{{count}} ações",
+			"failed": "{{count}} com falha",
+			"empty": "A conversa ainda não começou."
+		},
+		"screen": {
+			"live": "ao vivo",
+			"help": "A página que este agente está vendo, atualizada a cada dois ou três segundos. Você assiste; para clicar nela, use o computador.",
+			"stopped": "O navegador dele não está mais rodando."
+		},
+		"errors": {
+			"publicAccessDenied": "Acesso público negado.",
+			"unexpectedHost": "Host inesperado.",
+			"notPaired": "Dispositivo não pareado.",
+			"unknownDevice": "Dispositivo desconhecido ou revogado.",
+			"tooManyRequests": "Requisições demais.",
+			"pairingTailnetOnly": "O pareamento só funciona a partir da tailnet.",
+			"noPairing": "Nenhum pareamento em andamento.",
+			"codeExpired": "Código expirado.",
+			"codeInvalid": "Código inválido.",
+			"passkeyExists": "Este dispositivo já tem uma passkey. Revogue-o no computador e depois pareie-o de novo.",
+			"passkeyAlreadySet": "Este dispositivo já tem uma passkey.",
+			"enrollExpired": "O prazo para ativar o Face ID passou. Revogue este dispositivo no computador e depois pareie-o de novo.",
+			"noRegistration": "Nenhum registro em andamento.",
+			"challengeExpired": "Desafio expirado.",
+			"agentGone": "Este agente não está mais ativo.",
+			"imagesOnly": "Somente imagens podem ser lidas daqui.",
+			"imageNotFound": "Imagem não encontrada.",
+			"outsideFolder": "Fora da pasta deste agente.",
+			"imageTooLarge": "Imagem não encontrada ou grande demais.",
+			"browserNotRunning": "O navegador dele não está rodando.",
+			"denyLinkExpired": "Link de negação expirado.",
+			"noPasskey": "Este dispositivo não tem passkey: ele só pode ler e negar.",
+			"challengeUnknown": "Desafio desconhecido ou já usado.",
+			"challengeOtherDevice": "Desafio aberto por outro dispositivo.",
+			"invalidSignature": "Assinatura inválida.",
+			"noAgents": "Nenhum agente rodando.",
+			"stateUnreadable": "Estado móvel ilegível: {{error}}",
+			"stateWrite": "Gravando o estado móvel: {{error}}",
+			"ntfyTokenFormat": "Um token ntfy começa com “tk_”: este não começa. O campo pode ter sido preenchido automaticamente.",
+			"disabled": "O acesso móvel está desativado.",
+			"noTopic": "Nenhum tópico ntfy configurado.",
+			"nothingSent": "Nada foi enviado.",
+			"qr": "QR: {{error}}",
+			"funnelActive": "O Tailscale Funnel está ativo: ele exporia o cockpit na Internet. Desative-o (`tailscale funnel off`) antes de ativar o acesso móvel.",
+			"invalidOrigin": "Origem inválida: {{error}}",
+			"webauthn": "WebAuthn: {{error}}",
+			"port": "Porta {{port}}: {{error}}"
+		},
+		"journal": {
+			"enabled": "Acesso móvel ativado",
+			"disabled": "Acesso móvel desativado — dispositivos revogados",
+			"deviceRevoked": "Dispositivo revogado",
+			"devicePaired": "Dispositivo pareado",
+			"passkeyRegistered": "Passkey registrada",
+			"toolDenied": "Ferramenta negada",
+			"toolAllowed": "Ferramenta permitida",
+			"signatureRejected": "Assinatura rejeitada",
+			"planApproved": "Plano aprovado pelo celular",
+			"missionPaused": "Missão pausada pelo celular",
+			"missionStopped": "Missão parada pelo celular",
+			"questionAnswered": "Pergunta respondida",
+			"messageSent": "Mensagem enviada a um agente"
+		},
+		"remote": {
+			"missionStoppedNote": "Missão parada pelo celular. Branches e worktrees são mantidos.",
+			"quickDenied": "Negado."
+		},
+		"wake": {
+			"understandingTitle": "O agente principal leu o ticket",
+			"understandingDetail": "{{title}} — o entendimento dele aguarda sua revisão",
+			"approachTitle": "Uma abordagem aguarda sua aprovação",
+			"approachDetail": "{{title}} — antes de qualquer divisão",
+			"planTitle": "Um plano aguarda sua aprovação",
+			"planDetail": "{{title}} — {{count}} tarefa(s)",
+			"agentWaiting": "Um agente está aguardando",
+			"request": "Solicitação: {{tool}}",
+			"deny": "Negar",
+			"open": "Abrir",
+			"testBody": "Teste de relay a partir das Configurações.",
+			"published": "Publicado ({{status}}).",
+			"rejectedToken": "Rejeitado ({{status}}) — token de publicação inválido.",
+			"rejectedRate": "Rejeitado ({{status}}) — tentativas demais, o servidor está limitando.",
+			"rejected": "Rejeitado ({{status}}).",
+			"unreachable": "Servidor ntfy inacessível: {{error}}"
+		}
+	}
+}

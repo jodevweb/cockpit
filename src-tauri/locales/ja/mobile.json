@@ -1,1 +1,238 @@
-{}
+{
+	"mobile": {
+		"common": {
+			"connecting": "接続中…",
+			"back": "戻る",
+			"thisDevice": "このデバイス",
+			"agent": "エージェント",
+			"error": "エラー {{status}}"
+		},
+		"tabs": {
+			"you": "あなた向け",
+			"agents": "エージェント",
+			"missions": "ミッション"
+		},
+		"pairing": {
+			"notPaired": "このデバイスはまだペアリングされていません",
+			"title": "このスマートフォンをペアリング",
+			"help": "コンピュータで「設定 → モバイルアクセス」を開き、表示されたコードを入力してください。",
+			"codePlaceholder": "コード",
+			"submit": "ペアリング"
+		},
+		"enroll": {
+			"done": "Face ID を有効にしました。",
+			"failed": "パスキー：{{error}}"
+		},
+		"state": {
+			"toDecide_one": "あなたの対応待ち",
+			"toDecide_other": "{{count}} 件の判断待ち",
+			"working": "作業中",
+			"idle": "待機中",
+			"done": "終了"
+		},
+		"tools": {
+			"bash": "コマンドを実行",
+			"write": "ファイルを書き込む",
+			"edit": "ファイルを編集",
+			"webFetch": "Web ページを読む",
+			"mcp": "{{name}} を使用（{{server}}）",
+			"other": "{{tool}} を使用"
+		},
+		"decision": {
+			"agentAsks": "{{agent}} からのリクエスト",
+			"anAgentAsks": "エージェントからのリクエスト",
+			"agentQuestion": "{{agent}} から質問があります",
+			"questionWaiting": "質問があなたを待っています",
+			"answer": "回答",
+			"deny": "拒否",
+			"allow": "許可"
+		},
+		"mission": {
+			"state": {
+				"planning": "分析",
+				"awaitingApproval": "承認待ち",
+				"running": "実行中",
+				"integrating": "統合中",
+				"failed": "失敗",
+				"other": "進行中"
+			},
+			"task": {
+				"planned": "未着手",
+				"running": "進行中",
+				"delivered": "納品済み",
+				"integrated": "統合済み",
+				"failed": "失敗"
+			},
+			"progress_other": "{{count}} 件中 {{done}} 件のタスクを納品",
+			"approve": "計画を承認",
+			"paused": "一時停止中 — コンピュータから再開できます。",
+			"pause": "一時停止",
+			"stopAll": "すべて停止"
+		},
+		"agents": {
+			"browserOpen": "ブラウザ表示中",
+			"emptyTitle": "開いているエージェントはありません",
+			"emptyHelp": "エージェントはコンピュータから起動します。"
+		},
+		"missions": {
+			"emptyTitle": "進行中のミッションはありません",
+			"emptyHelp": "ミッションはコンピュータから起動します。"
+		},
+		"home": {
+			"decisions_other": "{{count}} 件の判断があなたを待っています",
+			"working_other": "{{count}} 件のエージェントが作業中",
+			"noneWorking": "作業中のエージェントはありません",
+			"noneOpen": "開いているエージェントはありません",
+			"failedSection": "失敗",
+			"emptyTitle": "対応待ちのものはありません",
+			"emptyWorking": "エージェントはあなたなしで作業を進めています。",
+			"emptyCalm": "すべて平穏です。",
+			"fleet": "エージェント一覧",
+			"unreachable": "コンピュータが応答しません",
+			"unreachableTitle": "接続できません"
+		},
+		"faceId": {
+			"off": "Face ID が有効になっていません",
+			"offHelp": "有効にしないと、このスマートフォンでは閲覧と拒否のみ可能で、許可はできません。",
+			"enable": "Face ID を有効にする",
+			"expired": "有効化の期限が過ぎました。コンピュータでこのスマートフォンを取り消し、もう一度ペアリングしてください。"
+		},
+		"toast": {
+			"copied": "コピーしました。",
+			"denied": "拒否しました。",
+			"allowed": "許可しました。",
+			"approved": "計画を承認しました — 実行役が開始できます。",
+			"paused": "ミッションを一時停止しました — 実行役は停止されました。",
+			"stopped": "ミッションを停止しました。作成された成果物はそのまま残ります。",
+			"answered": "回答しました。",
+			"sent": "送信しました。"
+		},
+		"device": {
+			"label": "デバイス",
+			"notPaired": "未ペアリング",
+			"armed": "Face ID が有効です：このスマートフォンで許可、回答、停止ができます。",
+			"unarmed": "Face ID が有効になっていません：このスマートフォンでは閲覧と拒否のみ可能で、許可はできません。",
+			"notifications": "通知",
+			"ntfyHelp": "ntfy アプリで、このサーバー上のこのトピックを購読してください。",
+			"copyTopic": "トピックをコピー",
+			"copyServer": "サーバーをコピー",
+			"capabilities": "このスマートフォンでできること",
+			"canDo": "閲覧、操作の許可・拒否、エージェントへの返信、計画の承認、ミッションの一時停止・停止。",
+			"cannotDo": "エージェントの起動、ミッションの再開、設定の変更はコンピュータで行います。"
+		},
+		"agent": {
+			"summary": "概要",
+			"thread": "スレッド",
+			"screen": "画面",
+			"jump": "↓ 新しいアクティビティ",
+			"placeholder": "エージェントに返信…",
+			"send": "送信"
+		},
+		"changes": {
+			"title": "リポジトリの状態 · {{base}}",
+			"help": "エージェントの発言ではなく、リポジトリから読み取った内容です。",
+			"root": "ルート",
+			"deleted_other": "{{count}} 件削除",
+			"created_other": "{{count}} 件作成",
+			"modified_other": "{{count}} 件変更",
+			"moreZones_other": "ほか {{count}} 箇所"
+		},
+		"summary": {
+			"diagram": "図があります — コンピュータで表示されます。",
+			"before": "変更前",
+			"after": "変更後",
+			"justSaid": "直前の発言",
+			"conclusion": "結論",
+			"working": "作業中です",
+			"nothing": "表示するものはありません",
+			"silent": "まだ何も発言していません。",
+			"yourPrompt": "あなたの指示"
+		},
+		"thread": {
+			"actions_other": "{{count}} 件のアクション",
+			"failed": "{{count}} 件失敗",
+			"empty": "会話はまだ始まっていません。"
+		},
+		"screen": {
+			"live": "ライブ",
+			"help": "このエージェントが見ているページで、2〜3 秒ごとに更新されます。閲覧のみ可能です。クリックするにはコンピュータを使ってください。",
+			"stopped": "ブラウザはもう動いていません。"
+		},
+		"errors": {
+			"publicAccessDenied": "公開アクセスは拒否されました。",
+			"unexpectedHost": "想定外のホストです。",
+			"notPaired": "デバイスがペアリングされていません。",
+			"unknownDevice": "不明なデバイス、または取り消されたデバイスです。",
+			"tooManyRequests": "リクエストが多すぎます。",
+			"pairingTailnetOnly": "ペアリングは tailnet からのみ可能です。",
+			"noPairing": "進行中のペアリングはありません。",
+			"codeExpired": "コードの有効期限が切れました。",
+			"codeInvalid": "無効なコードです。",
+			"passkeyExists": "このデバイスにはすでにパスキーがあります。コンピュータで取り消してから、もう一度ペアリングしてください。",
+			"passkeyAlreadySet": "このデバイスにはすでにパスキーがあります。",
+			"enrollExpired": "Face ID を有効にする期限が過ぎました。コンピュータでこのデバイスを取り消し、もう一度ペアリングしてください。",
+			"noRegistration": "進行中の登録はありません。",
+			"challengeExpired": "チャレンジの有効期限が切れました。",
+			"agentGone": "このエージェントはもう有効ではありません。",
+			"imagesOnly": "ここから読めるのは画像のみです。",
+			"imageNotFound": "画像が見つかりません。",
+			"outsideFolder": "このエージェントのフォルダ外です。",
+			"imageTooLarge": "画像が見つからないか、大きすぎます。",
+			"browserNotRunning": "ブラウザが動いていません。",
+			"denyLinkExpired": "拒否リンクの有効期限が切れました。",
+			"noPasskey": "このデバイスにはパスキーがありません：閲覧と拒否のみ可能です。",
+			"challengeUnknown": "不明なチャレンジ、または使用済みのチャレンジです。",
+			"challengeOtherDevice": "チャレンジは別のデバイスで開かれました。",
+			"invalidSignature": "無効な署名です。",
+			"noAgents": "実行中のエージェントはありません。",
+			"stateUnreadable": "モバイルの状態を読み取れません：{{error}}",
+			"stateWrite": "モバイルの状態の書き込み：{{error}}",
+			"ntfyTokenFormat": "ntfy トークンは「tk_」で始まりますが、これは違います。フィールドが自動入力された可能性があります。",
+			"disabled": "モバイルアクセスはオフになっています。",
+			"noTopic": "ntfy トピックが設定されていません。",
+			"nothingSent": "何も送信されませんでした。",
+			"qr": "QR：{{error}}",
+			"funnelActive": "Tailscale Funnel が有効です：Cockpit がインターネットに公開されてしまいます。モバイルアクセスを有効にする前にオフにしてください（`tailscale funnel off`）。",
+			"invalidOrigin": "無効なオリジン：{{error}}",
+			"webauthn": "WebAuthn：{{error}}",
+			"port": "ポート {{port}}：{{error}}"
+		},
+		"journal": {
+			"enabled": "モバイルアクセスを有効化",
+			"disabled": "モバイルアクセスをオフ — デバイスを取り消し",
+			"deviceRevoked": "デバイスを取り消し",
+			"devicePaired": "デバイスをペアリング",
+			"passkeyRegistered": "パスキーを登録",
+			"toolDenied": "ツールを拒否",
+			"toolAllowed": "ツールを許可",
+			"signatureRejected": "署名を却下",
+			"planApproved": "モバイルから計画を承認",
+			"missionPaused": "モバイルからミッションを一時停止",
+			"missionStopped": "モバイルからミッションを停止",
+			"questionAnswered": "質問に回答",
+			"messageSent": "エージェントにメッセージを送信"
+		},
+		"remote": {
+			"missionStoppedNote": "モバイルからミッションを停止しました。ブランチと worktree は保持されます。",
+			"quickDenied": "拒否しました。"
+		},
+		"wake": {
+			"understandingTitle": "リードがチケットを読みました",
+			"understandingDetail": "{{title}} — 理解内容があなたの確認を待っています",
+			"approachTitle": "アプローチがあなたの承認を待っています",
+			"approachDetail": "{{title}} — 分割の前に",
+			"planTitle": "計画があなたの承認を待っています",
+			"planDetail": "{{title}} — タスク {{count}} 件",
+			"agentWaiting": "エージェントが待機しています",
+			"request": "リクエスト：{{tool}}",
+			"deny": "拒否",
+			"open": "開く",
+			"testBody": "設定からのリレーテストです。",
+			"published": "公開しました（{{status}}）。",
+			"rejectedToken": "拒否されました（{{status}}）— 公開トークンが無効です。",
+			"rejectedRate": "拒否されました（{{status}}）— 試行回数が多すぎるため、サーバーが制限しています。",
+			"rejected": "拒否されました（{{status}}）。",
+			"unreachable": "ntfy サーバーに接続できません：{{error}}"
+		}
+	}
+}

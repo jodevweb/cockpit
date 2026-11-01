@@ -1,0 +1,309 @@
+{
+	"store": {
+		"job": {
+			"succeeded": "Hecho",
+			"failed": "Fallido",
+			"failedWithCode": "Fallido (código {{code}})",
+			"failedToast": "{{label}}: falló. Abre Scripts para ver la salida.",
+			"failedToastWithCode": "{{label}}: falló (código {{code}}). Abre Scripts para ver la salida.",
+			"worktreeDone": "{{label}}: hecho."
+		},
+		"notify": {
+			"waitingReply": "Espera tu respuesta · {{title}}",
+			"ciFailed": "CI en rojo · #{{number}}",
+			"readyToMerge": "Lista para fusionar · #{{number}}",
+			"prodError": "Error en producción · {{project}}"
+		}
+	},
+	"commandPalette": {
+		"views": {
+			"map": "Mapa",
+			"today": "Hoy",
+			"decisions": "Decisiones · lo que espera tu respuesta",
+			"recap": "Resumen visual · lo que ha pasado",
+			"automations": "Automatizaciones · reuniones que se preparan solas",
+			"overview": "Vista general",
+			"team": "Daily · equipo",
+			"agents": "Agentes IA",
+			"workspace": "Workspaces · agentes y terminales abiertos",
+			"libres": "Agentes libres · lanzados fuera de un proyecto",
+			"worktrees": "Worktrees",
+			"git": "Git",
+			"scripts": "Scripts",
+			"docs": "Documentos",
+			"observability": "Observabilidad",
+			"delivery": "Flujo · Linear, PR, CI, despliegues",
+			"infra": "Servidores y contenedores · lo que corre en esta máquina",
+			"settings": "Ajustes"
+		},
+		"hint": {
+			"goTo": "ir a"
+		},
+		"group": {
+			"navigation": "Navegación",
+			"libres": "Agentes libres",
+			"projects": "Proyectos",
+			"recentFolders": "Carpetas recientes",
+			"identifiers": "Identificadores"
+		},
+		"libre": {
+			"launch": "Lanzar un agente libre…",
+			"launchHint": "⌘N · una carpeta, un agente",
+			"launchIn": "Lanzar un agente en {{folder}}",
+			"launchInHint": "el lanzador, con tus últimas elecciones"
+		},
+		"project": {
+			"label": "Proyecto · {{name}}"
+		},
+		"git": {
+			"behind_one": "{{count}} commit por detrás",
+			"behind_other": "{{count}} commits por detrás",
+			"upToDate": "al día",
+			"pulled": "{{name}}: al día.",
+			"ahead_one": "{{count}} commit por publicar",
+			"ahead_other": "{{count}} commits por publicar",
+			"pushed": "{{name}}: enviado."
+		},
+		"worktree": {
+			"openEditor": "Abrir {{name}} en el editor",
+			"launchAgent": "Lanzar un agente en {{name}}",
+			"launchAgentHint": "conversación en el cockpit",
+			"terminal": "Terminal en {{name}}",
+			"terminalHint": "shell en el cockpit",
+			"terminalApp": "Abrir {{name}} en Terminal.app"
+		},
+		"folder": {
+			"newAgent": "Nuevo agente en una carpeta…",
+			"newAgentHint": "cualquier carpeta, sin rama ni worktree",
+			"dialogTitle": "Lanzar un agente en…",
+			"newAgentIn": "Nuevo agente en {{folder}}"
+		},
+		"openConfig": "Abrir el archivo de configuración",
+		"identifiers": {
+			"openPr": "Abrir la PR #{{number}}",
+			"onGithub": "en GitHub",
+			"openTicket": "Abrir {{ticket}}",
+			"linearTicket": "Ticket de Linear"
+		},
+		"placeholder": "Worktree, sesión, script, pantalla, #PR, ticket…",
+		"noResults": "Sin resultados.",
+		"keys": {
+			"navigate": "navegar",
+			"run": "ejecutar",
+			"close": "cerrar"
+		}
+	},
+	"review": {
+		"verdict": {
+			"merge": "puedes fusionar",
+			"blocking": "bloqueante",
+			"changes": "se esperan cambios"
+		},
+		"next": {
+			"merge": "No hay nada en marcha: puedes fusionar.",
+			"changes": "Ahora no hay nada en marcha: te toca publicar los puntos y luego «Volver a revisar» cuando el autor haya enviado cambios."
+		},
+		"delivered_one": "Revisión entregada: {{count}} punto · {{verdict}}. {{next}}",
+		"delivered_other": "Revisión entregada: {{count}} puntos · {{verdict}}. {{next}}",
+		"see": "Ver",
+		"activity": {
+			"verification": "Comprobando la PR #{{number}}",
+			"review": "Revisando la PR #{{number}}",
+			"askedReview": "Tu instrucción pide una revisión: paso por «Revisar» para que se entregue como tarjeta. Leyendo la PR en GitHub…",
+			"reading": "Leyendo la PR en GitHub y recuperando su rama…",
+			"launching": "Lanzando el agente de revisión: lee la PR y te avisaremos cuando la entregue.",
+			"updating": "Actualizando {{branch}}…",
+			"updateFailed": "No se pudo actualizar ({{error}}): se revisa la versión local.",
+			"creatingWorktree": "Creando el worktree de {{branch}}; puede tardar unos minutos."
+		},
+		"label": {
+			"verification": "Comprobación #{{number}}",
+			"review": "Revisión #{{number}}"
+		},
+		"error": {
+			"noMainRepo": "Este proyecto no tiene repositorio principal configurado.",
+			"worktreeTimeout": "El worktree de {{branch}} no apareció tras 15 minutos."
+		}
+	},
+	"blockers": {
+		"permission": {
+			"title_one": "{{tool}}: {{count}} solicitud",
+			"title_other": "{{tool}}: {{count}} solicitudes",
+			"anAgent": "Un agente",
+			"meta": "por decidir"
+		},
+		"plan": {
+			"meta": "por revisar"
+		},
+		"recheck": {
+			"title": "{{author}} envió cambios a #{{number}}",
+			"theAuthor": "El autor",
+			"meta": "por volver a revisar",
+			"fix": "Volver a revisar"
+		},
+		"failedTask": {
+			"noReason": "sin motivo indicado",
+			"fix": "Relanzar"
+		},
+		"ci": {
+			"meta": "CI en rojo",
+			"fix": "Corregir"
+		}
+	},
+	"decisions": {
+		"waited": {
+			"now": "ahora mismo",
+			"minutes": "desde hace {{minutes}} min",
+			"hours": "desde hace {{hours}} h {{minutes}}",
+			"days": "desde hace {{days}} d"
+		}
+	},
+	"terminals": {
+		"exited": "shell terminado",
+		"exitedWithCode": "shell terminado (código {{code}})"
+	},
+	"sidebar": {
+		"views": {
+			"map": "Mapa",
+			"today": "Hoy",
+			"decisions": "Decisiones",
+			"recap": "Resumen visual",
+			"automations": "Automatizaciones",
+			"permanence": "Permanence",
+			"overview": "Vista general",
+			"team": "Daily",
+			"missions": "Misiones",
+			"workspace": "Workspaces",
+			"libres": "Agentes libres",
+			"agents": "Agentes IA",
+			"docs": "Documentos",
+			"delivery": "Flujo",
+			"impact": "Impacto",
+			"observability": "Observabilidad",
+			"worktrees": "Worktrees",
+			"git": "Git",
+			"scripts": "Scripts",
+			"infra": "Servidores y contenedores",
+			"settings": "Ajustes"
+		},
+		"groups": {
+			"pilot": "Pilotar",
+			"produce": "Producir",
+			"deliver": "Entregar",
+			"tooling": "Herramientas"
+		},
+		"project": "Proyecto",
+		"recapFresh_one": "{{count}} novedad desde tu última visita",
+		"recapFresh_other": "{{count}} novedades desde tu última visita",
+		"automations": {
+			"running": "Una automatización está preparando su resultado",
+			"nextToday": "Próximo resultado listo hoy"
+		},
+		"launch": {
+			"placeHere": "aquí mismo",
+			"placeBranch": "nueva rama",
+			"placeWorktree": "nuevo worktree",
+			"defaultModel": "modelo por defecto de la máquina",
+			"title": "Una carpeta, un agente: como cd y luego claude (⌘N)",
+			"button": "Lanzar un agente",
+			"again": "Relanzar como la última vez",
+			"noneYet": "Nada todavía: tu primer lanzamiento se recordará para la próxima vez.",
+			"other": "Otra carpeta, otros ajustes…"
+		},
+		"top": {
+			"mapTitle": "El mapa de todo el trabajo (⌘⇧C)",
+			"workspaceTitle": "Agentes y terminales abiertos (⌘⇧A)",
+			"libresTitle": "Agentes lanzados fuera de un proyecto, como en una terminal",
+			"decisionsTitle": "Lo que espera tu decisión, ordenado por lo que desbloquea (⌘⇧D)",
+			"recapTitle": "Lo que ha pasado, en imágenes: una historia por turno de agente (⌘⇧J)",
+			"recap": "Resumen",
+			"automationsTitle": "Reuniones que se preparan solas, como la daily (⌘⇧R)"
+		},
+		"search": "Ir a, lanzar, preguntar…",
+		"atelier": {
+			"title": "Todas las pantallas, el proyecto, los ajustes",
+			"name": "Taller",
+			"close": "Cerrar el taller",
+			"subtitle": "todas las pantallas · ⌘K para buscar"
+		},
+		"live": {
+			"missions_one": "{{count}} misión",
+			"missions_other": "{{count}} misiones",
+			"missionsOngoing": "{{missions}} en curso (⌘⇧M)",
+			"missionsWaiting_one": "{{missions}} en curso, {{count}} espera tu aprobación (⌘⇧M)",
+			"missionsWaiting_other": "{{missions}} en curso, {{count}} esperan tu aprobación (⌘⇧M)",
+			"scripts_one": "{{count}} script en ejecución",
+			"scripts_other": "{{count}} scripts en ejecución"
+		}
+	},
+	"agents": {
+		"turn": {
+			"hookReminder": "Recordatorio automático (hook {{hook}}), no es una instrucción tuya: {{text}}",
+			"ended": "Agente terminado.",
+			"proofFilmed": "Prueba de aceptación grabada: {{seconds}} s en el navegador del workspace.",
+			"compactedManual": "Contexto compactado a petición tuya.",
+			"compactedAuto": "Contexto compactado: se resumió la conversación para hacer sitio.",
+			"resumed": "Conversación reanudada.",
+			"relaunchedModeKept": "Relanzado en modo {{mode}}; se conserva el hilo.",
+			"relaunchedModeFresh": "Relanzado en modo {{mode}}; conversación nueva, el agente aún no tenía sesión.",
+			"relaunchedModelKept": "Relanzado con {{model}}; se conserva el hilo.",
+			"relaunchedModelFresh": "Relanzado con {{model}}; conversación nueva."
+		},
+		"modes": {
+			"plan": {
+				"label": "Plan",
+				"hint": "propone sin ejecutar nada"
+			},
+			"default": {
+				"label": "Prudente",
+				"hint": "pregunta antes de cada herramienta"
+			},
+			"acceptEdits": {
+				"label": "Edición",
+				"hint": "edita archivos sin preguntar"
+			},
+			"bypassPermissions": {
+				"label": "Sin límites",
+				"hint": "sin preguntas ni límites: resérvalo para worktrees desechables"
+			}
+		},
+		"models": {
+			"default": {
+				"label": "Por defecto",
+				"hint": "el modelo configurado en esta máquina"
+			},
+			"fable": {
+				"hint": "el más capaz; razonamiento siempre activo"
+			},
+			"opus": {
+				"hint": "la opción habitual para trabajo exigente"
+			},
+			"sonnet": {
+				"hint": "el equilibrio entre capacidad y velocidad"
+			},
+			"haiku": {
+				"hint": "rápido, para tareas sencillas"
+			}
+		},
+		"review": {
+			"delivered_one": "Revisión de la PR #{{number}} entregada: {{count}} punto",
+			"delivered_other": "Revisión de la PR #{{number}} entregada: {{count}} puntos",
+			"recordFailed": "No se pudo guardar la revisión: {{error}}"
+		},
+		"see": "Ver",
+		"notify": {
+			"ended": "Agente terminado",
+			"replied": "El agente ha respondido",
+			"question": "El agente tiene una pregunta para ti",
+			"permission": "Permiso solicitado · {{tool}}"
+		},
+		"survivors": {
+			"title_one": "Un agente siguió trabajando sin ti",
+			"title_other": "{{count}} agentes siguieron trabajando sin ti",
+			"detail_one": "El cockpit estaba cerrado; trabajó en su relevo",
+			"detail_other": "El cockpit estaba cerrado; trabajaron en su relevo",
+			"done_one": "Ha vuelto a su workspace, conversación recargada.",
+			"done_other": "Han vuelto a sus workspaces, conversación recargada."
+		}
+	}
+}

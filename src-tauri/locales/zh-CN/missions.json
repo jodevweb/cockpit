@@ -1,1 +1,183 @@
-{}
+{
+	"orchestrator": {
+		"notAGitRepo": "`{{path}}` 不是 git 仓库。",
+		"branchInMainRepo": "`{{branch}}` 已在主仓库（`{{path}}`）中检出。Cockpit 从不在主仓库中写入：请将该仓库切换到其他分支，任务将在其自己的 worktree 中继续。",
+		"folderOnOtherBranch": "`{{path}}` 已存在，但位于 `{{current}}` 而非 `{{branch}}`。请移走该文件夹，或将其切回正确的分支：在它处于该子任务的分支之前，Cockpit 不会在其中启动任何东西。",
+		"noBranch": "无分支",
+		"noIntegrationBranch": "该任务没有集成分支。"
+	},
+	"mission": {
+		"step": {
+			"understanding": "理解",
+			"approach": "方案",
+			"split": "拆分"
+		},
+		"unknown": "未知任务：{{id}}",
+		"unreadable": "无法读取的任务：{{error}}",
+		"folderError": "任务文件夹：{{error}}",
+		"writeError": "写入任务：{{error}}",
+		"titleRequired": "任务需要一个标题。",
+		"deleteFailed": "无法删除 {{path}}：{{error}}",
+		"reworkNeedsReason": "没有理由的返工无法说明要修复什么。",
+		"unknownTask": "未知子任务：{{id}}",
+		"reworkLimit": "“{{title}}”已返工 {{count}} 次。请亲自接手，而不是再次重新启动。",
+		"note": {
+			"rework": "第 {{count}} 次返工：{{reason}}",
+			"redoAfterRework": "需重做：有子任务被返工。",
+			"workFoundAtStartup": "启动时发现已有工作：其分支上有提交。",
+			"resumedAfterRestart": "Cockpit 重启后已恢复。"
+		},
+		"journal": {
+			"taskReworked": "子任务已退回返工",
+			"paused": "任务已暂停",
+			"resumed": "任务已恢复",
+			"tasksRecovered": "子任务已恢复",
+			"tasksRecoveredDetail": "{{relaunch}} 个待重新启动，{{delivered}} 个已交付",
+			"planApproved": "计划已批准",
+			"proposal": "提案 — {{step}}",
+			"stepApproved": "已批准 — {{step}}",
+			"stepCorrected": "已修正 — {{step}}",
+			"worktreesCleaned": "Worktree 已清理",
+			"worktreesCleanedDetail": "已删除 {{count}} 个文件夹，释放了 {{size}} GB 磁盘空间",
+			"deleted": "任务已删除",
+			"deletedDetail": "已清除 {{count}} 项",
+			"opened": "任务已创建",
+			"planSubmitted": "计划已提交",
+			"planSubmittedDetail": "{{count}} 个子任务",
+			"closed": "任务已结束"
+		},
+		"nothingAwaitsDecision": "在{{step}}阶段没有等待你决定的事项：任务当前处于“{{state}}”。",
+		"correctionNeedsReason": "请说明哪里不对：如果没有理由，主智能体会再次提出同样的提案。",
+		"taskWithoutId": "子任务没有标识符：无法为其分配执行者。",
+		"blocked": {
+			"unknownBase": "它基于 `{{base}}`，但该分支不属于本计划中的任何子任务。请重新规划，让它基于集成分支。",
+			"baseExhausted": "它所基于的子任务（`{{base}}`）已用完返工次数：它将无法交付。"
+		}
+	},
+	"panel": {
+		"lens": {
+			"breaks": "会破坏什么",
+			"deployed": "部署之后",
+			"users": "谁在使用"
+		},
+		"folderError": "审查小组文件夹：{{error}}",
+		"unreadable": "无法读取的审查小组：{{error}}",
+		"writeError": "写入审查小组：{{error}}",
+		"alreadyRunning": "针对此变更的审查小组已在运行。",
+		"changeGone": "此变更已不存在：合并请求已关闭，或分支已被删除。",
+		"noFolder": "没有可运行智能体的文件夹。",
+		"silentVoice": "{{lens}}：{{error}}",
+		"noVoice": "没有任何视角作出回应。{{details}}",
+		"journal": {
+			"title": "针对变更的审查小组",
+			"detail": "{{verdict}} — {{count}} 处分歧"
+		},
+		"mergeFailed": "综合未能完成（{{error}}）。原始意见仍可阅读。"
+	},
+	"review": {
+		"noReview": "此 PR 没有代码审查。",
+		"noRepo": "请在设置中填写项目的 GitHub 仓库。",
+		"prNotFound": "在 {{repo}} 上找不到 PR #{{number}}。",
+		"noNewCommit": "自第 {{round}} 轮以来没有新提交：PR 没有变化。",
+		"noPreviousReview": "没有之前的代码审查：将进行完整审查。",
+		"noPrNumber": "该代码审查没有说明审查的是哪个 PR。"
+	},
+	"prompts": {
+		"group": {
+			"review": "代码审查",
+			"visual": "图像报告",
+			"delivery": "交付",
+			"fixes": "修复",
+			"quality": "质量",
+			"investigation": "调查",
+			"mine": "我的提示词"
+		},
+		"label": {
+			"review": "PR 的完整代码审查",
+			"reviewFollowup": "检查 PR 上的修复",
+			"visual": "带图像的报告",
+			"ship": "检查，然后 commit + push",
+			"reviewThenShip": "审查，然后 commit + push",
+			"openPr": "创建 pull request",
+			"reviewComments": "处理审查意见",
+			"prHealth": "PR 健康检查",
+			"ciRed": "CI 失败",
+			"conflicts": "解决与基础分支的冲突",
+			"selfQa": "对已完成的工作做 QA",
+			"conventions": "检查规范",
+			"tests": "补充测试",
+			"prodError": "调查生产环境错误",
+			"ticket": "实现工单"
+		},
+		"configFolderError": "配置文件夹：{{error}}",
+		"serializeError": "序列化：{{error}}",
+		"writeError": "写入 prompts.toml：{{error}}",
+		"labelAndTextRequired": "提示词需要一个标签和一段文本。"
+	},
+	"permissions": {
+		"unreadableAnswer": "无法读取的回答：{{error}}",
+		"writeError": "写入回答：{{error}}"
+	},
+	"codex": {
+		"turnFailed": "该回合失败。"
+	},
+	"agent": {
+		"notActive": "该智能体已不再活动。",
+		"inputUnavailable": "该智能体的输入不可用。",
+		"outputUnavailable": "该智能体的输出不可用。",
+		"emptyMessage": "空消息。",
+		"claudeNotFound": "在本机上找不到 `claude` CLI。",
+		"claudeTimeout": "Claude 在 {{seconds}} 秒内没有回应。",
+		"claudeLaunchError": "启动 Claude：{{error}}",
+		"claudeError": "Claude：{{error}}",
+		"claudeStopped": "Claude 已停止：{{detail}}",
+		"claudeUnreadable": "无法读取 Claude 的回答。",
+		"folderNotFound": "找不到文件夹：{{path}}",
+		"oneShotProtocol": "引擎“{{engine}}”声明的是 `{{protocol}}` 协议：一次性提问只能使用默认协议。",
+		"launchError": "启动智能体：{{error}}",
+		"agentError": "智能体：{{error}}",
+		"oneShotTimeout": "智能体在二十分钟后仍未返回任何内容；已放弃此次分析。",
+		"agentStopped": "智能体已停止：{{detail}}",
+		"agentUnreadable": "无法读取智能体的回答：{{output}}",
+		"noReason": "未给出原因",
+		"agentFailed": "智能体失败：{{reason}}",
+		"agentWroteNothing": "智能体没有写入任何内容。",
+		"memoryCeiling": "本机内存使用超过 {{ceiling}}%：在回落到该值以下之前，不会启动新的智能体。请关闭不再需要的内容，或在“设置 → 任务”中提高上限。",
+		"memoryCeilingTurn": "本机内存使用超过 {{ceiling}}%：下一回合将等待其回落到该值以下。",
+		"unknownProtocol": "引擎“{{engine}}”声明的是 `{{protocol}}` 协议，Cockpit 目前还不支持。已实现：{{known}}。",
+		"protocolNoMission": "`{{protocol}}` 协议目前还不支持任务工具：该引擎暂时无法在任务中使用，无论是作为主智能体还是执行者。",
+		"claudeNotFoundHint": "找不到 `claude` CLI。请安装它，或检查它是否位于 ~/.local/bin、~/.claude/local 或 /opt/homebrew/bin。",
+		"noBinary": "引擎“{{engine}}”未声明任何可执行文件，而 Cockpit 只能自行找到 `claude`。",
+		"codexNeedsMessage": "`codex-exec` 需要一条消息才能启动：它无法在没有输入的情况下开启。",
+		"geminiNeedsMessage": "`gemini-stream-json` 需要一条消息才能启动：它无法在没有输入的情况下开启。",
+		"geminiNoResume": "`gemini-stream-json` 无法恢复对话：没有任何资料说明如何做到。请启动一个新的智能体。",
+		"bridgeUnavailable": {
+			"title": "权限桥接不可用",
+			"subject": "找不到 Node",
+			"detail": "智能体的权限请求和提问将无法到达界面。请安装 Node（`brew install node`）以恢复；智能体仍会按其模式继续运行。"
+		},
+		"sandboxNoRuntimeHint": "已启用容器隔离，但未安装任何运行时（`orb` 或 `docker`）。请在“设置 → 任务”中禁用它，或安装一个运行时。",
+		"sandboxNoRuntime": "已启用容器隔离，但未安装任何运行时（`orb` 或 `docker`）。",
+		"sandboxImageFailed": "已启用容器隔离，但无法准备镜像：{{error}}",
+		"firstMessageError": "发送第一条消息：{{error}}",
+		"silentDeath": "进程停止了，没有写出任何回答，也没有在其输出或标准错误中留下任何内容。",
+		"journal": {
+			"diedBeforeFirstAnswer": "智能体在首次回答前停止"
+		},
+		"sendError": "发送消息：{{error}}",
+		"noThreadYet": "该智能体还没有对话标识符 — 它的第一次回答可能尚未到达。",
+		"resumeTurnError": "恢复回合：{{error}}",
+		"cannotInterrupt": "该引擎无法在不结束回合的情况下中断回合。请使用“停止”。",
+		"interruptError": "中断：{{error}}",
+		"noControlChannel": "该引擎没有控制通道。",
+		"step": {
+			"stoppedFromCockpit": "已从 Cockpit 停止。",
+			"detached": "Cockpit 已关闭；智能体在无窗口的情况下继续运行。",
+			"cockpitClosed": "Cockpit 已关闭。",
+			"detachedFinished": "分离的智能体在 Cockpit 关闭期间已完成。",
+			"detachedStopped": "分离的智能体在 Cockpit 关闭期间已停止。",
+			"reattached": "Cockpit 启动时发现它仍在运行。",
+			"lastTurnFailed": "引擎将其最后一个回合作为错误返回。"
+		}
+	}
+}

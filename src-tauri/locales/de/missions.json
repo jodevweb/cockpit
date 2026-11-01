@@ -1,1 +1,183 @@
-{}
+{
+	"orchestrator": {
+		"notAGitRepo": "`{{path}}` ist kein Git-Repository.",
+		"branchInMainRepo": "`{{branch}}` ist im Haupt-Repository (`{{path}}`) ausgecheckt. Cockpit schreibt dort nie: Wechsle dieses Repository auf einen anderen Branch, dann setzt die Mission in ihrem eigenen Worktree fort.",
+		"folderOnOtherBranch": "`{{path}}` existiert bereits, ist aber auf `{{current}}`, nicht auf `{{branch}}`. Verschiebe diesen Ordner oder setze ihn auf den richtigen Branch zurück: Cockpit startet dort nichts, solange er nicht den Branch der Aufgabe trägt.",
+		"noBranch": "kein Branch",
+		"noIntegrationBranch": "Die Mission hat keinen Integrations-Branch."
+	},
+	"mission": {
+		"step": {
+			"understanding": "Verständnis",
+			"approach": "Ansatz",
+			"split": "Aufteilung"
+		},
+		"unknown": "Unbekannte Mission: {{id}}",
+		"unreadable": "Mission unlesbar: {{error}}",
+		"folderError": "Missionsordner: {{error}}",
+		"writeError": "Schreiben der Mission: {{error}}",
+		"titleRequired": "Eine Mission braucht einen Titel.",
+		"deleteFailed": "{{path}} konnte nicht gelöscht werden: {{error}}",
+		"reworkNeedsReason": "Eine Nacharbeit ohne Grund sagt nicht, was zu korrigieren ist.",
+		"unknownTask": "Unbekannte Aufgabe: {{id}}",
+		"reworkLimit": "„{{title}}“ wurde bereits {{count}}-mal nachgearbeitet. Übernimm selbst, statt sie neu zu starten.",
+		"note": {
+			"rework": "Nacharbeit {{count}}: {{reason}}",
+			"redoAfterRework": "Neu zu machen: Eine Aufgabe wurde nachgearbeitet.",
+			"workFoundAtStartup": "Arbeit beim Start gefunden: Ihr Branch enthält Commits.",
+			"resumedAfterRestart": "Nach dem Neustart von Cockpit fortgesetzt."
+		},
+		"journal": {
+			"taskReworked": "Aufgabe zur Nacharbeit zurückgeschickt",
+			"paused": "Mission pausiert",
+			"resumed": "Mission fortgesetzt",
+			"tasksRecovered": "Aufgaben wiederhergestellt",
+			"tasksRecoveredDetail": "{{relaunch}} neu zu starten, {{delivered}} bereits geliefert",
+			"planApproved": "Plan freigegeben",
+			"proposal": "Vorschlag — {{step}}",
+			"stepApproved": "Freigegeben — {{step}}",
+			"stepCorrected": "Korrigiert — {{step}}",
+			"worktreesCleaned": "Worktrees aufgeräumt",
+			"worktreesCleanedDetail": "{{count}} Ordner entfernt, {{size}} GB Speicher frei",
+			"deleted": "Mission gelöscht",
+			"deletedDetail": "{{count}} Element(e) gelöscht",
+			"opened": "Mission eröffnet",
+			"planSubmitted": "Plan eingereicht",
+			"planSubmittedDetail": "{{count}} Aufgabe(n)",
+			"closed": "Mission abgeschlossen"
+		},
+		"nothingAwaitsDecision": "Beim Schritt {{step}} wartet nichts auf deine Entscheidung: Die Mission steht bei „{{state}}“.",
+		"correctionNeedsReason": "Sag, was falsch ist: Ohne Grund würde der Hauptagent denselben Vorschlag erneut machen.",
+		"taskWithoutId": "Aufgabe ohne Kennung: Kein Ausführer kann ihr zugeordnet werden.",
+		"blocked": {
+			"unknownBase": "Sie geht von `{{base}}` aus, dem Branch keiner Aufgabe dieses Plans. Plane sie neu, sodass sie vom Integrations-Branch ausgeht.",
+			"baseExhausted": "Die Aufgabe, von der sie ausgeht (`{{base}}`), hat ihre Nacharbeiten aufgebraucht: Sie wird nicht liefern."
+		}
+	},
+	"panel": {
+		"lens": {
+			"breaks": "Was kaputtgeht",
+			"deployed": "Nach dem Deployment",
+			"users": "Wer es nutzt"
+		},
+		"folderError": "Ordner der Kreuzverhöre: {{error}}",
+		"unreadable": "Kreuzverhör unlesbar: {{error}}",
+		"writeError": "Schreiben des Kreuzverhörs: {{error}}",
+		"alreadyRunning": "Für diese Änderung läuft bereits ein Kreuzverhör.",
+		"changeGone": "Diese Änderung existiert nicht mehr: Der Merge Request wurde geschlossen oder der Branch ist weg.",
+		"noFolder": "Kein Ordner, in dem die Agenten laufen können.",
+		"silentVoice": "{{lens}}: {{error}}",
+		"noVoice": "Kein Blickwinkel hat geantwortet. {{details}}",
+		"journal": {
+			"title": "Kreuzverhör einer Änderung",
+			"detail": "{{verdict}} — {{count}} Meinungsverschiedenheit(en)"
+		},
+		"mergeFailed": "Die Synthese wurde nicht abgeschlossen ({{error}}). Die Rohmeinungen bleiben lesbar."
+	},
+	"review": {
+		"noReview": "Kein Review für diesen PR.",
+		"noRepo": "Trage das GitHub-Repository des Projekts in den Einstellungen ein.",
+		"prNotFound": "Ich finde PR #{{number}} auf {{repo}} nicht.",
+		"noNewCommit": "Kein Commit seit Runde {{round}}: Der PR hat sich nicht bewegt.",
+		"noPreviousReview": "Kein vorheriges Review: Ich mache ein vollständiges Review.",
+		"noPrNumber": "Das Review sagt nicht, welchen PR es prüft."
+	},
+	"prompts": {
+		"group": {
+			"review": "Review",
+			"visual": "Visueller Bericht",
+			"delivery": "Auslieferung",
+			"fixes": "Korrekturen",
+			"quality": "Qualität",
+			"investigation": "Untersuchung",
+			"mine": "Meine Prompts"
+		},
+		"label": {
+			"review": "Vollständiges Code-Review eines PR",
+			"reviewFollowup": "Korrekturen an einem PR prüfen",
+			"visual": "Bericht mit Bildern",
+			"ship": "Prüfen, dann Commit + Push",
+			"reviewThenShip": "Reviewen, dann Commit + Push",
+			"openPr": "Pull Request öffnen",
+			"reviewComments": "Review-Feedback umsetzen",
+			"prHealth": "PR-Gesundheitscheck",
+			"ciRed": "CI ist rot",
+			"conflicts": "Konflikte mit der Basis lösen",
+			"selfQa": "Das Erledigte testen",
+			"conventions": "Konventionen prüfen",
+			"tests": "Tests ergänzen",
+			"prodError": "Produktionsfehler untersuchen",
+			"ticket": "Ticket umsetzen"
+		},
+		"configFolderError": "Konfigurationsordner: {{error}}",
+		"serializeError": "Serialisierung: {{error}}",
+		"writeError": "Schreiben von prompts.toml: {{error}}",
+		"labelAndTextRequired": "Ein Prompt braucht eine Bezeichnung und einen Text."
+	},
+	"permissions": {
+		"unreadableAnswer": "Antwort unlesbar: {{error}}",
+		"writeError": "Schreiben der Antwort: {{error}}"
+	},
+	"codex": {
+		"turnFailed": "Die Runde ist fehlgeschlagen."
+	},
+	"agent": {
+		"notActive": "Dieser Agent ist nicht mehr aktiv.",
+		"inputUnavailable": "Die Eingabe des Agenten ist nicht verfügbar.",
+		"outputUnavailable": "Die Ausgabe des Agenten ist nicht verfügbar.",
+		"emptyMessage": "Leere Nachricht.",
+		"claudeNotFound": "Die `claude`-CLI ist auf diesem Rechner nicht zu finden.",
+		"claudeTimeout": "Claude hat nicht innerhalb von {{seconds}} s geantwortet.",
+		"claudeLaunchError": "Start von Claude: {{error}}",
+		"claudeError": "Claude: {{error}}",
+		"claudeStopped": "Claude wurde beendet: {{detail}}",
+		"claudeUnreadable": "Unlesbare Antwort von Claude.",
+		"folderNotFound": "Ordner nicht gefunden: {{path}}",
+		"oneShotProtocol": "Die Engine „{{engine}}“ deklariert das Protokoll `{{protocol}}`: Eine einmalige Frage geht nur mit dem Standardprotokoll.",
+		"launchError": "Start des Agenten: {{error}}",
+		"agentError": "Agent: {{error}}",
+		"oneShotTimeout": "Der Agent hat nach zwanzig Minuten nichts geliefert; die Analyse wird abgebrochen.",
+		"agentStopped": "Der Agent wurde beendet: {{detail}}",
+		"agentUnreadable": "Unlesbare Antwort des Agenten: {{output}}",
+		"noReason": "kein Grund angegeben",
+		"agentFailed": "Der Agent ist gescheitert: {{reason}}",
+		"agentWroteNothing": "Der Agent hat nichts geschrieben.",
+		"memoryCeiling": "Arbeitsspeicher des Rechners über {{ceiling}} %: Kein neuer Agent startet, bis er wieder darunter fällt. Schließe, was nicht mehr gebraucht wird, oder erhöhe die Grenze unter Einstellungen → Missionen.",
+		"memoryCeilingTurn": "Arbeitsspeicher des Rechners über {{ceiling}} %: Die nächste Runde wartet, bis er wieder darunter fällt.",
+		"unknownProtocol": "Die Engine „{{engine}}“ deklariert das Protokoll `{{protocol}}`, das Cockpit noch nicht spricht. Implementiert: {{known}}.",
+		"protocolNoMission": "Das Protokoll `{{protocol}}` unterstützt die Missionswerkzeuge noch nicht: Diese Engine kann in einer Mission noch nicht verwendet werden, weder als Hauptagent noch als Ausführer.",
+		"claudeNotFoundHint": "Die `claude`-CLI ist nicht zu finden. Installiere sie oder prüfe, ob sie in ~/.local/bin, ~/.claude/local oder /opt/homebrew/bin liegt.",
+		"noBinary": "Die Engine „{{engine}}“ deklariert kein Binary, und Cockpit findet von sich aus nur `claude`.",
+		"codexNeedsMessage": "`codex-exec` braucht eine Nachricht zum Starten: Es kann nicht mit Schweigen beginnen.",
+		"geminiNeedsMessage": "`gemini-stream-json` braucht eine Nachricht zum Starten: Es kann nicht mit Schweigen beginnen.",
+		"geminiNoResume": "`gemini-stream-json` kann keine Unterhaltung fortsetzen: Keine Quelle dokumentiert, wie. Starte einen neuen Agenten.",
+		"bridgeUnavailable": {
+			"title": "Berechtigungsbrücke nicht verfügbar",
+			"subject": "Node nicht gefunden",
+			"detail": "Berechtigungsanfragen und Fragen der Agenten erreichen die Oberfläche nicht. Installiere Node (`brew install node`), um sie zurückzubekommen; die Agenten laufen weiter, gemäß ihrem Modus."
+		},
+		"sandboxNoRuntimeHint": "Container-Isolierung ist aktiviert, aber keine Laufzeit (`orb` oder `docker`) ist installiert. Deaktiviere sie unter Einstellungen → Missionen oder installiere eine.",
+		"sandboxNoRuntime": "Container-Isolierung ist aktiviert, aber keine Laufzeit (`orb` oder `docker`) ist installiert.",
+		"sandboxImageFailed": "Container-Isolierung ist aktiviert, aber das Image konnte nicht vorbereitet werden: {{error}}",
+		"firstMessageError": "Senden der ersten Nachricht: {{error}}",
+		"silentDeath": "Der Prozess wurde beendet, ohne eine Antwort zu schreiben und ohne etwas auf seiner Ausgabe oder seinem Standardfehler zu hinterlassen.",
+		"journal": {
+			"diedBeforeFirstAnswer": "Agent vor seiner ersten Antwort beendet"
+		},
+		"sendError": "Senden der Nachricht: {{error}}",
+		"noThreadYet": "Dieser Agent hat noch keine Unterhaltungskennung — seine erste Antwort ist vielleicht noch nicht angekommen.",
+		"resumeTurnError": "Fortsetzen der Runde: {{error}}",
+		"cannotInterrupt": "Diese Engine kann eine Runde nicht unterbrechen, ohne sie zu beenden. Nutze Stopp.",
+		"interruptError": "Unterbrechen: {{error}}",
+		"noControlChannel": "Diese Engine hat keinen Steuerkanal.",
+		"step": {
+			"stoppedFromCockpit": "Aus Cockpit gestoppt.",
+			"detached": "Cockpit geschlossen; der Agent arbeitet ohne Fenster weiter.",
+			"cockpitClosed": "Cockpit geschlossen.",
+			"detachedFinished": "Der abgekoppelte Agent ist fertig geworden, während Cockpit geschlossen war.",
+			"detachedStopped": "Der abgekoppelte Agent wurde beendet, während Cockpit geschlossen war.",
+			"reattached": "Beim Start von Cockpit lebend vorgefunden.",
+			"lastTurnFailed": "Die Engine hat ihre letzte Runde als Fehler zurückgegeben."
+		}
+	}
+}

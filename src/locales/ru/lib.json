@@ -1,0 +1,311 @@
+{
+	"format": {
+		"justNow": "только что",
+		"bytes": "{{value}} Б",
+		"kilobytes": "{{value}} КБ",
+		"megabytes": "{{value}} МБ"
+	},
+	"automations": {
+		"days": {
+			"mon": "Пн",
+			"tue": "Вт",
+			"wed": "Ср",
+			"thu": "Чт",
+			"fri": "Пт",
+			"sat": "Сб",
+			"sun": "Вс"
+		},
+		"stamp": {
+			"today": "сегодня {{time}}",
+			"tomorrow": "завтра {{time}}",
+			"yesterday": "вчера {{time}}"
+		},
+		"rhythm": {
+			"none": "Не выбран ни один день",
+			"weekdays": "С понедельника по пятницу в {{time}}",
+			"everyDay": "Каждый день в {{time}}",
+			"days": "{{days}} в {{time}}"
+		},
+		"run": {
+			"running": "Выполняется",
+			"partial": "Частично",
+			"failed": "Ошибка",
+			"missed": "Пропущено",
+			"caughtUp": "Наверстано",
+			"manual": "Вручную",
+			"onTime": "Вовремя"
+		},
+		"source": {
+			"tracker": "Трекер задач"
+		},
+		"event": {
+			"merged": "PR слит",
+			"opened": "PR открыт",
+			"updated": "PR обновлён",
+			"reviewed": "PR проверен",
+			"done": "Тикет выполнен",
+			"started": "Тикет начат",
+			"moved": "Тикет перемещён",
+			"canceled": "Тикет отменён",
+			"agent": "Агенты",
+			"git": "Действие Git",
+			"resolved": "Ошибка устранена",
+			"assigned": "Ошибка назначена"
+		},
+		"markdown": {
+			"silent": "На этот раз нет ответа: {{sources}}."
+		}
+	},
+	"world": {
+		"regions": {
+			"arrive": {
+				"label": "Входящие",
+				"hint": "разобрать"
+			},
+			"encours": {
+				"label": "В работе",
+				"hint": "держите под контролем или делегируйте"
+			},
+			"livrer": {
+				"label": "Поставить",
+				"hint": "проверить и слить"
+			},
+			"prod": {
+				"label": "В продакшене",
+				"hint": "что это меняет"
+			}
+		}
+	},
+	"missions": {
+		"awaited": {
+			"understanding": "ведущий агент прочитал тикет · проверьте, что он понял",
+			"approach": "подход ждёт вашего одобрения",
+			"approval_one": "{{count}} задача · ничего не начнётся без вашего одобрения",
+			"approval_few": "{{count}} задачи · ничего не начнётся без вашего одобрения",
+			"approval_many": "{{count}} задач · ничего не начнётся без вашего одобрения",
+			"approval_other": "{{count}} задачи · ничего не начнётся без вашего одобрения"
+		},
+		"state": {
+			"understanding": "чтение тикета",
+			"awaitingUnderstanding": "понимание ждёт подтверждения",
+			"approaching": "подход",
+			"awaitingApproach": "подход ждёт подтверждения",
+			"planning": "декомпозиция",
+			"awaitingApproval": "ждёт вашего одобрения",
+			"running": "в работе",
+			"integrating": "интеграция",
+			"done": "закрыта",
+			"failed": "остановлена"
+		}
+	},
+	"episodes": {
+		"gesture": {
+			"runs": "запускает {{command}}",
+			"uses": "использует {{tool}}",
+			"usesATool": "использует инструмент",
+			"edits": "редактирует {{file}}",
+			"editsAFile": "редактирует файл",
+			"delegated": "поручил «{{description}}»",
+			"launchedSubagent": "запустил субагента",
+			"reads": "читает {{file}}",
+			"searches": "ищет {{query}}",
+			"browses": "просматривает {{file}}"
+		}
+	},
+	"worktreeFlow": {
+		"title": "Worktree {{branch}}",
+		"creating": "Создание — зависимости, база данных… это может занять несколько минут.",
+		"timeout": "Worktree для {{branch}} не появился за 15 минут.",
+		"ready": "Worktree готов.",
+		"starting": "Запускаю создание worktree…",
+		"readyOpen": "Worktree готов, его рабочее пространство открыто."
+	},
+	"types": {
+		"triggers": {
+			"ci_red": {
+				"label": "CI становится красным",
+				"hint": "на изменении в работе"
+			},
+			"review_changes_requested": {
+				"label": "Ревью запрашивает правки",
+				"hint": "на открытом PR"
+			},
+			"pr_stale": {
+				"label": "Изменение перестало двигаться",
+				"hint": "по истечении срока — черновики игнорируются"
+			},
+			"schedule": {
+				"label": "Через равные промежутки",
+				"hint": "без сигнала, по часам — единственный триггер, который срабатывает, даже если ничего не происходит"
+			},
+			"linear_assigned": {
+				"label": "Мне назначен тикет Linear",
+				"hint": "срабатывает снова, если позже меняется его приоритет — условие решает, какой именно"
+			}
+		},
+		"commentScopes": {
+			"i_commented": "я уже комментировал этот PR",
+			"i_allowed": "я явно разрешил этот PR",
+			"hers": "PR открыт Permanence",
+			"mine": "это мой PR"
+		},
+		"powers": {
+			"rerun_pipeline": "Перезапустить пайплайн",
+			"create_branch": "Создать ветку",
+			"open_draft_pr": "Открыть черновик PR",
+			"set_label": "Добавить метку",
+			"open_worktree": "Открыть worktree",
+			"start_agent": "Запустить агента",
+			"run_command": "Выполнить команду репозитория",
+			"open_mission": "Открыть миссию для написания кода"
+		},
+		"never": {
+			"review": "одобрять или отклонять ревью",
+			"assign": "назначать",
+			"close": "закрывать",
+			"merge": "сливать",
+			"deploy": "деплоить"
+		}
+	},
+	"proof": {
+		"defaultTitle": "демонстрация агента"
+	},
+	"remarks": {
+		"about": "Насчёт {{anchor}}: {{text}}",
+		"intro": "Несколько замечаний по вашей работе:",
+		"outro": "Учитывайте их впредь; скажите, если какое-то из них кажется вам неверным."
+	},
+	"activity": {
+		"unexplainedFailure": "Ошибка без объяснения."
+	},
+	"ipc": {
+		"previewMissing": "Предпросмотр: у «{{command}}» нет примера ответа."
+	},
+	"footprint": {
+		"deleted_one": "{{count}} удалён",
+		"deleted_few": "{{count}} удалено",
+		"deleted_many": "{{count}} удалено",
+		"deleted_other": "{{count}} удалено",
+		"created_one": "{{count}} создан",
+		"created_few": "{{count}} создано",
+		"created_many": "{{count}} создано",
+		"created_other": "{{count}} создано",
+		"modified_one": "{{count}} изменён",
+		"modified_few": "{{count}} изменено",
+		"modified_many": "{{count}} изменено",
+		"modified_other": "{{count}} изменено"
+	},
+	"chantier": {
+		"slices": {
+			"messages": "Диалог",
+			"memory": "Инструкции проекта",
+			"system": "Базовая часть CLI",
+			"other": "Прочее"
+		}
+	},
+	"illustrations": {
+		"source": {
+			"mesure": "измерено",
+			"depot": "найдено в репозитории",
+			"capture": "снято с экрана",
+			"agent": "со слов агента"
+		}
+	},
+	"film": {
+		"caption": {
+			"read_one": "Читает {{count}} файл.",
+			"read_few": "Читает {{count}} файла.",
+			"read_many": "Читает {{count}} файлов.",
+			"read_other": "Читает {{count}} файла.",
+			"think": "Что он предполагает.",
+			"edit": "Редактирует {{file}}.",
+			"testsPass": "Тесты проходят.",
+			"testsFail": "Часть тестов падает.",
+			"fix": "Исправляет {{file}}.",
+			"seeBrowser": "Проверяет в браузере.",
+			"seeResult": "Смотрит на результат.",
+			"deliver": "Поставляет.",
+			"handBack": "Возвращает управление."
+		},
+		"deliver": {
+			"pushed": "Отправлено: {{branch}}",
+			"branch": "ветка {{branch}}"
+		},
+		"phase": {
+			"read": "чтение",
+			"edit": "правка",
+			"test": "тест",
+			"see": "проверка на экране",
+			"run": "команды",
+			"agent": "субагенты"
+		}
+	},
+	"narrator": {
+		"cloudModels": {
+			"natural": "Естественный",
+			"fast": "Быстрый"
+		},
+		"rates": {
+			"calm": "Спокойно",
+			"normal": "Обычно",
+			"fast": "Быстро"
+		},
+		"then": "затем",
+		"wrapUp": {
+			"handsBack": "Готово, он возвращает вам управление.",
+			"changed_one": "он изменил {{spoken}} файл",
+			"changed_few": "он изменил {{spoken}} файла",
+			"changed_many": "он изменил {{spoken}} файлов",
+			"changed_other": "он изменил {{spoken}} файла",
+			"testsFail": "тесты падают",
+			"testsPass": "тесты проходят",
+			"doneBut": "Готово: {{changed}}, но {{tests}}.",
+			"doneAnd": "Готово: {{changed}}, и {{tests}}.",
+			"done": "Готово: {{what}}."
+		},
+		"progress": {
+			"changed_one": "Всё ещё работает. С момента вашего указания изменён {{spoken}} файл.",
+			"changed_few": "Всё ещё работает. С момента вашего указания изменено {{spoken}} файла.",
+			"changed_many": "Всё ещё работает. С момента вашего указания изменено {{spoken}} файлов.",
+			"changed_other": "Всё ещё работает. С момента вашего указания изменено {{spoken}} файла.",
+			"exploring": "Всё ещё работает, изучает код."
+		},
+		"line": {
+			"subagent": "Он передаёт часть работы субагенту.",
+			"error": "Он столкнулся с ошибкой.",
+			"testsFail": "Тесты падают.",
+			"testsPass": "Тесты проходят.",
+			"question": "Вы ему нужны: он задаёт вам вопрос.",
+			"permission": "Он ждёт вашего разрешения, чтобы продолжить."
+		}
+	},
+	"assistant": {
+		"keys": {
+			"space": "Пробел",
+			"arrow": "Стрелка {{direction}}"
+		}
+	},
+	"feedMeta": {
+		"type": "тип",
+		"level": "уровень",
+		"project": "проект",
+		"author": "автор",
+		"assignee": "исполнитель",
+		"deployment": "деплой",
+		"attempt": "попытка",
+		"version": "версия",
+		"run": "запуск",
+		"task": "задача",
+		"environment": "окружение",
+		"commit": "коммит",
+		"event": "событие",
+		"branch": "ветка",
+		"labels": "метки",
+		"reviewers": "ревьюеры",
+		"priority": "приоритет",
+		"origin": "источник",
+		"url": "url",
+		"occurrences": "вхождения",
+		"users": "пользователи"
+	}
+}

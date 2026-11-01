@@ -1,0 +1,1002 @@
+{
+	"activityCenter": {
+		"pulse": {
+			"asksQuestion": "あなたに質問しています",
+			"asksPermission": "許可を求めています · {{tool}}",
+			"tool": "ツール",
+			"using": "{{tool}} を使用中",
+			"thinking": "思考中",
+			"replied": "完了 — 実行中のものはなく、あなたの指示を待っています"
+		},
+		"chip": {
+			"collapse": "折りたたむ",
+			"hint": "実行中のものと、あなたを待っているもの",
+			"working_other": "{{count}} 件作業中",
+			"yours": "あなたの番",
+			"done": "完了",
+			"yoursCount_other": "あなたの番 · {{count}}"
+		},
+		"panel": {
+			"running": "実行中",
+			"yourTurn": "あなたの番",
+			"idle": "実行中のものなし",
+			"collapseHint": "上部バーに折りたたむ",
+			"collapse": "最小化",
+			"cockpit": "Cockpit が対応中",
+			"working": "作業中",
+			"empty": "作業中のエージェントも進行中のアクションもありません：バックグラウンドでは何も起きていません。"
+		},
+		"openAgent": "エージェントを開く",
+		"row": {
+			"working": "対応中…",
+			"failed": "失敗しました。",
+			"done": "完了しました。",
+			"hideSteps": "ステップを隠す",
+			"steps_other": "{{count}} ステップ",
+			"unfollow": "ここでの追跡をやめる（アクションは続行）",
+			"dismiss": "閉じる"
+		}
+	},
+	"briefSettings": {
+		"saved": "エージェントのコンテキストを保存しました。",
+		"intro": "エージェントが起動する前に、Cockpit はブランチについて既に知っていることを集めます：チケット、レビューの指摘、ここで試したこと。ブリーフは入力欄の上に表示され、あなたの目を通さずに送信されるものはありません。",
+		"enable": "エージェントの起動時にコンテキストを集める",
+		"enableHint": "オフにすると、入力欄は素の状態に戻ります：何も組み立てられず、接続されたサービスにも何もリクエストしません。",
+		"sourcesTitle": "起動時に確認するソース",
+		"save": "保存"
+	},
+	"browserAnnotator": {
+		"tool": {
+			"ellipse": "円",
+			"arrow": "矢印",
+			"text": "テキスト",
+			"point": "要素を指す：Cockpit がそれが何かをエージェントに伝えます"
+		},
+		"describe": {
+			"marker": "マーカー {{index}}：<{{tag}}>",
+			"markerWithText": "マーカー {{index}}：<{{tag}}>「{{text}}」",
+			"component": "コンポーネント {{name}}",
+			"componentWithSource": "コンポーネント {{name}}（{{source}}）",
+			"selector": "セレクター `{{selector}}`"
+		},
+		"nothingHere": "この位置には指せるものがありません。",
+		"noImage": "ページにはまだ添付できる画像がありません。",
+		"defaultNote": "添付したスクリーンショットを見てください：丸で囲んだ部分を修正する必要があります。",
+		"pageUrl": "ページ：{{url}}",
+		"noConversation": "このワークスペースで開いている会話がありません：画面を見せるにはエージェントを起動してください。",
+		"attached": "スクリーンショットをプロンプトに添付しました：内容を補って送信してください。",
+		"clear": "すべてクリア",
+		"notePlaceholder": "これをどうしてほしいか",
+		"send": "エージェントに添付",
+		"close": "注釈を閉じる",
+		"overlay": "ページ上の注釈",
+		"textPlaceholder": "入力して Enter",
+		"quote": "「{{text}}」"
+	},
+	"browserView": {
+		"gesture": {
+			"navigate": "エージェントがページを移動中",
+			"click": "エージェントがクリック中",
+			"type": "エージェントが入力中",
+			"screenshot": "エージェントがスクリーンショットを撮影中",
+			"read": "エージェントがページを読んでいます",
+			"wait": "エージェントが待機中",
+			"act": "エージェントが操作中"
+		},
+		"back": "前のページ",
+		"forward": "次のページ",
+		"reload": "再読み込み",
+		"addressPlaceholder": "アドレス — localhost:3000、または任意のサイト",
+		"annotateTitle": "ページに注釈を付けてエージェントに見せる：丸で囲む、矢印を描く、要素を指す",
+		"annotate": "注釈",
+		"openExternal": "このページをシステムのブラウザで開く",
+		"stop": "このブラウザを停止 — エージェントは次のアクションで新しいブラウザを起動します",
+		"keyboardInput": "ページへの入力",
+		"starting": "ブラウザを起動中…",
+		"notRunning": "このワークスペースのブラウザは動いていません。エージェントが初めてページを操作するときに自動で起動し、ここで様子を見られます。今すぐ開くこともできます。",
+		"open": "ブラウザを開く",
+		"openingServer": "このワークスペースのサーバーを開いています…",
+		"serverStarting": "開発サーバーを起動中 — 応答があり次第ページが開きます。",
+		"nothingListening": "このワークスペースではまだ何も待ち受けていません。",
+		"nothingListeningHint": "このワークスペースでは何も待ち受けていません：アドレスを入力するか、ワークフロー設定で開発コマンドを宣言してください。"
+	},
+	"changeTour": {
+		"state": {
+			"added": "追加",
+			"untracked": "新規",
+			"modified": "変更",
+			"deleted": "削除"
+		},
+		"count": {
+			"added_other": "{{count}} 件追加",
+			"untracked_other": "{{count}} 件新規",
+			"modified_other": "{{count}} 件変更",
+			"deleted_other": "{{count}} 件削除"
+		},
+		"title": "変更ツアー",
+		"agent": "エージェント",
+		"fileCount_other": "ファイル {{count}} 個",
+		"tellTitle": "モデルが各ファイルのストーリーを、読むべき順に書きます",
+		"telling": "ストーリーを執筆中…",
+		"tellAgain": "もう一度語る",
+		"tell": "ストーリーを語る",
+		"closeEsc": "閉じる（Esc）",
+		"close": "閉じる",
+		"stepAria": "ステップ {{index}}",
+		"start": "ツアーを開始",
+		"empty": {
+			"title": "見て回るものがありません",
+			"body": "{{base}} と異なるファイルはありません。エージェントがすべてを元に戻したか、別のフォルダで作業した可能性があります。"
+		},
+		"nav": {
+			"previous": "前へ",
+			"intro": "はじめに",
+			"end": "終わり",
+			"fileOf": "ファイル {{step}} / {{total}}",
+			"finish": "完了",
+			"next": "次へ"
+		},
+		"intro": {
+			"heading_other": "見て回るファイル {{count}} 個",
+			"telling": "モデルが差分を読み、各ファイルのストーリーを書きます — 約 30 秒。",
+			"hint": "各ファイルには、エージェントが編集中にそのファイルについて述べたことが添えられます。「ストーリーを語る」では、読むべき順に本格的な説明を書きます。"
+		},
+		"file": {
+			"stepOf": "ステップ {{index}} / {{total}}",
+			"open": "ファイルを開く",
+			"story": "ストーリー",
+			"said": "エージェントがこのファイルについて述べたこと",
+			"quote": "「{{text}}」",
+			"silent": "エージェントはこのファイルに触れる際に何も述べていません：おそらくコマンドによるもの（生成ファイル、依存関係）です。「ストーリーを語る」で説明されます。"
+		},
+		"outro": {
+			"title": "ツアー完了",
+			"body_one": "変更されたファイルを見終わりました。",
+			"body_other": "変更された {{count}} 個のファイルを見終わりました。",
+			"restart": "最初から"
+		}
+	},
+	"commandsSettings": {
+		"saved": "コマンドを保存しました。",
+		"intro": "記憶では打ち直せないコマンド：オプション付きのもの、フラグを忘れがちなもの。スクリプト画面とターミナルメニューに表示されます。リポジトリの素のスクリプトは宣言しなくても表示されます。",
+		"empty": "宣言されたコマンドはありません。",
+		"emptyHint": "Cockpit はこのリポジトリのスクリプトを読み取り、追加を提案できます。",
+		"detectHint": "リポジトリのスクリプトを読み取り、足りないものを提案",
+		"detect": "リポジトリから検出",
+		"defaultGroup": "コマンド",
+		"defaultLabel": "新しいコマンド",
+		"write": "コマンドを書く",
+		"found": "リポジトリで見つかったもの · {{count}}",
+		"addAll": "すべて追加",
+		"close": "閉じる",
+		"nothingNew": "新しいものはありません：このリポジトリが宣言しているものはすべてここにあります。",
+		"add": "追加",
+		"unnamed": "— 名前なし —",
+		"sensitive": "要注意",
+		"mainRepo": "メインリポジトリ",
+		"remove": "削除",
+		"options_other": "オプション {{count}} 個",
+		"expectsArgument": "引数あり",
+		"requiredArgument": "必須の引数",
+		"argument": "引数"
+	},
+	"confirm": {
+		"confirm": "確認",
+		"validate": "OK",
+		"cancel": "キャンセル"
+	},
+	"dailyPresenter": {
+		"status": {
+			"done": "完了",
+			"ongoing": "進行中",
+			"postponed": "延期"
+		},
+		"parts": {
+			"nothing": "なし。",
+			"shipped": "出荷済み",
+			"shippedEmpty": "前回のデイリー以降、マージされたものはありません。",
+			"openedSince_other": "以降に作成された PR {{count}} 件",
+			"ongoing": "進行中",
+			"ongoingEmpty": "アクティブなチケットはありません。",
+			"ticketDetail": "{{id}} · {{progress}}% · {{days}} 日",
+			"toHandle": "対応が必要",
+			"toHandleEmpty": "止まっているものはありません。"
+		},
+		"recap": {
+			"heading": "# デイリー — {{date}} 以降",
+			"part": "- {{title}}：{{lines}}",
+			"shipped": "- 出荷済み：{{items}}",
+			"commitment": "- 約束：{{text}}",
+			"commitmentWithStatus": "- 約束：{{text}}（{{status}}）",
+			"parked": "## 保留トピック"
+		},
+		"title": "デイリー",
+		"since": "{{date}} 以降",
+		"total": "合計 {{time}}",
+		"quit": "終了（Esc）",
+		"done": {
+			"title": "デイリー完了",
+			"duration_other": "{{count}} 人で {{time}}",
+			"parked": "これから取り上げる · {{count}}",
+			"noParked": "保留トピックはありません。",
+			"copyRecap": "まとめをコピー",
+			"close": "閉じる"
+		},
+		"speakers": "発言順",
+		"speaker": {
+			"speaking": "発言中",
+			"done": "完了",
+			"ready": "準備完了"
+		},
+		"preparedByAutomation": "本人のパート · 自動化で準備",
+		"silentSources": "今回は応答がありませんでした：{{sources}}。",
+		"timeLeft": "残りの発言時間",
+		"pause": "一時停止（p）",
+		"partsLabel": "パート",
+		"nav": {
+			"previous": "前へ",
+			"nextPart": "次のパート",
+			"nextSpeaker": "次の発言者",
+			"finish": "完了"
+		},
+		"sideLabel": "約束とトピック",
+		"pledge": {
+			"title": "{{name}} が前回言ったこと",
+			"status": "状態",
+			"none": "前回のデイリーでの約束はありません。",
+			"placeholder": "次のデイリーまでの約束…"
+		},
+		"parked": {
+			"title": "保留",
+			"placeholder": "後で取り上げるトピック…",
+			"add": "保留にする"
+		},
+		"shortcuts": "→ 次へ · ← 戻る · p 一時停止 · Esc 終了",
+		"noDevelopers": "発表する開発者がいません。"
+	},
+	"diagram": {
+		"unreadable": "図を読み取れません — テキストを表示します",
+		"caption": "エージェントが記述した図"
+	},
+	"engagementPanel": {
+		"nothingProduced": "何も作成されていないため、取り消すものはありません。",
+		"cannotUndo": "Cockpit は取り消せません：{{items}}。手作業で対応してください。",
+		"undoConfirmTitle": "実施内容を取り消しますか？",
+		"undoConfirm": "取り消す",
+		"undoFailed": "取り消せませんでした：{{items}}",
+		"undone": "取り消しました：{{items}}",
+		"close": "閉じる",
+		"trigger": "トリガー",
+		"triggerLine": "{{trigger}} · ルール「{{rule}}」",
+		"noTrigger": "トリガーなし",
+		"oracle": "オラクル",
+		"none": "なし",
+		"timeline": "タイムライン",
+		"nothingYet": "まだ何もありません。",
+		"produced": "作成物",
+		"open": "開く",
+		"cost": "コスト",
+		"costHint": "API 料金で換算した場合のコスト。サブスクリプションでは課金されず、ウィンドウのクォータが消費されます",
+		"undoHint": "作成したものを取り消す",
+		"undo": "実施内容を取り消す"
+	},
+	"jobProgress": {
+		"starting": "起動中…",
+		"silentStop": "コマンドが何も出力せずに停止しました",
+		"exitCode": "終了コード {{code}}",
+		"cancelled": "キャンセル — {{reason}}",
+		"failed": "失敗 — {{reason}}"
+	},
+	"notebookPanel": {
+		"kept": "教訓を保存しました — 次の関連するエージェントに渡されます。",
+		"title": "プロジェクトノート",
+		"subtitle": "手作業でやり直す必要があったことと、そこから学んだこと",
+		"reload": "再読み込み",
+		"close": "閉じる",
+		"pending": "確認待ちのやり直し · {{count}}",
+		"pendingHint": "エージェントが納品した作業が、直後に手作業で修正されました。これは評価でも印象でもない唯一のフィードバックです — そこからルールを導けるか、それともこのケース固有だったかが問題です。",
+		"lessons": "保存した教訓 · {{count}}",
+		"write": "教訓を書く",
+		"empty": "ノートは空です。",
+		"emptyHint": "エージェントの作業をやり直すたびに自動で埋まっていきます — ただし、何を入れるかは必ずあなたが承認します。",
+		"noBranch": "ブランチなし",
+		"filesReworked_other": "やり直したファイル {{count}} 個",
+		"draftLesson": "ここから教訓を導く",
+		"dismissHandback": "却下：このやり直しから学ぶことはない",
+		"collapse": "折りたたむ",
+		"showPatch": "修正内容を表示",
+		"editLesson": "この教訓を編集",
+		"newLesson": "新しい教訓",
+		"draftHint": "まだ作業を始めていないエージェントに向けて命令形で書きます：起きたことではなく、すべきことを。",
+		"textPlaceholder": "例：fetch を直接呼ばず、共有クライアントを経由すること。",
+		"scope": "範囲 — 空欄 = リポジトリ全体",
+		"cancel": "キャンセル",
+		"keep": "保存",
+		"wholeRepo": "リポジトリ全体",
+		"neverUsed": "未使用",
+		"uses_other": "{{count}} 回使用",
+		"fromHandback": "やり直しから導出",
+		"stale": "2 か月使われていません — まだ正しいですか？",
+		"correct": "修正",
+		"edit": "編集",
+		"forget": "破棄"
+	},
+	"nowFeed": {
+		"state": {
+			"ciFailing": "CI 失敗",
+			"changesRequested": "修正依頼",
+			"stacked": "スタックされた PR",
+			"ready": "マージ可能",
+			"draft": "ドラフト",
+			"inReview": "レビュー中"
+		},
+		"empty": "進行中のものはありません",
+		"emptyHint": "アクティブなチケットもオープン中のプルリクエストもありません。今後の予定は下に表示されます。",
+		"noTicket": "チケットなし",
+		"lastActivity": "最後のアクティビティ：{{when}}",
+		"today": "今日",
+		"yesterday": "昨日",
+		"days_other": "{{count}} 日"
+	},
+	"permanenceSettings": {
+		"intro": "あなたが他のことをしている間、エコシステムを動かし続けるオペレーターです。何を作るかは決めません：修正し、再試行し、更新します — そして成功を証明できます。運用にはプロダクトにはないオラクルがあるからです。Cockpit が開いている間だけ動作します。<strong>すべてボタンなしで適用されます</strong>：変更した内容はフィールドを離れたときに保存されます。",
+		"scope": {
+			"station": "このマシン",
+			"project": "このプロジェクト"
+		},
+		"oracle": {
+			"groupCommand": "リポジトリのコマンド",
+			"groupProperty": "プロジェクトのプロパティ",
+			"groupCi": "CI の状態",
+			"groupGithub": "GitHub",
+			"ciGreen": "CI が成功する",
+			"commentPosted": "コメントを投稿した"
+		},
+		"service": {
+			"title": "サービス",
+			"enabled": "有効",
+			"disabled": "無効",
+			"disabledHint": "無効にすると、項目はサイドバーから消えます：何もできない画面はメニューに残しません。ここで再度有効にしてください。一方、一時停止は操作です — 画面から、または <kbd>⇧P</kbd> で行ってください。",
+			"hours": "サービス時間",
+			"hoursHint": "空欄 = 常時。深夜 0 時をまたぐ範囲もそのまま解釈されます。",
+			"cadence": "間隔",
+			"cadenceHint": "2 回の確認の間隔。空欄 = 2 分。",
+			"dailyTokens": "1 日のトークン上限",
+			"dailyTokensHint": "自身に課す上限。空欄 = 200,000。",
+			"dailyEngagements": "1 日の対応上限",
+			"dailyEngagementsHint": "空欄 = 20。",
+			"quotaFloor": "これを下回ると身を引く",
+			"quotaFloorHint": "サブスクリプションのクォータ残量の割合。空欄 = 15%。Permanence はバックグラウンド、あなたはフォアグラウンドで作業します。",
+			"retention": "履歴の保持",
+			"retentionHint": "完了した対応。空欄 = 14 日。",
+			"catchUp": "スリープ解除時に、溜まったものに対応する",
+			"catchUpHint": "オフにすると、ゼロから始めてスキップしたものを報告します。一晩分のシグナルに一度に対応するのは、上限を使い切る最も確実な方法です。",
+			"notifyFailures": "失敗時に通知する",
+			"notifyAll": "すべての対応で通知する",
+			"notifyAllHint": "成功は静かに、失敗は知らせます：すべての対応を通知すると受信箱が復活し、12 件のレポートを読むのは作業をするのと変わりません。"
+		},
+		"unit": {
+			"minutes": "分",
+			"percentLeft": "% 残り",
+			"days": "日",
+			"engagements": "件",
+			"hours": "時間",
+			"failures": "回失敗",
+			"default": "デフォルト"
+		},
+		"guards": {
+			"title": "安全装置",
+			"intro": "それぞれが特定の暴走パターンに対応し、互いに代わりにはなりません。これらがあるからこそ、オンにしても安心できます。",
+			"maxRunning": "同時対応数",
+			"maxRunningHint": "デフォルトは 1 件。当番のオペレーターは 8 件のインシデントを並行して扱いません — また、1 日の上限は一時的な集中を防げません。",
+			"rehearsal": "試行",
+			"rehearsalHint": "判断し、何をしたかを書きますが、実行はしません。権限を変更するとカウンターはリセットされます。空欄 = 10。",
+			"grace": "項目ごとの隔離",
+			"graceHint": "対応後、同じ PR にはしばらく手を出しません。これにより、自分のコミットで再び起動したり、固執したりすることを防ぎます。空欄 = 6 時間。",
+			"breaker": "サーキットブレーカー",
+			"breakerHint": "連続して失敗するとこの回数で自ら一時停止します。再開は手動の操作です：自動再起動では、防ぐべきことを繰り返してしまいます。空欄 = 3。"
+		},
+		"role": {
+			"title": "役割",
+			"intro": "モデルは 1 つではなく 2 つ。トリアージはすべての差分を確認します — 呼び出しの 95% で、入力はごく小さいものです。作業は対応が発生したときにだけ始まります。",
+			"engine": "エンジン",
+			"engineHint": "空欄 = 最初に宣言されたもの。",
+			"engineFirst": "最初に宣言されたもの",
+			"triageModel": "トリアージ — モデル",
+			"triageModelHint": "「何もない」と言える最小のモデル。",
+			"triageDepth": "トリアージ — 深さ",
+			"workModel": "作業 — モデル",
+			"workDepth": "作業 — 深さ",
+			"prompt": "常設の指示",
+			"promptHint": "リポジトリの資料に加えて、すべての対応のコンテキストに追加されます。",
+			"promptPlaceholder": "対応の内容にかかわらず、行動前に知っておくべきこと。"
+		},
+		"rules": {
+			"title": "ルール",
+			"add": "追加",
+			"intro": "初期状態はオフ。明示できるオラクルのないルールは、オンにしても開始しません：それが停止条件を持たないエージェントにとって唯一の停止条件です。",
+			"empty": "ルールはありません。何を監視するかを伝えるまで、Permanence は何もしません。"
+		},
+		"powers": {
+			"title": "権限",
+			"enabledCount": "{{total}} 件中 {{count}} 件有効",
+			"intro": "許可リストで、初期状態は空です。1 つずつチェックしてください。判断基準：あなた以外の誰かがそれに気づく可能性があるか？",
+			"notImplemented": "未実装 — この操作は拒否されます",
+			"neverShared": "<b>共有ブランチでは決して行いません。</b>何をチェックしても、{{branches}} や、ワークフローで宣言したベースブランチには決して書き込みません。自分専用のブランチでのみ作業します — 共有ブランチに触れるのはオペレーターの操作ではなく、全員を巻き込む操作です。",
+			"never": "<b>決して行わないこと：</b>{{list}}。これらの操作にはツールがありません — 報告ではなく、決定を伴う操作だからです。"
+		},
+		"comment": {
+			"title": "プルリクエストへのコメント",
+			"readByHuman": "人が読むもの",
+			"intro": "それ自体が目的になることはありません：すでにオラクルを持つ対応の報告のみです。ブランチで何をしたかを伝えるだけで、会話は始めません。",
+			"scopesTitle": "以下の条件のいずれかが真の場合にのみ書き込みます",
+			"noScope": "条件が 1 つもチェックされていません：どこにもコメントしません。",
+			"alwaysTitle": "そして常に",
+			"perDayBefore": "最大",
+			"perDayAfter": "件／PR／日のコメント。",
+			"noMonologue": "間に人の返信がない限り、2 回続けて書き込むことはありません — それではただの独り言です。",
+			"signature": "メッセージの末尾に <mono>{{signature}}</mono> と署名します。編集不可：PR では、同僚が読むのはあなたのアカウントだからです。",
+			"optOut": "「ここでのコメントをやめる」で、設定に触れずに PR を 1 操作で除外できます。"
+		},
+		"rule": {
+			"labelPlaceholder": "何をするかを 1 行で",
+			"noOracle": "オラクルなし",
+			"unknownTrigger": "不明なトリガー",
+			"remove": "このルールを削除",
+			"trigger": "トリガー",
+			"choose": "選択…",
+			"oracle": "オラクル",
+			"oracleHint": "目指す証拠。このリポジトリが宣言しているものから選びます。",
+			"oracleNone": "なし — ルールは開始しません",
+			"condition": "条件",
+			"conditionHint": "自然な言葉で。対応の前に、トリアージで判定されます。",
+			"conditionPlaceholder": "最後のコミットの作成者が自分である",
+			"reaction": "反応",
+			"reactionHint": "試みること。目標そのものは Permanence が書きます。",
+			"reactionPlaceholder": "修正して、ドラフト PR を作成する",
+			"delay": "間隔",
+			"delayScheduleHint": "このルールの 2 回の実行の間隔。空欄 = 24 時間。",
+			"delayStaleHint": "これを超えると、変更は停滞しているとみなされます。空欄 = 72 時間。",
+			"tokenBudget": "トークン予算",
+			"tokenBudgetHint": "このルールの対応 1 件あたり。空欄 = 1 日の上限。",
+			"perHour": "1 時間あたりの最大数",
+			"perHourHint": "空欄 = 1 日の上限のみ適用。",
+			"needsApproval": "作業開始前に自分の承認を求める",
+			"needsApprovalHint": "オフの場合、ミッションの計画は Permanence 自身が承認します — このルールが承認の役目を果たします。影響の大きいルールではオンにしてください。",
+			"save": "このルールを保存"
+		},
+		"depth": {
+			"engine": "エンジンのデフォルト",
+			"fast": "高速",
+			"normal": "標準",
+			"deep": "深く"
+		}
+	},
+	"planche": {
+		"enlarge": "拡大表示",
+		"before": "変更前",
+		"after": "変更後",
+		"slide": "スライドして比較",
+		"filmed": "Cockpit が録画 · {{seconds}} 秒",
+		"test": {
+			"title": "ここから導き出すテスト",
+			"steps_other": "{{count}} 件のアクションを再生",
+			"skipped_other": "{{count}} 件をスキップ（スクリーンショット、読み込み）",
+			"copied": "コピーしました",
+			"copy": "コピー",
+			"ask": "エージェントに追加させる"
+		},
+		"observed": "観察結果",
+		"files_other": "ファイル {{count}} 個",
+		"foldDetail": "詳細を折りたたむ",
+		"readDetail_other": "詳細を読む（{{chars}} 文字）"
+	},
+	"projectGround": {
+		"dirExists": "フォルダは存在します",
+		"dirMissing": "フォルダは存在しません",
+		"isRepo": "git リポジトリです",
+		"notRepo": "まだ git リポジトリではありません",
+		"noRemote": "リモートリポジトリなし",
+		"createRemote": "GitHub にもリポジトリを作成",
+		"createRemoteHint": "Cockpit が作成して「origin」に設定します。何もプッシュしません：最初のプッシュはあなたの判断です。",
+		"account": "アカウント",
+		"noGhSession": "`gh` セッションなし",
+		"repo": "リポジトリ",
+		"repoPlaceholder": "my-project",
+		"makePublic": "公開する",
+		"publicBadge": "誰でも閲覧可能",
+		"ready": "準備するものはありません — プロジェクトを追加できます。",
+		"preparing": "準備中…",
+		"step": {
+			"createDir": "フォルダを作成",
+			"gitInit": "git を初期化",
+			"createRemote": "GitHub リポジトリを作成"
+		},
+		"nothingToPrepare": "準備するものはありません"
+	},
+	"projectsHealth": {
+		"title": "プロジェクト",
+		"openWorktrees": "worktree を開く",
+		"switch": "このプロジェクトに切り替え",
+		"active": "アクティブ",
+		"liveAgents": "アクティブなエージェント",
+		"ciFailing": "CI 失敗",
+		"readyToMerge": "マージ可能",
+		"openPrs": "オープン中の PR",
+		"worktrees": "worktree",
+		"dirtyHint": "未コミットの作業がある worktree",
+		"dirty_other": "未コミット {{count}} 件",
+		"unpushed": "未プッシュのコミットがある worktree",
+		"partial": "一部のみ"
+	},
+	"propertiesReport": {
+		"verdict": {
+			"broken": "不成立",
+			"held": "成立",
+			"offTopic": "対象外",
+			"undecided": "判定不能"
+		},
+		"title": "常に成り立つべきこと",
+		"allHeld_other": "{{count}} 件のプロパティを確認 · 不成立なし",
+		"someBroken_other": "{{total}} 件中 {{count}} 件が不成立",
+		"costHint": "この確認を API 料金で換算した場合のコスト。サブスクリプションでは課金されず、ウィンドウのクォータが消費されます。",
+		"stale": "この確認以降にブランチが動きました。",
+		"quiet": "{{held}} 件成立、{{unrelated}} 件はこの変更と無関係。"
+	},
+	"propertiesSettings": {
+		"saved": "プロパティを保存しました。",
+		"caughtNothing": "このプロパティは、あなた自身の修正に対して何も検出しませんでした。",
+		"caughtSome": "{{tried}} 件中 {{caught}} 件の修正を検出していたはずです。",
+		"intro": "このリポジトリで常に成り立つべきことを、自然な言葉で書きます。Cockpit は変更に対してこれらを 1 つずつ証拠付きで判定させます。機械的に確認できることはここには書きません — どのツールも明文化していない、口伝えのルールのための場所です。",
+		"empty": "宣言されたプロパティはありません。",
+		"emptyHint": "Cockpit は、このリポジトリが過去に修正しなければならなかったことをもとに提案できます — それこそが再び壊れるものです。",
+		"proposeHint": "リポジトリの修正を読み取り、プロパティを導き出す",
+		"propose": "履歴から提案",
+		"write": "プロパティを書く",
+		"suggestions": "提案 · {{count}}",
+		"close": "閉じる",
+		"comesFrom": "出所：{{why}}",
+		"wholeRepo": "リポジトリ全体",
+		"keep": "保存",
+		"textPlaceholder": "例：データベースに書き込むすべてのルートは、呼び出す前に本文を検証する。",
+		"remove": "削除",
+		"scopePlaceholder": "範囲 — 空欄 = リポジトリ全体",
+		"neverTested": "未テスト",
+		"decorative_other": "飾り — {{count}} 件の修正で何も検出せず",
+		"wouldCatch_other": "{{tried}} 件中 {{count}} 件の修正を検出していたはず",
+		"testHint": "このプロパティをリポジトリの過去の修正に対して再生する",
+		"retest": "再テスト",
+		"test": "テスト",
+		"collapse": "折りたたむ",
+		"showSamples": "再生した修正を表示"
+	},
+	"pullRequestDetail": {
+		"noWorktree": "このブランチのローカル worktree はありません。",
+		"promptMissing": "プロンプト「{{id}}」がライブラリに見つかりません。",
+		"draft": "ドラフト",
+		"open": "オープン",
+		"stacked": "スタック",
+		"author": "作成者",
+		"files": "ファイル",
+		"additions": "追加",
+		"deletions": "削除",
+		"reviewers": "<name>{{names}}</name> のレビュー待ち",
+		"noReviewer": "レビュアーの依頼なし",
+		"assignee": "担当：<name>{{name}}</name>",
+		"fixCiHint": "CI を修正するエージェントを起動",
+		"fixCi": "CI を修正",
+		"feedbackHint": "エージェントでレビューの指摘に対応",
+		"feedback": "指摘対応",
+		"agentHint": "このブランチでエージェントを開く",
+		"agent": "エージェント",
+		"worktreeHint": "このブランチの worktree を開く",
+		"worktree": "Worktree",
+		"mergeTitle": "#{{id}} を {{base}} にマージしますか？",
+		"mergeMessage": "「{{title}}」— 元に戻せず、チーム全員に見えます。",
+		"merge": "マージ",
+		"merged": "#{{id}} をマージしました。",
+		"noDescription": "説明なし。"
+	},
+	"qaGallery": {
+		"empty": "QA の成果物はありません",
+		"emptyHint": ".claude/work に置かれたスクリーンショットやレポートがここに表示されます。",
+		"root": "ルート",
+		"openFolder": "Finder でフォルダを開く",
+		"reveal": "Finder で表示",
+		"close": "閉じる（Esc）",
+		"previous": "前へ（←）",
+		"next": "次へ（→）"
+	},
+	"sidePanel": {
+		"resize": "ドラッグで幅を広げる — ダブルクリックで元の幅に戻す",
+		"exitFull": "マップの横に戻す",
+		"full": "全画面",
+		"close": "閉じる"
+	},
+	"ui": {
+		"priority": {
+			"urgent": "緊急",
+			"high": "高",
+			"medium": "中",
+			"low": "低"
+		},
+		"missingConnector": {
+			"title": "{{service}} は接続されていません",
+			"hint": "{{missing}} がありません。入力するとこの画面が表示されます。",
+			"openSettings": "設定を開く"
+		},
+		"freshness": {
+			"never": "未読み込み",
+			"justNow": "たった今",
+			"seconds_other": "{{count}} 秒前",
+			"minutes_other": "{{count}} 分前",
+			"hours_other": "{{count}} 時間前",
+			"reload": "今すぐ再読み込み"
+		},
+		"errorNote": {
+			"retry": "再試行"
+		},
+		"searchField": {
+			"placeholder": "絞り込み…"
+		}
+	},
+	"updateBanner": {
+		"availableNotice": "バージョン {{version}} が利用可能です。",
+		"upToDate": "Cockpit は最新です。",
+		"checkFailed": "確認できませんでした：{{error}}",
+		"installFailedNotice": "更新できませんでした：{{error}}",
+		"available": "バージョン {{version}} が利用可能",
+		"later": "後で",
+		"restartWarning": "インストールすると Cockpit が再起動します — 実行中のエージェントは停止され、そのタスクは再起動後に再開されます。",
+		"update": "更新",
+		"downloading": "バージョン {{version}} をダウンロード中…",
+		"installed": "インストール完了 — 再起動中…",
+		"installFailed": "更新に失敗しました",
+		"close": "閉じる",
+		"version": "バージョン {{version}}",
+		"install": "{{version}} をインストール",
+		"check": "アップデートを確認"
+	},
+	"workflowSettings": {
+		"connectors": {
+			"intro": "画面は、依存するサービスが応答できる場合にのみ表示されます。キーを入力すると、項目は自動でメニューに戻ります。",
+			"ready": "準備完了",
+			"missing": "{{missing}} がありません",
+			"fill": "入力"
+		},
+		"workflow": {
+			"saved": "ワークフローを保存しました。",
+			"intro": "タスクトラッカーの列を、チームでの呼び方どおりに指定します。チケットの進み具合と、デイリーでの位置づけを決めます。",
+			"active": {
+				"label": "進行中",
+				"hint": "作業中の列"
+			},
+			"review": {
+				"label": "レビュー中",
+				"hint": "レビュー、QA"
+			},
+			"done": {
+				"label": "完了"
+			},
+			"blocked": {
+				"label": "ブロック中",
+				"hint": "ブロッカーを示す列"
+			},
+			"baseBranches": {
+				"label": "ベースブランチ",
+				"hint": "これ以外を対象とする PR はスタックとみなされます"
+			},
+			"dailyWeekdays": {
+				"label": "デイリーの曜日",
+				"hint": "1 = 月曜、5 = 金曜"
+			},
+			"prCommand": {
+				"label": "PR 作成コマンド",
+				"hint": "ミッションの最後にリードが実行します。空欄 = Cockpit が自分で PR を作成します"
+			},
+			"createWorktree": {
+				"label": "worktree を作成",
+				"hint": "空欄 = `git worktree add`。「/」で始まるコマンドはリポジトリのコマンドで、エージェントが実行します。"
+			},
+			"removeWorktree": {
+				"label": "worktree を削除",
+				"hint": "空欄 = `git worktree remove --force`。確認プロンプトで止まらないようにしてください：誰も読みません。"
+			},
+			"devServer": {
+				"label": "開発サーバーを起動",
+				"hint": "空欄 = Dev ボタンを表示しません。ここに存在しないコマンドでターミナルを開くよりはましです"
+			},
+			"malformed": "{{commands}}：プレースホルダーは波括弧で囲みます。それ以外の書き方では、そのままシェルに渡され、シェルは何も言わずにその行を拒否します。",
+			"testCommands": {
+				"label": "テストコマンド",
+				"hint": "vitest、jest、pytest、phpunit、php artisan test… に加えて — エージェントのカードに「テスト成功」と表示するためのもの"
+			},
+			"visualReports": {
+				"title": "エージェントは画像で報告する",
+				"detail": "オン：画像のほうがテキストより伝わる場合は作業を見せるよう、すべてのエージェントに指示します — 画面を変更してキャプチャできるなら変更前／変更後のスクリーンショット、構造を変更したなら図、単純な回答なら何もなし。今後起動するエージェントに適用され、すでに実行中のものには適用されません。"
+			},
+			"agentBrowser": {
+				"title": "エージェントはワークスペースのブラウザを操作する",
+				"detail": "オン：すべてのエージェントが、ページを開く、クリックする、入力する、スクリーンショットを撮るために必要なものを受け取ります。あなたのセッションやパスワードのない別のブラウザで行われ、「ブラウザ」タブでライブで見られます。最初のアクションで起動します。分離コンテナ内では効果がありません。今後起動するエージェントに適用されます。"
+			},
+			"browser": {
+				"label": "ブラウザ",
+				"hint": "空欄 = Chrome、Chromium、Edge、Brave の中で最初に見つかったもの"
+			},
+			"browserServer": {
+				"label": "ブラウザ操作サーバー",
+				"hint": "空欄 = Playwright のもの。独自のものには --cdp-endpoint <アドレス> が追加されます"
+			},
+			"reviewReadOnly": {
+				"title": "レビューエージェントは読み取り専用",
+				"detail": "オン：編集不可で、読み取り（git diff、git log、gh pr view…）のみ — それ以外はすべて拒否されます。オフ：テストの実行やファイルの変更が可能です。指示では PR を修正しないよう伝えますが、それを止めるものはありません。"
+			},
+			"themes_other": "{{count}} 件の業務トピックを宣言済み — デイリーで識別子を並べる代わりに「彼女は請求を担当」と言えるようになります。トピックは設定ファイルで編集します。",
+			"noThemes": "業務トピックはありません：デイリーの説明はタイトルそのものに頼ります。"
+		},
+		"replacedAtLaunch": "起動時に置き換え：",
+		"saving": "保存中…",
+		"save": "保存",
+		"remove": "削除",
+		"defaultPlaceholder": "デフォルト",
+		"fields": {
+			"key": "キー",
+			"displayName": "表示名"
+		},
+		"depth": {
+			"fast": "高速",
+			"normal": "標準",
+			"deep": "深く"
+		},
+		"roles": {
+			"saved": "ロールを保存しました。",
+			"intro": "実行役が起動時に受け取るもの：常設の指示、モデル、書き込みが許可されたパス。範囲は強制されます — 範囲外への書き込みは推奨されないのではなく、拒否されます。",
+			"masterNote": "このロールはミッションを率います：チケットを読み、分割を提案し、最後にすべてを統合します。キーは予約済みです — ステップとオーケストレーションツールは Cockpit が提供し、ここで設定するのはコマンド、指示、モデルのみです。",
+			"keyHint": "タスクから参照される",
+			"engine": {
+				"label": "エンジン",
+				"hint": "ロールを動かすプログラム",
+				"default": "デフォルト"
+			},
+			"model": {
+				"label": "モデル",
+				"hint": "空欄 = マシンのデフォルト"
+			},
+			"depth": {
+				"label": "深さ",
+				"hint": "ロールがどれだけ消費してよいか",
+				"engine": "エンジン",
+				"unsupported": "このエンジンは深さを宣言していません — エンジンで設定してください。"
+			},
+			"scope": {
+				"label": "範囲",
+				"hint": "パス、カンマ区切り"
+			},
+			"command": {
+				"label": "起動コマンド",
+				"hint": "指示の前に実行される、リポジトリのスキルまたはコマンド"
+			},
+			"prompt": "常設の指示",
+			"verifies": "他の作業を確認する — 実装が納品されてから開始",
+			"newLabel": "新しいロール",
+			"add": "ロールを追加",
+			"save": "ロールを保存"
+		},
+		"team": {
+			"saved": "チームを保存しました。",
+			"intro": "チームのメンバーと、各ツールでメンバーを識別するアカウント。この対応付けがデイリーとチームボードを動かします：GitHub ログインのないメンバーは、どのプルリクエストにも表示されません。",
+			"soloWarning": "このプロジェクトは<strong>ソロ</strong>に設定されています：チームは無視され、デイリーは非表示のままです。以下を役立てるには、プロジェクト設定で「ソロ」のチェックを外してください。",
+			"linearTeam": {
+				"label": "Linear チーム",
+				"hint": "現在のサイクルを読み取るチームの UUID — 空欄 = デイリーなし"
+			},
+			"empty": "メンバーが宣言されていません：デイリーとチームボードは空のままです。Cockpit はデフォルトで誰も提案しません — チームは推測できないからです。",
+			"name": "名前",
+			"role": {
+				"label": "ロール",
+				"hint": "dev または product"
+			},
+			"roleLabel": {
+				"label": "表示する肩書き",
+				"hint": "画面に表示されるもの",
+				"placeholder": "バックエンド開発者"
+			},
+			"github": {
+				"hint": "メインのログイン"
+			},
+			"linearId": {
+				"label": "Linear ID",
+				"hint": "UUID。プロフィールの URL に表示されます"
+			},
+			"githubAliases": {
+				"label": "その他の GitHub ログイン",
+				"hint": "以前のアカウント、カンマ区切り"
+			},
+			"sentryEmails": {
+				"label": "Sentry のメールアドレス",
+				"hint": "そのメンバーのアカウントのもの、カンマ区切り"
+			},
+			"sentryNames": {
+				"label": "Sentry の名前",
+				"hint": "イベントにメールアドレスがない場合"
+			},
+			"add": "メンバーを追加",
+			"save": "チームを保存"
+		},
+		"engines": {
+			"saved": "エンジンを保存しました。",
+			"intro": "エンジンはエージェントを動かすプログラムで、モデルの提供元ではありません。別のものを使うには 2 つの方法があります：同じプロトコルを話すバイナリ、または下の環境変数で指定する互換ゲートウェイ。その後、各ロールがエンジンを選びます。",
+			"keyHint": "ロールから参照される",
+			"binary": {
+				"label": "バイナリ",
+				"hint": "空欄 = claude（マシン上で検索）"
+			},
+			"protocol": {
+				"label": "プロトコル",
+				"hint": "claude-stream-json、codex-exec、または gemini-stream-json"
+			},
+			"models": {
+				"label": "モデル",
+				"hint": "エイリアスまたは完全な識別子（claude-opus-5-5）、カンマ区切り"
+			},
+			"args": {
+				"label": "引数",
+				"hint": "コマンドラインの末尾に追加"
+			},
+			"depthFastHint": "高速にするために追加するもの",
+			"depthDeepHint": "追加の労力に値するもののために",
+			"env": {
+				"label": "環境",
+				"hint": "1 行に 1 組：NAME=value — サービスのアドレス、アクセストークン",
+				"placeholder": "ANTHROPIC_BASE_URL=https://gateway.example.com\nANTHROPIC_AUTH_TOKEN=sk-…"
+			},
+			"variables_other": "{{count}} 個の変数 — 設定ファイルに権限 600 で書き込まれます。",
+			"noVariables": "変数なし：エンジンはマシンの環境を使います。",
+			"add": "エンジンを追加",
+			"save": "エンジンを保存"
+		},
+		"missionMode": {
+			"guided": {
+				"title": "ガイド付き",
+				"detail": "リードと一緒にチケットを読み、理解内容、アプローチ、分割を承認します — 3 つの合意を 1 つずつ。"
+			},
+			"autonomous": {
+				"title": "自律",
+				"detail": "リードがチケットを読み、すぐに分割を提案します。実行役が動き出す前の合意は 1 回だけです。"
+			},
+			"default": "デフォルト"
+		},
+		"budget": {
+			"intro": "想定以上に消費する 3 つのパターンに対する 3 つの上限：暴走するミッション、尽きるクォータ、飽和するマシン。どれも何かを強制終了することはありません — 進行中の作業は必ず最後まで実行されます。",
+			"tokenBudget": {
+				"label": "ミッションごとの上限",
+				"hint": "超えるとミッションは一時停止します — ブランチと作業はそのままで、ワンクリックで再開できます。空欄 = 500,000。",
+				"unit": "トークン"
+			},
+			"quotaFloor": {
+				"label": "これを下回ると新規開始しない",
+				"hint": "サブスクリプションのクォータ残量の割合。進行中のタスクは続行します。空欄 = 15%。",
+				"unit": "% 残り"
+			},
+			"memoryCeiling": {
+				"label": "これを上回ると新規起動しない",
+				"hint": "マシンのメモリ使用率。新しいエージェントは起動しません — ミッション、実行役、手動起動のいずれも。空欄 = 85%。",
+				"unit": "% メモリ"
+			}
+		},
+		"sandbox": {
+			"terminalLabel": "分離エージェントのサインイン",
+			"intro": "各エージェントはコンテナ内で動き、メモリは事後に計測するのではなくシステムによって制限されます。マシンに Docker または OrbStack が必要です — これがオフの間はどちらも不要です。",
+			"enable": "各エージェントをコンテナで分離する",
+			"runtime": {
+				"hint": "orb または docker。空欄 = マシン上で検出。",
+				"placeholder": "検出"
+			},
+			"memory": {
+				"label": "エージェントごとのメモリ",
+				"hint": "空欄 = 4096 MB。",
+				"unit": "MB"
+			},
+			"image": {
+				"hint": "空欄 = Cockpit のデフォルトイメージ。"
+			},
+			"loginNote": "サブスクリプションでサインインしたアカウントは、トークンをマシンのキーチェーンに保存しますが、コンテナはこれを読めません。このボタンはターミナルで <code>claude setup-token</code> を実行します — 表示されたトークンを「設定 → アクセストークン」（「分離アカウント」）に貼り付けてください。有効期間は 1 年で、期限が切れたらやり直してください。",
+			"connect": "分離アカウントを接続"
+		}
+	},
+	"workspacePanel": {
+		"masterRole": "リード",
+		"tabs": {
+			"agent": "エージェント",
+			"terminal": "ターミナル",
+			"board": "ビュー",
+			"boardTitle": "このブランチに関連するすべて：PR、チケット、レビュー、エージェント、コミット、ドキュメント、スクリーンショット",
+			"browser": "ブラウザ",
+			"browserTitle": "このワークスペースのブラウザ：エージェントがテストのためにライブで操作するもので、あなたもクリックできます",
+			"closeAgent": "閉じてエージェントを停止",
+			"closeTerminal": "ターミナルと実行中のものを閉じる"
+		},
+		"closeWorkspace": "このワークスペースを閉じる — すべて停止して破棄します",
+		"rail": {
+			"missionTitle_other": "{{title}}\nワークスペース {{count}} 件",
+			"closeMission_other": "このミッションのワークスペース {{count}} 件を閉じる",
+			"sleepingTitle": "{{cwd}}\n\n{{state}}\nクリックして再開",
+			"forgetSleeping": "このスリープ中のワークスペースを破棄",
+			"newWorkspace": "+ ワークスペース",
+			"openMission": "ミッション「{{title}}」を開く",
+			"delivered": "· {{done}}/{{total}} 納品済み",
+			"closeMissionWorkspace": "このミッションのワークスペースを閉じる"
+		},
+		"summary": {
+			"agents_other": "エージェント {{count}} 件",
+			"terminals_other": "ターミナル {{count}} 件"
+		},
+		"sleeping": {
+			"withParts": "スリープ中 — {{parts}}",
+			"empty": "スリープ中"
+		},
+		"menu": {
+			"browseDialog": "フォルダをワークスペースとして開く",
+			"browseGroup": "参照",
+			"browseLabel": "フォルダを開く…",
+			"browseHint": "ディスク上の任意の場所、一覧にある worktree 以外",
+			"worktreesGroup": "Worktree",
+			"detachedHead": "切り離された HEAD",
+			"alreadyOpen": "既に開いています",
+			"openTerminalHere": "ここでターミナルを開く（⇧Enter）",
+			"remoteBranchesGroup": "ここで一度もチェックアウトされていない他所のブランチ",
+			"localBranchesGroup": "worktree のないブランチ",
+			"remoteBranchHint": "{{remote}} 上 — ここにチェックアウトしてから作業",
+			"localBranchHint": "worktree を作成してから作業",
+			"creationNote": "作成",
+			"title": "ワークスペースを開く — 既存の worktree、またはこれから worktree を作成するブランチ",
+			"empty": "既知の worktree はありません。",
+			"prGroup": "プルリクエスト",
+			"prHint": "読み取り専用でレビュー — ⇧Enter：ブランチを開くだけ",
+			"prNote": "レビュー",
+			"prOpenBranch": "ブランチのワークスペースだけを開く",
+			"newBranchGroup": "このブランチはまだここにありません",
+			"newBranchHint": "worktree としてチェックアウトしてから、ワークスペースを開く"
+		},
+		"empty": {
+			"message": "開いているワークスペースはありません",
+			"hint": "ワークスペースとは、専用のフォルダにチェックアウトされたブランチと、そこで動かすすべてのものです。",
+			"stepBranch": "ブランチ",
+			"stepFolder": "そのフォルダ",
+			"stepAgents": "エージェントとターミナル",
+			"openBranch": "ブランチを開く"
+		},
+		"confirm": {
+			"closeTitle": "{{label}} を閉じますか？",
+			"message": "{{what}} — まだ実行中のものも含め、すべて停止します。",
+			"closeLabel": "ワークスペースを閉じる",
+			"closeMissionTitle_other": "「{{title}}」のワークスペース {{count}} 件を閉じますか？",
+			"closeAll": "すべて閉じる"
+		},
+		"toolbar": {
+			"addAgentTitle": "このワークスペースにエージェントを追加",
+			"addAgent": "+ エージェント",
+			"addTerminalTitle": "このワークスペースにターミナルを追加（⌘⇧T）",
+			"addTerminal": "+ ターミナル",
+			"stop": "停止",
+			"interrupt": "実行中のものを中断（⌃C）",
+			"clear": "画面をクリア",
+			"sleep": "脇に置く — プロセスは停止し、次回起動時にワークスペースが戻ります",
+			"closeMission": "ミッション「{{title}}」を閉じる — すべてのワークスペースが停止します"
+		},
+		"status": {
+			"shell": "シェル",
+			"finished": "終了",
+			"shellOpen": "シェル起動中",
+			"asking": "質問があります",
+			"permission": "許可が必要？",
+			"thinking": "思考中",
+			"ready": "準備完了"
+		},
+		"dock": {
+			"openTitle": "{{cwd}} — ワークスペース画面で開く",
+			"collapse": "リストを折りたたむ",
+			"expand": "グループの詳細を表示"
+		}
+	}
+}

@@ -1,1 +1,376 @@
-{}
+{
+	"brief": {
+		"sources": {
+			"conventions": {
+				"label": "저장소의 규칙",
+				"hint": "저장소가 컨벤션을 기록한 곳과 저장한 스킬 — 각 엔진은 자기 계열의 파일만 읽습니다"
+			},
+			"product": {
+				"label": "제품이 하는 일",
+				"hint": "변경을 읽기 위해 선언한 문장 — 이것이 없으면 에이전트는 코드 이야기만 합니다"
+			},
+			"lessons": {
+				"label": "프로젝트 노트",
+				"hint": "이미 손으로 다시 해야 했던 것들, 관련 파일 기준으로 필터링"
+			},
+			"place": {
+				"label": "브랜치와 상태",
+				"hint": "베이스, 분기, 커밋되지 않은 파일, 최근 커밋 — 저장소에서 읽으며 항상 사용 가능"
+			},
+			"ticket": {
+				"label": "브랜치의 티켓",
+				"hint": "선언된 트래커의 요청과 댓글"
+			},
+			"review": {
+				"label": "리뷰 피드백",
+				"hint": "이 브랜치에 열린 머지 요청의 설명과 토론"
+			},
+			"attempts": {
+				"label": "이미 시도한 것",
+				"hint": "이 폴더의 지난 대화, 각각 한 줄"
+			}
+		},
+		"missing": {
+			"noFolder": "폴더가 존재하지 않습니다",
+			"ticket": "티켓 {{id}}을(를) 읽을 수 없음 ({{error}})",
+			"pullRequests": "풀 리퀘스트를 읽을 수 없음 ({{error}})",
+			"pullRequest": "풀 리퀘스트 #{{number}}을(를) 읽을 수 없음 ({{error}})",
+			"mergeRequests": "머지 요청을 읽을 수 없음 ({{error}})",
+			"mergeRequestNotes": "MR !{{iid}}의 토론을 읽을 수 없음 ({{error}})"
+		},
+		"sections": {
+			"product": {
+				"label": "제품",
+				"detail": "팀이 선언한 내용"
+			},
+			"lessons": {
+				"label": "노트"
+			},
+			"place": {
+				"label": "브랜치",
+				"detail": "저장소 상태"
+			},
+			"ticket": {
+				"label": "티켓 {{identifier}}"
+			},
+			"review": {
+				"label": "리뷰 {{reference}}",
+				"descriptionOnly": "설명만"
+			},
+			"attempts": {
+				"label": "시도"
+			}
+		},
+		"count": {
+			"lessons_other": "교훈 {{count}}개",
+			"feedback_other": "댓글 {{count}}개",
+			"conversations_other": "대화 {{count}}개",
+			"skills_other": "스킬 {{count}}개",
+			"files_other": "파일 {{count}}개"
+		}
+	},
+	"impact": {
+		"errors": {
+			"folder": "분석 폴더: {{error}}",
+			"unreadable": "읽을 수 없는 분석: {{error}}",
+			"write": "분석 쓰기: {{error}}",
+			"alreadyRunning": "이 변경에 대한 분석이 이미 실행 중입니다.",
+			"changeGone": "이 변경은 더 이상 존재하지 않습니다: 풀 리퀘스트가 닫혔거나 브랜치가 사라졌습니다.",
+			"noWorkdir": "에이전트가 작업할 폴더가 없습니다."
+		},
+		"interrupted": {
+			"label": "Cockpit이 닫혀 읽기가 중단됨",
+			"detail": "이를 실행하던 에이전트는 애플리케이션과 함께 중지됩니다. 영향 화면에서 다시 시작하세요."
+		},
+		"journal": {
+			"analysis": "변경 분석"
+		},
+		"rawReportTitle": "보고서"
+	},
+	"properties": {
+		"errors": {
+			"folder": "속성 폴더: {{error}}",
+			"serialize": "직렬화: {{error}}",
+			"write": "쓰기: {{error}}",
+			"changeGone": "이 변경은 더 이상 존재하지 않습니다.",
+			"noneDeclared": "이 프로젝트에는 선언된 속성이 없습니다. 설정 → 에이전트에서 항상 참이어야 하는 것을 작성하거나, 직접 한 수정 사항을 바탕으로 Cockpit에 제안을 요청하세요.",
+			"noneApplicable": "선언된 속성 중 이 변경의 파일과 관련된 것이 없습니다.",
+			"noWorkdir": "에이전트가 작업할 폴더가 없습니다.",
+			"propertyGone": "이 속성은 더 이상 존재하지 않습니다.",
+			"repoMissing": "이 머신에서 이 프로젝트의 주 저장소를 찾을 수 없습니다.",
+			"noFixesCalibration": "최근 400개 커밋에서 식별 가능한 수정이 없습니다. 보정은 무언가를 고친 커밋에 의존합니다. 이것이 없으면 이 속성이 실패할 수 있는지 알 수 없습니다.",
+			"noFixesSuggest": "최근 기록에서 식별 가능한 수정이 없습니다: 이 저장소에 맞는 속성을 제안할 근거가 없습니다.",
+			"nothingUsable": "에이전트가 쓸 만한 것을 제안하지 않았습니다. 다시 시도하거나 첫 속성을 직접 작성하세요."
+		},
+		"judgeSilent": "판정자가 응답하지 않았습니다: {{error}}",
+		"journal": {
+			"label": "속성 확인",
+			"broken": "{{count}}개 위반"
+		}
+	},
+	"team": {
+		"priority": {
+			"urgent": "긴급",
+			"high": "높음",
+			"medium": "보통",
+			"low": "낮음"
+		},
+		"errors": {
+			"unknown": "오류",
+			"linear": "Linear: {{message}}",
+			"github": "GitHub: {{message}}",
+			"noMembers": "선언된 멤버가 없습니다: 설정 → 팀에서 팀을 추가하세요. 티켓을 연결하려면 각 사람의 작업 트래커 식별자가, 풀 리퀘스트를 연결하려면 GitHub 로그인이 필요합니다.",
+			"githubRepoMissing": "설정에서 `github.repo`(예: acme/monorepo)를 입력하세요."
+		},
+		"narrative": {
+			"theirTopics": "맡은 주제",
+			"and": "{{list}} 및 {{last}}",
+			"activeTickets_other": "진행 중인 티켓 {{count}}개",
+			"reviewTickets_other": "리뷰 중인 티켓 {{count}}개",
+			"openPrs_other": "열린 PR {{count}}개",
+			"newOpenPrs_other": "새로 연 PR {{count}}개",
+			"prs_other": "PR {{count}}개",
+			"blockingPoints_other": "차단 이슈 {{count}}개",
+			"nothingActiveDev": "{{name}}님은 현재 진행 중인 작업도 열린 PR도 없습니다.",
+			"nothingActive": "{{name}}님은 여기서 추적 중인 진행 주제가 없습니다.",
+			"variedTopics": "{{name}}님은 여러 주제를 진행하고 있습니다{{load}}.",
+			"alsoOn": ", 그리고 {{themes}}",
+			"mostlyOn": "{{name}}님은 주로 {{theme}} 작업 중입니다{{tail}}{{load}}.",
+			"workingOn": "{{name}}님은 {{themes}} 작업 중입니다{{load}}.",
+			"nothingMerged": "지난 데일리 이후 병합된 것이 없습니다.",
+			"openedNothingMerged": "지난 데일리 이후 {{opened}}, 아직 병합된 것은 없습니다.",
+			"shippedOn": " ({{themes}})",
+			"andOpened": ", 그리고 {{opened}}",
+			"shipped": "지난 데일리 이후 {{prs}} 배포{{themes}}{{opened}}.",
+			"toChallenge": "{{count}}개 점검 필요",
+			"toReview": "다른 사람을 위해 리뷰할 {{prs}}",
+			"nothingStuck": "이쪽에서 막힌 것은 없습니다.",
+			"toWatch": "지켜볼 것: {{items}}."
+		},
+		"days": "{{count}}일",
+		"flags": {
+			"blockedOne": "{{id}}이(가) Blocked로 표시됨 — 무엇이 있으면 풀릴까요?",
+			"blockedMany": "티켓 {{count}}개가 Blocked로 표시됨 ({{ids}}) — 무엇이 있으면 풀릴까요?",
+			"stacked": "PR #{{number}}이(가) `{{base}}` 기반 (dev 아님) — 베이스를 먼저 병합할까요?",
+			"ciFailing": "PR #{{number}} CI 실패 — 리뷰/병합 전에 수정하세요.",
+			"approved": "PR #{{number}} 승인되었지만 병합되지 않음 — 병합을 막는 것은 무엇인가요?",
+			"changesRequested": "PR #{{number}}: 변경 요청됨 — 작성자가 처리해야 합니다.",
+			"reviewStaleOne": "PR #{{number}}이(가) {{age}}일째 리뷰 대기 중 — 리뷰 시간을 잡을까요?",
+			"reviewStaleMany": "PR {{count}}개가 {{days}}일 넘게 리뷰 대기 중 ({{numbers}}, 가장 오래된 것 {{age}}일) — 리뷰를 계획할까요?",
+			"draftStale": "PR {{count}}개가 {{days}}일 넘게 초안 상태 ({{numbers}}) — 아직 유효한가요?",
+			"inProgressNoPrOne": "{{id}}이(가) {{days}}일 넘게 PR 없이 In Progress 상태 — 어디까지 진행됐나요?",
+			"inProgressNoPrMany": "티켓 {{count}}개가 {{days}}일 넘게 PR 없이 In Progress 상태 ({{ids}}) — 어디까지 진행됐나요?",
+			"reviewStale": "티켓 {{count}}개가 {{days}}일 넘게 리뷰 중 ({{ids}}) — 누구를 기다리나요?",
+			"wip": "티켓 {{count}}개가 동시에 In Progress — 우선순위를 정하거나 집중할까요?",
+			"assigneeMismatch": "{{issue}}은(는) {{name}}님에게 할당되었지만 코드는 @{{author}}님이 작성 (PR #{{number}}) — 재할당할까요?",
+			"idleNothing": "열린 PR도 진행 중인 티켓도 없음 — 무엇을 작업하고 있나요?",
+			"idleStale": "열린 PR이 없고 진행 중인 티켓에 최근 활동이 없음 — 여유가 있나요? 막혔나요?"
+		}
+	},
+	"automations": {
+		"errors": {
+			"serialize": "자동화: {{error}}",
+			"noName": "이름을 지정하세요.",
+			"badTime": "시간은 HH:MM 형식으로 작성합니다. 예: 14:00.",
+			"unreadableAnswer": "에이전트의 응답을 읽을 수 없습니다.",
+			"alreadyRunning": "이미 실행 중입니다.",
+			"emptyCorrection": "수정 내용이 비어 있습니다.",
+			"notFound": "자동화를 찾을 수 없습니다.",
+			"runNotFound": "실행 기록을 찾을 수 없습니다.",
+			"noOutput": "이 실행에는 결과물이 없습니다.",
+			"noChromium": "PDF를 만들려면 Chrome(또는 Chromium 브라우저)이 필요합니다. Markdown은 언제든 복사할 수 있습니다.",
+			"pdfTimeout": "브라우저가 1분 안에 PDF를 렌더링하지 못했습니다.",
+			"pdfNotProduced": "PDF가 생성되지 않았습니다. {{detail}}",
+			"noSlackWebhook": "이 자동화의 설정에서 Slack 웹훅을 입력하세요.",
+			"slack": "Slack: {{error}}",
+			"slackRefused": "Slack이 거부함: {{status}}"
+		},
+		"missed": {
+			"closedNoCatchUp": "예정된 시간에 Cockpit이 닫혀 있었고, 만회 실행이 꺼져 있습니다.",
+			"closedUntilAfter": "회의 시간이 지날 때까지 Cockpit이 닫혀 있었습니다."
+		},
+		"items": {
+			"draft": "초안",
+			"agentsIn": "{{name}}의 에이전트",
+			"turns_other": "{{count}}턴",
+			"minutes": "{{count}}분"
+		},
+		"sources": {
+			"noLinearToken": "설정에 Linear 토큰이 없음",
+			"noSentryToken": "설정에 Sentry 토큰이 없음",
+			"tracker": "작업 트래커"
+		},
+		"nothingFound": "읽은 소스에서 해당 기간에 찾은 것이 없습니다.",
+		"notify": {
+			"linesReady_other": "{{count}}줄 준비 완료.",
+			"silent": "응답 없음: {{sources}}.",
+			"ready": "{{name}} 준비 완료",
+			"failed": "{{name}}이(가) 완료되지 않았습니다"
+		},
+		"render": {
+			"silent": "이번에는 응답 없음: {{sources}}.",
+			"period": "{{from}}부터 {{to}}까지",
+			"slackPeriod": "{{from}}부터 {{to}}까지"
+		}
+	},
+	"permanence": {
+		"closed": {
+			"disabled": "설정에서 비활성화되어 있습니다.",
+			"suspended": "일시 정지됨. 진행 중인 개입은 마무리되며, 새로운 개입은 시작되지 않습니다.",
+			"offHours": "선언된 운영 시간 외입니다.",
+			"capped": "일일 상한에 도달했습니다. 내일 다시 시작합니다.",
+			"quota": "공유 할당량이 하한 아래입니다: 사용자를 위해 여유를 남겨 둡니다.",
+			"tripped": "서킷 브레이커: 연속 실패가 너무 많아 스스로 멈췄습니다."
+		},
+		"verdict": {
+			"pending": "진행 중",
+			"reached": "달성",
+			"missed": "미달성",
+			"offTopic": "주제 외",
+			"undecided": "판정 불가",
+			"rehearsed": "리허설"
+		},
+		"tripped": "연속 {{count}}회 실패. 마지막: {{last}}",
+		"journal": {
+			"breakerTripped": "서킷 브레이커 작동",
+			"emergencyStop": "비상 정지",
+			"undo": "개입 되돌림",
+			"act": "작업: {{tool}}",
+			"missionOpened": "Permanence가 연 미션",
+			"rule": "규칙 “{{rule}}”",
+			"ruleAwaiting": "규칙 “{{rule}}” — 계획이 승인을 기다리고 있습니다"
+		},
+		"halt": {
+			"requested": "중지를 요청했습니다.",
+			"cannotStop": "{{kind}} · {{what}} — Cockpit이 이것을 중지하는 방법을 모릅니다",
+			"summary": "{{stopped}}개 중지, {{failed}}개 실패"
+		},
+		"undo": {
+			"nothingProduced": "만들어진 것이 없습니다: 되돌릴 것이 없습니다.",
+			"cannotUndo": "Cockpit이 되돌리는 방법을 모릅니다: {{items}}. 직접 처리해야 합니다.",
+			"engagementGone": "이 개입은 더 이상 존재하지 않습니다.",
+			"missionPaused": "미션 “{{name}}” 일시 중지됨",
+			"missionFailed": "미션 “{{name}}” — {{error}}",
+			"labelRemoved": "라벨 “{{label}}” 제거됨",
+			"labelFailed": "라벨 “{{label}}” — {{error}}",
+			"labelNoTarget": "라벨 “{{label}}” — 대상을 읽을 수 없음",
+			"cannotUndoKind": "{{kind}} · {{what}} — Cockpit이 이것을 되돌리는 방법을 모릅니다",
+			"step": "수행한 작업을 되돌립니다",
+			"stepResult": "{{undone}}개 되돌림, {{failed}}개 되돌리지 못함",
+			"summary": "{{undone}}개 되돌림, {{failed}}개 실패"
+		},
+		"signals": {
+			"clock": "시계",
+			"every": "{{rule}} — {{hours}}시간마다",
+			"author": "작성자: {{author}}",
+			"reviewRequested": "리뷰 요청 대상: {{people}}",
+			"noPriority": "우선순위 없음",
+			"assignedToMe": "나에게 할당됨 · 우선순위: {{priority}}"
+		},
+		"dropped": {
+			"noTrigger": "인식된 트리거 없음",
+			"noActiveRule": "활성 규칙 없음",
+			"noNode": "분류를 사용할 수 없음: Node를 찾을 수 없음",
+			"noAnswer": "분류가 응답하지 않음: {{error}}",
+			"notDecided": "분류가 결정하지 않음",
+			"byTriage": "분류에서 제외됨",
+			"ruleGone": "규칙 “{{rule}}”이(가) 더 이상 존재하지 않음"
+		},
+		"blind": {
+			"linear": "Linear: {{error}}",
+			"source": "{{source}}: {{message}}"
+		},
+		"cannotOpen": {
+			"running": "이미 개입이 진행 중입니다 (동시에 최대 {{max}}개)",
+			"quarantined": "이 항목은 방금 처리되었습니다. {{hours}}시간 동안 건드리지 않습니다",
+			"dailyCap": "일일 상한 도달 (개입 {{max}}개)"
+		},
+		"oracle": {
+			"none": "선언된 오라클이 없습니다: 목표 달성 여부를 판단할 수 없습니다.",
+			"unknownKind": "Cockpit이 “{{kind}}” 유형의 오라클을 조회하는 방법을 모릅니다.",
+			"commandGone": "명령 “{{id}}”이(가) 이 저장소에 더 이상 선언되어 있지 않습니다.",
+			"commandSensitive": "“{{name}}”은(는) 민감한 명령으로 표시되어 있어 증거로 쓸 수 없습니다. 확인 과정은 아무것도 바꾸면 안 됩니다.",
+			"noRepo": "명령을 실행할 로컬 저장소가 없습니다.",
+			"commandOk": "`{{line}}`이(가) 0으로 종료되었습니다.",
+			"commandFailed": "`{{line}}` 실패 ({{code}}). {{tail}}",
+			"commandNotLaunched": "`{{line}}`을(를) 실행할 수 없습니다: {{error}}",
+			"commandTimeout": "`{{line}}`이(가) 10분이 지나도 아무것도 반환하지 않았습니다.",
+			"forgesSilent": "포지가 응답하지 않았습니다: {{error}}",
+			"changeGone": "이 변경은 더 이상 존재하지 않습니다: 병합되었거나 닫혔습니다.",
+			"ciGreen": "CI가 통과했습니다.",
+			"ciRed": "CI가 여전히 실패 상태입니다.",
+			"ciPending": "CI가 아직 결론이 나지 않았습니다 (상태: {{state}}).",
+			"noGithubAccount": "GitHub 계정을 확인할 수 없습니다 (`gh`가 없거나 로그인되지 않음).",
+			"commented": "{{me}}의 댓글이 #{{number}}에 게시되었습니다.",
+			"notCommented": "#{{number}}에 {{me}}의 댓글이 없습니다.",
+			"githubSilent": "GitHub가 응답하지 않았습니다: {{error}}",
+			"checkFailed": "확인에 실패했습니다: {{error}}",
+			"propertyNotApplicable": "속성 “{{id}}”은(는) 이 변경에 적용되지 않습니다."
+		},
+		"errors": {
+			"notPullRequest": "이 변경은 풀 리퀘스트가 아닙니다."
+		},
+		"engagement": {
+			"noNode": "Node를 찾을 수 없습니다: 에이전트가 의도를 선언할 수 없었고, 텍스트에서 읽은 계획은 계획이 아닙니다.",
+			"agentSilent": "에이전트가 응답하지 않았습니다: {{error}}",
+			"agentSilentShort": "에이전트가 응답하지 않음",
+			"noIntent": "에이전트가 의도를 선언하지 않았습니다. 명시할 수 있는 목표 없이는 아무것도 내보내지 않습니다.",
+			"noIntentShort": "선언된 의도 없음",
+			"planned": "계획만 됨, 실행되지 않음",
+			"plannedWhy": "계획됨 — {{why}}",
+			"openMissionStep": "미션 열기",
+			"openMissionWhy": "코드를 작성해야 합니다: 작업은 미션을 거칩니다",
+			"rehearsed": "리허설: 계획은 작성되었고, 실행된 것은 없습니다.",
+			"missionNotAllowed": "코드를 작성해야 했지만 “미션 열기”가 허용 목록에 없습니다. 아무것도 하지 않았습니다.",
+			"sharedBranch": "통합 브랜치가 공유 브랜치인 “{{branch}}”이(가) 됩니다. 아무것도 하지 않았습니다.",
+			"missionOpenedStep": "미션을 엽니다",
+			"missionName": "미션 “{{name}}”",
+			"awaitingApprovalStep": "승인을 기다립니다",
+			"awaitingApprovalWhy": "이 규칙은 다시 사람의 확인을 요구합니다: 계획이 대기 중입니다",
+			"missionFailed": "미션을 열 수 없습니다: {{error}}",
+			"missionFailedShort": "미션을 열 수 없음",
+			"resolvedWithoutActs": "{{why}} 요청된 작업이 없습니다: 상황이 저절로 해결되었습니다.",
+			"resolvedAllRefused": "{{why}} 어떤 작업도 수행할 수 없었습니다: 이것을 해결한 것은 그 작업이 아니었습니다.",
+			"someRefused": "{{why}} 작업 {{count}}개가 거부되었습니다.",
+			"missionGone": "미션이 사라졌습니다: 어떻게 되었는지 알 수 없습니다.",
+			"missionGoneShort": "미션 사라짐",
+			"missionFailedNote": "미션이 실패했습니다. {{note}}",
+			"askOracle": "오라클을 조회합니다"
+		},
+		"acts": {
+			"notAllowed": "“{{power}}”이(가) 허용 목록에 없습니다: 작업을 수행하지 않았습니다.",
+			"sharedBranch": "“{{branch}}”은(는) 공유 브랜치입니다: Permanence는 여기에 절대 쓰지 않으며, 자기 브랜치에서만 작업합니다.",
+			"noBranch": "이 변경의 브랜치를 찾을 수 없습니다.",
+			"rerun": "실행 #{{id}} 재시작됨",
+			"noLabel": "요청된 라벨이 없습니다.",
+			"labelSet": "라벨 “{{label}}” 설정됨",
+			"labelOn": "#{{number}}에 {{label}}",
+			"commandUnknown": "명령 “{{id}}”이(가) 선언되어 있지 않습니다.",
+			"commandSensitive": "“{{name}}”은(는) 민감한 명령으로 표시되어 있어 사용자 없이 실행되지 않습니다.",
+			"noBranchName": "요청된 브랜치 이름이 없습니다.",
+			"sharedBranchName": "“{{name}}”은(는) 공유 브랜치 이름이라 사용하지 않습니다.",
+			"noRepo": "로컬 저장소가 없습니다.",
+			"branchCreated": "브랜치 “{{name}}” 생성됨",
+			"noWorktreeBranch": "worktree용 브랜치가 없습니다.",
+			"sharedWorktree": "“{{branch}}”은(는) 공유 브랜치입니다: worktree로 체크아웃하지 않습니다. 그렇지 않으면 다음 작업에서 에이전트가 여기에 쓰게 됩니다.",
+			"worktreeByAgent": "Worktree 생성은 에이전트 명령을 거칩니다: 사람이 있어야 합니다.",
+			"worktreeOpened": "“{{branch}}”의 worktree 체크아웃됨",
+			"lineFailed": "`{{line}}` 실패: {{error}}",
+			"draftOpened": "초안 PR 열림: {{url}}",
+			"draftLabel": "초안 · {{branch}}",
+			"noWorktree": "브랜치 “{{branch}}”이(가) worktree로 체크아웃되어 있지 않습니다: 주 저장소에서 시작한 에이전트는 사용자가 작업 중인 곳에 쓰게 됩니다.",
+			"needsApp": "에이전트를 시작하려면 애플리케이션이 필요합니다: 테스트 환경에서는 시작되지 않습니다.",
+			"agentOn": "{{branch}}의 에이전트",
+			"agentStarted": "{{worktree}}에서 에이전트 시작됨",
+			"noText": "작성할 텍스트가 없습니다.",
+			"commented": "서명된 댓글 게시됨",
+			"commentOn": "#{{number}}에 댓글",
+			"unknown": "Cockpit이 “{{tool}}”을(를) 수행하는 방법을 모릅니다."
+		},
+		"comment": {
+			"disabled": "댓글 작성 권한이 활성화되어 있지 않습니다.",
+			"noScopes": "확인된 조건이 없습니다: 설계상 어디에도 댓글을 달지 않습니다.",
+			"noCondition": "#{{number}}에서 참인 조건이 없습니다: 여기에 쓸 수 없습니다."
+		}
+	}
+}

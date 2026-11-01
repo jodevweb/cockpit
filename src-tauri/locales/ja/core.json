@@ -1,1 +1,455 @@
-{}
+{
+	"error": {
+		"missingCredential": "{{service}} が設定されていません — 設定でトークンを追加してください。",
+		"network": "ネットワーク：{{error}}"
+	},
+	"accounts": {
+		"claudeNotFound": "このマシンに `claude` CLI が見つかりません。",
+		"cliLaunch": "CLI の起動：{{error}}",
+		"cliNoAnswer": "CLI が応答しませんでした。",
+		"cliUnreadable": "CLI の応答を読み取れません。",
+		"duplicateId": "2 つのアカウントが識別子「{{id}}」を共有しています：識別子がアカウントを区別するものです。",
+		"missingDir": "アカウント「{{id}}」にはフォルダがありません：フォルダが他のアカウントとの区別になります。",
+		"sameAsHome": "アカウント「{{id}}」がこのマシンのフォルダを指しています：2 つが同一になってしまいます。",
+		"createDir": "{{path}} の作成：{{error}}",
+		"saveConfig": "設定の保存：{{error}}"
+	},
+	"libre": {
+		"folderNotFound": "フォルダが見つかりません：{{path}}",
+		"branchNameRequired": "エージェントのブランチに名前を付けてください。",
+		"unknownPlace": "不明な場所：{{place}}",
+		"worktreeDirty": "worktree に未コミットの変更があります：コミットするか、「すべて破棄」を選んでください。（{{error}}）"
+	},
+	"mcp": {
+		"noServers": "このリポジトリは MCP サーバーを宣言していません。",
+		"blockerLocal": "ローカルアドレス：コンテナ内では、このアドレスはマシンではなくコンテナを指します",
+		"blockerNotInImage": "`{{command}}` は分離用イメージに含まれていません",
+		"blockerOauth": "OAuth 認可：マシンのキーチェーンに保存されており、コンテナにはありません"
+	},
+	"tasks": {
+		"configDir": "設定フォルダ：{{error}}",
+		"serialize": "タスクのシリアライズ：{{error}}",
+		"write": "タスクの書き込み：{{error}}",
+		"titleRequired": "タスクにはタイトルが必要です。"
+	},
+	"qa": {
+		"fileUnreadable": "ファイルを読み取れません：{{error}}",
+		"fileTooLarge": "プレビューするにはファイルが大きすぎます（{{size}} MB）。",
+		"readFailed": "読み取れません：{{error}}"
+	},
+	"proof": {
+		"unavailable": "録画による証拠を利用できません",
+		"ffmpegMissing": "ffmpeg が見つかりません",
+		"ffmpegHint": "QA のスクリーンショットは保持されますが、動画は作成されません。指摘事項の下に動画を表示するには ffmpeg をインストールしてください（`brew install ffmpeg`）。"
+	},
+	"runner": {
+		"dirNotFound": "ディレクトリが見つかりません：{{path}}",
+		"launchFailed": "起動できません：{{error}}",
+		"unknownJob": "不明なジョブ"
+	},
+	"terminal": {
+		"folderNotFound": "フォルダが見つかりません：{{path}}",
+		"open": "ターミナルを開く：{{error}}",
+		"shellLaunch": "シェル {{shell}} の起動：{{error}}",
+		"read": "ターミナルの読み取り：{{error}}",
+		"writeSetup": "ターミナルの書き込み準備：{{error}}",
+		"inactive": "このターミナルはもう有効ではありません。",
+		"write": "ターミナルへの書き込み：{{error}}",
+		"resize": "サイズ変更：{{error}}"
+	},
+	"tickets": {
+		"noTracker": "課題トラッカーが設定されていません：Linear トークン、GitLab プロジェクト、または GitHub リポジトリを入力してください。",
+		"linearTeamMissing": "Linear チームの識別子がありません：「設定 → チーム」で入力してください。課題の接頭辞のキーではなく、チーム設定の URL に表示される UUID です。"
+	},
+	"relay": {
+		"settingUnreadable": "設定を読み取れません：{{error}}",
+		"dir": "リレーフォルダ：{{error}}",
+		"file": "リレーファイル：{{error}}",
+		"launch": "切り離されたエージェントの起動：{{error}}"
+	},
+	"sandbox": {
+		"buildDir": "ビルドフォルダ：{{error}}",
+		"writeDockerfile": "Dockerfile の書き込み：{{error}}",
+		"imageMissing": "イメージ「{{image}}」はこのマシンで利用できません。自分でビルドまたはプルするか、「設定 → ミッション」でこのフィールドを空にして、Cockpit がビルドできるイメージを使ってください。",
+		"claudeNotFound": "このマシンに `claude` CLI が見つかりません。"
+	},
+	"sessions": {
+		"todoUpdate": "タスクリストの更新",
+		"noPrompt": "プロンプトのないセッション",
+		"notFound": "セッションが見つかりません：{{path}}",
+		"unknownStatus": "不明"
+	},
+	"executions": {
+		"outputTruncated": "{{bytes}} バイトの出力、上は抜粋です",
+		"turnEnded": "ターンが終了しました。",
+		"turnResumed": "次のターンを再開しました。",
+		"agentDone": "エージェントが終了しました。",
+		"orphaned": "この実行中に Cockpit が停止しました。"
+	},
+	"usage": {
+		"claudeNotFound": "`claude` CLI が見つかりません。",
+		"cliRefused": "CLI がリクエストを拒否しました。",
+		"limitsRead": "上限の読み取り：{{error}}",
+		"limits": {
+			"session": "現在のセッション",
+			"week": "今週"
+		}
+	},
+	"monitor": {
+		"localRepoSource": "{{label}} · ローカルリポジトリ",
+		"repoHere": "ここでは「{{slug}}」です。",
+		"repoWrite": "「{{slug}}」と書く",
+		"repoFixInSettings": "「設定 → プロジェクト」で修正してください。",
+		"repoMissingOwner": "このプロジェクトの GitHub リポジトリは「{{repo}}」と設定されています：オーナーがありません。リポジトリの URL に表示されるとおり「owner/repository」の形式にしてください。"
+	},
+	"metrics": {
+		"noProperties": "プロパティが宣言されていません：このリポジトリで常に成り立つべきことが何も確認されず、インパクトの読み取りは解釈にとどまります。",
+		"uncalibrated": "リポジトリの修正に対してテストされたプロパティがありません：破られうることが示されておらず、破られないプロパティは何も保証せずに安心感だけを与えます。",
+		"decorative": "{{count}} 件のプロパティは実際の修正で何も検出しませんでした。書き直すか削除してください：飾りのガードレールは、他に向けるべき注意を奪います。",
+		"idleLessons": "{{total}} 件中 {{idle}} 件の教訓は一度もエージェントに渡されていません。範囲が狭すぎるか、そもそも残す価値がなかったかのどちらかです。",
+		"noTakeBack": "数十件の納品で手作業による引き取りが一度も記録されていません。ありえることですが、多くの場合、もう誰もレビューしていない兆候です。",
+		"takeBackRate": "納品の 2 件に 1 件が手作業で引き取られています（{{rate}}%）。エージェントに足りないものはノートで読み取れます：ガードレールを追加する前に、まずそこを見てください。",
+		"longHaul": "{{part}}% の会話で 10 回を超えるフォローアップが必要でした。10 回やり直させるエージェントは、何を期待されているか分からないまま出発したエージェントです。"
+	},
+	"tour": {
+		"since": "{{ref}} 以降",
+		"sinceBefore": "{{sha}} より前から",
+		"sinceLastCommit": "最後のコミット以降",
+		"notGit": "このフォルダは git リポジトリではありません：ツアーするものがありません。",
+		"noChanges": "見て回る変更がありません。",
+		"unreadableStory": "返されたウォークスルーを読み取れません — もう一度試してください。"
+	},
+	"voiceInput": {
+		"noMic": "このマシンにはマイクがありません。",
+		"mic": "マイク：{{error}}",
+		"unsupportedFormat": "サポートされていないマイク形式：{{format}}",
+		"micDenied": "マイクが拒否されました：{{error}} — 「システム設定 → プライバシー → マイク」を確認してください。",
+		"notOpen": "マイクが開かれていませんでした。",
+		"noKey": "ElevenLabs キーがありません：音声メニューで保存してください。",
+		"unreachable": "ElevenLabs に接続できません：{{error}}",
+		"refused": "文字起こしが拒否されました（{{status}}）：{{body}}",
+		"unreadable": "文字起こしを読み取れません：{{error}}",
+		"saveShortcut": "ショートカットの保存：{{error}}"
+	},
+	"speech": {
+		"invalidKey": "このキーは ElevenLabs の API キーではないようです。",
+		"keychainRefused": "キーチェーンがキーを拒否しました：{{error}}",
+		"female": "女性",
+		"male": "男性",
+		"french": "フランス語",
+		"noKey": "キーチェーンに ElevenLabs キーがありません。",
+		"unreachable": "ElevenLabs に接続できません：{{error}}",
+		"keyRefused": "ElevenLabs がキーを拒否しました（{{status}}）。",
+		"noVoice": "この ElevenLabs アカウントには音声がありません。",
+		"invalidVoice": "無効な ElevenLabs 音声：{{voice}}",
+		"refused": "ElevenLabs が拒否しました（{{status}}）：{{body}}",
+		"audioFile": "音声ファイル：{{error}}"
+	},
+	"system": {
+		"pathNotFound": "パスが見つかりません：{{path}}",
+		"noEditor": "エディタが設定されていません：「設定 → ワークステーション」で設定してください。",
+		"terminalFailed": "Terminal.app を制御できませんでした。",
+		"emptyPrompt": "このプロンプトは空です。",
+		"linkNotOpenable": "リンクを開けません：{{url}}",
+		"linkFailed": "リンクを開けませんでした：{{url}}",
+		"pathNotOpenable": "パスを開けません：{{path}}",
+		"fileNotFound": "ファイルが見つかりません：{{path}}",
+		"noApp": "このファイルを開けるアプリケーションがありません：{{path}}",
+		"pathNotRevealable": "パスを表示できません：{{path}}",
+		"packageJsonMissing": "このリポジトリに package.json が見つかりません。",
+		"packageJsonUnreadable": "package.json を読み取れません：{{error}}",
+		"generalGroup": "一般",
+		"dockerDown": "Docker が応答しません — デーモンは起動していますか？",
+		"unknownProcess": "不明なプロセス。"
+	},
+	"notebook": {
+		"dir": "ノートフォルダ：{{error}}",
+		"unreadable": "ノートを読み取れません：{{error}}",
+		"write": "ノートの書き込み：{{error}}",
+		"emptyLesson": "空の教訓からは何も学べません。",
+		"handbackGone": "この引き取りはもうありません。",
+		"nothingToLearn": "この引き取りから残すものはありません — 一度きりの修正でした。"
+	},
+	"files": {
+		"folderNotFound": "フォルダが見つかりません：{{path}}",
+		"invalidPath": "無効なファイルパスです。",
+		"folderMissing": "フォルダが存在しません：{{path}}",
+		"isFolder": "このパスはフォルダを指しています。",
+		"writeFile": "{{path}} の書き込み：{{error}}",
+		"replaceFile": "{{path}} の置き換え：{{error}}",
+		"attachmentsDir": "添付ファイルフォルダ：{{error}}",
+		"tooManySameName": "この会話には同じ名前の添付ファイルが多すぎます。",
+		"fileUnreadable": "ファイルを読み取れません：{{error}}",
+		"folderNotAttachable": "フォルダは添付できません：ファイルを選んでください。",
+		"fileTooLarge": "{{name}} は {{size}} MB あります — {{max}} MB を超える場合は、パスをエージェントに渡すほうが適切です。",
+		"copyAttachment": "添付ファイルのコピー：{{error}}",
+		"badEncoding": "添付ファイルを読み取れません：想定外のエンコーディングです。",
+		"attachmentTooLarge": "この添付ファイルは {{size}} MB あります — {{max}} MB を超える場合は、保存してパスを渡してください。",
+		"emptyAttachment": "添付ファイルが空です。",
+		"writeAttachment": "添付ファイルの書き込み：{{error}}"
+	},
+	"git": {
+		"commandFailed": "git {{args}} が失敗しました：{{error}}",
+		"detachedHead": "HEAD が切り離されています：このフォルダから公開するブランチがありません。",
+		"commitMessageRequired": "コミットにはメッセージが必要です。",
+		"noWorktree": "git は worktree を報告していません。",
+		"pathMissing": "{{path}} は存在しません。",
+		"invalidBranchName": "「{{name}}」は有効なブランチ名ではありません。",
+		"branchExists": "ブランチ「{{name}}」はすでに存在します。",
+		"branchCreated": "{{base}} からブランチ {{name}} を作成しました。",
+		"noCommonAncestor": "`{{branch}}` と `{{base}}` には共通の祖先がありません — 比較するものがありません。"
+	},
+	"browser": {
+		"unreachable": "ブラウザに接続できません：{{error}}",
+		"unreadable": "ブラウザの応答を読み取れません：{{error}}",
+		"notOpen": "このブラウザは開いていません。",
+		"closed": "ブラウザが閉じられました。",
+		"notRunning": "このワークスペースのブラウザは動いていません。",
+		"noPage": "開いているページがありません。",
+		"pageConnection": "ページへの接続が拒否されました：{{error}}",
+		"pageQuery": "ページへのクエリ：{{error}}",
+		"pageNoAnswer": "ページが応答しませんでした。",
+		"noPort": "ブラウザ用のポートを確保できません。",
+		"notFound": "ブラウザが見つかりません：Chrome、Chromium、Edge、Brave のいずれかをインストールするか、ワークフロー設定で指定してください。",
+		"startFailed": "ブラウザが起動しませんでした：{{error}}",
+		"startedNoAnswer": "ブラウザは起動しましたが応答しません。",
+		"noDebugAddress": "ブラウザがデバッグ用アドレスを提供していません。",
+		"connection": "ブラウザへの接続が拒否されました：{{error}}"
+	},
+	"config": {
+		"connectorMissing": {
+			"github": "リポジトリ（`github.repo`）と、トークンまたは `gh` セッション",
+			"linear": "Linear トークン",
+			"gitlab": "GitLab トークン（`api` スコープ）とプロジェクトのパス",
+			"sentry": "Sentry トークン",
+			"betterstack": "Better Stack トークン",
+			"trigger": "Trigger.dev のシークレットキー",
+			"railway": "Railway トークン",
+			"stripe": "Stripe キー"
+		},
+		"secretHint": {
+			"github": "クラシックの `repo` トークン — または空のままにすると、Cockpit が `gh auth token` を使います。",
+			"sentry": "`project:read`、`event:read`、`event:write` スコープを持つユーザー認証トークン。",
+			"linear": "個人 API キー（Settings → API → Personal API keys）。",
+			"gitlab": "`api` スコープの個人トークン — `read_api` は読み取りには十分ですが、課題の状態は変更できません。",
+			"trigger": "環境のシークレットキー — 環境に応じて `tr_dev_…`、`tr_prod_…`、`tr_staging_…`（project → API keys）。CLI の `tr_pat_…` Personal Access Token ではありません。",
+			"railway": "アカウントまたはワークスペースのトークン（Account Settings → Tokens）— プロジェクトスコープのトークンの場合は、プロジェクトの識別子も併せて入力する必要があります。",
+			"betterstack": "Uptime API トークン（モニターとインシデント）。",
+			"betterstackTelemetry": "「Global API token」（Better Stack → API tokens → Global API tokens）。チームトークンはダッシュボードの一覧は取得できますが、データへのアクセスを開けないため、値は空のままになります。",
+			"betterstackClickhouseHost": "任意：KPI トークンだけでアクセスを開けない場合のみ入力してください。Better Stack → Integrations → SQL API（例：eu-nbg-2-connect.betterstackdata.com）。",
+			"betterstackClickhouseUsername": "SQL API のユーザー名。ホストの隣に表示されます。",
+			"betterstackClickhousePassword": "SQL API のパスワード — 作成後、Better Stack は二度と表示しません。",
+			"stripe": "読み取り専用の制限付きキー `rk_…`（Developers → API keys → Restricted keys）：公開可能キー `pk_…` はサーバー API で拒否されます。",
+			"sandboxOauthToken": "「設定 → 分離」から `claude setup-token` を実行し、表示されたトークンを貼り付けてください — 一度だけで、1 年間有効です。ホストのトークンは使えません：コンテナは macOS のキーチェーンを読めません。"
+		},
+		"secretLabel": {
+			"sandboxOauthToken": "分離アカウント（Claude）"
+		},
+		"homeAccount": "このマシンのアカウント",
+		"defaultEnvironment": "デフォルト",
+		"worktreeHostileValue": "worktree コマンドで拒否された値（シェル文字）：{{value}}",
+		"roles": {
+			"master": "リードエージェント",
+			"backend": "バックエンド開発",
+			"frontend": "フロントエンド開発",
+			"qa": "テストと QA",
+			"review": "レビュー"
+		}
+	},
+	"integrations": {
+		"githubRepoMissing": "`github.repo` が設定されていません。",
+		"telemetryTokenMissing": "テレメトリトークンがありません。",
+		"unreadableResponse": "応答を読み取れません：{{error}}",
+		"unreadableResponseBody": "応答を読み取れません（{{error}}）：{{body}}",
+		"sentryNoOrg": "この Sentry トークンでアクセスできる組織がありません。",
+		"sentrySeveralOrgs": "複数の Sentry 組織にアクセスできます（{{orgs}}）— 「設定 → Sentry 組織」で 1 つ選んでください。",
+		"linearNotCreated": "Linear は課題を作成しませんでした。",
+		"sentryInvalidIssue": "無効な Sentry 課題の識別子：{{id}}",
+		"kpiTokenMissing": "KPI ダッシュボードは telemetry.betterstack.com にあり、Uptime トークンの対象外です。設定で「Better Stack · KPI」トークンを追加してください。",
+		"telemetryTeamToken": "この Telemetry トークンはチームトークンです：ダッシュボードの一覧は取得できますが、データへのアクセスを開けません。書き込み権限付きの「Global API token」（Better Stack → API tokens → Global API tokens）が必要です。",
+		"telemetryReadOnly": "このグローバルトークンは読み取り専用です：データアクセスを開くことは書き込みとみなされます。方法は 2 つ — 「read-only」のチェックを外してトークンを作り直すか、既存の SQL API の認証情報（Better Stack → Integrations → SQL API）を設定の 3 つの ClickHouse フィールドに貼り付けてください。",
+		"betterstackConnection": "Better Stack 接続 {{status}} — {{body}}",
+		"betterstackNoCredentials": "Better Stack は使用可能な接続情報なしで応答しました。",
+		"chartNoQuery": "このグラフはクエリを公開していません。",
+		"issueNotFound": "課題 {{id}} が見つかりません。",
+		"linearUpdateRefused": "Linear が変更を拒否しました。",
+		"priority": {
+			"urgent": "緊急",
+			"high": "高",
+			"medium": "中",
+			"low": "低",
+			"none": "優先度なし"
+		},
+		"githubNoLogin": "GitHub が誰がサインインしているかを返しません。",
+		"githubRepoSet": "設定で `github.repo`（例：acme/monorepo）を設定してください。",
+		"githubRepoFormat": "`github.repo` を設定してください（例：acme/monorepo）。",
+		"triggerUnknownEnv": "不明な Trigger.dev 環境：{{name}}",
+		"triggerPatToken": "Trigger.dev は環境のシークレットキーを必要とします。`tr_pat_…` の Personal Access Token（CLI 用）ではありません。Dashboard → プロジェクト → 環境 → API keys。",
+		"railwayNoProject": "この Railway トークンではプロジェクトが一覧に出ません（プロジェクトスコープのトークンの場合）。ダッシュボードでプロジェクトを開き、URL `railway.com/project/<識別子>` の識別子を「設定 → Railway プロジェクト」に貼り付けてください。",
+		"railwaySeveralProjects": "複数の Railway プロジェクトにアクセスできます（{{projects}}）— 「設定 → Railway プロジェクト」で 1 つ選んでください。",
+		"stripePublishableKey": "Stripe は公開可能キー（`pk_…`）を拒否します：サーバー API にはシークレットキーが必要です。Developers → API keys → Restricted keys で、Events に `read` 権限を持つ読み取り専用の制限付きキー（`rk_…`）を作成してください。",
+		"githubUpdateRefused": "GitHub が変更を拒否しました（{{status}}）。",
+		"gitlabProjectSet": "設定で GitLab プロジェクトのパス（例：group/project）を設定してください。",
+		"gitlabUpdateRefused": "GitLab が変更を拒否しました（{{status}}）。",
+		"noCiRun": "「{{branch}}」に CI の実行がありません。",
+		"runNoId": "返された実行に識別子がありません。",
+		"githubRerunRefused": "GitHub が再実行を拒否しました（{{status}}）：{{body}}",
+		"githubLabelRefused": "GitHub がラベルを拒否しました（{{status}}）：{{body}}",
+		"githubUnlabelRefused": "GitHub がラベルの削除を拒否しました（{{status}}）。",
+		"githubCommentRefused": "GitHub がコメントを拒否しました（{{status}}）：{{body}}",
+		"prTitleRequired": "プルリクエストにはタイトルが必要です。",
+		"prSameAsBase": "`{{branch}}` はベースブランチです：提案するものがありません。",
+		"prRefused": "PR が拒否されました（{{status}}）：{{message}}",
+		"githubCloseRefused": "GitHub がクローズを拒否しました（{{status}}）。"
+	},
+	"lib": {
+		"connectorMissing": {
+			"claude": "このマシン上の `claude` CLI",
+			"node": "Node — ミッションの権限ブリッジとツールブリッジが依存しています",
+			"docker": "このマシン上の Docker"
+		},
+		"config": {
+			"serialize": "設定のシリアライズ：{{error}}",
+			"invalid": "無効な設定：{{error}}"
+		},
+		"trigger": {
+			"envNameRequired": "環境に名前を付けてください。",
+			"envKeyRequired": "新しい環境にはシークレットキーが必要です（`tr_prod_…` / `tr_dev_…`）。"
+		},
+		"project": {
+			"unknown": "不明なプロジェクト：{{id}}",
+			"notFound": "プロジェクト「{{id}}」が見つかりません。",
+			"serialize": "プロジェクトのシリアライズ：{{error}}",
+			"invalid": "無効なプロジェクト：{{error}}",
+			"folderRequired": "このプロジェクトにフォルダを指定してください。",
+			"createDir": "フォルダの作成：{{error}}",
+			"dirCreated": "フォルダを作成しました",
+			"pathMissing": "`{{path}}` は存在しません。作成したい場合は「フォルダを作成」にチェックを入れてください。",
+			"gitInitialized": "Git リポジトリを初期化しました",
+			"repoNameRequired": "作成するリポジトリに名前を付けてください。",
+			"localRepoRequired": "サーバーを設定する前に、ローカルの git リポジトリが必要です。",
+			"noGhSession": "`gh` セッションがありません：`gh auth login` を実行してください。",
+			"noGhToken": "アカウント「{{account}}」のトークンがありません。`gh auth login` を実行してください。",
+			"publicRepoCreated": "公開 GitHub リポジトリを作成しました",
+			"privateRepoCreated": "非公開 GitHub リポジトリを作成しました",
+			"mainRepoRequired": "プロジェクトにはメインリポジトリが必要です。",
+			"notGitRepo": "`{{path}}` は git リポジトリではありません。Cockpit が作成できます：手作業ではなく「準備」を使ってください。",
+			"keepOne": "Cockpit には少なくとも 1 つのプロジェクトが必要です — 削除せずに、このプロジェクトを編集してください。"
+		},
+		"git": {
+			"mainRepoInvalid": "`{{path}}` は git リポジトリではありません — 設定で `general.main_repo` を修正してください。",
+			"branch": "ブランチ",
+			"freeAgent": "フリーエージェント",
+			"freeAgentArchive": "フリーエージェントの片付け"
+		},
+		"shortcut": {
+			"unreadable": "ショートカットを読み取れません：{{error}}",
+			"taken": "別のアプリケーションですでに使われているか、macOS に拒否されました（{{error}}）。",
+			"refused": "ショートカットが拒否されました。"
+		},
+		"github": {
+			"repoFormat": "`github.repo` を設定してください（例：acme/monorepo）。",
+			"prFromBase": "`{{branch}}` はベースブランチです：PR を作成する前に専用のブランチを作ってください。",
+			"prRefused": "PR が拒否されました（{{status}}）：{{message}}",
+			"prCreation": "PR の作成",
+			"repoOwnerFormat": "`github.repo` は owner/repo の形式である必要があります。",
+			"mergeRefused": "マージが拒否されました（{{status}}）：{{message}}",
+			"prMerge": "PR のマージ",
+			"prTitleRequired": "プルリクエストにはタイトルが必要です。"
+		},
+		"permanence": {
+			"commentAllowed": "PR へのコメントを許可",
+			"commentWithdrawn": "PR へのコメント許可を取り消し"
+		},
+		"hygiene": {
+			"mainRepo": "メインリポジトリ",
+			"dirty": "未コミットの変更 {{count}} 件",
+			"unpushed": "未プッシュのコミット {{count}} 件",
+			"prMerged": "PR マージ済み",
+			"prClosed": "PR はマージされずにクローズ",
+			"prOpen": "PR オープン中",
+			"noPr": "既知の PR なし"
+		},
+		"worktree": {
+			"buildsPurged": "ビルドを削除しました",
+			"freed": "ディスクを {{size}} 解放しました"
+		},
+		"units": {
+			"gb": "{{n}} GB",
+			"mb": "{{n}} MB",
+			"kb": "{{n}} KB"
+		},
+		"interrupted": {
+			"scan": "スキャンが中断されました：{{error}}",
+			"read": "読み取りが中断されました：{{error}}",
+			"compute": "計算が中断されました：{{error}}",
+			"walk": "ファイルの走査が中断されました：{{error}}"
+		},
+		"window": {
+			"notification": "通知：{{error}}",
+			"monitor": "モニター：{{error}}",
+			"window": "ウィンドウ：{{error}}"
+		},
+		"budget": {
+			"reason": "{{total}} トークンを消費し、上限 {{budget}} を超えました。ミッションは一時停止されました：作業内容はそのまま残っています。超過が想定どおりであれば再開してください。",
+			"paused": "ミッションを一時停止 — 上限に到達"
+		},
+		"automationNotFound": "自動化が見つかりません。",
+		"mission": {
+			"ticketReferenceRequired": "課題の URL または識別子を貼り付けてください。",
+			"unknownTask": "不明なタスク。",
+			"fullReviewRequested": "全体レビューをリクエストしました。",
+			"workerStopped": "実行役を停止しました：ミッションを再開するとタスクも再開します。",
+			"stopped": "ミッションを停止しました。ブランチと worktree は保持されます。",
+			"agentsUnavailable": "エージェントレジストリを利用できません。",
+			"awaitingAgreement": "分割について合意するまで何も開始されません：まず各ステップを承認してください。",
+			"unknownRole": "不明なロール：{{role}}",
+			"workerWorktreeFailed": "worktree を作成できません：{{error}}。実行役は起動されません — メインリポジトリはミッションの作業場所ではありません。",
+			"coexistenceUnchecked": "共存は未確認",
+			"workerLaunched": "実行役を起動しました",
+			"ticketNoId": "この課題には読み取れる識別子がありません。",
+			"alreadyOpen": "{{identifier}} にはすでにミッションが開かれています：2 つ目を開かずに、そちらに戻ります。",
+			"openedGuided": "{{identifier}} でミッションを開きました：リードが課題を読み、あなたも一緒に読みます。",
+			"opened": "{{identifier}} でミッションを開きました。リードが課題を分析しています。",
+			"nodeMissing": "このマシンに Node が見つかりません：ミッションツールは Node で動く MCP ブリッジを経由します。Node をインストールしてから（`brew install node`）、ミッションを再起動してください。通常のエージェントは引き続き動作します。",
+			"integrationWorktreeFailed": "`{{branch}}` の統合用 worktree を作成できません：{{error}}。リードはメインリポジトリでは起動されません。",
+			"masterLaunched": "リードを起動しました",
+			"unclearVerdict": "{{tasks}} は読み取れる判定のないレポートを返しました：作業が合格かどうか判断できません。確認を再実行し、`VERDICT: ok`、`concerns`、`blocking` のいずれかで締めくくるよう求めてください。その意見を諦める場合は、タスクを放棄としてマークしてください — 見落としではなく、判断として残ります。",
+			"blockingVerdict": "{{tasks}} はブロッキングの判定を返しました。指摘された点を修正してから確認を再実行してください：新しい判定で拒否が解除されます。指摘が不当だと考える場合は、`rework` で差し戻し、その旨を伝えてください。",
+			"unintegrated": "{{count}} 件のタスクが `{{branch}}` に入っていません：{{tasks}}。統合するか、その作業を諦める場合は放棄としてマークしてください。",
+			"launchSuspendedQuota": "起動を保留 — クォータ残量わずか",
+			"quotaFloor": "残りクォータが {{floor}}% を下回ると、新しいタスクは開始されません。",
+			"launchSuspended": "起動を保留",
+			"tooManyWorkers": "マシン上ですでに {{count}} 件の実行役が動いています",
+			"taskWithoutId": "識別子のないタスクです：ミッションを計画し直してください。",
+			"taskBlocked": "タスクがブロックされています",
+			"worktreeFailed": "worktree を作成できません：{{error}}",
+			"noWorkerAttached": "実行役が割り当てられていません：起動に失敗しました。タスクを再起動してください。",
+			"workerDiedSilent": "実行役が何も作成せずに停止しました — 起動が拒否された可能性があります。",
+			"workerOtherBranch": "実行役が別のブランチで作業しました",
+			"workerOtherBranchDetail": "`{{expected}}` ではなく `{{actual}}` に {{count}} 件のコミットがあります。",
+			"workerOtherBranchNote": "作業は `{{expected}}` ではなく `{{actual}}` にあります（{{count}} 件のコミット）：統合すべきはこちらです。",
+			"workerDoneNoCommit": "実行役が終了しました。ブランチにコミットはありません。",
+			"workerDoneOneCommit": "実行役が終了しました — コミット 1 件。",
+			"workerDoneCommits": "実行役が終了しました — コミット {{count}} 件。",
+			"checkNoVerdict": "判定のない確認",
+			"checkNoVerdictDetail": "レポートが読み取れる形で結論づけられていません：Cockpit は作業が合格かどうか判断できません。再実行するか、手動で判断してください。",
+			"checkBlocking": "ブロッキングの確認",
+			"checkBlockingDetail": "この拒否が解除されるまで、プルリクエストは閉じたままです。",
+			"masterTimedOut": "リードを中断 — ターンが長すぎます",
+			"masterTimedOutDetail": "{{minutes}} 分間応答がありません：自動復旧で新しいリードを再起動できるよう切断しました。",
+			"allDelivered": "すべての実行役が納品しました。リードが統合しています。",
+			"masterNotRelaunched": "リードは再起動されていません",
+			"integrationResumed": "統合を再開しました",
+			"integrationResumedDetail": "ミッションを担当するリードがいなかったため、残りの作業に対してリードを再起動しました。",
+			"integrationNotResumed": "統合は再開されていません",
+			"outOfScopeRefused": "範囲外への書き込みを拒否しました"
+		},
+		"quoted": "「{{text}}」",
+		"tailscaleDown": "Tailscale が応答しません。",
+		"sentryIssue": {
+			"description": "Sentry が報告したエラーです。\n\n**プロジェクト**：{{project}}\n**発生元**：{{culprit}}\n**影響**：発生 {{events}} 回、ユーザー {{users}} 人\n\n[Sentry で開く]({{permalink}})\n\n_Cockpit から作成された課題です。_",
+			"note": "Linear 課題 {{identifier}} — {{url}}"
+		}
+	}
+}

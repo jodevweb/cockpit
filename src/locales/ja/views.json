@@ -1,0 +1,1372 @@
+{
+	"agents": {
+		"activity": {
+			"active": "アクティブ",
+			"recent": "最近",
+			"dormant": "休眠中"
+		},
+		"row": {
+			"waiting": "待機中",
+			"error": "エラー",
+			"exchanges": "やり取り",
+			"toolCallsHint": "ツール呼び出し",
+			"tools_other": "ツール {{count}} 回",
+			"subagentsHint": "サブエージェント",
+			"subagents_other": "エージェント {{count}} 件",
+			"tokensHint": "トークン（入力 + 出力 + キャッシュ書き込み）"
+		},
+		"event": {
+			"user": "あなた",
+			"assistant": "エージェント",
+			"thinking": "思考",
+			"tool": "ツール",
+			"toolResult": "結果",
+			"toolError": "エラー",
+			"thinkingInternal": "内部の推論",
+			"collapse": "折りたたむ",
+			"expand": "すべて表示"
+		},
+		"goToConversation": "会話へ移動",
+		"context": {
+			"goHint": "この会話はすでに実行中です — ワークスペースで確認してください",
+			"resumeHint": "Cockpit のワークスペースで会話を再開します",
+			"resume": "会話を再開",
+			"resumeTerminalHint": "Terminal.app で会話を再開します",
+			"resumeTerminal": "ターミナルで再開",
+			"editor": "エディタ",
+			"terminal": "ターミナル",
+			"title": "コンテキスト",
+			"directory": "ディレクトリ",
+			"branch": "ブランチ",
+			"models": "モデル",
+			"started": "開始",
+			"lastWrite": "最終書き込み",
+			"cliVersion": "CLI バージョン",
+			"id": "識別子",
+			"tools": "ツール",
+			"subagents": "サブエージェント",
+			"agentFallback": "エージェント",
+			"filesWritten": "書き込んだファイル"
+		},
+		"usage": {
+			"title": "使用量",
+			"input": "入力",
+			"output": "出力",
+			"cacheRead": "キャッシュ読み込み",
+			"cacheWrite": "キャッシュ書き込み",
+			"total": "課金対象トークンの合計 {{total}}（キャッシュ読み込みを除く）。"
+		},
+		"liveElsewhere": {
+			"message": "会話はワークスペースで開いています",
+			"hint": "会話はそちらでライブで続いています。ここではログを読むだけです — 最後の書き込み時点で止まっており、返信はできません。",
+			"readLog": "ログを読む"
+		},
+		"title": "AI エージェント",
+		"liveCount_other": "アクティブなエージェント {{count}} 件",
+		"noneActive": "アクティブなエージェントはありません",
+		"indexed_other": "インデックス済みのセッション {{count}} 件",
+		"toolbar": {
+			"toolsHint": "ツール呼び出しを表示",
+			"tools": "ツール",
+			"thinkingHint": "内部の推論を表示",
+			"thinking": "思考",
+			"notebookHint": "このリポジトリがエージェントの後で修正しなければならなかったこと",
+			"notebook": "ノート",
+			"loopHint": "エージェントが納品したもの、やり直しが必要なもの、ガードレールがまだ検出するもの",
+			"loop": "ループ",
+			"usageHint": "トークン使用量 — クォータではなく量",
+			"usage": "使用量",
+			"rescan": "再スキャン"
+		},
+		"filterPlaceholder": "セッションを絞り込む…",
+		"scope": {
+			"live": "実行中",
+			"recent": "最近",
+			"all": "すべて"
+		},
+		"hiddenDormant_other": "休眠中のセッション {{count}} 件を非表示 — すべて表示",
+		"empty": {
+			"message": "セッションはありません",
+			"hint": "Claude Code エージェントが ~/.claude/projects に書き込むとすぐにセッションが表示されます。"
+		},
+		"actionsHint": "既成プロンプトでこのフォルダにエージェントを起動",
+		"actions": "アクション",
+		"toBottomHint": "最新のイベントに戻る",
+		"toBottom": "最下部",
+		"eventCount_other": "イベント {{count}} 件",
+		"running": "実行中",
+		"nothingWithFilters": "このフィルターでは表示するものがありません。",
+		"select": {
+			"message": "セッションを選択してください",
+			"hint": "各セッションは worktree で起動されたエージェントです。"
+		}
+	},
+	"automations": {
+		"title": "自動化",
+		"new": "新規",
+		"whenItRuns": "自動化は Cockpit が開いている間に実行されます。設定時刻に Mac がスリープしていた場合、ミーティングの時刻を過ぎていなければ、Cockpit を開いたときに後から実行します。",
+		"paused": "一時停止中",
+		"nextRun": "次回：{{when}}",
+		"noUpcoming": "予定されたミーティングはありません",
+		"started": "{{name}}：実行中",
+		"startedHint": "手動で開始しました：次回の起点は変わりません。",
+		"active": "有効",
+		"running": "実行中…",
+		"runNow": "今すぐ実行",
+		"pause": "一時停止",
+		"resume": "再開",
+		"edit": "編集",
+		"openLatest": "最新の結果を開く",
+		"tab": {
+			"overview": "概要",
+			"runs": "実行 · {{count}}"
+		},
+		"recentRuns": "最近の実行",
+		"noRuns": "まだ実行はありません。",
+		"run": {
+			"reading": "ソースを読み取って執筆中…",
+			"lines_other": "{{count}} 行",
+			"startedAt": "{{when}} に開始",
+			"silent": "応答なし：{{sources}}",
+			"manual": "手動",
+			"scheduled": "予定",
+			"duration": "{{minutes}} 分 {{seconds}} 秒"
+		},
+		"what": {
+			"title": "内容",
+			"reads": "読み取り",
+			"noSource": "ソースなし",
+			"ready": "準備完了",
+			"leadMinutes": "ミーティングの {{minutes}} 分前",
+			"onTime": "ミーティングの時刻",
+			"sincePrevious": "、前回以降のすべてが対象",
+			"last24h": "、直近 24 時間が対象",
+			"delivers": "届けるもの",
+			"notification": "通知",
+			"dailyPart": "デイリー画面のあなたのパート",
+			"renderHere": "ここに結果",
+			"pdf": "PDF",
+			"slack": "ワンクリックで Slack",
+			"readOnly": "読み取り専用：エージェントは読んでまとめるだけで、プッシュ、コメント、移動は一切しません。"
+		},
+		"week": {
+			"planned": "予定",
+			"title": "今週",
+			"hint": "各帯は 1 回の実行が対象とする期間です：間に漏れるものはありません。",
+			"pausedNothing": "一時停止中：予定はありません",
+			"missed": "未実行",
+			"untilNext": "来週の次のミーティングまで",
+			"done": "完了",
+			"partial": "一部のみ",
+			"now": "現在",
+			"readyBefore": "ミーティングの {{minutes}} 分前に準備完了"
+		},
+		"empty": {
+			"title": "自動で準備されるミーティング",
+			"body": "各デイリーの前に、Cockpit は GitHub、タスクトラッカー、自身のエージェントであなたがやったことを読み取り、あなたのパートを書かせ、準備ができたら知らせます。読み取り専用：プッシュ、コメント、移動は一切しません。",
+			"create": "最初の自動化を作成"
+		}
+	},
+	"decisions": {
+		"kind": {
+			"question": "あなたに質問しています",
+			"permission": "許可を求めています",
+			"reply": "あなたの返答を待っています",
+			"plan": "承認待ちの計画"
+		},
+		"aQuestion": "質問",
+		"useTool": "{{tool}} を使用",
+		"mission": "ミッション",
+		"title": "判断待ち",
+		"nothingWaiting": "あなたを待っているものはありません。",
+		"summary_other": "判断待ち {{count}} 件 · 最も古いものは {{since}} 待っています",
+		"keys": "<up>↑</up><down>↓</down> 切り替え · <one>1</one>…<nine>9</nine> 選択 · <back>⌘⇧D</back> 戻る",
+		"empty": "あなたを待っているエージェントはいません。質問、権限のリクエスト、返答待ち、承認待ちの計画は、解除されるものの大きさ順にここに並びます。",
+		"blocksTasks_other": "タスク {{count}} 件をブロック中",
+		"agentStopped": "エージェント停止",
+		"openMission": "ミッションを開く",
+		"openConversation": "会話を開く",
+		"beforeAsking": "質問の前に行ったこと：",
+		"question": {
+			"step": "質問 {{step}} / {{total}} · {{header}}",
+			"customPlaceholder": "別の回答、または補足 — Enter で送信",
+			"skipHint": "エージェントは回答なしで続行します",
+			"skip": "スキップ"
+		},
+		"permission": {
+			"label": "権限",
+			"wantsTool": "エージェントが <tool>{{tool}}</tool> を使おうとしています",
+			"allow": "許可",
+			"allowHint": "このツールで続行します。",
+			"deny": "拒否",
+			"denyHint": "別の方法を探すか、あなたに伝えます。"
+		},
+		"reply": {
+			"option": "選択肢 {{number}}：{{option}}",
+			"label": "質問で操作を返しました",
+			"collapse": "メッセージを折りたたむ",
+			"expand": "メッセージ全文を読む",
+			"placeholder": "あなたの返答 — ⌘↵ で送信",
+			"send": "返答"
+		}
+	},
+	"delivery": {
+		"title": "フィード",
+		"tickets": "チケット",
+		"openWorktree": "worktree を開く",
+		"localTracking": "ローカルで追跡",
+		"yes": "はい",
+		"no": "いいえ",
+		"noLocalWorktree": "このブランチのローカル worktree はありません。",
+		"emptyHint": "不足しているトークンは設定で示されます。"
+	},
+	"docs": {
+		"title": "ドキュメント",
+		"subtitle": "エージェントの成果物：計画、レビュー、QA、wiki — すべての worktree から。",
+		"backToGrid": "グリッドに戻る（Esc）",
+		"openWorktree": "元の worktree を開く",
+		"reveal": "表示",
+		"grid": "グリッド",
+		"list": "リスト",
+		"search": "検索…",
+		"all": "すべて · {{count}}",
+		"groupByTypeTitle": "ドキュメントの種類でグループ化",
+		"groupByType": "種類別",
+		"groupByWorktreeTitle": "元の worktree でグループ化",
+		"groupByWorktree": "worktree 別",
+		"empty": "ドキュメントはありません",
+		"emptyHint": ".claude/work、.claude/reviews、docs/ のファイルと、ルートの Markdown がここに表示されます。",
+		"untracked": "未追跡",
+		"noPreview": "プレビューなし"
+	},
+	"git": {
+		"state": {
+			"added": "追加",
+			"modified": "変更",
+			"deleted": "削除",
+			"renamed": "名前変更",
+			"copied": "コピー"
+		},
+		"branch": {
+			"base": "ベース",
+			"commitsAhead_other": "{{count}} コミット / {{base}}",
+			"upToDate": "{{base}} と同期済み",
+			"worktree": "worktree"
+		},
+		"actions": {
+			"done": "{{label}} 完了。",
+			"pr": {
+				"title": "{{branch}} からプルリクエストを作成",
+				"message": "作成前にブランチをプッシュします — GitHub は head を知らない PR を拒否します。",
+				"placeholder": "feat: fair-use quotas",
+				"confirm": "PR を作成",
+				"opened": "{{branch}} のプルリクエストを作成しました。",
+				"hint": "ブランチをプッシュしてプルリクエストを作成します"
+			},
+			"stash": {
+				"title": "{{branch}} の作業中の変更を退避",
+				"message": "未追跡ファイルも含みます：ツリーは完全にクリーンな状態に戻ります。",
+				"placeholder": "wip: redesign attempt",
+				"confirm": "退避",
+				"hint": "作業中の変更を脇に置きます"
+			},
+			"commit": {
+				"title": "{{branch}} にコミット",
+				"message": "作業中の変更をすべて 1 つのコミットに保存します。",
+				"placeholder": "fix: correct the quota calculation",
+				"confirm": "コミット",
+				"hint": "作業中の変更をすべて保存します"
+			},
+			"push": {
+				"title": "{{branch}} をプッシュしますか？",
+				"messageAhead_other": "{{count}} 件のコミットが origin に送られ、チーム全員に見えます。",
+				"messageNew": "ブランチが origin に公開されます。",
+				"confirm": "プッシュ",
+				"hint": "ブランチを origin に公開します"
+			},
+			"pull": {
+				"hintBehind_other": "{{count}} コミット遅れ — fast-forward でプル",
+				"hintUpToDate": "最新です。fast-forward でプル"
+			}
+		},
+		"noBranchSelected": "ブランチが選択されていません",
+		"subtitle_other": "ブランチ {{count}} 件 · {{base}} と比較",
+		"reading": "リポジトリを読み取り中…",
+		"compareTo": "比較対象",
+		"filterPlaceholder": "ブランチを絞り込む…",
+		"scope": {
+			"all": "すべて",
+			"worktree": "worktree あり",
+			"ahead": "未マージ",
+			"unpushed": "未プッシュ"
+		},
+		"sort": {
+			"activity": "アクティビティ",
+			"commits": "コミット",
+			"name": "名前"
+		},
+		"noBranch": "ブランチはありません",
+		"fileCount_other": "ファイル {{count}} 個",
+		"since": "{{sha}} 以降（{{base}}）",
+		"editor": "エディタ",
+		"terminal": "ターミナル",
+		"openWorktree": "対応する worktree を開く",
+		"worktree": "Worktree",
+		"panel": {
+			"files": "ファイル",
+			"commits": "コミット",
+			"graph": "グラフ"
+		},
+		"noDifference": "{{branch}} と {{base}} に違いはありません",
+		"noDifferenceHint": "このブランチ独自のコミットはありません。",
+		"noOwnCommit": "独自のコミットなし",
+		"close": "閉じる",
+		"pickFile": "ファイルを選択",
+		"pickFileHint": "{{base}} から分岐した時点と比較した差分がここに表示されます。",
+		"nothingToShow": "表示するブランチはありません"
+	},
+	"impact": {
+		"title": "インパクト",
+		"forge": {
+			"github": "GitHub",
+			"gitlab": "GitLab",
+			"local": "ローカルブランチ"
+		},
+		"filter": {
+			"tous": {
+				"label": "すべて",
+				"hint": "動いているものすべて"
+			},
+			"aLire": {
+				"label": "未読",
+				"hint": "まだ分析されていないもの"
+			},
+			"risque": {
+				"label": "高リスク",
+				"hint": "分析で深刻と判断されたもの"
+			},
+			"perimes": {
+				"label": "古い",
+				"hint": "読み取り以降にブランチが動いたもの"
+			}
+		},
+		"card": {
+			"risk": "リスク {{risk}}",
+			"unread": "未読",
+			"draft": "ドラフト",
+			"noPr": "PR なし",
+			"project": "プロジェクト {{name}}",
+			"files_other": "ファイル {{count}} 個",
+			"ciFailing": "CI 失敗",
+			"ciSuccess": "CI 成功",
+			"ciPending": "CI 実行中",
+			"notRead": "この変更が意味することはまだ読み取られていません。",
+			"read": "読み取り済み",
+			"risks_other": "リスク {{count}} 件",
+			"checks_other": "要確認 {{count}} 件",
+			"openOn": "{{forge}} で開く",
+			"reading": "読み取り中…",
+			"reread": "再読み取り",
+			"stale": "この読み取り以降にブランチが動きました。"
+		},
+		"understand": "理解する",
+		"notify": {
+			"fixed": "設定を修正しました。",
+			"readBlocking": "読み取り完了 — ブロッカーが指摘されています。",
+			"read": "読み取り完了。",
+			"confrontAgree": "相互検証完了 — 3 つの観点で意見が一致しました。",
+			"confrontDisputes_other": "相互検証完了 — 解決すべき意見の相違 {{count}} 件。",
+			"auditClean": "確認完了 — 違反はありません。",
+			"auditBroken_other": "確認完了 — {{count}} 件のプロパティに違反。",
+			"repoMissing": "このリポジトリはこのマシンにありません：エージェントを開けません。",
+			"forgotten": "読み取り結果を破棄しました。"
+		},
+		"subtitle": {
+			"inFlight_other": "進行中 {{count}} 件",
+			"read_other": "読み取り済み {{count}} 件",
+			"stale_other": "古い {{count}} 件",
+			"default": "動いているものと、それが意味すること"
+		},
+		"allProjects": "すべてのプロジェクト",
+		"rescan": "再度調査する",
+		"filterPlaceholder": "絞り込み…",
+		"empty": {
+			"nothing": "宣言されたリポジトリで動いているものはありません。",
+			"noMatch": "このフィルターに一致する変更はありません。",
+			"nothingHint": "モニターは、プルリクエスト、マージリクエスト、ベースより先行しているローカルブランチを追跡します。"
+		},
+		"changes": "進行中の変更",
+		"panel": {
+			"reading": "読み取り中…",
+			"unread": "この変更はまだ読み取られていません。",
+			"readingHint": "エージェントが差分と周辺のコードを読んでいます — 数分かかります。Cockpit の他の場所に移動しても読み取りは続き、ここで待っています。ただし、Cockpit を閉じると中断されます。",
+			"unreadHint": "分析では、プロダクトにとって何が変わるか、なぜ今この作業なのか、何が壊れうるかを示します。"
+		}
+	},
+	"infra": {
+		"title": "サーバーとコンテナ",
+		"subtitle": "このマシンで動いているもの：開発サーバーとコンテナ。",
+		"portFreed": "ポート {{port}} を解放しました。",
+		"runningContainers": "実行中のコンテナ",
+		"stoppedContainers": "停止中のコンテナ",
+		"devPorts": "開発ポート",
+		"worktrees": "Worktree",
+		"noContainers": "コンテナはありません",
+		"viewLogs": "ログを表示",
+		"logs": "ログ",
+		"listening": "待ち受け中のサーバー",
+		"noServers": "実行中の開発サーバーはありません",
+		"unknownFolder": "不明なフォルダ",
+		"memoryTitle": "使用中のメモリ（サブプロセスを含む）",
+		"memoryGb": "{{value}} GB",
+		"memoryMb": "{{value}} MB",
+		"pid": "pid {{pid}}",
+		"open": "開く",
+		"stopServer": "このサーバーを停止"
+	},
+	"libres": {
+		"state": {
+			"attend": "あなたの返答待ち",
+			"travaille": "作業中",
+			"pret": "あなたの番",
+			"arrete": "停止",
+			"ferme": "クローズ"
+		},
+		"ago": {
+			"now": "たった今",
+			"minutes_other": "{{count}} 分",
+			"hours_other": "{{count}} 時間",
+			"days_other": "{{count}} 日"
+		},
+		"line": {
+			"closed": "会話はクローズ済み — 再開で開き直せます",
+			"question": "あなたへの質問",
+			"asks": "リクエスト：{{tool}}",
+			"thinking": "思考中",
+			"firstMessage": "最初のメッセージを待っています"
+		},
+		"title": "フリーエージェント",
+		"open_other": "{{count}} 件オープン",
+		"filter": {
+			"all": "すべて",
+			"yours": "あなたの番",
+			"running": "実行中",
+			"finished": "終了"
+		},
+		"oneMore": "このフォルダにエージェントを追加",
+		"inPlace": "その場で",
+		"defaultModel": "マシンのモデル",
+		"detail": {
+			"nothingToResume": "このエージェントはセッションを開いていません：再開するものはありません。",
+			"openTerminal": "ここでターミナルを開く",
+			"reveal": "Finder で表示",
+			"stop": "停止",
+			"resume": "再開",
+			"archive": "アーカイブ",
+			"conversation": "会話",
+			"changes": "変更",
+			"closed": "会話はクローズされています。再開すると、同じアカウントで同じスレッドを開き直します。",
+			"noChanges": "このフォルダにはまだ変更がありません。"
+		},
+		"archive": {
+			"keep": "ブランチは残し、worktree を片付ける",
+			"keepHint": "コミット済みの作業は git に残り、フォルダは削除されます。",
+			"leave": "worktree をそのまま残す",
+			"leaveHint": "ディスク上は何も変わりません。会話だけが片付けられます。",
+			"discard": "すべて破棄",
+			"discardHint": "worktree とブランチを削除します。プッシュしていないものは失われます。",
+			"title": "「{{label}}」をアーカイブしますか？",
+			"worktreeQuestion": "worktree の <branch>{{branch}}</branch> で作業しました。残したものをどうしますか？",
+			"inPlace": "その場で作業しました：ディスク上で片付けるものはありません。エージェントは停止し、会話は一覧から消えます。",
+			"cancel": "キャンセル",
+			"confirm": "アーカイブ"
+		},
+		"empty": {
+			"projectFolder": "my-project",
+			"becomes": "— これが —",
+			"shortcut": "<key>⌘N</key>、フォルダ、<key>⌘↵</key>",
+			"title": "1 つのフォルダに 1 つのエージェント、それだけ。",
+			"body": "作業場もミッションも、不要ならブランチもなし。フリーエージェントは、アーカイブするまでフォルダごとにここに整理されます。",
+			"launch": "エージェントを起動",
+			"orProject": "または、宣言済みのプロジェクトですぐに"
+		}
+	},
+	"map": {
+		"more": {
+			"tickets_other": "ほかにチケット {{count}} 件",
+			"errors_other": "ほかにエラー {{count}} 件",
+			"prs_other": "ほかに PR {{count}} 件"
+		},
+		"defaultProject": "プロジェクト",
+		"allProjects": "すべてのプロジェクト",
+		"chantier": "作業場",
+		"openWorkspace": "ワークスペースを開く",
+		"backToMap": "マップに戻る",
+		"summary": {
+			"tickets_other": "チケット {{count}} 件",
+			"errorsToTriage_other": "仕分け待ちのエラー {{count}} 件",
+			"agents_other": "エージェント {{count}} 件",
+			"collisions_other": "衝突 {{count}} 件",
+			"missions_other": "ミッション {{count}} 件",
+			"chantiers_other": "作業場 {{count}} 件",
+			"prs_other": "PR {{count}} 件",
+			"redCi_other": "CI 失敗 {{count}} 件",
+			"down_other": "{{count}} 件ダウン",
+			"online": "オンライン"
+		},
+		"waiting": "あなた待ち",
+		"island": {
+			"open": "{{name}} を開く",
+			"agentsWord_other": "エージェント",
+			"working_other": "{{count}} 件作業中",
+			"missionsWord_other": "ミッション",
+			"awaiting_other": "{{count}} 件があなた待ち",
+			"calm": "平穏",
+			"openProject": "このプロジェクトを開く →",
+			"thingsWaiting_other": "{{count}} 件があなたを待っています",
+			"prodErrors_other": "本番エラー {{count}} 件"
+		},
+		"region": {
+			"frame": "この領域を表示",
+			"empty": {
+				"arrive": "あなた宛てのチケットも、仕分け待ちのエラーもありません。",
+				"encours": "実行中のものはありません。チケットからエージェントかミッションを開始してください。",
+				"livrer": "オープン中の PR はありません。",
+				"prod": "本番をここに表示するには、設定でモニタリング（Better Stack）を接続してください。"
+			}
+		},
+		"card": {
+			"sentry": "Sentry · 仕分け待ち",
+			"deploy": "デプロイ",
+			"monitor": "モニタリング"
+		},
+		"ticket": {
+			"inMission": "ミッション中"
+		},
+		"mission": {
+			"eyebrow": "ミッション",
+			"tasksDelivered_other": "{{count}} 件中 {{done}} 件のタスクを納品",
+			"awaitingApproval": "開始の承認待ち",
+			"planning": "リードが分割を準備中"
+		},
+		"agent": {
+			"stopped": "停止",
+			"working": "作業中",
+			"workingOn": "作業中 · {{activity}}",
+			"waiting": "待機中"
+		},
+		"chantierCard": {
+			"open": "作業場のマップを開く",
+			"agentsOnWorktree_other": "この worktree のエージェント {{count}} 件",
+			"others_other": "+ ほか {{count}} 件",
+			"terminals_other": "ターミナル {{count}} 件"
+		},
+		"pr": {
+			"ciFailing": "CI 失敗",
+			"ciPassing": "CI 成功",
+			"ciRunning": "CI 実行中",
+			"approved": "承認済み",
+			"changesRequested": "修正依頼",
+			"reviewRequested": "レビュー：{{logins}}",
+			"notReviewed": "未レビュー",
+			"fromHere": "ここから",
+			"draft": "ドラフト",
+			"recheck": "再確認",
+			"review": "レビュー",
+			"reviewRound": "レビュー · ラウンド {{round}} · {{verdict}}",
+			"toMerge": "マージ可能",
+			"findings_other": "指摘 {{count}} 件"
+		}
+	},
+	"missions": {
+		"title": "ミッション",
+		"subtitle": "1 つのチケット、1 つの計画、複数の実行役",
+		"rerun": "再実行",
+		"follow": "追う",
+		"situation": {
+			"masterIdle": "リードエージェントは動いていません — 進行画面を開くと自動で再開します。",
+			"masterDrafting": "リードエージェントが提案を作成中です — 進行画面でチケットと並べて追えます。",
+			"paused": "一時停止中",
+			"pausedDetail": "ミッションを再開するまで何も再開されません。",
+			"splitting": "分割中",
+			"splittingDetail": "リードエージェントがチケットを読み、作業をタスクに分割しています。実行役が開始する前に計画を確認できます。",
+			"integrating": "統合",
+			"integratingDetail": "リードエージェントが納品されたブランチを統合ブランチにマージし、その後プルリクエストを作成します。"
+		},
+		"steps": {
+			"planning": {
+				"label": "分析",
+				"waiting": "リードエージェントを起動してください：チケットを読み、分割を提案します。"
+			},
+			"awaitingApproval": {
+				"label": "計画",
+				"waiting": "分割が提案されました。確認してください：あなたの承認なしには何も開始されません。"
+			},
+			"running": {
+				"label": "実行",
+				"waiting": "実行役はベースが存在した時点で、それぞれ専用の worktree で開始します。"
+			},
+			"integrating": {
+				"label": "統合",
+				"waiting": "すべて納品されました。リードエージェントがブランチをマージしてから PR を作成します。"
+			},
+			"done": {
+				"label": "納品済み",
+				"waiting": "ミッション完了。"
+			}
+		},
+		"verdicts": {
+			"blocking": "却下",
+			"reserves": "留保あり",
+			"ok": "確認済み",
+			"undecided": "判定なし"
+		},
+		"taskStates": {
+			"planned": "未着手",
+			"running": "進行中",
+			"delivered": "納品済み",
+			"integrated": "統合済み",
+			"failed": "失敗"
+		},
+		"open": {
+			"title": "ミッションを開く",
+			"confirmTitle": "{{source}} でミッションを開始しますか？",
+			"confirmMessage": "リードエージェントがすぐに起動してチケットを読みます。それ以外は、あなたの承認なしには何も開始されません。",
+			"confirmLabel": "ミッションを開始",
+			"activity": "{{source}} からのミッション",
+			"firstStep": "チケットを読み、リードエージェントを起動しています…",
+			"placeholder": "またはリンクを貼り付け — {{key}}-42、#317…",
+			"reading": "チケットを読み取り中…",
+			"submit": "開く",
+			"hint": "タイトルと統合ブランチはチケットから取得します：他に入力するものはありません。"
+		},
+		"remove": {
+			"confirmTitle": "「{{title}}」のすべてを削除しますか？",
+			"confirmMessage_other": "エージェントを停止してから、{{count}} 件の worktree、ミッションのブランチ（統合ブランチを含む）、実行役の会話を削除します。プッシュしていない作業は失われます。",
+			"confirmLabel": "すべて削除",
+			"done_other": "ミッションを削除しました — {{count}} 件の項目を削除。"
+		},
+		"intro": {
+			"title": "ミッションとは",
+			"how": "チケットを渡すと、リードエージェントがそれを読み、タスクへの分割を提案し、あなたの承認を待ちます — それまで何も開始されません。計画が承認されると、各タスクに専用の実行役、ブランチ、worktree が割り当てられ、最後にリードエージェントが作業を統合してプルリクエストを作成します。",
+			"why": "手動で起動するエージェントとの違いはここです：Cockpit がチケット、計画、ブランチ、納品物を追跡し続け、途中で再起動してもすべてそのまま残っています。",
+			"missingTitle": "ここで足りないもの",
+			"missing": "元のチケットを読むためのタスクトラッカー：{{missing}}。実行役のロールにはすでにデフォルト値があります — 後で「エージェントのロール」で調整できます。",
+			"missingDefault": "Linear、GitLab、または GitHub のトークン",
+			"openSettings": "設定を開く"
+		},
+		"empty": {
+			"title": "進行中のミッションはありません",
+			"hint": "上でチケットを選んでください：リードエージェントがそれを読み、分割を提案し、何かを開始する前にあなたの承認を待ちます。その後、各タスクは専用のブランチで実行され、最後にリードエージェントがすべてを統合します。"
+		},
+		"card": {
+			"noBranch": "ブランチなし",
+			"fromTo": "{{from}} から {{to}} へ",
+			"startedAt": "{{at}} に開始",
+			"yourTurn": "あなたの番 — 開く",
+			"journey": "進行",
+			"remove": "削除",
+			"delivered_other": "{{total}} 件中 {{count}} 件のタスクを納品",
+			"reworked_other": " · {{count}} 件が差し戻しを経由",
+			"masterLaunched": "リードエージェントを起動しました。",
+			"launching": "起動中…",
+			"launchMaster": "リードエージェントを起動",
+			"estimateTitle_other": "同規模の完了済みミッション {{count}} 件の中央値",
+			"estimate": "≈ {{duration}} の作業",
+			"estimateFailed": " · {{percent}}% が失敗",
+			"estimateThin": " · おおまかな見積もり",
+			"planApproved": "計画を承認しました — 実行役が開始しています。",
+			"launchingRunners": "実行役を起動中…",
+			"approvePlan": "計画を承認",
+			"outsideTitle": "この作業がマージまたは放棄されるまで、プルリクエストは作成されません。",
+			"allInsideTitle": "納品された作業はすべて統合ブランチに入っています。",
+			"integrated": "{{done}}/{{total}} 統合済み",
+			"outside_other": " · {{count}} 件がまだ外",
+			"refusedTitle": "{{tasks}} — 指摘された点を修正してから確認を再実行してください：新しい判定で却下が解除されます。",
+			"refused_other": "{{count}} 件の確認が却下",
+			"undecidedTitle": "レポートが読み取れる結論に達していません。再実行すると、すべてを見直して明確な判定（OK、留保あり、ブロッキング）で締めくくります。",
+			"undecided": "判定なし：{{title}}",
+			"rerunDone": "{{title}} — 再実行しました。",
+			"prBlockedRefused": "まだ却下している確認があります：プルリクエストを作成する前に判定を解除してください。",
+			"prBlockedUndecided": "結論の出ていない確認があります：作業が合格かどうか判断できません。プルリクエストを作成する前に再実行してください。",
+			"prOpened": "プルリクエストを作成しました。",
+			"opening": "作成中…",
+			"openPr": "PR を作成",
+			"viewPr": "PR を表示",
+			"resumeTitle": "リードエージェントと、動いているべきものすべてを再起動します",
+			"resumed": "ミッションを再開しました。",
+			"resuming": "再開中…",
+			"resume": "再開",
+			"pauseTitle": "エージェントを停止してランチャーを保留します — 作業はそのまま残ります",
+			"paused": "ミッションを一時停止しました。",
+			"pause": "一時停止",
+			"stopTitle": "すべて停止してミッションを放棄します",
+			"stopped": "ミッションを停止しました。",
+			"stop": "停止",
+			"master": "リードエージェント",
+			"summary": "仕組み",
+			"summaryPr": "プルリクエスト：{{url}}",
+			"summaryCopied": "レポートをコピーしました。",
+			"copy": "コピー",
+			"proposedPlan": "提案された計画",
+			"addTask": "タスクを手動で追加"
+		},
+		"base": {
+			"set": "PR は {{branch}} をベースにします。",
+			"cleared": "PR はデフォルトブランチを対象にします。",
+			"title": "プルリクエストのベースとなるブランチ",
+			"default": "デフォルトブランチ",
+			"stacking": "オープン中の PR — スタックとして認識されます",
+			"others": "その他のブランチ"
+		},
+		"pending": {
+			"wantsToUse": "使用したいツール",
+			"deny": "拒否",
+			"allow": "許可"
+		},
+		"agent": {
+			"permissions_other": "付与待ちの権限 {{count}} 件",
+			"working": "作業中…",
+			"waiting": "待機中",
+			"stopped": "停止",
+			"openConversation": "会話を開く"
+		},
+		"task": {
+			"noScopeTitle": "範囲なし：このタスクはどこにでも書き込めます",
+			"noScope": "範囲なし",
+			"actualBranchTitle": "実行役は「{{expected}}」ではなく「{{actual}}」で作業しました。統合でマージされるのはこのブランチです。",
+			"overrunTitle": "このタスクは {{spent}} 実行されていますが、通常のタスクは {{expected}} です。何も停止されません：再開するか、再分割するか、停止するかはあなた次第です。",
+			"workedAcross_other": "{{count}} 回のパスでの合計作業時間",
+			"worked": "作業時間",
+			"sentBack_other": "修正のため差し戻し {{count}} 回（最大 3 回）",
+			"reworks_other": "差し戻し {{count}} 回",
+			"reworkOf": "差し戻し {{count}}/3",
+			"held": "順番待ち",
+			"forceTitle": "ベースを待たずに強制的に開始",
+			"runnerLaunched": "{{title}} — 実行役を起動しました。",
+			"force": "強制開始",
+			"fullReviewTitle": "承認済みの内容を忘れて、すべてを見直す",
+			"fullReviewLaunched": "{{title}} — 全体レビューを開始しました。",
+			"fullReview": "すべてレビュー",
+			"orphanTitle": "このタスクには実行役が割り当てられていません：最初から再起動してください",
+			"runnerRelaunched": "{{title}} — 実行役を再起動しました。"
+		},
+		"form": {
+			"role": "ロール",
+			"title": "タイトル",
+			"titlePlaceholder": "請求のエントリーポイント",
+			"scope": "範囲",
+			"scopeHint": "パス、カンマ区切り",
+			"cancel": "キャンセル",
+			"submit": "タスクを追加"
+		},
+		"picker": {
+			"tickets": "チケット",
+			"title": "トラッカーからチケットを選ぶ",
+			"assigned": "割り当て済み",
+			"others": "その他",
+			"empty": "提案できるオープン中のチケットはありません。"
+		}
+	},
+	"observability": {
+		"title": "可観測性",
+		"subtitle": "Sentry と Better Stack",
+		"ticket": "チケット",
+		"ticketTitle": "Linear チケットを作成し、Sentry に記録",
+		"ticketCreated": "Linear チケットを作成しました。",
+		"resolve": "解決",
+		"resolved": "課題を解決しました。",
+		"ignore": "無視",
+		"ignored": "課題を無視しました。",
+		"regressions": "リグレッション",
+		"incidents": "インシデント",
+		"monitors": "モニター",
+		"errorsAndIncidents": "エラーとインシデント",
+		"emptyHint": "結果を期待していた場合は、設定でトークンと組織を確認してください。"
+	},
+	"overview": {
+		"prSegments": {
+			"ready": "準備完了",
+			"ciFailing": "CI ✗",
+			"stacked": "スタック",
+			"inReview": "レビュー中",
+			"drafts": "ドラフト"
+		},
+		"title": "概要",
+		"subtitle": "プロダクト、エージェント、ミッションの状態",
+		"refreshing": "更新中…",
+		"sourcesLoading_other": "{{count}} 件のソースを読み込み中…",
+		"waitingBanner_other": "{{count}} 件のエージェントがあなたの返答を待っています",
+		"tiles": {
+			"liveAgents": "アクティブなエージェント",
+			"waiting": "{{count}} 件待機中",
+			"readyToMerge": "マージ可能",
+			"ciFailing": "CI 失敗",
+			"dailyBlockers": "デイリーのブロッカー",
+			"prodErrors": "本番エラー",
+			"activeWorktrees": "アクティブな worktree",
+			"total": "合計 {{count}}"
+		},
+		"usage": {
+			"title": "Claude の使用量",
+			"dayLabel": "{{day}}：{{tokens}} トークン",
+			"summary": "今日 {{today}} · 7 日間で {{week}} · 直近 21 日",
+			"none": "まだ計測値はありません。"
+		},
+		"prState": "PR の状態",
+		"cycle": {
+			"title": "現在のサイクル",
+			"ticketsDone": "完了したチケット",
+			"reviewLoad": "レビュー待ちの PR",
+			"none": "アクティブなサイクルはありません。"
+		},
+		"missions": {
+			"title": "ミッション",
+			"none": "進行中のミッションはありません。ミッションはチケットをタスクに分割し、エージェントに割り当てます。",
+			"delivered": "{{done}}/{{total}} 納品済み",
+			"splitting": "分割中",
+			"running": "{{count}} 件実行中"
+		},
+		"production": {
+			"title": "本番",
+			"none": "14 日間、重大なエラーはありません。"
+		},
+		"prFlow": {
+			"title": "PR の流れ",
+			"see": "表示",
+			"stackedOn": "{{base}} にスタック",
+			"ready_other": "{{count}} 件の PR がマージ可能、壊れているものはありません。",
+			"noneFailing": "失敗している PR はありません。"
+		},
+		"fleet": {
+			"title": "worktree 一覧",
+			"allClean": "すべてのツリーはクリーンです。",
+			"changes_other": "{{count}} 件の変更"
+		},
+		"daily": {
+			"title": "デイリーのブロッカー",
+			"button": "デイリー"
+		},
+		"docs": {
+			"title": "最新の成果物",
+			"none": "最近のドキュメントはありません。"
+		},
+		"githubError": "GitHub：{{error}}",
+		"empty": {
+			"message": "表示するものはありません",
+			"hint": "設定で `general.main_repo` を確認してください。"
+		}
+	},
+	"permanence": {
+		"title": "Permanence",
+		"resume": "再開",
+		"suspend": "一時停止",
+		"lookNow": "間隔を待たずに今すぐ確認",
+		"settings": "Permanence の設定",
+		"halt": {
+			"confirmTitle": "すべて停止しますか？",
+			"confirmMessage_other": "進行中の {{count}} 件が中断されます：{{items}}。ミッションは一時停止され、作業はそのまま残ります。再度有効にするまで再開しません。",
+			"button": "すべて停止",
+			"rest": "残りを中断",
+			"hint": "受け付けを閉じ、保持しているものをすべて中断します",
+			"reason": "画面から停止がリクエストされました。",
+			"partial": "停止：{{stopped}}。中断できなかったもの：{{failed}}",
+			"done": "すべて停止しました（{{items}}）。",
+			"nothing": "実行中のものはありませんでした。再度有効にするまで再開しません。"
+		},
+		"release": {
+			"confirmTitle": "本番稼働させますか？",
+			"confirmMessage": "次の対応から、設定でチェックしたアクションを実際に実行します。共有ブランチには決して触れず、「すべて停止」はいつでも使えます。",
+			"button": "本番稼働",
+			"hint": "次の対応から実際に行動します"
+		},
+		"tripped": {
+			"title": "サーキットブレーカー：自ら停止しました。",
+			"holds_other": "{{count}} 件を中断できませんでした：{{items}}",
+			"rearm": "再度有効化"
+		},
+		"rehearsal": {
+			"title": "リハーサル — 判断はしますが、行動はしません。",
+			"left_other": "残りの試行対応 {{count}} 件",
+			"during": "<label>リハーサル中：</label>シグナルを読み、目標と実行するはずのアクションの一覧を書き — そこで止まります。リポジトリには何も触れません。完了した対応を開くと、何をしたはずかを読めます。",
+			"release": "<label>本番稼働：</label>次の対応から、チェックしたアクションを — それだけを — 実際に実行します。カウンターが尽きるのを待つこともできます。",
+			"reset": "<label>カウンターは</label>権限を変更するたびにリセットされます：許可範囲を広げると別の構成になるため、本番稼働の前に再び見守ります。"
+		},
+		"live": "実際に行動しています。設定でチェックしたアクションのみを実行し、共有ブランチでは決して行いません。",
+		"suspended": {
+			"message": "休止中。進行中の対応は最後まで実行され、新しい対応は開始しません。",
+			"hint": "クリックまたは ⌘⇧P で再開"
+		},
+		"inFlight": {
+			"title": "進行中",
+			"noRule": "有効なルールはありません。",
+			"noRuleHint": "何を監視するかを伝えるまで Permanence は何もしません — そして、チェックしたことだけを行います。",
+			"openSettings": "設定を開く",
+			"idle_other": "{{count}} 件のルールが待機中で、進行中のものはありません。ほとんどの場合、これが想定どおりの状態です。"
+		},
+		"finished": "完了",
+		"queue": {
+			"title": "キュー",
+			"unknownRule": "不明なルール",
+			"retained": "{{when}}に受付",
+			"single": "対応は 1 件ずつ：これらは順番を待っています。",
+			"multiple_other": "同時に最大 {{count}} 件の対応：これらは順番を待っています。"
+		},
+		"closed": {
+			"disabled": "無効",
+			"suspended": "休止中",
+			"offHours": "サービス時間外",
+			"capped": "1 日の上限に到達",
+			"quota": "共有クォータが下限を下回っています",
+			"tripped": "自ら停止"
+		},
+		"heartbeat": {
+			"tripped": "停止 — サーキットブレーカー",
+			"ready_other": "待機中のルール {{count}} 件",
+			"noneReady": "待機中のルールなし",
+			"never": "未確認",
+			"lastLook": "最終確認 {{when}}",
+			"blind_other": "応答のないソース {{count}} 件",
+			"cold": "カーソルを設定中"
+		},
+		"dropped": {
+			"title": "除外",
+			"cold": "初回の確認：カーソルを設定しています。今後の変化は報告されます。",
+			"nothing": "前回の確認以降、新しいものはありません。",
+			"seenPending_other": "{{count}} 件のシグナルを確認、うち {{pending}} 件がトリアージ待ち。",
+			"seen_other": "{{count}} 件のシグナルを確認、該当するルールはありません。",
+			"compared_other": "{{count}} 件の変更を比較",
+			"pending": "トリアージ待ち",
+			"retry": "このシグナルのトリアージを再実行",
+			"more_other": "+ ほか {{count}} 件"
+		},
+		"reserve": {
+			"title": "予備",
+			"grounded": "休止中",
+			"refresh": "CLI に上限を再度問い合わせる",
+			"ceiling": "1 日の上限",
+			"ceilingHint_other": "最大トークン · 最大 {{count}} 件の対応",
+			"shared": "あなたと共有しているもの",
+			"limitResets": "{{label}} · {{when}}にリセット",
+			"noLimits": "上限の報告なし",
+			"floor": "これを下回るとあなたに譲ります",
+			"floorHint": "クォータ残量",
+			"floorMark": "残り {{floor}} % を下回ると停止",
+			"belowFloor": "下限を下回っています：クォータが回復するまで対応を開始しません。",
+			"willStop": "残り {{floor}} % を下回ると自ら停止します。"
+		}
+	},
+	"recap": {
+		"period": {
+			"1h": "直近 1 時間",
+			"3h": "直近 3 時間",
+			"day": "今日"
+		},
+		"caption": {
+			"video": "Cockpit が録画した受け入れテスト。",
+			"after": "変更後。",
+			"before": "変更前。"
+		},
+		"status": {
+			"waiting": "あなたの返答待ち",
+			"prReady": "PR {{label}} 準備完了",
+			"testsGreen": "テスト成功",
+			"testsRed": "テスト失敗",
+			"handedBack": "操作を返しました"
+		},
+		"title": "起きたこと",
+		"noTurns": "この期間に終了したターンはありません。",
+		"turns_other": "{{count}} ターン",
+		"agents_other": "エージェント {{count}} 件",
+		"prsReady_other": "準備完了の PR {{count}} 件",
+		"decisionsWaiting_other": "{{count}} 件の判断があなたを待っています",
+		"watchAll": "すべて見る",
+		"empty": "エージェントが終えたターンは、ここで短いストーリーになります：何を変更し、見せ、録画したか。期間を広げるか、作業を始めてから戻ってきてください。",
+		"images_other": "画像 {{count}} 枚",
+		"player": {
+			"story": "ストーリー {{index}} / {{total}}",
+			"voiceOff": "音声をミュート",
+			"voiceOn": "読み上げる",
+			"resume": "再開",
+			"pause": "一時停止",
+			"close": "閉じる",
+			"workTime": "{{duration}} の作業",
+			"previous": "前の画像",
+			"next": "次の画像",
+			"openConversation": "会話を開く"
+		}
+	},
+	"scripts": {
+		"sensitive": "要注意",
+		"options": "オプション",
+		"defaultChoice": "— デフォルト —",
+		"command": "コマンド",
+		"in": "{{path}} 内",
+		"run": "実行",
+		"openInTerminal": "Cockpit ではなく Terminal.app で開く",
+		"required": "{{label}} は必須です。",
+		"title": "スクリプト",
+		"subtitle": "設定可能な独自コマンドとリポジトリのスクリプト。出力をライブで表示しながら実行します。",
+		"targetWorktree": "対象の worktree",
+		"search": "検索…",
+		"noCommands": "このプロジェクトに宣言されたコマンドはありません。",
+		"noCommandsHint": "設定 → エージェント → リポジトリのコマンド：Cockpit がリポジトリのスクリプトから検出するか、自分で書くことができます。",
+		"noRuns": "まだ実行はありません。",
+		"state": {
+			"running": "実行中",
+			"succeeded": "完了",
+			"cancelled": "キャンセル",
+			"failed": "失敗 {{code}}"
+		},
+		"stop": "停止",
+		"clearOutput": "出力をクリア",
+		"replayInTerminal": "Terminal.app で再実行",
+		"launchPrompt": "コマンドを実行",
+		"launchHint": "出力はターミナルの色付きで、ここにライブで表示されます。"
+	},
+	"settings": {
+		"tabs": {
+			"projects": {
+				"label": "プロジェクト",
+				"hint": "Cockpit が操作するリポジトリ"
+			},
+			"services": {
+				"label": "サービス",
+				"hint": "何がどのキーで接続されているか"
+			},
+			"team": {
+				"label": "チームとワークフロー",
+				"hint": "誰がどう働くか"
+			},
+			"agents": {
+				"label": "エージェント",
+				"hint": "実行役に与えるロール"
+			},
+			"voice": {
+				"label": "音声とアシスタント",
+				"hint": "音声、聞き取り、ElevenLabs"
+			},
+			"permanence": {
+				"label": "Permanence",
+				"hint": "何を監視し、何を自分に許すか"
+			},
+			"workstation": {
+				"label": "ワークステーション",
+				"hint": "フォルダ、エディタ、外観、起動"
+			},
+			"mobile": {
+				"label": "モバイルアクセス",
+				"hint": "スマートフォンからエージェントを追う"
+			},
+			"version": {
+				"label": "バージョン",
+				"hint": "アップデート"
+			}
+		},
+		"common": {
+			"remove": "削除",
+			"add": "追加",
+			"name": "名前"
+		},
+		"sentry": {
+			"unavailable": "一覧を取得できません（{{error}}）— スラッグを手動で入力してください。"
+		},
+		"trigger": {
+			"saved": "環境「{{name}}」を保存しました。",
+			"removeTitle": "環境「{{name}}」を削除しますか？",
+			"removed": "環境「{{name}}」を削除しました。",
+			"defaultProject": "デフォルトのプロジェクト",
+			"mainKey": "メインキー",
+			"namePlaceholder": "Production",
+			"secretKey": "シークレットキー",
+			"project": "プロジェクト",
+			"projectHint": "空欄 = 上のもの。",
+			"help": "シークレットキーは 1 つのプロジェクトの 1 つの環境でのみ使えます：追跡する環境ごとに 1 項目ずつ追加してください（Production、Staging、Test…）。それぞれがデリバリーのタブになります。"
+		},
+		"projects": {
+			"added": "プロジェクト「{{name}}」を追加しました。",
+			"removeTitle": "プロジェクト「{{name}}」を削除しますか？",
+			"removeMessage": "変更されるのは Cockpit の設定だけです — リポジトリには触れません。",
+			"activate": "このプロジェクトを有効化",
+			"soloBadge": "ソロ",
+			"new": "新規",
+			"namePlaceholder": "サイドプロジェクト",
+			"folder": "フォルダ",
+			"folderHint": "パス、「~」、またはプロジェクトフォルダ内の名前だけ。",
+			"folderPlaceholder": "~/Sites/my-project",
+			"githubHint": "空欄 = リポジトリにあればそこから推測。",
+			"githubPlaceholder": "me/my-project",
+			"solo": "ソロ",
+			"soloTitle": "チームのないプロジェクト：デイリーを非表示にします",
+			"prepareFirst": "まず環境を準備してください — 下のブロックで行えます"
+		},
+		"saved": "設定を保存しました。",
+		"title": "設定",
+		"revealFile": "ファイルを表示",
+		"saving": "保存中…",
+		"save": "保存",
+		"saveConfig": "設定を保存",
+		"scope": {
+			"projectTitle": "以下の設定は「{{name}}」に適用されます",
+			"thisProject": "このプロジェクト",
+			"globalTitle": "以下の設定はデフォルトで、すべてのプロジェクトに継承されます",
+			"projectHintIsolated": "ここに表示されるのは、このプロジェクトが宣言しているものだけです。空のフィールドはこのプロジェクトでは未設定です：プロジェクトが複数ある場合、他のプロジェクトのリポジトリやチームを借りることはありません。共有されるのはアクセストークンだけです。",
+			"projectHint": "空のフィールドはデフォルトを継承します。入力すると、このプロジェクト独自の設定になります — 別の GitHub アカウント、別の Sentry キーなど。",
+			"globalHintIsolated": "これらの値はアクセストークンのフォールバックです。リポジトリとチームはプロジェクトごとに宣言します。",
+			"globalHint": "これらの値は、プロジェクトが何も指定していない箇所に適用されます。プロジェクト独自の設定をするには、そのプロジェクトに切り替えてください。",
+			"project": "プロジェクト",
+			"defaults": "デフォルト"
+		},
+		"sections": {
+			"projects": "プロジェクト",
+			"services": "接続されたサービス",
+			"workflow": "ワークフロー",
+			"team": "チーム",
+			"accounts": "アカウント",
+			"engines": "エージェントのエンジン",
+			"mcp": "リポジトリのツール（MCP）",
+			"roles": "エージェントのロール",
+			"missionMode": "ミッションの開始方法",
+			"missionBudget": "ミッションに許可するコスト",
+			"sandbox": "エージェントの分離",
+			"properties": "常に成り立つべきこと",
+			"commands": "リポジトリのコマンド",
+			"brief": "エージェントのコンテキスト",
+			"impact": "変更の読み取り",
+			"voice": "音声",
+			"assistant": "音声アシスタント",
+			"mobile": "モバイルアクセス",
+			"version": "バージョン",
+			"language": "言語",
+			"appearance": "外観",
+			"onClose": "終了時",
+			"onStart": "起動時",
+			"dock": "ワークスペースの表示",
+			"workstation": "ワークステーション",
+			"identifiers": "プロジェクトの識別子",
+			"triggerEnvironments": "Trigger.dev の環境",
+			"secrets": "アクセストークン",
+			"links": "便利なリンク"
+		},
+		"voice": {
+			"intro": "エージェントの作業を聞くときに説明する音声であり、アシスタントに話しかけたときに応答する音声です。ElevenLabs キーは両方に使われます：話すことと、あなたの声を聞くこと。"
+		},
+		"version": {
+			"intro": "Cockpit は 1 日に数回、自動で確認します。あなたの同意なしには何もインストールされません：アップデートするとアプリケーションが再起動します。その間もワークスペースのエージェントは作業を続けます（ワークステーション → 終了時 でオフにしていない限り）。ミッションのエージェントは再起動後に再開されます。"
+		},
+		"workstation": {
+			"projectsRoot": "プロジェクトフォルダ",
+			"projectsRootHint": "モノレポと worktree を含むルート。",
+			"mainRepo": "メインリポジトリ",
+			"mainRepoHint": "git worktree の基準となるリポジトリ。",
+			"editor": "エディタ"
+		},
+		"services": {
+			"githubRepo": "GitHub リポジトリ",
+			"sentryOrg": "Sentry 組織",
+			"sentryProjects": "Sentry プロジェクト",
+			"sentryProjectsHint": "チェックなし = 組織全体。",
+			"ticketKey": "チケットのキー",
+			"ticketKeyHint": "Linear の接頭辞、例：ABC — デイリーのチームは下で設定します",
+			"gitlabProject": "GitLab プロジェクト",
+			"gitlabProjectHint": "グループを含むパス、例：group/product",
+			"gitlabProjectPlaceholder": "group/product",
+			"gitlabHost": "GitLab インスタンス",
+			"gitlabHostHint": "空欄 = gitlab.com。それ以外はあなたのインスタンスのルート",
+			"gitlabHostPlaceholder": "https://gitlab.example.com",
+			"triggerProject": "Trigger.dev プロジェクト",
+			"railwayProject": "Railway プロジェクト"
+		},
+		"secrets": {
+			"override": "プロジェクト固有",
+			"inherited": "継承",
+			"configured": "設定済み",
+			"missing": "未設定",
+			"keepPlaceholder": "•••••••• — 空欄のままで保持",
+			"pastePlaceholder": "トークンを貼り付け",
+			"storage": "トークンは権限 600 で {{path}} に書き込まれ、インターフェースに戻ってくることはありません。各値は環境変数（COCKPIT_SENTRY_TOKEN、COCKPIT_LINEAR_TOKEN…）でも指定でき、その場合はファイルより優先されます。"
+		},
+		"theme": {
+			"dark": "ダーク",
+			"darkHint": "オリジナルのテーマ",
+			"light": "ライト",
+			"lightHint": "同じ役割、別の値",
+			"system": "システム",
+			"systemHint": "macOS に追従、切り替えにも対応",
+			"help": "この選択はこのワークステーションに適用され、すぐに反映されます — 「設定を保存」を待ちません（そちらはプロジェクトの設定のみが対象です）。開いているターミナルも一緒に再描画されます。"
+		},
+		"relay": {
+			"continue": "エージェントは作業を続ける",
+			"stop": "エージェントは停止する",
+			"continueHelp": "Cockpit を閉じたり更新したりしても、手動で起動したワークスペースのエージェントは停止しません：ウィンドウなしでターンを終え、次回起動時に会話が再読み込みされた状態で戻ってきます。ただし、ワークスペースのブラウザはアプリとともに閉じます。ミッション、レビュー、コンテナで分離されたエージェントは従来どおり停止し、再開されます。",
+			"stopHelp": "Cockpit を閉じると、実行中のすべてのエージェントが停止します。次回起動時に「起動時」の設定に従って再開されます。",
+			"note": "この選択は今後起動するエージェントに適用されます。"
+		},
+		"resume": {
+			"resume": "作業を再開",
+			"resumeHint": "すべてを開き直し、各エージェントに中断したところから続けるよう依頼します",
+			"reopen": "再開せずに開き直す",
+			"reopenHint": "会話は再読み込みされて表示されますが、誰も自動では再開しません",
+			"off": "何も開き直さない",
+			"offHint": "ワークスペースはバーで待機します。ワンクリックで起こせます",
+			"resumeHelp": "開き直した各エージェントは再開の指示を受け取ります：最後のアクションから再開するのではなく、続ける前にリポジトリの実際の状態を確認するよう求めます。コンテキストはそのままです — CLI が識別子で会話を再開します。",
+			"reopenHelp": "会話は開き直されて読めますが、作業はあなたが再開します。",
+			"offHelp": "何も再開しません：昨日実行していたものは、ワークスペースバーでスリープ中として表示されます。",
+			"note": "この選択は次回の Cockpit 起動時に適用されます。実行中のミッションは常に再開されます — 実行役もリードエージェントも。"
+		},
+		"dock": {
+			"show": "表示",
+			"hide": "非表示",
+			"showHelp": "実行中のワークスペースは、画面の外でも右下に固定表示されます：他の場所を見ているときの唯一の手がかりです。",
+			"hideHelp": "他の画面の上には何も表示されません。実行中のものはワークスペース画面で確認でき、通知も引き続き届きます。"
+		}
+	},
+	"team": {
+		"title": "デイリー",
+		"loading": "読み込み中…",
+		"subtitle": "{{since}} のデイリー以降",
+		"subtitleCycle": "サイクル {{number}} · {{since}} のデイリー以降",
+		"present": "デイリーを全画面で進行",
+		"currentCycle": "現在のサイクル",
+		"all": "すべて",
+		"githubError": "GitHub 側：{{error}} — Linear のチケットは引き続き表示されます。",
+		"wholeTeam": "チーム全体",
+		"draft": "ドラフト",
+		"ageDays_other": "{{count}}日",
+		"decision": {
+			"approved": "承認済み",
+			"changesRequested": "修正依頼",
+			"reviewRequired": "レビュー待ち"
+		},
+		"chip": {
+			"wip": "WIP",
+			"review": "レビュー",
+			"prs": "PR",
+			"toReview": "レビュー待ち",
+			"merged": "マージ済み",
+			"blocking": "ブロッキング",
+			"toChallenge": "要確認",
+			"inReview": "レビュー中",
+			"readyToMerge": "マージ可能"
+		},
+		"member": {
+			"cycle": "サイクル {{done}}/{{total}}",
+			"more_other": "+ほか {{count}} 件",
+			"openPrs": "オープン中の PR",
+			"reviewInbox": "他メンバーのレビュー待ち",
+			"reviewFrom": "{{author}} · {{age}}",
+			"shipped": "前回のデイリー以降に出荷",
+			"next": "次"
+		},
+		"noTracker": {
+			"subtitle": "タスクトラッカーが接続されていません",
+			"service": "タスクトラッカー",
+			"token": "トークン"
+		},
+		"noTeam": {
+			"subtitle": "チームが宣言されていません",
+			"title": "デイリーには、チームに誰がいるかの情報が必要です",
+			"missingId": "チーム ID がありません：Linear チームの UUID で、チーム設定の URL に表示されます — チケットの接頭辞のキーではありません。",
+			"noMembers": "メンバーが宣言されていません：各メンバーには、チケットを紐づけるための Linear ID と、プルリクエスト用の GitHub ログインが必要です。",
+			"open": "設定 → チーム を開く"
+		},
+		"flags": {
+			"title": "デイリーで取り上げること",
+			"urgentOnly": "ブロッキングのみ",
+			"empty": "報告することはありません",
+			"emptyHint": "この範囲に未解決の問題はありません。"
+		},
+		"flow": {
+			"title": "PR の流れ",
+			"ready": "マージ可能（{{count}}）",
+			"ciFailing": "CI 失敗（{{count}}）",
+			"stacked": "スタックされた PR（{{count}}）",
+			"blockedBy": "#{{number}} によりブロック"
+		},
+		"focus": "チームの注力",
+		"product": "プロダクト · Linear での追跡",
+		"noMember": "メンバーなし",
+		"noMemberHint": "設定ファイルの `[team]` を入力してください。"
+	},
+	"today": {
+		"title": "今日",
+		"clearDoneHint": "完了したタスクを削除",
+		"clearDone": "整理",
+		"nothing": "あなたを待っているものはありません",
+		"nothingHint": "待機中のエージェントも、ブロックされた PR も、片付けるものもありません。",
+		"myTickets": "自分のチケット",
+		"todo": "やること",
+		"readyToMerge": "マージ可能",
+		"toReview": "レビュー待ち",
+		"activity": "Cockpit のアクティビティ",
+		"permanence": "Permanence",
+		"worktreesToClean": "片付ける worktree",
+		"waitingForYou": "あなた待ち",
+		"fixStarted": "{{label}} — 対応中。",
+		"task": {
+			"placeholder": "忘れたくないタスク…",
+			"markUrgent": "緊急にする",
+			"urgent": "緊急",
+			"add": "追加",
+			"reopen": "再開",
+			"complete": "完了",
+			"delete": "削除"
+		}
+	},
+	"worktrees": {
+		"row": {
+			"dirty_other": "{{count}} 件の変更",
+			"clean": "クリーン",
+			"conflicts_other": "{{count}} 件のコンフリクト",
+			"usageHint": "合計 {{total}}、うちビルド出力 {{builds}}、依存関係 {{dependencies}} — 依存関係は pnpm ストアからクローンされるため、ほとんど容量を使いません。",
+			"builds": "ビルド {{size}}",
+			"main": "メイン"
+		},
+		"detail": {
+			"editor": "エディタ",
+			"terminalHint": "作業パネルで、この worktree のシェル（⌘⇧T）",
+			"terminal": "ターミナル",
+			"agentHint": "Cockpit を離れずに、ここでエージェントを起動",
+			"agent": "エージェント",
+			"devHint": "パネルのターミナルで {{command}} — ⌃C で停止",
+			"dev": "Dev",
+			"changes": "変更",
+			"cleanTree": "クリーンなツリー — 比較するものはありません。",
+			"new": "新規",
+			"recentCommits": "最近のコミット",
+			"selfQa": "セルフ QA",
+			"agentSessions": "エージェントのセッション",
+			"close": "閉じる",
+			"untracked": "未追跡のファイル — 差分はありません。",
+			"pickFile": "ファイルを選択",
+			"pickFileHint": "HEAD と比較した差分がここに表示されます。"
+		},
+		"fleet": "一覧",
+		"title": "Worktree",
+		"trees_other": "ツリー {{count}} 件",
+		"erasableBuilds": "削除可能なビルド {{size}}",
+		"list": "リスト",
+		"create": {
+			"title": "新しい worktree",
+			"message": "ブランチ名。既存かどうかにかかわらず、準備ができ次第ワークスペースが開きます。",
+			"placeholder": "feat/my-feature",
+			"hint": "ブランチを worktree としてチェックアウト — コマンドは設定から取得します",
+			"button": "新規"
+		},
+		"filter": "絞り込み…",
+		"purge": {
+			"title": "{{name}} のビルドを削除しますか？",
+			"message": "ビルド出力とキャッシュ {{size}} を削除します — それ以外は削除しません。コード、履歴、未コミットのファイルには触れません：ビルドコマンドで同じものが再作成されます。",
+			"confirm": "削除",
+			"done": "ディスクを {{size}} 解放しました。",
+			"button": "ビルド {{size}} を削除"
+		},
+		"remove": {
+			"title": "worktree {{name}} を削除しますか？",
+			"message": "フォルダとそのローカルインフラ（データベース、バケット、Docker スタック）が削除されます。通常 1〜2 分かかります。リモートブランチはそのまま残ります。",
+			"confirm": "削除",
+			"button": "{{name}} を削除"
+		},
+		"none": "worktree はありません"
+	}
+}

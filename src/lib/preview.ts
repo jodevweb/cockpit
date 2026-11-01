@@ -840,7 +840,7 @@ const REPONSES: Record<string, unknown> = {
 	tour_changes: ({ cwd }: Record<string, unknown>) => ({
 		root: String(cwd),
 		base: "a1b2c3d",
-		baseLabel: "depuis dev",
+		baseLabel: "since dev",
 		files: [
 			{ path: "apps/web/src/cart.ts", added: 14, removed: 3, state: "modified" },
 			{ path: "apps/web/src/cart.test.ts", added: 38, removed: 0, state: "modified" },

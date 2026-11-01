@@ -1,1 +1,415 @@
-{}
+{
+	"brief": {
+		"sources": {
+			"conventions": {
+				"label": "Правила репозитория",
+				"hint": "где репозиторий записывает свои соглашения, и навыки, которые он хранит, — движок читает только файл своего семейства"
+			},
+			"product": {
+				"label": "Что делает продукт",
+				"hint": "фраза, заявленная для чтения изменений, — без неё агент говорит только о коде"
+			},
+			"lessons": {
+				"label": "Блокнот проекта",
+				"hint": "что уже приходилось переделывать вручную, с фильтром по затронутым файлам"
+			},
+			"place": {
+				"label": "Ветка и её состояние",
+				"hint": "база, расхождение, незакоммиченные файлы, последние коммиты — прочитано из репозитория, доступно всегда"
+			},
+			"ticket": {
+				"label": "Тикет ветки",
+				"hint": "запрос и комментарии к нему из заявленного трекера"
+			},
+			"review": {
+				"label": "Замечания ревью",
+				"hint": "описание и обсуждение merge request, открытого на этой ветке"
+			},
+			"attempts": {
+				"label": "Что уже пробовали",
+				"hint": "прошлые диалоги в этой папке, по одной строке на каждый"
+			}
+		},
+		"missing": {
+			"noFolder": "папка не существует",
+			"ticket": "не удаётся прочитать тикет {{id}} ({{error}})",
+			"pullRequests": "не удаётся прочитать pull requests ({{error}})",
+			"pullRequest": "не удаётся прочитать pull request #{{number}} ({{error}})",
+			"mergeRequests": "не удаётся прочитать merge requests ({{error}})",
+			"mergeRequestNotes": "не удаётся прочитать обсуждение MR !{{iid}} ({{error}})"
+		},
+		"sections": {
+			"product": {
+				"label": "Продукт",
+				"detail": "что заявила команда"
+			},
+			"lessons": {
+				"label": "Блокнот"
+			},
+			"place": {
+				"label": "Ветка",
+				"detail": "состояние репозитория"
+			},
+			"ticket": {
+				"label": "Тикет {{identifier}}"
+			},
+			"review": {
+				"label": "Ревью {{reference}}",
+				"descriptionOnly": "только описание"
+			},
+			"attempts": {
+				"label": "Попытки"
+			}
+		},
+		"count": {
+			"lessons_one": "{{count}} урок",
+			"lessons_few": "{{count}} урока",
+			"lessons_many": "{{count}} уроков",
+			"lessons_other": "{{count}} урока",
+			"feedback_one": "{{count}} комментарий",
+			"feedback_few": "{{count}} комментария",
+			"feedback_many": "{{count}} комментариев",
+			"feedback_other": "{{count}} комментария",
+			"conversations_one": "{{count}} диалог",
+			"conversations_few": "{{count}} диалога",
+			"conversations_many": "{{count}} диалогов",
+			"conversations_other": "{{count}} диалога",
+			"skills_one": "{{count}} навык",
+			"skills_few": "{{count}} навыка",
+			"skills_many": "{{count}} навыков",
+			"skills_other": "{{count}} навыка",
+			"files_one": "{{count}} файл",
+			"files_few": "{{count}} файла",
+			"files_many": "{{count}} файлов",
+			"files_other": "{{count}} файла"
+		}
+	},
+	"impact": {
+		"errors": {
+			"folder": "Папка анализов: {{error}}",
+			"unreadable": "Не удаётся прочитать анализ: {{error}}",
+			"write": "Запись анализа: {{error}}",
+			"alreadyRunning": "Анализ этого изменения уже выполняется.",
+			"changeGone": "Этого изменения больше нет: pull request закрыт или ветка удалена.",
+			"noWorkdir": "Нет папки, в которой агент мог бы работать."
+		},
+		"interrupted": {
+			"label": "Чтение прервано закрытием Cockpit",
+			"detail": "Выполнявший его агент останавливается вместе с приложением. Перезапустите его с экрана «Влияние»."
+		},
+		"journal": {
+			"analysis": "Анализ изменения"
+		},
+		"rawReportTitle": "Отчёт"
+	},
+	"properties": {
+		"errors": {
+			"folder": "Папка свойств: {{error}}",
+			"serialize": "Сериализация: {{error}}",
+			"write": "Запись: {{error}}",
+			"changeGone": "Этого изменения больше нет.",
+			"noneDeclared": "Этот проект не заявил ни одного свойства. Опишите, что должно оставаться верным, в Настройки → Агенты, или попросите Cockpit предложить свойства на основе ваших собственных исправлений.",
+			"noneApplicable": "Ни одно из заявленных свойств не касается файлов этого изменения.",
+			"noWorkdir": "Нет папки, в которой агенты могли бы работать.",
+			"propertyGone": "Этого свойства больше нет.",
+			"repoMissing": "Основной репозиторий этого проекта не найден на этой машине.",
+			"noFixesCalibration": "В последних четырёхстах коммитах нет распознаваемых исправлений. Калибровка опирается на коммиты, которые что-то исправляют: без них нельзя понять, может ли это свойство нарушиться.",
+			"noFixesSuggest": "В недавней истории нет распознаваемых исправлений: не на что опереться, чтобы предложить свойства, специфичные для этого репозитория.",
+			"nothingUsable": "Агент не предложил ничего пригодного. Попробуйте ещё раз или напишите первое свойство сами."
+		},
+		"judgeSilent": "Судья не ответил: {{error}}",
+		"journal": {
+			"label": "Проверка свойств",
+			"broken": "нарушено: {{count}}"
+		}
+	},
+	"team": {
+		"priority": {
+			"urgent": "Срочно",
+			"high": "Высокий",
+			"medium": "Средний",
+			"low": "Низкий"
+		},
+		"errors": {
+			"unknown": "ошибка",
+			"linear": "Linear: {{message}}",
+			"github": "GitHub: {{message}}",
+			"noMembers": "Участники не заявлены: добавьте команду в Настройки → Команда. Каждому нужен идентификатор в трекере задач, чтобы к нему можно было привязать его тикеты, и логин GitHub для его pull requests.",
+			"githubRepoMissing": "Укажите `github.repo` (например, acme/monorepo) в настройках."
+		},
+		"narrative": {
+			"theirTopics": "свои темы",
+			"and": "{{list}} и {{last}}",
+			"activeTickets_one": "{{count}} активный тикет",
+			"activeTickets_few": "{{count}} активных тикета",
+			"activeTickets_many": "{{count}} активных тикетов",
+			"activeTickets_other": "{{count}} активного тикета",
+			"reviewTickets_one": "{{count}} тикет на ревью",
+			"reviewTickets_few": "{{count}} тикета на ревью",
+			"reviewTickets_many": "{{count}} тикетов на ревью",
+			"reviewTickets_other": "{{count}} тикета на ревью",
+			"openPrs_one": "{{count}} открытый PR",
+			"openPrs_few": "{{count}} открытых PR",
+			"openPrs_many": "{{count}} открытых PR",
+			"openPrs_other": "{{count}} открытого PR",
+			"newOpenPrs_one": "{{count}} новый открытый PR",
+			"newOpenPrs_few": "{{count}} новых открытых PR",
+			"newOpenPrs_many": "{{count}} новых открытых PR",
+			"newOpenPrs_other": "{{count}} нового открытого PR",
+			"prs_one": "{{count}} PR",
+			"prs_few": "{{count}} PR",
+			"prs_many": "{{count}} PR",
+			"prs_other": "{{count}} PR",
+			"blockingPoints_one": "{{count}} блокирующая проблема",
+			"blockingPoints_few": "{{count}} блокирующие проблемы",
+			"blockingPoints_many": "{{count}} блокирующих проблем",
+			"blockingPoints_other": "{{count}} блокирующей проблемы",
+			"nothingActiveDev": "У {{name}} сейчас нет ничего активного и ни одного открытого PR.",
+			"nothingActive": "У {{name}} здесь нет отслеживаемых активных тем.",
+			"variedTopics": "{{name}} продвигается по разным темам{{load}}.",
+			"alsoOn": ", а также {{themes}}",
+			"mostlyOn": "{{name}} в основном занимается {{theme}}{{tail}}{{load}}.",
+			"workingOn": "{{name}} работает над {{themes}}{{load}}.",
+			"nothingMerged": "С прошлого дейли ничего не слито.",
+			"openedNothingMerged": "{{opened}} с прошлого дейли, пока ничего не слито.",
+			"shippedOn": " по {{themes}}",
+			"andOpened": ", и {{opened}}",
+			"shipped": "Поставлено {{prs}}{{themes}} с прошлого дейли{{opened}}.",
+			"toChallenge": "обсудить: {{count}}",
+			"toReview": "{{prs}} на ревью для других",
+			"nothingStuck": "С их стороны ничего не застряло.",
+			"toWatch": "Под наблюдением: {{items}}."
+		},
+		"days": "{{count}} дн.",
+		"flags": {
+			"blockedOne": "{{id}} помечен как Blocked — что его разблокирует?",
+			"blockedMany": "{{count}} тикетов помечены как Blocked ({{ids}}) — что их разблокирует?",
+			"stacked": "PR #{{number}} основан на `{{base}}` (не dev) — сначала слить базу?",
+			"ciFailing": "PR #{{number}} падает в CI — исправить до ревью/слияния.",
+			"approved": "PR #{{number}} одобрен, но не слит — что мешает слиянию?",
+			"changesRequested": "PR #{{number}}: запрошены правки — автору нужно их внести.",
+			"reviewStaleOne": "PR #{{number}} ждёт ревью уже {{age}} дн. — найти время на ревью?",
+			"reviewStaleMany": "{{count}} PR ждут ревью более {{days}} дн. ({{numbers}}, самый старый — {{age}} дн.) — запланировать ревью?",
+			"draftStale": "PR в черновике более {{days}} дн.: {{count}} ({{numbers}}) — ещё актуально?",
+			"inProgressNoPrOne": "{{id}} в In Progress без PR более {{days}} дн. — как продвигается?",
+			"inProgressNoPrMany": "{{count}} тикетов в In Progress без PR более {{days}} дн. ({{ids}}) — как продвигаются?",
+			"reviewStale": "Тикетов на ревью более {{days}} дн.: {{count}} ({{ids}}) — кого ждём?",
+			"wip": "{{count}} тикетов в In Progress параллельно — расставить приоритеты / сфокусироваться?",
+			"assigneeMismatch": "{{issue}} назначен на {{name}}, но код пишет @{{author}} (PR #{{number}}) — переназначить?",
+			"idleNothing": "нет открытых PR и активных тикетов — над чем вы работаете?",
+			"idleStale": "нет открытых PR, а у активных тикетов нет недавней активности — свободны? заблокированы?"
+		}
+	},
+	"automations": {
+		"errors": {
+			"serialize": "Автоматизации: {{error}}",
+			"noName": "Дайте ей название.",
+			"badTime": "Время записывается как ЧЧ:ММ, например 14:00.",
+			"unreadableAnswer": "Ответ агента не удалось прочитать.",
+			"alreadyRunning": "Она уже выполняется.",
+			"emptyCorrection": "Исправление пустое.",
+			"notFound": "Автоматизация не найдена.",
+			"runNotFound": "Запуск не найден.",
+			"noOutput": "У этого запуска нет результата.",
+			"noChromium": "Для создания PDF нужен Chrome (или браузер на Chromium). Markdown всегда можно скопировать.",
+			"pdfTimeout": "Браузер не отрисовал PDF за минуту.",
+			"pdfNotProduced": "PDF не создан. {{detail}}",
+			"noSlackWebhook": "Укажите Slack webhook этой автоматизации в её настройках.",
+			"slack": "Slack: {{error}}",
+			"slackRefused": "Slack отказал: {{status}}"
+		},
+		"missed": {
+			"closedNoCatchUp": "Cockpit был закрыт в запланированное время, а догоняющий запуск отключён.",
+			"closedUntilAfter": "Cockpit был закрыт до окончания встречи."
+		},
+		"items": {
+			"draft": "черновик",
+			"agentsIn": "Агенты в {{name}}",
+			"turns_one": "{{count}} ход",
+			"turns_few": "{{count}} хода",
+			"turns_many": "{{count}} ходов",
+			"turns_other": "{{count}} хода",
+			"minutes": "{{count}} мин"
+		},
+		"sources": {
+			"noLinearToken": "в настройках нет токена Linear",
+			"noSentryToken": "в настройках нет токена Sentry",
+			"tracker": "трекер задач"
+		},
+		"nothingFound": "В прочитанных источниках за период ничего не найдено.",
+		"notify": {
+			"linesReady_one": "Готова {{count}} строка.",
+			"linesReady_few": "Готовы {{count}} строки.",
+			"linesReady_many": "Готово {{count}} строк.",
+			"linesReady_other": "Готово {{count}} строки.",
+			"silent": "Нет ответа: {{sources}}.",
+			"ready": "{{name}} готова",
+			"failed": "{{name}} не завершилась"
+		},
+		"render": {
+			"silent": "На этот раз нет ответа: {{sources}}.",
+			"period": "С {{from}} по {{to}}",
+			"slackPeriod": "с {{from}} по {{to}}"
+		}
+	},
+	"permanence": {
+		"closed": {
+			"disabled": "Отключено в настройках.",
+			"suspended": "Приостановлено. Текущие обязательства завершаются; новые не начинаются.",
+			"offHours": "Вне заявленных часов работы.",
+			"capped": "Достигнут дневной лимит. Работа возобновится завтра.",
+			"quota": "Общая квота ниже порога: место оставлено для вас.",
+			"tripped": "Предохранитель: слишком много ошибок подряд. Permanence остановилась сама."
+		},
+		"verdict": {
+			"pending": "выполняется",
+			"reached": "достигнуто",
+			"missed": "не достигнуто",
+			"offTopic": "не по теме",
+			"undecided": "не определить",
+			"rehearsed": "репетиция"
+		},
+		"tripped": "Ошибок подряд: {{count}}. Последняя: {{last}}",
+		"journal": {
+			"breakerTripped": "Сработал предохранитель",
+			"emergencyStop": "Аварийная остановка",
+			"undo": "Обязательство отменено",
+			"act": "Действие: {{tool}}",
+			"missionOpened": "Миссия открыта Permanence",
+			"rule": "правило «{{rule}}»",
+			"ruleAwaiting": "правило «{{rule}}» — план ждёт вашего одобрения"
+		},
+		"halt": {
+			"requested": "Остановка запрошена.",
+			"cannotStop": "{{kind}} · {{what}} — Cockpit не умеет это останавливать",
+			"summary": "остановлено: {{stopped}}, ошибок: {{failed}}"
+		},
+		"undo": {
+			"nothingProduced": "Ничего не было создано: отменять нечего.",
+			"cannotUndo": "Cockpit не умеет отменять: {{items}}. Нужно сделать вручную.",
+			"engagementGone": "Этого обязательства больше нет.",
+			"missionPaused": "миссия «{{name}}» приостановлена",
+			"missionFailed": "миссия «{{name}}» — {{error}}",
+			"labelRemoved": "метка «{{label}}» снята",
+			"labelFailed": "метка «{{label}}» — {{error}}",
+			"labelNoTarget": "метка «{{label}}» — не удаётся прочитать цель",
+			"cannotUndoKind": "{{kind}} · {{what}} — Cockpit не умеет это отменять",
+			"step": "отменяет сделанное",
+			"stepResult": "отменено: {{undone}}, не поддалось: {{failed}}",
+			"summary": "отменено: {{undone}}, ошибок: {{failed}}"
+		},
+		"signals": {
+			"clock": "Часы",
+			"every": "{{rule}} — каждые {{hours}} ч",
+			"author": "автор: {{author}}",
+			"reviewRequested": "ревью запрошено у: {{people}}",
+			"noPriority": "без приоритета",
+			"assignedToMe": "назначено мне · приоритет: {{priority}}"
+		},
+		"dropped": {
+			"noTrigger": "триггер не распознан",
+			"noActiveRule": "нет активного правила",
+			"noNode": "сортировка недоступна: Node не найден",
+			"noAnswer": "сортировка не дала ответа: {{error}}",
+			"notDecided": "сортировка не приняла решения",
+			"byTriage": "отклонено сортировкой",
+			"ruleGone": "правила «{{rule}}» больше нет"
+		},
+		"blind": {
+			"linear": "Linear: {{error}}",
+			"source": "{{source}}: {{message}}"
+		},
+		"cannotOpen": {
+			"running": "обязательство уже выполняется (не более {{max}} одновременно)",
+			"quarantined": "этот элемент только что обрабатывался; его не трогают {{hours}} ч",
+			"dailyCap": "достигнут дневной лимит ({{max}} обязательств)"
+		},
+		"oracle": {
+			"none": "Оракул не заявлен: ничто не может сказать, достигнута ли цель.",
+			"unknownKind": "Cockpit не умеет опрашивать оракул типа «{{kind}}».",
+			"commandGone": "Команда «{{id}}» больше не заявлена в этом репозитории.",
+			"commandSensitive": "«{{name}}» помечена как чувствительная: она не может служить доказательством. Проверка не должна ничего менять.",
+			"noRepo": "Нет локального репозитория для запуска команды.",
+			"commandOk": "`{{line}}` завершилась с кодом 0.",
+			"commandFailed": "`{{line}}` завершилась с ошибкой ({{code}}). {{tail}}",
+			"commandNotLaunched": "Не удалось запустить `{{line}}`: {{error}}",
+			"commandTimeout": "`{{line}}` ничего не вернула за десять минут.",
+			"forgesSilent": "Хостинги кода не ответили: {{error}}",
+			"changeGone": "Этого изменения больше нет: оно слито или закрыто.",
+			"ciGreen": "CI зелёный.",
+			"ciRed": "CI всё ещё красный.",
+			"ciPending": "CI ещё не завершился (состояние: {{state}}).",
+			"noGithubAccount": "Не удалось определить аккаунт GitHub (`gh` отсутствует или вход не выполнен).",
+			"commented": "Комментарий от {{me}} опубликован в #{{number}}.",
+			"notCommented": "Нет комментария от {{me}} в #{{number}}.",
+			"githubSilent": "GitHub не ответил: {{error}}",
+			"checkFailed": "Проверка не удалась: {{error}}",
+			"propertyNotApplicable": "Свойство «{{id}}» не относится к этому изменению."
+		},
+		"errors": {
+			"notPullRequest": "Это изменение не является pull request."
+		},
+		"engagement": {
+			"noNode": "Node не найден: агент не смог заявить своё намерение, а план, прочитанный из текста, — это не план.",
+			"agentSilent": "Агент не ответил: {{error}}",
+			"agentSilentShort": "агент не ответил",
+			"noIntent": "Агент не заявил намерения. Без формулируемой цели ничего не отправляется.",
+			"noIntentShort": "намерение не заявлено",
+			"planned": "запланировано, не выполнено",
+			"plannedWhy": "запланировано — {{why}}",
+			"openMissionStep": "открыть миссию",
+			"openMissionWhy": "нужно написать код: работа пойдёт через миссию",
+			"rehearsed": "Репетиция: план написан, ничего не сделано.",
+			"missionNotAllowed": "Нужно было бы написать код, а «открыть миссию» нет в списке разрешённого. Ничего не сделано.",
+			"sharedBranch": "Интеграционной веткой была бы «{{branch}}», а она общая. Ничего не сделано.",
+			"missionOpenedStep": "открывает миссию",
+			"missionName": "миссия «{{name}}»",
+			"awaitingApprovalStep": "ждёт вашего одобрения",
+			"awaitingApprovalWhy": "это правило снова требует решения человека: план ждёт",
+			"missionFailed": "Не удалось открыть миссию: {{error}}",
+			"missionFailedShort": "не удалось открыть миссию",
+			"resolvedWithoutActs": "{{why}} Действий не потребовалось: ситуация разрешилась сама.",
+			"resolvedAllRefused": "{{why}} Ни одно действие не удалось выполнить: разрешилось не благодаря им.",
+			"someRefused": "{{why}} Отклонено действий: {{count}}.",
+			"missionGone": "Миссия исчезла: невозможно сказать, что с ней стало.",
+			"missionGoneShort": "миссия исчезла",
+			"missionFailedNote": "Миссия завершилась ошибкой. {{note}}",
+			"askOracle": "опрашивает оракул"
+		},
+		"acts": {
+			"notAllowed": "«{{power}}» нет в списке разрешённого: действие не выполнено.",
+			"sharedBranch": "«{{branch}}» — общая ветка: Permanence никогда в неё не пишет. Она работает только в собственных ветках.",
+			"noBranch": "Не удаётся найти ветку этого изменения.",
+			"rerun": "запуск #{{id}} перезапущен",
+			"noLabel": "Метка не запрошена.",
+			"labelSet": "метка «{{label}}» установлена",
+			"labelOn": "{{label}} на #{{number}}",
+			"commandUnknown": "Команда «{{id}}» не заявлена.",
+			"commandSensitive": "«{{name}}» помечена как чувствительная: без вас она не запускается.",
+			"noBranchName": "Имя ветки не запрошено.",
+			"sharedBranchName": "«{{name}}» — имя общей ветки: Permanence её не возьмёт.",
+			"noRepo": "Нет локального репозитория.",
+			"branchCreated": "ветка «{{name}}» создана",
+			"noWorktreeBranch": "Нет ветки для worktree.",
+			"sharedWorktree": "«{{branch}}» — общая ветка: она не извлекается как worktree, иначе агент начнёт в неё писать при следующем действии.",
+			"worktreeByAgent": "Создание worktree идёт через команду агента: нужен кто-то рядом.",
+			"worktreeOpened": "worktree ветки «{{branch}}» извлечён",
+			"lineFailed": "`{{line}}` завершилась с ошибкой: {{error}}",
+			"draftOpened": "Черновик PR открыт: {{url}}",
+			"draftLabel": "черновик · {{branch}}",
+			"noWorktree": "Ветка «{{branch}}» не извлечена как worktree: агент, запущенный в основном репозитории, писал бы туда, где работаете вы.",
+			"needsApp": "Для запуска агента нужно приложение: из тестового стенда он не запускается.",
+			"agentOn": "агент на {{branch}}",
+			"agentStarted": "агент запущен в {{worktree}}",
+			"noText": "Нет текста для записи.",
+			"commented": "комментарий опубликован, с подписью",
+			"commentOn": "комментарий в #{{number}}",
+			"unknown": "Cockpit не умеет выполнять «{{tool}}»."
+		},
+		"comment": {
+			"disabled": "Право комментировать не включено.",
+			"noScopes": "Ни одно условие не отмечено: Permanence намеренно нигде не комментирует.",
+			"noCondition": "Ни одно условие не выполнено для #{{number}}: писать туда не разрешено."
+		}
+	}
+}

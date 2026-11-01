@@ -1,1 +1,183 @@
-{}
+{
+	"orchestrator": {
+		"notAGitRepo": "`{{path}}`은(는) git 저장소가 아닙니다.",
+		"branchInMainRepo": "`{{branch}}`이(가) 주 저장소(`{{path}}`)에 체크아웃되어 있습니다. Cockpit은 그곳에 절대 쓰지 않습니다. 해당 저장소를 다른 브랜치로 전환하면 미션이 자체 worktree에서 재개됩니다.",
+		"folderOnOtherBranch": "`{{path}}`이(가) 이미 있지만 `{{branch}}`이(가) 아니라 `{{current}}`에 있습니다. 이 폴더를 다른 곳으로 옮기거나 올바른 브랜치로 되돌리세요. 작업의 브랜치가 될 때까지 Cockpit은 그곳에서 아무것도 실행하지 않습니다.",
+		"noBranch": "브랜치 없음",
+		"noIntegrationBranch": "미션에 통합 브랜치가 없습니다."
+	},
+	"mission": {
+		"step": {
+			"understanding": "이해",
+			"approach": "접근 방식",
+			"split": "작업 분할"
+		},
+		"unknown": "알 수 없는 미션: {{id}}",
+		"unreadable": "읽을 수 없는 미션: {{error}}",
+		"folderError": "미션 폴더: {{error}}",
+		"writeError": "미션 쓰기: {{error}}",
+		"titleRequired": "미션에는 제목이 필요합니다.",
+		"deleteFailed": "{{path}}을(를) 삭제할 수 없습니다: {{error}}",
+		"reworkNeedsReason": "사유 없는 재작업으로는 무엇을 고쳐야 할지 알 수 없습니다.",
+		"unknownTask": "알 수 없는 작업: {{id}}",
+		"reworkLimit": "\"{{title}}\"은(는) 이미 {{count}}번 재작업되었습니다. 다시 실행하지 말고 직접 맡으세요.",
+		"note": {
+			"rework": "재작업 {{count}}: {{reason}}",
+			"redoAfterRework": "다시 할 것: 작업 하나가 재작업되었습니다.",
+			"workFoundAtStartup": "시작 시 작업을 발견했습니다: 브랜치에 커밋이 있습니다.",
+			"resumedAfterRestart": "Cockpit 재시작 후 재개했습니다."
+		},
+		"journal": {
+			"taskReworked": "작업을 재작업으로 돌려보냄",
+			"paused": "미션 일시 중지",
+			"resumed": "미션 재개",
+			"tasksRecovered": "작업 복구됨",
+			"tasksRecoveredDetail": "다시 실행할 작업 {{relaunch}}개, 이미 전달된 작업 {{delivered}}개",
+			"planApproved": "계획 승인",
+			"proposal": "제안 — {{step}}",
+			"stepApproved": "승인 — {{step}}",
+			"stepCorrected": "수정 — {{step}}",
+			"worktreesCleaned": "Worktree 정리됨",
+			"worktreesCleanedDetail": "폴더 {{count}}개 삭제, 디스크 {{size}} GB 확보",
+			"deleted": "미션 삭제됨",
+			"deletedDetail": "항목 {{count}}개 삭제됨",
+			"opened": "미션 시작",
+			"planSubmitted": "계획 제출됨",
+			"planSubmittedDetail": "작업 {{count}}개",
+			"closed": "미션 종료"
+		},
+		"nothingAwaitsDecision": "{{step}} 단계에서 결정을 기다리는 항목이 없습니다: 미션은 \"{{state}}\" 상태입니다.",
+		"correctionNeedsReason": "무엇이 잘못되었는지 알려 주세요. 사유가 없으면 리드 에이전트가 같은 제안을 다시 합니다.",
+		"taskWithoutId": "식별자가 없는 작업입니다: 어떤 실행자도 연결할 수 없습니다.",
+		"blocked": {
+			"unknownBase": "이 작업은 `{{base}}`에서 시작하는데, 이는 이 계획의 어떤 작업 브랜치도 아닙니다. 통합 브랜치에서 시작하도록 계획을 다시 세우세요.",
+			"baseExhausted": "시작점이 되는 작업(`{{base}}`)이 재작업 횟수를 모두 소진했습니다: 결과물을 전달하지 못합니다."
+		}
+	},
+	"panel": {
+		"lens": {
+			"breaks": "무엇이 깨지는가",
+			"deployed": "배포된 후",
+			"users": "누가 사용하는가"
+		},
+		"folderError": "교차 검토 폴더: {{error}}",
+		"unreadable": "읽을 수 없는 교차 검토: {{error}}",
+		"writeError": "교차 검토 쓰기: {{error}}",
+		"alreadyRunning": "이 변경에 대한 교차 검토가 이미 실행 중입니다.",
+		"changeGone": "이 변경은 더 이상 존재하지 않습니다: 머지 요청이 닫혔거나 브랜치가 사라졌습니다.",
+		"noFolder": "에이전트를 실행할 폴더가 없습니다.",
+		"silentVoice": "{{lens}}: {{error}}",
+		"noVoice": "어떤 관점도 응답하지 않았습니다. {{details}}",
+		"journal": {
+			"title": "변경에 대한 교차 검토",
+			"detail": "{{verdict}} — 이견 {{count}}건"
+		},
+		"mergeFailed": "종합이 완료되지 않았습니다 ({{error}}). 원래 의견은 그대로 읽을 수 있습니다."
+	},
+	"review": {
+		"noReview": "이 PR에 대한 리뷰가 없습니다.",
+		"noRepo": "설정에서 프로젝트의 GitHub 저장소를 입력하세요.",
+		"prNotFound": "{{repo}}에서 PR #{{number}}을(를) 찾을 수 없습니다.",
+		"noNewCommit": "{{round}}차 이후 커밋이 없습니다: PR이 변경되지 않았습니다.",
+		"noPreviousReview": "이전 리뷰가 없습니다: 전체 리뷰를 진행합니다.",
+		"noPrNumber": "리뷰에 어떤 PR을 리뷰하는지 나와 있지 않습니다."
+	},
+	"prompts": {
+		"group": {
+			"review": "리뷰",
+			"visual": "시각적 보고서",
+			"delivery": "배포",
+			"fixes": "수정",
+			"quality": "품질",
+			"investigation": "조사",
+			"mine": "내 프롬프트"
+		},
+		"label": {
+			"review": "PR 전체 코드 리뷰",
+			"reviewFollowup": "PR의 수정 사항 확인",
+			"visual": "이미지가 포함된 보고서",
+			"ship": "확인 후 커밋 + 푸시",
+			"reviewThenShip": "리뷰 후 커밋 + 푸시",
+			"openPr": "풀 리퀘스트 열기",
+			"reviewComments": "리뷰 피드백 반영",
+			"prHealth": "PR 상태 점검",
+			"ciRed": "CI 실패",
+			"conflicts": "베이스와의 충돌 해결",
+			"selfQa": "작업 결과 QA",
+			"conventions": "컨벤션 확인",
+			"tests": "테스트 보완",
+			"prodError": "프로덕션 오류 조사",
+			"ticket": "티켓 구현"
+		},
+		"configFolderError": "설정 폴더: {{error}}",
+		"serializeError": "직렬화: {{error}}",
+		"writeError": "prompts.toml 쓰기: {{error}}",
+		"labelAndTextRequired": "프롬프트에는 라벨과 텍스트가 필요합니다."
+	},
+	"permissions": {
+		"unreadableAnswer": "읽을 수 없는 응답: {{error}}",
+		"writeError": "응답 쓰기: {{error}}"
+	},
+	"codex": {
+		"turnFailed": "턴이 실패했습니다."
+	},
+	"agent": {
+		"notActive": "이 에이전트는 더 이상 활성 상태가 아닙니다.",
+		"inputUnavailable": "에이전트의 입력을 사용할 수 없습니다.",
+		"outputUnavailable": "에이전트의 출력을 사용할 수 없습니다.",
+		"emptyMessage": "빈 메시지입니다.",
+		"claudeNotFound": "이 머신에서 `claude` CLI를 찾을 수 없습니다.",
+		"claudeTimeout": "Claude가 {{seconds}}초 안에 응답하지 않았습니다.",
+		"claudeLaunchError": "Claude 실행: {{error}}",
+		"claudeError": "Claude: {{error}}",
+		"claudeStopped": "Claude가 중지되었습니다: {{detail}}",
+		"claudeUnreadable": "Claude의 응답을 읽을 수 없습니다.",
+		"folderNotFound": "폴더를 찾을 수 없습니다: {{path}}",
+		"oneShotProtocol": "엔진 \"{{engine}}\"은(는) `{{protocol}}` 프로토콜을 선언합니다: 일회성 질문은 기본 프로토콜에서만 할 수 있습니다.",
+		"launchError": "에이전트 실행: {{error}}",
+		"agentError": "에이전트: {{error}}",
+		"oneShotTimeout": "에이전트가 20분이 지나도 아무것도 반환하지 않아 분석을 중단했습니다.",
+		"agentStopped": "에이전트가 중지되었습니다: {{detail}}",
+		"agentUnreadable": "에이전트의 응답을 읽을 수 없습니다: {{output}}",
+		"noReason": "사유 없음",
+		"agentFailed": "에이전트가 실패했습니다: {{reason}}",
+		"agentWroteNothing": "에이전트가 아무것도 쓰지 않았습니다.",
+		"memoryCeiling": "머신 메모리 사용량이 {{ceiling}}%를 넘었습니다: 다시 내려갈 때까지 새 에이전트가 시작되지 않습니다. 필요 없는 것을 닫거나 설정 → 미션에서 상한을 올리세요.",
+		"memoryCeilingTurn": "머신 메모리 사용량이 {{ceiling}}%를 넘었습니다: 다시 내려갈 때까지 다음 턴이 대기합니다.",
+		"unknownProtocol": "엔진 \"{{engine}}\"은(는) Cockpit이 아직 지원하지 않는 `{{protocol}}` 프로토콜을 선언합니다. 구현된 프로토콜: {{known}}.",
+		"protocolNoMission": "`{{protocol}}` 프로토콜은 아직 미션 도구를 지원하지 않습니다: 이 엔진은 아직 미션에서 리드나 실행자로 사용할 수 없습니다.",
+		"claudeNotFoundHint": "`claude` CLI를 찾을 수 없습니다. 설치하거나 ~/.local/bin, ~/.claude/local 또는 /opt/homebrew/bin에 있는지 확인하세요.",
+		"noBinary": "엔진 \"{{engine}}\"은(는) 바이너리를 선언하지 않았으며, Cockpit이 스스로 찾을 수 있는 것은 `claude`뿐입니다.",
+		"codexNeedsMessage": "`codex-exec`은(는) 시작하려면 메시지가 필요합니다: 빈 상태로는 열 수 없습니다.",
+		"geminiNeedsMessage": "`gemini-stream-json`은(는) 시작하려면 메시지가 필요합니다: 빈 상태로는 열 수 없습니다.",
+		"geminiNoResume": "`gemini-stream-json`은(는) 대화를 재개할 수 없습니다: 그 방법을 설명한 자료가 없습니다. 새 에이전트를 시작하세요.",
+		"bridgeUnavailable": {
+			"title": "권한 브리지를 사용할 수 없음",
+			"subject": "Node를 찾을 수 없음",
+			"detail": "에이전트의 권한 요청과 질문이 인터페이스에 전달되지 않습니다. 다시 받으려면 Node를 설치하세요 (`brew install node`). 에이전트는 모드에 따라 계속 실행됩니다."
+		},
+		"sandboxNoRuntimeHint": "컨테이너 격리가 켜져 있지만 런타임(`orb` 또는 `docker`)이 설치되어 있지 않습니다. 설정 → 미션에서 끄거나 런타임을 설치하세요.",
+		"sandboxNoRuntime": "컨테이너 격리가 켜져 있지만 런타임(`orb` 또는 `docker`)이 설치되어 있지 않습니다.",
+		"sandboxImageFailed": "컨테이너 격리가 켜져 있지만 이미지를 준비하지 못했습니다: {{error}}",
+		"firstMessageError": "첫 메시지 전송: {{error}}",
+		"silentDeath": "프로세스가 응답을 쓰지 않고, 출력이나 표준 오류에도 아무것도 남기지 않은 채 중지되었습니다.",
+		"journal": {
+			"diedBeforeFirstAnswer": "에이전트가 첫 응답 전에 중지됨"
+		},
+		"sendError": "메시지 전송: {{error}}",
+		"noThreadYet": "이 에이전트에는 아직 대화 식별자가 없습니다 — 첫 응답이 아직 도착하지 않았을 수 있습니다.",
+		"resumeTurnError": "턴 재개: {{error}}",
+		"cannotInterrupt": "이 엔진은 턴을 끝내지 않고는 중단할 수 없습니다. 중지를 사용하세요.",
+		"interruptError": "중단: {{error}}",
+		"noControlChannel": "이 엔진에는 제어 채널이 없습니다.",
+		"step": {
+			"stoppedFromCockpit": "Cockpit에서 중지했습니다.",
+			"detached": "Cockpit이 닫혔습니다. 에이전트는 창 없이 계속 작업합니다.",
+			"cockpitClosed": "Cockpit이 닫혔습니다.",
+			"detachedFinished": "Cockpit이 닫혀 있는 동안 분리된 에이전트가 완료되었습니다.",
+			"detachedStopped": "Cockpit이 닫혀 있는 동안 분리된 에이전트가 중지되었습니다.",
+			"reattached": "Cockpit 시작 시 실행 중인 상태로 발견되었습니다.",
+			"lastTurnFailed": "엔진이 마지막 턴을 오류로 반환했습니다."
+		}
+	}
+}

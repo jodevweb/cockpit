@@ -1,0 +1,1164 @@
+{
+	"agentMap": {
+		"genre": {
+			"frise": "хронология",
+			"avant_apres": "до/после",
+			"mesure": "измерение",
+			"table": "таблица",
+			"capture": "скриншот с пометками",
+			"matrice": "матрица"
+		},
+		"eyebrow": {
+			"ask": "ваше указание",
+			"explore": "исследование",
+			"subagent": "субагент",
+			"changed": "файл изменён",
+			"andAlso": "а также",
+			"tests": "тесты",
+			"commands": "команды",
+			"visuals": "визуальные материалы",
+			"review": "ревью готово",
+			"reviewPr": "ревью готово · PR #{{pr}}",
+			"footprint": "что изменилось · {{base}}",
+			"earlier": "ранее",
+			"asking": "задаёт вам вопрос",
+			"conclusion": "его вывод",
+			"said": "он сказал",
+			"yours": "ваш ход",
+			"now": "прямо сейчас",
+			"error": "ошибка",
+			"delivered": "сдано",
+			"pastAsk": "прошлое указание"
+		},
+		"ask": {
+			"replies_one": "+ {{count}} ваш ответ",
+			"replies_few": "+ {{count}} ваших ответа",
+			"replies_many": "+ {{count}} ваших ответов",
+			"replies_other": "+ {{count}} вашего ответа"
+		},
+		"explore": {
+			"files_one": "{{count}} файл просмотрен",
+			"files_few": "{{count}} файла просмотрено",
+			"files_many": "{{count}} файлов просмотрено",
+			"files_other": "{{count}} файла просмотрено",
+			"searches_one": "{{count}} поиск",
+			"searches_few": "{{count}} поиска",
+			"searches_many": "{{count}} поисков",
+			"searches_other": "{{count}} поиска"
+		},
+		"agent": {
+			"gestures": "действий: {{count}}"
+		},
+		"change": {
+			"others_one": "ещё {{count}} файл",
+			"others_few": "ещё {{count}} файла",
+			"others_many": "ещё {{count}} файлов",
+			"others_other": "ещё {{count}} файла"
+		},
+		"tests": {
+			"running": "Тесты выполняются",
+			"noResult": "Тесты без результата",
+			"failing": "Тесты падают",
+			"passing": "Тесты проходят",
+			"failuresSoFar_one": "Пока {{count}} падение",
+			"failuresSoFar_few": "Пока {{count}} падения",
+			"failuresSoFar_many": "Пока {{count}} падений",
+			"failuresSoFar_other": "Пока {{count}} падения",
+			"failuresBefore_one": "{{count}} падение до успеха",
+			"failuresBefore_few": "{{count}} падения до успеха",
+			"failuresBefore_many": "{{count}} падений до успеха",
+			"failuresBefore_other": "{{count}} падения до успеха",
+			"runs_one": "{{count}} запуск",
+			"runs_few": "{{count}} запуска",
+			"runs_many": "{{count}} запусков",
+			"runs_other": "{{count}} запуска"
+		},
+		"commands": {
+			"ran_one": "{{count}} команда выполнена",
+			"ran_few": "{{count}} команды выполнено",
+			"ran_many": "{{count}} команд выполнено",
+			"ran_other": "{{count}} команды выполнено"
+		},
+		"failedCount": "ошибок: {{count}}",
+		"review": {
+			"blocking_one": "{{count}} блокирующее",
+			"blocking_few": "{{count}} блокирующих",
+			"blocking_many": "{{count}} блокирующих",
+			"blocking_other": "{{count}} блокирующего",
+			"important_one": "{{count}} важное",
+			"important_few": "{{count}} важных",
+			"important_many": "{{count}} важных",
+			"important_other": "{{count}} важного",
+			"suggestion_one": "{{count}} предложение",
+			"suggestion_few": "{{count}} предложения",
+			"suggestion_many": "{{count}} предложений",
+			"suggestion_other": "{{count}} предложения",
+			"merge": "Можно сливать",
+			"blockingVerdict": "Блокирует",
+			"changes": "Запрошены правки",
+			"delivered": "Ревью готово",
+			"nothing": "замечаний нет",
+			"open": "открыть ревью по пунктам",
+			"loading": "Читаю сохранённое ревью…"
+		},
+		"severity": {
+			"bloquant": "блокирующее",
+			"important": "важное",
+			"suggestion": "предложение"
+		},
+		"said": {
+			"earlier_one": "{{count}} сообщение до этого",
+			"earlier_few": "{{count}} сообщения до этого",
+			"earlier_many": "{{count}} сообщений до этого",
+			"earlier_other": "{{count}} сообщения до этого"
+		},
+		"waiting": {
+			"title": "Агент ждёт вашего ответа",
+			"detail": "см. карточку вверху"
+		},
+		"live": {
+			"using": "Использует {{tool}}",
+			"thinking": "Думает"
+		},
+		"delivered": {
+			"pr": "PR {{list}}",
+			"commits_one": "{{count}} коммит",
+			"commits_few": "{{count}} коммита",
+			"commits_many": "{{count}} коммитов",
+			"commits_other": "{{count}} коммита",
+			"pushed": "отправлено в {{branches}}"
+		},
+		"media": {
+			"images_one": "{{count}} изображение",
+			"images_few": "{{count}} изображения",
+			"images_many": "{{count}} изображений",
+			"images_other": "{{count}} изображения",
+			"pdfs": "PDF: {{count}}",
+			"videos_one": "{{count}} видео",
+			"videos_few": "{{count}} видео",
+			"videos_many": "{{count}} видео",
+			"videos_other": "{{count}} видео"
+		},
+		"warn": {
+			"edits": "переделан {{count}} раз",
+			"editsDuring": "переделан {{count}} раз за {{duration}}",
+			"tests": "одно и то же падение {{count}} раз подряд",
+			"testsDuring": "одно и то же падение {{count}} раз подряд за {{duration}}",
+			"repeat": "«{{command}}» перезапущена {{count}} раз"
+		},
+		"loop": {
+			"edits": "{{file}} переделан {{count}} раз",
+			"tests": "{{target}} падает {{count}} раз подряд",
+			"repeat": "{{target}} перезапущен {{count}} раз"
+		},
+		"folded": {
+			"changed_one": "{{count}} файл изменён",
+			"changed_few": "{{count}} файла изменено",
+			"changed_many": "{{count}} файлов изменено",
+			"changed_other": "{{count}} файла изменено",
+			"testsKo": "тесты падают",
+			"testsOk": "тесты проходят",
+			"nothingChanged": "ничего не изменилось",
+			"resumed": "Возобновлено",
+			"circled": "ходил по кругу: {{loop}}"
+		},
+		"empty": "Напишите указание: здесь шаг за шагом сама собой нарисуется карта того, что делает агент.",
+		"backToNow": "Вернуться к настоящему",
+		"needsYou": "Агенту нужны вы",
+		"panel": {
+			"fullText": "Полный текст",
+			"terminal": "Его терминал",
+			"gone": "Этого шага больше нет на карте: вы читаете его последнюю версию.",
+			"thinking": "Он думает: всё, что он запустит, появится здесь сразу же.",
+			"nothing": "Для этого шага нечего показать подробно."
+		},
+		"remark": {
+			"anchor": "шаг «{{title}}»",
+			"placeholder": "Замечание об этом шаге — агент поймёт, о каком речь.",
+			"later": "Позже",
+			"laterTitle": "Сохранить вместе с остальными, чтобы отправить разом",
+			"send": "Отправить"
+		},
+		"strip": {
+			"episodes": "Эпизоды"
+		},
+		"state": {
+			"subagents_one": "{{count}} субагент",
+			"subagents_few": "{{count}} субагента",
+			"subagents_many": "{{count}} субагентов",
+			"subagents_other": "{{count}} субагента",
+			"waiting": "Ждёт вашего ответа",
+			"working": "Работает",
+			"awaiting": "ждёт {{agents}}",
+			"thinking": "думает",
+			"asks": "Задаёт вам вопрос",
+			"done": "Готово",
+			"background": "{{agents}} в фоне",
+			"idle": "ничего не выполняется · ваш ход",
+			"quietTitle": "Давно ничего нового: долгая команда или зависший агент.",
+			"since": "уже {{duration}}",
+			"loopTitle": "Повторение, на которое стоит взглянуть: агент не обязательно застрял, но всё время к этому возвращается.",
+			"circling": "Ходит по кругу",
+			"circled": "Ходил по кругу",
+			"compactedTitle": "CLI сжал диалог, чтобы освободить место. Из прочитанного ранее агент помнит только сводку: если он опирается на деталь, ему стоит перечитать её.",
+			"compacted": "Память сжата {{ago}}",
+			"sinceAsk": "{{duration}} с вашего указания",
+			"total": "всего {{duration}}",
+			"tour": "Обойти изменения"
+		},
+		"node": {
+			"remarkPending": "Замечание ждёт отправки",
+			"took": "Время на этот шаг",
+			"expandTitle": "Развернуть этот эпизод",
+			"collapseTitle": "Свернуть этот эпизод",
+			"expand": "развернуть",
+			"collapse": "свернуть"
+		},
+		"viewLarge": "Посмотреть в полном размере",
+		"since": {
+			"longTitle": "Долго: команда не возвращается или агент завис.",
+			"title": "С начала этого шага"
+		},
+		"stage": {
+			"before": "до",
+			"after": "после"
+		},
+		"fate": {
+			"deleted": "удалён",
+			"created": "создан",
+			"modified": "изменён"
+		},
+		"fateCount": {
+			"deleted_one": "{{count}} удалён",
+			"deleted_few": "{{count}} удалено",
+			"deleted_many": "{{count}} удалено",
+			"deleted_other": "{{count}} удалено",
+			"created_one": "{{count}} создан",
+			"created_few": "{{count}} создано",
+			"created_many": "{{count}} создано",
+			"created_other": "{{count}} создано",
+			"modified_one": "{{count}} изменён",
+			"modified_few": "{{count}} изменено",
+			"modified_many": "{{count}} изменено",
+			"modified_other": "{{count}} изменено"
+		},
+		"footprint": {
+			"lede": "Прочитано из репозитория, {{base}} — а не со слов агента. Сравните с его выводом."
+		},
+		"tourFiles": "Обойти изменения файл за файлом",
+		"deliveredSections": {
+			"pullRequests": "Pull requests",
+			"commits": "Коммиты",
+			"pushed": "Отправлено",
+			"files": "Созданные файлы"
+		},
+		"gallery": {
+			"enlarge": "Увеличить"
+		}
+	},
+	"missionJourney": {
+		"journey": {
+			"understanding": "Понимание",
+			"approach": "Подход",
+			"split": "Декомпозиция",
+			"execution": "Выполнение",
+			"delivery": "Поставка"
+		},
+		"copy": {
+			"understanding": {
+				"working": "Ведущий агент читает тикет",
+				"workingHint": "Читайте его слева одновременно с ним. Скоро он скажет, что понял, — не больше десяти строк, вопросы отдельно.",
+				"proposal": "Что понял ведущий агент",
+				"approve": "Одобрить — перейти к подходу"
+			},
+			"approach": {
+				"working": "Ведущий агент готовит подход",
+				"workingHint": "Как он собирается действовать: шаги, места в коде, порядок, риски. Пока без распределения между исполнителями.",
+				"proposal": "Предложенный подход",
+				"approve": "Одобрить — перейти к декомпозиции"
+			},
+			"split": {
+				"working": "Ведущий агент разбивает работу",
+				"workingHint": "Кто что делает, где и в каком порядке — в соответствии с одобренным вами подходом. Ничего не начнётся без вашего согласия.",
+				"proposal": "Предложенная декомпозиция",
+				"approve": "Одобрить — запустить исполнителей"
+			}
+		},
+		"stop": {
+			"title": "Отказаться от «{{title}}»?",
+			"message": "Ведущий агент останавливается, миссия закрывается. Одобренное остаётся доступным в её истории.",
+			"confirm": "Отказаться",
+			"done": "Миссия отменена."
+		},
+		"back": "Миссии",
+		"noBranch": "нет ветки",
+		"stepper": {
+			"yours": "ваш ход",
+			"stopped": "остановлено",
+			"masterStopped": "ведущий агент остановлен",
+			"tasksProgress": "{{done}}/{{total}} задач",
+			"integrating": "интеграция…",
+			"masterWriting": "ведущий агент пишет…",
+			"approvedVersion": "одобрено · v{{version}}",
+			"approved": "одобрено",
+			"tasks_one": "{{count}} задача",
+			"tasks_few": "{{count}} задачи",
+			"tasks_many": "{{count}} задач",
+			"tasks_other": "{{count}} задачи",
+			"prOpen": "PR открыт",
+			"closed": "закрыта"
+		},
+		"nothingProposed": "На этом этапе ничего не было предложено.",
+		"yourMove": "Ваш ход",
+		"working": {
+			"relaunched": "Ведущий агент перезапущен: он продолжает с одобренного.",
+			"starting": "Ведущий агент запускается…",
+			"stopped": "Ведущий агент остановлен",
+			"startingHint": "Он берёт тикет и продолжает с уже одобренного. Несколько секунд.",
+			"stoppedHint": "Сейчас над этим этапом никто не работает: предложений не будет, пока его не перезапустят.",
+			"correction": "Ваше исправление учитывается",
+			"plusAnswers": "+ ваши ответы на его вопросы",
+			"now": "Что он делает прямо сейчас",
+			"notRunning": "Ведущий агент не запущен. Перезапустите его: он продолжит с уже одобренного, не спрашивая снова то, что вы подтвердили.",
+			"relaunch": "Перезапустить ведущего агента"
+		},
+		"proposal": {
+			"maxTitle": "Cockpit отклоняет более длинные предложения",
+			"lines": "{{count}}/{{max}} строк"
+		},
+		"split": {
+			"executors_one": "{{count}} исполнитель",
+			"executors_few": "{{count}} исполнителя",
+			"executors_many": "{{count}} исполнителей",
+			"executors_other": "{{count}} исполнителя",
+			"estimate_one": "≈ {{duration}} работы, по {{count}} миссии похожего размера",
+			"estimate_few": "≈ {{duration}} работы, по {{count}} миссиям похожего размера",
+			"estimate_many": "≈ {{duration}} работы, по {{count}} миссиям похожего размера",
+			"estimate_other": "≈ {{duration}} работы, по {{count}} миссии похожего размера",
+			"failureRate": "{{percent}}% с ошибкой"
+		},
+		"task": {
+			"verifies": "оценивает работу остальных",
+			"wholeRepoRead": "весь репозиторий, только чтение",
+			"wholeRepoNoScope": "весь репозиторий — область не объявлена",
+			"after": "начинается после «{{title}}»",
+			"hideBrief": "Скрыть бриф",
+			"readBrief": "Прочитать полный бриф"
+		},
+		"decision": {
+			"splitApproved": "Декомпозиция одобрена — исполнители приступили.",
+			"approved": "Одобрено — ведущий агент идёт дальше.",
+			"correctionSent": "Исправление отправлено — ведущий агент переделывает предложение.",
+			"needsYou_one": "Ему нужны вы · {{count}} вопрос",
+			"needsYou_few": "Ему нужны вы · {{count}} вопроса",
+			"needsYou_many": "Ему нужны вы · {{count}} вопросов",
+			"needsYou_other": "Ему нужны вы · {{count}} вопроса",
+			"answerPlaceholder": "Ваш ответ…",
+			"feedbackLabel": "Уточнение, исправление?",
+			"placeholder": {
+				"understanding": "Например: речь не об экране администратора, а о личном кабинете клиента.",
+				"approach": "Например: использовать существующий сервис экспорта, а не создавать новый.",
+				"split": "Например: объединить две фронтенд-задачи, они затрагивают одни и те же файлы."
+			},
+			"unanswered_one": "{{count}} вопрос без ответа: если вы одобрите, ведущий агент решит сам.",
+			"unanswered_few": "{{count}} вопроса без ответа: если вы одобрите, ведущий агент решит сам.",
+			"unanswered_many": "{{count}} вопросов без ответа: если вы одобрите, ведущий агент решит сам.",
+			"unanswered_other": "{{count}} вопроса без ответа: если вы одобрите, ведущий агент решит сам.",
+			"withFeedback": "Одобрение также передаёт ваше уточнение.",
+			"nothingWithoutYou": "Ничего не уходит без вашего одобрения.",
+			"correctTitle": "Напишите, что не так: без причины ведущий агент сделает то же предложение снова.",
+			"requestVersion": "Запросить новую версию"
+		},
+		"verdict": {
+			"approved": "Одобрено",
+			"corrected": "Исправлено"
+		},
+		"quoted": "«{{text}}»",
+		"versions": {
+			"hide": "Скрыть предыдущие версии · {{count}}",
+			"show": "Показать предыдущие версии · {{count}}"
+		},
+		"ticket": {
+			"title": "Тикет",
+			"openExternal": "Открыть у провайдера",
+			"noTicket": "Эта миссия не из тикета: «{{title}}».",
+			"assignee": "Назначен на {{name}}",
+			"noDescription": "Нет описания.",
+			"comments": "Комментарии · {{count}}"
+		}
+	},
+	"workspaceTiles": {
+		"tiles": {
+			"progress": {
+				"eyebrow": "прогресс",
+				"title": "Где этот агент находится в своих указаниях"
+			},
+			"branch": {
+				"eyebrow": "обзор",
+				"title": "Всё, что связано с веткой"
+			},
+			"pr": {
+				"eyebrow": "pull request",
+				"title": "Pull request этой ветки"
+			},
+			"mission": {
+				"eyebrow": "миссия",
+				"title": "Миссия, открывшая эту папку"
+			},
+			"agents": {
+				"eyebrow": "агенты",
+				"title": "Агенты и терминалы этой папки"
+			},
+			"commits": {
+				"eyebrow": "коммиты",
+				"title": "Коммиты и то, что ещё не закоммичено"
+			},
+			"docs": {
+				"eyebrow": "документы",
+				"title": "Документы worktree"
+			},
+			"captures": {
+				"eyebrow": "QA",
+				"title": "Скриншоты QA"
+			},
+			"ports": {
+				"eyebrow": "серверы",
+				"title": "Что запущено в этой папке"
+			},
+			"ticket": {
+				"eyebrow": "тикет",
+				"title": "Тикет этой ветки"
+			},
+			"review": {
+				"eyebrow": "код-ревью",
+				"title": "Ревью PR"
+			},
+			"territory": {
+				"eyebrow": "территория",
+				"title": "Агенты площадки поверх кода"
+			},
+			"browser": {
+				"eyebrow": "браузер",
+				"title": "Страница, которой управляет агент, вживую"
+			}
+		},
+		"progress": {
+			"label": "Прогресс",
+			"title": "Шаги агента, его субагенты и сколько он уже работает",
+			"silent": "молчит {{duration}}",
+			"steps_one": "{{done}} / {{count}} шага",
+			"steps_few": "{{done}} / {{count}} шагов",
+			"steps_many": "{{done}} / {{count}} шагов",
+			"steps_other": "{{done}} / {{count}} шагов",
+			"helpers_one": "{{back}} / {{count}} субагента вернулись",
+			"helpers_few": "{{back}} / {{count}} субагентов вернулись",
+			"helpers_many": "{{back}} / {{count}} субагентов вернулись",
+			"helpers_other": "{{back}} / {{count}} субагентов вернулись",
+			"busyNoSteps": "работает — списка шагов не ведёт",
+			"idle": "ничего не выполняется"
+		},
+		"board": {
+			"workingFor": "работает уже",
+			"launchedAgo": "указания отправлены",
+			"lastActionAgo": "последнее действие",
+			"toolCalls": "вызовы инструментов",
+			"filesWritten": "записано файлов",
+			"brief": "Текущие указания",
+			"steps": "Его шаги",
+			"countNotPercent": "Количество, а не процент: агент дополняет список, когда находит новую работу.",
+			"noSteps": "Этот агент не ведёт списка шагов: ничто не показывает, какая часть работы сделана. Ниже видно только, что он движется.",
+			"helpers": "Его субагенты",
+			"helpersBack_one": "{{back}} / {{count}} вернулись",
+			"helpersBack_few": "{{back}} / {{count}} вернулись",
+			"helpersBack_many": "{{back}} / {{count}} вернулись",
+			"helpersBack_other": "{{back}} / {{count}} вернулись",
+			"helperRunning": "работает",
+			"helperFailed": "ошибка",
+			"helperDone": "вернулся",
+			"lastAction": "Его последнее действие"
+		},
+		"verdict": {
+			"merge": "готово к слиянию",
+			"corrections": "правки",
+			"bloquant": "блокирует"
+		},
+		"branch": {
+			"prDraft": "черновик",
+			"prOpen": "открыт",
+			"prMerged": "слит",
+			"prClosed": "закрыт",
+			"headerTitle": "PR, тикет, ревью, коммиты, документы",
+			"label": "Обзор",
+			"seeAll": "показать всё",
+			"ciRed": "CI красный",
+			"ciGreen": "CI зелёный",
+			"ciPending": "CI…",
+			"searchingPr": "ищу PR…",
+			"noPr": "PR ещё нет",
+			"noTicket": "нет тикета",
+			"reviewTitle": "Код-ревью PR",
+			"recheck": "перепроверить",
+			"reviewRound": "Ревью · раунд {{number}}",
+			"notReviewed": "ещё не проверен",
+			"mission": "Миссия",
+			"agentsTitle": "Агенты и терминалы этой папки с их контекстом",
+			"working_one": "{{count}} работает",
+			"working_few": "{{count}} работают",
+			"working_many": "{{count}} работают",
+			"working_other": "{{count}} работают",
+			"agents_one": "{{count}} агент",
+			"agents_few": "{{count}} агента",
+			"agents_many": "{{count}} агентов",
+			"agents_other": "{{count}} агента",
+			"terminals_one": "{{count}} терминал",
+			"terminals_few": "{{count}} терминала",
+			"terminals_many": "{{count}} терминалов",
+			"terminals_other": "{{count}} терминала",
+			"commitsTitle": "Коммиты ветки и то, что ещё не закоммичено",
+			"uncommitted_one": "{{count}} не закоммичен",
+			"uncommitted_few": "{{count}} не закоммичено",
+			"uncommitted_many": "{{count}} не закоммичено",
+			"uncommitted_other": "{{count}} не закоммичено",
+			"commits_one": "{{count}} коммит",
+			"commits_few": "{{count}} коммита",
+			"commits_many": "{{count}} коммитов",
+			"commits_other": "{{count}} коммита",
+			"commitsLabel": "Коммиты",
+			"documents_one": "{{count}} документ",
+			"documents_few": "{{count}} документа",
+			"documents_many": "{{count}} документов",
+			"documents_other": "{{count}} документа",
+			"captures_one": "{{count}} скриншот",
+			"captures_few": "{{count}} скриншота",
+			"captures_many": "{{count}} скриншотов",
+			"captures_other": "{{count}} скриншота",
+			"portsTitle": "Что слушает в этой папке",
+			"servers_one": "{{count}} сервер",
+			"servers_few": "{{count}} сервера",
+			"servers_many": "{{count}} серверов",
+			"servers_other": "{{count}} сервера"
+		},
+		"territory": {
+			"label": "Территория",
+			"title": "Где этот агент читал и писал, конфликты и устаревшие чтения",
+			"collisions_one": "{{count}} конфликт",
+			"collisions_few": "{{count}} конфликта",
+			"collisions_many": "{{count}} конфликтов",
+			"collisions_other": "{{count}} конфликта",
+			"stale_one": "{{count}} устарел",
+			"stale_few": "{{count}} устарело",
+			"stale_many": "{{count}} устарело",
+			"stale_other": "{{count}} устарело",
+			"files_one": "{{count}} файл",
+			"files_few": "{{count}} файла",
+			"files_many": "{{count}} файлов",
+			"files_other": "{{count}} файла",
+			"written_one": "{{count}} записан",
+			"written_few": "{{count}} записано",
+			"written_many": "{{count}} записано",
+			"written_other": "{{count}} записано",
+			"read_one": "{{count}} прочитан",
+			"read_few": "{{count}} прочитано",
+			"read_many": "{{count}} прочитано",
+			"read_other": "{{count}} прочитано",
+			"untouched": "ещё не трогал ни одного файла",
+			"agentsHere_one": "{{count}} агент здесь",
+			"agentsHere_few": "{{count}} агента здесь",
+			"agentsHere_many": "{{count}} агентов здесь",
+			"agentsHere_other": "{{count}} агента здесь"
+		},
+		"browser": {
+			"label": "Браузер",
+			"title": "Страница, которой управляют агенты этой папки, — один клик открывает её вживую",
+			"live": "вживую",
+			"drivingSelf": "управляет",
+			"drivingOther": "управляет {{name}}",
+			"openRight": "открыть справа",
+			"blank": "страница не открыта — один клик откроет её"
+		}
+	},
+	"assistant": {
+		"shortcutTaken": "{{shortcut}} уже занято: голосовой ассистент вас не услышит",
+		"chooseShortcut": "Выбрать сочетание",
+		"see": "Открыть",
+		"doneSentence": "Готово.",
+		"quoted": "«{{text}}»",
+		"close": "Закрыть",
+		"placeholder": "Открой рабочее пространство корзины, начни миссию по NW-3050…",
+		"hint": "Удерживайте {{shortcut}}, чтобы говорить · ⌘J, чтобы печатать",
+		"errors": {
+			"worktreeNotFound": "Не могу найти worktree «{{name}}».",
+			"agentNotFound": "Не могу найти агента «{{name}}».",
+			"viewUnknown": "Я не знаю экран «{{name}}».",
+			"projectNotFound": "Не могу найти проект «{{name}}».",
+			"workspaceNotFound": "Не могу найти рабочее пространство «{{name}}».",
+			"whichTicket": "С какого тикета начать?",
+			"missionNotFound": "Не могу найти миссию «{{name}}».",
+			"noMainRepo": "Для этого проекта не задан основной репозиторий.",
+			"whichBranch": "Для какой ветки?",
+			"whichPr": "Какой PR проверить?",
+			"whatToAsk": "Что ему сказать?",
+			"noWorkspace": "Ни одно рабочее пространство не открыто: скажите, в какой папке работать.",
+			"folderNotFound": "Не могу найти папку «{{name}}».",
+			"notUnderstood": "Я не понял ваш запрос."
+		},
+		"mission": {
+			"activity": "Миссия по {{ticket}}",
+			"firstStep": "Читаю тикет и запускаю ведущего агента…",
+			"started": "Миссия начата: {{title}}.",
+			"existed": "Миссия уже существовала.",
+			"existedOpening": "Миссия уже существовала: {{title}}. Открываю её."
+		},
+		"branch": {
+			"activity": "Ветка {{name}}",
+			"firstStep": "Создаю ветку…"
+		},
+		"tell": {
+			"activity": "Указания для {{name}}",
+			"sent": "Указания отправлены: агент взялся за дело.",
+			"launched": "Новый агент запущен с указаниями."
+		},
+		"git": {
+			"pullStep": "Получаю последние коммиты…",
+			"pulled": "Ветка актуальна.",
+			"pushStep": "Отправляю ветку…",
+			"pushed": "Ветка отправлена."
+		},
+		"phase": {
+			"listening": "Слушаю… отпустите {{shortcut}}, когда закончите",
+			"transcribing": "Расшифровываю…",
+			"thinking": "Думаю…",
+			"error": "Не получилось",
+			"done": "Готово",
+			"answered": "Cockpit отвечает",
+			"idle": "Спросить Cockpit"
+		},
+		"settings": {
+			"nothingHeard": "(ничего не слышно — говорите ближе к микрофону)",
+			"hold": "Удерживайте, говорите, отпустите: ассистент понимает, действует и отвечает вслух — даже когда Cockpit за другим окном.",
+			"keyboard": "То же с клавиатуры, когда Cockpit на переднем плане.",
+			"cost": "Сказанное расшифровывает ElevenLabs (голосовой ключ выше), затем понимает Claude по вашей подписке: несколько секунд вашего тарифа ElevenLabs и немного квоты Claude на запрос. Действия выполняются сразу; то, что не находит, он не угадывает.",
+			"noKey": "Без ключа ElevenLabs ассистент вас не слышит — ⌘J по-прежнему работает. Сохраните ключ в разделе «Голос».",
+			"speak": "Говорите… (4 с)",
+			"testMic": "Проверить микрофон",
+			"appOnly": "Только в приложении.",
+			"heard": "Услышано:",
+			"micDenied": "Если доступ к микрофону запрещён: Системные настройки → Конфиденциальность и безопасность → Микрофон → Cockpit."
+		},
+		"shortcut": {
+			"active": "{{shortcut}} активно во всех приложениях.",
+			"failed": "Не удалось зарегистрировать {{shortcut}}. Выберите другое.",
+			"failedWithError": "Не удалось зарегистрировать {{shortcut}}: {{error}} Выберите другое.",
+			"recording": "Нажмите сочетание… (Esc — отмена)",
+			"record": "Записать сочетание…"
+		}
+	},
+	"branchBoard": {
+		"gathering": "Собираю всё, что связано с {{branch}}…",
+		"new": "новое",
+		"pr": {
+			"draft": "черновик",
+			"open": "открыт",
+			"merged": "слит",
+			"closed": "закрыт",
+			"number": "PR #{{number}}",
+			"title": "Pull request",
+			"ciRed": "CI красный",
+			"ciGreen": "CI зелёный",
+			"ciRunning": "CI выполняется",
+			"approved": "одобрен",
+			"changesRequested": "запрошены правки",
+			"notApproved": "ещё не одобрен",
+			"byAuthor": "автор: <author>{{author}}</author>",
+			"reviewRequested": "ревью запрошено у {{logins}}",
+			"searching": "Ищу PR этой ветки…",
+			"none": "Нет PR для {{branch}}."
+		},
+		"review": {
+			"notYet": "PR #{{number}} ещё не проверен.",
+			"noPr": "На этой ветке нет PR: пока проверять нечего.",
+			"reviewPr": "Проверить PR",
+			"recheck": "Перепроверить исправления",
+			"reviewThisPr": "Проверить этот PR"
+		},
+		"ticket": {
+			"none": "Ни в ветке, ни в PR нет идентификатора тикета.",
+			"title_one": "Тикет",
+			"title_few": "Тикеты",
+			"title_many": "Тикеты",
+			"title_other": "Тикеты",
+			"notFound": "{{id}}: не найден."
+		},
+		"mission": {
+			"title": "Миссия",
+			"tasks_one": "{{count}} задача",
+			"tasks_few": "{{count}} задачи",
+			"tasks_many": "{{count}} задач",
+			"tasks_other": "{{count}} задачи"
+		},
+		"agents": {
+			"title": "Агенты",
+			"none": "На этом worktree нет агентов.",
+			"reviewReadOnly": "ревью · только чтение",
+			"review": "ревью",
+			"working": "работает",
+			"waiting": "ждёт",
+			"stopped": "остановлен",
+			"terminal": "терминал"
+		},
+		"commits": {
+			"title": "Коммиты",
+			"aheadBehind": "{{ahead}} впереди · {{behind}} позади",
+			"none": "Нет коммитов."
+		},
+		"changes": {
+			"title": "Изменено, ещё не закоммичено",
+			"none": "Ничего не ожидает: всё закоммичено."
+		},
+		"captures": {
+			"title": "QA · скриншоты",
+			"none": "В этой папке нет скриншотов QA.",
+			"count_one": "{{count}} скриншот, сначала новые",
+			"count_few": "{{count}} скриншота, сначала новые",
+			"count_many": "{{count}} скриншотов, сначала новые",
+			"count_other": "{{count}} скриншота, сначала новые",
+			"more_one": "Ещё {{count}} скриншот…",
+			"more_few": "Ещё {{count}} скриншота…",
+			"more_many": "Ещё {{count}} скриншотов…",
+			"more_other": "Ещё {{count}} скриншота…"
+		},
+		"ports": {
+			"title": "Что запущено",
+			"memory": "{{mb}} МБ"
+		},
+		"docs": {
+			"title_one": "Документы · {{count}}",
+			"title_few": "Документы · {{count}}",
+			"title_many": "Документы · {{count}}",
+			"title_other": "Документы · {{count}}"
+		}
+	},
+	"missionGraph": {
+		"working": "работает…",
+		"sentBack": "Отправлено на доработку",
+		"ticket": {
+			"eyebrow": "тикет",
+			"none": "Нет тикета"
+		},
+		"master": {
+			"eyebrow": "ведущий",
+			"title": "Руководит миссией",
+			"awaitingYou": "ждёт вашего решения",
+			"idle": "в ожидании"
+		},
+		"task": {
+			"asksPermission": "запрашивает ваше разрешение",
+			"rejected": "отклонил работу",
+			"delivered": "сдал работу",
+			"failed": "ошибка",
+			"waiting": "ждёт своей очереди"
+		},
+		"pr": {
+			"eyebrow": "pull request",
+			"open": "Открыт",
+			"toOpen": "Открыть",
+			"recomposing": "ведущий агент собирает работу",
+			"onceVerified": "когда всё будет проверено"
+		},
+		"phase": {
+			"done": "готово",
+			"live": "работает",
+			"wait": "ждёт",
+			"failed": "ошибка",
+			"yours": "ваш ход"
+		},
+		"detail": {
+			"close": "Закрыть",
+			"reproaches_one": "Доработка · {{count}}",
+			"reproaches_few": "Доработка · {{count}}",
+			"reproaches_many": "Доработка · {{count}}",
+			"reproaches_other": "Доработка · {{count}}",
+			"fullBrief": "Его полные указания",
+			"follow": "Следить за его диалогом",
+			"noAgent": "На этой задаче ещё нет агента."
+		}
+	},
+	"actions": {
+		"openTicket": "Открыть тикет в браузере",
+		"openWorktreeNamed": "Открыть worktree {{name}}",
+		"permanenceRevoked": "Permanence больше не будет комментировать #{{number}}.",
+		"permanenceAllowed": "Permanence может отчитываться в #{{number}}. Один комментарий в день, с подписью.",
+		"noPrompt": "В библиотеке нет промпта для этого действия: агент запускается без указаний.",
+		"openPr": "Открыть pull request #{{number}}",
+		"fixCiHint": "Запустить агента, который чинит CI",
+		"fixCi": "Починить CI",
+		"feedbackHint": "Обработать замечания ревью с агентом",
+		"feedback": "Замечания",
+		"agentHint": "Открыть агента на этой ветке",
+		"agent": "Агент",
+		"openWorktree": "Открыть worktree этой ветки",
+		"allowedHint": "Permanence может отчитываться здесь. Нажмите, чтобы отозвать.",
+		"allowHint": "Разрешить Permanence отчитываться здесь раз в день, с подписью.",
+		"allowed": "Разрешено",
+		"allow": "Разрешить"
+	},
+	"accounts": {
+		"notLoggedIn": "На этой машине вход ещё не выполнен.",
+		"loggedIn": "вход выполнен",
+		"nameRequired": "Дайте аккаунту название: именно оно его отличает.",
+		"nameTaken": "Аккаунт с названием «{{label}}» уже есть.",
+		"loginTerminal": "Вход — {{label}}",
+		"intro": "Аккаунт — это личность, под которой работают агенты, а не программа, которая их запускает: для этого есть движки. У каждого своя папка конфигурации: Cockpit указывает на неё, CLI сам выполняет там вход, и никакой токен здесь не проходит. Проект, привязанный к аккаунту, отправляет на него всё — своих агентов, терминалы, лимиты.",
+		"loading": "Спрашиваю у каждого аккаунта, кто он…",
+		"openProject": "открытый проект",
+		"reconnect": "Войти снова",
+		"connect": "Войти",
+		"attach": "Привязать «{{name}}»",
+		"remove": "Удалить",
+		"new": "Новый",
+		"nameLabel": "Название",
+		"nameHint": "то, что вы увидите на экране",
+		"namePlaceholder": "Рабочий аккаунт",
+		"dirLabel": "Папка",
+		"dirHint": "пусто = ~/.claude-<имя>",
+		"dirPlaceholder": "~/.claude-work",
+		"add": "Добавить",
+		"footer": "Папка создаётся при добавлении аккаунта; затем вход выполняется в терминале, как вы сделали бы вручную.",
+		"reading": "Читаю…",
+		"reload": "Обновить аккаунты"
+	},
+	"briefBar": {
+		"chars": "{{value}} симв.",
+		"kchars": "{{value}} тыс. симв.",
+		"loading": "Cockpit собирает всё, что знает об этой ветке…",
+		"agentWillKnow": "Агент будет знать",
+		"nothing": "ничего, кроме вашего указания — ни один объявленный источник не ответил.",
+		"collapse": "Свернуть",
+		"expand": "Прочитать дословно то, что будет приложено",
+		"refresh": "Собрать заново — ветка могла сдвинуться",
+		"missing": "Не удалось прочитать: {{sources}}",
+		"clickToDetach": "{{detail}} — нажмите, чтобы не прикладывать",
+		"clickToAttach": "{{detail}} — нажмите, чтобы приложить"
+	},
+	"fileFinder": {
+		"recent": "Недавно открытые",
+		"writtenByAgents": "Записаны агентами",
+		"uncommitted": "Изменены, ещё не закоммичены",
+		"files_one": "{{count}} файл",
+		"files_few": "{{count}} файла",
+		"files_many": "{{count}} файлов",
+		"files_other": "{{count}} файла",
+		"buttonHint": "Открыть файл из этого worktree по имени (⌘P)",
+		"button": "Файлы",
+		"placeholder": "Имя файла — «agentmap», «panel work», «apps/web env»",
+		"scanning": "Сканирую репозиторий…",
+		"noMatch": "Нет файла с таким именем.",
+		"typeToSearch": "Введите часть имени, чтобы искать по всему репозиторию.",
+		"total_one": "{{formatted}} файл",
+		"total_few": "{{formatted}} файла",
+		"total_many": "{{formatted}} файлов",
+		"total_other": "{{formatted}} файла",
+		"scanningShort": "сканирую репозиторий…",
+		"keys": "↑↓ — выбрать · Enter — открыть · ⌘P",
+		"whyAgent": "записан агентом",
+		"whyChanged": "изменён"
+	},
+	"feedPanel": {
+		"sort": {
+			"recent": "Сначала новые",
+			"oldest": "Сначала старые",
+			"severity": "Серьёзность",
+			"status": "Статус",
+			"title": "Название"
+		},
+		"severity": {
+			"critical": "Критично",
+			"warning": "Предупреждение",
+			"info": "Инфо",
+			"success": "ОК"
+		},
+		"sortHint": "Порядок отображения",
+		"filters": "Фильтры",
+		"clearAll": "Сбросить всё",
+		"empty": "Нечего показать",
+		"selectItem": "Выберите элемент"
+	},
+	"illustration": {
+		"genre": {
+			"frise": "Цепочка событий",
+			"avant_apres": "До и после",
+			"mesure": "Измерено",
+			"table": "Таблица, которая меняется",
+			"capture": "Скриншот с пометками",
+			"matrice": "Сравнение вариантов"
+		},
+		"source": {
+			"mesure": "измерено",
+			"depot": "найдено в репозитории",
+			"capture": "снято с экрана",
+			"agent": "со слов агента"
+		},
+		"beforeGraph": "До: {{nodes}}",
+		"afterGraph": "После: {{nodes}}",
+		"before": "До",
+		"after": "После",
+		"beforeShort": "до",
+		"afterShort": "после",
+		"percent": "{{sign}}{{value}}%",
+		"noCommand": "Команда не указана: эти цифры нельзя воспроизвести.",
+		"enlarge": "Посмотреть в полном размере",
+		"captureLabel": "скриншот"
+	},
+	"linearIssue": {
+		"state": "Состояние",
+		"priority": "Приоритет",
+		"priorities": {
+			"urgent": "Срочно",
+			"high": "Высокий",
+			"medium": "Средний",
+			"low": "Низкий",
+			"none": "—"
+		},
+		"priorityChanged": "приоритет {{priority}}",
+		"assignee": "Исполнитель",
+		"unassigned": "не назначен",
+		"nobody": "никто",
+		"assignedTo": "назначен на {{name}}",
+		"labels": "Метки",
+		"labelRemoved": "метка {{name}} снята",
+		"labelAdded": "метка {{name}} добавлена",
+		"noDescription": "Нет описания.",
+		"comments": "Комментарии · {{count}}"
+	},
+	"missionHistory": {
+		"whatHappened": "Что произошло",
+		"agents_one": "{{count}} агент",
+		"agents_few": "{{count}} агента",
+		"agents_many": "{{count}} агентов",
+		"agents_other": "{{count}} агента",
+		"loading": "читаю…",
+		"empty": "Для этой миссии не записано ни одного агента. Cockpit ведёт этот журнал только с версии 0.54: то, что выполнялось раньше, в него не попало.",
+		"outcome": {
+			"running": "работает",
+			"answered": "сдал работу",
+			"failed": "ошибка",
+			"lostAtLaunch": "потерян при запуске",
+			"stopped": "остановлен",
+			"orphaned": "Cockpit закрыт"
+		},
+		"actor": {
+			"me": "вы",
+			"master": "ведущий агент",
+			"cockpit": "Cockpit",
+			"permanence": "Permanence"
+		},
+		"retry": "повтор {{attempt}}",
+		"launchedBy": "{{model}} · запустил: {{who}}",
+		"reportedHint": "Значение, сообщённое движком, — не расход.\n{{input}} входных токенов, {{output}} выходных",
+		"unknownHint": "{{engine}} не сообщает стоимость своих ходов. Это не нулевая стоимость: это цифра, которой у нас нет.",
+		"unknownCost": "стоимость не сообщается",
+		"totalReported": "значение, сообщённое движками, — никогда не расход",
+		"totalLost": "из них {{amount}} $ на агентов, которые ничего не сдали",
+		"totalUnknown_one": "{{count}} ход без сообщённой стоимости",
+		"totalUnknown_few": "{{count}} хода без сообщённой стоимости",
+		"totalUnknown_many": "{{count}} ходов без сообщённой стоимости",
+		"totalUnknown_other": "{{count}} хода без сообщённой стоимости"
+	},
+	"viewBoundary": {
+		"failed": "Не удалось отобразить экран «{{view}}».",
+		"rest": "Остальной Cockpit работает — другие экраны доступны из меню, а всё запущенное продолжает работать.",
+		"retry": "Попробовать снова"
+	},
+	"lightbox": {
+		"openInViewer": "Открыть файл в просмотрщике",
+		"close": "Закрыть",
+		"previous": "Предыдущее изображение",
+		"next": "Следующее изображение"
+	},
+	"shellView": {
+		"pondering": "ничего не выполняется — он читает вывод и думает, что дальше",
+		"noCommand": "По этому указанию не выполнено ни одной команды.",
+		"runningSince": "выполняется<elapsed/> — вывод придёт, когда команда завершится",
+		"running": "выполняется — вывод придёт, когда команда завершится",
+		"interrupted": "прервано до ответа",
+		"linesAbove_one": "… {{count}} строка выше",
+		"linesAbove_few": "… {{count}} строки выше",
+		"linesAbove_many": "… {{count}} строк выше",
+		"linesAbove_other": "… {{count}} строки выше",
+		"noOutput": "(нет вывода)",
+		"since": "уже {{duration}}"
+	},
+	"pdfView": {
+		"page": "страница {{current}} / {{total}}",
+		"zoomOut": "Уменьшить",
+		"percent": "{{value}}%",
+		"zoomIn": "Увеличить",
+		"fitWidth": "По ширине окна"
+	},
+	"markdown": {
+		"loadImageFrom": "Загрузить изображение с <host>{{host}}</host>",
+		"enlarge": "Посмотреть в полном размере"
+	},
+	"charts": {
+		"trend_one": "Тренд по {{count}} точке",
+		"trend_few": "Тренд по {{count}} точкам",
+		"trend_many": "Тренд по {{count}} точкам",
+		"trend_other": "Тренд по {{count}} точки",
+		"segment": "{{label}}: {{value}}"
+	},
+	"narration": {
+		"waitingForYou": "Он ждёт вашего ответа.",
+		"stopped": "Он остановлен.",
+		"thisAgent": "этот агент",
+		"intro": "Я расскажу, что делает {{name}}. {{where}}",
+		"mute": "Выключить голос",
+		"listenLive": "Слушать вживую, что делает агент",
+		"listening": "Слушаю",
+		"listen": "Слушать",
+		"elevenLabsFailed": "ElevenLabs не сработал, его заменил голос Mac: {{reason}}",
+		"voiceAndRate": "Голос и скорость"
+	},
+	"voiceSettings": {
+		"engine": "Движок",
+		"macVoice": "Голос Mac",
+		"elevenLabsHint": "Самый человеческий голос, расходует символы вашего тарифа ElevenLabs. Ни одна подписка Claude или ChatGPT не даёт голос другому приложению.",
+		"systemHint": "Бесплатно и офлайн. Гораздо лучше с голосом Premium.",
+		"elevenLabsKey": "Ключ ElevenLabs",
+		"createKey": "Создать ключ",
+		"keyStored": "Хранится в связке ключей Mac",
+		"removeKey": "Удалить",
+		"storeKey": "Сохранить",
+		"voice": "Голос",
+		"loadingVoices": "Загружаю голоса аккаунта…",
+		"libraryHint": "Голоса из вашей библиотеки ElevenLabs, сначала на вашем языке. Добавьте другие на их сайте (Voice Library), чтобы увидеть их здесь.",
+		"model": "Модель",
+		"browserVoice": "Голос браузера, в предпросмотре.",
+		"noPremiumVoice": "Голос Premium не установлен. Скачайте его: Системные настройки → Универсальный доступ → Устный контент → Системный голос → Управление голосами.",
+		"rate": "Скорость",
+		"fallback": "Его заменил голос Mac: {{reason}}",
+		"sample": "Он исправил округление в корзине и перезапустил тесты. Готово: он изменил три файла, и тесты проходят.",
+		"tryVoice": "Попробовать этот голос",
+		"allSettings": "Все настройки голоса и ассистента"
+	},
+	"promptLauncher": {
+		"myPrompts": "Мои промпты",
+		"openedInTerminal": "Открыто в Terminal: {{label}}",
+		"saved": "Промпт сохранён.",
+		"deleteTitle": "Удалить «{{label}}»?",
+		"delete": "Удалить",
+		"title": "Запустить агента",
+		"reset": "Восстановить библиотеку по умолчанию",
+		"label": "Название",
+		"labelPlaceholder": "Проверить, затем commit + push",
+		"group": "Группа",
+		"groupHint": "Поставка, Ревью, Качество…",
+		"text": "Промпт, отправляемый агенту",
+		"cancel": "Отмена",
+		"save": "Сохранить",
+		"openInTerminal": "Открыть в Terminal.app",
+		"new": "Новый промпт",
+		"footer": "Клик запускает агента здесь, с диалогом и полем ответа в Cockpit. Значок терминала открывает его в Terminal.app — для всего, что требует настоящего TTY. Библиотека хранится в <path>{{path}}</path>."
+	},
+	"panelReport": {
+		"verdict": {
+			"ok": "ок",
+			"reserves": "оговорки",
+			"blocking": "блокирует"
+		},
+		"noVerdict": "без вердикта",
+		"title": "Перекрёстная проверка",
+		"angles_one": "{{count}} ракурс",
+		"angles_few": "{{count}} ракурса",
+		"angles_many": "{{count}} ракурсов",
+		"angles_other": "{{count}} ракурса",
+		"agreed": "согласны",
+		"disputes_one": "{{count}} разногласие",
+		"disputes_few": "{{count}} разногласия",
+		"disputes_many": "{{count}} разногласий",
+		"disputes_other": "{{count}} разногласия",
+		"costHint": "Сколько эта перекрёстная проверка стоила бы по тарифам API. По подписке ничего не списывается: расходуется квота окна.",
+		"severestWins": "Одного ракурса достаточно, чтобы определить вердикт: два прочтения, которые ничего не увидели, не доказывают, что третье ошибается.",
+		"stale": "Ветка изменилась после этой перекрёстной проверки.",
+		"silent": "Нет ответа: {{names}}",
+		"collapse": "Свернуть мнения",
+		"expand": "Прочитать каждый ракурс",
+		"heldBy": "Поддерживают",
+		"against": "Оспаривают"
+	},
+	"reviewPanel": {
+		"title": "Код-ревью",
+		"verdict": {
+			"merge": "Можно сливать",
+			"corrections": "Запрошены правки",
+			"bloquant": "Блокирует"
+		},
+		"severity": {
+			"bloquant": "Блокирующее",
+			"important": "Важное",
+			"suggestion": "Предложение"
+		},
+		"check": {
+			"corrige": "исправлено",
+			"partiel": "частично",
+			"non_corrige": "не исправлено"
+		},
+		"round": "Раунд {{number}}",
+		"roundVerification": "Раунд {{number}} · проверка",
+		"commit": "коммит",
+		"recheck": "Перепроверить",
+		"reviewAgainHint": "Полное ревью с нуля",
+		"reviewAgain": "Ревью заново",
+		"pushedSince": "{{author}} отправил изменения после этого раунда: PR уже не тот, что проверялся.",
+		"theAuthor": "Автор",
+		"understand": "Понять PR",
+		"previousPoints": "Прежние замечания",
+		"earlierPoint": "замечание из прошлого раунда",
+		"nothing": "В этом раунде замечаний нет.",
+		"openFileAtLine": "Открыть файл на этой строке",
+		"openOnGitHub": "Открыть PR на GitHub на этой строке, чтобы опубликовать комментарий",
+		"posted": "опубликовано",
+		"fix": "Исправить",
+		"quoted": "«{{text}}»",
+		"copyComment": "Скопировать комментарий",
+		"copied": "Скопировано",
+		"copy": "Скопировать"
+	},
+	"resources": {
+		"gigabytes": "{{value}} ГБ",
+		"megabytes": "{{value}} МБ",
+		"heaviest": "Самый тяжёлый процесс в этом поддереве: {{name}}",
+		"processesShort_one": "{{count}} проц.",
+		"processesShort_few": "{{count}} проц.",
+		"processesShort_many": "{{count}} проц.",
+		"processesShort_other": "{{count}} проц.",
+		"percent": "{{value}}%",
+		"title": "Использование ресурсов",
+		"subtitle": "Cockpit и всё, что он запускает",
+		"close": "Закрыть (Esc)",
+		"appOnly": "Только Cockpit",
+		"cpu": "{{value}}% CPU",
+		"withChildren": "С дочерними процессами",
+		"processes_one": "{{count}} процесс · {{cpu}}%",
+		"processes_few": "{{count}} процесса · {{cpu}}%",
+		"processes_many": "{{count}} процессов · {{cpu}}%",
+		"processes_other": "{{count}} процесса · {{cpu}}%",
+		"machine": "Машина",
+		"machineShare": "Cockpit использует {{value}}% её ресурсов",
+		"agents": "Агенты",
+		"terminals": "Терминалы",
+		"footnote": "Память суммируется без учёта того, что процессы делят между собой: итог — это потолок, а не точный счёт. Сам интерфейс работает в процессе WebKit, который macOS без привилегий никому не приписывает, — добавьте ещё около шестидесяти мегабайт.",
+		"spendNoQuota": "Токены, израсходованные сегодня. CLI не сообщает квоту.",
+		"spendLeft": "Осталось {{left}}% по «{{window}}»",
+		"spendLeftResets": "Осталось {{left}}% по «{{window}}», сброс {{resets}}",
+		"tickerHint": "Какую нагрузку Cockpit создаёт на машину"
+	},
+	"terminalView": {
+		"typeOnly": "Ввести без запуска",
+		"runAsIs": "Выполнить как есть",
+		"mainRepo": "основной репозиторий",
+		"scripts": "Скрипты",
+		"scriptsHint": "Скрипты репозитория и пользовательские команды",
+		"noScripts": "В этой папке нет скриптов.",
+		"footer": "Команда вводится, затем выполняется в этой оболочке — ⇧Enter делает обратное выбранному пункту."
+	}
+}

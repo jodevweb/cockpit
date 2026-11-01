@@ -1,0 +1,290 @@
+{
+	"format": {
+		"justNow": "たった今",
+		"bytes": "{{value}} B",
+		"kilobytes": "{{value}} KB",
+		"megabytes": "{{value}} MB"
+	},
+	"automations": {
+		"days": {
+			"mon": "月",
+			"tue": "火",
+			"wed": "水",
+			"thu": "木",
+			"fri": "金",
+			"sat": "土",
+			"sun": "日"
+		},
+		"stamp": {
+			"today": "今日 {{time}}",
+			"tomorrow": "明日 {{time}}",
+			"yesterday": "昨日 {{time}}"
+		},
+		"rhythm": {
+			"none": "曜日が選択されていません",
+			"weekdays": "月曜〜金曜の {{time}}",
+			"everyDay": "毎日 {{time}}",
+			"days": "{{days}} の {{time}}"
+		},
+		"run": {
+			"running": "実行中",
+			"partial": "一部のみ",
+			"failed": "失敗",
+			"missed": "未実行",
+			"caughtUp": "後から実行",
+			"manual": "手動",
+			"onTime": "定刻"
+		},
+		"source": {
+			"tracker": "タスク管理"
+		},
+		"event": {
+			"merged": "PR マージ",
+			"opened": "PR 作成",
+			"updated": "PR 更新",
+			"reviewed": "PR レビュー",
+			"done": "チケット完了",
+			"started": "チケット開始",
+			"moved": "チケット移動",
+			"canceled": "チケット取り消し",
+			"agent": "エージェント",
+			"git": "Git 操作",
+			"resolved": "エラー解決",
+			"assigned": "エラー割り当て"
+		},
+		"markdown": {
+			"silent": "今回は応答がありませんでした：{{sources}}。"
+		}
+	},
+	"world": {
+		"regions": {
+			"arrive": {
+				"label": "受信",
+				"hint": "仕分けが必要"
+			},
+			"encours": {
+				"label": "進行中",
+				"hint": "自分で進めるか委任する"
+			},
+			"livrer": {
+				"label": "出荷",
+				"hint": "レビューしてマージ"
+			},
+			"prod": {
+				"label": "本番",
+				"hint": "何が変わるか"
+			}
+		}
+	},
+	"missions": {
+		"awaited": {
+			"understanding": "リードがチケットを読みました · 理解内容を確認してください",
+			"approach": "アプローチがあなたの承認を待っています",
+			"approval_other": "タスク {{count}} 件 · 承認するまで何も開始されません"
+		},
+		"state": {
+			"understanding": "チケットを読解中",
+			"awaitingUnderstanding": "理解内容の確認待ち",
+			"approaching": "アプローチ",
+			"awaitingApproach": "アプローチの確認待ち",
+			"planning": "分割",
+			"awaitingApproval": "承認待ち",
+			"running": "進行中",
+			"integrating": "統合",
+			"done": "完了",
+			"failed": "停止"
+		}
+	},
+	"episodes": {
+		"gesture": {
+			"runs": "{{command}} を実行",
+			"uses": "{{tool}} を使用",
+			"usesATool": "ツールを使用",
+			"edits": "{{file}} を編集",
+			"editsAFile": "ファイルを編集",
+			"delegated": "「{{description}}」を委任",
+			"launchedSubagent": "サブエージェントを起動",
+			"reads": "{{file}} を読み込み",
+			"searches": "{{query}} を検索",
+			"browses": "{{file}} を閲覧"
+		}
+	},
+	"worktreeFlow": {
+		"title": "Worktree {{branch}}",
+		"creating": "作成中 — 依存関係、データベース… 数分かかる場合があります。",
+		"timeout": "{{branch}} の worktree が 15 分経っても作成されませんでした。",
+		"ready": "Worktree の準備ができました。",
+		"starting": "Worktree の作成を開始しています…",
+		"readyOpen": "Worktree の準備ができ、ワークスペースを開きました。"
+	},
+	"types": {
+		"triggers": {
+			"ci_red": {
+				"label": "CI が失敗したとき",
+				"hint": "進行中の変更で"
+			},
+			"review_changes_requested": {
+				"label": "レビューで修正が求められたとき",
+				"hint": "オープン中の PR で"
+			},
+			"pr_stale": {
+				"label": "変更が止まっているとき",
+				"hint": "期限を過ぎたもの — ドラフトは除外"
+			},
+			"schedule": {
+				"label": "一定間隔で",
+				"hint": "シグナルなし、時刻で — 何も起きなくても発動する唯一のトリガー"
+			},
+			"linear_assigned": {
+				"label": "Linear チケットが自分に割り当てられたとき",
+				"hint": "後で優先度が変わると再度発動します — どれが対象かは条件が判断します"
+			}
+		},
+		"commentScopes": {
+			"i_commented": "この PR にすでにコメントしている",
+			"i_allowed": "この PR を明示的に許可している",
+			"hers": "PR が Permanence によって作成された",
+			"mine": "PR が自分のもの"
+		},
+		"powers": {
+			"rerun_pipeline": "パイプラインを再実行",
+			"create_branch": "ブランチを作成",
+			"open_draft_pr": "ドラフト PR を作成",
+			"set_label": "ラベルを追加",
+			"open_worktree": "Worktree を開く",
+			"start_agent": "エージェントを起動",
+			"run_command": "リポジトリのコマンドを実行",
+			"open_mission": "コードを書くミッションを開く"
+		},
+		"never": {
+			"review": "レビューの承認・却下",
+			"assign": "割り当て",
+			"close": "クローズ",
+			"merge": "マージ",
+			"deploy": "デプロイ"
+		}
+	},
+	"proof": {
+		"defaultTitle": "エージェントのウォークスルー"
+	},
+	"remarks": {
+		"about": "{{anchor}} について：{{text}}",
+		"intro": "あなたの作業についていくつか指摘があります：",
+		"outro": "今後はこれらを念頭に置いてください。間違っていると思うものがあれば教えてください。"
+	},
+	"activity": {
+		"unexplainedFailure": "説明なしで失敗しました。"
+	},
+	"ipc": {
+		"previewMissing": "プレビュー：「{{command}}」にはサンプル応答がありません。"
+	},
+	"footprint": {
+		"deleted_other": "{{count}} 件削除",
+		"created_other": "{{count}} 件作成",
+		"modified_other": "{{count}} 件変更"
+	},
+	"chantier": {
+		"slices": {
+			"messages": "会話",
+			"memory": "プロジェクトの指示",
+			"system": "CLI の基本部分",
+			"other": "その他"
+		}
+	},
+	"illustrations": {
+		"source": {
+			"mesure": "計測値",
+			"depot": "リポジトリで確認",
+			"capture": "キャプチャ",
+			"agent": "エージェントの申告"
+		}
+	},
+	"film": {
+		"caption": {
+			"read_other": "{{count}} 個のファイルを読みます。",
+			"think": "前提としていること。",
+			"edit": "{{file}} を編集します。",
+			"testsPass": "テストが通ります。",
+			"testsFail": "一部のテストが失敗します。",
+			"fix": "{{file}} を修正します。",
+			"seeBrowser": "ブラウザで確認します。",
+			"seeResult": "結果を確認します。",
+			"deliver": "納品します。",
+			"handBack": "操作を返します。"
+		},
+		"deliver": {
+			"pushed": "プッシュ済み：{{branch}}",
+			"branch": "ブランチ {{branch}}"
+		},
+		"phase": {
+			"read": "読み込み",
+			"edit": "編集",
+			"test": "テスト",
+			"see": "画面で確認",
+			"run": "コマンド",
+			"agent": "サブエージェント"
+		}
+	},
+	"narrator": {
+		"cloudModels": {
+			"natural": "自然",
+			"fast": "高速"
+		},
+		"rates": {
+			"calm": "ゆっくり",
+			"normal": "標準",
+			"fast": "速い"
+		},
+		"then": "次に",
+		"wrapUp": {
+			"handsBack": "完了しました。操作をお返しします。",
+			"changed_other": "{{spoken}} 個のファイルを変更しました",
+			"testsFail": "テストが失敗しています",
+			"testsPass": "テストは通っています",
+			"doneBut": "完了しました：{{changed}}が、{{tests}}。",
+			"doneAnd": "完了しました：{{changed}}。{{tests}}。",
+			"done": "完了しました：{{what}}。"
+		},
+		"progress": {
+			"changed_other": "作業中です。指示以降、{{spoken}} 個のファイルを変更しました。",
+			"exploring": "作業中です。コードを調べています。"
+		},
+		"line": {
+			"subagent": "作業の一部をサブエージェントに任せています。",
+			"error": "エラーが発生しました。",
+			"testsFail": "テストが失敗しています。",
+			"testsPass": "テストが通りました。",
+			"question": "あなたの対応が必要です：質問があります。",
+			"permission": "続行するための許可を待っています。"
+		}
+	},
+	"assistant": {
+		"keys": {
+			"space": "スペース",
+			"arrow": "矢印 {{direction}}"
+		}
+	},
+	"feedMeta": {
+		"type": "種類",
+		"level": "レベル",
+		"project": "プロジェクト",
+		"author": "作成者",
+		"assignee": "担当者",
+		"deployment": "デプロイ",
+		"attempt": "試行",
+		"version": "バージョン",
+		"run": "実行",
+		"task": "タスク",
+		"environment": "環境",
+		"commit": "コミット",
+		"event": "イベント",
+		"branch": "ブランチ",
+		"labels": "ラベル",
+		"reviewers": "レビュアー",
+		"priority": "優先度",
+		"origin": "起点",
+		"url": "URL",
+		"occurrences": "発生回数",
+		"users": "ユーザー"
+	}
+}
