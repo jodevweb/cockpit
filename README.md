@@ -2,13 +2,14 @@
 
 *English · [Français](README.fr.md)*
 
-A cockpit for coding agents — Claude Code, Codex, Gemini — on macOS and
-Windows. Launch agents on worktrees, follow what they do, answer when they
+A cockpit for coding agents — Claude Code, Codex, Gemini — on macOS,
+Windows and Linux. Launch agents on worktrees, follow what they do, answer when they
 need you, and review what they deliver, all in one native window.
 
 [![MIT License](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
 ![macOS 13+](https://img.shields.io/badge/macOS-13%2B-lightgrey.svg)
 ![Windows 10/11](https://img.shields.io/badge/Windows-10%20%7C%2011-lightgrey.svg)
+![Linux x64](https://img.shields.io/badge/Linux-x64-lightgrey.svg)
 ![Tauri 2](https://img.shields.io/badge/Tauri-2-24C8DB.svg)
 
 <picture>
@@ -89,10 +90,10 @@ Windows when there is one (otherwise the `.sh`, run by Git for Windows' bash).
 
 ## Requirements
 
-**The machine.** macOS 13 or later, or Windows 10 (21H2 and later) / 11, on
-x64. No Linux. The shell used for everything the cockpit launches is `zsh` on
-macOS — the system one is fine — and **Git for Windows**' bash on Windows (see
-below).
+**The machine.** macOS 13 or later, Windows 10 (21H2 and later) / 11 on x64,
+or Linux on x64 (see "Linux"). The shell used for everything the cockpit
+launches is `zsh` on macOS — the system one is fine —, `bash` on Linux, and
+**Git for Windows**' bash on Windows (see below).
 
 **To build.** Node 20+, pnpm, stable Rust (`rustup`). On macOS, the Xcode
 Command Line Tools (`xcode-select --install`). On Windows, Rust's MSVC
@@ -159,6 +160,38 @@ Gatekeeper then does not evaluate the application at all.
 
 After that, the built-in updater takes over and offers the next versions on
 its own — the endpoint is public, no GitHub account is needed to read it.
+
+## Linux
+
+**Machine requirements.** x64, a desktop with WebKitGTK 4.1 (Ubuntu 22.04,
+Debian 12, Fedora 38 and later have it), `git`, `bash`, and Claude Code
+installed and signed in. Docker is optional, as elsewhere.
+
+**Installing from the release.** Versions published on
+[jodevweb/cockpit-releases](https://github.com/jodevweb/cockpit-releases/releases/latest)
+include a `Cockpit_<version>_amd64.AppImage` and a `.deb`.
+
+```bash
+chmod +x Cockpit_<version>_amd64.AppImage
+./Cockpit_<version>_amd64.AppImage          # or: sudo apt install ./Cockpit_<version>_amd64.deb
+```
+
+The built-in updater replaces the AppImage with the next versions; a `.deb`
+is updated by installing the next one.
+
+**Building.** Besides Node, pnpm and Rust, the WebKitGTK development
+packages — on Debian and Ubuntu:
+
+```bash
+sudo apt install libwebkit2gtk-4.1-dev libgtk-3-dev libayatana-appindicator3-dev librsvg2-dev libxdo-dev libssl-dev libasound2-dev
+pnpm install
+pnpm install:app   # builds the AppImage, installs it in ~/.local/bin, adds a menu entry
+```
+
+**What differs.** Files and links open with `xdg-open`; a terminal opens in the
+first one installed among `x-terminal-emulator`, GNOME Terminal, Konsole, Xfce
+Terminal, kitty, Alacritty, WezTerm, foot and xterm. Listening ports come from
+`ss`, processes and memory from `/proc`.
 
 ## Windows
 
@@ -437,9 +470,11 @@ record says so rather than filling the gap.
 
 ## Known limitations
 
-- **macOS and Windows only.** No Linux port is planned. On Windows, Git for
-  Windows is required: without its bash, the cockpit opens but launches
-  nothing.
+- **Linux is new.** It is built and tested by CI like the other systems,
+  but has had less real use. System speech (`say`) has no Linux counterpart
+  yet: reading aloud fails with a message there.
+- On Windows, Git for Windows is required: without its bash, the cockpit opens
+  but launches nothing.
 - **Windows**: the installer is not Authenticode-signed (SmartScreen warning,
   see "Windows").
 - **Cursor** does not expose its conversations as readable files (internal

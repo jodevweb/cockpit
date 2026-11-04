@@ -1414,6 +1414,15 @@ fn chromium() -> Option<PathBuf> {
 		"/Applications/Brave Browser.app/Contents/MacOS/Brave Browser",
 		"/Applications/Microsoft Edge.app/Contents/MacOS/Microsoft Edge",
 		"/Applications/Arc.app/Contents/MacOS/Arc",
+		// Linux : là où les paquets des distributions et ceux des éditeurs
+		// les posent.
+		"/usr/bin/google-chrome",
+		"/usr/bin/google-chrome-stable",
+		"/usr/bin/chromium",
+		"/usr/bin/chromium-browser",
+		"/usr/bin/microsoft-edge",
+		"/usr/bin/brave-browser",
+		"/snap/bin/chromium",
 	]
 	.iter()
 	.map(PathBuf::from)

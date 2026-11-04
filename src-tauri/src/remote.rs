@@ -352,10 +352,11 @@ fn tailscale_bin() -> Option<std::path::PathBuf> {
 	}
 	#[cfg(not(windows))]
 	{
-		const CANDIDATES: [&str; 3] = [
+		const CANDIDATES: [&str; 4] = [
 			"/Applications/Tailscale.app/Contents/MacOS/Tailscale",
 			"/usr/local/bin/tailscale",
 			"/opt/homebrew/bin/tailscale",
+			"/usr/bin/tailscale",
 		];
 		CANDIDATES
 			.into_iter()

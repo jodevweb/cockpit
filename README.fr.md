@@ -3,7 +3,7 @@
 *[English](README.md) · Français*
 
 Poste de pilotage pour les agents de code — Claude Code, Codex, Gemini — sur
-macOS et Windows.
+macOS, Windows et Linux.
 On lance des agents sur des worktrees, on suit ce qu'ils font, on répond quand
 ils ont besoin de toi, et on relit ce qu'ils livrent, dans une seule fenêtre
 native.
@@ -11,6 +11,7 @@ native.
 [![Licence MIT](https://img.shields.io/badge/licence-MIT-blue.svg)](LICENSE)
 ![macOS 13+](https://img.shields.io/badge/macOS-13%2B-lightgrey.svg)
 ![Windows 10/11](https://img.shields.io/badge/Windows-10%20%7C%2011-lightgrey.svg)
+![Linux x64](https://img.shields.io/badge/Linux-x64-lightgrey.svg)
 ![Tauri 2](https://img.shields.io/badge/Tauri-2-24C8DB.svg)
 
 <picture>
@@ -94,10 +95,10 @@ bash de Git for Windows).
 
 ## Prérequis
 
-**Le poste.** macOS 13 minimum, ou Windows 10 (21H2 et suivantes) / 11, en
-x64. Pas de Linux. Le shell utilisé pour tout ce que le cockpit lance est
-`zsh` sous macOS — celui du système convient — et le bash de **Git for
-Windows** sous Windows (voir plus bas).
+**Le poste.** macOS 13 minimum, Windows 10 (21H2 et suivantes) / 11 en x64,
+ou Linux en x64 (voir « Linux »). Le shell utilisé pour tout ce que le cockpit
+lance est `zsh` sous macOS — celui du système convient —, `bash` sous Linux,
+et le bash de **Git for Windows** sous Windows (voir plus bas).
 
 **Pour compiler.** Node 20+, pnpm, Rust stable (`rustup`). Sous macOS, les
 Xcode Command Line Tools (`xcode-select --install`). Sous Windows, la chaîne
@@ -165,6 +166,38 @@ alors plus l'application du tout.
 
 Ensuite l'updater intégré prend le relais et propose les versions suivantes tout
 seul — l'endpoint est public, aucun compte GitHub n'est nécessaire pour le lire.
+
+## Linux
+
+**Prérequis du poste.** x64, un bureau avec WebKitGTK 4.1 (Ubuntu 22.04,
+Debian 12, Fedora 38 et suivantes l'ont), `git`, `bash`, et Claude Code
+installé et connecté. Docker reste facultatif, comme ailleurs.
+
+**Installer depuis la release.** Les versions publiées sur
+[jodevweb/cockpit-releases](https://github.com/jodevweb/cockpit-releases/releases/latest)
+contiennent une `Cockpit_<version>_amd64.AppImage` et un `.deb`.
+
+```bash
+chmod +x Cockpit_<version>_amd64.AppImage
+./Cockpit_<version>_amd64.AppImage          # ou : sudo apt install ./Cockpit_<version>_amd64.deb
+```
+
+L'updater intégré remplace l'AppImage par les versions suivantes ; un `.deb` se
+met à jour en installant le suivant.
+
+**Compiler.** En plus de Node, pnpm et Rust, les paquets de développement de
+WebKitGTK — sous Debian et Ubuntu :
+
+```bash
+sudo apt install libwebkit2gtk-4.1-dev libgtk-3-dev libayatana-appindicator3-dev librsvg2-dev libxdo-dev libssl-dev libasound2-dev
+pnpm install
+pnpm install:app   # compile l'AppImage, l'installe dans ~/.local/bin, ajoute une entrée de menu
+```
+
+**Ce qui diffère.** Fichiers et liens s'ouvrent par `xdg-open` ; un terminal
+s'ouvre dans le premier installé parmi `x-terminal-emulator`, GNOME Terminal,
+Konsole, Terminal Xfce, kitty, Alacritty, WezTerm, foot et xterm. Les ports en
+écoute viennent de `ss`, les processus et la mémoire de `/proc`.
 
 ## Windows
 
@@ -450,8 +483,10 @@ forme vérifiée — et le relevé le dit plutôt que de le combler.
 
 ## Limites connues
 
-- **macOS et Windows seulement.** Aucun portage Linux n'est prévu. Sous
-  Windows, Git for Windows est indispensable : sans son bash, le cockpit
+- **Linux est neuf.** Compilé et testé par la CI comme les autres systèmes,
+  il a moins servi pour de vrai. La voix du système (`say`) n'y a pas encore
+  d'équivalent : la lecture à voix haute y échoue avec un message.
+- Sous Windows, Git for Windows est indispensable : sans son bash, le cockpit
   s'ouvre mais ne lance rien.
 - **Windows** : l'installeur n'est pas signé Authenticode (avertissement
   SmartScreen, voir « Windows »).

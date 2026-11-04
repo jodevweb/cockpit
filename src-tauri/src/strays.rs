@@ -40,7 +40,7 @@ pub struct Table {
 ///
 /// `ps -E` n'affiche l'environnement que des processus de l'utilisateur, ce
 /// qui est exactement le périmètre voulu : le cockpit ne lance rien d'autre.
-#[cfg(not(windows))]
+#[cfg(target_os = "macos")]
 pub fn read() -> Table {
 	let output = crate::platform::quiet_std(
 		std::process::Command::new("ps").args(["-axwwE", "-o", "pid=,ppid=,rss=,command="]),
@@ -65,7 +65,10 @@ pub fn read() -> Table {
 /// engendrent — précisément ce qu'on cherche. L'environnement, lui, est hérité
 /// par toute la descendance, comme sous macOS. Seuls les processus du compte
 /// s'ouvrent en lecture : même périmètre que `ps -E`.
-#[cfg(windows)]
+///
+/// Linux prend la même voie : `ps` n'y a pas d'option pour l'environnement,
+/// et `/proc/<pid>/environ` le donne directement (`platform::process_environment`).
+#[cfg(any(windows, target_os = "linux"))]
 pub fn read() -> Table {
 	let mut parents = HashMap::new();
 	let mut marked = Vec::new();
@@ -91,7 +94,7 @@ pub fn read() -> Table {
 	Table { parents, marked }
 }
 
-#[cfg_attr(windows, allow(dead_code))]
+#[cfg_attr(not(target_os = "macos"), allow(dead_code))]
 fn parse(raw: &str) -> Table {
 	// Une variable peut contenir un saut de ligne — `COCKPIT_SCOPE` en sépare
 	// ses chemins — et `ps` l'imprime tel quel. Une ligne qui ne commence pas

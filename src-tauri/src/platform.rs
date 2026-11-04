@@ -54,9 +54,15 @@ pub fn shell_program() -> PathBuf {
 	{
 		git_bash().unwrap_or_else(|| PathBuf::from("bash.exe"))
 	}
-	#[cfg(not(windows))]
+	// Le shell du système sous macOS. Sous Linux, `zsh` n'est pas toujours
+	// installé, `bash` l'est partout.
+	#[cfg(target_os = "macos")]
 	{
 		PathBuf::from("zsh")
+	}
+	#[cfg(all(unix, not(target_os = "macos")))]
+	{
+		PathBuf::from("bash")
 	}
 }
 
@@ -407,8 +413,8 @@ mod tests {
 // sous Windows, on demande directement au système. Rien ici ne sert sous
 // macOS : chaque appelant garde sa voie macOS intacte.
 
-/// Un processus de la machine, vu par Windows.
-#[cfg(windows)]
+/// Un processus de la machine, vu par Windows ou lu dans `/proc` sous Linux.
+#[cfg(any(windows, target_os = "linux", test))]
 #[derive(Debug, Clone)]
 pub struct ProcessEntry {
 	pub pid: u32,
@@ -514,7 +520,7 @@ pub fn processes() -> Vec<ProcessEntry> {
 /// d'abord. Sous Windows, d'un seul instantané ; ailleurs, vide (les appelants
 /// macOS ont leur propre voie).
 pub fn descendants(pid: u32) -> Vec<u32> {
-	#[cfg(windows)]
+	#[cfg(any(windows, target_os = "linux"))]
 	{
 		let mut children: std::collections::HashMap<u32, Vec<u32>> = std::collections::HashMap::new();
 		for process in processes() {
@@ -535,7 +541,7 @@ pub fn descendants(pid: u32) -> Vec<u32> {
 		found.reverse();
 		found
 	}
-	#[cfg(not(windows))]
+	#[cfg(not(any(windows, target_os = "linux")))]
 	{
 		let _ = pid;
 		Vec::new()
@@ -682,6 +688,80 @@ pub fn machine_memory_mb() -> (f64, f64) {
 		let used = status.ullTotalPhys.saturating_sub(status.ullAvailPhys) as f64 / 1024.0 / 1024.0;
 		(total, used)
 	}
+}
+
+/// Tous les processus de la machine, lus dans `/proc`.
+///
+/// `stat` donne le parent, le nom, les temps processeur et la mémoire
+/// résidente. Le nom est entre parenthèses et peut contenir des espaces ou des
+/// parenthèses : on coupe sur la **dernière** parenthèse fermante.
+#[cfg(target_os = "linux")]
+pub fn processes() -> Vec<ProcessEntry> {
+	let ticks = 100.0; // `getconf CLK_TCK` vaut 100 sur tous les noyaux courants.
+	let page_kb = (unsafe { libc::sysconf(libc::_SC_PAGESIZE) }.max(4096) / 1024) as u64;
+	let Ok(entries) = std::fs::read_dir("/proc") else {
+		return Vec::new();
+	};
+	entries
+		.filter_map(|entry| entry.ok()?.file_name().to_str()?.parse::<u32>().ok())
+		.filter_map(|pid| {
+			let stat = std::fs::read_to_string(format!("/proc/{pid}/stat")).ok()?;
+			parse_proc_stat(pid, &stat, ticks, page_kb)
+		})
+		.collect()
+}
+
+/// Une ligne de `/proc/<pid>/stat`, lue comme `proc(5)` la décrit.
+#[cfg(any(test, target_os = "linux"))]
+fn parse_proc_stat(pid: u32, stat: &str, ticks: f64, page_kb: u64) -> Option<ProcessEntry> {
+	let open = stat.find('(')?;
+	let close = stat.rfind(')')?;
+	let name = stat.get(open + 1..close)?.to_string();
+	// Après le nom : état (3), parent (4)… utime (14), stime (15)… rss (24).
+	let rest: Vec<&str> = stat.get(close + 1..)?.split_whitespace().collect();
+	let field = |n: usize| rest.get(n - 3).and_then(|value| value.parse::<u64>().ok());
+	Some(ProcessEntry {
+		pid,
+		ppid: field(4)? as u32,
+		name,
+		rss_kb: field(24).unwrap_or(0) * page_kb,
+		cpu_seconds: (field(14).unwrap_or(0) + field(15).unwrap_or(0)) as f64 / ticks,
+	})
+}
+
+/// L'environnement d'un autre processus, tel qu'il l'a reçu à sa naissance :
+/// `/proc/<pid>/environ`, lisible pour les processus de l'utilisateur.
+#[cfg(target_os = "linux")]
+pub fn process_environment(pid: u32) -> Option<Vec<String>> {
+	let raw = std::fs::read(format!("/proc/{pid}/environ")).ok()?;
+	Some(
+		raw.split(|byte| *byte == 0)
+			.filter(|entry| !entry.is_empty())
+			.map(|entry| String::from_utf8_lossy(entry).to_string())
+			.collect(),
+	)
+}
+
+/// Mémoire physique de la machine : totale et utilisée, en mégaoctets.
+/// « Utilisée » = tout sauf `MemAvailable`, comme `free`.
+#[cfg(target_os = "linux")]
+pub fn machine_memory_mb() -> (f64, f64) {
+	let raw = std::fs::read_to_string("/proc/meminfo").unwrap_or_default();
+	parse_meminfo(&raw)
+}
+
+#[cfg(any(test, target_os = "linux"))]
+fn parse_meminfo(raw: &str) -> (f64, f64) {
+	let read = |key: &str| {
+		raw.lines()
+			.find(|line| line.starts_with(key))
+			.and_then(|line| line.split_whitespace().nth(1))
+			.and_then(|value| value.parse::<f64>().ok())
+			.unwrap_or(0.0)
+	};
+	let total = read("MemTotal:") / 1024.0;
+	let available = read("MemAvailable:") / 1024.0;
+	(total, (total - available).max(0.0))
 }
 
 // ── agents, outils, sessions ──
@@ -837,6 +917,27 @@ pub fn file_url(path: &std::path::Path) -> String {
 
 #[cfg(test)]
 mod agents_tests {
+	#[test]
+	fn proc_stat_se_lit_meme_quand_le_nom_porte_des_parentheses() {
+		let stat = "4242 (node (dev) x) S 77 4242 4242 0 -1 4194560 2000 0 0 0 150 50 0 0 20 0 11 0 9000 123456 2560 18446744073709551615";
+		let entry = parse_proc_stat(4242, stat, 100.0, 4).unwrap();
+		assert_eq!(entry.name, "node (dev) x");
+		assert_eq!(entry.ppid, 77);
+		assert_eq!(entry.rss_kb, 2560 * 4);
+		assert!((entry.cpu_seconds - 2.0).abs() < 1e-9);
+	}
+
+	#[test]
+	fn meminfo_dit_le_total_et_ce_qui_est_pris() {
+		let raw = "MemTotal:       16384000 kB
+MemFree:         1000000 kB
+MemAvailable:    8192000 kB
+";
+		let (total, used) = parse_meminfo(raw);
+		assert!((total - 16000.0).abs() < 1.0, "{total}");
+		assert!((used - 8000.0).abs() < 1.0, "{used}");
+	}
+
 	use super::*;
 
 	#[test]
