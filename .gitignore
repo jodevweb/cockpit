@@ -20,3 +20,7 @@ cockpit.config.toml
 
 # Paquets générés par scripts/packages.mjs
 packaging/out/
+
+# Tests d interface (Playwright)
+test-results/
+playwright-report/
