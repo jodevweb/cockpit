@@ -41,6 +41,9 @@ test("chaque onglet de la barre du haut s'ouvre sans erreur", async ({ page }) =
 });
 
 test("chaque écran de l'atelier s'ouvre sans erreur", async ({ page }) => {
+	// Une vingtaine d'écrans à ouvrir l'un après l'autre : les 30 s par défaut
+	// passaient seul, et cédaient quand les autres tests tournaient en même temps.
+	test.setTimeout(120_000);
 	const errors = watchErrors(page);
 	await page.goto("/");
 	const atelier = topTab(page, "Workshop");
