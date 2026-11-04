@@ -700,12 +700,7 @@ impl WorkflowConfig {
 	/// diverger — c'est exactement ce qui avait produit deux commandes de
 	/// création différentes.
 	pub fn worktree_creation(&self, branch: &str, path: &str) -> (String, bool) {
-		Self::resolve(
-			&self.worktree_command,
-            &format!("git worktree add {} {}", shell_arg(path), shell_arg(branch)),
-			branch,
-			path,
-		)
+		Self::resolve(&self.worktree_command, &generic_creation(branch, path), branch, path)
 	}
 
 	pub fn worktree_removal(&self, branch: &str, path: &str) -> (String, bool) {
@@ -762,6 +757,31 @@ fn inert_in_shell(value: &str) -> bool {
 }
 
 /// Un argument de shell qui survit aux espaces et aux apostrophes.
+/// La création d'un worktree quand l'équipe n'a rien déclaré.
+///
+/// Deux cas qu'un `git worktree add <chemin> <branche>` nu ratait, et ce sont
+/// ceux d'un premier lancement :
+///
+/// - **pas de chemin** : « Ouvrir une branche » n'en donne pas, c'est au
+///   cockpit de le choisir. Vide, git refusait ; et un gabarit qui laissait
+///   `{path}` vide faisait prendre la branche pour le chemin — un dossier dans
+///   le dépôt lui-même, sur une branche au nom tronqué. Le worktree va à côté
+///   du dépôt : `../<dépôt>-<branche>`, comme on le range à la main ;
+/// - **branche neuve** : sans `-b`, git ne la crée pas. On sort celle qui
+///   existe (locale, ou sur `origin`, que git suit d'office) et on crée les
+///   autres depuis la branche en cours.
+fn generic_creation(branch: &str, path: &str) -> String {
+	let target = if path.is_empty() {
+		format!("../\"$(basename \"$PWD\")\"-{}", shell_arg(&branch.replace('/', "-")))
+	} else {
+		shell_arg(path)
+	};
+	let name = shell_arg(branch);
+	format!(
+		"if git show-ref --verify --quiet refs/heads/{name} || git show-ref --verify --quiet refs/remotes/origin/{name}; then git worktree add {target} {name}; else git worktree add -b {name} {target}; fi"
+	)
+}
+
 fn shell_arg(value: &str) -> String {
 	format!("'{}'", value.replace('\'', "'\\''"))
 }
@@ -3164,11 +3184,58 @@ mod tests {
 	fn sans_commande_declaree_on_retombe_sur_git() {
 		let workflow = WorkflowConfig::default();
 		let (commande, par_agent) = workflow.worktree_creation("fix/x", "/tmp/fix-x");
-		assert_eq!(commande, "git worktree add '/tmp/fix-x' 'fix/x'");
+		assert!(commande.contains("git worktree add '/tmp/fix-x' 'fix/x'"), "{commande}");
+		assert!(commande.contains("git worktree add -b 'fix/x' '/tmp/fix-x'"), "{commande}");
 		assert!(!par_agent, "git se lance dans un shell, pas dans un agent");
 
 		let (commande, _) = workflow.worktree_removal("fix/x", "/tmp/fix-x");
 		assert_eq!(commande, "git worktree remove --force '/tmp/fix-x'");
+	}
+
+	/// Le cas d'un premier lancement, joué pour de vrai : « Ouvrir une branche »
+	/// ne donne pas de chemin, et la branche n'existe pas encore. Le worktree
+	/// doit naître à côté du dépôt, sur la branche demandée — pas dans le dépôt
+	/// sur une branche au nom tronqué.
+	#[test]
+	fn sans_chemin_ni_branche_le_repli_cree_les_deux_a_cote_du_depot() {
+		let base = std::env::temp_dir().join(format!("cockpit-worktree-{}", std::process::id()));
+		let _ = std::fs::remove_dir_all(&base);
+		let root = base.as_path();
+		let repo = root.join("shop");
+		std::fs::create_dir_all(&repo).unwrap();
+		let git = |args: &[&str]| {
+			let status = std::process::Command::new("git")
+				.args(args)
+				.current_dir(&repo)
+				.status()
+				.expect("git");
+			assert!(status.success(), "git {args:?}");
+		};
+		git(&["init", "-q", "-b", "main"]);
+		git(&["-c", "user.name=t", "-c", "user.email=t@t", "commit", "-q", "--allow-empty", "-m", "base"]);
+
+		let workflow = WorkflowConfig::default();
+		let (commande, _) = workflow.worktree_creation("feat/currency-selector", "");
+		let out = crate::platform::shell(&commande).current_dir(&repo).output().expect("shell");
+		assert!(out.status.success(), "{}", String::from_utf8_lossy(&out.stderr));
+
+		let tree = root.join("shop-feat-currency-selector");
+		assert!(tree.join(".git").exists(), "worktree attendu à côté du dépôt : {}", tree.display());
+		assert!(!repo.join("feat").exists(), "rien ne doit naître dans le dépôt");
+		let head = std::process::Command::new("git")
+			.args(["rev-parse", "--abbrev-ref", "HEAD"])
+			.current_dir(&tree)
+			.output()
+			.unwrap();
+		assert_eq!(String::from_utf8_lossy(&head.stdout).trim(), "feat/currency-selector");
+
+		// Une branche qui existe déjà se sort telle quelle, sans `-b` qui échouerait.
+		git(&["branch", "fix/existante"]);
+		let (commande, _) = workflow.worktree_creation("fix/existante", "");
+		let out = crate::platform::shell(&commande).current_dir(&repo).output().expect("shell");
+		assert!(out.status.success(), "{}", String::from_utf8_lossy(&out.stderr));
+		assert!(root.join("shop-fix-existante").join(".git").exists());
+		let _ = std::fs::remove_dir_all(&base);
 	}
 
 	#[test]
