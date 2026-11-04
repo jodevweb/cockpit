@@ -1039,5 +1039,43 @@
 			"collapse": "Collapse the list",
 			"expand": "Show the group's details"
 		}
+	},
+	"readiness": {
+		"title": "Ready to start?",
+		"intro": "Cockpit drives tools already installed on this machine. What is missing below will stop the first agent you launch.",
+		"recheck": "Check again",
+		"optional": "optional",
+		"openSettings": "Open settings",
+		"restart": "After installing something, restart Cockpit: it looks up programs when it starts.",
+		"checks": {
+			"shell": {
+				"label": "Git for Windows",
+				"fix": "Install Git for Windows (git-scm.com): Cockpit runs every command in its bash."
+			},
+			"git": {
+				"label": "git",
+				"fix": "Install git: worktrees, diffs and missions all rely on it."
+			},
+			"claude": {
+				"label": "Claude Code CLI",
+				"fix": "Install Claude Code, then check that `claude` runs in a terminal."
+			},
+			"claudeAuth": {
+				"label": "Claude Code signed in",
+				"fix": "Sign in from {{where}}, or run `claude auth login` in a terminal."
+			},
+			"node": {
+				"label": "Node.js",
+				"fix": "Install Node 20+ (nodejs.org): agents use it to ask you questions and permissions, and mission workers for their git guardrail."
+			},
+			"project": {
+				"label": "A project",
+				"fix": "To follow a repository's worktrees, missions and pull requests, declare it in {{where}}. Free agents work without one."
+			},
+			"container": {
+				"label": "Docker or OrbStack",
+				"fix": "Optional: to run agents in containers, with their memory capped and their reach bounded."
+			}
+		}
 	}
 }

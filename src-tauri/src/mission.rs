@@ -26,6 +26,8 @@ use crate::error::{CockpitError, Result};
 use serde::{Deserialize, Serialize};
 
 /// Où en est une mission dans son cycle de vie.
+#[cfg_attr(test, derive(ts_rs::TS))]
+#[cfg_attr(test, ts(export))]
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub enum MissionState {
@@ -51,6 +53,8 @@ pub enum MissionState {
 	Failed,
 }
 
+#[cfg_attr(test, derive(ts_rs::TS))]
+#[cfg_attr(test, ts(export))]
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub enum TaskState {
@@ -63,6 +67,8 @@ pub enum TaskState {
 }
 
 /// Une tâche confiée à un exécutant.
+#[cfg_attr(test, derive(ts_rs::TS))]
+#[cfg_attr(test, ts(export, rename = "MissionTask"))]
 #[derive(Debug, Clone, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct Task {
@@ -156,6 +162,7 @@ pub struct Task {
 	/// s'étale sur des heures dont l'essentiel se passe à attendre son tour. Ce
 	/// qu'on veut savoir, c'est le temps qu'elle a réellement coûté.
 	#[serde(default)]
+	#[cfg_attr(test, ts(type = "number"))]
 	pub worked_seconds: u64,
 	/// Où en sont les portes du projet (`workflow.gate_commands`) sur le
 	/// dernier rendu de cette tâche. Voir `gates.rs`.
@@ -171,6 +178,8 @@ pub struct Task {
 /// `None` couvre deux cas qu'on ne distingue pas exprès : le projet ne déclare
 /// aucune porte, ou la tâche n'a encore rien rendu. Dans les deux, rien ne
 /// retient l'intégration — c'est le comportement d'avant les portes.
+#[cfg_attr(test, derive(ts_rs::TS))]
+#[cfg_attr(test, ts(export, rename = "TaskGate"))]
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize, Default)]
 #[serde(rename_all = "camelCase")]
 pub enum Gate {
@@ -189,6 +198,8 @@ impl Gate {
 }
 
 /// Ce que les exécutants d'une mission pourront faire sans rien demander.
+#[cfg_attr(test, derive(ts_rs::TS))]
+#[cfg_attr(test, ts(export, rename = "MissionExposure"))]
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
 #[serde(rename_all = "camelCase")]
 pub struct Exposure {
@@ -368,6 +379,8 @@ pub fn set_task_gate(id: &str, task_id: &str, gate: Gate, output: &str) -> Resul
 /// exécutants étaient déjà prêts à partir sur un malentendu. Chaque étape a
 /// son état de travail (le maître rédige) et son état d'attente (l'humain
 /// relit) ; on ne passe à la suivante que sur un accord.
+#[cfg_attr(test, derive(ts_rs::TS))]
+#[cfg_attr(test, ts(export, rename = "MissionStep"))]
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub enum Step {
@@ -439,6 +452,8 @@ impl Step {
 }
 
 /// Une version de ce que le maître propose à une étape.
+#[cfg_attr(test, derive(ts_rs::TS))]
+#[cfg_attr(test, ts(export, rename = "MissionDraft"))]
 #[derive(Debug, Clone, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct Draft {
@@ -454,6 +469,8 @@ pub struct Draft {
 }
 
 /// Ce qu'un humain a décidé d'une version.
+#[cfg_attr(test, derive(ts_rs::TS))]
+#[cfg_attr(test, ts(export, rename = "MissionReview"))]
 #[derive(Debug, Clone, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct Review {
@@ -467,6 +484,8 @@ pub struct Review {
 	pub at: String,
 }
 
+#[cfg_attr(test, derive(ts_rs::TS))]
+#[cfg_attr(test, ts(export))]
 #[derive(Debug, Clone, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct Mission {
@@ -1993,17 +2012,22 @@ mod tests {
 }
 
 /// Ce qu'une mission coûte, d'après celles qui lui ressemblent.
+#[cfg_attr(test, derive(ts_rs::TS))]
+#[cfg_attr(test, ts(export, rename = "MissionEstimate"))]
 #[derive(Debug, Clone, Serialize, Deserialize, Default)]
 #[serde(rename_all = "camelCase")]
 pub struct Estimate {
 	/// Missions closes sur lesquelles l'estimation s'appuie.
 	pub sample: usize,
 	/// Temps de travail cumulé des exécutants, médiane des comparables.
+	#[cfg_attr(test, ts(type = "number"))]
 	pub median_seconds: u64,
 	/// Le même temps rapporté à une tâche : ce qui permet d'extrapoler quand le
 	/// découpage proposé n'a pas la taille des précédents.
+	#[cfg_attr(test, ts(type = "number"))]
 	pub median_seconds_per_task: u64,
 	/// Estimation pour le découpage proposé.
+	#[cfg_attr(test, ts(type = "number"))]
 	pub expected_seconds: u64,
 	/// Part des comparables qui se sont soldées par un échec.
 	pub failure_rate: f32,
@@ -2788,6 +2812,8 @@ mod verdict_tests {
 }
 
 /// Une tâche qui déborde nettement de ce qu'une tâche coûte d'ordinaire.
+#[cfg_attr(test, derive(ts_rs::TS))]
+#[cfg_attr(test, ts(export, rename = "MissionOverrun"))]
 #[derive(Debug, Clone, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct Overrun {
@@ -2796,8 +2822,10 @@ pub struct Overrun {
 	pub task_id: String,
 	pub title: String,
 	/// Temps de travail du passage en cours, en secondes.
+	#[cfg_attr(test, ts(type = "number"))]
 	pub seconds: u64,
 	/// Ce qu'une tâche coûte d'ordinaire, sur les missions closes.
+	#[cfg_attr(test, ts(type = "number"))]
 	pub expected: u64,
 }
 

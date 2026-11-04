@@ -1,0 +1,4 @@
+# Où `cargo test` écrit les types TypeScript dérivés du Rust (ts-rs) : à côté
+# des types écrits à la main, que `src/lib/types.ts` réexporte.
+[env]
+TS_RS_EXPORT_DIR = { value = "../src/lib/generated", relative = true }

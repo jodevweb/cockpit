@@ -1005,5 +1005,43 @@
 			"collapse": "リストを折りたたむ",
 			"expand": "グループの詳細を表示"
 		}
+	},
+	"readiness": {
+		"title": "準備はできていますか？",
+		"intro": "Cockpit はこのマシンにインストール済みのツールを操作します。下で不足しているものがあると、最初に起動するエージェントが止まります。",
+		"recheck": "再確認",
+		"optional": "任意",
+		"openSettings": "設定を開く",
+		"restart": "インストール後は Cockpit を再起動してください。起動時にプログラムを探します。",
+		"checks": {
+			"shell": {
+				"label": "Git for Windows",
+				"fix": "Git for Windows（git-scm.com）をインストールしてください。Cockpit はすべてのコマンドをその bash で実行します。"
+			},
+			"git": {
+				"label": "git",
+				"fix": "git をインストールしてください。worktree、diff、ミッションが依存しています。"
+			},
+			"claude": {
+				"label": "Claude Code CLI",
+				"fix": "Claude Code をインストールし、ターミナルで `claude` が動くことを確認してください。"
+			},
+			"claudeAuth": {
+				"label": "Claude Code にサインイン済み",
+				"fix": "{{where}} からサインインするか、ターミナルで `claude auth login` を実行してください。"
+			},
+			"node": {
+				"label": "Node.js",
+				"fix": "Node 20+（nodejs.org）をインストールしてください。エージェントが質問や権限の確認に使い、ミッションの実行者は git ガードに使います。"
+			},
+			"project": {
+				"label": "プロジェクト",
+				"fix": "リポジトリの worktree、ミッション、プルリクエストを追うには、{{where}} で登録してください。フリーエージェントはなくても動きます。"
+			},
+			"container": {
+				"label": "Docker または OrbStack",
+				"fix": "任意：エージェントをコンテナで動かし、メモリと到達範囲を制限します。"
+			}
+		}
 	}
 }
