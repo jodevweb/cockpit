@@ -59,7 +59,8 @@
 			"running": "Vérifications du dépôt en cours : {{commands}}",
 			"timedOut": "Arrêtée après {{minutes}} min sans avoir fini.",
 			"launchFailed": "Impossible de lancer la vérification : {{error}}",
-			"noWorktree": "Les vérifications n'ont pas pu tourner : le worktree de la tâche n'existe plus ({{path}})."
+			"noWorktree": "Les vérifications n'ont pas pu tourner : le worktree de la tâche n'existe plus ({{path}}).",
+			"noRuntime": "L'isolation des agents est active mais ni Docker ni OrbStack n'est installé : les vérifications ne tournent pas sur le poste à leur place."
 		}
 	},
 	"panel": {

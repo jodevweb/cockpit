@@ -21,9 +21,19 @@
 //! revient à l'agent avec sa raison, et `--settings` **s'ajoute** aux hooks
 //! que le dépôt déclare dans `.claude/settings.json` au lieu de les remplacer.
 //!
+//! La ligne est lue comme un shell la lirait, guillemets compris : un message
+//! de commit qui contient « ; git push -f » reste un message. Ce qui enveloppe
+//! une commande sans en changer le sens est retiré avant de la juger —
+//! `bash -c`, `sh -lc`, `eval`, `xargs`, `env`, `sudo`, `time`, `nohup`, `(…)`,
+//! `$(…)`, `{ …; }`, `then`, `do` — et les options longues abrégées que git
+//! accepte (`--forc`, `--dele`) valent les entières.
+//!
 //! Ce qu'il ne fait pas, exprès : deviner ce qu'une ligne de commande écrit
 //! sur le disque. Il ne reconnaît que des commandes git dont la forme se lit
-//! sans ambiguïté, et laisse passer tout le reste.
+//! sans ambiguïté, et laisse passer tout le reste. Il reste donc des chemins
+//! qu'il ne voit pas — un alias déjà défini dans le `.gitconfig` du poste, un
+//! script qui pousse à la place de l'agent — : c'est un garde-fou contre le
+//! geste de routine, pas une enceinte. L'enceinte, c'est le conteneur.
 
 use std::path::PathBuf;
 
@@ -35,83 +45,195 @@ pub(crate) const GUARD: &str = r#"#!/usr/bin/env node
 const PROTECTED = (process.env.COCKPIT_PROTECTED_BRANCHES ?? "")
   .split("\n").map((b) => b.trim()).filter(Boolean);
 
-/** Les mots d'une commande, guillemets simples et doubles compris. */
-function words(segment) {
+/**
+ * Les commandes d'une ligne de shell, chacune en mots.
+ *
+ * Les séparateurs (`;`, `&&`, `||`, `|`, `&`, retour à la ligne) ne comptent
+ * qu'hors des guillemets : un message de commit qui contient « ; git push -f »
+ * reste un message, pas une seconde commande.
+ */
+function commands(line) {
   const out = [];
-  const re = /"((?:[^"\\]|\\.)*)"|'([^']*)'|(\S+)/g;
-  let m;
-  while ((m = re.exec(segment))) out.push(m[1] ?? m[2] ?? m[3]);
+  let current = [];
+  let word = "";
+  let inWord = false;
+  let quote = null;
+  const s = String(line ?? "");
+  const endWord = () => {
+    if (inWord) current.push(word);
+    word = "";
+    inWord = false;
+  };
+  const endCommand = () => {
+    endWord();
+    if (current.length) out.push(current);
+    current = [];
+  };
+  for (let i = 0; i < s.length; i += 1) {
+    const c = s[i];
+    if (quote) {
+      if (c === quote) quote = null;
+      else if (c === "\\" && quote === '"' && i + 1 < s.length) word += s[++i];
+      else word += c;
+      continue;
+    }
+    if (c === "'" || c === '"') { quote = c; inWord = true; continue; }
+    if (c === "\\" && i + 1 < s.length) { word += s[++i]; inWord = true; continue; }
+    // Les parenthèses ouvrent ou ferment une sous-commande : `(git push -f)`,
+    // `$(git push -f)` se jugent comme la commande qu'elles contiennent.
+    if (c === "\n" || c === ";" || c === "&" || c === "|" || c === "(" || c === ")") {
+      endCommand();
+      // `&&`, `||` : un seul séparateur.
+      if ((c === "&" || c === "|") && s[i + 1] === c) i += 1;
+      continue;
+    }
+    if (c === " " || c === "\t") { endWord(); continue; }
+    word += c;
+    inWord = true;
+  }
+  endCommand();
   return out;
 }
 
-/** Les commandes d'une ligne : `a && b`, `a; b`, `a | b`, une par ligne. */
-function segments(command) {
-  return String(command ?? "").split(/&&|\|\||[;|\n]/).map((s) => s.trim()).filter(Boolean);
+/** Les mots qui précèdent la vraie commande sans en changer le sens. */
+const PREFIXES = new Set(["then", "do", "else", "elif", "if", "while", "until", "!", "time", "nohup", "exec", "command", "builtin", "nice", "stdbuf"]);
+const SHELLS = /(^|[\/\\])(ba|z|da|k)?sh(\.exe)?$/;
+const GIT = /(^|[\/\\])git(\.exe)?$/;
+
+/** Retire ce qui enveloppe la commande : préfixes, affectations, `env`, `sudo`, `xargs`. */
+function unwrap(w) {
+  let words = w.map((word, index) => (index === 0 ? word.replace(/^[({]+/, "") : word)).filter((word, index) => index > 0 || word !== "");
+  for (let guard = 0; guard < 20 && words.length; guard += 1) {
+    const first = words[0];
+    if (first === "" || first === "(" || first === "{" || PREFIXES.has(first) || /^[A-Za-z_][A-Za-z0-9_]*=/.test(first)) {
+      words = words.slice(1);
+      if (words.length) words[0] = words[0].replace(/^[({]+/, "");
+      continue;
+    }
+    if (first === "env" || first === "sudo" || first === "xargs" || first === "doas") {
+      // Leurs options, et la valeur de celles qui en prennent une.
+      let i = 1;
+      const withValue = { env: ["-u", "--unset", "-C", "--chdir", "-S"], sudo: ["-u", "-g", "-C", "-D", "-h", "-p", "-r", "-t", "-U"], xargs: ["-n", "-L", "-P", "-I", "-d", "-E", "-s", "-a"], doas: ["-u", "-C"] }[first];
+      while (i < words.length && (words[i].startsWith("-") || (first === "env" && /^[A-Za-z_][A-Za-z0-9_]*=/.test(words[i])))) {
+        i += withValue.includes(words[i]) ? 2 : 1;
+      }
+      words = words.slice(i);
+      continue;
+    }
+    break;
+  }
+  return words;
 }
 
 const short = (word, letter) => /^-[A-Za-z]+$/.test(word) && word.includes(letter);
+/** Une option longue, ou une abréviation qu'en accepte git (`--forc`, `--dele`). */
+const long = (word, option, min) => {
+  const base = word.split("=")[0];
+  return base.length >= min && base.startsWith("--") && option.startsWith(base);
+};
 const branchName = (ref) => ref.replace(/^\+/, "").replace(/^refs\/heads\//, "");
 
-/** La raison du refus, ou `null` quand la commande passe. */
-function judge(command) {
-  for (const segment of segments(command)) {
-    let w = words(segment);
-    // `env X=1 git …`, `X=1 git …`, `sudo git …` : on va jusqu'au git.
-    while (w.length && (/^[A-Za-z_][A-Za-z0-9_]*=/.test(w[0]) || w[0] === "env" || w[0] === "command")) w = w.slice(1);
-    if (!w.length || !/(^|[\/\\])git(\.exe)?$/.test(w[0])) continue;
-    let i = 1;
-    while (i < w.length && w[i].startsWith("-")) {
-      i += w[i] === "-C" || w[i] === "-c" ? 2 : 1;
-    }
-    const sub = w[i];
-    const rest = w.slice(i + 1);
-    const flags = rest.filter((a) => a.startsWith("-"));
-    const positional = rest.filter((a) => !a.startsWith("-"));
+/** La raison du refus pour une commande en mots, ou `null`. */
+function judgeWords(raw, protectedBranches, depth) {
+  const w = unwrap(raw);
+  if (!w.length) return null;
+  // `bash -c "…"`, `sh -lc '…'` : le texte est une ligne de commande de plus.
+  if (SHELLS.test(w[0])) {
+    const flag = w.findIndex((word, index) => index > 0 && /^-[A-Za-z]*c[A-Za-z]*$/.test(word));
+    if (flag > 0 && w[flag + 1] !== undefined) return judge(w[flag + 1], protectedBranches, depth + 1);
+    return null;
+  }
+  if (w[0] === "eval") return judge(w.slice(1).join(" "), protectedBranches, depth + 1);
+  if (!GIT.test(w[0])) return null;
 
-    if (sub === "push") {
-      if (flags.some((f) => f === "--force" || f.startsWith("--force-with-lease") || f === "--force-if-includes" || short(f, "f"))
-        || positional.slice(1).some((ref) => ref.startsWith("+"))) {
-        return "Force-pushing is not allowed for a mission worker: it rewrites a history others read. Push normally, or report the problem.";
-      }
-      if (flags.some((f) => f === "--delete" || f === "--mirror" || f === "--prune" || short(f, "d"))
-        || positional.slice(1).some((ref) => ref.startsWith(":"))) {
-        return "Deleting or mirroring remote branches is not allowed for a mission worker.";
-      }
-      for (const ref of positional.slice(1)) {
-        const target = branchName(ref.includes(":") ? ref.split(":").pop() : ref);
-        if (PROTECTED.includes(target)) {
-          return `Pushing to \`${target}\` is not allowed for a mission worker: the integration merges your branch, you never push to it. Commit on your own branch.`;
-        }
-      }
+  let i = 1;
+  const twoTokens = ["-C", "-c", "--git-dir", "--work-tree", "--namespace", "--exec-path", "--config-env"];
+  while (i < w.length && w[i].startsWith("-")) {
+    // `-c alias.p="push -f"` : un alias posé pour la durée de la commande.
+    if (w[i] === "-c" && /^alias\./.test(w[i + 1] ?? "")) {
+      return "Defining git aliases is not allowed for a mission worker.";
     }
+    i += twoTokens.includes(w[i]) ? 2 : 1;
+  }
+  const sub = w[i];
+  const rest = w.slice(i + 1);
+  const flags = rest.filter((a) => a.startsWith("-"));
 
-    const creates =
-      (sub === "checkout" && flags.some((f) => f === "-b" || f === "-B" || f === "--orphan"))
-      || (sub === "switch" && flags.some((f) => ["-c", "-C", "--create", "--force-create", "--orphan"].includes(f)))
-      || (sub === "worktree" && rest[0] === "add" && flags.some((f) => f === "-b" || f === "-B"))
-      || (sub === "branch" && positional.length > 0
-        && !flags.some((f) => ["--list", "-l", "-a", "--all", "-r", "--remotes", "--contains", "--no-contains",
-          "--merged", "--no-merged", "--points-at", "--show-current", "-v", "-vv", "--verbose", "--format"].some((r) => f === r || f.startsWith(`${r}=`))));
-    if (creates) {
-      return "Creating, renaming or deleting branches is not allowed for a mission worker: your work must stay on the branch the cockpit gave you, where the integration looks for it. Commit there.";
+  if (sub === "config" && rest.some((a) => /^alias\./.test(a))) {
+    return "Defining git aliases is not allowed for a mission worker.";
+  }
+
+  if (sub === "push") {
+    // Les options qui prennent une valeur en deux mots : la valeur n'est ni
+    // le dépôt distant ni une branche.
+    const valued = ["-o", "--push-option", "--repo", "--receive-pack", "--exec"];
+    const positional = [];
+    for (let k = 0; k < rest.length; k += 1) {
+      if (valued.includes(rest[k])) { k += 1; continue; }
+      if (!rest[k].startsWith("-")) positional.push(rest[k]);
     }
+    const refs = positional.slice(1);
+    if (flags.some((f) => short(f, "f") || long(f, "--force", 4) || long(f, "--force-with-lease", 4) || long(f, "--force-if-includes", 4))
+      || refs.some((ref) => ref.startsWith("+"))) {
+      return "Force-pushing is not allowed for a mission worker: it rewrites a history others read. Push normally, or report the problem.";
+    }
+    if (flags.some((f) => short(f, "d") || long(f, "--delete", 4) || long(f, "--mirror", 4) || long(f, "--prune", 5) || long(f, "--all", 5))
+      || refs.some((ref) => ref.startsWith(":"))) {
+      return "Deleting, mirroring or pushing every branch is not allowed for a mission worker.";
+    }
+    for (const ref of refs) {
+      const target = branchName(ref.includes(":") ? ref.split(":").pop() : ref);
+      if (protectedBranches.includes(target)) {
+        return `Pushing to \`${target}\` is not allowed for a mission worker: the integration merges your branch, you never push to it. Commit on your own branch.`;
+      }
+    }
+  }
+
+  const listing = ["--list", "-l", "-a", "--all", "-r", "--remotes", "--contains", "--no-contains", "--merged",
+    "--no-merged", "--points-at", "--show-current", "--format", "-u", "--set-upstream-to", "--unset-upstream"];
+  const positional = rest.filter((a) => !a.startsWith("-"));
+  const creates =
+    (sub === "checkout" && flags.some((f) => ["-b", "-B", "--orphan", "-t"].includes(f) || long(f, "--track", 4) || long(f, "--orphan", 4)))
+    || (sub === "switch" && flags.some((f) => ["-c", "-C", "-t"].includes(f) || long(f, "--create", 4) || long(f, "--force-create", 4) || long(f, "--orphan", 4) || long(f, "--track", 4)))
+    // Un worktree de plus : une branche de plus, et un dossier hors du sien.
+    || (sub === "worktree" && rest[0] === "add")
+    || (sub === "update-ref" && rest.some((a) => a.startsWith("refs/heads/")))
+    || (sub === "branch" && positional.length > 0
+      && !flags.some((f) => listing.some((r) => f === r || f.startsWith(`${r}=`))));
+  if (creates) {
+    return "Creating, renaming or deleting branches is not allowed for a mission worker: your work must stay on the branch the cockpit gave you, where the integration looks for it. Commit there.";
   }
   return null;
 }
+
+/** La raison du refus, ou `null` quand la ligne de commande passe. */
+function judge(line, protectedBranches, depth = 0) {
+  // Une imbrication sans fin (`bash -c "bash -c …"`) ne mérite pas d'être lue
+  // jusqu'au bout : au-delà, on refuse.
+  if (depth > 4) return "This command nests too many shells to be checked.";
+  for (const words of commands(line)) {
+    const reason = judgeWords(words, protectedBranches, depth);
+    if (reason) return reason;
+  }
+  return null;
+}
+
 
 let raw = "";
 process.stdin.on("data", (chunk) => (raw += chunk));
 process.stdin.on("end", () => {
   let input = {};
-  try { input = JSON.parse(raw || "{}"); } catch { process.exit(0); }
-  if (input.tool_name !== "Bash") process.exit(0);
-  const reason = judge(input.tool_input?.command);
+  try { input = JSON.parse(raw || "{}"); } catch { return; }
+  if (input.tool_name !== "Bash") return;
+  const reason = judge(input.tool_input?.command, PROTECTED);
   if (reason) {
+    // Pas de `process.exit` juste derrière : la sortie partirait peut-être
+    // sans le refus, et le CLI lirait un accord.
     process.stdout.write(JSON.stringify({
       hookSpecificOutput: { hookEventName: "PreToolUse", permissionDecision: "deny", permissionDecisionReason: reason },
     }));
   }
-  process.exit(0);
+  process.exitCode = 0;
 });
 "#;
 
@@ -132,7 +254,9 @@ pub fn settings_argument(sandboxed: bool) -> Option<String> {
 		crate::agent::node_binary()?
 	};
 	std::fs::create_dir_all(config_dir()).ok()?;
-	std::fs::write(guard_path(), GUARD).ok()?;
+	// Écrit à côté puis renommé : plusieurs exécutants partent souvent ensemble,
+	// et un hook qui lirait un script à moitié écrit laisserait tout passer.
+	write_atomic(&guard_path(), GUARD).ok()?;
 
 	let seen = |path: &std::path::Path| {
 		let path = path.to_string_lossy().to_string();
@@ -151,8 +275,30 @@ pub fn settings_argument(sandboxed: bool) -> Option<String> {
 		},
 	});
 	let path = config_dir().join("mission-guard.json");
-	std::fs::write(&path, serde_json::to_string_pretty(&settings).ok()?).ok()?;
+	write_atomic(&path, &serde_json::to_string_pretty(&settings).ok()?).ok()?;
 	Some(seen(&path))
+}
+
+/// Écrit un fichier sans qu'on puisse jamais le lire à moitié : une copie
+/// propre à ce processus, puis un renommage, qui remplace d'un coup.
+fn write_atomic(path: &std::path::Path, content: &str) -> std::io::Result<()> {
+	static SEQ: std::sync::atomic::AtomicUsize = std::sync::atomic::AtomicUsize::new(0);
+	let n = SEQ.fetch_add(1, std::sync::atomic::Ordering::SeqCst);
+	let temp = path.with_extension(format!("tmp-{}-{n}", std::process::id()));
+	std::fs::write(&temp, content)?;
+	match std::fs::rename(&temp, path) {
+		Ok(()) => Ok(()),
+		Err(error) => {
+			let _ = std::fs::remove_file(&temp);
+			// Sous Windows, un hook qui lit le fichier à cet instant empêche de le
+			// remplacer. S'il porte déjà ce contenu, il n'y a rien à faire.
+			if std::fs::read_to_string(path).map(|present| present == content).unwrap_or(false) {
+				Ok(())
+			} else {
+				Err(error)
+			}
+		}
+	}
 }
 
 /// Les branches qu'un exécutant de cette mission ne pousse jamais.
@@ -249,6 +395,13 @@ mod tests {
 			"git log --oneline main..HEAD",
 			"pnpm test",
 			"echo 'git push --force'",
+			// Un séparateur entre guillemets n'ouvre pas de seconde commande.
+			"git commit -m \"fix: x; git push --force is now blocked\"",
+			"echo \"a | git push -f\"",
+			"git branch -u origin/x",
+			"git push -o ci.skip origin feat/mission-42-back",
+			"git push --follow-tags",
+			"bash -c 'pnpm test'",
 		] {
 			assert!(!sans_node_on_passe!(refuse(command)), "refusé à tort : {command}");
 		}
@@ -268,6 +421,10 @@ mod tests {
 			"git add . && git commit -m x && git push --force",
 			"GIT_TRACE=1 git push --force",
 			"git -C ../autre push -f",
+			"git --git-dir .git push -f",
+			"git push --forc",
+			"git push --dele origin x",
+			"git push --all origin",
 		] {
 			assert!(sans_node_on_passe!(refuse(command)), "laissé passer : {command}");
 		}
@@ -296,6 +453,36 @@ mod tests {
 			"git branch -m nouveau-nom",
 			"git branch -D feat/mission-42-back",
 			"git worktree add -b x ../x",
+			"git worktree add ../x",
+			"git checkout --track origin/x",
+			"git switch --track origin/x",
+			"git update-ref refs/heads/x HEAD",
+			"git branch -v nom",
+		] {
+			assert!(sans_node_on_passe!(refuse(command)), "laissé passer : {command}");
+		}
+	}
+
+	/// Ce qu'un agent écrirait pour passer à côté sans le vouloir — ou en le
+	/// voulant : une enveloppe de shell autour de la même commande.
+	#[test]
+	fn les_enveloppes_ne_cachent_pas_la_commande() {
+		for command in [
+			"bash -c \"git push --force\"",
+			"sh -lc 'git checkout -b x'",
+			"(git push -f)",
+			"{ git push -f; }",
+			"if true; then git push -f; fi",
+			"time git push -f",
+			"nohup git push -f",
+			"sudo -u bob git push -f",
+			"env -i git push -f",
+			"sleep 1 & git push -f",
+			"eval \"git push -f\"",
+			"xargs -n 1 git push -f",
+			"echo $(git push -f)",
+			"git config alias.p \"push -f\"",
+			"git -c alias.p=\"push -f\" p",
 		] {
 			assert!(sans_node_on_passe!(refuse(command)), "laissé passer : {command}");
 		}

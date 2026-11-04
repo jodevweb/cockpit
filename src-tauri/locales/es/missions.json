@@ -59,7 +59,8 @@
 			"running": "Comprobaciones del repositorio en curso: {{commands}}",
 			"timedOut": "Detenida tras {{minutes}} min sin terminar.",
 			"launchFailed": "No se pudo iniciar la comprobación: {{error}}",
-			"noWorktree": "Las comprobaciones no pudieron ejecutarse: el worktree de la tarea ya no existe ({{path}})."
+			"noWorktree": "Las comprobaciones no pudieron ejecutarse: el worktree de la tarea ya no existe ({{path}}).",
+			"noRuntime": "El aislamiento de agentes está activado pero no se encontró Docker ni OrbStack: las comprobaciones no se ejecutan en el equipo en su lugar."
 		}
 	},
 	"panel": {

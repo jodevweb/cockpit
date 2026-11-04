@@ -51,7 +51,7 @@ const SCOPE = (process.env.COCKPIT_SCOPE ?? "")
 // Les outils dont on sait lire la cible sans l'interpréter. `Bash` en est
 // exclu : deviner ce qu'une ligne de commande touche serait une promesse qu'on
 // ne peut pas tenir.
-const ECRITURES = { Write: "file_path", Edit: "file_path", NotebookEdit: "notebook_path" };
+const ECRITURES = { Write: "file_path", Edit: "file_path", MultiEdit: "file_path", NotebookEdit: "notebook_path" };
 
 // Le dossier de travail de l'agent : les chemins que le CLI passe à `Write` et
 // `Edit` sont absolus, le périmètre est relatif à ce dossier.

@@ -59,7 +59,8 @@
 			"running": "Repository checks running: {{commands}}",
 			"timedOut": "Stopped after {{minutes}} min without finishing.",
 			"launchFailed": "Could not start the check: {{error}}",
-			"noWorktree": "The checks could not run: the task's worktree no longer exists ({{path}})."
+			"noWorktree": "The checks could not run: the task's worktree no longer exists ({{path}}).",
+			"noRuntime": "Agent isolation is on but neither Docker nor OrbStack was found: the checks are not run on the host in their place."
 		}
 	},
 	"panel": {

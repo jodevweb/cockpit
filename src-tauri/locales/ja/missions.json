@@ -59,7 +59,8 @@
 			"running": "リポジトリのチェックを実行中: {{commands}}",
 			"timedOut": "{{minutes}} 分経っても終わらないため停止しました。",
 			"launchFailed": "チェックを開始できませんでした: {{error}}",
-			"noWorktree": "チェックを実行できません: タスクの worktree が存在しません ({{path}})。"
+			"noWorktree": "チェックを実行できません: タスクの worktree が存在しません ({{path}})。",
+			"noRuntime": "エージェントの隔離が有効ですが、Docker も OrbStack も見つかりません。代わりにこのマシンでチェックを実行することはしません。"
 		}
 	},
 	"panel": {

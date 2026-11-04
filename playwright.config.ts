@@ -15,16 +15,20 @@ export default defineConfig({
 	retries: process.env.CI ? 1 : 0,
 	reporter: process.env.CI ? [["list"], ["html", { open: "never" }]] : "list",
 	use: {
-		baseURL: "http://localhost:4173",
+		baseURL: "http://localhost:41730",
 		locale: "en-US",
 		viewport: { width: 1568, height: 900 },
 		trace: "retain-on-failure",
 	},
 	projects: [{ name: "chromium", use: { ...devices["Desktop Chrome"], viewport: { width: 1568, height: 900 } } }],
+	// Un port que rien d'autre n'occupe d'ordinaire, et jamais un serveur déjà
+	// là : le 4173 par défaut de Vite servait parfois l'app d'un autre projet,
+	// et tous les tests échouaient contre elle. Un port pris fait désormais
+	// échouer le lancement, avec un message qui le dit.
 	webServer: {
-		command: "pnpm exec vite --port 4173 --strictPort",
-		url: "http://localhost:4173",
-		reuseExistingServer: !process.env.CI,
+		command: "pnpm exec vite --port 41730 --strictPort",
+		url: "http://localhost:41730",
+		reuseExistingServer: false,
 		timeout: 60_000,
 	},
 });

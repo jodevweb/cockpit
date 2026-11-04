@@ -1702,7 +1702,7 @@ pub fn relative_to(root: &str, path: &str) -> Option<String> {
 	fn parts(raw: &str) -> (bool, Vec<String>) {
 		let forward = raw.trim().replace('\\', "/");
 		let absolute = forward.starts_with('/')
-			|| (forward.len() >= 2 && forward.as_bytes()[1] == b':');
+			|| (forward.len() >= 2 && forward.as_bytes()[0].is_ascii_alphabetic() && forward.as_bytes()[1] == b':');
 		let mut out: Vec<String> = Vec::new();
 		for (index, part) in forward.split('/').enumerate() {
 			match part {
@@ -1716,7 +1716,7 @@ pub fn relative_to(root: &str, path: &str) -> Option<String> {
 				}
 				// `C:` et `/c/` désignent le même lecteur : la seconde est la
 				// forme du conteneur sous Windows (`sandbox::container_path`).
-				part if index == 0 && part.len() == 2 && part.ends_with(':') => {
+				part if index == 0 && part.len() == 2 && part.ends_with(':') && part.as_bytes()[0].is_ascii_alphabetic() => {
 					out.push(part[..1].to_ascii_lowercase());
 				}
 				part if absolute && out.is_empty() && part.len() == 1 => {
@@ -1775,7 +1775,10 @@ pub fn written_paths(tool: &str, input: &serde_json::Value) -> Vec<String> {
 			.map(|value| value.to_string())
 	};
 	match tool {
-		"Write" | "Edit" | "NotebookEdit" => field("file_path").into_iter().collect(),
+		"Write" | "Edit" | "MultiEdit" => field("file_path").into_iter().collect(),
+		// Le carnet nomme sa cible autrement : la lire sous `file_path` laissait
+		// ce garde-fou aveugle à toute écriture de notebook.
+		"NotebookEdit" => field("notebook_path").into_iter().collect(),
 		_ => Vec::new(),
 	}
 }
@@ -1984,6 +1987,21 @@ mod tests {
 		// La forme vue depuis un conteneur (`sandbox::container_path`).
 		assert!(within_scope_at(root, &scope, "/c/Users/a/wt/feat-x/apps/api/main.rs"));
 		assert!(!within_scope_at(root, &scope, r"D:\Users\a\wt\feat-x\apps\api\main.rs"));
+	}
+
+	#[test]
+	fn chaque_outil_d_ecriture_nomme_sa_cible() {
+		let input = serde_json::json!({ "file_path": "/w/a.rs", "notebook_path": "/w/n.ipynb" });
+		assert_eq!(written_paths("Write", &input), vec!["/w/a.rs"]);
+		assert_eq!(written_paths("MultiEdit", &input), vec!["/w/a.rs"]);
+		assert_eq!(written_paths("NotebookEdit", &input), vec!["/w/n.ipynb"]);
+		assert!(written_paths("Bash", &input).is_empty());
+	}
+
+	#[test]
+	fn un_chiffre_suivi_de_deux_points_n_est_pas_un_lecteur() {
+		// Seule une lettre désigne un lecteur Windows.
+		assert_eq!(relative_to("/w", "1:/x"), Some("1:/x".to_string()));
 	}
 
 	#[test]

@@ -59,7 +59,8 @@
 			"running": "저장소 검사 실행 중: {{commands}}",
 			"timedOut": "{{minutes}}분 동안 끝나지 않아 중지했습니다.",
 			"launchFailed": "검사를 시작할 수 없습니다: {{error}}",
-			"noWorktree": "검사를 실행할 수 없습니다: 작업의 worktree가 더 이상 없습니다 ({{path}})."
+			"noWorktree": "검사를 실행할 수 없습니다: 작업의 worktree가 더 이상 없습니다 ({{path}}).",
+			"noRuntime": "에이전트 격리가 켜져 있지만 Docker와 OrbStack을 찾을 수 없습니다. 대신 이 컴퓨터에서 검사를 실행하지 않습니다."
 		}
 	},
 	"panel": {

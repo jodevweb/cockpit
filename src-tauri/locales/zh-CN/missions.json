@@ -59,7 +59,8 @@
 			"running": "仓库检查进行中：{{commands}}",
 			"timedOut": "运行 {{minutes}} 分钟仍未结束，已停止。",
 			"launchFailed": "无法启动检查：{{error}}",
-			"noWorktree": "无法运行检查：任务的 worktree 已不存在（{{path}}）。"
+			"noWorktree": "无法运行检查：任务的 worktree 已不存在（{{path}}）。",
+			"noRuntime": "已开启代理隔离，但未找到 Docker 或 OrbStack：检查不会改为在本机上运行。"
 		}
 	},
 	"panel": {

@@ -59,7 +59,8 @@
 			"running": "Controlli del repository in corso: {{commands}}",
 			"timedOut": "Interrotto dopo {{minutes}} min senza terminare.",
 			"launchFailed": "Impossibile avviare il controllo: {{error}}",
-			"noWorktree": "Impossibile eseguire i controlli: il worktree dell'attività non esiste più ({{path}})."
+			"noWorktree": "Impossibile eseguire i controlli: il worktree dell'attività non esiste più ({{path}}).",
+			"noRuntime": "L'isolamento degli agenti è attivo ma non sono stati trovati né Docker né OrbStack: i controlli non vengono eseguiti sulla macchina al loro posto."
 		}
 	},
 	"panel": {
