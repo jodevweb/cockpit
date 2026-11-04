@@ -1007,40 +1007,9 @@ export interface LinearIssueDetail {
 }
 
 /** Ce qu'une mission coûtera, d'après celles qui lui ressemblent. */
-/** Un prérequis du poste (voir `readiness.rs`). */
-export interface ReadinessCheck {
-	id: "shell" | "git" | "claude" | "claudeAuth" | "node" | "project" | "container";
-	/** Sans lui, aucun agent ne peut tourner sur un dépôt. */
-	required: boolean;
-	ok: boolean;
-	/** Ce qui a été trouvé : un chemin, un courriel. */
-	detail: string;
-}
 
-export interface Readiness {
-	ready: boolean;
-	checks: ReadinessCheck[];
-}
 
-/** Ce que les exécutants d'une mission pourront faire sans rien demander. */
-export interface MissionExposure {
-	/** Les agents partent dans un conteneur. */
-	sandboxed: boolean;
-	/** Les rôles du plan qui partiront en `bypassPermissions` hors conteneur. */
-	unguardedRoles: string[];
-}
 
-export interface MissionEstimate {
-	/** Missions closes sur lesquelles l'estimation s'appuie. */
-	sample: number;
-	medianSeconds: number;
-	medianSecondsPerTask: number;
-	expectedSeconds: number;
-	/** Part des comparables qui ont échoué, entre 0 et 1. */
-	failureRate: number;
-	/** Vrai quand l'échantillon est trop mince pour qu'on s'y fie. */
-	thin: boolean;
-}
 
 export interface LinearOptions {
 	states: NamedRef[];
@@ -1769,140 +1738,14 @@ export interface RemoteStatus {
 
 // ──────────────────────────────── Missions ────────────────────────────────
 
-export type MissionState =
-	| "understanding"
-	| "awaitingUnderstanding"
-	| "approaching"
-	| "awaitingApproach"
-	| "planning"
-	| "awaitingApproval"
-	| "running"
-	| "integrating"
-	| "done"
-	| "failed";
 
-/** Les trois accords d'une mission guidée, dans l'ordre. */
-export type MissionStep = "understanding" | "approach" | "split";
 
-/** Ce qu'un humain a décidé d'une proposition — posé une fois, jamais réécrit. */
-export interface MissionReview {
-	approved: boolean;
-	feedback: string;
-	/** Dans l'ordre des questions ; vide = sans réponse. */
-	answers: string[];
-	at: string;
-}
 
-/** Une version de ce que le maître propose à une étape. */
-export interface MissionDraft {
-	text: string;
-	questions: string[];
-	submittedAt: string;
-	review: MissionReview | null;
-}
 
-export type TaskState = "planned" | "running" | "delivered" | "integrated" | "failed";
 
-export interface MissionTask {
-	id: string;
-	/** Rôle du catalogue : décide du prompt, du modèle et du périmètre. */
-	role: string;
-	title: string;
-	brief: string;
-	/** Chemins où cette tâche a le droit d'écrire ; vide = tout le dépôt. */
-	scope: string[];
-	/** Branche de départ : l'intégration, ou une sœur en cas de dépendance. */
-	base: string;
-	branch: string;
-	worktree: string;
-	sessionId: string | null;
-	/** Conversation du moteur, retenue pour reprendre plutôt que tout refaire. */
-	engineSession: string;
-	/**
-	 * La branche où l'exécutant a réellement travaillé, quand ce n'est pas la
-	 * sienne. Vide tant qu'il est resté sur la branche de sa tâche.
-	 */
-	actualBranch: string;
-	state: TaskState;
-	/**
-	 * Ce que le cockpit a lu du rapport d'une vérification : `blocking`,
-	 * `reserves` ou `ok`. Vide tant qu'elle n'a rien conclu, ou quand le rôle
-	 * ne juge pas. Un `blocking` ferme la pull request tant qu'il tient.
-	 */
-	verdict: string;
-	note: string;
-	/** Nombre de renvois en correction ; 3 au maximum. */
-	attempts: number;
-	/** Ce qui a été reproché, une entrée par reprise, dans l'ordre. */
-	reproaches: string[];
-	/** Début du passage en cours ; remis à zéro à chaque reprise. */
-	startedAt: string | null;
-	finishedAt: string | null;
-	/** Temps de travail cumulé sur tous les passages, en secondes. */
-	workedSeconds: number;
-	/** Où en était le travail au dernier passage d'une vérification. */
-	checkpoint: string;
-	/**
-	 * Les portes du dépôt (`workflow.gateCommands`) sur le dernier rendu.
-	 * `running` ou `failed` retiennent l'intégration de la tâche.
-	 */
-	gate: TaskGate;
-	/** La commande qui a échoué et la fin de sa sortie. */
-	gateOutput: string;
-}
 
-export type TaskGate = "none" | "running" | "passed" | "failed";
 
-/**
- * Une tâche qui déborde nettement de ce qu'une tâche coûte d'ordinaire.
- *
- * Le cockpit ne coupe rien : une tâche longue peut être une tâche difficile.
- * Il dit ce qu'il voit, et la décision reste à qui pilote.
- */
-export interface MissionOverrun {
-	missionId: string;
-	missionTitle: string;
-	taskId: string;
-	title: string;
-	/** Temps du passage en cours, en secondes. */
-	seconds: number;
-	/** Le repère : ce qu'une tâche coûte sur les missions closes. */
-	expected: number;
-}
 
-export interface Mission {
-	id: string;
-	title: string;
-	ticket: string;
-	ticketUrl: string;
-	/** Branche d'intégration : les exécutants en partent, le maître y recompose. */
-	branch: string;
-	/** Branche sur laquelle la PR finale se greffe. Vide = branche par défaut. */
-	base: string;
-	cwd: string;
-	masterSession: string | null;
-	state: MissionState;
-	plan: string;
-	/** Parcours guidé : compréhension, approche et découpage validés un à un. */
-	guided: boolean;
-	understanding: MissionDraft[];
-	approach: MissionDraft[];
-	/** Les découpages proposés ; le dernier est celui que portent `plan` et `tasks`. */
-	split: MissionDraft[];
-	/** Pull request d'intégration, une fois ouverte. */
-	prUrl: string;
-	/** Compte rendu du maître : ce qui a été fait, et comment ça marche. */
-	summary: string;
-	note: string;
-	/** Mission suspendue : le lanceur ne fait plus partir personne. */
-	paused: boolean;
-	/** Approbation du plan — le vrai départ, distinct de l'ouverture. */
-	startedAt: string | null;
-	finishedAt: string | null;
-	tasks: MissionTask[];
-	createdAt: string;
-	updatedAt: string;
-}
 
 /**
  * Un moteur d'agent : le programme qui fait tourner un agent.
@@ -2640,3 +2483,19 @@ export interface AutomationOverview {
 	upcoming: AutomationUpcoming[];
 	running: boolean;
 }
+
+// Dérivés du Rust par ts-rs (`cargo test`, voir src-tauri/.cargo/config.toml) :
+// ne pas les redéfinir ici, les changer côté Rust.
+export type { MissionState } from "./generated/MissionState";
+export type { TaskState } from "./generated/TaskState";
+export type { MissionTask } from "./generated/MissionTask";
+export type { TaskGate } from "./generated/TaskGate";
+export type { MissionStep } from "./generated/MissionStep";
+export type { MissionDraft } from "./generated/MissionDraft";
+export type { MissionReview } from "./generated/MissionReview";
+export type { Mission } from "./generated/Mission";
+export type { MissionExposure } from "./generated/MissionExposure";
+export type { MissionEstimate } from "./generated/MissionEstimate";
+export type { MissionOverrun } from "./generated/MissionOverrun";
+export type { ReadinessCheck } from "./generated/ReadinessCheck";
+export type { Readiness } from "./generated/Readiness";
