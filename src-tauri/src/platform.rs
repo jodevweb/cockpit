@@ -797,6 +797,19 @@ fn msys_path(path: &str) -> String {
 	}
 }
 
+/// Un chemin tel que le reste du cockpit l'écrit : sous Windows, séparateurs
+/// `/` et sans le préfixe `\\?\` que pose `canonicalize`. La casse est gardée :
+/// c'est un chemin qu'on affiche et qu'on renvoie, pas une clé de comparaison
+/// (pour ça, `path_key`). Ailleurs, inchangé.
+pub fn plain_path(path: &str) -> String {
+	if cfg!(windows) {
+		let slashed = path.replace('\\', "/");
+		slashed.strip_prefix("//?/").unwrap_or(&slashed).to_string()
+	} else {
+		path.to_string()
+	}
+}
+
 /// La forme sous laquelle comparer deux chemins de dossier : sans séparateur
 /// final. Sous Windows en plus, séparateurs `/`, sans préfixe `\\?\` (ce que
 /// rend `canonicalize`), et sans casse — le système n'en tient pas compte.
@@ -957,6 +970,8 @@ MemAvailable:    8192000 kB
 		} else {
 			assert!(same_path(r"C:\Users\Moi\proj", "c:/users/moi/proj/"));
 			assert!(same_path(r"\\?\C:\Users\moi", "C:/Users/moi"));
+			assert_eq!(plain_path(r"\\?\D:\jorda\Shop"), "D:/jorda/Shop");
+			assert_eq!(plain_path("D:/jorda/Shop"), "D:/jorda/Shop");
 		}
 	}
 
