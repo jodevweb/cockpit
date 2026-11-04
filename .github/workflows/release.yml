@@ -143,6 +143,16 @@ jobs:
             cible: x86_64-pc-windows-msvc
             bundles: nsis
             facultative: false
+          # Linux : une AppImage (que l'updater sait remplacer) et un `.deb`.
+          # Sur la plus ancienne Ubuntu suivie par GitHub : une AppImage tourne
+          # sur les glibc plus récentes, pas sur les plus anciennes. Facultatif
+          # tant que la plateforme est neuve : un échec n'empêche pas de publier
+          # macOS et Windows.
+          - plateforme: linux-x86_64
+            os: ubuntu-22.04
+            cible: x86_64-unknown-linux-gnu
+            bundles: appimage,deb
+            facultative: true
     runs-on: ${{ matrix.os }}
     continue-on-error: ${{ matrix.facultative }}
     defaults:
@@ -176,6 +186,12 @@ jobs:
       # Perl complet : sous Windows, celui de Git Bash n'a pas tous ses modules.
       # Strawberry Perl est installé sur les machines Windows de GitHub. Posée
       # ici et non pour tout le workflow : sur macOS, ce chemin n'existe pas.
+      - name: Bibliothèques système (Linux)
+        if: runner.os == 'Linux'
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y libwebkit2gtk-4.1-dev libgtk-3-dev libayatana-appindicator3-dev librsvg2-dev libxdo-dev libssl-dev patchelf
+
       - name: Perl pour OpenSSL (Windows)
         if: runner.os == 'Windows'
         run: echo "OPENSSL_SRC_PERL=C:/Strawberry/perl/bin/perl.exe" >> "$GITHUB_ENV"
@@ -307,6 +323,8 @@ jobs:
               "darwin-aarch64": (r"_aarch64\.app\.tar\.gz$", True),
               "darwin-x86_64": (r"_(x64|x86_64)\.app\.tar\.gz$", False),
               "windows-x86_64": (r"_x64-setup\.exe$", True),
+              # Facultative, comme sa compilation (voir la matrice).
+              "linux-x86_64": (r"_amd64\.AppImage$", False),
           }
           plateformes, manquantes = {}, []
           for cible, (motif, obligatoire) in attendues.items():

@@ -221,7 +221,7 @@ fn ffmpeg_candidates() -> Vec<PathBuf> {
 	}
 	#[cfg(not(windows))]
 	{
-		vec!["/opt/homebrew/bin/ffmpeg".into(), "/usr/local/bin/ffmpeg".into()]
+		vec!["/opt/homebrew/bin/ffmpeg".into(), "/usr/local/bin/ffmpeg".into(), "/usr/bin/ffmpeg".into()]
 	}
 }
 

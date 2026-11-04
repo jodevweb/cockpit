@@ -1,7 +1,8 @@
 #!/usr/bin/env node
 //
 // Lance la variante d'un script qui convient au système : `scripts/<nom>.ps1`
-// sous Windows quand elle existe, `scripts/<nom>.sh` sinon.
+// sous Windows quand elle existe, `scripts/<nom>.linux.sh` sous Linux quand
+// elle existe, `scripts/<nom>.sh` sinon.
 //
 //   node scripts/plateforme.mjs install-app [arguments…]
 //
@@ -22,7 +23,10 @@ if (!nom) {
 
 const dossier = dirname(fileURLToPath(import.meta.url));
 const ps1 = join(dossier, `${nom}.ps1`);
-const sh = join(dossier, `${nom}.sh`);
+// Sous Linux, une variante `<nom>.linux.sh` passe avant le `.sh` commun, qui
+// suppose souvent macOS (`/Applications`, `codesign`).
+const linux = join(dossier, `${nom}.linux.sh`);
+const sh = process.platform === "linux" && existsSync(linux) ? linux : join(dossier, `${nom}.sh`);
 
 function bashDeGit() {
 	if (process.env.COCKPIT_BASH && existsSync(process.env.COCKPIT_BASH)) return process.env.COCKPIT_BASH;

@@ -6,7 +6,13 @@ use serde::Serialize;
 use serde_json::Value;
 use std::path::Path;
 
-#[cfg(not(windows))]
+/// Ce qui ouvre un fichier ou une adresse avec l'application par défaut.
+#[cfg(target_os = "macos")]
+const OPENER: &str = "/usr/bin/open";
+#[cfg(all(unix, not(target_os = "macos")))]
+const OPENER: &str = "xdg-open";
+
+#[cfg(target_os = "macos")]
 fn escape_applescript(input: &str) -> String {
 	input.replace('\\', "\\\\").replace('"', "\\\"")
 }
@@ -47,13 +53,27 @@ pub async fn open_in_editor(editor: &str, path: &str) -> Result<()> {
 		// Le chemin entre apostrophes, jamais entre guillemets : il vient souvent
 		// d'une sortie d'agent ou d'un dépôt cloné, et `"$(…)"` reste évalué par le
 		// shell — un fichier nommé `$(curl …|sh).md` s'exécutait à l'ouverture.
-		let command = if has_cli {
-			format!("{editor} {}", shell_quote(path))
-		} else {
-			format!("open -a {} {}", shell_quote(app_name), shell_quote(path))
-		};
-
-		capture("/", &command).await.map(|_| ())
+		if has_cli {
+			return capture("/", &format!("{editor} {}", shell_quote(path))).await.map(|_| ());
+		}
+		// Sans son outil en ligne de commande, l'éditeur s'ouvre par son nom
+		// d'application sous macOS ; sous Linux, il n'y a pas d'équivalent à
+		// `open -a` : l'application par défaut du fichier fera l'affaire.
+		#[cfg(target_os = "macos")]
+		{
+			capture("/", &format!("open -a {} {}", shell_quote(app_name), shell_quote(path)))
+				.await
+				.map(|_| ())
+		}
+		#[cfg(not(target_os = "macos"))]
+		{
+			let _ = app_name;
+			let target = path.to_string();
+			tokio::task::spawn_blocking(move || crate::platform::open(&target))
+				.await
+				.map_err(|e| CockpitError::msg(format!("xdg-open : {e}")))?
+				.map_err(|e| CockpitError::msg(format!("xdg-open : {e}")))
+		}
 	}
 }
 
@@ -201,7 +221,12 @@ pub async fn open_terminal(cwd: &str, command: Option<String>) -> Result<()> {
 		windows_terminal::open(&script_line)
 	}
 
-	#[cfg(not(windows))]
+	#[cfg(all(unix, not(target_os = "macos")))]
+	{
+		linux_terminal::open(&script_line)
+	}
+
+	#[cfg(target_os = "macos")]
 	{
 		let applescript = format!(
 			r#"tell application "Terminal"
@@ -221,6 +246,48 @@ end tell"#,
 			return Err(CockpitError::msg(crate::i18n::t("system.terminalFailed")));
 		}
 		Ok(())
+	}
+}
+
+/// Un terminal sous Linux.
+///
+/// Il n'y a pas de terminal du système : on prend le premier installé, dans
+/// l'ordre où un bureau le désigne d'ordinaire (`x-terminal-emulator` est le
+/// choix de Debian et d'Ubuntu). Chacun reçoit la commande à sa façon — `--`
+/// pour GNOME Terminal, `-e` pour la plupart, `-x` pour Xfce — et toujours en
+/// arguments séparés, jamais en une chaîne que l'émulateur redécouperait. Le
+/// shell reste ouvert une fois la commande finie, comme sous macOS.
+#[cfg(all(unix, not(target_os = "macos")))]
+mod linux_terminal {
+	use crate::error::{CockpitError, Result};
+
+	/// L'émulateur, et ce qui précède la commande à jouer.
+	const TERMINALS: [(&str, &[&str]); 9] = [
+		("x-terminal-emulator", &["-e"]),
+		("gnome-terminal", &["--"]),
+		("konsole", &["-e"]),
+		("xfce4-terminal", &["-x"]),
+		("kitty", &[]),
+		("alacritty", &["-e"]),
+		("wezterm", &["start", "--"]),
+		("foot", &[]),
+		("xterm", &["-e"]),
+	];
+
+	pub fn open(script_line: &str) -> Result<()> {
+		let script = format!("{script_line}; exec bash -l");
+		for (name, before) in TERMINALS {
+			if crate::platform::locate(name).is_none() {
+				continue;
+			}
+			let mut command = std::process::Command::new(name);
+			command.args(before).args(["bash", "-lc", &script]);
+			crate::platform::detach_std(&mut command);
+			if command.spawn().is_ok() {
+				return Ok(());
+			}
+		}
+		Err(CockpitError::msg(crate::i18n::t("system.terminalFailed")))
 	}
 }
 
@@ -374,7 +441,7 @@ pub async fn open_external(url: &str) -> Result<()> {
 
 	#[cfg(not(windows))]
 	{
-		let status = tokio::process::Command::new("/usr/bin/open")
+		let status = tokio::process::Command::new(OPENER)
 			.arg(url)
 			.status()
 			.await
@@ -418,7 +485,7 @@ pub async fn open_file(path: &str) -> Result<()> {
 	}
 	#[cfg(not(windows))]
 	{
-		let status = tokio::process::Command::new("/usr/bin/open")
+		let status = tokio::process::Command::new(OPENER)
 			.arg(path)
 			.status()
 			.await
@@ -468,10 +535,7 @@ pub async fn reveal_in_finder(path: &str) -> Result<()> {
 	}
 	#[cfg(not(windows))]
 	{
-		std::process::Command::new("open")
-			.args(["-R", path])
-			.status()
-			.map_err(|e| CockpitError::msg(format!("open -R : {e}")))?;
+		crate::platform::reveal(path).map_err(|e| CockpitError::msg(format!("reveal : {e}")))?;
 	}
 	Ok(())
 }
@@ -641,6 +705,39 @@ pub struct ListeningPort {
 	pub memory_mb: f64,
 }
 
+/// Les ports en écoute tels que `ss -Hltnp` les rend.
+///
+/// Une ligne : `LISTEN 0 511 127.0.0.1:5173 0.0.0.0:* users:(("node",pid=4242,fd=23))`.
+/// Le processus n'est nommé que s'il appartient à l'utilisateur : les autres
+/// (un serveur système) sont écartés, comme `lsof` les écarte sans droits.
+#[cfg(any(test, all(unix, not(target_os = "macos"))))]
+fn parse_ss(raw: &str) -> Vec<ListeningPort> {
+	let mut ports: Vec<ListeningPort> = Vec::new();
+	for line in raw.lines() {
+		let fields: Vec<&str> = line.split_whitespace().collect();
+		let Some(local) = fields.get(3) else { continue };
+		let Some(port) = local.rsplit(':').next().and_then(|port| port.parse::<u16>().ok()) else {
+			continue;
+		};
+		let Some(users) = fields.iter().find(|field| field.starts_with("users:")) else { continue };
+		let process = users.split('"').nth(1).unwrap_or_default().to_string();
+		let Some(pid) = users
+			.split("pid=")
+			.nth(1)
+			.and_then(|rest| rest.split(|c: char| !c.is_ascii_digit()).next())
+			.and_then(|pid| pid.parse::<u32>().ok())
+		else {
+			continue;
+		};
+		if ports.iter().any(|entry| entry.port == port && entry.pid == pid) {
+			continue;
+		}
+		ports.push(ListeningPort { port, process, pid, cwd: String::new(), memory_mb: 0.0 });
+	}
+	ports.sort_by_key(|entry| entry.port);
+	ports
+}
+
 /// Ports TCP en écoute, via `lsof`. Sert à repérer d'un coup d'œil quel
 /// worktree a un serveur dev encore vivant.
 pub async fn listening_ports() -> Result<Vec<ListeningPort>> {
@@ -652,7 +749,20 @@ pub async fn listening_ports() -> Result<Vec<ListeningPort>> {
 			.await
 			.map_err(|e| CockpitError::msg(e.to_string()));
 	}
-	#[cfg(not(windows))]
+	// Sous Linux, `lsof` est rarement installé d'office ; `ss` l'est toujours,
+	// et `/proc` dit le dossier de chaque processus sans rien lancer de plus.
+	#[cfg(all(unix, not(target_os = "macos")))]
+	{
+		let raw = capture("/", "ss -Hltnp 2>/dev/null || true").await?;
+		let mut ports = parse_ss(&raw);
+		for entry in ports.iter_mut() {
+			entry.cwd = std::fs::read_link(format!("/proc/{}/cwd", entry.pid))
+				.map(|path| path.to_string_lossy().to_string())
+				.unwrap_or_default();
+		}
+		return Ok(ports);
+	}
+	#[cfg(target_os = "macos")]
 	{
 		let raw = capture("/", "lsof -nP -iTCP -sTCP:LISTEN -Fpcn 2>/dev/null || true").await?;
 
@@ -942,6 +1052,19 @@ pub async fn stop_process(pid: u32) -> Result<()> {
 #[cfg(test)]
 mod tests {
 	use super::*;
+
+	#[test]
+	fn ss_dit_le_port_le_processus_et_son_pid() {
+		let raw = "\
+LISTEN 0 511 127.0.0.1:5173 0.0.0.0:* users:((\"node\",pid=4242,fd=23))
+LISTEN 0 4096 [::]:3000 [::]:* users:((\"next-server\",pid=77,fd=19),(\"next-server\",pid=77,fd=20))
+LISTEN 0 128 0.0.0.0:22 0.0.0.0:*
+";
+		let ports = parse_ss(raw);
+		assert_eq!(ports.len(), 2, "{ports:?}");
+		assert_eq!((ports[0].port, ports[0].pid, ports[0].process.as_str()), (3000, 77, "next-server"));
+		assert_eq!((ports[1].port, ports[1].pid, ports[1].process.as_str()), (5173, 4242, "node"));
+	}
 
 	#[test]
 	fn seul_un_chemin_absolu_s_ouvre() {

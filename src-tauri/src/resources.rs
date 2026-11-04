@@ -73,7 +73,7 @@ struct Sample {
 static PREVIOUS: Mutex<Option<(Instant, HashMap<u32, f64>)>> = Mutex::new(None);
 
 /// « 12:34.56 », « 1-02:03:04 » — le format de `ps`, en secondes.
-#[cfg_attr(windows, allow(dead_code))]
+#[cfg_attr(not(target_os = "macos"), allow(dead_code))]
 fn parse_cpu_time(value: &str) -> f64 {
 	let (days, rest) = match value.split_once('-') {
 		Some((d, rest)) => (d.parse::<f64>().unwrap_or(0.0), rest),
@@ -87,8 +87,9 @@ fn parse_cpu_time(value: &str) -> f64 {
 }
 
 /// Sous Windows, pas de `ps` : le système donne la même table directement
-/// (voir `platform::processes`), sans lancer de programme.
-#[cfg(windows)]
+/// (voir `platform::processes`), sans lancer de programme. Sous Linux, la
+/// même table vient de `/proc`.
+#[cfg(any(windows, target_os = "linux"))]
 fn read_processes() -> HashMap<u32, Sample> {
 	crate::platform::processes()
 		.into_iter()
@@ -106,7 +107,7 @@ fn read_processes() -> HashMap<u32, Sample> {
 		.collect()
 }
 
-#[cfg(not(windows))]
+#[cfg(target_os = "macos")]
 fn read_processes() -> HashMap<u32, Sample> {
 	let output = crate::platform::quiet_std(
 		std::process::Command::new("ps").args(["-axo", "pid=,ppid=,rss=,cputime=,comm="]),
@@ -210,13 +211,13 @@ impl Walker<'_> {
 }
 
 /// Mémoire physique totale et utilisée de la machine, en mégaoctets.
-#[cfg(windows)]
+#[cfg(any(windows, target_os = "linux"))]
 pub(crate) fn machine_memory() -> (f64, f64) {
 	crate::platform::machine_memory_mb()
 }
 
 /// Mémoire physique totale et utilisée de la machine, en mégaoctets.
-#[cfg(not(windows))]
+#[cfg(target_os = "macos")]
 pub(crate) fn machine_memory() -> (f64, f64) {
 	let total = crate::platform::quiet_std(std::process::Command::new("sysctl").args(["-n", "hw.memsize"]))
 		.output()
