@@ -676,7 +676,10 @@ async fn repos_of(paths: Vec<String>) -> std::collections::HashMap<String, Strin
 				commun
 					.parent()
 					.and_then(|p| p.canonicalize().ok())
-					.map(|p| p.to_string_lossy().to_string())
+					// Sous la forme de `config.mainRepo` : l'écran Workspaces compare
+					// les deux tels quels, et `\\?\D:\…` contre `D:/…` y masquait,
+					// sous Windows, tous les workspaces d'un projet déclaré.
+					.map(|p| crate::platform::plain_path(&p.to_string_lossy()))
 					.unwrap_or_default()
 			}
 			Err(_) => String::new(),
