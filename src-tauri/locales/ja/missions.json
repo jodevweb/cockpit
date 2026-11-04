@@ -44,7 +44,9 @@
 			"opened": "ミッションを開始",
 			"planSubmitted": "計画を提出",
 			"planSubmittedDetail": "タスク {{count}} 件",
-			"closed": "ミッションを完了"
+			"closed": "ミッションを完了",
+			"gatePassed": "リポジトリのチェックに合格",
+			"gateFailed": "リポジトリのチェックに失敗"
 		},
 		"nothingAwaitsDecision": "{{step}}について判断待ちのものはありません：ミッションは「{{state}}」の段階です。",
 		"correctionNeedsReason": "何が間違っているかを書いてください。理由がないと、リードエージェントは同じ提案を繰り返します。",
@@ -52,6 +54,12 @@
 		"blocked": {
 			"unknownBase": "このタスクは `{{base}}` から始まっていますが、これはこの計画のどのタスクのブランチでもありません。統合ブランチから始まるように計画し直してください。",
 			"baseExhausted": "起点となるタスク（`{{base}}`）は差し戻し回数を使い切りました：納品されることはありません。"
+		},
+		"gate": {
+			"running": "リポジトリのチェックを実行中: {{commands}}",
+			"timedOut": "{{minutes}} 分経っても終わらないため停止しました。",
+			"launchFailed": "チェックを開始できませんでした: {{error}}",
+			"noWorktree": "チェックを実行できません: タスクの worktree が存在しません ({{path}})。"
 		}
 	},
 	"panel": {

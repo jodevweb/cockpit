@@ -663,7 +663,9 @@
 			"rejected": "a refusé le travail",
 			"delivered": "a rendu sa copie",
 			"failed": "a échoué",
-			"waiting": "attend son tour"
+			"waiting": "attend son tour",
+			"checksFailed": "les vérifications du dépôt échouent",
+			"checksRunning": "vérifications du dépôt en cours"
 		},
 		"pr": {
 			"eyebrow": "pull request",
@@ -1053,5 +1055,9 @@
 		"scriptsHint": "Scripts du dépôt et commandes maison",
 		"noScripts": "Aucun script dans ce dossier.",
 		"footer": "La commande est tapée puis lancée dans ce shell — {{shift}}Entrée fait l'inverse de l'entrée choisie."
+	},
+	"isolationNotice": {
+		"title": "Aucun conteneur pour {{roles}}.",
+		"body": "Ces exécutants travailleront en bypassPermissions sur ce poste : leur outil Bash a les droits de ta session (disque, réseau, identifiants), et le périmètre d'écriture ne couvre que les éditions de fichiers. Pour borner ce qu'ils peuvent atteindre, active l'isolation des agents dans {{where}}."
 	}
 }

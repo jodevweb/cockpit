@@ -734,7 +734,11 @@
 				"detail": "勾选后：不能编辑，只能读取（git diff、git log、gh pr view…）— 其他一切都会被拒绝。取消勾选后：它可以运行测试或修改文件；它的指令仍会告诉它不要修复 PR，但没有任何东西阻止它这样做。"
 			},
 			"themes_other": "已声明 {{count}} 个业务主题 — 它们让每日站会可以说“她在做计费”，而不是列出一串标识符。主题在配置文件中编辑。",
-			"noThemes": "没有业务主题：每日站会的叙述将直接依赖标题本身。"
+			"noThemes": "没有业务主题：每日站会的叙述将直接依赖标题本身。",
+			"gateCommands": {
+				"label": "集成前检查",
+				"hint": "以逗号分隔的 shell 命令，在任务交付代码后于其 worktree 中运行；全部通过才会合并，否则主控会收到输出并将任务退回修改"
+			}
 		},
 		"replacedAtLaunch": "启动时替换：",
 		"saving": "正在保存…",
@@ -1000,6 +1004,44 @@
 			"openTitle": "{{cwd}} — 在“工作区”界面中打开",
 			"collapse": "收起列表",
 			"expand": "显示该组的详情"
+		}
+	},
+	"readiness": {
+		"title": "准备好开始了吗？",
+		"intro": "Cockpit 调用本机已安装的工具。下面缺少的项会让你启动的第一个代理无法运行。",
+		"recheck": "重新检查",
+		"optional": "可选",
+		"openSettings": "打开设置",
+		"restart": "安装后请重启 Cockpit：它在启动时查找程序。",
+		"checks": {
+			"shell": {
+				"label": "Git for Windows",
+				"fix": "安装 Git for Windows（git-scm.com）：Cockpit 的所有命令都在它的 bash 中运行。"
+			},
+			"git": {
+				"label": "git",
+				"fix": "安装 git：worktree、diff 和任务都依赖它。"
+			},
+			"claude": {
+				"label": "Claude Code CLI",
+				"fix": "安装 Claude Code，并确认 `claude` 能在终端中运行。"
+			},
+			"claudeAuth": {
+				"label": "Claude Code 已登录",
+				"fix": "在 {{where}} 中登录，或在终端运行 `claude auth login`。"
+			},
+			"node": {
+				"label": "Node.js",
+				"fix": "安装 Node 20+（nodejs.org）：代理用它向你提问和请求权限，任务执行者用它实现 git 防护。"
+			},
+			"project": {
+				"label": "一个项目",
+				"fix": "如需跟踪某个仓库的 worktree、任务和拉取请求，请在 {{where}} 中声明它。自由代理无需项目即可运行。"
+			},
+			"container": {
+				"label": "Docker 或 OrbStack",
+				"fix": "可选：让代理在容器中运行，限制内存与可触及范围。"
+			}
 		}
 	}
 }

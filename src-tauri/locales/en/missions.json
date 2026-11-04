@@ -44,7 +44,9 @@
 			"opened": "Mission opened",
 			"planSubmitted": "Plan submitted",
 			"planSubmittedDetail": "{{count}} task(s)",
-			"closed": "Mission closed"
+			"closed": "Mission closed",
+			"gatePassed": "Repository checks passed",
+			"gateFailed": "Repository check failed"
 		},
 		"nothingAwaitsDecision": "Nothing is waiting for your decision on the {{step}}: the mission is at \"{{state}}\".",
 		"correctionNeedsReason": "Say what is wrong: without a reason, the lead agent would make the same proposal again.",
@@ -52,6 +54,12 @@
 		"blocked": {
 			"unknownBase": "It starts from `{{base}}`, which is not the branch of any task in this plan. Replan it to start from the integration branch.",
 			"baseExhausted": "The task it starts from (`{{base}}`) has used up its reworks: it will not deliver."
+		},
+		"gate": {
+			"running": "Repository checks running: {{commands}}",
+			"timedOut": "Stopped after {{minutes}} min without finishing.",
+			"launchFailed": "Could not start the check: {{error}}",
+			"noWorktree": "The checks could not run: the task's worktree no longer exists ({{path}})."
 		}
 	},
 	"panel": {

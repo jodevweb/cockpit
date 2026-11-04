@@ -829,6 +829,11 @@
 			"assigned": "Assegnati",
 			"others": "Altri",
 			"empty": "Nessun ticket aperto da suggerire."
+		},
+		"gates": {
+			"running": "controlli in corso",
+			"passed": "controlli OK",
+			"failed": "controlli falliti"
 		}
 	},
 	"observability": {

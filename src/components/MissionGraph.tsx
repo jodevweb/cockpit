@@ -221,7 +221,11 @@ export function MissionGraph({
 								: phase === "done"
 									? task.verdict === "blocking"
 										? t("missionGraph.task.rejected")
-										: t("missionGraph.task.delivered")
+										: task.gate === "failed"
+											? t("missionGraph.task.checksFailed")
+											: task.gate === "running"
+												? t("missionGraph.task.checksRunning")
+												: t("missionGraph.task.delivered")
 									: phase === "failed"
 										? task.note || t("missionGraph.task.failed")
 										: task.scope.length > 0

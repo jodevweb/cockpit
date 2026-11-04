@@ -663,7 +663,9 @@
 			"rejected": "ha respinto il lavoro",
 			"delivered": "ha consegnato il suo lavoro",
 			"failed": "è fallito",
-			"waiting": "aspetta il suo turno"
+			"waiting": "aspetta il suo turno",
+			"checksFailed": "i controlli del repository falliscono",
+			"checksRunning": "controlli del repository in corso"
 		},
 		"pr": {
 			"eyebrow": "pull request",
@@ -1053,5 +1055,9 @@
 		"scriptsHint": "Script del repository e comandi personalizzati",
 		"noScripts": "Nessuno script in questa cartella.",
 		"footer": "Il comando viene digitato e poi eseguito in questa shell — {{shift}}Invio fa l'opposto della voce scelta."
+	},
+	"isolationNotice": {
+		"title": "Nessun container per {{roles}}.",
+		"body": "Questi esecutori lavoreranno in bypassPermissions su questa macchina: il loro strumento Bash ha i diritti della tua sessione (disco, rete, credenziali), e il perimetro di scrittura copre solo la modifica dei file. Per limitare ciò che possono raggiungere, attiva l'isolamento degli agenti in {{where}}."
 	}
 }
