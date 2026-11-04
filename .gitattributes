@@ -1,0 +1,2 @@
+# Écrits par ts-rs en LF : sans cela, un checkout Windows les verrait modifiés.
+src/lib/generated/** text eol=lf

@@ -1055,5 +1055,9 @@
 		"scriptsHint": "Repository-Skripte und eigene Befehle",
 		"noScripts": "Keine Skripte in diesem Ordner.",
 		"footer": "Der Befehl wird in dieser Shell getippt und dann ausgeführt — {{shift}}Enter macht das Gegenteil des gewählten Eintrags."
+	},
+	"isolationNotice": {
+		"title": "Kein Container für {{roles}}.",
+		"body": "Diese Ausführer arbeiten auf diesem Rechner in bypassPermissions: Ihr Bash-Werkzeug hat die Rechte deiner Sitzung (Festplatte, Netzwerk, Zugangsdaten), und der Schreibbereich gilt nur für Dateibearbeitungen. Um ihre Reichweite zu begrenzen, aktiviere die Agenten-Isolation unter {{where}}."
 	}
 }

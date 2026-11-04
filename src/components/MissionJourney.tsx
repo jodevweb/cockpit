@@ -27,6 +27,7 @@ import { useEffect, useMemo, useState, type ReactNode } from "react";
 import { useTranslation } from "react-i18next";
 import { useConfirm } from "@/components/Confirm";
 import { Markdown } from "@/components/Markdown";
+import { IsolationNotice } from "@/components/IsolationNotice";
 import { MissionGraph } from "@/components/MissionGraph";
 import { Badge, Button, ErrorNote, PriorityBadge } from "@/components/ui";
 import { useCockpit } from "@/app/store";
@@ -980,6 +981,10 @@ function Decision({
 					))}
 				</section>
 			) : null}
+
+			{/* Le dernier accord fait partir les exécutants : c'est là qu'on dit
+			    ce qu'ils pourront faire sans demander. */}
+			{step === "split" ? <IsolationNotice mission={mission} /> : null}
 
 			<section className="rise rise-2 sticky bottom-0 flex flex-col gap-2.5 rounded-xl border border-accent/35 bg-surface p-3 shadow-[0_-12px_24px_-12px_rgba(0,0,0,0.35)]">
 				<div className="flex items-center gap-1.5 text-[11px] font-medium text-ink-muted">

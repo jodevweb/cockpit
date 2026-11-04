@@ -4,6 +4,7 @@ import { listen } from "@tauri-apps/api/event";
 import { t } from "@/i18n";
 import type {
 	Account,
+	Readiness,
 	Automation,
 	AutomationOverview,
 	AutomationRun,
@@ -69,6 +70,7 @@ import type {
 	Mission,
 	MissionActivity,
 	MissionEstimate,
+	MissionExposure,
 	MissionOverrun,
 	MissionState,
 	MissionStep,
@@ -648,6 +650,8 @@ export const api = {
 			call<MissionEstimate>("mission_estimate", { taskCount }),
 		/** Les tâches en cours qui débordent de ce qu'une tâche coûte d'ordinaire. */
 		overruns: () => call<MissionOverrun[]>("mission_overruns"),
+		/** Les rôles du plan qui partiront sans filet : `bypassPermissions` hors conteneur. */
+		exposure: (id: string) => call<MissionExposure>("mission_exposure", { id }),
 		get: (id: string) => call<Mission>("mission_get", { id }),
 		create: (
 			title: string,
@@ -781,6 +785,8 @@ export const api = {
 		stop: () => call<void>("speech_stop"),
 	},
 	system: {
+		/** Les prérequis du poste : ce qu'il faut avant de lancer un agent. */
+		readiness: () => call<Readiness>("readiness_check"),
 		openEditor: (path: string) => call<void>("open_editor", { path }),
 		openTerminal: (cwd: string, command?: string) =>
 			call<void>("open_terminal", { cwd, command }),

@@ -875,6 +875,9 @@ async fn start_inner(
 	account: Option<String>,
 ) -> Result<String> {
 	let reviewing = profile.as_deref() == Some("review");
+	// Un exécutant de mission : lancé pour une tâche. Le maître, lui, n'en a
+	// pas — il intègre, et pousse donc sur la branche d'intégration.
+	let executor = mission.is_some() && !origin.task.trim().is_empty();
 	// La lecture seule se règle par projet (Réglages → Flux de travail) : un
 	// agent de revue sans elle garde son outil de remise, rien d'autre.
 	let locked = reviewing && crate::config::Config::active().workflow.review_read_only;
@@ -1162,6 +1165,14 @@ async fn start_inner(
 				command.push_str(&format!(" --mcp-config {}", shell_quote(&config)));
 			}
 		}
+		// Un exécutant (une tâche de mission) reçoit le garde-fou git : pas de
+		// push forcé, pas de push sur une branche protégée, pas de branche à
+		// lui. Un hook du CLI, qui tient en `bypassPermissions` (voir `guard.rs`).
+		if executor {
+			if let Some(settings) = crate::guard::settings_argument(config.sandbox.enabled) {
+				command.push_str(&format!(" --settings {}", shell_quote(&settings)));
+			}
+		}
 		// Rendre compte en images, quand elles valent mieux que du texte. La
 		// consigne s'ajoute à celles du CLI plutôt que de partir en message : elle
 		// doit être là avant le premier geste — une capture « avant » ne se prend
@@ -1225,6 +1236,15 @@ async fn start_inner(
 			mission.clone().unwrap_or_default(),
 		),
 		("COCKPIT_SCOPE".to_string(), scope.join("\n")),
+		// Les branches qu'un exécutant ne pousse jamais : lues par le garde-fou.
+		(
+			"COCKPIT_PROTECTED_BRANCHES".to_string(),
+			if executor {
+				mission.as_deref().map(crate::guard::protected_branches).unwrap_or_default().join("\n")
+			} else {
+				String::new()
+			},
+		),
 		// La racine contre laquelle le pont lit les chemins absolus du CLI.
 		// Isolé, l'agent les écrit sous la forme que le conteneur connaît.
 		(

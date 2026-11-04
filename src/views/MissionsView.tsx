@@ -43,6 +43,7 @@ import { JourneyDots, MissionJourney } from "@/components/MissionJourney";
 import { QuickMenu } from "@/components/QuickMenu";
 import { useConfirm } from "@/components/Confirm";
 import { Markdown } from "@/components/Markdown";
+import { IsolationNotice } from "@/components/IsolationNotice";
 import { withActivity } from "@/lib/activity";
 import { duration, elapsedSeconds, fromIso } from "@/lib/format";
 import { api } from "@/lib/ipc";
@@ -918,6 +919,7 @@ function MissionCard({
 							</p>
 						</div>
 					) : null}
+					<IsolationNotice mission={mission} />
 
 					{mission.tasks.length > 0 ? (
 						<div className="flex flex-col gap-1">

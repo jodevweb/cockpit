@@ -1005,5 +1005,43 @@
 			"collapse": "收起列表",
 			"expand": "显示该组的详情"
 		}
+	},
+	"readiness": {
+		"title": "准备好开始了吗？",
+		"intro": "Cockpit 调用本机已安装的工具。下面缺少的项会让你启动的第一个代理无法运行。",
+		"recheck": "重新检查",
+		"optional": "可选",
+		"openSettings": "打开设置",
+		"restart": "安装后请重启 Cockpit：它在启动时查找程序。",
+		"checks": {
+			"shell": {
+				"label": "Git for Windows",
+				"fix": "安装 Git for Windows（git-scm.com）：Cockpit 的所有命令都在它的 bash 中运行。"
+			},
+			"git": {
+				"label": "git",
+				"fix": "安装 git：worktree、diff 和任务都依赖它。"
+			},
+			"claude": {
+				"label": "Claude Code CLI",
+				"fix": "安装 Claude Code，并确认 `claude` 能在终端中运行。"
+			},
+			"claudeAuth": {
+				"label": "Claude Code 已登录",
+				"fix": "在 {{where}} 中登录，或在终端运行 `claude auth login`。"
+			},
+			"node": {
+				"label": "Node.js",
+				"fix": "安装 Node 20+（nodejs.org）：代理用它向你提问和请求权限，任务执行者用它实现 git 防护。"
+			},
+			"project": {
+				"label": "一个项目",
+				"fix": "如需跟踪某个仓库的 worktree、任务和拉取请求，请在 {{where}} 中声明它。自由代理无需项目即可运行。"
+			},
+			"container": {
+				"label": "Docker 或 OrbStack",
+				"fix": "可选：让代理在容器中运行，限制内存与可触及范围。"
+			}
+		}
 	}
 }
