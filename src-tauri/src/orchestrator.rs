@@ -1182,16 +1182,12 @@ pub async fn prepare_worktree(mission: &mission::Mission, task: &Task) -> Result
 fn worktree_target(root: &str, repo: &std::path::Path, branch: &str) -> std::path::PathBuf {
 	let folder = branch.replace('/', "-");
 	if root.trim().is_empty() {
-		let name = repo
-			.file_name()
-			.map(|name| name.to_string_lossy().to_string())
-			.unwrap_or_default();
-		let parent = repo.parent().unwrap_or(repo);
-		return if name.is_empty() {
-			parent.join(&folder)
-		} else {
-			parent.join(format!("{name}-{folder}"))
-		};
+		// Au niveau du texte plutôt que par `parent().join()` : sous Windows,
+		// `join` collait un `\` derrière un dépôt écrit avec des `/`, et l'écran
+		// affichait `D:/jorda\dépôt-branche`. On garde le séparateur du dépôt.
+		let repo = repo.to_string_lossy();
+		let repo = repo.trim_end_matches(std::path::is_separator);
+		return std::path::PathBuf::from(format!("{repo}-{folder}"));
 	}
 	std::path::PathBuf::from(crate::config::resolve_path(root, "")).join(&folder)
 }
@@ -1343,6 +1339,10 @@ mod tests {
 		assert!(path.is_absolute(), "{}", path.display());
 		assert_eq!(path, std::env::temp_dir().join("demo-shop-feat-#1-cart-total"));
 		assert!(!path.starts_with(&repo), "{}", path.display());
+
+		// Un seul séparateur dans le chemin affiché : celui du dépôt.
+		let path = worktree_target("", std::path::Path::new("D:/jorda/demo-shop/"), "feat/x");
+		assert_eq!(path.to_string_lossy(), "D:/jorda/demo-shop-feat-x");
 
 		let root = std::env::temp_dir().join("projets");
 		let path = worktree_target(&root.to_string_lossy(), &repo, "feat/x");
