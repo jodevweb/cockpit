@@ -2088,21 +2088,31 @@ fn is_pull_request(issue: &Value) -> bool {
 	issue.get("pull_request").is_some()
 }
 
+/// L'adresse des issues ouvertes d'un dépôt, celles d'une personne si on la nomme.
+fn github_issues_url(repo: &str, assignee: Option<&str>) -> String {
+	let mut url = format!("https://api.github.com/repos/{repo}/issues?state=open&sort=updated&per_page=50");
+	if let Some(login) = assignee.filter(|login| !login.is_empty()) {
+		url.push_str("&assignee=");
+		url.push_str(&urlencoding::encode(login));
+	}
+	url
+}
+
 pub async fn github_issues(config: &Config, only_mine: bool) -> Result<Vec<FeedItem>> {
 	if config.github.repo.is_empty() {
 		return Err(CockpitError::msg(crate::i18n::t("integrations.githubRepoMissing")));
 	}
 	let token = github_token(config).await?;
-	let assignee = if only_mine { "&assignee=@me" } else { "" };
-	let value = json_get(
-		&format!(
-			"https://api.github.com/repos/{}/issues?state=open&sort=updated&per_page=50{assignee}",
-			config.github.repo
-		),
-		&token,
-		"Bearer",
-	)
-	.await?;
+	// « Les miens » demande un identifiant : l'API des issues d'un dépôt refuse
+	// `@me` (422), qui ne vaut que pour la recherche. Celui qui est déclaré, à
+	// défaut le compte qui porte le jeton — celui-là même qui lit.
+	let login = if only_mine {
+		let declared = config.github.user.trim();
+		Some(if declared.is_empty() { github_viewer(config).await? } else { declared.to_string() })
+	} else {
+		None
+	};
+	let value = json_get(&github_issues_url(&config.github.repo, login.as_deref()), &token, "Bearer").await?;
 
 	let Some(issues) = value.as_array() else {
 		return Ok(Vec::new());
@@ -3239,4 +3249,23 @@ pub async fn close_pull_request(config: &Config, number: u64) -> Result<()> {
 		)));
 	}
 	Ok(())
+}
+
+#[cfg(test)]
+mod github_issues_tests {
+	use super::github_issues_url;
+
+	#[test]
+	fn les_miens_nomment_un_identifiant_jamais_arobase_me() {
+		let url = github_issues_url("acme/shop", Some("jodevweb"));
+		assert!(url.ends_with("&assignee=jodevweb"), "{url}");
+		assert!(!url.contains("@me"));
+	}
+
+	#[test]
+	fn sans_personne_toutes_les_issues_ouvertes() {
+		let url = github_issues_url("acme/shop", None);
+		assert!(!url.contains("assignee"), "{url}");
+		assert_eq!(github_issues_url("acme/shop", Some("")), url);
+	}
 }
