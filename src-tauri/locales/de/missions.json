@@ -44,7 +44,9 @@
 			"opened": "Mission eröffnet",
 			"planSubmitted": "Plan eingereicht",
 			"planSubmittedDetail": "{{count}} Aufgabe(n)",
-			"closed": "Mission abgeschlossen"
+			"closed": "Mission abgeschlossen",
+			"gatePassed": "Repository-Prüfungen bestanden",
+			"gateFailed": "Repository-Prüfung fehlgeschlagen"
 		},
 		"nothingAwaitsDecision": "Beim Schritt {{step}} wartet nichts auf deine Entscheidung: Die Mission steht bei „{{state}}“.",
 		"correctionNeedsReason": "Sag, was falsch ist: Ohne Grund würde der Hauptagent denselben Vorschlag erneut machen.",
@@ -52,6 +54,13 @@
 		"blocked": {
 			"unknownBase": "Sie geht von `{{base}}` aus, dem Branch keiner Aufgabe dieses Plans. Plane sie neu, sodass sie vom Integrations-Branch ausgeht.",
 			"baseExhausted": "Die Aufgabe, von der sie ausgeht (`{{base}}`), hat ihre Nacharbeiten aufgebraucht: Sie wird nicht liefern."
+		},
+		"gate": {
+			"running": "Repository-Prüfungen laufen: {{commands}}",
+			"timedOut": "Nach {{minutes}} Min. ohne Abschluss gestoppt.",
+			"launchFailed": "Prüfung konnte nicht gestartet werden: {{error}}",
+			"noWorktree": "Die Prüfungen konnten nicht laufen: Der Worktree der Aufgabe existiert nicht mehr ({{path}}).",
+			"noRuntime": "Die Agenten-Isolation ist aktiv, aber weder Docker noch OrbStack wurde gefunden: Die Prüfungen laufen nicht stattdessen auf dem Rechner."
 		}
 	},
 	"panel": {

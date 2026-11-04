@@ -769,6 +769,11 @@
 			"assigned": "할당됨",
 			"others": "기타",
 			"empty": "제안할 열린 티켓이 없습니다."
+		},
+		"gates": {
+			"running": "검사 중",
+			"passed": "검사 통과",
+			"failed": "검사 실패"
 		}
 	},
 	"observability": {

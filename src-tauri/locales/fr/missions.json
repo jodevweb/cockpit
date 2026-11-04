@@ -44,7 +44,9 @@
 			"opened": "Mission ouverte",
 			"planSubmitted": "Plan soumis",
 			"planSubmittedDetail": "{{count}} tâche(s)",
-			"closed": "Mission close"
+			"closed": "Mission close",
+			"gatePassed": "Vérifications du dépôt passées",
+			"gateFailed": "Vérification du dépôt en échec"
 		},
 		"nothingAwaitsDecision": "Rien n'attend ta décision sur la {{step}} : la mission en est à « {{state}} ».",
 		"correctionNeedsReason": "Dis ce qui ne va pas : sans motif, le maître referait la même proposition.",
@@ -52,6 +54,13 @@
 		"blocked": {
 			"unknownBase": "Elle part de `{{base}}`, qui n'est la branche d'aucune tâche de ce plan. Replanifie en la faisant partir de la branche d'intégration.",
 			"baseExhausted": "La tâche dont elle part (`{{base}}`) a épuisé ses reprises : elle ne livrera pas."
+		},
+		"gate": {
+			"running": "Vérifications du dépôt en cours : {{commands}}",
+			"timedOut": "Arrêtée après {{minutes}} min sans avoir fini.",
+			"launchFailed": "Impossible de lancer la vérification : {{error}}",
+			"noWorktree": "Les vérifications n'ont pas pu tourner : le worktree de la tâche n'existe plus ({{path}}).",
+			"noRuntime": "L'isolation des agents est active mais ni Docker ni OrbStack n'est installé : les vérifications ne tournent pas sur le poste à leur place."
 		}
 	},
 	"panel": {

@@ -829,6 +829,11 @@
 			"assigned": "Assignés",
 			"others": "Autres",
 			"empty": "Aucun ticket ouvert à proposer."
+		},
+		"gates": {
+			"running": "vérifications en cours",
+			"passed": "vérifications OK",
+			"failed": "vérifications en échec"
 		}
 	},
 	"observability": {

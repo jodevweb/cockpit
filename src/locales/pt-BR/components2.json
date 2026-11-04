@@ -663,7 +663,9 @@
 			"rejected": "rejeitou o trabalho",
 			"delivered": "entregou o trabalho",
 			"failed": "falhou",
-			"waiting": "aguardando a vez"
+			"waiting": "aguardando a vez",
+			"checksFailed": "as verificações do repositório falham",
+			"checksRunning": "verificando o repositório"
 		},
 		"pr": {
 			"eyebrow": "pull request",
@@ -1053,5 +1055,9 @@
 		"scriptsHint": "Scripts do repositório e comandos personalizados",
 		"noScripts": "Nenhum script nesta pasta.",
 		"footer": "O comando é digitado e depois executado neste shell — {{shift}}Enter faz o contrário da opção escolhida."
+	},
+	"isolationNotice": {
+		"title": "Nenhum contêiner para {{roles}}.",
+		"body": "Esses executores vão trabalhar em bypassPermissions nesta máquina: a ferramenta Bash deles tem os direitos da sua sessão (disco, rede, credenciais), e o escopo de escrita cobre apenas a edição de arquivos. Para limitar o que podem alcançar, ative o isolamento de agentes em {{where}}."
 	}
 }

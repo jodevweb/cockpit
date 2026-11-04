@@ -769,6 +769,11 @@
 			"assigned": "割り当て済み",
 			"others": "その他",
 			"empty": "提案できるオープン中のチケットはありません。"
+		},
+		"gates": {
+			"running": "チェック中",
+			"passed": "チェック合格",
+			"failed": "チェック失敗"
 		}
 	},
 	"observability": {

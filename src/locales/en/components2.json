@@ -663,7 +663,9 @@
 			"rejected": "rejected the work",
 			"delivered": "handed in its work",
 			"failed": "failed",
-			"waiting": "waiting its turn"
+			"waiting": "waiting its turn",
+			"checksFailed": "repository checks fail",
+			"checksRunning": "running the repository checks"
 		},
 		"pr": {
 			"eyebrow": "pull request",
@@ -1053,5 +1055,9 @@
 		"scriptsHint": "Repository scripts and custom commands",
 		"noScripts": "No scripts in this folder.",
 		"footer": "The command is typed then run in this shell — {{shift}}Enter does the opposite of the chosen entry."
+	},
+	"isolationNotice": {
+		"title": "No container for {{roles}}.",
+		"body": "These runners will work in bypassPermissions on this machine: their Bash tool has your session's rights (disk, network, credentials), and the write scope only covers file edits. To cap what they can reach, turn on agent isolation in {{where}}."
 	}
 }

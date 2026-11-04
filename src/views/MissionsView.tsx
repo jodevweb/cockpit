@@ -43,6 +43,7 @@ import { JourneyDots, MissionJourney } from "@/components/MissionJourney";
 import { QuickMenu } from "@/components/QuickMenu";
 import { useConfirm } from "@/components/Confirm";
 import { Markdown } from "@/components/Markdown";
+import { IsolationNotice } from "@/components/IsolationNotice";
 import { withActivity } from "@/lib/activity";
 import { duration, elapsedSeconds, fromIso } from "@/lib/format";
 import { api } from "@/lib/ipc";
@@ -165,6 +166,12 @@ const STEP_RUNNING = 2;
 const ONGOING: MissionState[] = ["running", "integrating"];
 
 /** Comment se dit un verdict, et sur quel ton. */
+const GATES: Record<string, { tone: "critical" | "info" | "success" }> = {
+	running: { tone: "info" },
+	passed: { tone: "success" },
+	failed: { tone: "critical" },
+};
+
 const VERDICTS: Record<string, { tone: "critical" | "warning" | "success" }> = {
 	blocking: { tone: "critical" },
 	reserves: { tone: "warning" },
@@ -301,8 +308,10 @@ export function MissionsView() {
 	// Une mission part d'un ticket : sans suivi de tâches, le champ ci-dessous
 	// n'a rien à lire et l'écran se réduisait à un formulaire qui échoue. Dire
 	// à quoi sert la fonctionnalité, et ce qu'il lui manque, vaut mieux qu'un
-	// message d'erreur au premier essai.
-	if (!hasConnector("tickets")) {
+	// message d'erreur au premier essai. Seulement tant qu'il n'y a rien à
+	// montrer : une mission ouverte autrement (par la Permanence, sans ticket)
+	// restait sinon introuvable derrière cette présentation.
+	if (!hasConnector("tickets") && (missions.data ?? []).length === 0) {
 		const tickets = connectors.find((entry) => entry.kind === "tickets");
 		return (
 			<>
@@ -912,6 +921,7 @@ function MissionCard({
 							</p>
 						</div>
 					) : null}
+					<IsolationNotice mission={mission} />
 
 					{mission.tasks.length > 0 ? (
 						<div className="flex flex-col gap-1">
@@ -1333,6 +1343,14 @@ function TaskRow({
 				    rapport. Il ne s'adressait qu'au maître : ni toi ni la mission ne
 				    saviez qu'une recette avait refusé, et la pull request s'ouvrait
 				    dessus. Un refus se lève en corrigeant, puis en la relançant. */}
+				{/* Les portes du dépôt : un code de sortie, pas un avis. La sortie de
+				    celle qui a échoué est au survol — c'est ce que le maître reçoit
+				    pour renvoyer la tâche en correction. */}
+				{GATES[task.gate] ? (
+					<Badge tone={GATES[task.gate].tone}>
+						<span title={task.gateOutput || undefined}>{t(`missions.gates.${task.gate}`)}</span>
+					</Badge>
+				) : null}
 				{VERDICTS[task.verdict] ? (
 					<Badge tone={VERDICTS[task.verdict].tone}>
 						{t(`missions.verdicts.${task.verdict}`)}
@@ -1468,6 +1486,8 @@ function TaskForm({ mission, onDone }: { mission: Mission; onDone: () => void })
 				finishedAt: null,
 				workedSeconds: 0,
 				checkpoint: "",
+				gate: "none",
+				gateOutput: "",
 			});
 			onDone();
 		} catch (error) {

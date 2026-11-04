@@ -616,7 +616,9 @@
 			"rejected": "否决了该工作",
 			"delivered": "已提交其工作",
 			"failed": "失败",
-			"waiting": "等待轮到它"
+			"waiting": "等待轮到它",
+			"checksFailed": "仓库检查未通过",
+			"checksRunning": "正在运行仓库检查"
 		},
 		"pr": {
 			"eyebrow": "pull request",
@@ -995,5 +997,9 @@
 		"scriptsHint": "仓库脚本和自定义命令",
 		"noScripts": "此文件夹中没有脚本。",
 		"footer": "命令会在此 shell 中输入并运行 — {{shift}}Enter 执行与所选项相反的操作。"
+	},
+	"isolationNotice": {
+		"title": "{{roles}} 没有容器隔离。",
+		"body": "这些执行者将在本机以 bypassPermissions 运行：它们的 Bash 工具拥有你会话的全部权限（磁盘、网络、凭据），而写入范围只约束文件编辑。要限制它们能触及的范围，请在 {{where}} 中开启代理隔离。"
 	}
 }

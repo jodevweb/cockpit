@@ -99,6 +99,7 @@ export function WorkflowSettings() {
 		worktreeRemoveCommand: "",
 		devCommand: "",
 		testCommands: "",
+		gateCommands: "",
 		visualReports: true,
 		agentBrowser: true,
 		browserCommand: "",
@@ -122,6 +123,7 @@ export function WorkflowSettings() {
 			worktreeRemoveCommand: workflow.worktreeRemoveCommand ?? "",
 			devCommand: workflow.devCommand ?? "",
 			testCommands: toText(workflow.testCommands ?? []),
+			gateCommands: toText(workflow.gateCommands ?? []),
 			visualReports: workflow.visualReports ?? true,
 			agentBrowser: workflow.agentBrowser ?? true,
 			browserCommand: workflow.browserCommand ?? "",
@@ -152,6 +154,7 @@ export function WorkflowSettings() {
 					worktreeRemoveCommand: draft.worktreeRemoveCommand.trim(),
 					devCommand: draft.devCommand.trim(),
 					testCommands: fromText(draft.testCommands),
+					gateCommands: fromText(draft.gateCommands),
 					visualReports: draft.visualReports,
 					agentBrowser: draft.agentBrowser,
 					browserCommand: draft.browserCommand.trim(),
@@ -330,6 +333,20 @@ export function WorkflowSettings() {
 					value={draft.testCommands}
 					onChange={(testCommands) => setDraft({ ...draft, testCommands })}
 					placeholder="check:unit, ./scripts/tests.sh"
+					mono
+				/>
+			</Field>
+
+			{/* Les portes : ce qui doit passer avant qu'une tâche de mission soit
+			    fusionnée. Un fait, là où la relecture du maître est un avis. */}
+			<Field
+				label={t("workflowSettings.workflow.gateCommands.label")}
+				hint={t("workflowSettings.workflow.gateCommands.hint")}
+			>
+				<TextInput
+					value={draft.gateCommands}
+					onChange={(gateCommands) => setDraft({ ...draft, gateCommands })}
+					placeholder="pnpm test, pnpm lint"
 					mono
 				/>
 			</Field>

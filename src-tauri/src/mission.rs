@@ -26,6 +26,8 @@ use crate::error::{CockpitError, Result};
 use serde::{Deserialize, Serialize};
 
 /// Où en est une mission dans son cycle de vie.
+#[cfg_attr(test, derive(ts_rs::TS))]
+#[cfg_attr(test, ts(export))]
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub enum MissionState {
@@ -51,6 +53,8 @@ pub enum MissionState {
 	Failed,
 }
 
+#[cfg_attr(test, derive(ts_rs::TS))]
+#[cfg_attr(test, ts(export))]
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub enum TaskState {
@@ -63,6 +67,8 @@ pub enum TaskState {
 }
 
 /// Une tâche confiée à un exécutant.
+#[cfg_attr(test, derive(ts_rs::TS))]
+#[cfg_attr(test, ts(export, rename = "MissionTask"))]
 #[derive(Debug, Clone, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct Task {
@@ -156,7 +162,214 @@ pub struct Task {
 	/// s'étale sur des heures dont l'essentiel se passe à attendre son tour. Ce
 	/// qu'on veut savoir, c'est le temps qu'elle a réellement coûté.
 	#[serde(default)]
+	#[cfg_attr(test, ts(type = "number"))]
 	pub worked_seconds: u64,
+	/// Où en sont les portes du projet (`workflow.gate_commands`) sur le
+	/// dernier rendu de cette tâche. Voir `gates.rs`.
+	#[serde(default)]
+	pub gate: Gate,
+	/// La fin de la sortie de la porte qui a échoué, pour le maître et pour toi.
+	#[serde(default)]
+	pub gate_output: String,
+}
+
+/// L'état des portes de vérification d'une tâche.
+///
+/// `None` couvre deux cas qu'on ne distingue pas exprès : le projet ne déclare
+/// aucune porte, ou la tâche n'a encore rien rendu. Dans les deux, rien ne
+/// retient l'intégration — c'est le comportement d'avant les portes.
+#[cfg_attr(test, derive(ts_rs::TS))]
+#[cfg_attr(test, ts(export, rename = "TaskGate"))]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize, Default)]
+#[serde(rename_all = "camelCase")]
+pub enum Gate {
+	#[default]
+	None,
+	Running,
+	Passed,
+	Failed,
+}
+
+impl Gate {
+	/// Vrai quand l'intégration de cette tâche doit attendre.
+	pub fn holds(self) -> bool {
+		matches!(self, Gate::Running | Gate::Failed)
+	}
+}
+
+/// Ce que les exécutants d'une mission pourront faire sans rien demander.
+#[cfg_attr(test, derive(ts_rs::TS))]
+#[cfg_attr(test, ts(export, rename = "MissionExposure"))]
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
+#[serde(rename_all = "camelCase")]
+pub struct Exposure {
+	/// Les agents partent dans un conteneur (`sandbox.enabled`).
+	pub sandboxed: bool,
+	/// Les rôles du plan qui partiront en `bypassPermissions`, sans doublon,
+	/// dans l'ordre du plan. Vide quand l'isolation est active : le conteneur
+	/// borne alors ce que le mode laisse faire.
+	pub unguarded_roles: Vec<String>,
+}
+
+/// Les rôles d'un plan qui travailleront sans filet sur le poste.
+///
+/// `bypassPermissions` est un choix défendable pour un exécutant (voir
+/// `RoleConfig::permission_mode`) : il travaille seul, dans un worktree à lui.
+/// Mais hors conteneur, son outil Bash a les droits de la session — tout le
+/// disque, le réseau, les identifiants. Le dire au moment d'approuver le plan
+/// est le seul moment où ça peut encore changer quelque chose.
+pub fn exposure(tasks: &[Task], roles: &[crate::config::RoleConfig], sandboxed: bool) -> Exposure {
+	let mut unguarded: Vec<String> = Vec::new();
+	if !sandboxed {
+		for task in tasks {
+			let bypass = roles
+				.iter()
+				.find(|role| role.id == task.role)
+				.map(|role| role.permission_mode.trim() == "bypassPermissions")
+				.unwrap_or(false);
+			if bypass && !unguarded.contains(&task.role) {
+				unguarded.push(task.role.clone());
+			}
+		}
+	}
+	Exposure { sandboxed, unguarded_roles: unguarded }
+}
+
+#[cfg(test)]
+mod exposure_tests {
+	use super::*;
+
+	fn role(id: &str, mode: &str) -> crate::config::RoleConfig {
+		crate::config::RoleConfig {
+			id: id.into(),
+			permission_mode: mode.into(),
+			..Default::default()
+		}
+	}
+
+	fn tache(role: &str) -> Task {
+		serde_json::from_value(serde_json::json!({
+			"id": format!("t-{role}"),
+			"role": role,
+			"title": role,
+			"state": "planned",
+		}))
+		.unwrap()
+	}
+
+	#[test]
+	fn nomme_les_roles_sans_filet_une_fois_chacun() {
+		let roles = vec![role("backend", "bypassPermissions"), role("frontend", "acceptEdits")];
+		let plan = vec![tache("backend"), tache("frontend"), tache("backend")];
+		let vue = exposure(&plan, &roles, false);
+		assert_eq!(vue.unguarded_roles, vec!["backend".to_string()]);
+		assert!(!vue.sandboxed);
+	}
+
+	#[test]
+	fn un_conteneur_borne_ce_que_le_mode_laisse_faire() {
+		let roles = vec![role("backend", "bypassPermissions")];
+		let vue = exposure(&[tache("backend")], &roles, true);
+		assert!(vue.unguarded_roles.is_empty());
+		assert!(vue.sandboxed);
+	}
+
+	#[test]
+	fn les_roles_par_defaut_partent_sans_filet() {
+		// Ce que le cockpit livre d'office : c'est précisément le cas à dire.
+		let roles = crate::config::default_roles();
+		let vue = exposure(&[tache("backend")], &roles, false);
+		assert_eq!(vue.unguarded_roles, vec!["backend".to_string()]);
+	}
+}
+
+/// Ce que l'intégration fait d'une tâche livrée, au regard des portes.
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum GateDecision {
+	/// Rien ne la retient : on la fusionne.
+	Merge,
+	/// Ses portes n'ont jamais tourné sur ce rendu : on les lance, et elle attend.
+	Start,
+	/// Ses portes tournent : elle attend.
+	Pending,
+	/// Une porte a échoué : elle ne part pas, le maître la renvoie en correction.
+	Refuse,
+}
+
+/// La règle, à part de tout effet pour qu'elle se vérifie en entier.
+///
+/// `declared` : le dépôt déclare des portes. `verifies` : la tâche est une
+/// vérification, qui ne commite rien et n'a donc rien à faire juger.
+pub fn gate_decision(gate: Gate, declared: bool, verifies: bool) -> GateDecision {
+	if !declared || verifies {
+		// Une porte retirée des réglages ne retient plus rien, même notée en
+		// échec : c'est le dépôt qui dit ce qui doit passer.
+		return GateDecision::Merge;
+	}
+	match gate {
+		Gate::Passed => GateDecision::Merge,
+		Gate::None => GateDecision::Start,
+		Gate::Running => GateDecision::Pending,
+		Gate::Failed => GateDecision::Refuse,
+	}
+}
+
+#[cfg(test)]
+mod gate_tests {
+	use super::*;
+
+	#[test]
+	fn sans_porte_declaree_tout_se_fusionne() {
+		for gate in [Gate::None, Gate::Running, Gate::Passed, Gate::Failed] {
+			assert_eq!(gate_decision(gate, false, false), GateDecision::Merge, "{gate:?}");
+		}
+	}
+
+	#[test]
+	fn une_verification_ne_passe_pas_les_portes() {
+		assert_eq!(gate_decision(Gate::None, true, true), GateDecision::Merge);
+	}
+
+	#[test]
+	fn seule_une_porte_passee_ouvre_l_integration() {
+		assert_eq!(gate_decision(Gate::Passed, true, false), GateDecision::Merge);
+		assert_eq!(gate_decision(Gate::None, true, false), GateDecision::Start);
+		assert_eq!(gate_decision(Gate::Running, true, false), GateDecision::Pending);
+		assert_eq!(gate_decision(Gate::Failed, true, false), GateDecision::Refuse);
+	}
+
+	#[test]
+	fn une_porte_se_relit_telle_qu_elle_s_ecrit() {
+		// L'interface lit ces valeurs ; un renommage côté Rust la ferait taire.
+		for (gate, texte) in [
+			(Gate::None, "\"none\""),
+			(Gate::Running, "\"running\""),
+			(Gate::Passed, "\"passed\""),
+			(Gate::Failed, "\"failed\""),
+		] {
+			assert_eq!(serde_json::to_string(&gate).unwrap(), texte);
+			assert_eq!(serde_json::from_str::<Gate>(texte).unwrap(), gate);
+		}
+	}
+
+	#[test]
+	fn une_fiche_d_avant_les_portes_se_relit() {
+		// Les missions déjà sur le disque n'ont ni `gate` ni `gateOutput`.
+		let ancienne = r#"{"id":"t","role":"backend","title":"x","state":"delivered"}"#;
+		let task: Task = serde_json::from_str(ancienne).unwrap();
+		assert_eq!(task.gate, Gate::None);
+		assert!(task.gate_output.is_empty());
+	}
+}
+
+/// Pose l'état des portes d'une tâche, et la sortie qui l'explique.
+pub fn set_task_gate(id: &str, task_id: &str, gate: Gate, output: &str) -> Result<Mission> {
+	update(id, |mission| {
+		if let Some(task) = mission.tasks.iter_mut().find(|task| task.id == task_id) {
+			task.gate = gate;
+			task.gate_output = output.to_string();
+		}
+	})
 }
 
 /// Les trois accords d'une mission guidée, dans l'ordre où on les donne.
@@ -166,6 +379,8 @@ pub struct Task {
 /// exécutants étaient déjà prêts à partir sur un malentendu. Chaque étape a
 /// son état de travail (le maître rédige) et son état d'attente (l'humain
 /// relit) ; on ne passe à la suivante que sur un accord.
+#[cfg_attr(test, derive(ts_rs::TS))]
+#[cfg_attr(test, ts(export, rename = "MissionStep"))]
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub enum Step {
@@ -237,6 +452,8 @@ impl Step {
 }
 
 /// Une version de ce que le maître propose à une étape.
+#[cfg_attr(test, derive(ts_rs::TS))]
+#[cfg_attr(test, ts(export, rename = "MissionDraft"))]
 #[derive(Debug, Clone, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct Draft {
@@ -252,6 +469,8 @@ pub struct Draft {
 }
 
 /// Ce qu'un humain a décidé d'une version.
+#[cfg_attr(test, derive(ts_rs::TS))]
+#[cfg_attr(test, ts(export, rename = "MissionReview"))]
 #[derive(Debug, Clone, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct Review {
@@ -265,6 +484,8 @@ pub struct Review {
 	pub at: String,
 }
 
+#[cfg_attr(test, derive(ts_rs::TS))]
+#[cfg_attr(test, ts(export))]
 #[derive(Debug, Clone, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct Mission {
@@ -629,6 +850,9 @@ pub fn rework(id: &str, task_id: &str, reproche: &str, verifies: impl Fn(&str) -
 				entry.session_id = None;
 				// Ce qu'elle avait conclu ne vaut plus : elle va rejuger.
 				entry.verdict.clear();
+				// Une correction se rejuge : la porte d'avant parlait d'un autre code.
+				entry.gate = Gate::None;
+				entry.gate_output.clear();
 				entry.note = crate::i18n::tf(
 					"mission.note.rework",
 					&[("count", &entry.attempts), ("reason", &reproche)],
@@ -1431,11 +1655,11 @@ pub fn branch_from(identifier: &str, title: &str) -> String {
 /// Une consigne de périmètre dans un prompt tient tant que le modèle y pense.
 /// Ici, elle ne dépend plus de lui : la demande d'écriture est examinée avant
 /// d'arriver sous tes yeux, et refusée si elle sort du terrain de la tâche.
-pub fn scope_of(session_id: &str) -> Option<(String, Vec<String>)> {
+pub fn scope_of(session_id: &str) -> Option<(String, String, Vec<String>)> {
 	for mission in list() {
 		for task in &mission.tasks {
 			if task.session_id.as_deref() == Some(session_id) && !task.scope.is_empty() {
-				return Some((task.title.clone(), task.scope.clone()));
+				return Some((task.title.clone(), task.worktree.clone(), task.scope.clone()));
 			}
 		}
 	}
@@ -1462,6 +1686,82 @@ pub fn within_scope(scope: &[String], path: &str) -> bool {
 	})
 }
 
+/// Le chemin d'écriture d'un agent, ramené à sa racine de travail.
+///
+/// Le CLI passe à `Write` et `Edit` des chemins **absolus** (son outil l'exige),
+/// alors qu'un périmètre se déclare en chemins relatifs au dépôt (`apps/api/**`).
+/// Comparés tels quels, aucun chemin réel ne tombait jamais dans un périmètre :
+/// toute écriture d'un exécutant borné était refusée. Et un relatif comme
+/// `apps/api/../web/x.ts` passait le test de préfixe sans être chez lui.
+///
+/// On résout donc les `.` et `..` sans toucher au disque (le fichier n'existe
+/// souvent pas encore), on retire la racine, et l'on rend `None` pour tout ce
+/// qui en sort. Les séparateurs Windows et la casse des lecteurs sont ramenés à
+/// une seule forme.
+pub fn relative_to(root: &str, path: &str) -> Option<String> {
+	fn parts(raw: &str) -> (bool, Vec<String>) {
+		let forward = raw.trim().replace('\\', "/");
+		let absolute = forward.starts_with('/')
+			|| (forward.len() >= 2 && forward.as_bytes()[0].is_ascii_alphabetic() && forward.as_bytes()[1] == b':');
+		let mut out: Vec<String> = Vec::new();
+		for (index, part) in forward.split('/').enumerate() {
+			match part {
+				"" | "." => {}
+				".." => {
+					if matches!(out.last(), Some(last) if last != "..") {
+						out.pop();
+					} else {
+						out.push("..".into());
+					}
+				}
+				// `C:` et `/c/` désignent le même lecteur : la seconde est la
+				// forme du conteneur sous Windows (`sandbox::container_path`).
+				part if index == 0 && part.len() == 2 && part.ends_with(':') && part.as_bytes()[0].is_ascii_alphabetic() => {
+					out.push(part[..1].to_ascii_lowercase());
+				}
+				part if absolute && out.is_empty() && part.len() == 1 => {
+					out.push(part.to_ascii_lowercase());
+				}
+				part => out.push(part.to_string()),
+			}
+		}
+		(absolute, out)
+	}
+	let same = |a: &str, b: &str| {
+		if cfg!(windows) { a.eq_ignore_ascii_case(b) } else { a == b }
+	};
+
+	let (absolute, mut target) = parts(path);
+	if absolute {
+		let (_, root) = parts(root);
+		if root.is_empty()
+			|| target.len() < root.len()
+			|| !root.iter().zip(&target).all(|(a, b)| same(a, b))
+		{
+			return None;
+		}
+		target.drain(..root.len());
+	}
+	if target.iter().any(|part| part == "..") {
+		return None;
+	}
+	Some(target.join("/"))
+}
+
+/// `within_scope`, pour un chemin tel que l'agent l'écrit, depuis `root`.
+///
+/// Un chemin qui sort de la racine est hors périmètre dès qu'il y en a un :
+/// un exécutant borné n'écrit pas hors de son worktree.
+pub fn within_scope_at(root: &str, scope: &[String], path: &str) -> bool {
+	if scope.is_empty() {
+		return true;
+	}
+	match relative_to(root, path) {
+		Some(relative) => within_scope(scope, &relative),
+		None => false,
+	}
+}
+
 /// Chemins qu'un appel d'outil s'apprête à écrire.
 ///
 /// On ne cherche pas à comprendre une ligne de commande : `Bash` reste hors
@@ -1475,7 +1775,10 @@ pub fn written_paths(tool: &str, input: &serde_json::Value) -> Vec<String> {
 			.map(|value| value.to_string())
 	};
 	match tool {
-		"Write" | "Edit" | "NotebookEdit" => field("file_path").into_iter().collect(),
+		"Write" | "Edit" | "MultiEdit" => field("file_path").into_iter().collect(),
+		// Le carnet nomme sa cible autrement : la lire sous `file_path` laissait
+		// ce garde-fou aveugle à toute écriture de notebook.
+		"NotebookEdit" => field("notebook_path").into_iter().collect(),
 		_ => Vec::new(),
 	}
 }
@@ -1506,6 +1809,8 @@ mod tests {
 			finished_at: None,
 			checkpoint: String::new(),
 			worked_seconds: 0,
+			gate: Gate::None,
+			gate_output: String::new(),
 		}
 	}
 
@@ -1648,6 +1953,62 @@ mod tests {
 		assert!(within_scope(&[], "n/importe/quoi.rs"));
 	}
 
+	/// Le CLI écrit en chemins absolus : c'est la forme qui compte, pas celle
+	/// des tests ci-dessus.
+	#[test]
+	fn le_perimetre_tient_sur_les_chemins_absolus_du_cli() {
+		let scope = vec!["apps/api/**".to_string()];
+		let root = "/Users/a/wt/feat-x";
+		assert!(within_scope_at(root, &scope, "/Users/a/wt/feat-x/apps/api/src/main.rs"));
+		assert!(within_scope_at(root, &scope, "apps/api/src/main.rs"));
+		assert!(!within_scope_at(root, &scope, "/Users/a/wt/feat-x/apps/web/page.tsx"));
+		// Un worktree voisin qui commence pareil n'est pas le même.
+		assert!(!within_scope_at(root, &scope, "/Users/a/wt/feat-x-2/apps/api/main.rs"));
+		// Hors du worktree, même dans un dossier qui porte le même nom.
+		assert!(!within_scope_at(root, &scope, "/tmp/apps/api/main.rs"));
+	}
+
+	#[test]
+	fn on_ne_sort_pas_du_perimetre_par_les_points() {
+		let scope = vec!["apps/api".to_string()];
+		let root = "/Users/a/wt/feat-x";
+		assert!(!within_scope_at(root, &scope, "apps/api/../web/page.tsx"));
+		assert!(!within_scope_at(root, &scope, "/Users/a/wt/feat-x/apps/api/../../../etc/x"));
+		assert!(!within_scope_at(root, &scope, "../feat-y/apps/api/main.rs"));
+		assert!(within_scope_at(root, &scope, "./apps/api/./src/../lib.rs"));
+	}
+
+	#[test]
+	fn les_formes_windows_se_rejoignent() {
+		let scope = vec!["apps/api".to_string()];
+		let root = r"C:\Users\a\wt\feat-x";
+		assert!(within_scope_at(root, &scope, r"C:\Users\a\wt\feat-x\apps\api\main.rs"));
+		assert!(within_scope_at(root, &scope, "c:/Users/a/wt/feat-x/apps/api/main.rs"));
+		// La forme vue depuis un conteneur (`sandbox::container_path`).
+		assert!(within_scope_at(root, &scope, "/c/Users/a/wt/feat-x/apps/api/main.rs"));
+		assert!(!within_scope_at(root, &scope, r"D:\Users\a\wt\feat-x\apps\api\main.rs"));
+	}
+
+	#[test]
+	fn chaque_outil_d_ecriture_nomme_sa_cible() {
+		let input = serde_json::json!({ "file_path": "/w/a.rs", "notebook_path": "/w/n.ipynb" });
+		assert_eq!(written_paths("Write", &input), vec!["/w/a.rs"]);
+		assert_eq!(written_paths("MultiEdit", &input), vec!["/w/a.rs"]);
+		assert_eq!(written_paths("NotebookEdit", &input), vec!["/w/n.ipynb"]);
+		assert!(written_paths("Bash", &input).is_empty());
+	}
+
+	#[test]
+	fn un_chiffre_suivi_de_deux_points_n_est_pas_un_lecteur() {
+		// Seule une lettre désigne un lecteur Windows.
+		assert_eq!(relative_to("/w", "1:/x"), Some("1:/x".to_string()));
+	}
+
+	#[test]
+	fn sans_perimetre_tout_reste_permis() {
+		assert!(within_scope_at("/r", &[], "/ailleurs/x.rs"));
+	}
+
 	/// Seules les écritures de fichiers se vérifient sans ambiguïté.
 	#[test]
 	fn on_ne_devine_pas_ce_qu_une_commande_ecrit() {
@@ -1669,17 +2030,22 @@ mod tests {
 }
 
 /// Ce qu'une mission coûte, d'après celles qui lui ressemblent.
+#[cfg_attr(test, derive(ts_rs::TS))]
+#[cfg_attr(test, ts(export, rename = "MissionEstimate"))]
 #[derive(Debug, Clone, Serialize, Deserialize, Default)]
 #[serde(rename_all = "camelCase")]
 pub struct Estimate {
 	/// Missions closes sur lesquelles l'estimation s'appuie.
 	pub sample: usize,
 	/// Temps de travail cumulé des exécutants, médiane des comparables.
+	#[cfg_attr(test, ts(type = "number"))]
 	pub median_seconds: u64,
 	/// Le même temps rapporté à une tâche : ce qui permet d'extrapoler quand le
 	/// découpage proposé n'a pas la taille des précédents.
+	#[cfg_attr(test, ts(type = "number"))]
 	pub median_seconds_per_task: u64,
 	/// Estimation pour le découpage proposé.
+	#[cfg_attr(test, ts(type = "number"))]
 	pub expected_seconds: u64,
 	/// Part des comparables qui se sont soldées par un échec.
 	pub failure_rate: f32,
@@ -2023,6 +2389,8 @@ pub(crate) mod blocking_tests {
 			finished_at: None,
 			checkpoint: String::new(),
 			worked_seconds: 0,
+			gate: Gate::None,
+			gate_output: String::new(),
 		}
 	}
 
@@ -2462,6 +2830,8 @@ mod verdict_tests {
 }
 
 /// Une tâche qui déborde nettement de ce qu'une tâche coûte d'ordinaire.
+#[cfg_attr(test, derive(ts_rs::TS))]
+#[cfg_attr(test, ts(export, rename = "MissionOverrun"))]
 #[derive(Debug, Clone, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct Overrun {
@@ -2470,8 +2840,10 @@ pub struct Overrun {
 	pub task_id: String,
 	pub title: String,
 	/// Temps de travail du passage en cours, en secondes.
+	#[cfg_attr(test, ts(type = "number"))]
 	pub seconds: u64,
 	/// Ce qu'une tâche coûte d'ordinaire, sur les missions closes.
+	#[cfg_attr(test, ts(type = "number"))]
 	pub expected: u64,
 }
 

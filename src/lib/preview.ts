@@ -1241,6 +1241,7 @@ const REPONSES: Record<string, unknown> = {
 			worktreeRemoveCommand: "pnpm worktree:remove {folder} --force",
 			devCommand: "pnpm dev",
 			testCommands: [],
+			gateCommands: [],
 		},
 		impact: {
 			brief:
@@ -1675,6 +1676,13 @@ const REPONSES: Record<string, unknown> = {
 					finishedAt: ago(40),
 					checkpoint: "",
 					workedSeconds: 6600,
+					gate: "failed",
+					gateOutput: [
+						"$ pnpm test",
+						"exit 1",
+						" FAIL  api/cart.test.ts > rounds each line",
+						"   expected 10.01 to be 10",
+					].join("\n"),
 				},
 				{
 					id: "t2",
@@ -1696,6 +1704,8 @@ const REPONSES: Record<string, unknown> = {
 					finishedAt: null,
 					checkpoint: "",
 					workedSeconds: 2100,
+					gate: "none",
+					gateOutput: "",
 				},
 				{
 					id: "t3",
@@ -1717,6 +1727,8 @@ const REPONSES: Record<string, unknown> = {
 					finishedAt: ago(80),
 					checkpoint: "",
 					workedSeconds: 300,
+					gate: "none",
+					gateOutput: "",
 				},
 			],
 		},
@@ -1789,6 +1801,8 @@ const REPONSES: Record<string, unknown> = {
 				finishedAt: null,
 				checkpoint: "",
 				workedSeconds: 0,
+				gate: "none",
+				gateOutput: "",
 			})),
 		},
 
@@ -1834,6 +1848,8 @@ const REPONSES: Record<string, unknown> = {
 				finishedAt: ago(30),
 				checkpoint: "",
 				workedSeconds: 4200,
+				gate: "none",
+				gateOutput: "",
 			})),
 		},
 	],
@@ -2363,6 +2379,20 @@ const REPONSES: Record<string, unknown> = {
 		},
 		tasks: [],
 	},
+	// Un poste d'exemple déjà prêt : la carte « prêt à démarrer » ne s'affiche
+	// pas sur les captures du README.
+	readiness_check: {
+		ready: true,
+		checks: [
+			{ id: "git", required: true, ok: true, detail: "/usr/bin/git" },
+			{ id: "claude", required: true, ok: true, detail: "/Users/demo/.local/bin/claude" },
+			{ id: "claudeAuth", required: true, ok: true, detail: "demo@northwind.dev" },
+			{ id: "node", required: true, ok: true, detail: "/opt/homebrew/bin/node" },
+			{ id: "project", required: false, ok: true, detail: "/Users/demo/code/northwind" },
+			{ id: "container", required: false, ok: false, detail: "" },
+		],
+	},
+	mission_exposure: { sandboxed: false, unguardedRoles: ["backend", "frontend", "qa"] },
 	mission_estimate: {
 		sample: 7,
 		medianSeconds: 11_400,

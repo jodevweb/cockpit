@@ -44,7 +44,9 @@
 			"opened": "Missão aberta",
 			"planSubmitted": "Plano enviado",
 			"planSubmittedDetail": "{{count}} tarefa(s)",
-			"closed": "Missão encerrada"
+			"closed": "Missão encerrada",
+			"gatePassed": "Verificações do repositório aprovadas",
+			"gateFailed": "Verificação do repositório falhou"
 		},
 		"nothingAwaitsDecision": "Nada aguarda sua decisão sobre a etapa de {{step}}: a missão está em \"{{state}}\".",
 		"correctionNeedsReason": "Diga o que está errado: sem um motivo, o agente principal faria a mesma proposta de novo.",
@@ -52,6 +54,13 @@
 		"blocked": {
 			"unknownBase": "Ela parte de `{{base}}`, que não é a branch de nenhuma tarefa deste plano. Replaneje-a para partir da branch de integração.",
 			"baseExhausted": "A tarefa da qual ela parte (`{{base}}`) esgotou seus retrabalhos: ela não vai entregar."
+		},
+		"gate": {
+			"running": "Verificações do repositório em andamento: {{commands}}",
+			"timedOut": "Interrompida após {{minutes}} min sem terminar.",
+			"launchFailed": "Não foi possível iniciar a verificação: {{error}}",
+			"noWorktree": "As verificações não puderam ser executadas: o worktree da tarefa não existe mais ({{path}}).",
+			"noRuntime": "O isolamento de agentes está ativo, mas nem Docker nem OrbStack foi encontrado: as verificações não rodam na máquina no lugar deles."
 		}
 	},
 	"panel": {

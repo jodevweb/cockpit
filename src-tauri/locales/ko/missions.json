@@ -44,7 +44,9 @@
 			"opened": "미션 시작",
 			"planSubmitted": "계획 제출됨",
 			"planSubmittedDetail": "작업 {{count}}개",
-			"closed": "미션 종료"
+			"closed": "미션 종료",
+			"gatePassed": "저장소 검사 통과",
+			"gateFailed": "저장소 검사 실패"
 		},
 		"nothingAwaitsDecision": "{{step}} 단계에서 결정을 기다리는 항목이 없습니다: 미션은 \"{{state}}\" 상태입니다.",
 		"correctionNeedsReason": "무엇이 잘못되었는지 알려 주세요. 사유가 없으면 리드 에이전트가 같은 제안을 다시 합니다.",
@@ -52,6 +54,13 @@
 		"blocked": {
 			"unknownBase": "이 작업은 `{{base}}`에서 시작하는데, 이는 이 계획의 어떤 작업 브랜치도 아닙니다. 통합 브랜치에서 시작하도록 계획을 다시 세우세요.",
 			"baseExhausted": "시작점이 되는 작업(`{{base}}`)이 재작업 횟수를 모두 소진했습니다: 결과물을 전달하지 못합니다."
+		},
+		"gate": {
+			"running": "저장소 검사 실행 중: {{commands}}",
+			"timedOut": "{{minutes}}분 동안 끝나지 않아 중지했습니다.",
+			"launchFailed": "검사를 시작할 수 없습니다: {{error}}",
+			"noWorktree": "검사를 실행할 수 없습니다: 작업의 worktree가 더 이상 없습니다 ({{path}}).",
+			"noRuntime": "에이전트 격리가 켜져 있지만 Docker와 OrbStack을 찾을 수 없습니다. 대신 이 컴퓨터에서 검사를 실행하지 않습니다."
 		}
 	},
 	"panel": {

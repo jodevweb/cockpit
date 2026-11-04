@@ -616,7 +616,9 @@
 			"rejected": "작업을 거부했습니다",
 			"delivered": "작업을 제출했습니다",
 			"failed": "실패했습니다",
-			"waiting": "차례를 기다리는 중"
+			"waiting": "차례를 기다리는 중",
+			"checksFailed": "저장소 검사 실패",
+			"checksRunning": "저장소 검사 실행 중"
 		},
 		"pr": {
 			"eyebrow": "풀 리퀘스트",
@@ -995,5 +997,9 @@
 		"scriptsHint": "저장소 스크립트와 사용자 지정 명령",
 		"noScripts": "이 폴더에 스크립트가 없습니다.",
 		"footer": "명령이 이 셸에 입력된 뒤 실행됩니다 — {{shift}}Enter는 선택한 항목과 반대로 동작합니다."
+	},
+	"isolationNotice": {
+		"title": "{{roles}}에 컨테이너가 없습니다.",
+		"body": "이 실행자들은 이 컴퓨터에서 bypassPermissions로 작업합니다. Bash 도구는 세션의 권한(디스크, 네트워크, 자격 증명)을 가지며, 쓰기 범위는 파일 편집에만 적용됩니다. 접근 범위를 제한하려면 {{where}}에서 에이전트 격리를 켜세요."
 	}
 }

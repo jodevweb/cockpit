@@ -44,7 +44,9 @@
 			"opened": "Misión abierta",
 			"planSubmitted": "Plan enviado",
 			"planSubmittedDetail": "{{count}} tarea(s)",
-			"closed": "Misión cerrada"
+			"closed": "Misión cerrada",
+			"gatePassed": "Comprobaciones del repositorio superadas",
+			"gateFailed": "Comprobación del repositorio fallida"
 		},
 		"nothingAwaitsDecision": "Nada espera tu decisión sobre el {{step}}: la misión está en «{{state}}».",
 		"correctionNeedsReason": "Di qué está mal: sin motivo, el agente principal volvería a hacer la misma propuesta.",
@@ -52,6 +54,13 @@
 		"blocked": {
 			"unknownBase": "Parte de `{{base}}`, que no es la rama de ninguna tarea de este plan. Vuelve a planificarla para que parta de la rama de integración.",
 			"baseExhausted": "La tarea de la que parte (`{{base}}`) ha agotado sus correcciones: no entregará."
+		},
+		"gate": {
+			"running": "Comprobaciones del repositorio en curso: {{commands}}",
+			"timedOut": "Detenida tras {{minutes}} min sin terminar.",
+			"launchFailed": "No se pudo iniciar la comprobación: {{error}}",
+			"noWorktree": "Las comprobaciones no pudieron ejecutarse: el worktree de la tarea ya no existe ({{path}}).",
+			"noRuntime": "El aislamiento de agentes está activado pero no se encontró Docker ni OrbStack: las comprobaciones no se ejecutan en el equipo en su lugar."
 		}
 	},
 	"panel": {
