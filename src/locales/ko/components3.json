@@ -1036,7 +1036,7 @@
 			},
 			"project": {
 				"label": "프로젝트",
-				"fix": "{{where}}에서 프로젝트의 메인 저장소를 등록하세요."
+				"fix": "저장소의 worktree, 미션, 풀 리퀘스트를 추적하려면 {{where}}에서 등록하세요. 자유 에이전트는 없어도 작동합니다."
 			},
 			"container": {
 				"label": "Docker 또는 OrbStack",

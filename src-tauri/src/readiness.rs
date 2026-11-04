@@ -20,6 +20,7 @@ use serde::Serialize;
 #[serde(rename_all = "camelCase")]
 pub struct Check {
 	/// `shell`, `git`, `claude`, `claudeAuth`, `node`, `project`, `container`.
+	/// Les deux derniers sont facultatifs.
 	/// L'interface en tire le libellé et la façon de le régler.
 	pub id: String,
 	/// Sans lui, le cockpit ne peut pas faire son travail principal : lancer
@@ -78,7 +79,10 @@ pub fn assemble(seen: &Observed) -> Readiness {
 		checks.push(check("claudeAuth", true, &seen.logged_in));
 	}
 	checks.push(check("node", true, &seen.node));
-	checks.push(check("project", true, &seen.project));
+	// Facultatif : un agent libre travaille dans n'importe quel dossier, sans
+	// projet déclaré. Le réclamer à chaque ouverture aurait harcelé qui ne se
+	// sert que de ceux-là.
+	checks.push(check("project", false, &seen.project));
 	checks.push(check("container", false, &seen.container));
 	let ready = checks.iter().all(|check| check.ok || !check.required);
 	Readiness { ready, checks }
@@ -141,18 +145,29 @@ mod tests {
 
 	#[test]
 	fn chaque_prerequis_manquant_retient() {
-		for manque in ["git", "claude", "node", "project"] {
+		for manque in ["git", "claude", "node"] {
 			let mut seen = complet();
 			match manque {
 				"git" => seen.git = None,
 				"claude" => seen.claude = None,
-				"node" => seen.node = None,
-				_ => seen.project = None,
+				_ => seen.node = None,
 			}
 			let vue = assemble(&seen);
 			assert!(!vue.ready, "{manque}");
 			assert!(vue.checks.iter().any(|check| check.id == manque && !check.ok));
 		}
+	}
+
+	#[test]
+	fn sans_projet_les_agents_libres_suffisent() {
+		// Un poste qui ne lance que des agents libres est prêt : il ne faut pas
+		// lui réclamer un projet dont il n'a pas l'usage.
+		let mut seen = complet();
+		seen.project = None;
+		let vue = assemble(&seen);
+		assert!(vue.ready);
+		let projet = vue.checks.iter().find(|check| check.id == "project").unwrap();
+		assert!(!projet.ok && !projet.required);
 	}
 
 	#[test]

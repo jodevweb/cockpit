@@ -2388,7 +2388,7 @@ const REPONSES: Record<string, unknown> = {
 			{ id: "claude", required: true, ok: true, detail: "/Users/demo/.local/bin/claude" },
 			{ id: "claudeAuth", required: true, ok: true, detail: "demo@northwind.dev" },
 			{ id: "node", required: true, ok: true, detail: "/opt/homebrew/bin/node" },
-			{ id: "project", required: true, ok: true, detail: "/Users/demo/code/northwind" },
+			{ id: "project", required: false, ok: true, detail: "/Users/demo/code/northwind" },
 			{ id: "container", required: false, ok: false, detail: "" },
 		],
 	},
