@@ -6,6 +6,7 @@
 export type ReadinessCheck = { 
 /**
  * `shell`, `git`, `claude`, `claudeAuth`, `node`, `project`, `container`.
+ * Les deux derniers sont facultatifs.
  * L'interface en tire le libellé et la façon de le régler.
  */
 id: string, 
