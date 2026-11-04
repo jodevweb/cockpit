@@ -632,6 +632,7 @@
 			"online": "в сети"
 		},
 		"waiting": "Ждут вас",
+		"waitingDismiss": "Скрыть — вернётся, если что-то изменится",
 		"island": {
 			"open": "Открыть {{name}}",
 			"agentsWord_one": "агент",
@@ -1562,6 +1563,7 @@
 		"permanence": "Permanence",
 		"worktreesToClean": "Worktrees к уборке",
 		"waitingForYou": "Ждут вас",
+		"waitingDismiss": "Скрыть — вернётся, если что-то изменится",
 		"fixStarted": "{{label}} — взялся.",
 		"task": {
 			"placeholder": "Задача, которую нельзя забыть…",

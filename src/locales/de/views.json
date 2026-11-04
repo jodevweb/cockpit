@@ -556,6 +556,7 @@
 			"online": "online"
 		},
 		"waiting": "Wartet auf dich",
+		"waitingDismiss": "Ausblenden — kommt zurück, wenn sich etwas ändert",
 		"island": {
 			"open": "{{name}} öffnen",
 			"agentsWord_one": "Agent",
@@ -1396,6 +1397,7 @@
 		"permanence": "Permanence",
 		"worktreesToClean": "Aufzuräumende Worktrees",
 		"waitingForYou": "Wartet auf dich",
+		"waitingDismiss": "Ausblenden — kommt zurück, wenn sich etwas ändert",
 		"fixStarted": "{{label}} — läuft.",
 		"task": {
 			"placeholder": "Eine Aufgabe, die du nicht vergessen willst…",

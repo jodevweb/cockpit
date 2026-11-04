@@ -556,6 +556,7 @@
 			"online": "en línea"
 		},
 		"waiting": "Te espera",
+		"waitingDismiss": "Descartar — vuelve si cambia",
 		"island": {
 			"open": "Abrir {{name}}",
 			"agentsWord_one": "agente",
@@ -1396,6 +1397,7 @@
 		"permanence": "Permanence",
 		"worktreesToClean": "Worktrees por recoger",
 		"waitingForYou": "Te espera",
+		"waitingDismiss": "Descartar — vuelve si cambia",
 		"fixStarted": "{{label}} — en ello.",
 		"task": {
 			"placeholder": "Una tarea que no olvidar…",

@@ -93,3 +93,17 @@ test("les portes se règlent dans Équipe & flux", async ({ page }) => {
 	await expect(field).toBeVisible();
 	await expect(field).toHaveAttribute("placeholder", "pnpm test, pnpm lint");
 });
+
+test("la croix retire un élément du bandeau « ça t'attend »", async ({ page }) => {
+	const errors = watchErrors(page);
+	await page.goto("/");
+	const bar = page.getByText("Waiting on you", { exact: true }).locator("xpath=..");
+	const item = bar.getByRole("button", { name: /^Show delivery estimates at checkout/ });
+	await expect(item).toBeVisible();
+	await item.locator("xpath=following-sibling::button[1]").click();
+	await expect(item).toHaveCount(0);
+	// Écarter ne fait taire que le bandeau : la mission reste là où elle vit.
+	await page.locator("header button", { hasText: "Missions" }).first().click();
+	await expect(page.getByText("Show delivery estimates at checkout").first()).toBeVisible();
+	expect(errors).toEqual([]);
+});

@@ -518,6 +518,7 @@
 			"online": "在线"
 		},
 		"waiting": "等待你处理",
+		"waitingDismiss": "忽略 — 有变化时会重新出现",
 		"island": {
 			"open": "打开 {{name}}",
 			"agentsWord_other": "智能体",
@@ -1313,6 +1314,7 @@
 		"permanence": "Permanence",
 		"worktreesToClean": "待整理的 worktree",
 		"waitingForYou": "等待你处理",
+		"waitingDismiss": "忽略 — 有变化时会重新出现",
 		"fixStarted": "{{label}} — 处理中。",
 		"task": {
 			"placeholder": "一件不能忘记的事…",
