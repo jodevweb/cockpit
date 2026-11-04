@@ -17,3 +17,10 @@ cockpit.config.toml
 
 # Réglages locaux des agents
 .claude/
+
+# Paquets générés par scripts/packages.mjs
+packaging/out/
+
+# Tests d interface (Playwright)
+test-results/
+playwright-report/

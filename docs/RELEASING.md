@@ -93,3 +93,43 @@ l'identité du trousseau, publie l'archive et un `latest.json` — **macOS de ce
 machine seulement** : les postes Windows ne se verront rien proposer pour cette
 version. Le commit porte `[skip ci]` pour que le tag ne relance pas une
 publication en CI. À réserver au jour où la CI est indisponible.
+
+## Homebrew et winget (après la publication)
+
+`node scripts/packages.mjs` (ou `node scripts/packages.mjs v0.85.1`) lit la
+release publiée, télécharge chaque binaire pour en calculer l'empreinte, et
+écrit dans `packaging/out/<version>/` (ignoré par git) :
+
+- `homebrew/cockpit.rb` — le cask, Apple Silicon et Intel quand la version a
+  les deux archives, Apple Silicon seule sinon ;
+- `winget/*.yaml` — les trois manifestes (version, installeur, description),
+  avec Git for Windows en dépendance.
+
+Aucun jeton n'est nécessaire : le script ne lit que des adresses publiques.
+
+**Homebrew.** Le cask vit dans un tap à part, `jodevweb/homebrew-cockpit`
+(un dépôt public dont le nom commence par `homebrew-`), sous `Casks/`. Une
+fois le fichier poussé :
+
+```bash
+brew install --cask jodevweb/cockpit/cockpit
+```
+
+L'app n'étant pas notarisée, le cask retire l'attribut de quarantaine après
+l'installation (`postflight`), comme le README le fait faire à la main. C'est
+aussi pourquoi il ne peut pas entrer dans le tap officiel de Homebrew, qui
+exige des apps notarisées. `auto_updates true` : l'updater intégré reste
+celui qui propose les versions suivantes.
+
+**winget.** Valider puis soumettre au dépôt communautaire
+`microsoft/winget-pkgs` :
+
+```powershell
+winget validate --manifest packaging\out\<version>\winget
+wingetcreate submit packaging\out\<version>\winget   # ouvre la PR chez Microsoft
+```
+
+La première soumission passe par une relecture humaine chez Microsoft ; les
+suivantes ne changent que la version, l'adresse et l'empreinte. L'installeur
+n'est pas signé Authenticode : la validation automatique de winget peut le
+signaler, sans que ce soit bloquant par principe.

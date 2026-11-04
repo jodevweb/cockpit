@@ -14,6 +14,8 @@
 use serde::Serialize;
 
 /// Un prérequis du poste.
+#[cfg_attr(test, derive(ts_rs::TS))]
+#[cfg_attr(test, ts(export, rename = "ReadinessCheck"))]
 #[derive(Debug, Clone, Serialize, PartialEq, Eq)]
 #[serde(rename_all = "camelCase")]
 pub struct Check {
@@ -30,6 +32,8 @@ pub struct Check {
 }
 
 /// L'état du poste, prêt ou non.
+#[cfg_attr(test, derive(ts_rs::TS))]
+#[cfg_attr(test, ts(export))]
 #[derive(Debug, Clone, Serialize, PartialEq, Eq)]
 #[serde(rename_all = "camelCase")]
 pub struct Readiness {
