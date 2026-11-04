@@ -331,6 +331,13 @@ partiront en `bypassPermissions` directement sur le poste : leur outil Bash a
 alors les droits de la session, et le périmètre d'écriture ne couvre que les
 éditions de fichiers.
 
+Isolés ou non, les exécutants de mission reçoivent un garde-fou git : un hook
+`PreToolUse` du CLI (`src-tauri/src/guard.rs`, passé par `--settings`, qui
+s'ajoute aux hooks du dépôt sans les remplacer) refuse le push forcé, le push
+sur la branche d'intégration, sa base ou les `base_branches` du projet, et la
+création de branches. Il tient en `bypassPermissions`. `cargo run --example
+guard` vérifie la commande du hook telle que le shell du poste la lira.
+
 Le worktree est monté au même chemin à l'intérieur qu'à l'extérieur du
 conteneur, et les identifiants (`~/.claude`, `~/.gitconfig`, `~/.ssh`) en
 lecture seule. Activée sans runtime installé, le lancement de l'agent est

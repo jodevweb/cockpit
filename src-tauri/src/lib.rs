@@ -12,6 +12,7 @@ pub mod error;
 pub mod executions;
 pub mod files;
 pub mod gates;
+pub mod guard;
 pub mod gemini;
 pub mod git;
 pub mod i18n;
