@@ -79,6 +79,18 @@ jobs:
         working-directory: src-tauri
         run: cargo test --lib
 
+      # `cargo test` réécrit les types TypeScript dérivés du Rust (ts-rs). S'ils
+      # bougent, c'est qu'un type Rust a changé sans que `src/lib/generated` ne
+      # suive : l'interface lirait une forme qui n'existe plus.
+      - name: Types dérivés à jour
+        run: |
+          if [ -n "$(git status --porcelain src/lib/generated)" ]; then
+            git status --porcelain src/lib/generated
+            git diff src/lib/generated
+            echo "::error::src/lib/generated n'est pas à jour : lancer cargo test dans src-tauri et commiter le résultat."
+            exit 1
+          fi
+
   # L'interface dans un navigateur, en mode aperçu (données de `src/lib/preview.ts`) :
   # chaque écran s'ouvre sans erreur, et les gestes qui protègent une mission
   # restent visibles. Linux suffit : l'aperçu ne touche à aucun binaire natif.
