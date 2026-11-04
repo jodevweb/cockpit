@@ -44,6 +44,7 @@ import { QuickMenu } from "@/components/QuickMenu";
 import { useConfirm } from "@/components/Confirm";
 import { Markdown } from "@/components/Markdown";
 import { IsolationNotice } from "@/components/IsolationNotice";
+import { DeliveryDossierPanel } from "@/components/DeliveryDossierPanel";
 import { withActivity } from "@/lib/activity";
 import { duration, elapsedSeconds, fromIso } from "@/lib/format";
 import { api } from "@/lib/ipc";
@@ -965,6 +966,11 @@ function MissionCard({
 					    tourné, leurs reprises, leurs coûts, et pourquoi ceux qui sont
 					    morts sont morts. Les états des tâches ci-dessus disent où l'on
 					    en est ; eux seuls disent comment on y est arrivé. */}
+					{/* Ce que le cockpit a mesuré, tel que la pull request le reçoit :
+					    dès qu'une tâche a rendu, il y a quelque chose à prouver. */}
+					{mission.tasks.some((task) => ["delivered", "integrated"].includes(task.state)) ? (
+						<DeliveryDossierPanel mission={mission} />
+					) : null}
 					<MissionHistory missionId={mission.id} />
 				</>
 			) : null}

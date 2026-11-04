@@ -451,5 +451,47 @@
 			"description": "Error reported by Sentry.\n\n**Project**: {{project}}\n**Origin**: {{culprit}}\n**Impact**: {{events}} occurrence(s), {{users}} user(s)\n\n[Open in Sentry]({{permalink}})\n\n_Issue created from Cockpit._",
 			"note": "Linear issue {{identifier}} — {{url}}"
 		}
+	},
+	"delivery": {
+		"title": "Delivery dossier — Cockpit",
+		"gates": {
+			"none": "No repository checks declared",
+			"passed": "Repository checks passed: {{commands}}",
+			"failed": "Repository checks ({{commands}}) fail for {{tasks}}",
+			"waiting": "Repository checks ({{commands}}) not finished for {{tasks}}"
+		},
+		"verdicts": {
+			"none": "No QA or review task",
+			"line": "{{task}}: {{verdict}}",
+			"ok": "verified",
+			"reserves": "verified with reservations",
+			"blocking": "rejected",
+			"undecided": "no readable verdict — not an approval",
+			"waiting": "not handed in yet"
+		},
+		"properties": {
+			"none": "No property audit for this branch",
+			"held": "Properties: {{held}}/{{total}} hold",
+			"broken": "{{count}} broken",
+			"unsettled": "{{count}} undecided",
+			"decorative": "{{count}} never caught a past bug (decorative)"
+		},
+		"changes": "Changes: {{files}} file(s), +{{insertions}} −{{deletions}}",
+		"films": "QA recorded on video: {{count}} film(s), kept on the maintainer's machine",
+		"cost": "Cost: {{tasks}} task(s), {{reworks}} rework(s), {{minutes}} min of work, ≈ {{tokens}} tokens",
+		"footer": "Written by Cockpit from what it measured, not from what the agents said.",
+		"status": {
+			"success": "Checks, verdicts and properties hold",
+			"pending": "Some checks or verdicts are not settled yet",
+			"failure": "A check, a verdict or a property fails"
+		},
+		"journal": {
+			"published": "Delivery dossier published",
+			"statusFailed": "Commit status not posted",
+			"publishFailed": "Delivery dossier not published"
+		},
+		"errors": {
+			"noGithubPull": "This mission has no GitHub pull request to publish the dossier on."
+		}
 	}
 }

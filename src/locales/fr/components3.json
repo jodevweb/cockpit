@@ -766,6 +766,10 @@
 			"gateCommands": {
 				"label": "Vérifications avant intégration",
 				"hint": "commandes shell, séparées par des virgules, jouées dans le worktree d'une tâche de mission quand elle rend du code ; elle n'est fusionnée que si toutes passent, sinon son maître reçoit la sortie pour la renvoyer en correction"
+			},
+			"deliveryDossier": {
+				"title": "Publier le dossier de livraison sur les pull requests des missions",
+				"detail": "Quand une mission ouvre sa pull request, Cockpit ajoute à la description ce qu'il a mesuré — vérifications, verdicts, propriétés, coût — et pose un statut de commit cockpit/dossier. Les vidéos de recette restent sur ce poste."
 			}
 		},
 		"replacedAtLaunch": "Remplacés au lancement :",
@@ -1077,5 +1081,19 @@
 				"fix": "Facultatif : pour faire tourner les agents dans des conteneurs, mémoire plafonnée et portée bornée."
 			}
 		}
+	},
+	"deliveryDossier": {
+		"title": "Dossier de livraison",
+		"overall": {
+			"success": "tient",
+			"pending": "pas tranché",
+			"failure": "échoue"
+		},
+		"films": "Recette en vidéo",
+		"filmsLocal": "Lues depuis ce poste. Les vidéos ne sont jamais publiées sur la pull request.",
+		"publish": "Publier sur la PR",
+		"publishHint": "Met à jour la section « dossier » de la description et le statut de commit cockpit/dossier.",
+		"noPull": "Pas encore de pull request GitHub : le dossier sera publié quand la mission l'ouvrira.",
+		"published": "Dossier publié sur la pull request"
 	}
 }

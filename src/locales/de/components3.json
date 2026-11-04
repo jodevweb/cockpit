@@ -766,6 +766,10 @@
 			"gateCommands": {
 				"label": "Prüfungen vor der Integration",
 				"hint": "Shell-Befehle, durch Kommas getrennt, im Worktree einer Missionsaufgabe ausgeführt, sobald sie Code abliefert; sie wird nur gemergt, wenn alle bestehen, sonst erhält ihr Leiter die Ausgabe, um sie zurückzuschicken"
+			},
+			"deliveryDossier": {
+				"title": "Lieferakte in den Pull Requests von Missionen veröffentlichen",
+				"detail": "Wenn eine Mission ihren Pull Request öffnet, ergänzt Cockpit die Beschreibung um das Gemessene – Prüfungen, Urteile, Eigenschaften, Kosten – und setzt einen Commit-Status cockpit/dossier. QA-Videos bleiben auf diesem Rechner."
 			}
 		},
 		"replacedAtLaunch": "Beim Start ersetzt:",
@@ -1077,5 +1081,19 @@
 				"fix": "Optional: um Agenten in Containern laufen zu lassen, mit begrenztem Speicher und begrenzter Reichweite."
 			}
 		}
+	},
+	"deliveryDossier": {
+		"title": "Lieferakte",
+		"overall": {
+			"success": "hält",
+			"pending": "offen",
+			"failure": "schlägt fehl"
+		},
+		"films": "QA auf Video",
+		"filmsLocal": "Von diesem Rechner abgespielt. Videos werden nie im Pull Request veröffentlicht.",
+		"publish": "Im PR veröffentlichen",
+		"publishHint": "Aktualisiert den Akten-Abschnitt der Beschreibung und den Commit-Status cockpit/dossier.",
+		"noPull": "Noch kein GitHub-Pull-Request: Die Akte wird veröffentlicht, wenn die Mission ihn öffnet.",
+		"published": "Akte im Pull Request veröffentlicht"
 	}
 }

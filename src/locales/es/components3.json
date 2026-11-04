@@ -766,6 +766,10 @@
 			"gateCommands": {
 				"label": "Comprobaciones antes de integrar",
 				"hint": "comandos de shell, separados por comas, ejecutados en el worktree de una tarea de misión cuando entrega código; solo se fusiona si todos pasan, si no su agente principal recibe la salida para devolverla"
+			},
+			"deliveryDossier": {
+				"title": "Publicar el expediente de entrega en las pull requests de las misiones",
+				"detail": "Cuando una misión abre su pull request, Cockpit añade a la descripción lo que midió —comprobaciones, veredictos, propiedades, coste— y publica un estado de commit cockpit/dossier. Los vídeos de QA se quedan en este equipo."
 			}
 		},
 		"replacedAtLaunch": "Sustituido al lanzar:",
@@ -1077,5 +1081,19 @@
 				"fix": "Opcional: para ejecutar los agentes en contenedores, con memoria limitada y alcance acotado."
 			}
 		}
+	},
+	"deliveryDossier": {
+		"title": "Expediente de entrega",
+		"overall": {
+			"success": "se cumple",
+			"pending": "sin resolver",
+			"failure": "falla"
+		},
+		"films": "QA en vídeo",
+		"filmsLocal": "Se reproducen desde este equipo. Los vídeos nunca se publican en la pull request.",
+		"publish": "Publicar en la PR",
+		"publishHint": "Actualiza la sección del expediente en la descripción y el estado de commit cockpit/dossier.",
+		"noPull": "Aún no hay pull request de GitHub: el expediente se publicará cuando la misión la abra.",
+		"published": "Expediente publicado en la pull request"
 	}
 }

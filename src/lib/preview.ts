@@ -1242,6 +1242,7 @@ const REPONSES: Record<string, unknown> = {
 			devCommand: "pnpm dev",
 			testCommands: [],
 			gateCommands: [],
+			deliveryDossier: true,
 		},
 		impact: {
 			brief:
@@ -2391,6 +2392,32 @@ const REPONSES: Record<string, unknown> = {
 			{ id: "project", required: false, ok: true, detail: "/Users/demo/code/northwind" },
 			{ id: "container", required: false, ok: false, detail: "" },
 		],
+	},
+	// Le dossier d'une mission où une porte échoue et où la recette n'a pas
+	// conclu : ce que l'écran doit montrer sans le maquiller.
+	mission_dossier: {
+		missionId: "m-preview",
+		title: "Fix cart total rounding on multi-currency orders",
+		branch: "fix/cart-rounding-nw-3044",
+		gateCommands: ["pnpm test"],
+		gates: [{ task: "Per-line rounding in the API", gate: "failed" }],
+		verdicts: [{ task: "Functional QA", role: "qa", verdict: "blocking", delivered: true }],
+		properties: { total: 6, held: 5, broken: 0, unsettled: 1, decorative: 1 },
+		films: [],
+		changes: { files: 7, insertions: 120, deletions: 14 },
+		cost: { tasks: 3, reworks: 1, workedSeconds: 9000, tokens: 1_900_000, usd: 4.2 },
+		overall: "failure",
+		markdown: [
+			"### Delivery dossier — Cockpit",
+			"",
+			"- ❌ Repository checks (`pnpm test`) fail for « Per-line rounding in the API »",
+			"- ❌ Functional QA: rejected",
+			"- ⚠️ Properties: 5/6 hold · 1 undecided · 1 never caught a past bug (decorative)",
+			"- 📄 Changes: 7 file(s), +120 −14",
+			"- 💸 Cost: 3 task(s), 1 rework(s), 150 min of work, ≈ 1.9 M tokens",
+			"",
+			"*Written by Cockpit from what it measured, not from what the agents said.*",
+		].join("\n"),
 	},
 	mission_exposure: { sandboxed: false, unguardedRoles: ["backend", "frontend", "qa"] },
 	mission_estimate: {

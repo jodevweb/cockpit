@@ -451,5 +451,47 @@
 			"description": "Sentry 报告的错误。\n\n**项目**：{{project}}\n**来源**：{{culprit}}\n**影响**：{{events}} 次出现，{{users}} 个用户\n\n[在 Sentry 中打开]({{permalink}})\n\n_工单由 Cockpit 创建。_",
 			"note": "Linear 工单 {{identifier}} — {{url}}"
 		}
+	},
+	"delivery": {
+		"title": "交付档案 — Cockpit",
+		"gates": {
+			"none": "未声明仓库检查",
+			"passed": "仓库检查已通过：{{commands}}",
+			"failed": "仓库检查（{{commands}}）在 {{tasks}} 上未通过",
+			"waiting": "仓库检查（{{commands}}）在 {{tasks}} 上尚未完成"
+		},
+		"verdicts": {
+			"none": "没有测试或评审任务",
+			"line": "{{task}}：{{verdict}}",
+			"ok": "已验证",
+			"reserves": "已验证（有保留意见）",
+			"blocking": "已拒绝",
+			"undecided": "没有可读的结论——不等于同意",
+			"waiting": "尚未提交"
+		},
+		"properties": {
+			"none": "该分支没有属性审计",
+			"held": "属性：{{held}}/{{total}} 成立",
+			"broken": "{{count}} 项被违反",
+			"unsettled": "{{count}} 项未定",
+			"decorative": "{{count}} 项从未发现过往缺陷（装饰性）"
+		},
+		"changes": "改动：{{files}} 个文件，+{{insertions}} −{{deletions}}",
+		"films": "已录制测试视频：{{count}} 个，保存在维护者的机器上",
+		"cost": "成本：{{tasks}} 个任务，{{reworks}} 次返工，{{minutes}} 分钟工作，约 {{tokens}} 个令牌",
+		"footer": "由 Cockpit 根据其测量结果撰写，而非根据代理的陈述。",
+		"status": {
+			"success": "检查、结论和属性均成立",
+			"pending": "部分检查或结论尚未确定",
+			"failure": "有检查、结论或属性未通过"
+		},
+		"journal": {
+			"published": "交付档案已发布",
+			"statusFailed": "未能设置提交状态",
+			"publishFailed": "交付档案未发布"
+		},
+		"errors": {
+			"noGithubPull": "该任务没有可发布档案的 GitHub 拉取请求。"
+		}
 	}
 }

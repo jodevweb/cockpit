@@ -71,6 +71,7 @@ import type {
 	MissionActivity,
 	MissionEstimate,
 	MissionExposure,
+	DeliveryDossier,
 	MissionOverrun,
 	MissionState,
 	MissionStep,
@@ -652,6 +653,10 @@ export const api = {
 		overruns: () => call<MissionOverrun[]>("mission_overruns"),
 		/** Les rôles du plan qui partiront sans filet : `bypassPermissions` hors conteneur. */
 		exposure: (id: string) => call<MissionExposure>("mission_exposure", { id }),
+		/** Le dossier de livraison : ce que le cockpit a mesuré de la mission. */
+		dossier: (id: string) => call<DeliveryDossier>("mission_dossier", { id }),
+		/** Le publie sur la pull request : section de description et statut de commit. */
+		publishDossier: (id: string) => call<string>("mission_dossier_publish", { id }),
 		get: (id: string) => call<Mission>("mission_get", { id }),
 		create: (
 			title: string,
