@@ -195,6 +195,10 @@ export function MissionsView() {
 		useCockpit();
 	const { t } = useTranslation("views");
 	const { confirm } = useConfirm();
+	// GitHub Issues sert aussi de suivi : une mission part très bien d'un « #1 ».
+	// Ne compter que Linear et GitLab laissait le parcours fermé — le bouton
+	// « À toi — ouvrir » ne faisait rien — sur un projet suivi dans GitHub.
+	const hasTickets = hasConnector("tickets") || hasConnector("repository");
 	const missions = useAsync(() => api.missions.list(), [], { pollMs: 10_000 });
 	// Ce qui déborde, sur toutes les missions à la fois : le repère se calcule
 	// sur l'historique commun, le demander mission par mission relirait les
@@ -281,7 +285,7 @@ export function MissionsView() {
 	};
 
 	const opened = openId ? list.find((mission) => mission.id === openId) : undefined;
-	if (openId && hasConnector("tickets")) {
+	if (openId && hasTickets) {
 		if (!opened) {
 			return (
 				<div className="flex min-h-0 flex-1 items-center justify-center">
@@ -312,7 +316,7 @@ export function MissionsView() {
 	// message d'erreur au premier essai. Seulement tant qu'il n'y a rien à
 	// montrer : une mission ouverte autrement (par la Permanence, sans ticket)
 	// restait sinon introuvable derrière cette présentation.
-	if (!hasConnector("tickets") && (missions.data ?? []).length === 0) {
+	if (!hasTickets && (missions.data ?? []).length === 0) {
 		const tickets = connectors.find((entry) => entry.kind === "tickets");
 		return (
 			<>
