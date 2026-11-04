@@ -14,10 +14,7 @@ native.
 ![Linux x64](https://img.shields.io/badge/Linux-x64-lightgrey.svg)
 ![Tauri 2](https://img.shields.io/badge/Tauri-2-24C8DB.svg)
 
-<picture>
-  <source media="(prefers-color-scheme: dark)" srcset="docs/images/carte-dark.webp">
-  <img alt="La carte : tickets, missions, revues et mises en production d'un projet" src="docs/images/carte-light.webp">
-</picture>
+<img alt="La carte d'un projet : ses tickets ouverts, une mission livrée par trois exécutants, sa pull request prête à fusionner, CI verte" src="docs/images/carte.webp">
 
 Application Tauri 2 — binaire natif, aucun serveur. Rust pour tout ce qui
 touche au système (git, processus, fichiers, HTTP), React + Tailwind pour
@@ -48,24 +45,35 @@ livrent sans tout relire**.
   restent sur ton poste.
 
 <p align="center">
-  <img alt="Un parcours : la carte, un workspace, les décisions, la conversation d'un agent" src="docs/images/demo.gif" width="800">
+  <img alt="Un ticket GitHub devient une mission : tu valides ce que le maître a compris, son approche, son découpage, et tu reçois une pull request avec son dossier de livraison" src="docs/images/demo.gif" width="800">
 </p>
 
 <table>
   <tr>
-    <td width="33%"><img alt="Un workspace : l'agent pose une question" src="docs/images/workspace.webp"></td>
-    <td width="33%"><img alt="Les décisions en attente" src="docs/images/decisions.webp"></td>
-    <td width="33%"><img alt="La conversation d'un agent, outil par outil" src="docs/images/agents.webp"></td>
+    <td width="33%"><img alt="Un workspace : l'agent demande avant de lancer une commande" src="docs/images/workspace-autorisation.webp"></td>
+    <td width="33%"><img alt="Le film du tour d'un agent : fichiers lus, modifications, tests qui passent, résultat" src="docs/images/film-du-tour.webp"></td>
+    <td width="33%"><img alt="L'écran Git : une branche, ses fichiers et son diff" src="docs/images/git.webp"></td>
   </tr>
   <tr>
-    <td align="center"><sub>Un workspace : l'agent attend ta réponse</sub></td>
-    <td align="center"><sub>Les décisions qui t'attendent</sub></td>
-    <td align="center"><sub>Ce qu'un agent a fait, outil par outil</sub></td>
+    <td align="center"><sub>Un workspace : l'agent demande avant de lancer une commande</sub></td>
+    <td align="center"><sub>Le film de son tour : ce qu'il a lu, changé et testé</sub></td>
+    <td align="center"><sub>La branche et son diff, sans quitter Cockpit</sub></td>
+  </tr>
+  <tr>
+    <td width="33%"><img alt="Une mission : ce que le maître a compris du ticket, et sa question" src="docs/images/mission-comprehension.webp"></td>
+    <td width="33%"><img alt="Une mission : le découpage proposé, un exécutant par tâche" src="docs/images/mission-decoupage.webp"></td>
+    <td width="33%"><img alt="Une mission livrée : toutes les tâches rendues, la pull request ouverte" src="docs/images/mission-livraison.webp"></td>
+  </tr>
+  <tr>
+    <td align="center"><sub>Une mission : tu valides ce que le maître a compris</sub></td>
+    <td align="center"><sub>Puis son découpage, avant que rien ne parte</sub></td>
+    <td align="center"><sub>Livré : une pull request et son dossier</sub></td>
   </tr>
 </table>
 
-<sub>Captures prises en mode aperçu (`pnpm vite:dev` dans un navigateur), sur
-des données d'exemple.</sub>
+<sub>Captures tirées d'une vraie session, interface en anglais : un projet web
+JavaScript neuf, deux tickets GitHub, l'un traité dans un workspace, l'autre en
+mission. Dans le GIF, les attentes sont accélérées, et c'est indiqué.</sub>
 
 ---
 
@@ -278,18 +286,19 @@ fichier :
 
 ## Les écrans
 
+Les écrans de tous les jours sont dans la barre du haut ; les autres dans le
+tiroir **Atelier**, à droite de la barre.
+
 | Écran             | Ce qu'il montre                                                                                                                  |
 | ----------------- | -------------------------------------------------------------------------------------------------------------------------------- |
-| **Vue d'ensemble** | Agents actifs, worktrees à surveiller, erreurs Sentry, PR ouvertes, derniers documents produits.                                   |
-| **Agents IA**      | Toutes les sessions Claude Code, leur timeline complète, sous-agents, outils, fichiers écrits, consommation. Reprise en un clic.   |
-| **Worktrees**      | État git de chaque arbre, diff par fichier, commits, sessions rattachées, création et suppression via l'outillage du dépôt.        |
-| **Git**            | Toutes les branches, ce que chacune change depuis sa divergence avec la base : arbre de fichiers, commits, graphe, diff.           |
-| **Scripts**        | Commandes maison avec leurs options en formulaire, scripts du `package.json`, exécution avec sortie live et annulation.            |
-| **Documents**      | Livrables des agents (`.claude/work`, `.claude/reviews`, `docs/`, markdown racine) sur tous les worktrees, rendus en markdown.     |
-| **Observabilité**  | Issues Sentry (résolution et mise en sourdine depuis l'app), incidents et monitors Better Stack.                                   |
-| **Delivery**       | Issues Linear, pull requests, GitHub Actions, runs Trigger.dev, déploiements Railway, événements Stripe.                           |
-| **Impact**         | Tout ce qui bouge sur les dépôts déclarés — PR GitHub, MR GitLab, branches parties sans demande de fusion — et, à la demande, ce que chaque changement implique : pour le produit, pour l'équipe, et ce qui risque de casser. |
-| **Infra locale**   | Conteneurs Docker et ports de développement en écoute.                                                                            |
+| **Carte**         | Chaque projet en quatre colonnes — arrive, en cours, livrer, en prod — avec ses tickets, missions, workspaces et pull requests, et le bandeau « Ce qui t'attend » au-dessus (une croix écarte un élément jusqu'à ce qu'il change). |
+| **Workspaces**    | Un worktree, ses agents et ses terminaux, côte à côte (voir « Le panneau de travail »).                                           |
+| **Agents libres** | Les agents lancés hors projet, dans le dossier de ton choix.                                                                     |
+| **Décisions**     | Tout ce qui attend ta réponse : autorisations, questions, plans à approuver.                                                     |
+| **Récap en images** | Ce qui s'est passé dans l'heure, les trois heures ou la journée, raconté en images.                                            |
+| **Automatisations** | Les rendez-vous et comptes rendus préparés seuls, à heure fixe, tant que Cockpit est ouvert.                                   |
+| **Missions**      | Un ticket, un plan, plusieurs exécutants : tu valides ce que le maître a compris, son approche, son découpage ; chaque exécutant a sa branche et son worktree ; les vérifications du dépôt filtrent chaque livraison ; la pull request porte un dossier de livraison. |
+| *Atelier*         | **Aujourd'hui**, **Permanence** (un agent de garde, dans les horaires et budgets que tu fixes), **Vue d'ensemble**, **Daily**, **Agents IA** (chaque session Claude Code, sa timeline, ses outils), **Documents**, **Flux** (tickets, PR, CI, déploiements), **Impact** (ce qu'implique chaque changement en cours), **Observabilité** (Sentry, Better Stack), **Worktrees**, **Git**, **Scripts**, **Serveurs & conteneurs**, **Réglages**. |
 
 ## Raccourcis
 

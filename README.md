@@ -12,10 +12,7 @@ need you, and review what they deliver, all in one native window.
 ![Linux x64](https://img.shields.io/badge/Linux-x64-lightgrey.svg)
 ![Tauri 2](https://img.shields.io/badge/Tauri-2-24C8DB.svg)
 
-<picture>
-  <source media="(prefers-color-scheme: dark)" srcset="docs/images/carte-dark.webp">
-  <img alt="The map: a project's tickets, missions, reviews and releases" src="docs/images/carte-light.webp">
-</picture>
+<img alt="The map of a project: its open issues, a mission delivered by three workers, its pull request ready to merge with CI green" src="docs/images/carte.webp">
 
 A Tauri 2 application — a native binary, no server. Rust for everything that
 touches the system (git, processes, files, HTTP), React + Tailwind for the
@@ -45,24 +42,35 @@ of it**.
   machine.
 
 <p align="center">
-  <img alt="A walkthrough: the map, a workspace, the decisions, an agent's conversation" src="docs/images/demo.gif" width="800">
+  <img alt="A GitHub issue becomes a mission: you confirm what the lead agent understood, its approach, its breakdown, and get a pull request with its delivery dossier" src="docs/images/demo.gif" width="800">
 </p>
 
 <table>
   <tr>
-    <td width="33%"><img alt="A workspace: the agent asks a question" src="docs/images/workspace.webp"></td>
-    <td width="33%"><img alt="Pending decisions" src="docs/images/decisions.webp"></td>
-    <td width="33%"><img alt="An agent's conversation, tool by tool" src="docs/images/agents.webp"></td>
+    <td width="33%"><img alt="A workspace: the agent asks before running a command" src="docs/images/workspace-autorisation.webp"></td>
+    <td width="33%"><img alt="The film of an agent's turn: files read, edits, tests passing, result" src="docs/images/film-du-tour.webp"></td>
+    <td width="33%"><img alt="The Git screen: a branch, its files and its diff" src="docs/images/git.webp"></td>
   </tr>
   <tr>
-    <td align="center"><sub>A workspace: the agent waits for your answer</sub></td>
-    <td align="center"><sub>The decisions waiting for you</sub></td>
-    <td align="center"><sub>What an agent did, tool by tool</sub></td>
+    <td align="center"><sub>A workspace: the agent asks before running a command</sub></td>
+    <td align="center"><sub>The film of its turn: what it read, changed and tested</sub></td>
+    <td align="center"><sub>The branch and its diff, without leaving Cockpit</sub></td>
+  </tr>
+  <tr>
+    <td width="33%"><img alt="A mission: what the lead agent understood of the ticket, and its question" src="docs/images/mission-comprehension.webp"></td>
+    <td width="33%"><img alt="A mission: the proposed breakdown, one worker per task" src="docs/images/mission-decoupage.webp"></td>
+    <td width="33%"><img alt="A mission delivered: every task done, the pull request open" src="docs/images/mission-livraison.webp"></td>
+  </tr>
+  <tr>
+    <td align="center"><sub>A mission: you confirm what the lead agent understood</sub></td>
+    <td align="center"><sub>Then its breakdown, before anything starts</sub></td>
+    <td align="center"><sub>Delivered: a pull request and its dossier</sub></td>
   </tr>
 </table>
 
-<sub>Screenshots taken in preview mode (`pnpm vite:dev` in a browser), on
-sample data.</sub>
+<sub>Screenshots taken from a real session: a new JavaScript web project, two
+GitHub issues, one handled in a workspace, the other as a mission. In the GIF,
+waits are sped up, and it says so.</sub>
 
 ---
 
@@ -270,18 +278,19 @@ the file:
 
 ## Screens
 
+The top bar holds the screens you use all day; the others are in the
+**Workshop** drawer, on the right of the bar.
+
 | Screen            | What it shows                                                                                                                    |
 | ----------------- | -------------------------------------------------------------------------------------------------------------------------------- |
-| **Overview**      | Active agents, worktrees to watch, Sentry errors, open PRs, latest documents produced.                                            |
-| **AI Agents**     | Every Claude Code session, its full timeline, subagents, tools, files written, usage. One-click resume.                           |
-| **Worktrees**     | Git state of each tree, per-file diff, commits, attached sessions, creation and removal through the repository's tooling.         |
-| **Git**           | All branches, what each one changes since it diverged from the base: file tree, commits, graph, diff.                             |
-| **Scripts**       | In-house commands with their options as a form, `package.json` scripts, execution with live output and cancellation.             |
-| **Documents**     | Agent deliverables (`.claude/work`, `.claude/reviews`, `docs/`, root markdown) across all worktrees, rendered as markdown.        |
-| **Observability** | Sentry issues (resolve and mute from the app), Better Stack incidents and monitors.                                               |
-| **Delivery**      | Linear issues, pull requests, GitHub Actions, Trigger.dev runs, Railway deployments, Stripe events.                               |
-| **Impact**        | Everything moving on the declared repositories — GitHub PRs, GitLab MRs, branches pushed without a merge request — and, on demand, what each change implies: for the product, for the team, and what may break. |
-| **Local Infra**   | Docker containers and listening development ports.                                                                               |
+| **Map**           | Each project as four columns — incoming, in progress, ship, in production — with its tickets, missions, workspaces and pull requests, and the "Waiting on you" bar above (a cross sets an item aside until it changes). |
+| **Workspaces**    | A worktree, its agents and its terminals, side by side (see "The work panel").                                                    |
+| **Free agents**   | Agents launched outside any project, in a folder of your choice.                                                                  |
+| **Decisions**     | Everything waiting for your answer: permissions, questions, plans to approve.                                                     |
+| **Recap**         | What happened over the past hour, three hours or day, told visually.                                                              |
+| **Automations**   | Meetings and reports prepared on their own, at a set time, while Cockpit is open.                                                 |
+| **Missions**      | One ticket, one plan, several workers: you confirm what the lead agent understood, its approach, its breakdown; each worker gets its own branch and worktree; repository checks gate every delivery; the pull request carries a delivery dossier. |
+| *Workshop*        | **Today**, **Permanence** (an agent on call, within hours and budgets you set), **Overview**, **Daily**, **AI agents** (every Claude Code session, its timeline, its tools), **Documents**, **Flow** (tickets, PRs, CI, deployments), **Impact** (what each change in flight implies), **Observability** (Sentry, Better Stack), **Worktrees**, **Git**, **Scripts**, **Servers & containers**, **Settings**. |
 
 ## Shortcuts
 
