@@ -188,6 +188,90 @@ impl Gate {
 	}
 }
 
+/// Ce que les exécutants d'une mission pourront faire sans rien demander.
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
+#[serde(rename_all = "camelCase")]
+pub struct Exposure {
+	/// Les agents partent dans un conteneur (`sandbox.enabled`).
+	pub sandboxed: bool,
+	/// Les rôles du plan qui partiront en `bypassPermissions`, sans doublon,
+	/// dans l'ordre du plan. Vide quand l'isolation est active : le conteneur
+	/// borne alors ce que le mode laisse faire.
+	pub unguarded_roles: Vec<String>,
+}
+
+/// Les rôles d'un plan qui travailleront sans filet sur le poste.
+///
+/// `bypassPermissions` est un choix défendable pour un exécutant (voir
+/// `RoleConfig::permission_mode`) : il travaille seul, dans un worktree à lui.
+/// Mais hors conteneur, son outil Bash a les droits de la session — tout le
+/// disque, le réseau, les identifiants. Le dire au moment d'approuver le plan
+/// est le seul moment où ça peut encore changer quelque chose.
+pub fn exposure(tasks: &[Task], roles: &[crate::config::RoleConfig], sandboxed: bool) -> Exposure {
+	let mut unguarded: Vec<String> = Vec::new();
+	if !sandboxed {
+		for task in tasks {
+			let bypass = roles
+				.iter()
+				.find(|role| role.id == task.role)
+				.map(|role| role.permission_mode.trim() == "bypassPermissions")
+				.unwrap_or(false);
+			if bypass && !unguarded.contains(&task.role) {
+				unguarded.push(task.role.clone());
+			}
+		}
+	}
+	Exposure { sandboxed, unguarded_roles: unguarded }
+}
+
+#[cfg(test)]
+mod exposure_tests {
+	use super::*;
+
+	fn role(id: &str, mode: &str) -> crate::config::RoleConfig {
+		crate::config::RoleConfig {
+			id: id.into(),
+			permission_mode: mode.into(),
+			..Default::default()
+		}
+	}
+
+	fn tache(role: &str) -> Task {
+		serde_json::from_value(serde_json::json!({
+			"id": format!("t-{role}"),
+			"role": role,
+			"title": role,
+			"state": "planned",
+		}))
+		.unwrap()
+	}
+
+	#[test]
+	fn nomme_les_roles_sans_filet_une_fois_chacun() {
+		let roles = vec![role("backend", "bypassPermissions"), role("frontend", "acceptEdits")];
+		let plan = vec![tache("backend"), tache("frontend"), tache("backend")];
+		let vue = exposure(&plan, &roles, false);
+		assert_eq!(vue.unguarded_roles, vec!["backend".to_string()]);
+		assert!(!vue.sandboxed);
+	}
+
+	#[test]
+	fn un_conteneur_borne_ce_que_le_mode_laisse_faire() {
+		let roles = vec![role("backend", "bypassPermissions")];
+		let vue = exposure(&[tache("backend")], &roles, true);
+		assert!(vue.unguarded_roles.is_empty());
+		assert!(vue.sandboxed);
+	}
+
+	#[test]
+	fn les_roles_par_defaut_partent_sans_filet() {
+		// Ce que le cockpit livre d'office : c'est précisément le cas à dire.
+		let roles = crate::config::default_roles();
+		let vue = exposure(&[tache("backend")], &roles, false);
+		assert_eq!(vue.unguarded_roles, vec!["backend".to_string()]);
+	}
+}
+
 /// Ce que l'intégration fait d'une tâche livrée, au regard des portes.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum GateDecision {

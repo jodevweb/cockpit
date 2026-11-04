@@ -2379,6 +2379,7 @@ const REPONSES: Record<string, unknown> = {
 		},
 		tasks: [],
 	},
+	mission_exposure: { sandboxed: false, unguardedRoles: ["backend", "frontend", "qa"] },
 	mission_estimate: {
 		sample: 7,
 		medianSeconds: 11_400,

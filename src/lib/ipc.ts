@@ -69,6 +69,7 @@ import type {
 	Mission,
 	MissionActivity,
 	MissionEstimate,
+	MissionExposure,
 	MissionOverrun,
 	MissionState,
 	MissionStep,
@@ -648,6 +649,8 @@ export const api = {
 			call<MissionEstimate>("mission_estimate", { taskCount }),
 		/** Les tâches en cours qui débordent de ce qu'une tâche coûte d'ordinaire. */
 		overruns: () => call<MissionOverrun[]>("mission_overruns"),
+		/** Les rôles du plan qui partiront sans filet : `bypassPermissions` hors conteneur. */
+		exposure: (id: string) => call<MissionExposure>("mission_exposure", { id }),
 		get: (id: string) => call<Mission>("mission_get", { id }),
 		create: (
 			title: string,

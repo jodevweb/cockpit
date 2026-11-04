@@ -4101,6 +4101,22 @@ pub async fn open_mission_pr(
 	create_pr_on(cwd, branch, base, title, Some(body.to_string()), false).await
 }
 
+/// Ce que les exécutants de cette mission pourront faire sans rien demander :
+/// ce que l'écran dit au moment d'approuver le plan.
+///
+/// Les rôles viennent du projet de la mission (`roles_for`), l'isolation du
+/// réglage que le lanceur lit lui-même (`agent::start_with_mission`) : la
+/// mise en garde dit ce qui se passera, pas ce qu'un autre écran suppose.
+#[tauri::command]
+fn mission_exposure(id: String) -> Result<mission::Exposure> {
+	let mission = mission::get(&id)?;
+	Ok(mission::exposure(
+		&mission.tasks,
+		&roles_for(&mission.cwd),
+		config::Config::active().sandbox.enabled,
+	))
+}
+
 #[tauri::command]
 async fn mission_pr(id: String, title: Option<String>, body: Option<String>) -> Result<mission::Mission> {
 	let mission = mission::get(&id)?;
@@ -5779,6 +5795,7 @@ pub fn run() {
 			mission_set_base,
 			mission_master_launch,
 			mission_pr,
+			mission_exposure,
 			mission_cleanup,
 			roles_list,
 			remote_status,

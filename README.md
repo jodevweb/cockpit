@@ -304,7 +304,7 @@ dernières minutes, **récente** en deçà d'une heure, **dormante** au-delà.
 
 ## Ce qu'un agent a le droit de consommer
 
-Deux garde-fous, dans **Réglages → Missions**, pour deux formes de la même
+Deux garde-fous, dans **Réglages → Agents**, pour deux formes de la même
 peur : la machine qui sature.
 
 **Le coupe-circuit mémoire** (`memoryCeilingPercent`, 85 % par défaut) refuse
@@ -325,6 +325,11 @@ runtime déclaré explicitement) ; l'image par défaut se construit une fois,
 ```bash
 docker build -t cockpit-agent:latest sandbox/
 ```
+
+Tant qu'elle est éteinte, l'écran d'approbation d'un plan nomme les rôles qui
+partiront en `bypassPermissions` directement sur le poste : leur outil Bash a
+alors les droits de la session, et le périmètre d'écriture ne couvre que les
+éditions de fichiers.
 
 Le worktree est monté au même chemin à l'intérieur qu'à l'extérieur du
 conteneur, et les identifiants (`~/.claude`, `~/.gitconfig`, `~/.ssh`) en
@@ -385,7 +390,7 @@ kind = "text"
 
 ## Moteurs d'agents : Claude Code, Codex et Gemini
 
-Un moteur (Réglages → Moteurs d'agents) déclare un protocole. Trois sont
+Un moteur (Réglages → Agents → Moteurs d'agents) déclare un protocole. Trois sont
 câblés :
 
 - **`claude-stream-json`** (le défaut) — un process qui reste ouvert d'un tour

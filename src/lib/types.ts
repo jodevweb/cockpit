@@ -1007,6 +1007,14 @@ export interface LinearIssueDetail {
 }
 
 /** Ce qu'une mission coûtera, d'après celles qui lui ressemblent. */
+/** Ce que les exécutants d'une mission pourront faire sans rien demander. */
+export interface MissionExposure {
+	/** Les agents partent dans un conteneur. */
+	sandboxed: boolean;
+	/** Les rôles du plan qui partiront en `bypassPermissions` hors conteneur. */
+	unguardedRoles: string[];
+}
+
 export interface MissionEstimate {
 	/** Missions closes sur lesquelles l'estimation s'appuie. */
 	sample: number;

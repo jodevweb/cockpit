@@ -1055,5 +1055,9 @@
 		"scriptsHint": "Repository scripts and custom commands",
 		"noScripts": "No scripts in this folder.",
 		"footer": "The command is typed then run in this shell — {{shift}}Enter does the opposite of the chosen entry."
+	},
+	"isolationNotice": {
+		"title": "No container for {{roles}}.",
+		"body": "These runners will work in bypassPermissions on this machine: their Bash tool has your session's rights (disk, network, credentials), and the write scope only covers file edits. To cap what they can reach, turn on agent isolation in {{where}}."
 	}
 }
