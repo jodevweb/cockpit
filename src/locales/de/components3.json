@@ -1070,7 +1070,7 @@
 			},
 			"project": {
 				"label": "Ein Projekt",
-				"fix": "Lege das Haupt-Repository eines Projekts unter {{where}} an."
+				"fix": "Um Worktrees, Missionen und Pull Requests eines Repositorys zu verfolgen, lege es unter {{where}} an. Freie Agenten kommen ohne aus."
 			},
 			"container": {
 				"label": "Docker oder OrbStack",

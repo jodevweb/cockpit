@@ -1070,7 +1070,7 @@
 			},
 			"project": {
 				"label": "Un projet",
-				"fix": "Déclare le dépôt principal d'un projet dans {{where}}."
+				"fix": "Pour suivre les worktrees, les missions et les pull requests d'un dépôt, déclare-le dans {{where}}. Les agents libres s'en passent."
 			},
 			"container": {
 				"label": "Docker ou OrbStack",
