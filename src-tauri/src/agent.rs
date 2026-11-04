@@ -1225,6 +1225,12 @@ async fn start_inner(
 			mission.clone().unwrap_or_default(),
 		),
 		("COCKPIT_SCOPE".to_string(), scope.join("\n")),
+		// La racine contre laquelle le pont lit les chemins absolus du CLI.
+		// Isolé, l'agent les écrit sous la forme que le conteneur connaît.
+		(
+			"COCKPIT_CWD".to_string(),
+			if config.sandbox.enabled { crate::sandbox::container_path(&cwd) } else { cwd.clone() },
+		),
 	];
 	// Sous quel compte cet agent travaille — le dossier de configuration décidé
 	// par le projet. Posé avant l'environnement du moteur, pour la raison qui

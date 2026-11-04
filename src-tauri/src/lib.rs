@@ -5196,12 +5196,12 @@ fn watch_scopes() {
 					let _ = permissions::answer(&request.id, false, Some(reason));
 					continue;
 				}
-				let Some((task, scope)) = mission::scope_of(session) else {
+				let Some((task, root, scope)) = mission::scope_of(session) else {
 					continue;
 				};
 				let outside: Vec<String> = mission::written_paths(&request.tool, &request.input)
 					.into_iter()
-					.filter(|path| !mission::within_scope(&scope, path))
+					.filter(|path| !mission::within_scope_at(&root, &scope, path))
 					.collect();
 				if outside.is_empty() {
 					continue;

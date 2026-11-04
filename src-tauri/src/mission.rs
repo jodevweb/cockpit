@@ -1431,11 +1431,11 @@ pub fn branch_from(identifier: &str, title: &str) -> String {
 /// Une consigne de périmètre dans un prompt tient tant que le modèle y pense.
 /// Ici, elle ne dépend plus de lui : la demande d'écriture est examinée avant
 /// d'arriver sous tes yeux, et refusée si elle sort du terrain de la tâche.
-pub fn scope_of(session_id: &str) -> Option<(String, Vec<String>)> {
+pub fn scope_of(session_id: &str) -> Option<(String, String, Vec<String>)> {
 	for mission in list() {
 		for task in &mission.tasks {
 			if task.session_id.as_deref() == Some(session_id) && !task.scope.is_empty() {
-				return Some((task.title.clone(), task.scope.clone()));
+				return Some((task.title.clone(), task.worktree.clone(), task.scope.clone()));
 			}
 		}
 	}
@@ -1460,6 +1460,82 @@ pub fn within_scope(scope: &[String], path: &str) -> bool {
 		}
 		path == prefix || path.starts_with(&format!("{prefix}/"))
 	})
+}
+
+/// Le chemin d'écriture d'un agent, ramené à sa racine de travail.
+///
+/// Le CLI passe à `Write` et `Edit` des chemins **absolus** (son outil l'exige),
+/// alors qu'un périmètre se déclare en chemins relatifs au dépôt (`apps/api/**`).
+/// Comparés tels quels, aucun chemin réel ne tombait jamais dans un périmètre :
+/// toute écriture d'un exécutant borné était refusée. Et un relatif comme
+/// `apps/api/../web/x.ts` passait le test de préfixe sans être chez lui.
+///
+/// On résout donc les `.` et `..` sans toucher au disque (le fichier n'existe
+/// souvent pas encore), on retire la racine, et l'on rend `None` pour tout ce
+/// qui en sort. Les séparateurs Windows et la casse des lecteurs sont ramenés à
+/// une seule forme.
+pub fn relative_to(root: &str, path: &str) -> Option<String> {
+	fn parts(raw: &str) -> (bool, Vec<String>) {
+		let forward = raw.trim().replace('\\', "/");
+		let absolute = forward.starts_with('/')
+			|| (forward.len() >= 2 && forward.as_bytes()[1] == b':');
+		let mut out: Vec<String> = Vec::new();
+		for (index, part) in forward.split('/').enumerate() {
+			match part {
+				"" | "." => {}
+				".." => {
+					if matches!(out.last(), Some(last) if last != "..") {
+						out.pop();
+					} else {
+						out.push("..".into());
+					}
+				}
+				// `C:` et `/c/` désignent le même lecteur : la seconde est la
+				// forme du conteneur sous Windows (`sandbox::container_path`).
+				part if index == 0 && part.len() == 2 && part.ends_with(':') => {
+					out.push(part[..1].to_ascii_lowercase());
+				}
+				part if absolute && out.is_empty() && part.len() == 1 => {
+					out.push(part.to_ascii_lowercase());
+				}
+				part => out.push(part.to_string()),
+			}
+		}
+		(absolute, out)
+	}
+	let same = |a: &str, b: &str| {
+		if cfg!(windows) { a.eq_ignore_ascii_case(b) } else { a == b }
+	};
+
+	let (absolute, mut target) = parts(path);
+	if absolute {
+		let (_, root) = parts(root);
+		if root.is_empty()
+			|| target.len() < root.len()
+			|| !root.iter().zip(&target).all(|(a, b)| same(a, b))
+		{
+			return None;
+		}
+		target.drain(..root.len());
+	}
+	if target.iter().any(|part| part == "..") {
+		return None;
+	}
+	Some(target.join("/"))
+}
+
+/// `within_scope`, pour un chemin tel que l'agent l'écrit, depuis `root`.
+///
+/// Un chemin qui sort de la racine est hors périmètre dès qu'il y en a un :
+/// un exécutant borné n'écrit pas hors de son worktree.
+pub fn within_scope_at(root: &str, scope: &[String], path: &str) -> bool {
+	if scope.is_empty() {
+		return true;
+	}
+	match relative_to(root, path) {
+		Some(relative) => within_scope(scope, &relative),
+		None => false,
+	}
 }
 
 /// Chemins qu'un appel d'outil s'apprête à écrire.
@@ -1646,6 +1722,47 @@ mod tests {
 		assert!(!within_scope(&scope, "apps/api-legacy/main.rs"));
 		// Sans périmètre déclaré, rien n'est refusé — l'exception est assumée.
 		assert!(within_scope(&[], "n/importe/quoi.rs"));
+	}
+
+	/// Le CLI écrit en chemins absolus : c'est la forme qui compte, pas celle
+	/// des tests ci-dessus.
+	#[test]
+	fn le_perimetre_tient_sur_les_chemins_absolus_du_cli() {
+		let scope = vec!["apps/api/**".to_string()];
+		let root = "/Users/a/wt/feat-x";
+		assert!(within_scope_at(root, &scope, "/Users/a/wt/feat-x/apps/api/src/main.rs"));
+		assert!(within_scope_at(root, &scope, "apps/api/src/main.rs"));
+		assert!(!within_scope_at(root, &scope, "/Users/a/wt/feat-x/apps/web/page.tsx"));
+		// Un worktree voisin qui commence pareil n'est pas le même.
+		assert!(!within_scope_at(root, &scope, "/Users/a/wt/feat-x-2/apps/api/main.rs"));
+		// Hors du worktree, même dans un dossier qui porte le même nom.
+		assert!(!within_scope_at(root, &scope, "/tmp/apps/api/main.rs"));
+	}
+
+	#[test]
+	fn on_ne_sort_pas_du_perimetre_par_les_points() {
+		let scope = vec!["apps/api".to_string()];
+		let root = "/Users/a/wt/feat-x";
+		assert!(!within_scope_at(root, &scope, "apps/api/../web/page.tsx"));
+		assert!(!within_scope_at(root, &scope, "/Users/a/wt/feat-x/apps/api/../../../etc/x"));
+		assert!(!within_scope_at(root, &scope, "../feat-y/apps/api/main.rs"));
+		assert!(within_scope_at(root, &scope, "./apps/api/./src/../lib.rs"));
+	}
+
+	#[test]
+	fn les_formes_windows_se_rejoignent() {
+		let scope = vec!["apps/api".to_string()];
+		let root = r"C:\Users\a\wt\feat-x";
+		assert!(within_scope_at(root, &scope, r"C:\Users\a\wt\feat-x\apps\api\main.rs"));
+		assert!(within_scope_at(root, &scope, "c:/Users/a/wt/feat-x/apps/api/main.rs"));
+		// La forme vue depuis un conteneur (`sandbox::container_path`).
+		assert!(within_scope_at(root, &scope, "/c/Users/a/wt/feat-x/apps/api/main.rs"));
+		assert!(!within_scope_at(root, &scope, r"D:\Users\a\wt\feat-x\apps\api\main.rs"));
+	}
+
+	#[test]
+	fn sans_perimetre_tout_reste_permis() {
+		assert!(within_scope_at("/r", &[], "/ailleurs/x.rs"));
 	}
 
 	/// Seules les écritures de fichiers se vérifient sans ambiguïté.

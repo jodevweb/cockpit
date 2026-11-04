@@ -53,10 +53,50 @@ const SCOPE = (process.env.COCKPIT_SCOPE ?? "")
 // ne peut pas tenir.
 const ECRITURES = { Write: "file_path", Edit: "file_path", NotebookEdit: "notebook_path" };
 
-/** Le même test que `within_scope` côté Rust — même règle des deux côtés. */
+// Le dossier de travail de l'agent : les chemins que le CLI passe à `Write` et
+// `Edit` sont absolus, le périmètre est relatif à ce dossier.
+const RACINE = process.env.COCKPIT_CWD ?? "";
+const WINDOWS = process.platform === "win32";
+
+/** Les morceaux d'un chemin, `.` et `..` résolus sans toucher au disque. */
+function morceaux(brut) {
+  const avant = String(brut ?? "").trim().replace(/\\/g, "/");
+  const absolu = avant.startsWith("/") || /^[A-Za-z]:/.test(avant);
+  const sortie = [];
+  avant.split("/").forEach((morceau, index) => {
+    if (morceau === "" || morceau === ".") return;
+    if (morceau === "..") {
+      if (sortie.length && sortie[sortie.length - 1] !== "..") sortie.pop();
+      else sortie.push("..");
+      return;
+    }
+    // `C:` et `/c/` désignent le même lecteur (forme du conteneur sous Windows).
+    if (index === 0 && /^[A-Za-z]:$/.test(morceau)) return sortie.push(morceau[0].toLowerCase());
+    if (absolu && sortie.length === 0 && morceau.length === 1) return sortie.push(morceau.toLowerCase());
+    sortie.push(morceau);
+  });
+  return { absolu, sortie };
+}
+
+/** Le même calcul que `mission::relative_to` côté Rust ; `null` hors de la racine. */
+function relatif(chemin) {
+  const { absolu, sortie } = morceaux(chemin);
+  if (absolu) {
+    const racine = morceaux(RACINE).sortie;
+    const pareil = (a, b) => (WINDOWS ? a.toLowerCase() === b.toLowerCase() : a === b);
+    if (!racine.length || sortie.length < racine.length) return null;
+    if (!racine.every((morceau, index) => pareil(morceau, sortie[index]))) return null;
+    sortie.splice(0, racine.length);
+  }
+  if (sortie.includes("..")) return null;
+  return sortie.join("/");
+}
+
+/** Le même test que `within_scope_at` côté Rust — même règle des deux côtés. */
 function dansLePerimetre(chemin) {
   if (SCOPE.length === 0) return true;
-  const cible = String(chemin ?? "").replace(/^\.\//, "");
+  const cible = relatif(chemin);
+  if (cible === null) return false;
   return SCOPE.some((autorise) => {
     const prefixe = autorise.replace(/^\.\//, "").replace(/\*+$/, "").replace(/\/+$/, "");
     if (!prefixe) return true;
