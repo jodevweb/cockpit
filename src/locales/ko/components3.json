@@ -738,6 +738,10 @@
 			"gateCommands": {
 				"label": "통합 전 검사",
 				"hint": "쉼표로 구분한 셸 명령으로, 미션 작업이 코드를 넘기면 그 worktree에서 실행됩니다. 모두 통과해야 병합되며, 실패하면 마스터가 출력을 받아 작업을 되돌려 보냅니다"
+			},
+			"deliveryDossier": {
+				"title": "미션 풀 리퀘스트에 납품 기록 게시",
+				"detail": "미션이 풀 리퀘스트를 열면 Cockpit이 측정한 내용(검사, 판정, 속성, 비용)을 설명에 추가하고 cockpit/dossier 커밋 상태를 설정합니다. QA 영상은 이 컴퓨터에 남습니다."
 			}
 		},
 		"replacedAtLaunch": "실행 시 대체됨:",
@@ -1043,5 +1047,19 @@
 				"fix": "선택: 에이전트를 컨테이너에서 실행해 메모리와 접근 범위를 제한합니다."
 			}
 		}
+	},
+	"deliveryDossier": {
+		"title": "납품 기록",
+		"overall": {
+			"success": "유지",
+			"pending": "미결",
+			"failure": "실패"
+		},
+		"films": "QA 영상",
+		"filmsLocal": "이 컴퓨터에서 재생됩니다. 영상은 풀 리퀘스트에 절대 게시되지 않습니다.",
+		"publish": "PR에 게시",
+		"publishHint": "설명의 기록 섹션과 cockpit/dossier 커밋 상태를 업데이트합니다.",
+		"noPull": "아직 GitHub 풀 리퀘스트가 없습니다. 미션이 열면 기록이 게시됩니다.",
+		"published": "풀 리퀘스트에 기록 게시됨"
 	}
 }

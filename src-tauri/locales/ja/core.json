@@ -453,5 +453,47 @@
 			"description": "Sentry が報告したエラーです。\n\n**プロジェクト**：{{project}}\n**発生元**：{{culprit}}\n**影響**：発生 {{events}} 回、ユーザー {{users}} 人\n\n[Sentry で開く]({{permalink}})\n\n_Cockpit から作成された課題です。_",
 			"note": "Linear 課題 {{identifier}} — {{url}}"
 		}
+	},
+	"delivery": {
+		"title": "納品記録 — Cockpit",
+		"gates": {
+			"none": "リポジトリのチェックは宣言されていません",
+			"passed": "リポジトリのチェックに合格：{{commands}}",
+			"failed": "リポジトリのチェック（{{commands}}）が {{tasks}} で失敗",
+			"waiting": "リポジトリのチェック（{{commands}}）が {{tasks}} で未完了"
+		},
+		"verdicts": {
+			"none": "QA・レビューのタスクはありません",
+			"line": "{{task}}：{{verdict}}",
+			"ok": "検証済み",
+			"reserves": "留保付きで検証済み",
+			"blocking": "却下",
+			"undecided": "読み取れる判定なし — 承認ではありません",
+			"waiting": "まだ提出されていません"
+		},
+		"properties": {
+			"none": "このブランチのプロパティ監査はありません",
+			"held": "プロパティ：{{held}}/{{total}} が成立",
+			"broken": "{{count}} 件が違反",
+			"unsettled": "{{count}} 件が未確定",
+			"decorative": "{{count}} 件は過去のバグを一度も検出していません（装飾的）"
+		},
+		"changes": "変更：{{files}} ファイル、+{{insertions}} −{{deletions}}",
+		"films": "QA の録画：{{count}} 本、メンテナーのマシンに保存",
+		"cost": "コスト：{{tasks}} タスク、{{reworks}} 回の手直し、作業 {{minutes}} 分、約 {{tokens}} トークン",
+		"footer": "エージェントの発言ではなく、Cockpit が計測した内容から作成。",
+		"status": {
+			"success": "チェック、判定、プロパティがすべて成立",
+			"pending": "一部のチェックまたは判定がまだ確定していません",
+			"failure": "チェック、判定、またはプロパティが失敗しています"
+		},
+		"journal": {
+			"published": "納品記録を公開しました",
+			"statusFailed": "コミットステータスを設定できませんでした",
+			"publishFailed": "納品記録を公開できませんでした"
+		},
+		"errors": {
+			"noGithubPull": "このミッションには記録を公開できる GitHub のプルリクエストがありません。"
+		}
 	}
 }

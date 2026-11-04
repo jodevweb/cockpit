@@ -998,6 +998,7 @@ async fn run(app: &tauri::AppHandle, call: &Call) -> Result<Value> {
 			};
 
 			mission::finish(&mission.id, &url)?;
+			crate::delivery::publish_on_close(&mission.id);
 			let removed = mission::cleanup(&mission.id).await.unwrap_or_default();
 			Ok(json!({
 				"url": url,

@@ -453,5 +453,47 @@
 			"description": "Von Sentry gemeldeter Fehler.\n\n**Projekt**: {{project}}\n**Herkunft**: {{culprit}}\n**Auswirkung**: {{events}} Vorkommen, {{users}} Nutzer\n\n[In Sentry öffnen]({{permalink}})\n\n_Issue aus Cockpit angelegt._",
 			"note": "Linear-Issue {{identifier}} — {{url}}"
 		}
+	},
+	"delivery": {
+		"title": "Lieferakte — Cockpit",
+		"gates": {
+			"none": "Keine Repository-Prüfungen festgelegt",
+			"passed": "Repository-Prüfungen bestanden: {{commands}}",
+			"failed": "Repository-Prüfungen ({{commands}}) schlagen fehl für {{tasks}}",
+			"waiting": "Repository-Prüfungen ({{commands}}) noch nicht fertig für {{tasks}}"
+		},
+		"verdicts": {
+			"none": "Keine QA- oder Review-Aufgabe",
+			"line": "{{task}}: {{verdict}}",
+			"ok": "verifiziert",
+			"reserves": "mit Vorbehalten verifiziert",
+			"blocking": "abgelehnt",
+			"undecided": "kein lesbares Urteil — keine Zustimmung",
+			"waiting": "noch nicht abgegeben"
+		},
+		"properties": {
+			"none": "Keine Eigenschaftsprüfung für diesen Branch",
+			"held": "Eigenschaften: {{held}}/{{total}} halten",
+			"broken": "{{count}} verletzt",
+			"unsettled": "{{count}} unentschieden",
+			"decorative": "{{count}} haben nie einen früheren Fehler gefunden (dekorativ)"
+		},
+		"changes": "Änderungen: {{files}} Datei(en), +{{insertions}} −{{deletions}}",
+		"films": "QA auf Video: {{count}} Film(e), auf dem Rechner des Maintainers gespeichert",
+		"cost": "Kosten: {{tasks}} Aufgabe(n), {{reworks}} Nacharbeit(en), {{minutes}} Min. Arbeit, ≈ {{tokens}} Tokens",
+		"footer": "Von Cockpit aus dem Gemessenen geschrieben, nicht aus dem, was die Agenten gesagt haben.",
+		"status": {
+			"success": "Prüfungen, Urteile und Eigenschaften halten",
+			"pending": "Einige Prüfungen oder Urteile sind noch offen",
+			"failure": "Eine Prüfung, ein Urteil oder eine Eigenschaft schlägt fehl"
+		},
+		"journal": {
+			"published": "Lieferakte veröffentlicht",
+			"statusFailed": "Commit-Status nicht gesetzt",
+			"publishFailed": "Lieferakte nicht veröffentlicht"
+		},
+		"errors": {
+			"noGithubPull": "Diese Mission hat keinen GitHub-Pull-Request, auf dem die Akte veröffentlicht werden kann."
+		}
 	}
 }

@@ -738,6 +738,10 @@
 			"gateCommands": {
 				"label": "集成前检查",
 				"hint": "以逗号分隔的 shell 命令，在任务交付代码后于其 worktree 中运行；全部通过才会合并，否则主控会收到输出并将任务退回修改"
+			},
+			"deliveryDossier": {
+				"title": "在任务的拉取请求上发布交付档案",
+				"detail": "任务创建拉取请求时，Cockpit 会把它测量到的内容（检查、结论、属性、成本）加入描述，并设置 cockpit/dossier 提交状态。测试视频保留在本机。"
 			}
 		},
 		"replacedAtLaunch": "启动时替换：",
@@ -1043,5 +1047,19 @@
 				"fix": "可选：让代理在容器中运行，限制内存与可触及范围。"
 			}
 		}
+	},
+	"deliveryDossier": {
+		"title": "交付档案",
+		"overall": {
+			"success": "成立",
+			"pending": "未定",
+			"failure": "未通过"
+		},
+		"films": "测试视频",
+		"filmsLocal": "从本机播放。视频绝不会发布到拉取请求上。",
+		"publish": "发布到 PR",
+		"publishHint": "更新描述中的档案部分以及 cockpit/dossier 提交状态。",
+		"noPull": "尚无 GitHub 拉取请求：任务创建它时会发布档案。",
+		"published": "档案已发布到拉取请求"
 	}
 }

@@ -1410,6 +1410,19 @@ pub async fn open_mission_pr(
 	create_pr_on(cwd, branch, base, title, Some(body.to_string()), false).await
 }
 
+/// Le dossier de livraison d'une mission, tel que l'écran le montre et que la
+/// pull request le recevrait.
+#[tauri::command]
+pub(crate) async fn mission_dossier(id: String) -> Result<delivery::Dossier> {
+	delivery::compose(&id).await
+}
+
+/// Publie (ou republie) le dossier sur la pull request de la mission.
+#[tauri::command]
+pub(crate) async fn mission_dossier_publish(id: String) -> Result<String> {
+	delivery::publish(&id).await
+}
+
 /// Ce qu'il manque au poste pour lancer des agents : la liste « prêt à
 /// démarrer » de la carte.
 #[tauri::command]
@@ -1501,6 +1514,7 @@ pub(crate) async fn mission_pr(id: String, title: Option<String>, body: Option<S
 	)
 	.await?;
 	let closed = mission::finish(&id, &url)?;
+	delivery::publish_on_close(&id);
 	let _ = mission::cleanup(&id).await;
 	Ok(closed)
 }

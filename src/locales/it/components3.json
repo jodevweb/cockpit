@@ -766,6 +766,10 @@
 			"gateCommands": {
 				"label": "Controlli prima dell'integrazione",
 				"hint": "comandi shell, separati da virgole, eseguiti nel worktree di un'attività della missione quando consegna codice; viene unita solo se passano tutti, altrimenti il master riceve l'output per rimandarla in correzione"
+			},
+			"deliveryDossier": {
+				"title": "Pubblica il fascicolo di consegna sulle pull request delle missioni",
+				"detail": "Quando una missione apre la sua pull request, Cockpit aggiunge alla descrizione ciò che ha misurato — controlli, verdetti, proprietà, costo — e imposta uno stato del commit cockpit/dossier. I video di QA restano su questa macchina."
 			}
 		},
 		"replacedAtLaunch": "Sostituiti all'avvio:",
@@ -1077,5 +1081,19 @@
 				"fix": "Facoltativo: per eseguire gli agenti in container, con memoria limitata e portata circoscritta."
 			}
 		}
+	},
+	"deliveryDossier": {
+		"title": "Fascicolo di consegna",
+		"overall": {
+			"success": "regge",
+			"pending": "da decidere",
+			"failure": "fallisce"
+		},
+		"films": "QA in video",
+		"filmsLocal": "Riprodotti da questa macchina. I video non vengono mai pubblicati sulla pull request.",
+		"publish": "Pubblica sulla PR",
+		"publishHint": "Aggiorna la sezione del fascicolo nella descrizione e lo stato del commit cockpit/dossier.",
+		"noPull": "Ancora nessuna pull request GitHub: il fascicolo sarà pubblicato quando la missione la aprirà.",
+		"published": "Fascicolo pubblicato sulla pull request"
 	}
 }

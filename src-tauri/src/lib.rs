@@ -7,6 +7,7 @@ pub mod chantier;
 pub mod codex;
 pub mod commands;
 pub mod config;
+pub mod delivery;
 pub mod docs;
 pub mod error;
 pub mod executions;
@@ -3333,6 +3334,8 @@ pub fn run() {
 			mission_master_launch,
 			mission_pr,
 			mission_exposure,
+			mission_dossier,
+			mission_dossier_publish,
 			readiness_check,
 			mission_cleanup,
 			roles_list,

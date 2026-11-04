@@ -453,5 +453,47 @@
 			"description": "Errore segnalato da Sentry.\n\n**Progetto**: {{project}}\n**Origine**: {{culprit}}\n**Impatto**: {{events}} occorrenza/e, {{users}} utente/i\n\n[Apri in Sentry]({{permalink}})\n\n_Ticket creato da Cockpit._",
 			"note": "Ticket Linear {{identifier}} — {{url}}"
 		}
+	},
+	"delivery": {
+		"title": "Fascicolo di consegna — Cockpit",
+		"gates": {
+			"none": "Nessun controllo del repository dichiarato",
+			"passed": "Controlli del repository superati: {{commands}}",
+			"failed": "I controlli del repository ({{commands}}) falliscono per {{tasks}}",
+			"waiting": "I controlli del repository ({{commands}}) non sono finiti per {{tasks}}"
+		},
+		"verdicts": {
+			"none": "Nessuna attività di QA o di revisione",
+			"line": "{{task}}: {{verdict}}",
+			"ok": "verificato",
+			"reserves": "verificato con riserve",
+			"blocking": "rifiutato",
+			"undecided": "nessun verdetto leggibile — non è un'approvazione",
+			"waiting": "non ancora consegnato"
+		},
+		"properties": {
+			"none": "Nessun audit delle proprietà per questo branch",
+			"held": "Proprietà: {{held}}/{{total}} reggono",
+			"broken": "{{count}} violata/e",
+			"unsettled": "{{count}} indecisa/e",
+			"decorative": "{{count}} non hanno mai colto un bug passato (decorative)"
+		},
+		"changes": "Modifiche: {{files}} file, +{{insertions}} −{{deletions}}",
+		"films": "QA registrata in video: {{count}} video, conservati sulla macchina del maintainer",
+		"cost": "Costo: {{tasks}} attività, {{reworks}} correzione/i, {{minutes}} min di lavoro, ≈ {{tokens}} token",
+		"footer": "Scritto da Cockpit in base a ciò che ha misurato, non a ciò che hanno detto gli agenti.",
+		"status": {
+			"success": "Controlli, verdetti e proprietà reggono",
+			"pending": "Alcuni controlli o verdetti non sono ancora decisi",
+			"failure": "Un controllo, un verdetto o una proprietà fallisce"
+		},
+		"journal": {
+			"published": "Fascicolo di consegna pubblicato",
+			"statusFailed": "Stato del commit non impostato",
+			"publishFailed": "Fascicolo di consegna non pubblicato"
+		},
+		"errors": {
+			"noGithubPull": "Questa missione non ha una pull request GitHub su cui pubblicare il fascicolo."
+		}
 	}
 }

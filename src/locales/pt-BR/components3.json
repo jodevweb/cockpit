@@ -766,6 +766,10 @@
 			"gateCommands": {
 				"label": "Verificações antes da integração",
 				"hint": "comandos de shell, separados por vírgulas, executados no worktree de uma tarefa de missão quando ela entrega código; só é mesclada se todos passarem, senão o agente principal recebe a saída para devolvê-la"
+			},
+			"deliveryDossier": {
+				"title": "Publicar o dossiê de entrega nas pull requests das missões",
+				"detail": "Quando uma missão abre sua pull request, o Cockpit adiciona à descrição o que mediu — verificações, vereditos, propriedades, custo — e publica um status de commit cockpit/dossier. Os vídeos de QA ficam nesta máquina."
 			}
 		},
 		"replacedAtLaunch": "Substituído no lançamento:",
@@ -1077,5 +1081,19 @@
 				"fix": "Opcional: para rodar os agentes em contêineres, com memória limitada e alcance restrito."
 			}
 		}
+	},
+	"deliveryDossier": {
+		"title": "Dossiê de entrega",
+		"overall": {
+			"success": "se mantém",
+			"pending": "não decidido",
+			"failure": "falha"
+		},
+		"films": "QA em vídeo",
+		"filmsLocal": "Reproduzidos desta máquina. Os vídeos nunca são publicados na pull request.",
+		"publish": "Publicar na PR",
+		"publishHint": "Atualiza a seção do dossiê na descrição e o status de commit cockpit/dossier.",
+		"noPull": "Ainda não há pull request no GitHub: o dossiê será publicado quando a missão a abrir.",
+		"published": "Dossiê publicado na pull request"
 	}
 }

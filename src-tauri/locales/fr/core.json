@@ -453,5 +453,47 @@
 			"description": "Erreur remontée par Sentry.\n\n**Projet** : {{project}}\n**Origine** : {{culprit}}\n**Impact** : {{events}} occurrence(s), {{users}} utilisateur(s)\n\n[Ouvrir dans Sentry]({{permalink}})\n\n_Ticket créé depuis le cockpit._",
 			"note": "Ticket Linear {{identifier}} — {{url}}"
 		}
+	},
+	"delivery": {
+		"title": "Dossier de livraison — Cockpit",
+		"gates": {
+			"none": "Aucune vérification du dépôt déclarée",
+			"passed": "Vérifications du dépôt passées : {{commands}}",
+			"failed": "Vérifications du dépôt ({{commands}}) en échec pour {{tasks}}",
+			"waiting": "Vérifications du dépôt ({{commands}}) pas terminées pour {{tasks}}"
+		},
+		"verdicts": {
+			"none": "Aucune tâche de recette ni de relecture",
+			"line": "{{task}} : {{verdict}}",
+			"ok": "vérifié",
+			"reserves": "vérifié avec réserves",
+			"blocking": "refusé",
+			"undecided": "aucun verdict lisible — ce n'est pas un accord",
+			"waiting": "pas encore rendu"
+		},
+		"properties": {
+			"none": "Aucun audit de propriétés pour cette branche",
+			"held": "Propriétés : {{held}}/{{total}} tiennent",
+			"broken": "{{count}} enfreinte(s)",
+			"unsettled": "{{count}} indécise(s)",
+			"decorative": "{{count}} n'ont jamais attrapé un ancien bug (décoratives)"
+		},
+		"changes": "Changements : {{files}} fichier(s), +{{insertions}} −{{deletions}}",
+		"films": "Recette filmée : {{count}} vidéo(s), gardées sur le poste du mainteneur",
+		"cost": "Coût : {{tasks}} tâche(s), {{reworks}} reprise(s), {{minutes}} min de travail, ≈ {{tokens}} jetons",
+		"footer": "Écrit par Cockpit à partir de ce qu'il a mesuré, pas de ce que les agents ont dit.",
+		"status": {
+			"success": "Vérifications, verdicts et propriétés tiennent",
+			"pending": "Des vérifications ou des verdicts ne sont pas encore tranchés",
+			"failure": "Une vérification, un verdict ou une propriété échoue"
+		},
+		"journal": {
+			"published": "Dossier de livraison publié",
+			"statusFailed": "Statut de commit non posé",
+			"publishFailed": "Dossier de livraison non publié"
+		},
+		"errors": {
+			"noGithubPull": "Cette mission n'a pas de pull request GitHub où publier le dossier."
+		}
 	}
 }

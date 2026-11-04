@@ -453,5 +453,47 @@
 			"description": "Error reportado por Sentry.\n\n**Proyecto**: {{project}}\n**Origen**: {{culprit}}\n**Impacto**: {{events}} ocurrencia(s), {{users}} usuario(s)\n\n[Abrir en Sentry]({{permalink}})\n\n_Ticket creado desde Cockpit._",
 			"note": "Ticket de Linear {{identifier}} — {{url}}"
 		}
+	},
+	"delivery": {
+		"title": "Expediente de entrega — Cockpit",
+		"gates": {
+			"none": "No hay comprobaciones del repositorio declaradas",
+			"passed": "Comprobaciones del repositorio superadas: {{commands}}",
+			"failed": "Las comprobaciones del repositorio ({{commands}}) fallan en {{tasks}}",
+			"waiting": "Las comprobaciones del repositorio ({{commands}}) no han terminado en {{tasks}}"
+		},
+		"verdicts": {
+			"none": "Ninguna tarea de QA ni de revisión",
+			"line": "{{task}}: {{verdict}}",
+			"ok": "verificado",
+			"reserves": "verificado con reservas",
+			"blocking": "rechazado",
+			"undecided": "sin veredicto legible — no es una aprobación",
+			"waiting": "aún no entregado"
+		},
+		"properties": {
+			"none": "No hay auditoría de propiedades para esta rama",
+			"held": "Propiedades: {{held}}/{{total}} se cumplen",
+			"broken": "{{count}} incumplida(s)",
+			"unsettled": "{{count}} indecisa(s)",
+			"decorative": "{{count}} nunca detectaron un error pasado (decorativas)"
+		},
+		"changes": "Cambios: {{files}} archivo(s), +{{insertions}} −{{deletions}}",
+		"films": "QA grabada en vídeo: {{count}} vídeo(s), guardados en el equipo del mantenedor",
+		"cost": "Coste: {{tasks}} tarea(s), {{reworks}} corrección(es), {{minutes}} min de trabajo, ≈ {{tokens}} tokens",
+		"footer": "Escrito por Cockpit a partir de lo que midió, no de lo que dijeron los agentes.",
+		"status": {
+			"success": "Comprobaciones, veredictos y propiedades se cumplen",
+			"pending": "Algunas comprobaciones o veredictos aún no están resueltos",
+			"failure": "Falla una comprobación, un veredicto o una propiedad"
+		},
+		"journal": {
+			"published": "Expediente de entrega publicado",
+			"statusFailed": "Estado de commit no publicado",
+			"publishFailed": "Expediente de entrega no publicado"
+		},
+		"errors": {
+			"noGithubPull": "Esta misión no tiene una pull request de GitHub donde publicar el expediente."
+		}
 	}
 }

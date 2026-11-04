@@ -453,5 +453,47 @@
 			"description": "Sentry가 보고한 오류입니다.\n\n**프로젝트**: {{project}}\n**출처**: {{culprit}}\n**영향**: 발생 {{events}}회, 사용자 {{users}}명\n\n[Sentry에서 열기]({{permalink}})\n\n_Cockpit에서 생성한 이슈입니다._",
 			"note": "Linear 이슈 {{identifier}} — {{url}}"
 		}
+	},
+	"delivery": {
+		"title": "납품 기록 — Cockpit",
+		"gates": {
+			"none": "선언된 저장소 검사가 없습니다",
+			"passed": "저장소 검사 통과: {{commands}}",
+			"failed": "저장소 검사({{commands}})가 {{tasks}}에서 실패",
+			"waiting": "저장소 검사({{commands}})가 {{tasks}}에서 아직 끝나지 않음"
+		},
+		"verdicts": {
+			"none": "QA 또는 리뷰 작업이 없습니다",
+			"line": "{{task}}: {{verdict}}",
+			"ok": "검증됨",
+			"reserves": "조건부 검증됨",
+			"blocking": "거부됨",
+			"undecided": "읽을 수 있는 판정 없음 — 승인이 아닙니다",
+			"waiting": "아직 제출되지 않음"
+		},
+		"properties": {
+			"none": "이 브랜치에 대한 속성 감사가 없습니다",
+			"held": "속성: {{held}}/{{total}} 유지",
+			"broken": "{{count}}개 위반",
+			"unsettled": "{{count}}개 미결",
+			"decorative": "{{count}}개는 과거 버그를 한 번도 잡지 못함(장식용)"
+		},
+		"changes": "변경: 파일 {{files}}개, +{{insertions}} −{{deletions}}",
+		"films": "QA 녹화: 영상 {{count}}개, 메인테이너의 컴퓨터에 보관",
+		"cost": "비용: 작업 {{tasks}}개, 재작업 {{reworks}}회, 작업 {{minutes}}분, 약 {{tokens}} 토큰",
+		"footer": "에이전트의 말이 아니라 Cockpit이 측정한 내용으로 작성됨.",
+		"status": {
+			"success": "검사, 판정, 속성이 모두 유지됨",
+			"pending": "일부 검사나 판정이 아직 확정되지 않음",
+			"failure": "검사, 판정 또는 속성이 실패함"
+		},
+		"journal": {
+			"published": "납품 기록 게시됨",
+			"statusFailed": "커밋 상태를 설정하지 못함",
+			"publishFailed": "납품 기록을 게시하지 못함"
+		},
+		"errors": {
+			"noGithubPull": "이 미션에는 기록을 게시할 GitHub 풀 리퀘스트가 없습니다."
+		}
 	}
 }

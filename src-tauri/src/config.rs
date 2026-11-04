@@ -674,6 +674,14 @@ pub struct WorkflowConfig {
 	/// test qui prouve un point, si l'équipe le veut un jour.
 	#[serde(default = "review_read_only_default", alias = "review_read_only")]
 	pub review_read_only: bool,
+
+	/// Le dossier de livraison part sur la pull request d'une mission quand
+	/// elle s'ouvre : une section de la description et un statut de commit
+	/// `cockpit/dossier` (voir `delivery.rs`). Vrai par défaut — c'est ce que le
+	/// relecteur ne voyait pas. Décoché, le dossier reste dans l'écran de la
+	/// mission. Les vidéos ne partent jamais.
+	#[serde(default = "visual_reports_default", alias = "delivery_dossier")]
+	pub delivery_dossier: bool,
 }
 
 fn review_read_only_default() -> bool {
@@ -1527,6 +1535,7 @@ impl Default for WorkflowConfig {
 			browser_command: String::new(),
 			browser_server: String::new(),
 			review_read_only: true,
+			delivery_dossier: true,
 		}
 	}
 }
@@ -1982,6 +1991,7 @@ impl ProjectConfig {
 		// Un booléen n'a pas de « vide » : le projet dit toujours le sien, vrai
 		// tant qu'on ne l'a pas décoché.
 		base.workflow.review_read_only = self.workflow.review_read_only;
+		base.workflow.delivery_dossier = self.workflow.delivery_dossier;
 		base.workflow.visual_reports = self.workflow.visual_reports;
 		base.workflow.agent_browser = self.workflow.agent_browser;
 		if !self.workflow.browser_command.trim().is_empty() {

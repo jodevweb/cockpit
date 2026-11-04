@@ -453,5 +453,47 @@
 			"description": "Erro reportado pelo Sentry.\n\n**Projeto**: {{project}}\n**Origem**: {{culprit}}\n**Impacto**: {{events}} ocorrência(s), {{users}} usuário(s)\n\n[Abrir no Sentry]({{permalink}})\n\n_Ticket criado a partir do Cockpit._",
 			"note": "Ticket do Linear {{identifier}} — {{url}}"
 		}
+	},
+	"delivery": {
+		"title": "Dossiê de entrega — Cockpit",
+		"gates": {
+			"none": "Nenhuma verificação do repositório declarada",
+			"passed": "Verificações do repositório aprovadas: {{commands}}",
+			"failed": "Verificações do repositório ({{commands}}) falham em {{tasks}}",
+			"waiting": "Verificações do repositório ({{commands}}) não terminadas em {{tasks}}"
+		},
+		"verdicts": {
+			"none": "Nenhuma tarefa de QA ou revisão",
+			"line": "{{task}}: {{verdict}}",
+			"ok": "verificado",
+			"reserves": "verificado com ressalvas",
+			"blocking": "recusado",
+			"undecided": "sem veredito legível — não é uma aprovação",
+			"waiting": "ainda não entregue"
+		},
+		"properties": {
+			"none": "Nenhuma auditoria de propriedades para esta branch",
+			"held": "Propriedades: {{held}}/{{total}} se mantêm",
+			"broken": "{{count}} violada(s)",
+			"unsettled": "{{count}} indecisa(s)",
+			"decorative": "{{count}} nunca pegaram um bug antigo (decorativas)"
+		},
+		"changes": "Mudanças: {{files}} arquivo(s), +{{insertions}} −{{deletions}}",
+		"films": "QA gravada em vídeo: {{count}} vídeo(s), guardados na máquina do mantenedor",
+		"cost": "Custo: {{tasks}} tarefa(s), {{reworks}} retrabalho(s), {{minutes}} min de trabalho, ≈ {{tokens}} tokens",
+		"footer": "Escrito pelo Cockpit a partir do que mediu, não do que os agentes disseram.",
+		"status": {
+			"success": "Verificações, vereditos e propriedades se mantêm",
+			"pending": "Algumas verificações ou vereditos ainda não foram decididos",
+			"failure": "Uma verificação, um veredito ou uma propriedade falha"
+		},
+		"journal": {
+			"published": "Dossiê de entrega publicado",
+			"statusFailed": "Status de commit não publicado",
+			"publishFailed": "Dossiê de entrega não publicado"
+		},
+		"errors": {
+			"noGithubPull": "Esta missão não tem uma pull request do GitHub onde publicar o dossiê."
+		}
 	}
 }

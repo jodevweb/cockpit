@@ -105,6 +105,7 @@ export function WorkflowSettings() {
 		browserCommand: "",
 		browserServer: "",
 		reviewReadOnly: true,
+		deliveryDossier: true,
 	});
 	const [saving, setSaving] = useState(false);
 
@@ -129,6 +130,7 @@ export function WorkflowSettings() {
 			browserCommand: workflow.browserCommand ?? "",
 			browserServer: workflow.browserServer ?? "",
 			reviewReadOnly: workflow.reviewReadOnly ?? true,
+			deliveryDossier: workflow.deliveryDossier ?? true,
 		});
 	}, [config?.workflow]);
 
@@ -160,6 +162,7 @@ export function WorkflowSettings() {
 					browserCommand: draft.browserCommand.trim(),
 					browserServer: draft.browserServer.trim(),
 					reviewReadOnly: draft.reviewReadOnly,
+					deliveryDossier: draft.deliveryDossier,
 				},
 			});
 			reloadConfig();
@@ -434,6 +437,25 @@ export function WorkflowSettings() {
 					</span>
 					<span className="text-[11px] leading-relaxed text-ink-faint">
 						{t("workflowSettings.workflow.reviewReadOnly.detail")}
+					</span>
+				</span>
+			</label>
+
+			{/* Le dossier de livraison sur la pull request : ce que le relecteur ne
+			    voyait pas. Les vidéos restent sur le poste quoi qu'il arrive. */}
+			<label className="flex cursor-pointer items-start gap-2.5 rounded-lg border border-line-soft px-3 py-2.5">
+				<input
+					type="checkbox"
+					checked={draft.deliveryDossier}
+					onChange={(event) => setDraft({ ...draft, deliveryDossier: event.target.checked })}
+					className="mt-0.5 accent-[var(--color-accent)]"
+				/>
+				<span className="flex flex-col gap-0.5">
+					<span className="text-[12px] font-medium text-ink">
+						{t("workflowSettings.workflow.deliveryDossier.title")}
+					</span>
+					<span className="text-[11px] leading-relaxed text-ink-faint">
+						{t("workflowSettings.workflow.deliveryDossier.detail")}
 					</span>
 				</span>
 			</label>

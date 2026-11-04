@@ -1195,6 +1195,8 @@ export interface ConfigView {
 		browserServer: string;
 		/** L'agent de revue travaille en lecture seule. Vrai par défaut. */
 		reviewReadOnly: boolean;
+		/** Le dossier de livraison part sur la pull request d'une mission. Vrai par défaut. */
+		deliveryDossier: boolean;
 	};
 	/** Comment le cockpit lit les changements en vol. */
 	impact: {
@@ -2499,3 +2501,4 @@ export type { MissionEstimate } from "./generated/MissionEstimate";
 export type { MissionOverrun } from "./generated/MissionOverrun";
 export type { ReadinessCheck } from "./generated/ReadinessCheck";
 export type { Readiness } from "./generated/Readiness";
+export type { DeliveryDossier } from "./generated/DeliveryDossier";

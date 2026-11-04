@@ -766,6 +766,10 @@
 			"gateCommands": {
 				"label": "Checks before integration",
 				"hint": "shell commands, comma-separated, run in a mission task's worktree once it hands back code; a task is only merged when they all pass, otherwise its master gets the output to send it back"
+			},
+			"deliveryDossier": {
+				"title": "Publish the delivery dossier on mission pull requests",
+				"detail": "When a mission opens its pull request, Cockpit adds what it measured — checks, verdicts, properties, cost — to the description, and posts a cockpit/dossier commit status. QA videos stay on this machine."
 			}
 		},
 		"replacedAtLaunch": "Replaced at launch:",
@@ -1077,5 +1081,19 @@
 				"fix": "Optional: to run agents in containers, with their memory capped and their reach bounded."
 			}
 		}
+	},
+	"deliveryDossier": {
+		"title": "Delivery dossier",
+		"overall": {
+			"success": "holds",
+			"pending": "not settled",
+			"failure": "fails"
+		},
+		"films": "QA on video",
+		"filmsLocal": "Played from this machine. Videos are never published on the pull request.",
+		"publish": "Publish on the PR",
+		"publishHint": "Updates the dossier section of the description and the cockpit/dossier commit status.",
+		"noPull": "No GitHub pull request yet: the dossier is published when the mission opens it.",
+		"published": "Dossier published on the pull request"
 	}
 }
