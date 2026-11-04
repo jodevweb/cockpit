@@ -5,6 +5,19 @@ Actions (`.github/workflows/release.yml`), pour macOS (Apple Silicon, et Intel
 si la compilation croisée passe) et Windows x64. Le poste du mainteneur ne fait
 que poser le tag.
 
+## La branche `main`
+
+Deux jeux de règles la gardent (Settings → Rules → Rulesets) :
+
+- **« main : historique intouchable »**, sans exception, mainteneur compris :
+  ni suppression, ni push forcé. Une version publiée renvoie à un commit de
+  `main` : réécrire l'historique casserait ce lien.
+- **« main : par pull request, CI verte »** : on n'y fusionne que par une pull
+  request dont `macos-latest`, `windows-latest` et `Interface (Playwright)`
+  passent. Le rôle administrateur peut passer outre — c'est ce qui laisse
+  `pnpm release` pousser son commit « Version x.y.z » et son tag. Pour tout
+  le reste, même seul sur le projet : une branche, une pull request, la CI.
+
 ## Une fois : les secrets du dépôt
 
 Dans **Settings → Secrets and variables → Actions** du dépôt `jodevweb/cockpit` :
