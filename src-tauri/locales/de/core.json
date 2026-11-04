@@ -443,7 +443,9 @@
 			"integrationResumed": "Integration fortgesetzt",
 			"integrationResumedDetail": "Kein Hauptagent hielt die Mission; einer wird für das Verbleibende neu gestartet.",
 			"integrationNotResumed": "Integration nicht fortgesetzt",
-			"outOfScopeRefused": "Schreiben außerhalb des Bereichs abgelehnt"
+			"outOfScopeRefused": "Schreiben außerhalb des Bereichs abgelehnt",
+			"revivalsExhausted": "Mission pausiert: Die Integration dreht sich im Kreis",
+			"revivalsExhaustedDetail": "Der Leitagent wurde {{count}}-mal neu gestartet, ohne dass sich etwas bewegt hat (Aufgaben, Prüfungen, Pull Request). Sieh nach, was ihn blockiert – ein Pull Request, der sich nicht öffnen lässt, ein Konflikt – und setze die Mission dann fort."
 		},
 		"quoted": "„{{text}}“",
 		"tailscaleDown": "Tailscale antwortet nicht.",

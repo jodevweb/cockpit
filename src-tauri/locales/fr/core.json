@@ -443,7 +443,9 @@
 			"integrationResumed": "Intégration reprise",
 			"integrationResumedDetail": "Aucun maître ne tenait la mission ; il est relancé sur ce qu'il reste à faire.",
 			"integrationNotResumed": "Intégration non reprise",
-			"outOfScopeRefused": "Écriture hors périmètre refusée"
+			"outOfScopeRefused": "Écriture hors périmètre refusée",
+			"revivalsExhausted": "Mission en pause : l'intégration tourne en rond",
+			"revivalsExhaustedDetail": "Le maître a été relancé {{count}} fois sans que rien ne bouge (tâches, vérifications, pull request). Regarde ce qui le bloque — une pull request qui ne peut pas s'ouvrir, un conflit — puis reprends la mission."
 		},
 		"quoted": "« {{text}} »",
 		"tailscaleDown": "Tailscale ne répond pas.",

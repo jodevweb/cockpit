@@ -607,6 +607,9 @@ pub(crate) const MASTER_TURN_TIMEOUT: std::time::Duration = std::time::Duration:
 /// personne ne tient la mission, et qu'elle n'a rien écrit depuis un moment,
 /// qu'on la reprend. Le compteur repart à chaque écriture, donc un maître
 /// relancé qui avance n'est pas relancé de nouveau.
+/// Relances d'un maître d'intégration tolérées sans que rien n'avance.
+const MAX_FRUITLESS_REVIVALS: u32 = 3;
+
 pub(crate) async fn revive_integration(app: &AppHandle, mission: &mission::Mission) {
 	use tauri::Manager;
 	if mission::idle_seconds(mission) < INTEGRATION_STALL_SECONDS {
@@ -618,6 +621,26 @@ pub(crate) async fn revive_integration(app: &AppHandle, mission: &mission::Missi
 				return;
 			}
 		}
+	}
+
+	// Une relance qui ne fait rien avancer se répète toutes les quatre minutes,
+	// indéfiniment — constaté sur une mission dont la pull request ne pouvait
+	// pas s'ouvrir (pas de forge) : chaque maître relancé relisait tout,
+	// échouait au même endroit, et coûtait un tour complet. Passé
+	// `MAX_FRUITLESS_REVIVALS` relances sans le moindre progrès, la mission se
+	// met en pause et dit pourquoi : c'est un humain qu'il faut, pas un maître
+	// de plus.
+	if !mission::note_revival(&mission.id, &mission::progress_fingerprint(mission), MAX_FRUITLESS_REVIVALS) {
+		if mission::set_paused(&mission.id, true).is_ok() {
+			journal::record(
+				"mission",
+				&i18n::t("lib.mission.revivalsExhausted"),
+				&mission.title,
+				false,
+				&i18n::tf("lib.mission.revivalsExhaustedDetail", &[("count", &MAX_FRUITLESS_REVIVALS)]),
+			);
+		}
+		return;
 	}
 
 	journal::record(

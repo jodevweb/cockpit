@@ -2078,7 +2078,12 @@ fn pause_missions_hors_budget() {
 		.collect();
 	let vivantes: Vec<(String, String)> = mission::list()
 		.into_iter()
-		.filter(|mission| !mission.paused && mission.state == mission::MissionState::Running)
+		// L'intégration aussi : c'est là qu'un maître relancé en boucle dépensait
+		// sans que ce plafond ne le voie jamais.
+		.filter(|mission| {
+			!mission.paused
+				&& matches!(mission.state, mission::MissionState::Running | mission::MissionState::Integrating)
+		})
 		.map(|mission| (mission.id.clone(), mission.title.clone()))
 		.collect();
 	if vivantes.is_empty() {

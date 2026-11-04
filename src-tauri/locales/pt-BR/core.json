@@ -443,7 +443,9 @@
 			"integrationResumed": "Integração retomada",
 			"integrationResumedDetail": "Nenhum agente principal estava cuidando da missão; um é relançado sobre o que falta fazer.",
 			"integrationNotResumed": "Integração não retomada",
-			"outOfScopeRefused": "Escrita fora do escopo recusada"
+			"outOfScopeRefused": "Escrita fora do escopo recusada",
+			"revivalsExhausted": "Missão em pausa: a integração está andando em círculos",
+			"revivalsExhaustedDetail": "O agente principal foi reiniciado {{count}} vezes sem que nada avançasse (tarefas, verificações, pull request). Veja o que o bloqueia — uma pull request que não abre, um conflito — e retome a missão."
 		},
 		"quoted": "“{{text}}”",
 		"tailscaleDown": "O Tailscale não está respondendo.",

@@ -443,7 +443,9 @@
 			"integrationResumed": "集成已恢复",
 			"integrationResumedDetail": "没有主智能体在负责该任务；已针对剩余工作重新启动一个。",
 			"integrationNotResumed": "集成未恢复",
-			"outOfScopeRefused": "超出范围的写入被拒绝"
+			"outOfScopeRefused": "超出范围的写入被拒绝",
+			"revivalsExhausted": "任务已暂停：集成在原地打转",
+			"revivalsExhaustedDetail": "主控已重新启动 {{count}} 次，但没有任何进展（任务、检查、拉取请求）。请查看阻碍它的原因——无法创建的拉取请求、冲突——然后继续任务。"
 		},
 		"quoted": "“{{text}}”",
 		"tailscaleDown": "Tailscale 没有响应。",

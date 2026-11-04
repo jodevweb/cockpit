@@ -443,7 +443,9 @@
 			"integrationResumed": "Integrazione ripresa",
 			"integrationResumedDetail": "Nessun agente principale teneva la missione; ne viene rilanciato uno su ciò che resta da fare.",
 			"integrationNotResumed": "Integrazione non ripresa",
-			"outOfScopeRefused": "Scrittura fuori ambito rifiutata"
+			"outOfScopeRefused": "Scrittura fuori ambito rifiutata",
+			"revivalsExhausted": "Missione in pausa: l'integrazione gira a vuoto",
+			"revivalsExhaustedDetail": "Il master è stato riavviato {{count}} volte senza che nulla si muovesse (attività, controlli, pull request). Guarda cosa lo blocca — una pull request che non si apre, un conflitto — poi riprendi la missione."
 		},
 		"quoted": "“{{text}}”",
 		"tailscaleDown": "Tailscale non risponde.",
