@@ -337,6 +337,15 @@ function Blockers({ items }: { items: Blocker[] }) {
 								) : null}
 							</button>
 							{item.fix ? <Fix item={item} /> : null}
+							<button
+								type="button"
+								onClick={item.dismiss}
+								title={t("today.waitingDismiss")}
+								aria-label={t("today.waitingDismiss")}
+								className="focus-ring grid size-6 shrink-0 place-items-center rounded-md text-ink-faint hover:bg-hover hover:text-ink"
+							>
+								<X size={12} />
+							</button>
 						</div>
 					);
 				})}

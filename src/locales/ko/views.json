@@ -518,6 +518,7 @@
 			"online": "온라인"
 		},
 		"waiting": "나를 기다리는 것",
+		"waitingDismiss": "숨기기 — 변경되면 다시 표시",
 		"island": {
 			"open": "{{name}} 열기",
 			"agentsWord_other": "에이전트",
@@ -1313,6 +1314,7 @@
 		"permanence": "Permanence",
 		"worktreesToClean": "정리할 worktree",
 		"waitingForYou": "나를 기다리는 것",
+		"waitingDismiss": "숨기기 — 변경되면 다시 표시",
 		"fixStarted": "{{label}} — 처리 중.",
 		"task": {
 			"placeholder": "잊지 말아야 할 작업…",

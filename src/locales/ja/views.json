@@ -518,6 +518,7 @@
 			"online": "オンライン"
 		},
 		"waiting": "あなた待ち",
+		"waitingDismiss": "非表示にする — 変化があれば再表示",
 		"island": {
 			"open": "{{name}} を開く",
 			"agentsWord_other": "エージェント",
@@ -1313,6 +1314,7 @@
 		"permanence": "Permanence",
 		"worktreesToClean": "片付ける worktree",
 		"waitingForYou": "あなた待ち",
+		"waitingDismiss": "非表示にする — 変化があれば再表示",
 		"fixStarted": "{{label}} — 対応中。",
 		"task": {
 			"placeholder": "忘れたくないタスク…",

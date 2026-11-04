@@ -556,6 +556,7 @@
 			"online": "online"
 		},
 		"waiting": "Aspetta te",
+		"waitingDismiss": "Ignora — torna se cambia",
 		"island": {
 			"open": "Apri {{name}}",
 			"agentsWord_one": "agente",
@@ -1396,6 +1397,7 @@
 		"permanence": "Permanence",
 		"worktreesToClean": "Worktree da riordinare",
 		"waitingForYou": "Aspetta te",
+		"waitingDismiss": "Ignora — torna se cambia",
 		"fixStarted": "{{label}} — al lavoro.",
 		"task": {
 			"placeholder": "Un compito da non dimenticare…",

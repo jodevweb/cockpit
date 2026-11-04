@@ -1,6 +1,7 @@
 import { AlertTriangle, Bot, ListChecks, ScanSearch, ShieldQuestion } from "lucide-react";
 import { useMemo } from "react";
 import { useTranslation } from "react-i18next";
+import { dismiss, isDismissed, useDismissed } from "@/lib/dismissed";
 import { fromSeconds, shortPath } from "@/lib/format";
 import { api } from "@/lib/ipc";
 import { awaitedDecision, awaitsHuman } from "@/lib/missions";
@@ -28,6 +29,13 @@ export type Blocker = {
 	meta?: string;
 	onClick: () => void;
 	/**
+	 * L'état qu'on a sous les yeux. Écarter retient cette empreinte : quand elle
+	 * change (l'agent reparle, la PR reçoit un commit), l'élément revient.
+	 */
+	stamp: string;
+	/** Retire l'élément du bandeau tant que son état ne bouge pas. */
+	dismiss: () => void;
+	/**
 	 * Le geste qui lève ce blocage, quand le cockpit sait lequel c'est.
 	 *
 	 * Voir qu'une CI est rouge depuis trois jours ne la répare pas : il fallait
@@ -48,6 +56,7 @@ export function useBlockers(prs: PullRequest[]): Blocker[] {
 	const { pendingForSession } = useAgentGuard();
 	const reviews = useReviews();
 	const startReview = useReviewFlow();
+	const dismissed = useDismissed();
 
 	// Une PR relue qui a bougé depuis : l'auteur a poussé des corrections, et
 	// c'est à toi de les vérifier. Une revue qui disait « tu peux fusionner »
@@ -90,7 +99,7 @@ export function useBlockers(prs: PullRequest[]): Blocker[] {
 	// Tout ce qui arrête quelque chose, dans l'ordre où ça coûte : une
 	// autorisation gèle un agent en plein travail, un plan non approuvé gèle une
 	// mission entière, une tâche en échec a déjà perdu son temps.
-	return [
+	const all: Array<Omit<Blocker, "dismiss">> = [
 		...permissions.map(({ run, waiting: asks }) => ({
 			key: `perm-${run.id}`,
 			icon: ShieldQuestion,
@@ -101,6 +110,7 @@ export function useBlockers(prs: PullRequest[]): Blocker[] {
 			}),
 			detail: shortPath(run.cwd, 2),
 			meta: t("blockers.permission.meta"),
+			stamp: asks.map((ask) => ask.id).join(","),
 			onClick: () => show(run.id),
 		})),
 		...toApprove.map((mission) => ({
@@ -110,6 +120,7 @@ export function useBlockers(prs: PullRequest[]): Blocker[] {
 			title: mission.title,
 			detail: awaitedDecision(mission),
 			meta: t("blockers.plan.meta"),
+			stamp: mission.updatedAt,
 			onClick: () => go("missions", { missionId: mission.id }),
 		})),
 		...toRecheck.map(({ review, pr }) => ({
@@ -122,6 +133,7 @@ export function useBlockers(prs: PullRequest[]): Blocker[] {
 			}),
 			detail: pr?.title ?? review.title,
 			meta: t("blockers.recheck.meta"),
+			stamp: pr?.headSha ?? "",
 			onClick: () => void startReview(review.number, "verification"),
 			fix: { label: t("blockers.recheck.fix"), run: () => startReview(review.number, "verification") },
 		})),
@@ -136,6 +148,7 @@ export function useBlockers(prs: PullRequest[]): Blocker[] {
 				title: session.title,
 				detail: session.gitBranch ?? shortPath(session.cwd, 2),
 				meta: fromSeconds(session.idleSeconds),
+				stamp: session.updatedAt ?? String(session.sizeBytes),
 				onClick: () => (run ? show(run.id) : go("agents", { sessionFile: session.file })),
 			};
 		}),
@@ -145,6 +158,7 @@ export function useBlockers(prs: PullRequest[]): Blocker[] {
 			tone: "critical" as const,
 			title: task.title,
 			detail: `${mission.title} · ${task.note || t("blockers.failedTask.noReason")}`,
+			stamp: `${task.attempts}`,
 			onClick: () => go("missions"),
 			fix: {
 				label: t("blockers.failedTask.fix"),
@@ -160,6 +174,7 @@ export function useBlockers(prs: PullRequest[]): Blocker[] {
 				title: pr.title,
 				detail: `#${pr.number} · ${pr.headRef}`,
 				meta: t("blockers.ci.meta"),
+				stamp: pr.headSha,
 				onClick: () => {
 					void api.system.openUrl(pr.url).catch(() => undefined);
 				},
@@ -183,4 +198,7 @@ export function useBlockers(prs: PullRequest[]): Blocker[] {
 			};
 		}),
 	];
+	return all
+		.filter((item) => !isDismissed(dismissed, item.key, item.stamp))
+		.map((item) => ({ ...item, dismiss: () => dismiss(item.key, item.stamp) }));
 }

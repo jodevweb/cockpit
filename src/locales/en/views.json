@@ -556,6 +556,7 @@
 			"online": "online"
 		},
 		"waiting": "Waiting on you",
+		"waitingDismiss": "Dismiss — it comes back if it changes",
 		"island": {
 			"open": "Open {{name}}",
 			"agentsWord_one": "agent",
@@ -1396,6 +1397,7 @@
 		"permanence": "Permanence",
 		"worktreesToClean": "Worktrees to tidy up",
 		"waitingForYou": "Waiting on you",
+		"waitingDismiss": "Dismiss — it comes back if it changes",
 		"fixStarted": "{{label}} — on it.",
 		"task": {
 			"placeholder": "A task not to forget…",

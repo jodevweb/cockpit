@@ -635,17 +635,32 @@ function Waiting({ items }: { items: Blocker[] }) {
 		<div className="hairline-b flex shrink-0 items-center gap-2 overflow-x-auto bg-surface px-3 py-2">
 			<span className="shrink-0 font-mono text-[10px] tracking-[0.08em] text-ink-faint uppercase">{t("map.waiting")}</span>
 			{items.slice(0, 6).map((item) => (
-				<button
+				// La croix vit à côté de la puce, pas dedans : un bouton dans un
+				// bouton est du HTML invalide.
+				<div
 					key={item.key}
-					type="button"
-					onClick={item.onClick}
-					title={`${item.title}\n${item.detail}`}
-					className={clsx("focus-ring flex h-7 max-w-72 shrink-0 items-center gap-1.5 rounded-lg px-2.5 text-[11.5px] font-medium", TONE[item.tone])}
+					className={clsx("flex h-7 max-w-80 shrink-0 items-center rounded-lg text-[11.5px] font-medium", TONE[item.tone])}
 				>
-					<item.icon size={12} className="shrink-0" />
-					<span className="truncate">{item.title}</span>
-					{item.meta ? <span className="shrink-0 font-mono text-[10px] opacity-80">{item.meta}</span> : null}
-				</button>
+					<button
+						type="button"
+						onClick={item.onClick}
+						title={`${item.title}\n${item.detail}`}
+						className="focus-ring flex h-full min-w-0 items-center gap-1.5 rounded-lg pr-1 pl-2.5"
+					>
+						<item.icon size={12} className="shrink-0" />
+						<span className="truncate">{item.title}</span>
+						{item.meta ? <span className="shrink-0 font-mono text-[10px] opacity-80">{item.meta}</span> : null}
+					</button>
+					<button
+						type="button"
+						onClick={item.dismiss}
+						title={t("map.waitingDismiss")}
+						aria-label={t("map.waitingDismiss")}
+						className="focus-ring mr-1 grid size-5 shrink-0 place-items-center rounded-md opacity-60 hover:bg-hover hover:opacity-100"
+					>
+						<X size={11} />
+					</button>
+				</div>
 			))}
 			{items.length > 6 ? <span className="shrink-0 text-[11px] text-ink-faint">+ {items.length - 6}</span> : null}
 		</div>
