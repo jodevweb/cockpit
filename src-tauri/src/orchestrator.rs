@@ -648,7 +648,10 @@ async fn run(app: &tauri::AppHandle, call: &Call) -> Result<Value> {
 			// qu'un redémarrage a interrompues repartent ici.
 			let gate_commands = crate::gates::commands_for(&mission.cwd);
 			crate::gates::ensure(&mission);
-			let juges: std::collections::HashSet<String> = crate::roles_list()
+			// Les rôles du projet de la mission, comme au ramassage des tâches
+			// rendues (`collect_finished_tasks`) : les deux doivent s'accorder
+			// sur qui juge, sans quoi une recette passerait les portes ici.
+			let juges: std::collections::HashSet<String> = crate::roles_for(&mission.cwd)
 				.into_iter()
 				.filter(|role| role.verifies)
 				.map(|role| role.id)
