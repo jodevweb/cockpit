@@ -189,7 +189,7 @@ met à jour en installant le suivant.
 WebKitGTK — sous Debian et Ubuntu :
 
 ```bash
-sudo apt install libwebkit2gtk-4.1-dev libgtk-3-dev libayatana-appindicator3-dev librsvg2-dev libxdo-dev libssl-dev
+sudo apt install libwebkit2gtk-4.1-dev libgtk-3-dev libayatana-appindicator3-dev librsvg2-dev libxdo-dev libssl-dev libasound2-dev
 pnpm install
 pnpm install:app   # compile l'AppImage, l'installe dans ~/.local/bin, ajoute une entrée de menu
 ```

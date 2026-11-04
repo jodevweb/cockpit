@@ -16,7 +16,8 @@
 		"linux": {
 			"deb": {
 				"depends": [
-					"git"
+					"git",
+					"libasound2"
 				],
 				"section": "devel"
 			},
