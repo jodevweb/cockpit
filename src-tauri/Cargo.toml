@@ -1,6 +1,6 @@
 [package]
 name = "cockpit"
-version = "0.85.1"
+version = "0.86.0"
 description = "Cockpit — poste de pilotage du développement"
 authors = ["jodevweb"]
 license = "MIT"
