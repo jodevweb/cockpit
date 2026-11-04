@@ -1036,7 +1036,7 @@
 			},
 			"project": {
 				"label": "一个项目",
-				"fix": "在 {{where}} 中声明项目的主仓库。"
+				"fix": "如需跟踪某个仓库的 worktree、任务和拉取请求，请在 {{where}} 中声明它。自由代理无需项目即可运行。"
 			},
 			"container": {
 				"label": "Docker 或 OrbStack",
