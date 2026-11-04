@@ -2379,6 +2379,19 @@ const REPONSES: Record<string, unknown> = {
 		},
 		tasks: [],
 	},
+	// Un poste d'exemple déjà prêt : la carte « prêt à démarrer » ne s'affiche
+	// pas sur les captures du README.
+	readiness_check: {
+		ready: true,
+		checks: [
+			{ id: "git", required: true, ok: true, detail: "/usr/bin/git" },
+			{ id: "claude", required: true, ok: true, detail: "/Users/demo/.local/bin/claude" },
+			{ id: "claudeAuth", required: true, ok: true, detail: "demo@northwind.dev" },
+			{ id: "node", required: true, ok: true, detail: "/opt/homebrew/bin/node" },
+			{ id: "project", required: true, ok: true, detail: "/Users/demo/code/northwind" },
+			{ id: "container", required: false, ok: false, detail: "" },
+		],
+	},
 	mission_exposure: { sandboxed: false, unguardedRoles: ["backend", "frontend", "qa"] },
 	mission_estimate: {
 		sample: 7,

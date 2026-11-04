@@ -4,6 +4,7 @@ import { listen } from "@tauri-apps/api/event";
 import { t } from "@/i18n";
 import type {
 	Account,
+	Readiness,
 	Automation,
 	AutomationOverview,
 	AutomationRun,
@@ -784,6 +785,8 @@ export const api = {
 		stop: () => call<void>("speech_stop"),
 	},
 	system: {
+		/** Les prérequis du poste : ce qu'il faut avant de lancer un agent. */
+		readiness: () => call<Readiness>("readiness_check"),
 		openEditor: (path: string) => call<void>("open_editor", { path }),
 		openTerminal: (cwd: string, command?: string) =>
 			call<void>("open_terminal", { cwd, command }),

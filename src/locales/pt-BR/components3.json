@@ -1039,5 +1039,43 @@
 			"collapse": "Recolher a lista",
 			"expand": "Mostrar os detalhes do grupo"
 		}
+	},
+	"readiness": {
+		"title": "Pronto para começar?",
+		"intro": "O Cockpit controla ferramentas já instaladas nesta máquina. O que falta abaixo vai parar o primeiro agente que você iniciar.",
+		"recheck": "Verificar novamente",
+		"optional": "opcional",
+		"openSettings": "Abrir configurações",
+		"restart": "Depois de instalar algo, reinicie o Cockpit: ele procura os programas ao iniciar.",
+		"checks": {
+			"shell": {
+				"label": "Git for Windows",
+				"fix": "Instale o Git for Windows (git-scm.com): o Cockpit executa todos os comandos no bash dele."
+			},
+			"git": {
+				"label": "git",
+				"fix": "Instale o git: worktrees, diffs e missões dependem dele."
+			},
+			"claude": {
+				"label": "CLI do Claude Code",
+				"fix": "Instale o Claude Code e verifique se `claude` roda em um terminal."
+			},
+			"claudeAuth": {
+				"label": "Claude Code conectado",
+				"fix": "Entre em {{where}}, ou rode `claude auth login` em um terminal."
+			},
+			"node": {
+				"label": "Node.js",
+				"fix": "Instale o Node 20+ (nodejs.org): os agentes o usam para fazer perguntas e pedir permissões, e os executores de missão para sua proteção de git."
+			},
+			"project": {
+				"label": "Um projeto",
+				"fix": "Declare o repositório principal de um projeto em {{where}}."
+			},
+			"container": {
+				"label": "Docker ou OrbStack",
+				"fix": "Opcional: para rodar os agentes em contêineres, com memória limitada e alcance restrito."
+			}
+		}
 	}
 }

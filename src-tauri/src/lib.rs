@@ -34,6 +34,7 @@ pub mod permissions;
 pub mod prompts;
 pub mod proof;
 pub mod protocol;
+pub mod readiness;
 pub mod properties;
 pub mod qa;
 pub mod relay;
@@ -4102,6 +4103,13 @@ pub async fn open_mission_pr(
 	create_pr_on(cwd, branch, base, title, Some(body.to_string()), false).await
 }
 
+/// Ce qu'il manque au poste pour lancer des agents : la liste « prêt à
+/// démarrer » de la carte.
+#[tauri::command]
+async fn readiness_check() -> readiness::Readiness {
+	readiness::observe().await
+}
+
 /// Ce que les exécutants de cette mission pourront faire sans rien demander :
 /// ce que l'écran dit au moment d'approuver le plan.
 ///
@@ -5797,6 +5805,7 @@ pub fn run() {
 			mission_master_launch,
 			mission_pr,
 			mission_exposure,
+			readiness_check,
 			mission_cleanup,
 			roles_list,
 			remote_status,

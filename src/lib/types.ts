@@ -1007,6 +1007,21 @@ export interface LinearIssueDetail {
 }
 
 /** Ce qu'une mission coûtera, d'après celles qui lui ressemblent. */
+/** Un prérequis du poste (voir `readiness.rs`). */
+export interface ReadinessCheck {
+	id: "shell" | "git" | "claude" | "claudeAuth" | "node" | "project" | "container";
+	/** Sans lui, aucun agent ne peut tourner sur un dépôt. */
+	required: boolean;
+	ok: boolean;
+	/** Ce qui a été trouvé : un chemin, un courriel. */
+	detail: string;
+}
+
+export interface Readiness {
+	ready: boolean;
+	checks: ReadinessCheck[];
+}
+
 /** Ce que les exécutants d'une mission pourront faire sans rien demander. */
 export interface MissionExposure {
 	/** Les agents partent dans un conteneur. */
