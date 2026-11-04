@@ -34,6 +34,7 @@ import {
 import { AnimatePresence, motion } from "motion/react";
 import { createContext, useContext, useEffect, useMemo, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
+import { ReadinessCard } from "@/components/ReadinessCard";
 import { t as translate } from "@/i18n";
 import { useBlockers, type Blocker } from "@/app/blockers";
 import { useAgentRuns, type AgentRun } from "@/app/agents";
@@ -410,6 +411,7 @@ function World() {
 			<div className="relative flex min-h-0 flex-1 flex-col bg-base">
 				<LoadingBar active={[prs, tickets, sentry, everywhere].some((source) => source.initial && source.loading)} />
 				<Waiting items={blockers} />
+				<ReadinessCard />
 				<div className="mission-graph relative min-h-0 flex-1">
 					<ReactFlow
 						nodes={sized}
