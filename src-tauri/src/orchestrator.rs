@@ -1120,8 +1120,7 @@ pub async fn prepare_worktree(mission: &mission::Mission, task: &Task) -> Result
 	}
 
 	let root = crate::config::Config::active().general.projects_root;
-	let folder = task.branch.replace('/', "-");
-	let path = std::path::Path::new(&root).join(&folder);
+	let path = worktree_target(&root, repo, &task.branch);
 	if path.exists() {
 		// Le dossier porte le nom de la branche ; rien ne garantit qu'il la
 		// contienne. Un homonyme — dossier renommé, ancienne mission, clone posé
@@ -1171,6 +1170,30 @@ pub async fn prepare_worktree(mission: &mission::Mission, task: &Task) -> Result
 		.await?;
 	}
 	Ok(chemin)
+}
+
+/// Le dossier où créer le worktree d'une branche de mission.
+///
+/// Sans répertoire de projets réglé — le cas d'une installation neuve —, le
+/// chemin restait relatif : git le créait *dans* le dépôt principal, et l'agent,
+/// lancé ailleurs, ne trouvait pas son dossier. On se pose alors à côté du
+/// dépôt, nommé comme le fait le repli générique des workspaces
+/// (`<dépôt>-<branche>`), pour qu'un même worktree ne porte pas deux noms.
+fn worktree_target(root: &str, repo: &std::path::Path, branch: &str) -> std::path::PathBuf {
+	let folder = branch.replace('/', "-");
+	if root.trim().is_empty() {
+		let name = repo
+			.file_name()
+			.map(|name| name.to_string_lossy().to_string())
+			.unwrap_or_default();
+		let parent = repo.parent().unwrap_or(repo);
+		return if name.is_empty() {
+			parent.join(&folder)
+		} else {
+			parent.join(format!("{name}-{folder}"))
+		};
+	}
+	std::path::PathBuf::from(crate::config::resolve_path(root, "")).join(&folder)
 }
 
 /// Ce qu'une synchronisation de la cohabitation a donné.
@@ -1310,6 +1333,21 @@ pub async fn integration_worktree(mission: &mission::Mission) -> Result<String> 
 #[cfg(test)]
 mod tests {
 	use super::*;
+
+	/// Sans répertoire de projets, le worktree d'une mission se créait dans le
+	/// dépôt principal, sous un chemin relatif que l'agent ne retrouvait pas.
+	#[test]
+	fn sans_racine_le_worktree_de_mission_se_pose_a_cote_du_depot() {
+		let repo = std::env::temp_dir().join("demo-shop");
+		let path = worktree_target("", &repo, "feat/#1-cart-total");
+		assert!(path.is_absolute(), "{}", path.display());
+		assert_eq!(path, std::env::temp_dir().join("demo-shop-feat-#1-cart-total"));
+		assert!(!path.starts_with(&repo), "{}", path.display());
+
+		let root = std::env::temp_dir().join("projets");
+		let path = worktree_target(&root.to_string_lossy(), &repo, "feat/x");
+		assert_eq!(path, root.join("feat-x"));
+	}
 
 	/// Un plan incomplet ne doit pas produire de tâches bancales : ce que le
 	/// maître laisse implicite se complète, il ne se perd pas.
