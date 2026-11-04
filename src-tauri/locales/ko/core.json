@@ -443,7 +443,9 @@
 			"integrationResumed": "통합 재개",
 			"integrationResumedDetail": "미션을 맡은 리드가 없었습니다. 남은 작업에 대해 새 리드를 다시 시작합니다.",
 			"integrationNotResumed": "통합이 재개되지 않음",
-			"outOfScopeRefused": "범위 밖 쓰기 거부됨"
+			"outOfScopeRefused": "범위 밖 쓰기 거부됨",
+			"revivalsExhausted": "미션 일시 중지: 통합이 제자리를 맴돌고 있습니다",
+			"revivalsExhaustedDetail": "마스터를 {{count}}번 다시 실행했지만 아무것도 진행되지 않았습니다(작업, 검사, 풀 리퀘스트). 막고 있는 원인(열 수 없는 풀 리퀘스트, 충돌 등)을 확인한 뒤 미션을 재개하세요."
 		},
 		"quoted": "“{{text}}”",
 		"tailscaleDown": "Tailscale이 응답하지 않습니다.",

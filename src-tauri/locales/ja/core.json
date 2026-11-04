@@ -443,7 +443,9 @@
 			"integrationResumed": "統合を再開しました",
 			"integrationResumedDetail": "ミッションを担当するリードがいなかったため、残りの作業に対してリードを再起動しました。",
 			"integrationNotResumed": "統合は再開されていません",
-			"outOfScopeRefused": "範囲外への書き込みを拒否しました"
+			"outOfScopeRefused": "範囲外への書き込みを拒否しました",
+			"revivalsExhausted": "ミッションを一時停止：統合が堂々巡りしています",
+			"revivalsExhaustedDetail": "マスターを {{count}} 回再起動しましたが、何も進みませんでした（タスク、チェック、プルリクエスト）。妨げているもの（開けないプルリクエスト、コンフリクトなど）を確認してから、ミッションを再開してください。"
 		},
 		"quoted": "「{{text}}」",
 		"tailscaleDown": "Tailscale が応答しません。",

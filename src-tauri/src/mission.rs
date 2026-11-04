@@ -283,6 +283,88 @@ mod exposure_tests {
 	}
 }
 
+/// Ce qui dit qu'une mission a avancé : l'état, chaque tâche (état, portes,
+/// reprises), la pull request et le compte rendu. Le maître qui la tient n'en
+/// fait pas partie — en relancer un ne compte pas comme un progrès.
+pub fn progress_fingerprint(mission: &Mission) -> String {
+	let mut parts = vec![
+		format!("{:?}", mission.state),
+		mission.pr_url.clone(),
+		mission.summary.len().to_string(),
+	];
+	for task in &mission.tasks {
+		parts.push(format!("{}:{:?}:{:?}:{}", task.id, task.state, task.gate, task.attempts));
+	}
+	parts.join("|")
+}
+
+/// Les relances sans progrès, par mission, dans ce processus.
+fn revivals() -> &'static std::sync::Mutex<std::collections::HashMap<String, (String, u32)>> {
+	static REVIVALS: std::sync::OnceLock<std::sync::Mutex<std::collections::HashMap<String, (String, u32)>>> =
+		std::sync::OnceLock::new();
+	REVIVALS.get_or_init(Default::default)
+}
+
+/// Note une relance du maître d'intégration, et dit si elle est permise.
+///
+/// Le compte repart à zéro dès que l'empreinte change : une mission qui avance,
+/// même lentement, n'est jamais arrêtée par ce garde-fou. Il ne retient que
+/// celle qui tourne en rond.
+pub fn note_revival(mission_id: &str, fingerprint: &str, max: u32) -> bool {
+	let mut table = revivals().lock().unwrap_or_else(|poisoned| poisoned.into_inner());
+	revival_allowed(table.entry(mission_id.to_string()).or_insert((String::new(), 0)), fingerprint, max)
+}
+
+fn revival_allowed(entry: &mut (String, u32), fingerprint: &str, max: u32) -> bool {
+	if entry.0 != fingerprint {
+		*entry = (fingerprint.to_string(), 0);
+	}
+	if entry.1 >= max {
+		return false;
+	}
+	entry.1 += 1;
+	true
+}
+
+#[cfg(test)]
+mod revival_tests {
+	use super::*;
+
+	#[test]
+	fn une_mission_qui_tourne_en_rond_est_arretee() {
+		let mut entry = (String::new(), 0);
+		assert!(revival_allowed(&mut entry, "a", 3));
+		assert!(revival_allowed(&mut entry, "a", 3));
+		assert!(revival_allowed(&mut entry, "a", 3));
+		assert!(!revival_allowed(&mut entry, "a", 3), "la quatrième relance sans progrès est refusée");
+	}
+
+	#[test]
+	fn le_moindre_progres_remet_le_compte_a_zero() {
+		let mut entry = (String::new(), 0);
+		for _ in 0..3 {
+			assert!(revival_allowed(&mut entry, "a", 3));
+		}
+		assert!(revival_allowed(&mut entry, "b", 3), "la mission a bougé");
+		assert_eq!(entry.1, 1);
+	}
+
+	#[test]
+	fn relancer_un_maitre_n_est_pas_un_progres() {
+		let mut mission: Mission = serde_json::from_value(serde_json::json!({
+			"id": "m", "title": "t", "state": "integrating", "tasks": [],
+			"branch": "b", "cwd": "/r", "createdAt": "", "updatedAt": ""
+		}))
+		.unwrap();
+		let avant = progress_fingerprint(&mission);
+		mission.master_session = Some("agent-2".into());
+		mission.updated_at = "plus tard".into();
+		assert_eq!(progress_fingerprint(&mission), avant);
+		mission.pr_url = "https://example.invalid/pr/1".into();
+		assert_ne!(progress_fingerprint(&mission), avant);
+	}
+}
+
 /// Ce que l'intégration fait d'une tâche livrée, au regard des portes.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum GateDecision {

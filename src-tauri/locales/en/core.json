@@ -443,7 +443,9 @@
 			"integrationResumed": "Integration resumed",
 			"integrationResumedDetail": "No lead was holding the mission; one is relaunched on what remains to be done.",
 			"integrationNotResumed": "Integration not resumed",
-			"outOfScopeRefused": "Out-of-scope write refused"
+			"outOfScopeRefused": "Out-of-scope write refused",
+			"revivalsExhausted": "Mission paused: the integration is going round in circles",
+			"revivalsExhaustedDetail": "The lead agent was relaunched {{count}} times without anything moving (tasks, checks, pull request). Look at what blocks it — a pull request that cannot open, a conflict — then resume the mission."
 		},
 		"quoted": "“{{text}}”",
 		"tailscaleDown": "Tailscale is not responding.",
