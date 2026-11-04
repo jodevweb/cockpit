@@ -1,127 +1,143 @@
 # Cockpit
 
-Poste de pilotage pour les agents de code — Claude Code, Codex, Gemini — sur
-macOS et Windows.
-On lance des agents sur des worktrees, on suit ce qu'ils font, on répond quand
-ils ont besoin de toi, et on relit ce qu'ils livrent, dans une seule fenêtre
-native.
+*English · [Français](README.fr.md)*
 
-*A native macOS and Windows cockpit to run, watch and steer coding agents
-(Claude Code, Codex, Gemini) across git worktrees. Available in 10 languages; the docs are in
-French.*
+A cockpit for coding agents — Claude Code, Codex, Gemini — on macOS and
+Windows. Launch agents on worktrees, follow what they do, answer when they
+need you, and review what they deliver, all in one native window.
 
-[![Licence MIT](https://img.shields.io/badge/licence-MIT-blue.svg)](LICENSE)
+[![MIT License](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
 ![macOS 13+](https://img.shields.io/badge/macOS-13%2B-lightgrey.svg)
 ![Windows 10/11](https://img.shields.io/badge/Windows-10%20%7C%2011-lightgrey.svg)
 ![Tauri 2](https://img.shields.io/badge/Tauri-2-24C8DB.svg)
 
 <picture>
   <source media="(prefers-color-scheme: dark)" srcset="docs/images/carte-dark.webp">
-  <img alt="La carte : tickets, missions, revues et mises en production d'un projet" src="docs/images/carte-light.webp">
+  <img alt="The map: a project's tickets, missions, reviews and releases" src="docs/images/carte-light.webp">
 </picture>
 
-Application Tauri 2 — binaire natif, aucun serveur. Rust pour tout ce qui
-touche au système (git, processus, fichiers, HTTP), React + Tailwind pour
-l'interface. Rien n'est embarqué : Cockpit pilote les outils déjà installés
-sur le poste (`git`, `claude`, `gh`…).
+A Tauri 2 application — a native binary, no server. Rust for everything that
+touches the system (git, processes, files, HTTP), React + Tailwind for the
+interface. Nothing is bundled: Cockpit drives the tools already installed on
+the machine (`git`, `claude`, `gh`…).
+
+## Why Cockpit
+
+Plenty of tools run agents in parallel on worktrees. Cockpit takes care of
+what comes next: **being able to trust what they deliver without reading all
+of it**.
+
+- **You see before.** The exact context the agent will receive (the brief),
+  and a plan split into tasks that nothing launches without your approval.
+- **You check without reading 800 lines.** Repository checks that must pass
+  before anything is integrated, properties replayed against the repository's
+  past fixes to prove they can fail, a video of what the agent did in its
+  browser, and a tour of the changes taken from git rather than from what the
+  agent says about them.
+- **It learns from your corrections.** What you fix by hand after an agent
+  becomes, once you approve it, a lesson the next agents receive for those
+  files.
+- **Nothing happens behind your back.** A log of what was done on your behalf,
+  guardrails that hold even without permission prompts (write scope, git
+  operations forbidden to workers), and orphan processes found and stopped.
+- **Local and open.** MIT license, no server: tokens and code stay on your
+  machine.
 
 <p align="center">
-  <img alt="Un parcours : la carte, un workspace, les décisions, la conversation d'un agent" src="docs/images/demo.gif" width="800">
+  <img alt="A walkthrough: the map, a workspace, the decisions, an agent's conversation" src="docs/images/demo.gif" width="800">
 </p>
 
 <table>
   <tr>
-    <td width="33%"><img alt="Un workspace : l'agent pose une question" src="docs/images/workspace.webp"></td>
-    <td width="33%"><img alt="Les décisions en attente" src="docs/images/decisions.webp"></td>
-    <td width="33%"><img alt="La conversation d'un agent, outil par outil" src="docs/images/agents.webp"></td>
+    <td width="33%"><img alt="A workspace: the agent asks a question" src="docs/images/workspace.webp"></td>
+    <td width="33%"><img alt="Pending decisions" src="docs/images/decisions.webp"></td>
+    <td width="33%"><img alt="An agent's conversation, tool by tool" src="docs/images/agents.webp"></td>
   </tr>
   <tr>
-    <td align="center"><sub>Un workspace : l'agent attend ta réponse</sub></td>
-    <td align="center"><sub>Les décisions qui t'attendent</sub></td>
-    <td align="center"><sub>Ce qu'un agent a fait, outil par outil</sub></td>
+    <td align="center"><sub>A workspace: the agent waits for your answer</sub></td>
+    <td align="center"><sub>The decisions waiting for you</sub></td>
+    <td align="center"><sub>What an agent did, tool by tool</sub></td>
   </tr>
 </table>
 
-<sub>Captures prises en mode aperçu (`pnpm vite:dev` dans un navigateur), sur
-des données d'exemple.</sub>
+<sub>Screenshots taken in preview mode (`pnpm vite:dev` in a browser), on
+sample data.</sub>
 
 ---
 
-## Démarrer
+## Getting started
 
 ```bash
 pnpm install
-pnpm dev          # développement, rechargement à chaud
-pnpm install:app  # compile et installe l'app sur ce poste
-pnpm build        # macOS : Cockpit.app + .dmg ; Windows : installeur NSIS
-                  # (dans src-tauri/target/release/bundle)
+pnpm dev          # development, hot reload
+pnpm install:app  # builds and installs the app on this machine
+pnpm build        # macOS: Cockpit.app + .dmg; Windows: NSIS installer
+                  # (in src-tauri/target/release/bundle)
 ```
 
-`pnpm install:app` est la commande du quotidien. Sous macOS, elle installe
-l'app dans `/Applications`, d'où elle se lance comme n'importe quelle autre
-(Spotlight, Launchpad, Dock) sans dépendre d'un terminal ouvert ; elle saute
-volontairement la cible `.dmg`, dont le script de bundling attend une
-autorisation d'automatisation du Finder et reste bloqué sans elle. Sous
-Windows, elle produit l'installeur NSIS et le joue en silence : l'app
-s'installe pour l'utilisateur courant (`%LOCALAPPDATA%\Cockpit`), sans droits
-administrateur, et apparaît dans le menu Démarrer.
+`pnpm install:app` is the everyday command. On macOS it installs the app in
+`/Applications`, from where it launches like any other (Spotlight, Launchpad,
+Dock) without depending on an open terminal; it deliberately skips the `.dmg`
+target, whose bundling script waits for a Finder automation permission and
+hangs without it. On Windows it builds the NSIS installer and runs it
+silently: the app is installed for the current user (`%LOCALAPPDATA%\Cockpit`),
+without administrator rights, and shows up in the Start menu.
 
-Les scripts `pnpm install:app` et `pnpm setup:mobile` passent par
-`scripts/plateforme.mjs`, qui choisit la variante du système : le `.sh` sous
-macOS, le `.ps1` sous Windows quand il existe (sinon le `.sh`, joué par le
-bash de Git for Windows).
+`pnpm install:app` and `pnpm setup:mobile` go through `scripts/plateforme.mjs`,
+which picks the variant for the system: the `.sh` on macOS, the `.ps1` on
+Windows when there is one (otherwise the `.sh`, run by Git for Windows' bash).
 
-## Prérequis
+## Requirements
 
-**Le poste.** macOS 13 minimum, ou Windows 10 (21H2 et suivantes) / 11, en
-x64. Pas de Linux. Le shell utilisé pour tout ce que le cockpit lance est
-`zsh` sous macOS — celui du système convient — et le bash de **Git for
-Windows** sous Windows (voir plus bas).
+**The machine.** macOS 13 or later, or Windows 10 (21H2 and later) / 11, on
+x64. No Linux. The shell used for everything the cockpit launches is `zsh` on
+macOS — the system one is fine — and **Git for Windows**' bash on Windows (see
+below).
 
-**Pour compiler.** Node 20+, pnpm, Rust stable (`rustup`). Sous macOS, les
-Xcode Command Line Tools (`xcode-select --install`). Sous Windows, la chaîne
-MSVC de Rust (`rustup default stable-x86_64-pc-windows-msvc`, celle par
-défaut) et les **Visual Studio Build Tools** avec la charge de travail
-« Développement Desktop en C++ » (compilateur MSVC et SDK Windows), et
-**Strawberry Perl** (`winget install StrawberryPerl.StrawberryPerl`) pour
-compiler OpenSSL : le Perl de Git for Windows n'a pas tous les modules
-nécessaires. Si `perl` désigne encore celui de Git, indiquez le bon avec
-`set OPENSSL_SRC_PERL=C:\Strawberry\perl\bin\perl.exe`. La première compilation
-Rust prend plusieurs minutes ; les suivantes sont incrémentales.
+**To build.** Node 20+, pnpm, stable Rust (`rustup`). On macOS, the Xcode
+Command Line Tools (`xcode-select --install`). On Windows, Rust's MSVC
+toolchain (`rustup default stable-x86_64-pc-windows-msvc`, the default one),
+the **Visual Studio Build Tools** with the "Desktop development with C++"
+workload (MSVC compiler and Windows SDK), and **Strawberry Perl**
+(`winget install StrawberryPerl.StrawberryPerl`) to build OpenSSL: Git for
+Windows' Perl lacks some of the modules it needs. If `perl` still points to
+Git's, set the right one with
+`set OPENSSL_SRC_PERL=C:\Strawberry\perl\bin\perl.exe`. The first Rust build
+takes several minutes; the next ones are incremental.
 
-**Les outils qu'il pilote.** Rien n'est embarqué : le cockpit se sert de ce qui
-est déjà installé sur le poste.
+**The tools it drives.** Nothing is bundled: the cockpit uses what is already
+installed on the machine.
 
-| Outil                  | Ce qu'il dessert                                          | Sans lui                                        |
-| ---------------------- | --------------------------------------------------------- | ----------------------------------------------- |
-| `git`                  | Worktrees, écran Git, diffs, commits                       | rien ne fonctionne                              |
-| `claude`               | Écran Agents IA, lancement et reprise des missions         | plus d'agents, le reste tient                   |
-| `gh` authentifié       | Repli quand aucun jeton GitHub n'est configuré             | il faut fournir `COCKPIT_GITHUB_TOKEN`          |
-| `docker` ou `orb`      | Écran Infra locale, serveur ntfy de l'accès mobile, isolation des agents | la liste des conteneurs reste vide, l'isolation refuse de démarrer si activée |
-| `zed`, `cursor`, `code`| Ouverture d'un fichier dans l'éditeur                      | les liens vers l'éditeur ne font rien           |
-| Tailscale              | `pnpm setup:mobile` uniquement                             | pas d'accès mobile                              |
+| Tool                   | What it serves                                             | Without it                                      |
+| ---------------------- | ---------------------------------------------------------- | ----------------------------------------------- |
+| `git`                  | Worktrees, Git screen, diffs, commits                       | nothing works                                   |
+| `claude`               | AI Agents screen, launching and resuming missions           | no more agents, the rest still works            |
+| authenticated `gh`     | Fallback when no GitHub token is configured                 | `COCKPIT_GITHUB_TOKEN` must be provided         |
+| `docker` or `orb`      | Local Infra screen, ntfy server for mobile access, agent isolation | the container list stays empty, isolation refuses to start when enabled |
+| `zed`, `cursor`, `code`| Opening a file in the editor                                | editor links do nothing                         |
+| Tailscale              | `pnpm setup:mobile` only                                    | no mobile access                                |
 
-Le CLI `claude` est cherché dans le `PATH` du shell de connexion (Git Bash
-sous Windows), puis, sous macOS, dans `~/.local/bin`, `~/.claude/local`, `/opt/homebrew/bin`, `/usr/local/bin`,
-`~/.bun/bin` et `~/.volta/bin`. L'écran Agents lit `~/.claude/projects` en
-lecture seule : sur un poste qui n'a jamais fait tourner Claude Code, il est
-vide, et c'est normal.
+The `claude` CLI is looked up in the login shell's `PATH` (Git Bash on
+Windows), then, on macOS, in `~/.local/bin`, `~/.claude/local`,
+`/opt/homebrew/bin`, `/usr/local/bin`, `~/.bun/bin` and `~/.volta/bin`. The
+Agents screen reads `~/.claude/projects` read-only: on a machine that has never
+run Claude Code, it is empty, and that is expected.
 
-**La configuration.** Un seul fichier, `~/.config/cockpit/config.toml`, écrit
-par l'écran **Réglages** — personne n'a besoin de l'éditer à la main. Le strict
-minimum est la section `[general]` : `projects_root`, `main_repo`, `editor`.
-Toutes les intégrations SaaS sont facultatives et se rajoutent une par une ;
-un bloc sans jeton laisse simplement son écran vide.
+**Configuration.** A single file, `~/.config/cockpit/config.toml`, written by
+the **Settings** screen — nobody needs to edit it by hand. The bare minimum is
+the `[general]` section: `projects_root`, `main_repo`, `editor`. Every SaaS
+integration is optional and can be added one at a time; a block without a
+token simply leaves its screen empty.
 
-**Le catalogue de scripts.** Une installation neuve n'a aucune commande
-fournie d'office : chaque projet déclare les siennes, ou les fait détecter
-depuis les scripts de son dépôt (voir « Ajouter une commande au catalogue »).
+**The script catalog.** A fresh install ships no commands: each project
+declares its own, or has them detected from its repository's scripts (see
+"Adding a command to the catalog").
 
-## Installer sans compiler (macOS)
+## Installing without building (macOS)
 
-Les versions publiées vivent sur [jodevweb/cockpit-releases](https://github.com/jodevweb/cockpit-releases/releases/latest) :
-une archive `Cockpit_<version>_<arch>.app.tar.gz` par architecture Mac, pas de
-`.dmg` (pour Windows, voir la section « Windows » plus bas).
+Published versions live on [jodevweb/cockpit-releases](https://github.com/jodevweb/cockpit-releases/releases/latest):
+one `Cockpit_<version>_<arch>.app.tar.gz` archive per Mac architecture, no
+`.dmg` (for Windows, see the "Windows" section below).
 
 ```bash
 tar xzf Cockpit_<version>_aarch64.app.tar.gz
@@ -129,351 +145,345 @@ mv Cockpit.app /Applications/
 xattr -dr com.apple.quarantine /Applications/Cockpit.app
 ```
 
-Les versions sont compilées par GitHub Actions pour Apple Silicon (`aarch64`)
-et, quand la compilation croisée passe, pour les Mac Intel (`x64`). Une version
-sans archive `x64` ne se propose pas aux Mac Intel : ils passent alors par les
-sources.
+Versions are built by GitHub Actions for Apple Silicon (`aarch64`) and, when
+cross-compilation succeeds, for Intel Macs (`x64`). A version without an `x64`
+archive is not offered to Intel Macs: they go through the sources instead.
 
-**La troisième ligne n'est pas facultative.** L'application est signée par une
-identité auto-signée (ou ad hoc) et non notarisée : sans elle, Gatekeeper refuse de l'ouvrir. Et le vieux contournement
-— clic droit → Ouvrir — **a disparu depuis macOS 15** : il n'y a plus d'entrée
-« Ouvrir quand même » dans le menu contextuel, seulement au fond de Réglages
-Système → Confidentialité et sécurité, après une première tentative refusée.
-Retirer l'attribut de quarantaine évite tout ce parcours : Gatekeeper n'évalue
-alors plus l'application du tout.
+**The third line is not optional.** The application is signed with a
+self-signed (or ad hoc) identity and is not notarized: without that line,
+Gatekeeper refuses to open it. And the old workaround — right-click → Open —
+**is gone since macOS 15**: there is no "Open anyway" entry in the context menu
+anymore, only deep in System Settings → Privacy & Security, after a first
+refused attempt. Removing the quarantine attribute avoids all of that:
+Gatekeeper then does not evaluate the application at all.
 
-Ensuite l'updater intégré prend le relais et propose les versions suivantes tout
-seul — l'endpoint est public, aucun compte GitHub n'est nécessaire pour le lire.
+After that, the built-in updater takes over and offers the next versions on
+its own — the endpoint is public, no GitHub account is needed to read it.
 
 ## Windows
 
-**Prérequis du poste.**
+**Machine requirements.**
 
-- **Windows 10 (21H2+) ou 11**, x64.
-- **[Git for Windows](https://git-scm.com/download/win), obligatoire.** Le
-  cockpit joue toutes ses commandes — scripts du catalogue, lancement des
-  agents, `git` lui-même — dans le bash de Git for Windows, comme Claude Code
-  sous Windows. Il le trouve à partir de `git` dans le `PATH`, puis dans
-  `Program Files\Git` et `%LOCALAPPDATA%\Programs\Git` ; la variable
-  `COCKPIT_BASH` force un autre chemin vers `bash.exe`. Le `bash.exe` de
-  `System32` (WSL) n'est jamais utilisé.
-- **WebView2**, déjà présent sur Windows 11 et sur un Windows 10 à jour.
-  Absent, l'installeur le télécharge et l'installe tout seul.
-- **Claude Code** installé et authentifié (`claude` joignable depuis Git Bash),
-  comme sur Mac. Les autres outils du tableau ci-dessus (`gh`, Docker Desktop,
-  un éditeur…) restent facultatifs.
+- **Windows 10 (21H2+) or 11**, x64.
+- **[Git for Windows](https://git-scm.com/download/win), required.** The
+  cockpit runs all its commands — catalog scripts, agent launches, `git`
+  itself — in Git for Windows' bash, like Claude Code on Windows. It finds it
+  from `git` in the `PATH`, then in `Program Files\Git` and
+  `%LOCALAPPDATA%\Programs\Git`; the `COCKPIT_BASH` variable forces another
+  path to `bash.exe`. The `bash.exe` in `System32` (WSL) is never used.
+- **WebView2**, already present on Windows 11 and on an up-to-date
+  Windows 10. If it is missing, the installer downloads and installs it.
+- **Claude Code** installed and authenticated (`claude` reachable from Git
+  Bash), as on Mac. The other tools in the table above (`gh`, Docker Desktop,
+  an editor…) remain optional.
 
-**Installer depuis la release.** Les versions publiées sur
+**Installing from the release.** Versions published on
 [jodevweb/cockpit-releases](https://github.com/jodevweb/cockpit-releases/releases/latest)
-contiennent un installeur `Cockpit_<version>_x64-setup.exe`. Il installe le
-cockpit pour l'utilisateur courant, sans droits administrateur, et l'ajoute au
-menu Démarrer. L'updater intégré propose ensuite les versions suivantes, comme
-sur Mac : l'installation part sur un clic et relance l'app.
+include a `Cockpit_<version>_x64-setup.exe` installer. It installs the cockpit
+for the current user, without administrator rights, and adds it to the Start
+menu. The built-in updater then offers the next versions, as on Mac: the
+installation starts with one click and restarts the app.
 
-**SmartScreen.** L'installeur n'est pas signé Authenticode : au premier
-lancement, Windows affiche « Windows a protégé votre ordinateur ». Cliquer sur
-**Informations complémentaires**, puis **Exécuter quand même**. Si le
-navigateur bloque le téléchargement lui-même, choisir **Conserver** dans sa
-liste de téléchargements. On peut aussi débloquer le fichier avant de le lancer :
-clic droit → Propriétés → cocher **Débloquer**, ou en PowerShell
+**SmartScreen.** The installer is not Authenticode-signed: on first launch,
+Windows shows "Windows protected your PC". Click **More info**, then **Run
+anyway**. If the browser blocks the download itself, choose **Keep** in its
+download list. You can also unblock the file before running it: right-click →
+Properties → check **Unblock**, or in PowerShell
 `Unblock-File .\Cockpit_<version>_x64-setup.exe`.
 
-**Compiler.** Avec les prérequis de compilation ci-dessus, depuis PowerShell ou
-Git Bash :
+**Building.** With the build requirements above, from PowerShell or Git Bash:
 
 ```powershell
 pnpm install
-pnpm install:app   # compile l'installeur NSIS et l'installe
+pnpm install:app   # builds the NSIS installer and installs it
 ```
 
-**Ce qui diffère du Mac.**
+**What differs from the Mac.**
 
-- Les raccourcis utilisent `Ctrl` là où le Mac utilise `⌘` (`Ctrl+K` pour la
-  palette, etc.) ; dans un terminal, seuls les raccourcis avec `Maj` restent à
-  l'app, `Ctrl`+lettre appartient au shell.
-- La fenêtre garde la barre de titre native de Windows.
-- Ce qui passe sous macOS par le Finder, Terminal.app ou `open` passe par
-  l'Explorateur et les associations de fichiers de Windows.
-- L'accès mobile se prépare avec `pnpm setup:mobile`, qui joue
-  `scripts/setup-mobile.ps1` : Tailscale pour Windows et Docker Desktop requis.
-- Pas de signature de code : rien d'équivalent aux autorisations macOS n'est
-  redemandé d'une version à l'autre, mais SmartScreen avertit à chaque
-  installation manuelle (pas lors des mises à jour intégrées).
+- Shortcuts use `Ctrl` where the Mac uses `⌘` (`Ctrl+K` for the palette,
+  etc.); in a terminal, only shortcuts with `Shift` stay with the app,
+  `Ctrl`+letter belongs to the shell.
+- The window keeps Windows' native title bar.
+- What goes through Finder, Terminal.app or `open` on macOS goes through
+  Explorer and Windows file associations.
+- Mobile access is set up with `pnpm setup:mobile`, which runs
+  `scripts/setup-mobile.ps1`: Tailscale for Windows and Docker Desktop are
+  required.
+- No code signing: nothing like macOS permissions is asked again from one
+  version to the next, but SmartScreen warns on each manual installation (not
+  on built-in updates).
 
 ## Configuration
 
-Un seul fichier : `~/.config/cockpit/config.toml` (permissions 600).
-Tout est éditable depuis l'écran **Réglages** ; `config.example.toml` sert de
-référence commentée.
+A single file: `~/.config/cockpit/config.toml` (permissions 600). Everything
+can be edited from the **Settings** screen; `config.example.toml` is the
+commented reference.
 
-Les jetons ne descendent jamais dans le webview : toutes les requêtes SaaS
-partent du process Rust. L'interface ne connaît qu'un booléen « configuré ».
+Tokens never go down to the webview: every SaaS request leaves from the Rust
+process. The interface only knows a "configured" boolean.
 
-Chaque secret peut venir d'une variable d'environnement, qui prime sur le
-fichier :
+Each secret can come from an environment variable, which takes precedence over
+the file:
 
-| Service      | Variable                    | Jeton attendu                                          |
+| Service      | Variable                    | Expected token                                         |
 | ------------ | --------------------------- | ------------------------------------------------------ |
-| GitHub       | `COCKPIT_GITHUB_TOKEN`      | facultatif — repli automatique sur `gh auth token`     |
-| Sentry       | `COCKPIT_SENTRY_TOKEN`      | auth token utilisateur (`project:read`, `event:write`) |
-| Linear       | `COCKPIT_LINEAR_TOKEN`      | clé API personnelle                                     |
-| Trigger.dev  | `COCKPIT_TRIGGER_TOKEN`     | secret key d'environnement (`tr_prod_…`, `tr_staging_…`) |
-| Railway      | `COCKPIT_RAILWAY_TOKEN`     | token de compte ou de projet                            |
-| Better Stack | `COCKPIT_BETTERSTACK_TOKEN` | token API Uptime                                        |
-| Stripe       | `COCKPIT_STRIPE_TOKEN`      | clé restreinte en lecture seule                         |
+| GitHub       | `COCKPIT_GITHUB_TOKEN`      | optional — automatic fallback to `gh auth token`        |
+| Sentry       | `COCKPIT_SENTRY_TOKEN`      | user auth token (`project:read`, `event:write`)         |
+| Linear       | `COCKPIT_LINEAR_TOKEN`      | personal API key                                        |
+| Trigger.dev  | `COCKPIT_TRIGGER_TOKEN`     | environment secret key (`tr_prod_…`, `tr_staging_…`)    |
+| Railway      | `COCKPIT_RAILWAY_TOKEN`     | account or project token                                |
+| Better Stack | `COCKPIT_BETTERSTACK_TOKEN` | Uptime API token                                        |
+| Stripe       | `COCKPIT_STRIPE_TOKEN`      | read-only restricted key                                |
 
-## Les écrans
+## Screens
 
-| Écran             | Ce qu'il montre                                                                                                                  |
+| Screen            | What it shows                                                                                                                    |
 | ----------------- | -------------------------------------------------------------------------------------------------------------------------------- |
-| **Vue d'ensemble** | Agents actifs, worktrees à surveiller, erreurs Sentry, PR ouvertes, derniers documents produits.                                   |
-| **Agents IA**      | Toutes les sessions Claude Code, leur timeline complète, sous-agents, outils, fichiers écrits, consommation. Reprise en un clic.   |
-| **Worktrees**      | État git de chaque arbre, diff par fichier, commits, sessions rattachées, création et suppression via l'outillage du dépôt.        |
-| **Git**            | Toutes les branches, ce que chacune change depuis sa divergence avec la base : arbre de fichiers, commits, graphe, diff.           |
-| **Scripts**        | Commandes maison avec leurs options en formulaire, scripts du `package.json`, exécution avec sortie live et annulation.            |
-| **Documents**      | Livrables des agents (`.claude/work`, `.claude/reviews`, `docs/`, markdown racine) sur tous les worktrees, rendus en markdown.     |
-| **Observabilité**  | Issues Sentry (résolution et mise en sourdine depuis l'app), incidents et monitors Better Stack.                                   |
-| **Delivery**       | Issues Linear, pull requests, GitHub Actions, runs Trigger.dev, déploiements Railway, événements Stripe.                           |
-| **Impact**         | Tout ce qui bouge sur les dépôts déclarés — PR GitHub, MR GitLab, branches parties sans demande de fusion — et, à la demande, ce que chaque changement implique : pour le produit, pour l'équipe, et ce qui risque de casser. |
-| **Infra locale**   | Conteneurs Docker et ports de développement en écoute.                                                                            |
+| **Overview**      | Active agents, worktrees to watch, Sentry errors, open PRs, latest documents produced.                                            |
+| **AI Agents**     | Every Claude Code session, its full timeline, subagents, tools, files written, usage. One-click resume.                           |
+| **Worktrees**     | Git state of each tree, per-file diff, commits, attached sessions, creation and removal through the repository's tooling.         |
+| **Git**           | All branches, what each one changes since it diverged from the base: file tree, commits, graph, diff.                             |
+| **Scripts**       | In-house commands with their options as a form, `package.json` scripts, execution with live output and cancellation.             |
+| **Documents**     | Agent deliverables (`.claude/work`, `.claude/reviews`, `docs/`, root markdown) across all worktrees, rendered as markdown.        |
+| **Observability** | Sentry issues (resolve and mute from the app), Better Stack incidents and monitors.                                               |
+| **Delivery**      | Linear issues, pull requests, GitHub Actions, Trigger.dev runs, Railway deployments, Stripe events.                               |
+| **Impact**        | Everything moving on the declared repositories — GitHub PRs, GitLab MRs, branches pushed without a merge request — and, on demand, what each change implies: for the product, for the team, and what may break. |
+| **Local Infra**   | Docker containers and listening development ports.                                                                               |
 
-## Raccourcis
+## Shortcuts
 
-| Touche      | Action                            |
-| ----------- | --------------------------------- |
-| `⌘K`        | Palette de recherche et d'actions |
-| `⌘1` … `⌘9` | Écrans, dans l'ordre du menu      |
-| `⌘0`        | Réglages                          |
-| `⌘⇧A`       | Replier ou rappeler le panneau de travail |
-| `⌘⇧I`       | Le moniteur des changements, et retour   |
-| `⌘⇧T`       | Nouveau terminal sur le chantier en cours |
+| Key         | Action                                 |
+| ----------- | -------------------------------------- |
+| `⌘K`        | Search and action palette              |
+| `⌘1` … `⌘9` | Screens, in menu order                 |
+| `⌘0`        | Settings                               |
+| `⌘⇧A`       | Fold or recall the work panel          |
+| `⌘⇧I`       | The change monitor, and back           |
+| `⌘⇧T`       | New terminal on the current workspace  |
 
-## Le panneau de travail
+## The work panel
 
-À droite de l'écran, un panneau montre **un worktree, ses agents et ses
-terminaux** — pas une liste d'objets indépendants. C'est la façon dont on
-travaille : on ouvre un chantier, on y lance deux agents et un `pnpm dev`, on le
-met de côté pour lire une PR, on y revient entier.
+On the right of the screen, a panel shows **a worktree, its agents and its
+terminals** — not a list of independent objects. That is how work actually
+happens: you open a workspace, launch two agents and a `pnpm dev` in it, set it
+aside to read a PR, and come back to it whole.
 
-Les terminaux sont de vrais shells derrière un pseudo-terminal : `⌃C` arrête ce
-qui tourne, les interfaces plein écran s'affichent correctement, et le shell
-reste utilisable quand la commande se termine. Fermer un onglet, et cela seul,
-arrête le processus — le serveur de dev meurt avec sa descendance, pas juste
-avec son shell.
+Terminals are real shells behind a pseudo-terminal: `⌃C` stops what is
+running, full-screen interfaces display correctly, and the shell stays usable
+when the command ends. Closing a tab, and only that, stops the process — the
+dev server dies with its descendants, not just with its shell.
 
-Replié, le groupe descend dans le dock en bas à droite : une pastille par
-worktree, qui dit ce qui tourne, ce qui attend une autorisation et ce qu'on n'a
-pas lu. Un clic le rouvre sur l'onglet qu'on y regardait.
+Folded, the group goes down into the dock at the bottom right: one badge per
+worktree, saying what is running, what is waiting for a permission and what
+you haven't read. A click reopens it on the tab you were looking at.
 
-L'écran **Scripts** reste indépendant : c'est le lanceur de commandes
-paramétrables, avec sa sortie en direct, sans shell interactif derrière.
+The **Scripts** screen stays independent: it is the parameterized command
+launcher, with its live output, without an interactive shell behind it.
 
-## Fraîcheur des données
+## Data freshness
 
-Aucun écran n'attend qu'on appuie sur « rafraîchir ».
+No screen waits for you to press "refresh".
 
-Ce qui vient du disque est piloté par événement : `~/.claude/projects` et le
-`.git` du dépôt principal sont surveillés par `notify`, et toute écriture
-pousse un rafraîchissement (avec palier, pour absorber les rafales et ignorer
-les écritures que provoquent nos propres lectures). Comme les métadonnées des
-worktrees vivent sous `.git/worktrees/`, une seule surveillance les couvre tous.
+What comes from disk is event-driven: `~/.claude/projects` and the main
+repository's `.git` are watched by `notify`, and every write triggers a refresh
+(with a delay, to absorb bursts and ignore the writes our own reads cause).
+Since worktree metadata lives under `.git/worktrees/`, a single watch covers
+them all.
 
-Ce qui vient du réseau est sondé à intervalle : quelques secondes pour Docker et
-les ports, deux à trois minutes pour les SaaS — assez pour rester juste, assez
-peu pour ne pas entamer les quotas d'API.
+What comes from the network is polled: every few seconds for Docker and ports,
+every two to three minutes for SaaS — enough to stay accurate, little enough
+not to eat into API quotas.
 
-Dans les deux cas le rythme s'arrête quand la fenêtre passe en arrière-plan et
-repart par un rechargement immédiat au retour : un cockpit qu'on regarde est à
-jour, un cockpit qu'on ne regarde pas ne coûte rien.
+In both cases the rhythm stops when the window goes to the background and
+resumes with an immediate reload when it comes back: a cockpit you look at is
+up to date, a cockpit you don't look at costs nothing.
 
-## Comment ça lit les agents
+## How it reads agents
 
-Claude Code écrit un JSONL par session sous
-`~/.claude/projects/<chemin-encodé>/<session-id>.jsonl`, plus un dossier
-`<session-id>/subagents/` pour les sous-agents. Le cockpit lit ces fichiers
-**en lecture seule** et surveille l'arborescence via `notify` : dès qu'un agent
-écrit, la vue se rafraîchit (avec un debounce de 1,5 s pour absorber les
-rafales).
+Claude Code writes one JSONL per session under
+`~/.claude/projects/<encoded-path>/<session-id>.jsonl`, plus a
+`<session-id>/subagents/` folder for subagents. The cockpit reads these files
+**read-only** and watches the tree with `notify`: as soon as an agent writes,
+the view refreshes (with a 1.5 s debounce to absorb bursts).
 
-Le rattachement session ↔ worktree se fait sur le champ `cwd` des entrées, pas
-sur le nom de dossier encodé : c'est fiable même quand une branche contient des
-tirets.
+Sessions are matched to worktrees on the entries' `cwd` field, not on the
+encoded folder name: it is reliable even when a branch contains dashes.
 
-Une session est considérée **active** si son journal a bougé dans les trois
-dernières minutes, **récente** en deçà d'une heure, **dormante** au-delà.
+A session is considered **active** if its log moved in the last three minutes,
+**recent** under an hour, **dormant** beyond that.
 
-## Ce qu'un agent a le droit de consommer
+## What an agent is allowed to consume
 
-Deux garde-fous, dans **Réglages → Agents**, pour deux formes de la même
-peur : la machine qui sature.
+Two guardrails, in **Settings → Agents**, for two forms of the same fear: the
+machine running out.
 
-**Le coupe-circuit mémoire** (`memoryCeilingPercent`, 85 % par défaut) refuse
-de démarrer un agent de plus tant que la mémoire de la machine dépasse le
-seuil — mission, exécutant ou lancement manuel confondus. Chaque agent tient
-plusieurs process (le CLI, ses ponts MCP) ; sans lui, rien n'empêchait d'en
-cumuler assez pour saturer le poste.
+**The memory circuit breaker** (`memoryCeilingPercent`, 85 % by default)
+refuses to start one more agent while the machine's memory is above the
+threshold — mission, worker or manual launch alike. Each agent holds several
+processes (the CLI, its MCP bridges); without it, nothing prevented stacking
+enough of them to saturate the machine.
 
-**L'isolation par conteneurs** (section « Isolation des agents », éteinte par
-défaut) va plus loin : chaque agent tourne dans un conteneur avec sa propre
-mémoire plafonnée par le système, imposée plutôt que mesurée après coup. Elle
-couvre ce que le coupe-circuit ne voit pas — un agent qui lance lui-même un
-`pnpm dev` ou un build lourd via son propre outil Bash. Demande Docker ou
-OrbStack sur le poste (repli automatique sur `orb` puis `docker`, ou un
-runtime déclaré explicitement) ; l'image par défaut se construit une fois,
-à la main :
+**Container isolation** ("Agent isolation" section, off by default) goes
+further: each agent runs in a container with its own memory capped by the
+system, enforced rather than measured after the fact. It covers what the
+circuit breaker doesn't see — an agent that launches a `pnpm dev` or a heavy
+build itself through its own Bash tool. It needs Docker or OrbStack on the
+machine (automatic fallback to `orb` then `docker`, or an explicitly declared
+runtime); the default image is built once, by hand:
 
 ```bash
 docker build -t cockpit-agent:latest sandbox/
 ```
 
-Tant qu'elle est éteinte, l'écran d'approbation d'un plan nomme les rôles qui
-partiront en `bypassPermissions` directement sur le poste : leur outil Bash a
-alors les droits de la session, et le périmètre d'écriture ne couvre que les
-éditions de fichiers.
+The worktree is mounted at the same path inside and outside the container, and
+credentials (`~/.claude`, `~/.gitconfig`, `~/.ssh`) read-only. When isolation
+is enabled without a runtime installed, the agent launch is refused with a
+clear message rather than silently falling back to a direct launch.
 
-Isolés ou non, les exécutants de mission reçoivent un garde-fou git : un hook
-`PreToolUse` du CLI (`src-tauri/src/guard.rs`, passé par `--settings`, qui
-s'ajoute aux hooks du dépôt sans les remplacer) refuse le push forcé, le push
-sur la branche d'intégration, sa base ou les `base_branches` du projet, et la
-création de branches. Il tient en `bypassPermissions`. `cargo run --example
-guard` vérifie la commande du hook telle que le shell du poste la lira.
+While isolation is off, the plan approval screen names the roles that will run
+in `bypassPermissions` directly on the machine: their Bash tool then has the
+session's rights, and the write scope only covers file edits.
 
-Le worktree est monté au même chemin à l'intérieur qu'à l'extérieur du
-conteneur, et les identifiants (`~/.claude`, `~/.gitconfig`, `~/.ssh`) en
-lecture seule. Activée sans runtime installé, le lancement de l'agent est
-refusé avec un message clair plutôt que de retomber en direct sans le dire.
+Isolated or not, mission workers get a git guardrail: a `PreToolUse` hook of
+the CLI (`src-tauri/src/guard.rs`, passed with `--settings`, which adds to the
+repository's hooks without replacing them) refuses force-pushes, pushes to the
+integration branch, its base or the project's `base_branches`, and branch
+creation. It holds in `bypassPermissions`. `cargo run --example guard` checks
+the hook command as the machine's shell will read it.
 
 ## Architecture
 
 ```
 src-tauri/src/
-  config.rs        config TOML + variables d'environnement, vue expurgée pour l'UI
-  git.rs           worktrees, statut porcelain v2, diffs, commits
-  sessions.rs      parsing des JSONL Claude Code (résumés + timelines + sous-agents)
-  protocol.rs      les trois façons de parler à un agent, derrière une seule valeur
-  executions.rs    ce que chaque agent a fait : identité, tours, coûts, timeline
-  docs.rs          découverte des livrables markdown
-  runner.rs        exécution de commandes, streaming ligne à ligne, groupes de processus
-  system.rs        éditeur, terminal, Finder/Explorateur, Docker, ports
+  config.rs        TOML config + environment variables, redacted view for the UI
+  git.rs           worktrees, porcelain v2 status, diffs, commits
+  sessions.rs      parsing of Claude Code JSONL (summaries + timelines + subagents)
+  protocol.rs      the three ways to talk to an agent, behind a single value
+  executions.rs    what each agent did: identity, turns, costs, timeline
+  docs.rs          discovery of markdown deliverables
+  runner.rs        command execution, line-by-line streaming, process groups
+  system.rs        editor, terminal, Finder/Explorer, Docker, ports
   integrations.rs  Sentry, Better Stack, Linear, GitHub, Trigger, Railway, Stripe
-  monitor.rs       recensement des changements en vol, toutes forges confondues
-  impact.rs        dossier factuel d'un changement, lecture par agent, relecture du rapport
-  lib.rs           commandes IPC + surveillance du système de fichiers
+  monitor.rs       census of in-flight changes, across all forges
+  impact.rs        factual file of a change, reading by an agent, report review
+  lib.rs           IPC commands + file system watching
 
 src/
-  app/             shell, menu, palette ⌘K, état global
-  views/           un fichier par écran
-  components/      système de composants, markdown, logs ANSI, diff, flux SaaS
-  lib/             types miroir, IPC typée, formatage, catalogue de commandes
+  app/             shell, menu, ⌘K palette, global state
+  views/           one file per screen
+  components/      component system, markdown, ANSI logs, diff, SaaS feeds
+  lib/             mirror types, typed IPC, formatting, command catalog
 ```
 
-## Ajouter une commande au catalogue
+## Adding a command to the catalog
 
-Les commandes se déclarent par projet, depuis l'écran Scripts ou dans la
-configuration (`src-tauri/src/commands.rs`). Une entrée décrit une commande, son
-argument positionnel et ses options ; l'interface construit le formulaire et la
-ligne de commande toute seule. Le format, tel qu'il s'écrit en TOML :
+Commands are declared per project, from the Scripts screen or in the
+configuration (`src-tauri/src/commands.rs`). An entry describes a command, its
+positional argument and its options; the interface builds the form and the
+command line by itself. The format, as written in TOML:
 
 ```toml
 [[commands]]
 id = "worktree-create"
 group = "Worktrees"
-label = "Créer un worktree"
+label = "Create a worktree"
 description = "git worktree + .env + install."
 base = "pnpm worktree:create"
 scoped = false
 
 [commands.positional]
-label = "Branche"
-placeholder = "feat/ma-feature"
+label = "Branch"
+placeholder = "feat/my-feature"
 required = true
 
 [[commands.options]]
 id = "from"
 flag = "--from"
-label = "Partir de"
+label = "Start from"
 kind = "text"
 ```
 
-## Moteurs d'agents : Claude Code, Codex et Gemini
+## Agent engines: Claude Code, Codex and Gemini
 
-Un moteur (Réglages → Agents → Moteurs d'agents) déclare un protocole. Trois sont
-câblés :
+An engine (Settings → Agents → Agent engines) declares a protocol. Three are
+wired:
 
-- **`claude-stream-json`** (le défaut) — un process qui reste ouvert d'un tour
-  à l'autre.
-- **`codex-exec`** — OpenAI Codex CLI (`codex exec`). À l'opposé : chaque tour
-  relance un process (`codex exec resume <fil>` pour les suivants), qui se
-  termine de lui-même une fois la réponse rendue. Le cockpit traduit ce qu'il
-  peut vers la forme que le fil de discussion sait déjà lire — texte de
-  l'agent, commande lancée, fin de tour — et laisse le reste de côté plutôt
-  que d'afficher un champ deviné (voir `codex.rs`).
+- **`claude-stream-json`** (the default) — a process that stays open from one
+  turn to the next.
+- **`codex-exec`** — OpenAI Codex CLI (`codex exec`). The opposite: each turn
+  relaunches a process (`codex exec resume <thread>` for the following ones),
+  which ends by itself once the answer is given. The cockpit translates what it
+  can into the shape the conversation thread already knows how to read — agent
+  text, command run, end of turn — and leaves the rest aside rather than
+  showing a guessed field (see `codex.rs`).
 - **`gemini-stream-json`** — Google Gemini CLI (`gemini --output-format
-  stream-json`). Un seul tour possible : aucune source ne documente de
-  mécanisme de reprise pour ce mode (voir `gemini.rs`), donc un agent Gemini
-  ne reçoit qu'un message et s'arrête là. Traduction la plus prudente des
-  trois — le schéma des événements vient d'une pull request qui a livré la
-  fonctionnalité, pas d'une documentation stabilisée : deux pages officielles
-  se contredisaient sur son existence même au moment où ceci a été écrit.
+  stream-json`). A single turn only: no source documents a resume mechanism for
+  this mode (see `gemini.rs`), so a Gemini agent receives one message and stops
+  there. The most cautious translation of the three — the event schema comes
+  from the pull request that shipped the feature, not from stable
+  documentation: two official pages contradicted each other on its very
+  existence when this was written.
 
-`codex-exec` et `gemini-stream-json` ne peuvent pas encore être le moteur
-d'une mission (maître ou exécutant) : les outils de mission et le pont
-d'autorisation sont des mécanismes du protocole par défaut.
+`codex-exec` and `gemini-stream-json` cannot yet be the engine of a mission
+(master or worker): mission tools and the permission bridge are mechanisms of
+the default protocol.
 
-Leur historique, en revanche, se relit désormais. Le cockpit tient son propre
-relevé de ce que font les agents (`executions.rs`), écrit au fil de l'eau et
-valable pour les trois moteurs : l'écran Agents s'y replie quand il n'y a pas
-de journal Claude Code à lire. Un historique Codex reste incomplet par
-construction — ni son raisonnement ni les sorties de ses commandes n'ont de
-forme vérifiée — et le relevé le dit plutôt que de le combler.
+Their history, on the other hand, can now be read back. The cockpit keeps its
+own record of what agents do (`executions.rs`), written as it happens and valid
+for all three engines: the Agents screen falls back to it when there is no
+Claude Code log to read. A Codex history remains incomplete by construction —
+neither its reasoning nor its command outputs have a verified shape — and the
+record says so rather than filling the gap.
 
-## Limites connues
+## Known limitations
 
-- **macOS et Windows seulement.** Aucun portage Linux n'est prévu. Sous
-  Windows, Git for Windows est indispensable : sans son bash, le cockpit
-  s'ouvre mais ne lance rien.
-- **Windows** : l'installeur n'est pas signé Authenticode (avertissement
-  SmartScreen, voir « Windows »).
-- **Cursor** n'expose pas ses conversations en fichiers lisibles (SQLite interne) :
-  seuls ses livrables écrits sur disque apparaissent, dans l'écran Documents.
-- **Codex et Gemini** (`codex-exec`, `gemini-stream-json`) n'ont pas été
-  vérifiés contre leur vrai binaire, absent de tout poste où ces protocoles
-  ont été écrits — seulement contre leur documentation officielle et un faux
-  CLI de test qui en imite le comportement. Gemini avec moins de certitude que
-  Codex : sa documentation était contradictoire d'une page à l'autre au
-  moment où ceci a été écrit. Voir « Moteurs d'agents » ci-dessus.
+- **macOS and Windows only.** No Linux port is planned. On Windows, Git for
+  Windows is required: without its bash, the cockpit opens but launches
+  nothing.
+- **Windows**: the installer is not Authenticode-signed (SmartScreen warning,
+  see "Windows").
+- **Cursor** does not expose its conversations as readable files (internal
+  SQLite): only its deliverables written to disk show up, in the Documents
+  screen.
+- **Codex and Gemini** (`codex-exec`, `gemini-stream-json`) have not been
+  checked against their real binary, absent from every machine where these
+  protocols were written — only against their official documentation and a fake
+  test CLI that mimics their behavior. Gemini with less certainty than Codex:
+  its documentation contradicted itself from one page to the next when this
+  was written. See "Agent engines" above.
 
-## Langues
+## Languages
 
-L'interface, la page mobile et les messages du cockpit existent en anglais,
-français, espagnol, allemand, portugais (Brésil), chinois simplifié, japonais,
-coréen, russe et italien. Par défaut, Cockpit suit la langue du système ; on la
-change dans **Réglages → Poste → Langue**. Les agents répondent dans la langue
-choisie : leurs consignes sont écrites en anglais, avec une instruction de
-langue.
+The interface, the mobile page and the cockpit's messages exist in English,
+French, Spanish, German, Portuguese (Brazil), Simplified Chinese, Japanese,
+Korean, Russian and Italian. By default, Cockpit follows the system language;
+you change it in **Settings → Workstation → Language**. Agents answer in the
+chosen language: their instructions are written in English, with a language
+directive.
 
-L'anglais est la référence. Les catalogues vivent dans `src/locales/<langue>/`
-(interface, via i18next) et `src-tauri/locales/<langue>/` (textes produits par
-le Rust et la page mobile). Pour corriger une traduction ou ajouter une langue :
-copier les fichiers `en`, traduire les valeurs sans toucher aux clés ni aux
-`{{variables}}`, déclarer la langue dans `src/i18n/index.ts` et
-`src-tauri/src/i18n.rs`, puis vérifier :
+English is the reference. The catalogs live in `src/locales/<language>/`
+(interface, through i18next) and `src-tauri/locales/<language>/` (texts
+produced by Rust and the mobile page). To fix a translation or add a language:
+copy the `en` files, translate the values without touching the keys or the
+`{{variables}}`, declare the language in `src/i18n/index.ts` and
+`src-tauri/src/i18n.rs`, then check:
 
 ```bash
-node scripts/i18n-check.mjs <langue>
+node scripts/i18n-check.mjs <language>
 ```
 
-Les traductions ont été produites avec l'aide d'un modèle de langue : les
-relectures par des locuteurs natifs sont les bienvenues.
+The translations were produced with the help of a language model: reviews by
+native speakers are welcome.
 
-## Contribuer
+## Contributing
 
-Les issues et pull requests sont les bienvenues ; la CI vérifie chaque pull
-request sous macOS et Windows (types, catalogues de traduction, tests Rust).
-Pour une faille de sécurité, passe par le signalement privé décrit dans
-[SECURITY.md](SECURITY.md), pas par une issue publique. La publication d'une
-version est réservée au mainteneur : voir [docs/RELEASING.md](docs/RELEASING.md).
+Issues and pull requests are welcome; CI checks every pull request on macOS and
+Windows (types, translation catalogs, Rust tests). The source code and its
+comments are written in French. For a security vulnerability, use the private
+report described in [SECURITY.md](SECURITY.md), not a public issue. Publishing
+a version is reserved for the maintainer: see
+[docs/RELEASING.md](docs/RELEASING.md).
 
-## Licence
+## License
 
 [MIT](LICENSE)
