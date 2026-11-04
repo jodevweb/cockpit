@@ -308,8 +308,10 @@ export function MissionsView() {
 	// Une mission part d'un ticket : sans suivi de tâches, le champ ci-dessous
 	// n'a rien à lire et l'écran se réduisait à un formulaire qui échoue. Dire
 	// à quoi sert la fonctionnalité, et ce qu'il lui manque, vaut mieux qu'un
-	// message d'erreur au premier essai.
-	if (!hasConnector("tickets")) {
+	// message d'erreur au premier essai. Seulement tant qu'il n'y a rien à
+	// montrer : une mission ouverte autrement (par la Permanence, sans ticket)
+	// restait sinon introuvable derrière cette présentation.
+	if (!hasConnector("tickets") && (missions.data ?? []).length === 0) {
 		const tickets = connectors.find((entry) => entry.kind === "tickets");
 		return (
 			<>

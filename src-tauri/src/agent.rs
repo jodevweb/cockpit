@@ -70,10 +70,21 @@ impl Input {
 	/// Même écriture, depuis un appelant synchrone qui tient le registre.
 	fn write_blocking(&mut self, data: &str) -> std::io::Result<()> {
 		match self {
-			Input::Pipe(stdin) => futures::executor::block_on(async {
-				stdin.write_all(data.as_bytes()).await?;
-				stdin.flush().await
-			}),
+			Input::Pipe(stdin) => {
+				// Une commande IPC synchrone tourne sur le fil principal, hors du
+				// runtime. Sous Windows, tokio écrit dans un tuyau par son pool
+				// bloquant, qui exige ce contexte : sans lui, « there is no reactor
+				// running » faisait tomber l'app entière — constaté en sondant le
+				// contexte d'un exécutant de mission (`agent_probe_context`). Sous
+				// macOS l'écriture passait. Entrer dans le runtime de Tauri vaut
+				// pour tous les appelants, et s'emboîte sans mal si l'on y est déjà.
+				let runtime = tauri::async_runtime::handle();
+				let _contexte = runtime.inner().enter();
+				futures::executor::block_on(async {
+					stdin.write_all(data.as_bytes()).await?;
+					stdin.flush().await
+				})
+			}
 			Input::Relay(handle) => crate::relay::write(handle, data),
 		}
 	}
@@ -2374,6 +2385,29 @@ fn uuid_like() -> String {
 		.map(|d| d.as_nanos())
 		.unwrap_or(0);
 	format!("{nanos:x}")
+}
+
+#[cfg(test)]
+mod write_tests {
+	use super::Input;
+
+	/// Une commande IPC synchrone écrit à l'agent depuis le fil principal, hors
+	/// de tout runtime : sous Windows, cela faisait tomber l'app.
+	#[test]
+	fn on_ecrit_a_un_agent_depuis_un_fil_hors_runtime() {
+		let mut child = tauri::async_runtime::block_on(async {
+			crate::platform::shell_async("cat > /dev/null")
+				.stdin(std::process::Stdio::piped())
+				.spawn()
+				.expect("shell introuvable")
+		});
+		let mut input = Input::Pipe(child.stdin.take().unwrap());
+		let ecrit = std::thread::spawn(move || input.write_blocking("{\"type\":\"user\"}\n").is_ok())
+			.join()
+			.expect("l'écriture a paniqué hors du runtime");
+		assert!(ecrit);
+		let _ = tauri::async_runtime::block_on(async { child.kill().await });
+	}
 }
 
 #[cfg(test)]
