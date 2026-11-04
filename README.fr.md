@@ -490,7 +490,9 @@ relectures par des locuteurs natifs sont les bienvenues.
 ## Contribuer
 
 Les issues et pull requests sont les bienvenues ; la CI vérifie chaque pull
-request sous macOS et Windows (types, catalogues de traduction, tests Rust).
+request sous macOS et Windows (types, catalogues de traduction, tests Rust), et
+l'interface dans un navigateur (`pnpm test:ui`, Playwright sur les données
+d'aperçu ; `pnpm exec playwright install chromium` une fois avant).
 Pour une faille de sécurité, passe par le signalement privé décrit dans
 [SECURITY.md](SECURITY.md), pas par une issue publique. La publication d'une
 version est réservée au mainteneur : voir [docs/RELEASING.md](docs/RELEASING.md).

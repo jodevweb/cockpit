@@ -478,7 +478,9 @@ native speakers are welcome.
 ## Contributing
 
 Issues and pull requests are welcome; CI checks every pull request on macOS and
-Windows (types, translation catalogs, Rust tests). The source code and its
+Windows (types, translation catalogs, Rust tests) and the interface in a browser
+(`pnpm test:ui`, Playwright on the preview data; run
+`pnpm exec playwright install chromium` once beforehand). The source code and its
 comments are written in French. For a security vulnerability, use the private
 report described in [SECURITY.md](SECURITY.md), not a public issue. Publishing
 a version is reserved for the maintainer: see
