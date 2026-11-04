@@ -1070,7 +1070,7 @@
 			},
 			"project": {
 				"label": "Um projeto",
-				"fix": "Declare o repositório principal de um projeto em {{where}}."
+				"fix": "Para acompanhar os worktrees, as missões e as pull requests de um repositório, declare-o em {{where}}. Os agentes livres funcionam sem ele."
 			},
 			"container": {
 				"label": "Docker ou OrbStack",

@@ -1,0 +1,15 @@
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.installer.1.6.0.schema.json
+PackageIdentifier: Jodevweb.Cockpit
+PackageVersion: 0.85.1
+InstallerType: nullsoft
+Scope: user
+UpgradeBehavior: install
+Dependencies:
+  PackageDependencies:
+  - PackageIdentifier: Git.Git
+Installers:
+- Architecture: x64
+  InstallerUrl: https://github.com/jodevweb/cockpit-releases/releases/download/v0.85.1/Cockpit_0.85.1_x64-setup.exe
+  InstallerSha256: A640250BB3D70ED731072E954E2AA16627ED5136A6D29CDB8FB597F9E9C93407
+ManifestType: installer
+ManifestVersion: 1.6.0
