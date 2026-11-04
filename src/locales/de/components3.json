@@ -762,7 +762,11 @@
 			},
 			"themes_one": "{{count}} fachliches Thema deklariert — es lässt das Daily „sie ist an der Abrechnung“ sagen, statt Kennungen aufzulisten. Themen werden in der Konfigurationsdatei bearbeitet.",
 			"themes_other": "{{count}} fachliche Themen deklariert — sie lassen das Daily „sie ist an der Abrechnung“ sagen, statt Kennungen aufzulisten. Themen werden in der Konfigurationsdatei bearbeitet.",
-			"noThemes": "Keine fachlichen Themen: Die Daily-Erzählung stützt sich auf die Titel selbst."
+			"noThemes": "Keine fachlichen Themen: Die Daily-Erzählung stützt sich auf die Titel selbst.",
+			"gateCommands": {
+				"label": "Prüfungen vor der Integration",
+				"hint": "Shell-Befehle, durch Kommas getrennt, im Worktree einer Missionsaufgabe ausgeführt, sobald sie Code abliefert; sie wird nur gemergt, wenn alle bestehen, sonst erhält ihr Leiter die Ausgabe, um sie zurückzuschicken"
+			}
 		},
 		"replacedAtLaunch": "Beim Start ersetzt:",
 		"saving": "Speichere…",

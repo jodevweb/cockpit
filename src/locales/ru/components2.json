@@ -757,7 +757,9 @@
 			"rejected": "отклонил работу",
 			"delivered": "сдал работу",
 			"failed": "ошибка",
-			"waiting": "ждёт своей очереди"
+			"waiting": "ждёт своей очереди",
+			"checksFailed": "проверки репозитория не пройдены",
+			"checksRunning": "идут проверки репозитория"
 		},
 		"pr": {
 			"eyebrow": "pull request",

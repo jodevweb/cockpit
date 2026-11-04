@@ -762,7 +762,11 @@
 			},
 			"themes_one": "{{count}} business topic declared — it lets the daily say \"she's on billing\" rather than list identifiers. Topics are edited in the configuration file.",
 			"themes_other": "{{count}} business topics declared — they let the daily say \"she's on billing\" rather than list identifiers. Topics are edited in the configuration file.",
-			"noThemes": "No business topics: the daily narrative will rely on the titles themselves."
+			"noThemes": "No business topics: the daily narrative will rely on the titles themselves.",
+			"gateCommands": {
+				"label": "Checks before integration",
+				"hint": "shell commands, comma-separated, run in a mission task's worktree once it hands back code; a task is only merged when they all pass, otherwise its master gets the output to send it back"
+			}
 		},
 		"replacedAtLaunch": "Replaced at launch:",
 		"saving": "Saving…",

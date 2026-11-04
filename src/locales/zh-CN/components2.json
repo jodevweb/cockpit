@@ -616,7 +616,9 @@
 			"rejected": "否决了该工作",
 			"delivered": "已提交其工作",
 			"failed": "失败",
-			"waiting": "等待轮到它"
+			"waiting": "等待轮到它",
+			"checksFailed": "仓库检查未通过",
+			"checksRunning": "正在运行仓库检查"
 		},
 		"pr": {
 			"eyebrow": "pull request",

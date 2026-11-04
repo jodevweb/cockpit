@@ -663,7 +663,9 @@
 			"rejected": "a refusé le travail",
 			"delivered": "a rendu sa copie",
 			"failed": "a échoué",
-			"waiting": "attend son tour"
+			"waiting": "attend son tour",
+			"checksFailed": "les vérifications du dépôt échouent",
+			"checksRunning": "vérifications du dépôt en cours"
 		},
 		"pr": {
 			"eyebrow": "pull request",

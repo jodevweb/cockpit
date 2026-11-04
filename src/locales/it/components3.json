@@ -762,7 +762,11 @@
 			},
 			"themes_one": "{{count}} tema di business dichiarato — permette al daily di dire \"lei è sulla fatturazione\" invece di elencare identificativi. I temi si modificano nel file di configurazione.",
 			"themes_other": "{{count}} temi di business dichiarati — permettono al daily di dire \"lei è sulla fatturazione\" invece di elencare identificativi. I temi si modificano nel file di configurazione.",
-			"noThemes": "Nessun tema di business: il racconto del daily si baserà sui titoli stessi."
+			"noThemes": "Nessun tema di business: il racconto del daily si baserà sui titoli stessi.",
+			"gateCommands": {
+				"label": "Controlli prima dell'integrazione",
+				"hint": "comandi shell, separati da virgole, eseguiti nel worktree di un'attività della missione quando consegna codice; viene unita solo se passano tutti, altrimenti il master riceve l'output per rimandarla in correzione"
+			}
 		},
 		"replacedAtLaunch": "Sostituiti all'avvio:",
 		"saving": "Salvataggio…",

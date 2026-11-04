@@ -1241,6 +1241,7 @@ const REPONSES: Record<string, unknown> = {
 			worktreeRemoveCommand: "pnpm worktree:remove {folder} --force",
 			devCommand: "pnpm dev",
 			testCommands: [],
+			gateCommands: [],
 		},
 		impact: {
 			brief:
@@ -1675,6 +1676,13 @@ const REPONSES: Record<string, unknown> = {
 					finishedAt: ago(40),
 					checkpoint: "",
 					workedSeconds: 6600,
+					gate: "failed",
+					gateOutput: [
+						"$ pnpm test",
+						"exit 1",
+						" FAIL  api/cart.test.ts > rounds each line",
+						"   expected 10.01 to be 10",
+					].join("\n"),
 				},
 				{
 					id: "t2",
@@ -1696,6 +1704,8 @@ const REPONSES: Record<string, unknown> = {
 					finishedAt: null,
 					checkpoint: "",
 					workedSeconds: 2100,
+					gate: "none",
+					gateOutput: "",
 				},
 				{
 					id: "t3",
@@ -1717,6 +1727,8 @@ const REPONSES: Record<string, unknown> = {
 					finishedAt: ago(80),
 					checkpoint: "",
 					workedSeconds: 300,
+					gate: "none",
+					gateOutput: "",
 				},
 			],
 		},
@@ -1789,6 +1801,8 @@ const REPONSES: Record<string, unknown> = {
 				finishedAt: null,
 				checkpoint: "",
 				workedSeconds: 0,
+				gate: "none",
+				gateOutput: "",
 			})),
 		},
 
@@ -1834,6 +1848,8 @@ const REPONSES: Record<string, unknown> = {
 				finishedAt: ago(30),
 				checkpoint: "",
 				workedSeconds: 4200,
+				gate: "none",
+				gateOutput: "",
 			})),
 		},
 	],

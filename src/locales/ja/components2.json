@@ -616,7 +616,9 @@
 			"rejected": "作業を却下しました",
 			"delivered": "作業を提出しました",
 			"failed": "失敗",
-			"waiting": "順番待ち"
+			"waiting": "順番待ち",
+			"checksFailed": "リポジトリのチェックに失敗",
+			"checksRunning": "リポジトリのチェックを実行中"
 		},
 		"pr": {
 			"eyebrow": "プルリクエスト",

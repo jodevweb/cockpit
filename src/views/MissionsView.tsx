@@ -165,6 +165,12 @@ const STEP_RUNNING = 2;
 const ONGOING: MissionState[] = ["running", "integrating"];
 
 /** Comment se dit un verdict, et sur quel ton. */
+const GATES: Record<string, { tone: "critical" | "info" | "success" }> = {
+	running: { tone: "info" },
+	passed: { tone: "success" },
+	failed: { tone: "critical" },
+};
+
 const VERDICTS: Record<string, { tone: "critical" | "warning" | "success" }> = {
 	blocking: { tone: "critical" },
 	reserves: { tone: "warning" },
@@ -1333,6 +1339,14 @@ function TaskRow({
 				    rapport. Il ne s'adressait qu'au maître : ni toi ni la mission ne
 				    saviez qu'une recette avait refusé, et la pull request s'ouvrait
 				    dessus. Un refus se lève en corrigeant, puis en la relançant. */}
+				{/* Les portes du dépôt : un code de sortie, pas un avis. La sortie de
+				    celle qui a échoué est au survol — c'est ce que le maître reçoit
+				    pour renvoyer la tâche en correction. */}
+				{GATES[task.gate] ? (
+					<Badge tone={GATES[task.gate].tone}>
+						<span title={task.gateOutput || undefined}>{t(`missions.gates.${task.gate}`)}</span>
+					</Badge>
+				) : null}
 				{VERDICTS[task.verdict] ? (
 					<Badge tone={VERDICTS[task.verdict].tone}>
 						{t(`missions.verdicts.${task.verdict}`)}
@@ -1468,6 +1482,8 @@ function TaskForm({ mission, onDone }: { mission: Mission; onDone: () => void })
 				finishedAt: null,
 				workedSeconds: 0,
 				checkpoint: "",
+				gate: "none",
+				gateOutput: "",
 			});
 			onDone();
 		} catch (error) {

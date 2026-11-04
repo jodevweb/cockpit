@@ -829,6 +829,11 @@
 			"assigned": "Assigned",
 			"others": "Others",
 			"empty": "No open ticket to suggest."
+		},
+		"gates": {
+			"running": "checks running",
+			"passed": "checks pass",
+			"failed": "checks fail"
 		}
 	},
 	"observability": {

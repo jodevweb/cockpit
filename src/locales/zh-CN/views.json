@@ -769,6 +769,11 @@
 			"assigned": "分配给我的",
 			"others": "其他",
 			"empty": "没有可推荐的打开工单。"
+		},
+		"gates": {
+			"running": "检查中",
+			"passed": "检查通过",
+			"failed": "检查未通过"
 		}
 	},
 	"observability": {

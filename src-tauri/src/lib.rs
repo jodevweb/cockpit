@@ -11,6 +11,7 @@ pub mod docs;
 pub mod error;
 pub mod executions;
 pub mod files;
+pub mod gates;
 pub mod gemini;
 pub mod git;
 pub mod i18n;
@@ -4835,6 +4836,11 @@ async fn collect_finished_tasks(app: &AppHandle, id: &str) -> bool {
 				n => i18n::tf("lib.mission.workerDoneCommits", &[("count", &n)]),
 			},
 		);
+		// Un rendu qui porte du code passe les portes du dépôt avant d'être
+		// intégrable. Une vérification ne commite rien : rien à juger chez elle.
+		if !verifiers.contains(&task.role) && (commits > 0 || !derive.is_empty()) {
+			let _ = gates::start(id, &task.id);
+		}
 		// Capturé maintenant, tant que l'agent est encore vivant : une fois
 		// `stop` appelé plus bas, plus rien ne sait retrouver son identifiant de
 		// session (l'entrée disparaît du registre). C'est ce qui laissait
@@ -4996,7 +5002,10 @@ async fn move_to_integration(app: &AppHandle, id: &str) {
 	             On a blocking verdict, do not fix it yourself — `rework` the faulty task, \
 	             passing on the points to rework. It will restart on its own, the checks \
 	             will judge again, and you will be called back. Three reworks at most per \
-	             task; beyond that, explain what is blocking and stop there."
+	             task; beyond that, explain what is blocking and stop there.\n\n\
+	             When the repository declares checks, `integrate` only merges the tasks that \
+	             pass them. A failed check comes back with its output: `rework` the task with \
+	             it, the same way as a blocking verdict."
 		.to_string();
 	if let Err(error) = launch_master(
 		app.clone(),

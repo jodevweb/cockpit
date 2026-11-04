@@ -762,7 +762,11 @@
 			},
 			"themes_one": "{{count}} assunto de negócio declarado — ele permite à daily dizer \"ela está no faturamento\" em vez de listar identificadores. Os assuntos são editados no arquivo de configuração.",
 			"themes_other": "{{count}} assuntos de negócio declarados — eles permitem à daily dizer \"ela está no faturamento\" em vez de listar identificadores. Os assuntos são editados no arquivo de configuração.",
-			"noThemes": "Nenhum assunto de negócio: a narrativa da daily vai se basear nos próprios títulos."
+			"noThemes": "Nenhum assunto de negócio: a narrativa da daily vai se basear nos próprios títulos.",
+			"gateCommands": {
+				"label": "Verificações antes da integração",
+				"hint": "comandos de shell, separados por vírgulas, executados no worktree de uma tarefa de missão quando ela entrega código; só é mesclada se todos passarem, senão o agente principal recebe a saída para devolvê-la"
+			}
 		},
 		"replacedAtLaunch": "Substituído no lançamento:",
 		"saving": "Salvando…",

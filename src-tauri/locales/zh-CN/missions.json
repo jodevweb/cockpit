@@ -44,7 +44,9 @@
 			"opened": "任务已创建",
 			"planSubmitted": "计划已提交",
 			"planSubmittedDetail": "{{count}} 个子任务",
-			"closed": "任务已结束"
+			"closed": "任务已结束",
+			"gatePassed": "仓库检查已通过",
+			"gateFailed": "仓库检查未通过"
 		},
 		"nothingAwaitsDecision": "在{{step}}阶段没有等待你决定的事项：任务当前处于“{{state}}”。",
 		"correctionNeedsReason": "请说明哪里不对：如果没有理由，主智能体会再次提出同样的提案。",
@@ -52,6 +54,12 @@
 		"blocked": {
 			"unknownBase": "它基于 `{{base}}`，但该分支不属于本计划中的任何子任务。请重新规划，让它基于集成分支。",
 			"baseExhausted": "它所基于的子任务（`{{base}}`）已用完返工次数：它将无法交付。"
+		},
+		"gate": {
+			"running": "仓库检查进行中：{{commands}}",
+			"timedOut": "运行 {{minutes}} 分钟仍未结束，已停止。",
+			"launchFailed": "无法启动检查：{{error}}",
+			"noWorktree": "无法运行检查：任务的 worktree 已不存在（{{path}}）。"
 		}
 	},
 	"panel": {

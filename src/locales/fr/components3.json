@@ -762,7 +762,11 @@
 			},
 			"themes_one": "{{count}} sujet(s) métier déclaré(s) — ils servent à raconter « il est sur la facturation » plutôt qu'aligner des identifiants. Ils s'éditent dans le fichier de configuration.",
 			"themes_other": "{{count}} sujet(s) métier déclaré(s) — ils servent à raconter « il est sur la facturation » plutôt qu'aligner des identifiants. Ils s'éditent dans le fichier de configuration.",
-			"noThemes": "Aucun sujet métier : la narration du daily s'appuiera sur les titres eux-mêmes."
+			"noThemes": "Aucun sujet métier : la narration du daily s'appuiera sur les titres eux-mêmes.",
+			"gateCommands": {
+				"label": "Vérifications avant intégration",
+				"hint": "commandes shell, séparées par des virgules, jouées dans le worktree d'une tâche de mission quand elle rend du code ; elle n'est fusionnée que si toutes passent, sinon son maître reçoit la sortie pour la renvoyer en correction"
+			}
 		},
 		"replacedAtLaunch": "Remplacés au lancement :",
 		"saving": "Enregistrement…",

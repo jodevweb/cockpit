@@ -762,7 +762,11 @@
 			},
 			"themes_one": "{{count}} tema de negocio declarado — permite que la daily diga \"está con la facturación\" en vez de listar identificadores. Los temas se editan en el archivo de configuración.",
 			"themes_other": "{{count}} temas de negocio declarados — permiten que la daily diga \"está con la facturación\" en vez de listar identificadores. Los temas se editan en el archivo de configuración.",
-			"noThemes": "Ningún tema de negocio: el relato de la daily se basará en los propios títulos."
+			"noThemes": "Ningún tema de negocio: el relato de la daily se basará en los propios títulos.",
+			"gateCommands": {
+				"label": "Comprobaciones antes de integrar",
+				"hint": "comandos de shell, separados por comas, ejecutados en el worktree de una tarea de misión cuando entrega código; solo se fusiona si todos pasan, si no su agente principal recibe la salida para devolverla"
+			}
 		},
 		"replacedAtLaunch": "Sustituido al lanzar:",
 		"saving": "Guardando…",

@@ -626,6 +626,19 @@ pub struct WorkflowConfig {
 	#[serde(default, alias = "test_commands")]
 	pub test_commands: Vec<String>,
 
+	/// Ce qui doit passer avant qu'une tâche de mission soit intégrée.
+	///
+	/// Une ligne de shell par entrée (`pnpm test`, `pnpm lint`…), jouée dans le
+	/// worktree de la tâche dès que son exécutant rend la main avec des
+	/// commits. La relecture du maître et le verdict de recette sont des
+	/// jugements ; ceci est un fait, et un fait ne se laisse pas convaincre.
+	/// Une tâche dont une porte échoue n'est pas fusionnée : le maître reçoit
+	/// la sortie et la renvoie en correction (voir `gates.rs`).
+	///
+	/// Vide par défaut : aucune commande n'est devinée.
+	#[serde(default, alias = "gate_commands")]
+	pub gate_commands: Vec<String>,
+
 	/// Les agents rendent compte en images quand elles valent mieux que du
 	/// texte : une capture avant/après, un schéma (voir `prompts::visual`).
 	///
@@ -1508,6 +1521,7 @@ impl Default for WorkflowConfig {
 			worktree_remove_command: String::new(),
 			dev_command: String::new(),
 			test_commands: Vec::new(),
+			gate_commands: Vec::new(),
 			visual_reports: true,
 			agent_browser: true,
 			browser_command: String::new(),
@@ -1960,6 +1974,10 @@ impl ProjectConfig {
 		}
 		if !self.workflow.test_commands.is_empty() {
 			base.workflow.test_commands = self.workflow.test_commands.clone();
+		}
+		// Les portes appartiennent au dépôt, comme ses tests.
+		if !self.workflow.gate_commands.is_empty() {
+			base.workflow.gate_commands = self.workflow.gate_commands.clone();
 		}
 		// Un booléen n'a pas de « vide » : le projet dit toujours le sien, vrai
 		// tant qu'on ne l'a pas décoché.

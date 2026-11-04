@@ -829,6 +829,11 @@
 			"assigned": "Zugewiesen",
 			"others": "Andere",
 			"empty": "Kein offenes Ticket vorzuschlagen."
+		},
+		"gates": {
+			"running": "Prüfungen laufen",
+			"passed": "Prüfungen OK",
+			"failed": "Prüfungen fehlgeschlagen"
 		}
 	},
 	"observability": {

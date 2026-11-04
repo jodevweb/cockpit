@@ -44,7 +44,9 @@
 			"opened": "Missione aperta",
 			"planSubmitted": "Piano proposto",
 			"planSubmittedDetail": "{{count}} compito/i",
-			"closed": "Missione chiusa"
+			"closed": "Missione chiusa",
+			"gatePassed": "Controlli del repository superati",
+			"gateFailed": "Controllo del repository fallito"
 		},
 		"nothingAwaitsDecision": "Niente attende la tua decisione su {{step}}: la missione è a \"{{state}}\".",
 		"correctionNeedsReason": "Di' cosa non va: senza motivo, l'agente principale rifarebbe la stessa proposta.",
@@ -52,6 +54,12 @@
 		"blocked": {
 			"unknownBase": "Parte da `{{base}}`, che non è il branch di nessun compito di questo piano. Ripianificalo perché parta dal branch di integrazione.",
 			"baseExhausted": "Il compito da cui parte (`{{base}}`) ha esaurito le sue rilavorazioni: non consegnerà."
+		},
+		"gate": {
+			"running": "Controlli del repository in corso: {{commands}}",
+			"timedOut": "Interrotto dopo {{minutes}} min senza terminare.",
+			"launchFailed": "Impossibile avviare il controllo: {{error}}",
+			"noWorktree": "Impossibile eseguire i controlli: il worktree dell'attività non esiste più ({{path}})."
 		}
 	},
 	"panel": {

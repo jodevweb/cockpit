@@ -157,6 +157,124 @@ pub struct Task {
 	/// qu'on veut savoir, c'est le temps qu'elle a réellement coûté.
 	#[serde(default)]
 	pub worked_seconds: u64,
+	/// Où en sont les portes du projet (`workflow.gate_commands`) sur le
+	/// dernier rendu de cette tâche. Voir `gates.rs`.
+	#[serde(default)]
+	pub gate: Gate,
+	/// La fin de la sortie de la porte qui a échoué, pour le maître et pour toi.
+	#[serde(default)]
+	pub gate_output: String,
+}
+
+/// L'état des portes de vérification d'une tâche.
+///
+/// `None` couvre deux cas qu'on ne distingue pas exprès : le projet ne déclare
+/// aucune porte, ou la tâche n'a encore rien rendu. Dans les deux, rien ne
+/// retient l'intégration — c'est le comportement d'avant les portes.
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize, Default)]
+#[serde(rename_all = "camelCase")]
+pub enum Gate {
+	#[default]
+	None,
+	Running,
+	Passed,
+	Failed,
+}
+
+impl Gate {
+	/// Vrai quand l'intégration de cette tâche doit attendre.
+	pub fn holds(self) -> bool {
+		matches!(self, Gate::Running | Gate::Failed)
+	}
+}
+
+/// Ce que l'intégration fait d'une tâche livrée, au regard des portes.
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum GateDecision {
+	/// Rien ne la retient : on la fusionne.
+	Merge,
+	/// Ses portes n'ont jamais tourné sur ce rendu : on les lance, et elle attend.
+	Start,
+	/// Ses portes tournent : elle attend.
+	Pending,
+	/// Une porte a échoué : elle ne part pas, le maître la renvoie en correction.
+	Refuse,
+}
+
+/// La règle, à part de tout effet pour qu'elle se vérifie en entier.
+///
+/// `declared` : le dépôt déclare des portes. `verifies` : la tâche est une
+/// vérification, qui ne commite rien et n'a donc rien à faire juger.
+pub fn gate_decision(gate: Gate, declared: bool, verifies: bool) -> GateDecision {
+	if !declared || verifies {
+		// Une porte retirée des réglages ne retient plus rien, même notée en
+		// échec : c'est le dépôt qui dit ce qui doit passer.
+		return GateDecision::Merge;
+	}
+	match gate {
+		Gate::Passed => GateDecision::Merge,
+		Gate::None => GateDecision::Start,
+		Gate::Running => GateDecision::Pending,
+		Gate::Failed => GateDecision::Refuse,
+	}
+}
+
+#[cfg(test)]
+mod gate_tests {
+	use super::*;
+
+	#[test]
+	fn sans_porte_declaree_tout_se_fusionne() {
+		for gate in [Gate::None, Gate::Running, Gate::Passed, Gate::Failed] {
+			assert_eq!(gate_decision(gate, false, false), GateDecision::Merge, "{gate:?}");
+		}
+	}
+
+	#[test]
+	fn une_verification_ne_passe_pas_les_portes() {
+		assert_eq!(gate_decision(Gate::None, true, true), GateDecision::Merge);
+	}
+
+	#[test]
+	fn seule_une_porte_passee_ouvre_l_integration() {
+		assert_eq!(gate_decision(Gate::Passed, true, false), GateDecision::Merge);
+		assert_eq!(gate_decision(Gate::None, true, false), GateDecision::Start);
+		assert_eq!(gate_decision(Gate::Running, true, false), GateDecision::Pending);
+		assert_eq!(gate_decision(Gate::Failed, true, false), GateDecision::Refuse);
+	}
+
+	#[test]
+	fn une_porte_se_relit_telle_qu_elle_s_ecrit() {
+		// L'interface lit ces valeurs ; un renommage côté Rust la ferait taire.
+		for (gate, texte) in [
+			(Gate::None, "\"none\""),
+			(Gate::Running, "\"running\""),
+			(Gate::Passed, "\"passed\""),
+			(Gate::Failed, "\"failed\""),
+		] {
+			assert_eq!(serde_json::to_string(&gate).unwrap(), texte);
+			assert_eq!(serde_json::from_str::<Gate>(texte).unwrap(), gate);
+		}
+	}
+
+	#[test]
+	fn une_fiche_d_avant_les_portes_se_relit() {
+		// Les missions déjà sur le disque n'ont ni `gate` ni `gateOutput`.
+		let ancienne = r#"{"id":"t","role":"backend","title":"x","state":"delivered"}"#;
+		let task: Task = serde_json::from_str(ancienne).unwrap();
+		assert_eq!(task.gate, Gate::None);
+		assert!(task.gate_output.is_empty());
+	}
+}
+
+/// Pose l'état des portes d'une tâche, et la sortie qui l'explique.
+pub fn set_task_gate(id: &str, task_id: &str, gate: Gate, output: &str) -> Result<Mission> {
+	update(id, |mission| {
+		if let Some(task) = mission.tasks.iter_mut().find(|task| task.id == task_id) {
+			task.gate = gate;
+			task.gate_output = output.to_string();
+		}
+	})
 }
 
 /// Les trois accords d'une mission guidée, dans l'ordre où on les donne.
@@ -629,6 +747,9 @@ pub fn rework(id: &str, task_id: &str, reproche: &str, verifies: impl Fn(&str) -
 				entry.session_id = None;
 				// Ce qu'elle avait conclu ne vaut plus : elle va rejuger.
 				entry.verdict.clear();
+				// Une correction se rejuge : la porte d'avant parlait d'un autre code.
+				entry.gate = Gate::None;
+				entry.gate_output.clear();
 				entry.note = crate::i18n::tf(
 					"mission.note.rework",
 					&[("count", &entry.attempts), ("reason", &reproche)],
@@ -1582,6 +1703,8 @@ mod tests {
 			finished_at: None,
 			checkpoint: String::new(),
 			worked_seconds: 0,
+			gate: Gate::None,
+			gate_output: String::new(),
 		}
 	}
 
@@ -2140,6 +2263,8 @@ pub(crate) mod blocking_tests {
 			finished_at: None,
 			checkpoint: String::new(),
 			worked_seconds: 0,
+			gate: Gate::None,
+			gate_output: String::new(),
 		}
 	}
 

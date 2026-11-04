@@ -663,7 +663,9 @@
 			"rejected": "hat die Arbeit abgelehnt",
 			"delivered": "hat seine Arbeit abgegeben",
 			"failed": "fehlgeschlagen",
-			"waiting": "wartet, bis er dran ist"
+			"waiting": "wartet, bis er dran ist",
+			"checksFailed": "Repository-Prüfungen schlagen fehl",
+			"checksRunning": "Repository-Prüfungen laufen"
 		},
 		"pr": {
 			"eyebrow": "Pull Request",

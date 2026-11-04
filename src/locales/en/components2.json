@@ -663,7 +663,9 @@
 			"rejected": "rejected the work",
 			"delivered": "handed in its work",
 			"failed": "failed",
-			"waiting": "waiting its turn"
+			"waiting": "waiting its turn",
+			"checksFailed": "repository checks fail",
+			"checksRunning": "running the repository checks"
 		},
 		"pr": {
 			"eyebrow": "pull request",

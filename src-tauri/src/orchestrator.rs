@@ -237,7 +237,7 @@ const TOOLS = [
   {
     name: "integrate",
     description:
-      "Merges the delivered branches into the integration branch. Returns the conflicts to resolve, without forcing anything.",
+      "Merges the delivered branches into the integration branch. Returns the conflicts to resolve, without forcing anything. When the repository declares checks, a task is merged only once they pass: failed ones come back in `gatesFailed` with their output (send them to `rework`), running ones in `gatesPending`.",
     inputSchema: { type: "object", properties: {} },
   },
 ];
@@ -464,6 +464,8 @@ async fn run(app: &tauri::AppHandle, call: &Call) -> Result<Value> {
 					// Le maître le voit donc même s'il n'a pas relu le fil, et
 					// un « blocking » ici ferme la pull request tant qu'il tient.
 					"verdict": task.verdict,
+					// Les portes du dépôt sur son dernier rendu.
+					"gate": task.gate,
 					"note": task.note,
 				})).collect::<Vec<_>>(),
 			}))
@@ -611,6 +613,9 @@ async fn run(app: &tauri::AppHandle, call: &Call) -> Result<Value> {
 				"commits": commits,
 				"files": files,
 				"branch": mission::working_branch(task),
+				// Les portes du dépôt sur ce rendu : `none` quand il n'y en a pas.
+				"gate": task.gate,
+				"gateOutput": task.gate_output,
 			}))
 		}
 
@@ -638,6 +643,19 @@ async fn run(app: &tauri::AppHandle, call: &Call) -> Result<Value> {
 			let mut merged = Vec::new();
 			let mut conflicts = Vec::new();
 
+			// Les portes du dépôt (`gates.rs`) : une tâche n'est fusionnée que
+			// sur un code de sortie, pas sur ce qu'elle dit d'elle-même. Celles
+			// qu'un redémarrage a interrompues repartent ici.
+			let gate_commands = crate::gates::commands_for(&mission.cwd);
+			crate::gates::ensure(&mission);
+			let juges: std::collections::HashSet<String> = crate::roles_list()
+				.into_iter()
+				.filter(|role| role.verifies)
+				.map(|role| role.id)
+				.collect();
+			let mut gates_pending = Vec::new();
+			let mut gates_failed = Vec::new();
+
 			for task in &mission.tasks {
 				// La branche qui porte le travail, pas celle qu'on lui avait
 				// assignée : un exécutant qui s'est créé sa propre branche a bien
@@ -646,6 +664,44 @@ async fn run(app: &tauri::AppHandle, call: &Call) -> Result<Value> {
 				let branche = mission::working_branch(task).to_string();
 				if task.state != TaskState::Delivered || branche.is_empty() {
 					continue;
+				}
+				let decision = mission::gate_decision(
+					task.gate,
+					!gate_commands.is_empty(),
+					juges.contains(&task.role),
+				);
+				// Rendue avant que les portes existent, ou retrouvée au démarrage :
+				// elle passe les portes comme les autres.
+				let decision = if decision == mission::GateDecision::Start {
+					match crate::gates::start(&mission.id, &task.id) {
+						mission::Gate::Running => mission::GateDecision::Pending,
+						mission::Gate::Failed => mission::GateDecision::Refuse,
+						// Les portes ont disparu des réglages entre-temps.
+						_ => mission::GateDecision::Merge,
+					}
+				} else {
+					decision
+				};
+				match decision {
+					mission::GateDecision::Merge => {}
+					mission::GateDecision::Pending | mission::GateDecision::Start => {
+						gates_pending.push(json!({ "taskId": task.id, "task": task.title }));
+						continue;
+					}
+					mission::GateDecision::Refuse => {
+						// Relue : `start` vient peut-être d'en poser la raison.
+						let output = mission::get(&mission.id)
+							.ok()
+							.and_then(|fresh| fresh.tasks.into_iter().find(|t| t.id == task.id))
+							.map(|fresh| fresh.gate_output)
+							.unwrap_or_else(|| task.gate_output.clone());
+						gates_failed.push(json!({
+							"taskId": task.id,
+							"task": task.title,
+							"output": output,
+						}));
+						continue;
+					}
 				}
 				match crate::git::run_git(cwd, &["merge", "--no-ff", "--no-edit", &branche]).await
 				{
@@ -730,9 +786,37 @@ async fn run(app: &tauri::AppHandle, call: &Call) -> Result<Value> {
 				.map(|task| task.title.clone())
 				.collect();
 
+			let portes = {
+				let titres = |entries: &[serde_json::Value]| {
+					entries
+						.iter()
+						.filter_map(|entry| Some(format!("\"{}\"", entry.get("task")?.as_str()?)))
+						.collect::<Vec<_>>()
+						.join(", ")
+				};
+				let mut texte = String::new();
+				if !gates_failed.is_empty() {
+					texte.push_str(&format!(
+						" Not merged, the repository checks failed for {}: send them back \
+						 with `rework`, quoting the output given in `gatesFailed`.",
+						titres(&gates_failed)
+					));
+				}
+				if !gates_pending.is_empty() {
+					texte.push_str(&format!(
+						" Not merged yet, the repository checks are still running for {}: \
+						 call `integrate` again once `status` shows them finished.",
+						titres(&gates_pending)
+					));
+				}
+				texte
+			};
+
 			Ok(json!({
 				"merged": merged,
 				"conflicts": conflicts,
+				"gatesFailed": gates_failed,
+				"gatesPending": gates_pending,
 				"worktree": worktree,
 				"evidence": evidence,
 				"evidenceMissing": recettes_muettes,
@@ -772,7 +856,7 @@ async fn run(app: &tauri::AppHandle, call: &Call) -> Result<Value> {
 					};
 					format!(
 						"Branches merged into `{worktree}`. It is up to you to validate the whole \
-						 before the pull request.{alerte}{perdu}"
+						 before the pull request.{portes}{alerte}{perdu}"
 					)
 				} else {
 					format!(
@@ -987,6 +1071,8 @@ fn read_tasks(input: &Value, integration: &str) -> Result<Vec<Task>> {
 				finished_at: None,
 				checkpoint: String::new(),
 				worked_seconds: 0,
+				gate: crate::mission::Gate::None,
+				gate_output: String::new(),
 			}
 		})
 		.collect())
@@ -1211,6 +1297,8 @@ pub async fn integration_worktree(mission: &mission::Mission) -> Result<String> 
 		finished_at: None,
 		checkpoint: String::new(),
 		worked_seconds: 0,
+		gate: crate::mission::Gate::None,
+		gate_output: String::new(),
 	};
 	prepare_worktree(mission, &task).await
 }
@@ -1381,6 +1469,8 @@ mod tests {
 			finished_at: None,
 			checkpoint: String::new(),
 			worked_seconds: 0,
+			gate: crate::mission::Gate::None,
+			gate_output: String::new(),
 		}
 	}
 

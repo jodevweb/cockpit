@@ -1191,6 +1191,8 @@ export interface ConfigView {
 		devCommand: string;
 		/** Ce qui signale une commande de test, en plus de ce qui est reconnu d'office. */
 		testCommands: string[];
+		/** Ce qui doit passer, dans le worktree d'une tâche, avant son intégration. */
+		gateCommands: string[];
 		/** Les agents rendent compte en images quand elles valent mieux que du texte. Vrai par défaut. */
 		visualReports: boolean;
 		/** Les agents pilotent le navigateur de leur workspace. Vrai par défaut. */
@@ -1817,7 +1819,16 @@ export interface MissionTask {
 	workedSeconds: number;
 	/** Où en était le travail au dernier passage d'une vérification. */
 	checkpoint: string;
+	/**
+	 * Les portes du dépôt (`workflow.gateCommands`) sur le dernier rendu.
+	 * `running` ou `failed` retiennent l'intégration de la tâche.
+	 */
+	gate: TaskGate;
+	/** La commande qui a échoué et la fin de sa sortie. */
+	gateOutput: string;
 }
+
+export type TaskGate = "none" | "running" | "passed" | "failed";
 
 /**
  * Une tâche qui déborde nettement de ce qu'une tâche coûte d'ordinaire.

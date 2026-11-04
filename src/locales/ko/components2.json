@@ -616,7 +616,9 @@
 			"rejected": "작업을 거부했습니다",
 			"delivered": "작업을 제출했습니다",
 			"failed": "실패했습니다",
-			"waiting": "차례를 기다리는 중"
+			"waiting": "차례를 기다리는 중",
+			"checksFailed": "저장소 검사 실패",
+			"checksRunning": "저장소 검사 실행 중"
 		},
 		"pr": {
 			"eyebrow": "풀 리퀘스트",
