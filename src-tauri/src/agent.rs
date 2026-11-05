@@ -563,11 +563,30 @@ pub async fn run_once_with_tools(
 	mcp: &str,
 	origin: crate::executions::Origin,
 ) -> Result<OneShot> {
+	run_once_with_config(crate::config::Config::active(), cwd, prompt, engine_id, model, depth, disallowed, mcp, origin).await
+}
+
+/// Le même, sous une configuration donnée plutôt que celle du projet affiché.
+///
+/// Ce qui tourne en fond pour un dépôt précis — un essai de rejeu — doit
+/// garder son moteur, son compte et son environnement même si l'on change de
+/// projet à l'écran pendant qu'il travaille (`Config::for_repo`).
+#[allow(clippy::too_many_arguments)]
+pub async fn run_once_with_config(
+	config: crate::config::Config,
+	cwd: &str,
+	prompt: &str,
+	engine_id: &str,
+	model: &str,
+	depth: &str,
+	disallowed: &[&str],
+	mcp: &str,
+	origin: crate::executions::Origin,
+) -> Result<OneShot> {
 	if !std::path::Path::new(cwd).is_dir() {
 		return Err(CockpitError::msg(crate::i18n::tf("agent.folderNotFound", &[("path", &cwd)])));
 	}
 
-	let config = crate::config::Config::active();
 	let engine = crate::config::engine_for(&config, engine_id);
 	// Une question ponctuelle se pose en `--output-format json`, que seul le
 	// protocole par défaut sait rendre : ce n'est pas un dialogue, il n'y a rien
@@ -1520,7 +1539,11 @@ fn film_the_proof(app: &AppHandle, agents: &SharedAgents, session_id: &str, payl
 	}
 	let app = app.clone();
 	tauri::async_runtime::spawn(async move {
-		if let Some(film) = crate::proof::finish(&cwd, &session).await {
+		let film = crate::proof::finish(&cwd, &session).await;
+		// L'enregistrement fermé, le flux qu'il gardait ouvert s'arrête — sauf si
+		// l'onglet Navigateur le regarde.
+		crate::browser::release(app.state::<crate::browser::SharedBrowsers>().inner(), &cwd);
+		if let Some(film) = film {
 			let _ = app.emit(
 				"agent://event",
 				AgentEvent {

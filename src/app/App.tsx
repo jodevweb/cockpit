@@ -5,6 +5,7 @@ import { Lightbox } from "@/components/Lightbox";
 import { useResolvedTheme } from "@/lib/theme";
 import { AgentsView } from "@/views/AgentsView";
 import { MethodsView } from "@/views/MethodsView";
+import { ReplayView } from "@/views/ReplayView";
 import { MapView } from "@/views/MapView";
 import { TodayView } from "@/views/TodayView";
 import { DecisionsView } from "@/views/DecisionsView";
@@ -215,6 +216,7 @@ function Shell() {
 					{view === "team" ? <TeamView /> : null}
 					{view === "agents" ? <AgentsView /> : null}
 					{view === "methods" ? <MethodsView /> : null}
+					{view === "replay" ? <ReplayView /> : null}
 					{view === "libres" ? <LibresView /> : null}
 					{view === "missions" ? <MissionsView /> : null}
 					{view === "permanence" ? <PermanenceView /> : null}

@@ -35,6 +35,7 @@
 			"delivery": "Fluxo · Linear, PRs, CI, deploys",
 			"infra": "Servidores e contêineres · o que está rodando nesta máquina",
 			"settings": "Configurações",
+			"replay": "Replay · avaliar uma configuração de agentes em PRs passadas",
 			"methods": "Métodos · plugins que este projeto pode adotar, lidos antes de instalar"
 		},
 		"hint": {
@@ -187,6 +188,7 @@
 			"scripts": "Scripts",
 			"infra": "Servidores e contêineres",
 			"settings": "Configurações",
+			"replay": "Replay",
 			"methods": "Métodos"
 		},
 		"groups": {

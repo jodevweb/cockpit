@@ -47,6 +47,9 @@ export type ViewId =
 	// Les plugins (skills, hooks, serveurs MCP) qu'un projet peut adopter, lus
 	// avant d'être installés.
 	| "methods"
+	// Les PR fusionnées comme banc d'essai : juger une configuration d'agents
+	// sur ce que le dépôt a déjà résolu.
+	| "replay"
 	// Le travail vivant est une destination, pas un tiroir : les agents et les
 	// terminaux ouverts ont leur écran, que le panneau de droite ne fait que
 	// prêter quand on regarde ailleurs.

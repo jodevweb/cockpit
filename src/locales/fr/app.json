@@ -35,6 +35,7 @@
 			"delivery": "Flux · Linear, PR, CI, déploiements",
 			"infra": "Serveurs & conteneurs · ce qui tourne sur le poste",
 			"settings": "Réglages",
+			"replay": "Rejeu · juger une configuration d'agents sur les PR passées",
 			"methods": "Méthodes · les plugins qu'un projet peut adopter, lus avant de les installer"
 		},
 		"hint": {
@@ -187,6 +188,7 @@
 			"scripts": "Scripts",
 			"infra": "Serveurs & conteneurs",
 			"settings": "Réglages",
+			"replay": "Rejeu",
 			"methods": "Méthodes"
 		},
 		"groups": {

@@ -35,6 +35,7 @@
 			"delivery": "Flow · Linear, PRs, CI, deployments",
 			"infra": "Servers & containers · what's running on this machine",
 			"settings": "Settings",
+			"replay": "Replay · judge an agent setup on past PRs",
 			"methods": "Methods · plugins this project can adopt, read before installing"
 		},
 		"hint": {
@@ -187,6 +188,7 @@
 			"scripts": "Scripts",
 			"infra": "Servers & containers",
 			"settings": "Settings",
+			"replay": "Replay",
 			"methods": "Methods"
 		},
 		"groups": {

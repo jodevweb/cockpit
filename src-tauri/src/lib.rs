@@ -44,6 +44,7 @@ pub mod readiness;
 pub mod properties;
 pub mod qa;
 pub mod relay;
+pub mod replay;
 pub mod remote;
 pub mod resources;
 pub mod review;
@@ -2370,7 +2371,7 @@ fn terminal_close(terminals: State<'_, terminal::SharedTerminals>, id: String) -
 /// Regarde le navigateur d'un workspace, en le lançant s'il ne tourne pas.
 #[tauri::command]
 async fn browser_watch(browsers: State<'_, browser::SharedBrowsers>, cwd: String) -> Result<()> {
-	browser::watch(browsers.inner().clone(), cwd).await
+	browser::watch_for_ui(browsers.inner().clone(), cwd).await
 }
 
 /// L'image suivante de la page, en binaire : l'interface la demande quand elle
@@ -2468,6 +2469,50 @@ async fn methods_uninstall(project: String, plugin_id: String, scope: String) ->
 #[tauri::command]
 async fn methods_measure(project: String, project_id: String, plugin_id: String) -> Result<methods::Measure> {
 	methods::measure(Path::new(&project), &project_id, &plugin_id).await
+}
+
+// ──────────────────────────────── Rejeu ────────────────────────────────
+
+/// Les PR fusionnées du dépôt qui peuvent servir de cas d'essai.
+#[tauri::command]
+async fn replay_cases(project: String) -> Result<Vec<replay::Case>> {
+	let repo = PathBuf::from(&project);
+	let branch = git::default_branch(&repo).await;
+	replay::cases(&repo, &branch, 20).await
+}
+
+/// Les essais déjà joués sur ce dépôt, les plus récents d'abord.
+#[tauri::command]
+fn replay_trials(project: String) -> Vec<replay::Trial> {
+	replay::trials(Path::new(&project))
+}
+
+/// La campagne en cours, s'il y en a une.
+#[tauri::command]
+fn replay_progress() -> Option<replay::Progress> {
+	replay::progress()
+}
+
+/// Lance une campagne : les cas choisis, avec chaque configuration. Rend le
+/// nombre d'essais engagés ; la campagne tourne ensuite en fond.
+#[tauri::command]
+async fn replay_run(project: String, numbers: Vec<u32>, setups: Vec<replay::Setup>) -> Result<usize> {
+	let repo = PathBuf::from(&project);
+	let commands = gates::commands_for(&project);
+	if commands.is_empty() {
+		return Err(CockpitError::msg(i18n::t("replay.noGates")));
+	}
+	let branch = git::default_branch(&repo).await;
+	let cases: Vec<replay::Case> = replay::cases(&repo, &branch, 20)
+		.await?
+		.into_iter()
+		.filter(|case| case.number.is_some_and(|number| numbers.contains(&number)))
+		.collect();
+	let setups = if setups.is_empty() { vec![replay::Setup::default()] } else { setups };
+	let total = cases.len() * setups.len();
+	replay::reserve(&repo, total)?;
+	tauri::async_runtime::spawn(replay::run_campaign(repo, cases, setups, commands));
+	Ok(total)
 }
 
 #[tauri::command]
@@ -3363,6 +3408,10 @@ pub fn run() {
 			methods_install,
 			methods_uninstall,
 			methods_measure,
+			replay_cases,
+			replay_trials,
+			replay_progress,
+			replay_run,
 			terminal_resize,
 			terminal_close,
 			terminals_list,

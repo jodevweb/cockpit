@@ -35,6 +35,7 @@
 			"delivery": "Flusso · Linear, PR, CI, deploy",
 			"infra": "Server e container · cosa gira su questa macchina",
 			"settings": "Impostazioni",
+			"replay": "Replay · valutare una configurazione di agenti sulle PR passate",
 			"methods": "Metodi · i plugin che il progetto può adottare, letti prima di installarli"
 		},
 		"hint": {
@@ -187,6 +188,7 @@
 			"scripts": "Script",
 			"infra": "Server e container",
 			"settings": "Impostazioni",
+			"replay": "Replay",
 			"methods": "Metodi"
 		},
 		"groups": {

@@ -5,6 +5,16 @@
 		"ffmpegHint": "Las capturas de la prueba se conservan, pero no se monta ningún vídeo con ellas. Instala ffmpeg (`winget install Gyan.FFmpeg`) para recuperarlo bajo los hallazgos.",
 		"nodeMissing": "No se encuentra Node en este equipo: las herramientas de misión pasan por un puente MCP que él ejecuta. Instala Node (`winget install OpenJS.NodeJS.LTS`) y vuelve a lanzar la misión. Los agentes normales siguen funcionando."
 	},
+	"replay": {
+		"noGates": "El repositorio no declara ninguna verificación: no hay nada con qué juzgar el resultado.",
+		"testsDontApply": "Las pruebas de la pull request no se aplican a este resultado: {{error}}",
+		"nothingToRun": "No hay ningún ensayo que lanzar: elige al menos un caso.",
+		"tooMany": "{{count}} ensayos pedidos, {{max}} como máximo por campaña.",
+		"alreadyRunning": "Ya hay una campaña en curso.",
+		"passesBefore": "Las pruebas de la pull request ya pasan con el código anterior: este caso no distingue una solución de la ausencia de solución.",
+		"installFailed": "La instalación de las dependencias falló ({{command}}): {{output}}",
+		"humanFails": "Con la solución de la propia pull request, las verificaciones del repositorio fallan hoy ({{command}}): cualquier agente fallaría también. {{output}}"
+	},
 	"methods": {
 		"unsupportedSource": "La fuente de este plugin no se puede leer aquí ({{kind}}).",
 		"unknownPlugin": "Plugin desconocido: {{id}}.",

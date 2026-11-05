@@ -131,3 +131,18 @@ test("les méthodes montrent ce qu'un plugin exécute avant de l'installer", asy
 	await expect(page.getByText("27 runs · 2 failed")).toBeVisible();
 	expect(errors).toEqual([]);
 });
+
+test("le rejeu montre ses cas, son rapport, et compte les essais avant de lancer", async ({ page }) => {
+	const errors = watchErrors(page);
+	await page.goto("/");
+	await topTab(page, "Workshop").click();
+	await atelierNav(page).locator("button", { hasText: "Replay" }).click();
+	await expect(page.getByText("Cart total ignores line quantities").first()).toBeVisible();
+	// Le rapport : la configuration « test d'abord » a résolu ses deux cas.
+	await expect(page.getByText("2/2").first()).toBeVisible();
+	// Deux cas choisis, une configuration : deux essais, annoncés avant le lancement.
+	await page.locator("button", { hasText: "Cart total ignores line quantities" }).first().click();
+	await page.locator("button", { hasText: "Rounding drift on multi-currency orders" }).first().click();
+	await expect(page.getByText(/^2 trial\(s\)/).first()).toBeVisible();
+	expect(errors).toEqual([]);
+});

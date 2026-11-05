@@ -903,6 +903,63 @@ const REPONSES: Record<string, unknown> = {
 			approved: null,
 		};
 	},
+	// Le rejeu : deux PR fusionnées qui ajoutent des tests, et une campagne
+	// jouée avec deux configurations.
+	replay_cases: () => [
+		{
+			number: 2051,
+			title: "Cart total ignores line quantities",
+			base: "4f2a9c1",
+			head: "9b7e3d0",
+			tests: ["src/cart/__tests__/total.test.ts"],
+			sources: ["src/cart/total.ts"],
+		},
+		{
+			number: 2044,
+			title: "Rounding drift on multi-currency orders",
+			base: "1c8d2aa",
+			head: "7a0f5e2",
+			tests: ["src/cart/__tests__/rounding.test.ts", "src/money/__tests__/minor-units.test.ts"],
+			sources: ["src/cart/total.ts", "src/money/minor-units.ts"],
+		},
+	],
+	replay_trials: () => {
+		const sonnet = { label: "Sonnet", engine: "", model: "sonnet", depth: "", instructions: "" };
+		const tdd = {
+			label: "Sonnet + write the test first",
+			engine: "",
+			model: "sonnet",
+			depth: "",
+			instructions: "Write a failing test before changing the code.",
+		};
+		const trial = (
+			number: number,
+			title: string,
+			setup: typeof sonnet,
+			verdict: { kind: string; command?: string; output?: string; reason?: string },
+			costUsd: number,
+			minutes: number,
+		) => ({
+			at: "2026-11-05T10:20:00Z",
+			number,
+			title,
+			setup,
+			judgement: { verdict, agentFiles: ["src/cart/total.ts"], sharedFiles: ["src/cart/total.ts"] },
+			error: null,
+			costUsd,
+			durationMs: minutes * 60_000,
+		});
+		const failed = { kind: "failed", command: "pnpm test", output: "expected 12.40, received 10.00" };
+		return [
+			trial(2051, "Cart total ignores line quantities", tdd, { kind: "resolved" }, 0.41, 6),
+			trial(2051, "Cart total ignores line quantities", sonnet, { kind: "resolved" }, 0.33, 5),
+			trial(2044, "Rounding drift on multi-currency orders", tdd, { kind: "resolved" }, 0.58, 9),
+			trial(2044, "Rounding drift on multi-currency orders", sonnet, failed, 0.44, 8),
+		];
+	},
+	replay_progress: () => null,
+	replay_run: (args: Record<string, unknown>) =>
+		((args.numbers as number[]) ?? []).length * Math.max(1, ((args.setups as unknown[]) ?? []).length),
 	tour_changes: ({ cwd }: Record<string, unknown>) => ({
 		root: String(cwd),
 		base: "a1b2c3d",

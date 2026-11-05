@@ -107,6 +107,10 @@ import type {
 	MethodInspection,
 	MethodInstallation,
 	MethodMeasure,
+	ReplayCase,
+	ReplayProgress,
+	ReplaySetup,
+	ReplayTrial,
 } from "./types";
 
 /** Toutes les erreurs backend remontent en `string` : on les normalise ici. */
@@ -660,6 +664,19 @@ export const api = {
 		/** Les agents du projet avant et après l'installation. */
 		measure: (project: string, projectId: string, pluginId: string) =>
 			call<MethodMeasure>("methods_measure", { project, projectId, pluginId }),
+	},
+
+	/** Rejeu de l'historique : les PR fusionnées comme cas d'essai. */
+	replay: {
+		/** Les PR fusionnées qui ajoutent des tests, les plus récentes d'abord. */
+		cases: (project: string) => call<ReplayCase[]>("replay_cases", { project }),
+		/** Les essais déjà joués, les plus récents d'abord. */
+		trials: (project: string) => call<ReplayTrial[]>("replay_trials", { project }),
+		/** La campagne en cours, ou `null`. */
+		progress: () => call<ReplayProgress | null>("replay_progress"),
+		/** Lance une campagne ; rend le nombre d'essais engagés. */
+		run: (project: string, numbers: number[], setups: ReplaySetup[]) =>
+			call<number>("replay_run", { project, numbers, setups }),
 	},
 
 	/** Missions : un ticket, un plan, des exécutants. */
