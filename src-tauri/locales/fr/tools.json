@@ -12,6 +12,7 @@
 		"tooMany": "{{count}} essais demandés, {{max}} au plus par campagne.",
 		"alreadyRunning": "Une campagne tourne déjà.",
 		"passesBefore": "Les tests de la pull request passent déjà sur le code d'avant : ce cas ne distingue pas une solution d'une absence de solution.",
-		"installFailed": "L'installation des dépendances a échoué ({{command}}) : {{output}}"
+		"installFailed": "L'installation des dépendances a échoué ({{command}}) : {{output}}",
+		"humanFails": "Avec la solution de la pull request elle-même, les vérifications du dépôt échouent aujourd'hui ({{command}}) : n'importe quel agent échouerait aussi. {{output}}"
 	}
 }

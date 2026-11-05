@@ -12,6 +12,7 @@
 		"tooMany": "{{count}} prove richieste, al massimo {{max}} per campagna.",
 		"alreadyRunning": "Una campagna è già in corso.",
 		"passesBefore": "I test della pull request passano già sul codice precedente: questo caso non distingue una soluzione dall'assenza di soluzione.",
-		"installFailed": "L'installazione delle dipendenze non è riuscita ({{command}}): {{output}}"
+		"installFailed": "L'installazione delle dipendenze non è riuscita ({{command}}): {{output}}",
+		"humanFails": "Con la soluzione della pull request stessa, i controlli del repository oggi falliscono ({{command}}): qualsiasi agente fallirebbe. {{output}}"
 	}
 }
