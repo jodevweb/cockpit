@@ -533,7 +533,8 @@ relectures par des locuteurs natifs sont les bienvenues.
 
 ## Contribuer
 
-Les issues et pull requests sont les bienvenues ; la CI vérifie chaque pull
+Les issues et pull requests sont les bienvenues : commence par
+[CONTRIBUTING.md](CONTRIBUTING.md) (lancer le projet, vérifications, conventions) ; la CI vérifie chaque pull
 request sous macOS et Windows (types, catalogues de traduction, tests Rust), et
 l'interface dans un navigateur (`pnpm test:ui`, Playwright sur les données
 d'aperçu ; `pnpm exec playwright install chromium` une fois avant).

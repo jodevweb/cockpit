@@ -1,5 +1,11 @@
 # Sécurité
 
+> **English.** Please do not open a public issue for a security vulnerability.
+> Use GitHub's private reporting: the repository's **Security** tab →
+> **Report a vulnerability**. Describe the scenario, the affected version and,
+> if possible, a minimal reproduction. A first answer comes within a few days.
+> The scope below is in French; issues and reports are welcome in English.
+
 ## Signaler une faille
 
 Merci de **ne pas** ouvrir d'issue publique pour une faille de sécurité.
