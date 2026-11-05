@@ -12,6 +12,7 @@
 		"tooMany": "{{count}} trials asked, at most {{max}} per campaign.",
 		"alreadyRunning": "A campaign is already running.",
 		"passesBefore": "The pull request's tests already pass on the code before it: this case cannot tell a solution from no solution.",
-		"installFailed": "Installing the dependencies failed ({{command}}): {{output}}"
+		"installFailed": "Installing the dependencies failed ({{command}}): {{output}}",
+		"humanFails": "With the pull request's own solution, the repository's checks fail today ({{command}}): any agent would fail too. {{output}}"
 	}
 }

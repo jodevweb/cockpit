@@ -12,6 +12,7 @@
 		"tooMany": "{{count}} Versuche angefragt, höchstens {{max}} pro Kampagne.",
 		"alreadyRunning": "Es läuft bereits eine Kampagne.",
 		"passesBefore": "Die Tests des Pull Requests bestehen bereits mit dem Code davor: Dieser Fall unterscheidet keine Lösung von keiner Lösung.",
-		"installFailed": "Die Installation der Abhängigkeiten ist fehlgeschlagen ({{command}}): {{output}}"
+		"installFailed": "Die Installation der Abhängigkeiten ist fehlgeschlagen ({{command}}): {{output}}",
+		"humanFails": "Mit der Lösung des Pull Requests selbst schlagen die Prüfungen des Repositorys heute fehl ({{command}}): Jeder Agent würde ebenfalls scheitern. {{output}}"
 	}
 }
