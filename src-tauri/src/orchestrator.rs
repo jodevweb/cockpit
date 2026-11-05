@@ -706,6 +706,16 @@ async fn run(app: &tauri::AppHandle, call: &Call) -> Result<Value> {
 						continue;
 					}
 				}
+				// Une tâche qui vérifie sans rien commiter n'apporte que les
+				// fusions de ses sœurs, reçues avant son lancement
+				// (`sync_verifier_worktree`). La fusionner à son tour ramenait
+				// ces fusions dans la PR : six commits de fusion pour deux
+				// commits de travail. Elle est intégrée sans fusion.
+				if !brings_own_commits(cwd, &branche).await {
+					mission::set_task_state(&mission.id, &task.id, TaskState::Integrated, "")?;
+					merged.push(branche.clone());
+					continue;
+				}
 				match crate::git::run_git(cwd, &["merge", "--no-ff", "--no-edit", &branche]).await
 				{
 					Ok(_) => {
@@ -1255,6 +1265,19 @@ pub async fn sync_verifier_worktree(
 	Ok(report)
 }
 
+/// La branche apporte-t-elle un commit à elle, hors fusions, que la branche
+/// courante n'a pas encore ?
+///
+/// Dans le doute — git qui échoue, une sortie illisible — on répond oui : la
+/// fusion se fait alors comme avant, et le pire est un commit de fusion de trop.
+async fn brings_own_commits(cwd: &std::path::Path, branch: &str) -> bool {
+	crate::git::run_git(cwd, &["rev-list", "--count", "--no-merges", &format!("HEAD..{branch}")])
+		.await
+		.ok()
+		.and_then(|raw| raw.trim().parse::<u32>().ok())
+		.map_or(true, |count| count > 0)
+}
+
 /// Deux chemins qui désignent le même dossier.
 ///
 /// Comparaison textuelle après résolution des liens : `~/Sites/app`,
@@ -1555,6 +1578,60 @@ mod tests {
 		std::fs::remove_dir_all(&depot).ok();
 		std::fs::remove_dir_all(&backend).ok();
 		std::fs::remove_dir_all(&qa).ok();
+	}
+
+	/// Le cas réel de la PR à six fusions : deux lots livrés, une vérification
+	/// qui les a reçus sans rien commiter. Une fois les deux lots intégrés, elle
+	/// n'apporte plus rien, et n'est pas fusionnée ; une vérification qui a
+	/// commité, si.
+	#[tokio::test]
+	async fn une_verification_sans_commit_n_est_pas_fusionnee() {
+		let depot = depot_jetable("integration");
+		let backend = worktree_de(&depot, "feat/w-backend", "feat/x");
+		commit_dans(&backend, "backend.txt", "api\n", "Le lot backend");
+		let frontend = worktree_de(&depot, "feat/w-frontend", "feat/x");
+		commit_dans(&frontend, "frontend.txt", "page\n", "Le lot frontend");
+		let qa = worktree_de(&depot, "feat/w-qa", "feat/x");
+		let review = worktree_de(&depot, "feat/w-review", "feat/x");
+
+		let mission = mission_avec(
+			&depot.to_string_lossy(),
+			"feat/x",
+			vec![
+				tache_de_test("backend", "feat/w-backend", TaskState::Delivered),
+				tache_de_test("frontend", "feat/w-frontend", TaskState::Delivered),
+				tache_de_test("qa", "feat/w-qa", TaskState::Running),
+				tache_de_test("review", "feat/w-review", TaskState::Running),
+			],
+		);
+		for (tache, dossier) in [(&mission.tasks[2], &qa), (&mission.tasks[3], &review)] {
+			let rapport = sync_verifier_worktree(&mission, tache, &dossier.to_string_lossy())
+				.await
+				.unwrap();
+			assert!(rapport.conflicts.is_empty());
+		}
+		commit_dans(&review, "relecture.md", "ok\n", "La relecture laisse une note");
+
+		// Avant l'intégration des lots, la vérification les porte : elle apporte.
+		assert!(brings_own_commits(&depot, "feat/w-qa").await);
+
+		for lot in ["feat/w-backend", "feat/w-frontend"] {
+			let sortie = std::process::Command::new("git")
+				.args(["merge", "--no-ff", "--no-edit", "--quiet", lot])
+				.current_dir(&depot)
+				.output()
+				.unwrap();
+			assert!(sortie.status.success(), "{}", String::from_utf8_lossy(&sortie.stderr));
+		}
+
+		assert!(!brings_own_commits(&depot, "feat/w-backend").await, "lot déjà intégré");
+		assert!(!brings_own_commits(&depot, "feat/w-qa").await, "qa n'a rien commité");
+		assert!(brings_own_commits(&depot, "feat/w-review").await, "review a commité sa note");
+
+		std::fs::remove_dir_all(&depot).ok();
+		for dossier in [&backend, &frontend, &qa, &review] {
+			std::fs::remove_dir_all(dossier).ok();
+		}
 	}
 
 	/// Une vérification qui n'a rien commité avance sur le lot de sa sœur au
