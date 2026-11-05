@@ -905,8 +905,42 @@ pub fn act(shared: &SharedBrowsers, cwd: &str, action: Action) -> Result<()> {
 		.map_err(|_| CockpitError::msg(crate::i18n::t("browser.closed")))
 }
 
-/// Cesse de regarder, sans rien arrêter : l'agent garde son navigateur.
+/// Les dossiers dont l'onglet Navigateur est à l'écran.
+///
+/// Le flux d'images sert deux lecteurs : l'onglet, et la preuve filmée
+/// (`proof.rs`). L'onglet qui se masquait coupait le flux pour les deux, et une
+/// recette en cours perdait toutes ses images — c'est ainsi qu'une recette
+/// pilotée pendant qu'on changeait d'écran rendait un film vide.
+fn ui_watching() -> &'static Mutex<std::collections::HashSet<String>> {
+	static UI: std::sync::OnceLock<Mutex<std::collections::HashSet<String>>> = std::sync::OnceLock::new();
+	UI.get_or_init(Default::default)
+}
+
+/// Le flux peut-il s'arrêter ? Seulement quand plus personne ne le lit.
+fn may_stop(ui: bool, recording: bool) -> bool {
+	!ui && !recording
+}
+
+/// L'onglet Navigateur se branche : comme `watch`, en retenant qu'il regarde.
+pub async fn watch_for_ui(shared: SharedBrowsers, cwd: String) -> Result<()> {
+	ui_watching().lock().unwrap().insert(cwd.clone());
+	watch(shared, cwd).await
+}
+
+/// L'onglet cesse de regarder, sans rien arrêter : l'agent garde son
+/// navigateur, et un enregistrement en cours garde son flux.
 pub fn unwatch(shared: &SharedBrowsers, cwd: &str) {
+	ui_watching().lock().unwrap().remove(cwd);
+	release(shared, cwd);
+}
+
+/// Arrête le flux si plus personne ne le lit : appelé quand l'onglet se masque,
+/// et quand un enregistrement se referme.
+pub fn release(shared: &SharedBrowsers, cwd: &str) {
+	let ui = ui_watching().lock().unwrap().contains(cwd);
+	if !may_stop(ui, crate::proof::is_recording(cwd)) {
+		return;
+	}
 	if let Some(viewer) = shared.0.lock().unwrap().remove(cwd) {
 		viewer.task.abort();
 	}
@@ -925,7 +959,11 @@ fn kill(path: &std::path::Path) {
 
 /// Arrête le navigateur d'un dossier — le workspace se ferme, ou on le demande.
 pub fn stop(shared: &SharedBrowsers, cwd: &str) {
-	unwatch(shared, cwd);
+	// Le navigateur s'arrête : le flux aussi, enregistrement ou pas.
+	ui_watching().lock().unwrap().remove(cwd);
+	if let Some(viewer) = shared.0.lock().unwrap().remove(cwd) {
+		viewer.task.abort();
+	}
 	kill(&pid_path(cwd));
 }
 
@@ -949,6 +987,16 @@ pub fn stop_all(shared: &SharedBrowsers) {
 #[cfg(test)]
 mod tests {
 	use super::*;
+
+	/// Le flux ne s'arrête que quand ni l'onglet ni une recette filmée ne le
+	/// lisent : masquer l'onglet en pleine recette coupait le film.
+	#[test]
+	fn le_flux_reste_tant_qu_un_lecteur_le_lit() {
+		assert!(may_stop(false, false));
+		assert!(!may_stop(true, false), "l'onglet regarde");
+		assert!(!may_stop(false, true), "une recette est filmée");
+		assert!(!may_stop(true, true));
+	}
 
 	/// L'en-tête d'un bloc rendu par `frame`.
 	fn header(block: &[u8]) -> serde_json::Value {

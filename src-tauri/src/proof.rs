@@ -73,6 +73,13 @@ pub fn is_browser_tool(name: &str) -> bool {
 /// geste, sans coût une fois l'enregistrement ouvert.
 pub async fn touch(browsers: crate::browser::SharedBrowsers, cwd: &str, session: &str) {
 	if recordings().lock().unwrap().contains_key(cwd) {
+		// Déjà en cours : on s'assure seulement que le flux tourne encore. Il a
+		// pu être coupé (navigateur relancé, onglet refermé) ; sans cette
+		// relance, une seule coupure faisait perdre tout le reste du tour.
+		// Jamais de lancement : un navigateur éteint ne se filme pas.
+		if crate::browser::running(cwd).await {
+			let _ = crate::browser::watch(browsers, cwd.to_string()).await;
+		}
 		return;
 	}
 	// Le premier geste démarre le navigateur ; laissons-lui le temps de
@@ -116,6 +123,12 @@ pub async fn touch(browsers: crate::browser::SharedBrowsers, cwd: &str, session:
 	// Le flux d'images ne tourne que si quelqu'un regarde : on s'y branche, sans
 	// rien lancer puisque le navigateur répond déjà.
 	let _ = crate::browser::watch(browsers, cwd.to_string()).await;
+}
+
+/// Un enregistrement est-il ouvert pour ce dossier ? Tant qu'il l'est, le flux
+/// d'images ne doit pas s'arrêter (`browser::release`).
+pub fn is_recording(cwd: &str) -> bool {
+	recordings().lock().unwrap().contains_key(cwd)
 }
 
 /// Une image de la page est arrivée (appelé par le flux de `browser.rs`).
