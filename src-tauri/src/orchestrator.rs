@@ -1565,8 +1565,7 @@ mod tests {
 	async fn une_verification_sans_commit_avance_sans_fusion_vide() {
 		let depot = depot_jetable("avance");
 		let backend = worktree_de(&depot, "feat/z-backend", "feat/x");
-		commit_dans(&backend, "backend.txt", "api
-", "Le lot backend");
+		commit_dans(&backend, "backend.txt", "api\n", "Le lot backend");
 		let qa = worktree_de(&depot, "feat/z-qa", "feat/x");
 
 		let mission = mission_avec(
