@@ -243,6 +243,12 @@ fn scripts_in(command: &str) -> Vec<String> {
 /// sont pas de confiance : `../..` pointerait ailleurs, et l'on lirait un autre
 /// plugin que celui qui s'installe.
 pub fn safe_relative(path: &str) -> bool {
+	// Les formes absolues de tous les systèmes, pas seulement celles du poste :
+	// `C:/…` n'est un chemin relatif que pour macOS et Linux, et un manifeste
+	// écrit ailleurs doit être refusé partout pareil.
+	if path.contains(':') || path.starts_with('/') || path.starts_with('\\') {
+		return false;
+	}
 	let path = Path::new(path.trim_start_matches("./"));
 	!path.as_os_str().is_empty()
 		&& path.components().all(|component| matches!(component, std::path::Component::Normal(_) | std::path::Component::CurDir))
