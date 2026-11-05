@@ -2526,6 +2526,35 @@ impl Config {
 		}
 	}
 
+	/// Ajoute un projet, ou remplace celui qui porte le même identifiant.
+	///
+	/// Un projet sans dépôt ne peut venir que d'`ensure_projects` : c'est la
+	/// place réservée d'une installation neuve, que rien n'a encore remplie
+	/// (`project_save` refuse un dépôt vide). Le premier vrai projet la prend
+	/// au lieu de s'y ajouter — sans quoi une installation neuve montrait,
+	/// à côté du projet qu'on venait de créer, un « principal » que personne
+	/// n'avait demandé et qui ne menait nulle part.
+	///
+	/// Le projet historique d'une ancienne configuration a, lui, un dépôt :
+	/// celui du global. Il reste.
+	pub fn upsert_project(&mut self, saved: ProjectConfig) {
+		if let Some(existing) = self.projects.iter_mut().find(|entry| entry.id == saved.id) {
+			*existing = saved;
+			return;
+		}
+		let placeholders: Vec<String> = self
+			.projects
+			.iter()
+			.filter(|entry| entry.main_repo.trim().is_empty())
+			.map(|entry| entry.id.clone())
+			.collect();
+		self.projects.retain(|entry| !entry.main_repo.trim().is_empty());
+		if placeholders.contains(&self.active_project) || self.projects.is_empty() {
+			self.active_project = saved.id.clone();
+		}
+		self.projects.push(saved);
+	}
+
 	/// Configuration telle que la voient les écrans : le projet actif l'emporte.
 	///
 	/// Distincte de `load` à dessein. Tout ce qui écrit la configuration doit
@@ -3092,6 +3121,50 @@ mod tests {
 		assert_eq!(cfg.projects[0].main_repo, "/repos/monorepo");
 		// Le projet historique n'a rien en propre : tout reste hérité.
 		assert!(cfg.projects[0].github.token.is_empty());
+	}
+
+	/// Installation neuve : le premier projet ajouté prend la place réservée
+	/// au lieu de s'ajouter à côté d'un « principal » sans dépôt.
+	#[test]
+	fn le_premier_projet_remplace_la_place_reservee() {
+		let mut cfg = Config::default();
+		cfg.ensure_projects();
+		assert_eq!(cfg.projects.len(), 1);
+		assert!(cfg.projects[0].main_repo.is_empty());
+
+		cfg.upsert_project(ProjectConfig {
+			id: "demo-shop".into(),
+			main_repo: "/repos/demo-shop".into(),
+			..Default::default()
+		});
+		assert_eq!(cfg.projects.len(), 1);
+		assert_eq!(cfg.projects[0].id, "demo-shop");
+		assert_eq!(cfg.active_project, "demo-shop");
+
+		// Le suivant s'ajoute, et ne change pas le projet actif.
+		cfg.upsert_project(ProjectConfig {
+			id: "blog".into(),
+			main_repo: "/repos/blog".into(),
+			..Default::default()
+		});
+		assert_eq!(cfg.projects.len(), 2);
+		assert_eq!(cfg.active_project, "demo-shop");
+	}
+
+	/// Le projet historique d'une ancienne configuration a un dépôt : un nouveau
+	/// projet s'ajoute à côté, sans le remplacer.
+	#[test]
+	fn le_projet_historique_reste_a_l_ajout_d_un_projet() {
+		let mut cfg = base();
+		cfg.ensure_projects();
+		cfg.upsert_project(ProjectConfig {
+			id: "blog".into(),
+			main_repo: "/repos/blog".into(),
+			..Default::default()
+		});
+		assert_eq!(cfg.projects.len(), 2);
+		assert_eq!(cfg.projects[0].id, "principal");
+		assert_eq!(cfg.active_project, "principal");
 	}
 
 	/// Un projet actif inconnu ne doit pas laisser le cockpit sans projet.

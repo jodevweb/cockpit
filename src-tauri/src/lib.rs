@@ -558,10 +558,7 @@ fn project_save(project: config::ProjectConfig) -> Result<ConfigView> {
 		..project
 	};
 
-	match config.projects.iter_mut().find(|entry| entry.id == id) {
-		Some(existing) => *existing = saved,
-		None => config.projects.push(saved),
-	}
+	config.upsert_project(saved);
 	config.save()?;
 	Ok(Config::active().view())
 }
