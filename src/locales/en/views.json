@@ -1467,5 +1467,37 @@
 			"button": "Delete {{name}}"
 		},
 		"none": "No worktree"
+	},
+	"methods": {
+		"title": "Methods",
+		"subtitle": "Plugins this project can adopt — skills, commands, sub-agents, hooks, MCP servers",
+		"noProject": "Open a project to see the plugins it can adopt.",
+		"refresh": "Refresh",
+		"search": "Search a plugin by name or description…",
+		"installed": "Installed",
+		"available": "Available in the marketplaces",
+		"noneInstalled": "No plugin installed.",
+		"noneAvailable": "No plugin matches.",
+		"more": "{{shown}} of {{total}} shown — refine the search to see the others.",
+		"installs_one": "{{count}} install",
+		"installs_other": "{{count}} installs",
+		"scope": {
+			"user": "you",
+			"project": "project",
+			"local": "this machine"
+		},
+		"pick": "Pick a plugin to read it.",
+		"pickHint": "Its source is read at the commit its marketplace pins, without installing anything.",
+		"reading": "Reading the plugin's source…",
+		"alwaysOn": "≈ {{tokens}} tokens added to every session",
+		"executes": "Runs code on this machine",
+		"executesNothing": "Runs nothing",
+		"executesNothingHint": "Only instructions: skills, commands or sub-agents that the agent reads. No hook, no server, no script.",
+		"scripts": "Plugin files these run: {{files}}",
+		"fingerprint": "fingerprint {{value}}…",
+		"skills": "Skills",
+		"commands": "Commands",
+		"agents": "Sub-agents",
+		"source": "Source: {{where}} @ {{at}}"
 	}
 }

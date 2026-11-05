@@ -1467,5 +1467,37 @@
 			"button": "Excluir {{name}}"
 		},
 		"none": "Nenhum worktree"
+	},
+	"methods": {
+		"title": "Métodos",
+		"subtitle": "Plugins que este projeto pode adotar — skills, comandos, subagentes, hooks, servidores MCP",
+		"noProject": "Abra um projeto para ver os plugins que ele pode adotar.",
+		"refresh": "Atualizar",
+		"search": "Buscar um plugin por nome ou descrição…",
+		"installed": "Instalados",
+		"available": "Disponíveis nos marketplaces",
+		"noneInstalled": "Nenhum plugin instalado.",
+		"noneAvailable": "Nenhum plugin corresponde.",
+		"more": "{{shown}} de {{total}} exibidos — refine a busca para ver os outros.",
+		"installs_one": "{{count}} instalação",
+		"installs_other": "{{count}} instalações",
+		"scope": {
+			"user": "você",
+			"project": "projeto",
+			"local": "esta máquina"
+		},
+		"pick": "Escolha um plugin para lê-lo.",
+		"pickHint": "A fonte dele é lida no commit fixado pelo marketplace, sem instalar nada.",
+		"reading": "Lendo a fonte do plugin…",
+		"alwaysOn": "≈ {{tokens}} tokens adicionados a cada sessão",
+		"executes": "Executa código nesta máquina",
+		"executesNothing": "Não executa nada",
+		"executesNothingHint": "Só instruções: skills, comandos ou subagentes que o agente lê. Nenhum hook, nenhum servidor, nenhum script.",
+		"scripts": "Arquivos do plugin que eles executam: {{files}}",
+		"fingerprint": "impressão {{value}}…",
+		"skills": "Skills",
+		"commands": "Comandos",
+		"agents": "Subagentes",
+		"source": "Fonte: {{where}} @ {{at}}"
 	}
 }

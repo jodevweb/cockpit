@@ -2432,6 +2432,20 @@ fn browser_stop(browsers: State<'_, browser::SharedBrowsers>, cwd: String) {
 	browser::stop(browsers.inner(), &cwd)
 }
 
+// ──────────────────────────────── Méthodes ────────────────────────────────
+
+/// Les plugins du projet, et ceux que ses marketplaces proposent.
+#[tauri::command]
+async fn methods_catalog(project: String) -> Result<methods::Catalog> {
+	methods::catalog(Path::new(&project)).await
+}
+
+/// Ce qu'un plugin contient et exécute, lu sans l'installer.
+#[tauri::command]
+async fn methods_inspect(project: String, plugin_id: String) -> Result<methods::Inspection> {
+	methods::inspect(Path::new(&project), &plugin_id).await
+}
+
 #[tauri::command]
 fn terminals_list(terminals: State<'_, terminal::SharedTerminals>) -> Vec<terminal::TerminalInfo> {
 	terminals.snapshot()
@@ -3320,6 +3334,8 @@ pub fn run() {
 			browser_act,
 			browser_unwatch,
 			browser_stop,
+			methods_catalog,
+			methods_inspect,
 			terminal_resize,
 			terminal_close,
 			terminals_list,

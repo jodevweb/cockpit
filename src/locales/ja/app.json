@@ -34,7 +34,8 @@
 			"observability": "可観測性",
 			"delivery": "フロー · Linear、PR、CI、デプロイ",
 			"infra": "サーバーとコンテナ · このマシンで動いているもの",
-			"settings": "設定"
+			"settings": "設定",
+			"methods": "メソッド · このプロジェクトで使えるプラグインを、インストール前に確認"
 		},
 		"hint": {
 			"goTo": "移動"
@@ -181,7 +182,8 @@
 			"git": "Git",
 			"scripts": "スクリプト",
 			"infra": "サーバーとコンテナ",
-			"settings": "設定"
+			"settings": "設定",
+			"methods": "メソッド"
 		},
 		"groups": {
 			"pilot": "操縦",
