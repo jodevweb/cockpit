@@ -38,7 +38,10 @@ permissions:
 jobs:
   lancement:
     if: github.event_name != 'workflow_run' || github.event.workflow_run.conclusion == 'success'
-    name: ${{ matrix.os }}
+    # Pas le seul nom du système : `macos-latest` et `windows-latest` sont les
+    # vérifications obligatoires de `main`, et un job homonyme se confondrait
+    # avec elles.
+    name: Premier lancement (${{ matrix.os }})
     strategy:
       fail-fast: false
       matrix:
