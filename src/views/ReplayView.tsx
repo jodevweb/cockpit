@@ -57,7 +57,10 @@ export function ReplayView() {
 	const repo = activeProject?.mainRepo ?? "";
 
 	const progress = useAsync(() => api.replay.progress(), [], { pollMs: 5_000 });
-	const running = progress.data != null;
+	// Une campagne tourne peut-être sur un autre projet : elle n'a rien à faire
+	// ni dans les chiffres ni dans le bouton de celui-ci.
+	const running = progress.data != null && progress.data.repo === repo;
+	const busyElsewhere = progress.data != null && progress.data.repo !== repo;
 	const cases = useAsync(() => (repo ? api.replay.cases(repo) : Promise.resolve([])), [repo]);
 	const trials = useAsync(
 		() => (repo ? api.replay.trials(repo) : Promise.resolve([])),
@@ -215,7 +218,13 @@ export function ReplayView() {
 								<Button
 									size="sm"
 									icon={Plus}
-									onClick={() => setSetups((current) => [...current, blankSetup("B")])}
+									onClick={() =>
+										setSetups((current) => {
+											const taken = new Set(current.map((setup) => setup.label));
+											const label = ["A", "B", "C"].find((name) => !taken.has(name)) ?? "B";
+											return [...current, blankSetup(label)];
+										})
+									}
 								>
 									{t("replay.addSetup")}
 								</Button>
@@ -282,7 +291,7 @@ export function ReplayView() {
 							<Button
 								variant="solid"
 								icon={Play}
-								disabled={total === 0 || tooMany || running}
+								disabled={total === 0 || tooMany || running || busyElsewhere}
 								loading={launching}
 								onClick={() => void launch()}
 							>
