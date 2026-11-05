@@ -1,0 +1,190 @@
+# Le premier lancement d'une version publiée, sur des machines neuves.
+#
+# Ce que reçoit quelqu'un qui découvre Cockpit : l'installeur publié dans
+# `jodevweb/cockpit-releases`, sur un poste sans configuration Cockpit et sans
+# CLI `claude`. Chaque machine est créée pour l'occasion et détruite ensuite.
+# Les machines de GitHub ont déjà `git`, `node` et `gh` : c'est l'écart avec un
+# poste vierge.
+#
+# Pour chaque système : installer, lancer, vérifier que l'app tourne encore au
+# bout de 40 secondes sans panique, et garder des captures d'écran. Sous Windows,
+# l'interface est en plus parcourue écran par écran (`scripts/premier-lancement.mjs`).
+# Les captures et les journaux sont joints au run.
+#
+# Après chaque release, et à la demande pour une version donnée.
+
+name: Premier lancement
+
+on:
+  workflow_run:
+    workflows: [Release]
+    types: [completed]
+  # Une modification de ce workflow ou de son script s'essaie sur la dernière
+  # version publiée, avant d'être fusionnée.
+  pull_request:
+    paths:
+      - .github/workflows/premier-lancement.yml
+      - scripts/premier-lancement.mjs
+  workflow_dispatch:
+    inputs:
+      version:
+        description: "Tag à essayer (vX.Y.Z) ; vide = la dernière release"
+        required: false
+        default: ""
+
+permissions:
+  contents: read
+
+jobs:
+  lancement:
+    if: github.event_name != 'workflow_run' || github.event.workflow_run.conclusion == 'success'
+    # Pas le seul nom du système : `macos-latest` et `windows-latest` sont les
+    # vérifications obligatoires de `main`, et un job homonyme se confondrait
+    # avec elles.
+    name: Premier lancement (${{ matrix.os }})
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: windows-latest
+            motif: "*_x64-setup.exe"
+          - os: macos-latest
+            motif: "*_aarch64.app.tar.gz"
+          - os: ubuntu-22.04
+            motif: "*_amd64.AppImage"
+    runs-on: ${{ matrix.os }}
+    defaults:
+      run:
+        shell: bash
+    env:
+      GH_TOKEN: ${{ github.token }}
+      SORTIE: premier-lancement
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      - name: Télécharger la version publiée
+        run: |
+          tag="${{ github.event.inputs.version }}"
+          if [ -z "$tag" ]; then
+            tag=$(gh release view --repo jodevweb/cockpit-releases --json tagName -q .tagName)
+          fi
+          echo "Version essayée : $tag"
+          mkdir -p paquet "$SORTIE"
+          gh release download "$tag" --repo jodevweb/cockpit-releases --pattern "${{ matrix.motif }}" --dir paquet
+          ls -la paquet
+
+      # ───────────────────────────── Windows ─────────────────────────────
+
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        if: runner.os == 'Windows'
+        with:
+          node-version: 22
+
+      # Une seule étape, de l'installation à la vérification : sous Windows, le
+      # runner arrête les processus lancés par une étape quand elle se termine,
+      # et l'app partait avec elle.
+      - name: Installer, lancer, parcourir (Windows)
+        if: runner.os == 'Windows'
+        shell: pwsh
+        run: |
+          # Dans un dossier à part : à la racine, npm installerait toutes les
+          # dépendances du projet pour un seul paquet.
+          $outil = Join-Path $env:RUNNER_TEMP "premier-lancement"
+          New-Item -ItemType Directory -Force $outil | Out-Null
+          Copy-Item scripts/premier-lancement.mjs $outil
+          npm install --prefix $outil --no-audit --no-fund playwright-core@1.56.1 | Out-Null
+
+          $installeur = Get-ChildItem paquet -Filter *.exe | Select-Object -First 1
+          $p = Start-Process $installeur.FullName -ArgumentList "/S" -Wait -PassThru
+          if ($p.ExitCode -ne 0) { Write-Error "L'installeur a échoué (code $($p.ExitCode))"; exit 1 }
+          $env:WEBVIEW2_ADDITIONAL_BROWSER_ARGUMENTS = "--remote-debugging-port=9333"
+          # Un dossier de données à part, comme sur le poste où le port s'ouvre.
+          $env:WEBVIEW2_USER_DATA_FOLDER = Join-Path $env:RUNNER_TEMP "webview2"
+          Start-Process "$env:LOCALAPPDATA\Cockpit\cockpit.exe" -RedirectStandardError "$env:SORTIE\stderr.log" -RedirectStandardOutput "$env:SORTIE\stdout.log"
+
+          # L'écran entier, comme sur les autres systèmes : il montre la fenêtre
+          # même quand le port de débogage ne répond pas.
+          Add-Type -AssemblyName System.Windows.Forms, System.Drawing
+          function Capturer($nom) {
+            $ecran = [System.Windows.Forms.Screen]::PrimaryScreen.Bounds
+            $image = New-Object System.Drawing.Bitmap $ecran.Width, $ecran.Height
+            $g = [System.Drawing.Graphics]::FromImage($image)
+            $g.CopyFromScreen($ecran.Location, [System.Drawing.Point]::Empty, $ecran.Size)
+            $image.Save((Join-Path $env:SORTIE "$nom.png"))
+            $g.Dispose(); $image.Dispose()
+          }
+          Start-Sleep 5; Capturer "windows-5s"
+
+          node (Join-Path $outil "premier-lancement.mjs") (Join-Path $PWD $env:SORTIE)
+          $parcours = $LASTEXITCODE
+          if ($parcours -ne 0) {
+            "--- processus WebView2"
+            Get-Process msedgewebview2 -ErrorAction SilentlyContinue | Select-Object Id, StartTime | Format-Table | Out-String
+            "--- port 9333"
+            netstat -ano | Select-String ":9333"
+            "--- runtime WebView2"
+            Get-ItemProperty "HKLM:\SOFTWARE\WOW6432Node\Microsoft\EdgeUpdate\Clients\{F3017226-FE2A-4295-8BDF-00C3A9A7E4C5}" -ErrorAction SilentlyContinue | Select-Object -ExpandProperty pv
+          }
+          Capturer "windows-fin"
+
+          Start-Sleep 20
+          if (-not (Get-Process cockpit -ErrorAction SilentlyContinue)) { Write-Error "L'app s'est arrêtée"; exit 1 }
+          if (Select-String -Path "$env:SORTIE\*.log" -Pattern "panicked" -Quiet) { Write-Error "Panique au démarrage"; exit 1 }
+          "L'app tourne."
+          exit $parcours
+
+      # ───────────────────────────── macOS ─────────────────────────────
+
+      - name: Installer, lancer, capturer (macOS)
+        if: runner.os == 'macOS'
+        run: |
+          tar -xzf paquet/*.app.tar.gz -C /Applications
+          /Applications/Cockpit.app/Contents/MacOS/cockpit > "$SORTIE/stdout.log" 2> "$SORTIE/stderr.log" &
+          for t in 5 20 40; do
+            sleep $(( t == 5 ? 5 : (t == 20 ? 15 : 20) ))
+            screencapture -x "$SORTIE/macos-${t}s.png" || echo "capture impossible à ${t}s"
+          done
+          if ! pgrep -f "Cockpit.app/Contents/MacOS/cockpit" > /dev/null; then
+            echo "::error::L'app s'est arrêtée avant 40 secondes."; tail -40 "$SORTIE/stderr.log"; exit 1
+          fi
+          if grep -q panicked "$SORTIE"/*.log; then
+            echo "::error::Panique au démarrage."; tail -40 "$SORTIE/stderr.log"; exit 1
+          fi
+          echo "L'app tourne."
+
+      # ───────────────────────────── Linux ─────────────────────────────
+
+      - name: Lancer et capturer (Linux)
+        if: runner.os == 'Linux'
+        run: |
+          # L'image de GitHub est celle d'un serveur. Le README demande « un
+          # bureau avec WebKitGTK 4.1 » : on pose ce bureau minimal, qui apporte
+          # aussi EGL et OpenGL — qu'une AppImage n'embarque jamais, parce
+          # qu'ils viennent des pilotes du poste.
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq xvfb imagemagick libwebkit2gtk-4.1-0 > /dev/null
+          app=$(ls paquet/*.AppImage | head -1)
+          chmod +x "$app"
+          Xvfb :99 -screen 0 1440x900x24 > /dev/null 2>&1 &
+          export DISPLAY=:99
+          sleep 2
+          APPIMAGE_EXTRACT_AND_RUN=1 "$app" > "$SORTIE/stdout.log" 2> "$SORTIE/stderr.log" &
+          pid=$!
+          for t in 5 20 40; do
+            sleep $(( t == 5 ? 5 : (t == 20 ? 15 : 20) ))
+            import -window root "$SORTIE/linux-${t}s.png" || echo "capture impossible à ${t}s"
+          done
+          if ! kill -0 "$pid" 2> /dev/null; then
+            echo "::error::L'app s'est arrêtée avant 40 secondes."; tail -40 "$SORTIE/stderr.log"; exit 1
+          fi
+          if grep -q panicked "$SORTIE"/*.log; then
+            echo "::error::Panique au démarrage."; tail -40 "$SORTIE/stderr.log"; exit 1
+          fi
+          echo "L'app tourne."
+
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        if: always()
+        with:
+          name: premier-lancement-${{ runner.os }}
+          path: ${{ env.SORTIE }}
+          retention-days: 30
