@@ -43,6 +43,7 @@ pub mod readiness;
 pub mod properties;
 pub mod qa;
 pub mod relay;
+pub mod replay;
 pub mod remote;
 pub mod resources;
 pub mod review;

@@ -4,5 +4,9 @@
 		"bridgeUnavailableDetail": "Les demandes d'autorisation et les questions des agents n'arriveront pas jusqu'à l'interface. Installe Node (`winget install OpenJS.NodeJS.LTS`) pour les retrouver ; les agents tournent quand même, selon leur mode.",
 		"ffmpegHint": "Les captures de la recette sont gardées, mais aucune vidéo n'en est montée. Installe ffmpeg (`winget install Gyan.FFmpeg`) pour la retrouver sous les constats.",
 		"nodeMissing": "Node est introuvable sur ce poste : les outils de mission passent par un pont MCP qu'il fait tourner. Installe Node (`winget install OpenJS.NodeJS.LTS`), puis relance la mission. Les agents ordinaires continuent de fonctionner."
+	},
+	"replay": {
+		"noGates": "Le dépôt ne déclare aucune vérification : rien ne peut juger le résultat.",
+		"testsDontApply": "Les tests de la pull request ne s'appliquent pas à ce résultat : {{error}}"
 	}
 }
