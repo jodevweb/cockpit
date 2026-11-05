@@ -837,6 +837,72 @@ const REPONSES: Record<string, unknown> = {
 	}),
 	browser_unwatch: () => null,
 	browser_stop: () => null,
+	// Les méthodes : deux plugins installés, trois disponibles, et la lecture
+	// d'un plugin qui exécute quelque chose — c'est le cas qu'il faut voir.
+	methods_catalog: () => ({
+		installed: [
+			{ id: "commit-commands@claude-plugins-official", version: "1.0.1", scope: "user", enabled: true, installPath: "", installedAt: "2026-09-07T18:44:12Z" },
+			{ id: "review-kit@northwind-tools", version: "2.3.0", scope: "project", enabled: true, installPath: "", installedAt: "2026-10-20T09:00:00Z" },
+		],
+		available: [
+			{
+				pluginId: "security-guard@claude-plugins-official",
+				name: "security-guard",
+				description: "Blocks risky shell commands before they run, and audits dependencies on install.",
+				marketplaceName: "claude-plugins-official",
+				source: { source: "git-subdir", url: "https://github.com/example/guards.git", repo: "", path: "plugins/security-guard", ref: "v1.4.0", sha: "a1b2c3d4e5f60718293a4b5c6d7e8f9012345678" },
+				installCount: 18240,
+			},
+			{
+				pluginId: "test-first@claude-plugins-official",
+				name: "test-first",
+				description: "Skills that make the agent write a failing test before changing code.",
+				marketplaceName: "claude-plugins-official",
+				source: { source: "relative", url: "", repo: "", path: "plugins/test-first", ref: "", sha: "" },
+				installCount: 9310,
+			},
+			{
+				pluginId: "design-system@northwind-tools",
+				name: "design-system",
+				description: "Northwind's component conventions, as skills.",
+				marketplaceName: "northwind-tools",
+				source: { source: "github", url: "", repo: "northwind/agent-tools", path: "", ref: "main", sha: "" },
+				installCount: 42,
+			},
+		],
+	}),
+	methods_install: () => ({ kind: "installed", message: "Installed for the project." }),
+	methods_uninstall: () => "Uninstalled.",
+	methods_measure: () => ({
+		since: "2026-10-20T09:00:00Z",
+		days: 14,
+		before: { executions: 31, failed: 6, medianTurns: 18, medianCostUsd: 0.62 },
+		after: { executions: 27, failed: 2, medianTurns: 14, medianCostUsd: 0.55 },
+	}),
+	methods_inspect: (args: Record<string, unknown>) => {
+		const guard = args.pluginId === "security-guard@claude-plugins-official";
+		return {
+			inventory: {
+				name: String(args.pluginId).split("@")[0],
+				description: "",
+				version: guard ? "1.4.0" : "0.9.0",
+				skills: guard ? ["audit-dependencies"] : ["red-green", "test-naming"],
+				agents: [],
+				commands: guard ? ["guard-report"] : [],
+				hooks: guard
+					? [{ event: "PreToolUse", command: 'python3 "${CLAUDE_PLUGIN_ROOT}/hooks/check_command.py"' }]
+					: [],
+				servers: guard ? [{ name: "osv", target: "https://api.osv.dev/mcp" }] : [],
+				scripts: guard ? ["hooks/check_command.py"] : [],
+				fingerprint: guard ? "9f2c1e7a40b35d68c2e1f0a9b8d7c6e5f4a3b2c1d0e9f8a7b6c5d4e3f2a1b0c9" : "",
+			},
+			alwaysOnTokens: guard ? 340 : 120,
+			source: guard
+				? { source: "git-subdir", url: "https://github.com/example/guards.git", repo: "", path: "plugins/security-guard", ref: "v1.4.0", sha: "a1b2c3d4e5f60718293a4b5c6d7e8f9012345678" }
+				: { source: "relative", url: "", repo: "", path: "plugins/test-first", ref: "", sha: "" },
+			approved: null,
+		};
+	},
 	// Le rejeu : deux PR fusionnées qui ajoutent des tests, et une campagne
 	// jouée avec deux configurations.
 	replay_cases: () => [

@@ -103,6 +103,10 @@ import type {
 	TourStory,
 	Voice,
 	CloudVoice,
+	MethodCatalog,
+	MethodInspection,
+	MethodInstallation,
+	MethodMeasure,
 	ReplayCase,
 	ReplayProgress,
 	ReplaySetup,
@@ -643,6 +647,23 @@ export const api = {
 		/** Cesse de regarder ; l'agent garde son navigateur. */
 		unwatch: (cwd: string) => call<void>("browser_unwatch", { cwd }),
 		stop: (cwd: string) => call<void>("browser_stop", { cwd }),
+	},
+
+	/** Méthodes : les plugins qu'un projet peut adopter. */
+	methods: {
+		/** Les plugins du projet, et ceux des marketplaces connues. */
+		catalog: (project: string) => call<MethodCatalog>("methods_catalog", { project }),
+		/** Ce qu'un plugin contient et exécute, lu sans l'installer. */
+		inspect: (project: string, pluginId: string) =>
+			call<MethodInspection>("methods_inspect", { project, pluginId }),
+		/** Installe pour le projet ou ce poste, si ce qu'il exécute est encore ce qu'on a lu. */
+		install: (project: string, pluginId: string, scope: string, approved: string, accept?: string) =>
+			call<MethodInstallation>("methods_install", { project, pluginId, scope, approved, accept: accept ?? null }),
+		uninstall: (project: string, pluginId: string, scope: string) =>
+			call<string>("methods_uninstall", { project, pluginId, scope }),
+		/** Les agents du projet avant et après l'installation. */
+		measure: (project: string, projectId: string, pluginId: string) =>
+			call<MethodMeasure>("methods_measure", { project, projectId, pluginId }),
 	},
 
 	/** Rejeu de l'historique : les PR fusionnées comme cas d'essai. */

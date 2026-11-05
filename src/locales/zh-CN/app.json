@@ -35,7 +35,8 @@
 			"delivery": "流程 · Linear、PR、CI、部署",
 			"infra": "服务器与容器 · 本机正在运行的内容",
 			"settings": "设置",
-			"replay": "回放 · 用过去的 PR 评估智能体配置"
+			"replay": "回放 · 用过去的 PR 评估智能体配置",
+			"methods": "方法 · 项目可采用的插件，安装前先查看"
 		},
 		"hint": {
 			"goTo": "前往"
@@ -183,7 +184,8 @@
 			"scripts": "脚本",
 			"infra": "服务器与容器",
 			"settings": "设置",
-			"replay": "回放"
+			"replay": "回放",
+			"methods": "方法"
 		},
 		"groups": {
 			"pilot": "指挥",

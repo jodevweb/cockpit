@@ -2503,6 +2503,81 @@ export type { ReadinessCheck } from "./generated/ReadinessCheck";
 export type { Readiness } from "./generated/Readiness";
 export type { DeliveryDossier } from "./generated/DeliveryDossier";
 
+// ── Méthodes : les plugins Claude Code (`methods.rs`) ───────────────────────
+
+export interface MethodInstalled {
+	id: string;
+	version: string;
+	/** `user`, `project` ou `local`. */
+	scope: string;
+	enabled: boolean;
+	installPath: string;
+	installedAt: string;
+}
+
+export interface MethodSource {
+	source: string;
+	url: string;
+	repo: string;
+	path: string;
+	ref: string;
+	sha: string;
+}
+
+export interface MethodAvailable {
+	pluginId: string;
+	name: string;
+	description: string;
+	marketplaceName: string;
+	source: MethodSource;
+	installCount: number;
+}
+
+export interface MethodCatalog {
+	installed: MethodInstalled[];
+	available: MethodAvailable[];
+}
+
+export interface MethodInspection {
+	inventory: {
+		name: string;
+		description: string;
+		version: string;
+		skills: string[];
+		agents: string[];
+		commands: string[];
+		/** Ce qui s'exécute sur le poste. */
+		hooks: Array<{ event: string; command: string }>;
+		servers: Array<{ name: string; target: string }>;
+		scripts: string[];
+		/** Empreinte de ce qui s'exécute ; vide quand rien ne s'exécute. */
+		fingerprint: string;
+	};
+	alwaysOnTokens: number | null;
+	source: MethodSource;
+	/** L'empreinte approuvée en l'installant d'ici ; différente de l'actuelle =
+	    ce qui s'exécute a changé depuis ton accord. */
+	approved: string | null;
+}
+
+export type MethodInstallation =
+	| { kind: "installed"; message: string }
+	| { kind: "needsCommand"; command: string; sha256: string };
+
+export interface MethodPeriod {
+	executions: number;
+	failed: number;
+	medianTurns: number | null;
+	medianCostUsd: number | null;
+}
+
+export interface MethodMeasure {
+	since: string;
+	days: number;
+	before: MethodPeriod;
+	after: MethodPeriod;
+}
+
 // ── Rejeu de l'historique (`replay.rs`) ─────────────────────────────────────
 
 /** Une PR fusionnée, vue comme un cas d'essai. */

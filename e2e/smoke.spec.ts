@@ -108,6 +108,30 @@ test("la croix retire un élément du bandeau « ça t'attend »", async ({ page
 	expect(errors).toEqual([]);
 });
 
+test("les méthodes montrent ce qu'un plugin exécute avant de l'installer", async ({ page }) => {
+	const errors = watchErrors(page);
+	await page.goto("/");
+	await topTab(page, "Workshop").click();
+	await atelierNav(page).locator("button", { hasText: "Methods" }).click();
+	// Un plugin qui exécute du code : le hook et sa commande sont en tête.
+	await page.locator("button", { hasText: "security-guard" }).first().click();
+	await expect(page.getByText("Runs code on this machine")).toBeVisible();
+	await expect(page.getByText("check_command.py").first()).toBeVisible();
+	// Un plugin de skills seuls : rien ne s'exécute, et il le dit.
+	await page.locator("button", { hasText: "test-first" }).first().click();
+	await expect(page.getByText("Runs nothing")).toBeVisible();
+	// L'installer : une confirmation, puis le rappel de commiter les réglages.
+	await page.getByRole("button", { name: "Install", exact: true }).click();
+	// La confirmation s'ouvre par-dessus : son bouton est le dernier « Install ».
+	await page.getByRole("button", { name: "Install", exact: true }).last().click();
+	await expect(page.getByText(/commit \.claude\/settings\.json/).first()).toBeVisible();
+	// Un plugin installé : l'avant/après de ses agents.
+	await page.locator("button", { hasText: "review-kit" }).first().click();
+	await expect(page.getByText("Before", { exact: true })).toBeVisible();
+	await expect(page.getByText("27 runs · 2 failed")).toBeVisible();
+	expect(errors).toEqual([]);
+});
+
 test("le rejeu montre ses cas, son rapport, et compte les essais avant de lancer", async ({ page }) => {
 	const errors = watchErrors(page);
 	await page.goto("/");

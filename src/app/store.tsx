@@ -44,6 +44,9 @@ export type ViewId =
 	| "overview"
 	| "team"
 	| "agents"
+	// Les plugins (skills, hooks, serveurs MCP) qu'un projet peut adopter, lus
+	// avant d'être installés.
+	| "methods"
 	// Les PR fusionnées comme banc d'essai : juger une configuration d'agents
 	// sur ce que le dépôt a déjà résolu.
 	| "replay"

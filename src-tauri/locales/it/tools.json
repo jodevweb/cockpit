@@ -14,5 +14,13 @@
 		"passesBefore": "I test della pull request passano già sul codice precedente: questo caso non distingue una soluzione dall'assenza di soluzione.",
 		"installFailed": "L'installazione delle dipendenze non è riuscita ({{command}}): {{output}}",
 		"humanFails": "Con la soluzione della pull request stessa, i controlli del repository oggi falliscono ({{command}}): qualsiasi agente fallirebbe. {{output}}"
+	},
+	"methods": {
+		"unsupportedSource": "La sorgente di questo plugin non si può leggere qui ({{kind}}).",
+		"unknownPlugin": "Plugin sconosciuto: {{id}}.",
+		"badScope": "Ambito sconosciuto: {{scope}}. Un plugin si installa per il progetto o per questa postazione.",
+		"changedSinceReading": "Ciò che questo plugin esegue è cambiato da quando l'hai letto: rileggilo prima di installarlo.",
+		"unsafePath": "Questo percorso esce dalla cartella del plugin, non viene seguito: {{path}}",
+		"installedDiffers": "Ciò che è stato installato non è ciò che hai letto: il plugin è stato disinstallato. Rileggilo e riprova."
 	}
 }

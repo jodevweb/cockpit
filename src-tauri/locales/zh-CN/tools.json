@@ -14,5 +14,13 @@
 		"passesBefore": "拉取请求的测试在修改前的代码上已经通过：此案例无法区分有无解决方案。",
 		"installFailed": "安装依赖失败（{{command}}）：{{output}}",
 		"humanFails": "即使使用拉取请求自身的解决方案，仓库检查如今也会失败（{{command}}）：任何智能体都会失败。{{output}}"
+	},
+	"methods": {
+		"unsupportedSource": "无法在此读取该插件的源（{{kind}}）。",
+		"unknownPlugin": "未知插件：{{id}}。",
+		"badScope": "未知范围：{{scope}}。插件可安装到项目或本机。",
+		"changedSinceReading": "该插件执行的内容在你查看后已更改：安装前请重新查看。",
+		"unsafePath": "此路径指向插件文件夹之外，不予采用：{{path}}",
+		"installedDiffers": "安装的内容与你查看的不一致：插件已被卸载。请重新查看后再试。"
 	}
 }

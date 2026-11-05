@@ -35,7 +35,8 @@
 			"delivery": "Fluss · Linear, PRs, CI, Deployments",
 			"infra": "Server & Container · was auf diesem Rechner läuft",
 			"settings": "Einstellungen",
-			"replay": "Replay · eine Agenten-Konfiguration an vergangenen PRs prüfen"
+			"replay": "Replay · eine Agenten-Konfiguration an vergangenen PRs prüfen",
+			"methods": "Methoden · Plugins, die dieses Projekt übernehmen kann, vor der Installation gelesen"
 		},
 		"hint": {
 			"goTo": "gehe zu"
@@ -187,7 +188,8 @@
 			"scripts": "Skripte",
 			"infra": "Server & Container",
 			"settings": "Einstellungen",
-			"replay": "Replay"
+			"replay": "Replay",
+			"methods": "Methoden"
 		},
 		"groups": {
 			"pilot": "Steuern",

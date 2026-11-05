@@ -35,7 +35,8 @@
 			"delivery": "Flujo · Linear, PR, CI, despliegues",
 			"infra": "Servidores y contenedores · lo que corre en esta máquina",
 			"settings": "Ajustes",
-			"replay": "Repetición · juzgar una configuración de agentes con PR pasadas"
+			"replay": "Repetición · juzgar una configuración de agentes con PR pasadas",
+			"methods": "Métodos · plugins que este proyecto puede adoptar, leídos antes de instalarlos"
 		},
 		"hint": {
 			"goTo": "ir a"
@@ -187,7 +188,8 @@
 			"scripts": "Scripts",
 			"infra": "Servidores y contenedores",
 			"settings": "Ajustes",
-			"replay": "Repetición"
+			"replay": "Repetición",
+			"methods": "Métodos"
 		},
 		"groups": {
 			"pilot": "Pilotar",
