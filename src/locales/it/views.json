@@ -1467,5 +1467,46 @@
 			"button": "Elimina {{name}}"
 		},
 		"none": "Nessun worktree"
+	},
+	"replay": {
+		"title": "Replay",
+		"subtitle": "Valutare una configurazione di agenti su ciò che il repository ha già risolto",
+		"intro": "Ogni pull request unita che aggiunge test è un caso. Un agente riparte dal commit precedente, con il solo titolo della pull request, e il suo risultato viene giudicato dai test scritti dalla persona — che non ha mai visto. Due configurazioni giocate sugli stessi casi si confrontano su qualcosa di più di un'impressione. Ogni prova è un vero compito di agente, preso dal tuo abbonamento.",
+		"noProject": "Apri un progetto per rigiocarne la cronologia.",
+		"refresh": "Aggiorna",
+		"cases": "Casi · pull request unite con test",
+		"noCases": "Nessun caso utilizzabile in questo repository.",
+		"noCasesHint": "Un caso è una pull request unita che aggiunge o modifica file di test separati dal codice (tests/, *.test.*, *_test.*…).",
+		"caseMeta": "{{tests}} file di test · {{files}} altro/i file",
+		"setups": "Configurazioni da confrontare",
+		"addSetup": "Confronta con un'altra",
+		"removeSetup": "Rimuovi questa configurazione",
+		"labelPlaceholder": "Nome nel rapporto («Sonnet», «con lo skill X»)",
+		"model": "Modello",
+		"defaultModel": "Modello della postazione",
+		"instructionsPlaceholder": "Istruzione aggiunta al compito — facoltativa, spesso ciò che si vuole giudicare",
+		"pickCases": "Scegli i casi da rigiocare.",
+		"summary": "{{count}} prova/e · ancora nessuna stima",
+		"summaryEstimate": "{{count}} prova/e · ≈ {{minutes}} min · ≈ {{cost}} $",
+		"tooMany": "{{count}} prove: al massimo {{max}} per campagna.",
+		"launch": "Avvia",
+		"confirmTitle": "Avviare {{count}} prova/e?",
+		"confirmEstimate": "Ogni prova è un compito completo di agente. Dalle prove già giocate qui: ≈ {{minutes}} min e ≈ {{cost}} $ in totale (prezzo API; con un abbonamento, è quota).",
+		"confirmNoEstimate": "Ogni prova è un compito completo di agente. Qui non è ancora stata giocata nessuna prova: le prime daranno la stima.",
+		"launched": "{{count}} prova/e avviata/e.",
+		"running": "Campagna in corso: {{done}} prova/e su {{total}}.",
+		"report": "Rapporto",
+		"noTrials": "Nessuna prova giocata finora.",
+		"unnamed": "Configurazione senza nome",
+		"medianCost": "mediana {{cost}} $",
+		"medianMinutes": "mediana {{minutes}} min",
+		"notJudgeableCount": "{{count}} non giudicabile/i",
+		"trialCost": "{{cost}} $ · {{minutes}} min",
+		"outcome": {
+			"resolved": "risolto",
+			"failed": "fallito",
+			"notJudgeable": "non giudicabile",
+			"error": "interrotto"
+		}
 	}
 }

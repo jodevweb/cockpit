@@ -1467,5 +1467,46 @@
 			"button": "Delete {{name}}"
 		},
 		"none": "No worktree"
+	},
+	"replay": {
+		"title": "Replay",
+		"subtitle": "Judge an agent setup on what the repository already solved",
+		"intro": "Each merged pull request that adds tests is a case. An agent starts again from the commit before it, with only the pull request's title, and its result is judged by the tests the human wrote — which it never saw. Two setups played on the same cases compare on something other than an impression. Each trial is a real agent task, taken from your subscription.",
+		"noProject": "Open a project to replay its history.",
+		"refresh": "Refresh",
+		"cases": "Cases · merged pull requests with tests",
+		"noCases": "No usable case in this repository.",
+		"noCasesHint": "A case is a merged pull request that adds or changes test files separate from the code (tests/, *.test.*, *_test.*…).",
+		"caseMeta": "{{tests}} test file(s) · {{files}} other file(s)",
+		"setups": "Setups to compare",
+		"addSetup": "Compare with another",
+		"removeSetup": "Remove this setup",
+		"labelPlaceholder": "Name in the report (\"Sonnet\", \"with skill X\")",
+		"model": "Model",
+		"defaultModel": "Machine's model",
+		"instructionsPlaceholder": "Instructions added to the task — optional, often what you want to judge",
+		"pickCases": "Pick the cases to replay.",
+		"summary": "{{count}} trial(s) · no estimate yet",
+		"summaryEstimate": "{{count}} trial(s) · ≈ {{minutes}} min · ≈ ${{cost}}",
+		"tooMany": "{{count}} trials: at most {{max}} per campaign.",
+		"launch": "Launch",
+		"confirmTitle": "Launch {{count}} trial(s)?",
+		"confirmEstimate": "Each trial is a full agent task. From the trials already played here: ≈ {{minutes}} min and ≈ ${{cost}} in all (API price; on a subscription, it is quota).",
+		"confirmNoEstimate": "Each trial is a full agent task. No trial has been played here yet: the first ones will give the estimate.",
+		"launched": "{{count}} trial(s) launched.",
+		"running": "Campaign running: {{done}} of {{total}} trial(s) done.",
+		"report": "Report",
+		"noTrials": "No trial played yet.",
+		"unnamed": "Unnamed setup",
+		"medianCost": "median ${{cost}}",
+		"medianMinutes": "median {{minutes}} min",
+		"notJudgeableCount": "{{count}} not judgeable",
+		"trialCost": "${{cost}} · {{minutes}} min",
+		"outcome": {
+			"resolved": "resolved",
+			"failed": "failed",
+			"notJudgeable": "not judgeable",
+			"error": "interrupted"
+		}
 	}
 }

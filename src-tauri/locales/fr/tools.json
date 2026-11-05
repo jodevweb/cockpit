@@ -7,6 +7,12 @@
 	},
 	"replay": {
 		"noGates": "Le dépôt ne déclare aucune vérification : rien ne peut juger le résultat.",
-		"testsDontApply": "Les tests de la pull request ne s'appliquent pas à ce résultat : {{error}}"
+		"testsDontApply": "Les tests de la pull request ne s'appliquent pas à ce résultat : {{error}}",
+		"nothingToRun": "Aucun essai à lancer : choisis au moins un cas.",
+		"tooMany": "{{count}} essais demandés, {{max}} au plus par campagne.",
+		"alreadyRunning": "Une campagne tourne déjà.",
+		"passesBefore": "Les tests de la pull request passent déjà sur le code d'avant : ce cas ne distingue pas une solution d'une absence de solution.",
+		"installFailed": "L'installation des dépendances a échoué ({{command}}) : {{output}}",
+		"humanFails": "Avec la solution de la pull request elle-même, les vérifications du dépôt échouent aujourd'hui ({{command}}) : n'importe quel agent échouerait aussi. {{output}}"
 	}
 }
