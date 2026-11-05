@@ -1467,5 +1467,46 @@
 			"button": "Eliminar {{name}}"
 		},
 		"none": "Ningún worktree"
+	},
+	"replay": {
+		"title": "Repetición",
+		"subtitle": "Juzgar una configuración de agentes con lo que el repositorio ya resolvió",
+		"intro": "Cada pull request fusionada que añade pruebas es un caso. Un agente vuelve a partir del commit anterior, solo con el título de la pull request, y su resultado se juzga con las pruebas que escribió la persona — que nunca vio. Dos configuraciones jugadas en los mismos casos se comparan con algo más que una impresión. Cada ensayo es una tarea real de agente, que se descuenta de tu suscripción.",
+		"noProject": "Abre un proyecto para repetir su historial.",
+		"refresh": "Actualizar",
+		"cases": "Casos · pull requests fusionadas con pruebas",
+		"noCases": "No hay ningún caso utilizable en este repositorio.",
+		"noCasesHint": "Un caso es una pull request fusionada que añade o modifica archivos de prueba separados del código (tests/, *.test.*, *_test.*…).",
+		"caseMeta": "{{tests}} archivo(s) de prueba · {{files}} otro(s) archivo(s)",
+		"setups": "Configuraciones a comparar",
+		"addSetup": "Comparar con otra",
+		"removeSetup": "Quitar esta configuración",
+		"labelPlaceholder": "Nombre en el informe («Sonnet», «con el skill X»)",
+		"model": "Modelo",
+		"defaultModel": "Modelo del equipo",
+		"instructionsPlaceholder": "Instrucción añadida a la tarea — opcional, a menudo lo que se quiere juzgar",
+		"pickCases": "Elige los casos que repetir.",
+		"summary": "{{count}} ensayo(s) · aún sin estimación",
+		"summaryEstimate": "{{count}} ensayo(s) · ≈ {{minutes}} min · ≈ {{cost}} $",
+		"tooMany": "{{count}} ensayos: como máximo {{max}} por campaña.",
+		"launch": "Lanzar",
+		"confirmTitle": "¿Lanzar {{count}} ensayo(s)?",
+		"confirmEstimate": "Cada ensayo es una tarea completa de agente. Según los ensayos ya jugados aquí: ≈ {{minutes}} min y ≈ {{cost}} $ en total (precio de la API; con suscripción, es cuota).",
+		"confirmNoEstimate": "Cada ensayo es una tarea completa de agente. Aún no se ha jugado ningún ensayo aquí: los primeros darán la estimación.",
+		"launched": "{{count}} ensayo(s) lanzado(s).",
+		"running": "Campaña en curso: {{done}} de {{total}} ensayo(s) hechos.",
+		"report": "Informe",
+		"noTrials": "Aún no se ha jugado ningún ensayo.",
+		"unnamed": "Configuración sin nombre",
+		"medianCost": "mediana {{cost}} $",
+		"medianMinutes": "mediana {{minutes}} min",
+		"notJudgeableCount": "{{count}} no juzgable(s)",
+		"trialCost": "{{cost}} $ · {{minutes}} min",
+		"outcome": {
+			"resolved": "resuelto",
+			"failed": "fallido",
+			"notJudgeable": "no juzgable",
+			"error": "interrumpido"
+		}
 	}
 }

@@ -379,6 +379,119 @@ pub fn trials(repo: &Path) -> Vec<Trial> {
 	all
 }
 
+// ── Les campagnes ────────────────────────────────────────────────────────────
+
+/// Au plus cinq essais par campagne (cas × configurations). Chaque essai est
+/// une vraie tâche d'agent, prise sur l'abonnement : on commence petit.
+pub const MAX_TRIALS: usize = 5;
+
+/// Le temps laissé aux portes pour juger un essai.
+const GATE_TIMEOUT: Duration = Duration::from_secs(10 * 60);
+
+/// Où en est la campagne en cours, s'il y en a une.
+#[derive(Debug, Clone, Serialize, PartialEq)]
+#[serde(rename_all = "camelCase")]
+pub struct Progress {
+	pub repo: String,
+	pub done: usize,
+	pub total: usize,
+}
+
+fn progress_slot() -> &'static std::sync::Mutex<Option<Progress>> {
+	static SLOT: std::sync::OnceLock<std::sync::Mutex<Option<Progress>>> = std::sync::OnceLock::new();
+	SLOT.get_or_init(Default::default)
+}
+
+/// La campagne en cours, s'il y en a une.
+pub fn progress() -> Option<Progress> {
+	progress_slot().lock().unwrap().clone()
+}
+
+/// Réserve la place d'une campagne : une seule à la fois, et jamais plus de
+/// [`MAX_TRIALS`] essais.
+pub fn reserve(repo: &Path, total: usize) -> Result<()> {
+	if total == 0 {
+		return Err(crate::error::CockpitError::msg(crate::i18n::t("replay.nothingToRun")));
+	}
+	if total > MAX_TRIALS {
+		return Err(crate::error::CockpitError::msg(crate::i18n::tf(
+			"replay.tooMany",
+			&[("count", &total), ("max", &MAX_TRIALS)],
+		)));
+	}
+	let mut slot = progress_slot().lock().unwrap();
+	if slot.is_some() {
+		return Err(crate::error::CockpitError::msg(crate::i18n::t("replay.alreadyRunning")));
+	}
+	*slot = Some(Progress { repo: repo.to_string_lossy().to_string(), done: 0, total });
+	Ok(())
+}
+
+/// Joue une campagne réservée : chaque cas est d'abord vérifié — ses tests
+/// doivent échouer sur le code d'avant — puis essayé avec chaque
+/// configuration. Un cas qui ne sait pas échouer est écarté sans dépenser
+/// d'essai, et le relevé dit pourquoi.
+pub async fn run_campaign(repo: std::path::PathBuf, cases: Vec<Case>, setups: Vec<Setup>, commands: Vec<String>) {
+	let advance = |count: usize| {
+		if let Some(progress) = progress_slot().lock().unwrap().as_mut() {
+			progress.done += count;
+		}
+	};
+	for case in &cases {
+		let check = trials_dir(&repo).join(format!("controle-{}", chrono::Utc::now().timestamp_millis()));
+		let _ = std::fs::create_dir_all(trials_dir(&repo));
+		let before = baseline(&repo, case, &check, &commands, GATE_TIMEOUT).await;
+		let refusal = match before {
+			Ok(Verdict::Failed { .. }) => None,
+			Ok(Verdict::Resolved) => Some(crate::i18n::t("replay.passesBefore")),
+			Ok(Verdict::NotJudgeable { reason }) => Some(reason),
+			Err(error) => Some(error.to_string()),
+		};
+		if let Some(reason) = refusal {
+			for setup in &setups {
+				let _ = record(
+					&repo,
+					&Trial {
+						at: chrono::Utc::now().to_rfc3339(),
+						number: case.number,
+						title: case.title.clone(),
+						setup: setup.clone(),
+						judgement: Some(Judgement {
+							verdict: Verdict::NotJudgeable { reason: reason.clone() },
+							agent_files: Vec::new(),
+							shared_files: Vec::new(),
+						}),
+						error: None,
+						cost_usd: 0.0,
+						duration_ms: 0,
+					},
+				);
+			}
+			advance(setups.len());
+			continue;
+		}
+		for setup in &setups {
+			if let Err(error) = trial(&repo, case, setup, &commands, GATE_TIMEOUT).await {
+				let _ = record(
+					&repo,
+					&Trial {
+						at: chrono::Utc::now().to_rfc3339(),
+						number: case.number,
+						title: case.title.clone(),
+						setup: setup.clone(),
+						judgement: None,
+						error: Some(error.to_string()),
+						cost_usd: 0.0,
+						duration_ms: 0,
+					},
+				);
+			}
+			advance(1);
+		}
+	}
+	*progress_slot().lock().unwrap() = None;
+}
+
 /// Range le worktree d'un essai, quoi qu'il contienne.
 pub async fn discard(repo: &Path, dir: &Path) {
 	let path = dir.to_string_lossy();
@@ -514,6 +627,19 @@ mod tests {
 		discard(&repo, &essai).await;
 
 		let _ = std::fs::remove_dir_all(&repo);
+	}
+
+	/// Une seule campagne à la fois, jamais plus de cinq essais, jamais zéro.
+	#[test]
+	fn une_campagne_se_reserve_dans_ses_bornes() {
+		let repo = Path::new("/depot");
+		assert!(reserve(repo, 0).is_err());
+		assert!(reserve(repo, MAX_TRIALS + 1).is_err());
+		assert!(progress().is_none());
+		reserve(repo, 2).unwrap();
+		assert_eq!(progress().map(|p| (p.done, p.total)), Some((0, 2)));
+		assert!(reserve(repo, 1).is_err(), "une seule campagne à la fois");
+		*progress_slot().lock().unwrap() = None;
 	}
 
 	/// La consigne ne dit rien de la solution : ni ses fichiers, ni ses tests.

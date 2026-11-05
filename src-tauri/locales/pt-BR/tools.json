@@ -7,6 +7,10 @@
 	},
 	"replay": {
 		"noGates": "O repositório não declara nenhuma verificação: não há com o que julgar o resultado.",
-		"testsDontApply": "Os testes da pull request não se aplicam a este resultado: {{error}}"
+		"testsDontApply": "Os testes da pull request não se aplicam a este resultado: {{error}}",
+		"nothingToRun": "Nenhum ensaio para executar: escolha pelo menos um caso.",
+		"tooMany": "{{count}} ensaios pedidos, no máximo {{max}} por campanha.",
+		"alreadyRunning": "Já há uma campanha em andamento.",
+		"passesBefore": "Os testes da pull request já passam no código anterior: este caso não distingue uma solução da ausência de solução."
 	}
 }

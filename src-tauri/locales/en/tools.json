@@ -7,6 +7,10 @@
 	},
 	"replay": {
 		"noGates": "The repository declares no checks: there is nothing to judge the result with.",
-		"testsDontApply": "The pull request's tests do not apply to this result: {{error}}"
+		"testsDontApply": "The pull request's tests do not apply to this result: {{error}}",
+		"nothingToRun": "No trial to run: pick at least one case.",
+		"tooMany": "{{count}} trials asked, at most {{max}} per campaign.",
+		"alreadyRunning": "A campaign is already running.",
+		"passesBefore": "The pull request's tests already pass on the code before it: this case cannot tell a solution from no solution."
 	}
 }
