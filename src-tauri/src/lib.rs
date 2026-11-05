@@ -2369,7 +2369,7 @@ fn terminal_close(terminals: State<'_, terminal::SharedTerminals>, id: String) -
 /// Regarde le navigateur d'un workspace, en le lançant s'il ne tourne pas.
 #[tauri::command]
 async fn browser_watch(browsers: State<'_, browser::SharedBrowsers>, cwd: String) -> Result<()> {
-	browser::watch(browsers.inner().clone(), cwd).await
+	browser::watch_for_ui(browsers.inner().clone(), cwd).await
 }
 
 /// L'image suivante de la page, en binaire : l'interface la demande quand elle
