@@ -77,7 +77,9 @@ pub async fn touch(browsers: crate::browser::SharedBrowsers, cwd: &str, session:
 		// pu être coupé (navigateur relancé, onglet refermé) ; sans cette
 		// relance, une seule coupure faisait perdre tout le reste du tour.
 		// Jamais de lancement : un navigateur éteint ne se filme pas.
-		if crate::browser::running(cwd).await {
+		// Relu après l'attente : le tour a pu se clore entre-temps, et relancer
+		// le flux d'un enregistrement refermé le laisserait tourner pour personne.
+		if crate::browser::running(cwd).await && is_recording(cwd) {
 			let _ = crate::browser::watch(browsers, cwd.to_string()).await;
 		}
 		return;
@@ -188,10 +190,15 @@ pub fn drop_for(session: &str) {
 		.filter(|(_, recording)| recording.session == session)
 		.map(|(cwd, _)| cwd.clone())
 		.collect();
-	for cwd in gone {
-		if let Some(recording) = map.remove(&cwd) {
+	for cwd in &gone {
+		if let Some(recording) = map.remove(cwd) {
 			let _ = std::fs::remove_dir_all(recording.dir);
 		}
+	}
+	drop(map);
+	// Le flux que gardait l'enregistrement n'a plus de lecteur — sauf l'onglet.
+	for cwd in &gone {
+		crate::browser::release_after_recording(cwd);
 	}
 }
 

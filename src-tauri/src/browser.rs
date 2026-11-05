@@ -582,6 +582,9 @@ struct Page {
 /// Se branche sur le navigateur du dossier et diffuse sa page active. Le lance
 /// s'il ne tourne pas. Déjà branché : ne fait rien.
 pub async fn watch(shared: SharedBrowsers, cwd: String) -> Result<()> {
+	// Retenu au premier branchement : la preuve filmée en a besoin pour libérer
+	// un flux quand un agent s'arrête en pleine recette (`release_after_recording`).
+	let _ = SHARED.set(shared.clone());
 	{
 		let viewers = shared.0.lock().unwrap();
 		if viewers.get(&cwd).is_some_and(|viewer| !viewer.task.is_finished()) {
@@ -607,8 +610,27 @@ pub async fn watch(shared: SharedBrowsers, cwd: String) -> Result<()> {
 	let (actions, inbox) = mpsc::unbounded_channel();
 	let feed = Arc::new(Feed::default());
 	let task = tokio::spawn(stream(socket, inbox, feed.clone(), cwd.clone()));
-	shared.0.lock().unwrap().insert(cwd, Viewer { actions, task, feed });
+	let mut viewers = shared.0.lock().unwrap();
+	// Deux branchements simultanés (l'onglet, et un geste de l'agent) passent
+	// tous deux le test du début : le second ne remplace pas le premier, il se
+	// retire — sinon le flux remplacé tournerait sans plus personne pour l'arrêter.
+	if viewers.get(&cwd).is_some_and(|viewer| !viewer.task.is_finished()) {
+		task.abort();
+		return Ok(());
+	}
+	viewers.insert(cwd, Viewer { actions, task, feed });
 	Ok(())
+}
+
+/// Les navigateurs regardés, retenus au premier branchement.
+static SHARED: std::sync::OnceLock<SharedBrowsers> = std::sync::OnceLock::new();
+
+/// Un enregistrement vient d'être abandonné (agent arrêté en pleine recette) :
+/// le flux qu'il gardait ouvert s'arrête, sauf si l'onglet le regarde.
+pub fn release_after_recording(cwd: &str) {
+	if let Some(shared) = SHARED.get() {
+		release(shared, cwd);
+	}
 }
 
 type Socket = tokio_tungstenite::WebSocketStream<
