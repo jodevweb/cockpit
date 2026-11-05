@@ -77,35 +77,34 @@ jobs:
         with:
           node-version: 22
 
-      - name: Installer et lancer (Windows)
+      # Une seule étape, de l'installation à la vérification : sous Windows, le
+      # runner arrête les processus lancés par une étape quand elle se termine,
+      # et l'app partait avec elle.
+      - name: Installer, lancer, parcourir (Windows)
         if: runner.os == 'Windows'
         shell: pwsh
         run: |
+          # Dans un dossier à part : à la racine, npm installerait toutes les
+          # dépendances du projet pour un seul paquet.
+          $outil = Join-Path $env:RUNNER_TEMP "premier-lancement"
+          New-Item -ItemType Directory -Force $outil | Out-Null
+          Copy-Item scripts/premier-lancement.mjs $outil
+          npm install --prefix $outil --no-audit --no-fund playwright-core@1.56.1 | Out-Null
+
           $installeur = Get-ChildItem paquet -Filter *.exe | Select-Object -First 1
           $p = Start-Process $installeur.FullName -ArgumentList "/S" -Wait -PassThru
           if ($p.ExitCode -ne 0) { Write-Error "L'installeur a échoué (code $($p.ExitCode))"; exit 1 }
           $env:WEBVIEW2_ADDITIONAL_BROWSER_ARGUMENTS = "--remote-debugging-port=9333"
           Start-Process "$env:LOCALAPPDATA\Cockpit\cockpit.exe" -RedirectStandardError "$env:SORTIE\stderr.log" -RedirectStandardOutput "$env:SORTIE\stdout.log"
 
-      - name: Parcourir l'interface (Windows)
-        if: runner.os == 'Windows'
-        run: |
-          # Dans un dossier à part : à la racine, npm installerait toutes les
-          # dépendances du projet pour un seul paquet.
-          outil="$RUNNER_TEMP/premier-lancement"
-          mkdir -p "$outil"
-          cp scripts/premier-lancement.mjs "$outil/"
-          npm install --prefix "$outil" --no-audit --no-fund playwright-core@1.56.1 > /dev/null
-          node "$outil/premier-lancement.mjs" "$PWD/$SORTIE"
+          node (Join-Path $outil "premier-lancement.mjs") (Join-Path $PWD $env:SORTIE)
+          $parcours = $LASTEXITCODE
 
-      - name: Toujours debout (Windows)
-        if: runner.os == 'Windows'
-        shell: pwsh
-        run: |
           Start-Sleep 20
           if (-not (Get-Process cockpit -ErrorAction SilentlyContinue)) { Write-Error "L'app s'est arrêtée"; exit 1 }
           if (Select-String -Path "$env:SORTIE\*.log" -Pattern "panicked" -Quiet) { Write-Error "Panique au démarrage"; exit 1 }
           "L'app tourne."
+          exit $parcours
 
       # ───────────────────────────── macOS ─────────────────────────────
 
@@ -131,8 +130,12 @@ jobs:
       - name: Lancer et capturer (Linux)
         if: runner.os == 'Linux'
         run: |
+          # L'image de GitHub est celle d'un serveur. Le README demande « un
+          # bureau avec WebKitGTK 4.1 » : on pose ce bureau minimal, qui apporte
+          # aussi EGL et OpenGL — qu'une AppImage n'embarque jamais, parce
+          # qu'ils viennent des pilotes du poste.
           sudo apt-get update -qq
-          sudo apt-get install -y -qq xvfb imagemagick > /dev/null
+          sudo apt-get install -y -qq xvfb imagemagick libwebkit2gtk-4.1-0 > /dev/null
           app=$(ls paquet/*.AppImage | head -1)
           chmod +x "$app"
           Xvfb :99 -screen 0 1440x900x24 > /dev/null 2>&1 &
