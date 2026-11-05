@@ -1539,7 +1539,11 @@ fn film_the_proof(app: &AppHandle, agents: &SharedAgents, session_id: &str, payl
 	}
 	let app = app.clone();
 	tauri::async_runtime::spawn(async move {
-		if let Some(film) = crate::proof::finish(&cwd, &session).await {
+		let film = crate::proof::finish(&cwd, &session).await;
+		// L'enregistrement fermé, le flux qu'il gardait ouvert s'arrête — sauf si
+		// l'onglet Navigateur le regarde.
+		crate::browser::release(app.state::<crate::browser::SharedBrowsers>().inner(), &cwd);
+		if let Some(film) = film {
 			let _ = app.emit(
 				"agent://event",
 				AgentEvent {
