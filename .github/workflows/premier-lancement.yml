@@ -95,6 +95,8 @@ jobs:
           $p = Start-Process $installeur.FullName -ArgumentList "/S" -Wait -PassThru
           if ($p.ExitCode -ne 0) { Write-Error "L'installeur a échoué (code $($p.ExitCode))"; exit 1 }
           $env:WEBVIEW2_ADDITIONAL_BROWSER_ARGUMENTS = "--remote-debugging-port=9333"
+          # Un dossier de données à part, comme sur le poste où le port s'ouvre.
+          $env:WEBVIEW2_USER_DATA_FOLDER = Join-Path $env:RUNNER_TEMP "webview2"
           Start-Process "$env:LOCALAPPDATA\Cockpit\cockpit.exe" -RedirectStandardError "$env:SORTIE\stderr.log" -RedirectStandardOutput "$env:SORTIE\stdout.log"
 
           # L'écran entier, comme sur les autres systèmes : il montre la fenêtre
