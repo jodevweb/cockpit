@@ -2502,3 +2502,48 @@ export type { MissionOverrun } from "./generated/MissionOverrun";
 export type { ReadinessCheck } from "./generated/ReadinessCheck";
 export type { Readiness } from "./generated/Readiness";
 export type { DeliveryDossier } from "./generated/DeliveryDossier";
+
+// ── Rejeu de l'historique (`replay.rs`) ─────────────────────────────────────
+
+/** Une PR fusionnée, vue comme un cas d'essai. */
+export interface ReplayCase {
+	number: number | null;
+	title: string;
+	base: string;
+	head: string;
+	/** Les fichiers de test de la PR : le juge. */
+	tests: string[];
+	/** Les autres fichiers touchés : la solution, jamais montrée à l'agent. */
+	sources: string[];
+}
+
+/** La configuration jugée. */
+export interface ReplaySetup {
+	label: string;
+	engine: string;
+	model: string;
+	depth: string;
+	instructions: string;
+}
+
+export type ReplayVerdict =
+	| { kind: "resolved" }
+	| { kind: "failed"; command: string; output: string }
+	| { kind: "notJudgeable"; reason: string };
+
+export interface ReplayTrial {
+	at: string;
+	number: number | null;
+	title: string;
+	setup: ReplaySetup;
+	judgement: { verdict: ReplayVerdict; agentFiles: string[]; sharedFiles: string[] } | null;
+	error: string | null;
+	costUsd: number;
+	durationMs: number;
+}
+
+export interface ReplayProgress {
+	repo: string;
+	done: number;
+	total: number;
+}

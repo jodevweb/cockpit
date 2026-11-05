@@ -34,7 +34,8 @@
 			"observability": "Observabilité",
 			"delivery": "Flux · Linear, PR, CI, déploiements",
 			"infra": "Serveurs & conteneurs · ce qui tourne sur le poste",
-			"settings": "Réglages"
+			"settings": "Réglages",
+			"replay": "Rejeu · juger une configuration d'agents sur les PR passées"
 		},
 		"hint": {
 			"goTo": "aller à"
@@ -185,7 +186,8 @@
 			"git": "Git",
 			"scripts": "Scripts",
 			"infra": "Serveurs & conteneurs",
-			"settings": "Réglages"
+			"settings": "Réglages",
+			"replay": "Rejeu"
 		},
 		"groups": {
 			"pilot": "Piloter",

@@ -4,5 +4,15 @@
 		"bridgeUnavailableDetail": "代理的权限请求和问题将无法到达界面。安装 Node（`winget install OpenJS.NodeJS.LTS`）即可恢复；代理仍会按其模式运行。",
 		"ffmpegHint": "验收截图会保留，但不会合成视频。安装 ffmpeg（`winget install Gyan.FFmpeg`）即可在发现下方重新看到视频。",
 		"nodeMissing": "此电脑上找不到 Node：任务工具通过由它运行的 MCP 桥接。请安装 Node（`winget install OpenJS.NodeJS.LTS`），然后重新启动任务。普通代理仍可正常工作。"
+	},
+	"replay": {
+		"noGates": "仓库没有声明任何检查：无法评判结果。",
+		"testsDontApply": "拉取请求的测试无法应用于此结果：{{error}}",
+		"nothingToRun": "没有可运行的试验：请至少选择一个案例。",
+		"tooMany": "请求了 {{count}} 次试验，每次活动最多 {{max}} 次。",
+		"alreadyRunning": "已有一个活动正在运行。",
+		"passesBefore": "拉取请求的测试在修改前的代码上已经通过：此案例无法区分有无解决方案。",
+		"installFailed": "安装依赖失败（{{command}}）：{{output}}",
+		"humanFails": "即使使用拉取请求自身的解决方案，仓库检查如今也会失败（{{command}}）：任何智能体都会失败。{{output}}"
 	}
 }

@@ -4,5 +4,15 @@
 		"bridgeUnavailableDetail": "エージェントの権限リクエストや質問がインターフェースに届きません。Node（`winget install OpenJS.NodeJS.LTS`）をインストールすると復旧します。エージェントはモードに従って動作し続けます。",
 		"ffmpegHint": "検収のスクリーンショットは保持されますが、動画は作成されません。ffmpeg（`winget install Gyan.FFmpeg`）をインストールすると、指摘の下に動画が戻ります。",
 		"nodeMissing": "このマシンに Node が見つかりません。ミッションのツールは Node が動かす MCP ブリッジを経由します。Node（`winget install OpenJS.NodeJS.LTS`）をインストールしてから、ミッションを再起動してください。通常のエージェントは引き続き動作します。"
+	},
+	"replay": {
+		"noGates": "リポジトリにチェックが宣言されていません。結果を判定する手段がありません。",
+		"testsDontApply": "プルリクエストのテストをこの結果に適用できません：{{error}}",
+		"nothingToRun": "実行する試行がありません。ケースを1つ以上選んでください。",
+		"tooMany": "{{count}} 件の試行が要求されました。1キャンペーンあたり最大 {{max}} 件です。",
+		"alreadyRunning": "キャンペーンはすでに実行中です。",
+		"passesBefore": "プルリクエストのテストが変更前のコードですでに通っています。このケースでは解決策の有無を区別できません。",
+		"installFailed": "依存関係のインストールに失敗しました（{{command}}）：{{output}}",
+		"humanFails": "プルリクエスト自身の解決策でも、現在のリポジトリのチェックが失敗します（{{command}}）。どのエージェントでも失敗します。{{output}}"
 	}
 }

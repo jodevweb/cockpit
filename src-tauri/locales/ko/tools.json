@@ -4,5 +4,15 @@
 		"bridgeUnavailableDetail": "에이전트의 권한 요청과 질문이 인터페이스에 도달하지 않습니다. Node(`winget install OpenJS.NodeJS.LTS`)를 설치하면 복구됩니다. 에이전트는 모드에 따라 계속 실행됩니다.",
 		"ffmpegHint": "QA 스크린샷은 보관되지만 영상으로 합쳐지지 않습니다. ffmpeg(`winget install Gyan.FFmpeg`)를 설치하면 발견 사항 아래에 영상이 다시 표시됩니다.",
 		"nodeMissing": "이 컴퓨터에서 Node를 찾을 수 없습니다. 미션 도구는 Node가 실행하는 MCP 브리지를 거칩니다. Node(`winget install OpenJS.NodeJS.LTS`)를 설치한 뒤 미션을 다시 시작하세요. 일반 에이전트는 계속 작동합니다."
+	},
+	"replay": {
+		"noGates": "저장소에 선언된 검사가 없습니다. 결과를 판정할 방법이 없습니다.",
+		"testsDontApply": "풀 리퀘스트의 테스트를 이 결과에 적용할 수 없습니다: {{error}}",
+		"nothingToRun": "실행할 시도가 없습니다. 케이스를 하나 이상 선택하세요.",
+		"tooMany": "{{count}}개의 시도를 요청했습니다. 캠페인당 최대 {{max}}개입니다.",
+		"alreadyRunning": "이미 실행 중인 캠페인이 있습니다.",
+		"passesBefore": "풀 리퀘스트의 테스트가 이전 코드에서 이미 통과합니다. 이 케이스로는 해결책이 있는지 없는지 구별할 수 없습니다.",
+		"installFailed": "의존성 설치에 실패했습니다({{command}}): {{output}}",
+		"humanFails": "풀 리퀘스트 자체의 해결책으로도 오늘 저장소 검사가 실패합니다({{command}}). 어떤 에이전트도 실패할 것입니다. {{output}}"
 	}
 }

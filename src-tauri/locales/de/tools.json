@@ -4,5 +4,15 @@
 		"bridgeUnavailableDetail": "Berechtigungsanfragen und Fragen der Agenten erreichen die Oberfläche nicht. Installiere Node (`winget install OpenJS.NodeJS.LTS`), um sie zurückzubekommen; die Agenten laufen trotzdem, je nach Modus.",
 		"ffmpegHint": "Die Screenshots der Abnahme bleiben erhalten, aber es wird kein Video daraus erstellt. Installiere ffmpeg (`winget install Gyan.FFmpeg`), um es unter den Befunden zurückzubekommen.",
 		"nodeMissing": "Node wurde auf diesem Rechner nicht gefunden: Die Missionswerkzeuge laufen über eine MCP-Brücke, die Node ausführt. Installiere Node (`winget install OpenJS.NodeJS.LTS`) und starte die Mission neu. Normale Agenten funktionieren weiterhin."
+	},
+	"replay": {
+		"noGates": "Das Repository deklariert keine Prüfungen: Es gibt nichts, womit sich das Ergebnis beurteilen ließe.",
+		"testsDontApply": "Die Tests des Pull Requests lassen sich auf dieses Ergebnis nicht anwenden: {{error}}",
+		"nothingToRun": "Kein Versuch zu starten: Wähle mindestens einen Fall.",
+		"tooMany": "{{count}} Versuche angefragt, höchstens {{max}} pro Kampagne.",
+		"alreadyRunning": "Es läuft bereits eine Kampagne.",
+		"passesBefore": "Die Tests des Pull Requests bestehen bereits mit dem Code davor: Dieser Fall unterscheidet keine Lösung von keiner Lösung.",
+		"installFailed": "Die Installation der Abhängigkeiten ist fehlgeschlagen ({{command}}): {{output}}",
+		"humanFails": "Mit der Lösung des Pull Requests selbst schlagen die Prüfungen des Repositorys heute fehl ({{command}}): Jeder Agent würde ebenfalls scheitern. {{output}}"
 	}
 }

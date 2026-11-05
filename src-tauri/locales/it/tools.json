@@ -4,5 +4,15 @@
 		"bridgeUnavailableDetail": "Le richieste di autorizzazione e le domande degli agenti non arriveranno all'interfaccia. Installa Node (`winget install OpenJS.NodeJS.LTS`) per recuperarle; gli agenti continuano a funzionare secondo la loro modalità.",
 		"ffmpegHint": "Gli screenshot del collaudo vengono conservati, ma non ne viene montato alcun video. Installa ffmpeg (`winget install Gyan.FFmpeg`) per ritrovarlo sotto i rilievi.",
 		"nodeMissing": "Node non è stato trovato su questo computer: gli strumenti della missione passano da un ponte MCP che esegue. Installa Node (`winget install OpenJS.NodeJS.LTS`), poi riavvia la missione. Gli agenti ordinari continuano a funzionare."
+	},
+	"replay": {
+		"noGates": "Il repository non dichiara alcun controllo: non c'è nulla con cui giudicare il risultato.",
+		"testsDontApply": "I test della pull request non si applicano a questo risultato: {{error}}",
+		"nothingToRun": "Nessuna prova da avviare: scegli almeno un caso.",
+		"tooMany": "{{count}} prove richieste, al massimo {{max}} per campagna.",
+		"alreadyRunning": "Una campagna è già in corso.",
+		"passesBefore": "I test della pull request passano già sul codice precedente: questo caso non distingue una soluzione dall'assenza di soluzione.",
+		"installFailed": "L'installazione delle dipendenze non è riuscita ({{command}}): {{output}}",
+		"humanFails": "Con la soluzione della pull request stessa, i controlli del repository oggi falliscono ({{command}}): qualsiasi agente fallirebbe. {{output}}"
 	}
 }

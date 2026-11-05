@@ -1381,5 +1381,46 @@
 			"button": "{{name}} を削除"
 		},
 		"none": "worktree はありません"
+	},
+	"replay": {
+		"title": "リプレイ",
+		"subtitle": "リポジトリがすでに解決したことでエージェント構成を評価",
+		"intro": "テストを追加したマージ済みのプルリクエストはそれぞれ1つのケースです。エージェントはその直前のコミットから、プルリクエストのタイトルだけを手がかりにやり直し、その結果は人が書いたテスト — エージェントが一度も見ていないもの — で判定されます。同じケースで2つの構成を試せば、印象ではなく結果で比較できます。各試行は実際のエージェントタスクで、サブスクリプションを消費します。",
+		"noProject": "履歴をリプレイするにはプロジェクトを開いてください。",
+		"refresh": "更新",
+		"cases": "ケース · テスト付きのマージ済みプルリクエスト",
+		"noCases": "このリポジトリには使えるケースがありません。",
+		"noCasesHint": "ケースとは、コードとは別のテストファイル（tests/、*.test.*、*_test.* など）を追加または変更したマージ済みのプルリクエストです。",
+		"caseMeta": "テストファイル {{tests}} 件 · その他のファイル {{files}} 件",
+		"setups": "比較する構成",
+		"addSetup": "別の構成と比較",
+		"removeSetup": "この構成を削除",
+		"labelPlaceholder": "レポートでの名前（「Sonnet」「スキル X あり」）",
+		"model": "モデル",
+		"defaultModel": "このマシンのモデル",
+		"instructionsPlaceholder": "タスクに追加する指示 — 任意。評価したいのはたいていこれです",
+		"pickCases": "リプレイするケースを選んでください。",
+		"summary": "試行 {{count}} 件 · まだ見積もりはありません",
+		"summaryEstimate": "試行 {{count}} 件 · 約 {{minutes}} 分 · 約 ${{cost}}",
+		"tooMany": "試行 {{count}} 件：1キャンペーンあたり最大 {{max}} 件です。",
+		"launch": "実行",
+		"confirmTitle": "試行を {{count}} 件実行しますか？",
+		"confirmEstimate": "各試行は完全なエージェントタスクです。ここで行った試行に基づくと、合計で約 {{minutes}} 分、約 ${{cost}} です（API 価格。サブスクリプションでは使用枠を消費します）。",
+		"confirmNoEstimate": "各試行は完全なエージェントタスクです。ここではまだ試行がありません。最初の試行で見積もりが出ます。",
+		"launched": "試行を {{count}} 件開始しました。",
+		"running": "キャンペーン実行中：{{total}} 件中 {{done}} 件完了。",
+		"report": "レポート",
+		"noTrials": "まだ試行がありません。",
+		"unnamed": "名前のない構成",
+		"medianCost": "中央値 ${{cost}}",
+		"medianMinutes": "中央値 {{minutes}} 分",
+		"notJudgeableCount": "判定不可 {{count}} 件",
+		"trialCost": "${{cost}} · {{minutes}} 分",
+		"outcome": {
+			"resolved": "解決",
+			"failed": "失敗",
+			"notJudgeable": "判定不可",
+			"error": "中断"
+		}
 	}
 }

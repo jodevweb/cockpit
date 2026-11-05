@@ -34,7 +34,8 @@
 			"observability": "Osservabilità",
 			"delivery": "Flusso · Linear, PR, CI, deploy",
 			"infra": "Server e container · cosa gira su questa macchina",
-			"settings": "Impostazioni"
+			"settings": "Impostazioni",
+			"replay": "Replay · valutare una configurazione di agenti sulle PR passate"
 		},
 		"hint": {
 			"goTo": "vai a"
@@ -185,7 +186,8 @@
 			"git": "Git",
 			"scripts": "Script",
 			"infra": "Server e container",
-			"settings": "Impostazioni"
+			"settings": "Impostazioni",
+			"replay": "Replay"
 		},
 		"groups": {
 			"pilot": "Pilotare",
