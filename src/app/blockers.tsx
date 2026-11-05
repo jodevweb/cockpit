@@ -4,7 +4,7 @@ import { useTranslation } from "react-i18next";
 import { dismiss, isDismissed, useDismissed } from "@/lib/dismissed";
 import { fromSeconds, shortPath } from "@/lib/format";
 import { api } from "@/lib/ipc";
-import { awaitedDecision, awaitsHuman } from "@/lib/missions";
+import { awaitedDecision, awaitsHuman, folderKey, missionFolders } from "@/lib/missions";
 import { replyDirective } from "@/lib/language";
 import type { PullRequest } from "@/lib/types";
 import { useAgentGuard, useAgentRuns } from "./agents";
@@ -67,8 +67,18 @@ export function useBlockers(prs: PullRequest[]): Blocker[] {
 
 	// Un agent qui a rendu la main est le seul cas où c'est toi qui bloques la
 	// machine, et non l'inverse : il passe donc avant tout le reste.
+	//
+	// Sauf ceux des missions : un exécutant qui a rendu son rapport, un maître
+	// qui a fini son tour ont aussi la dernière réplique, sans rien attendre de
+	// toi. Une mission close remplissait le bandeau de ses sessions arrêtées ;
+	// ce qu'une mission attend vraiment est dit plus bas, par ses accords et
+	// ses tâches en échec.
+	const ofMissions = useMemo(() => missionFolders(missions, worktrees), [missions, worktrees]);
 	const waiting = sessions.filter(
-		(session) => session.awaitingInput && session.idleSeconds < 24 * 3600,
+		(session) =>
+			session.awaitingInput &&
+			session.idleSeconds < 24 * 3600 &&
+			!ofMissions.has(folderKey(session.cwd)),
 	);
 
 	const localBranches = useMemo(
