@@ -1381,5 +1381,36 @@
 			"button": "删除 {{name}}"
 		},
 		"none": "没有 worktree"
+	},
+	"methods": {
+		"title": "方法",
+		"subtitle": "项目可采用的插件 — 技能、命令、子智能体、钩子、MCP 服务器",
+		"noProject": "打开一个项目以查看它可采用的插件。",
+		"refresh": "刷新",
+		"search": "按名称或描述搜索插件…",
+		"installed": "已安装",
+		"available": "插件市场中可用",
+		"noneInstalled": "未安装任何插件。",
+		"noneAvailable": "没有匹配的插件。",
+		"more": "已显示 {{total}} 个中的 {{shown}} 个 — 缩小搜索范围以查看其他插件。",
+		"installs_other": "{{count}} 次安装",
+		"scope": {
+			"user": "你",
+			"project": "项目",
+			"local": "本机"
+		},
+		"pick": "选择一个插件以查看。",
+		"pickHint": "在插件市场固定的提交上读取其源码，不会安装任何内容。",
+		"reading": "正在读取插件源码…",
+		"alwaysOn": "每个会话约增加 {{tokens}} 个令牌",
+		"executes": "会在本机执行代码",
+		"executesNothing": "不执行任何内容",
+		"executesNothingHint": "只有指示：智能体读取的技能、命令或子智能体。没有钩子、服务器或脚本。",
+		"scripts": "它们运行的插件文件：{{files}}",
+		"fingerprint": "指纹 {{value}}…",
+		"skills": "技能",
+		"commands": "命令",
+		"agents": "子智能体",
+		"source": "源：{{where}} @ {{at}}"
 	}
 }

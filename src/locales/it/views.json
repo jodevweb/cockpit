@@ -1467,5 +1467,37 @@
 			"button": "Elimina {{name}}"
 		},
 		"none": "Nessun worktree"
+	},
+	"methods": {
+		"title": "Metodi",
+		"subtitle": "I plugin che il progetto può adottare — skill, comandi, sotto-agenti, hook, server MCP",
+		"noProject": "Apri un progetto per vedere i plugin che può adottare.",
+		"refresh": "Aggiorna",
+		"search": "Cerca un plugin per nome o descrizione…",
+		"installed": "Installati",
+		"available": "Disponibili nei marketplace",
+		"noneInstalled": "Nessun plugin installato.",
+		"noneAvailable": "Nessun plugin corrisponde.",
+		"more": "{{shown}} su {{total}} mostrati — affina la ricerca per vedere gli altri.",
+		"installs_one": "{{count}} installazione",
+		"installs_other": "{{count}} installazioni",
+		"scope": {
+			"user": "tu",
+			"project": "progetto",
+			"local": "questa postazione"
+		},
+		"pick": "Scegli un plugin per leggerlo.",
+		"pickHint": "La sua sorgente viene letta al commit fissato dal marketplace, senza installare nulla.",
+		"reading": "Lettura della sorgente del plugin…",
+		"alwaysOn": "≈ {{tokens}} token aggiunti a ogni sessione",
+		"executes": "Esegue codice su questa postazione",
+		"executesNothing": "Non esegue nulla",
+		"executesNothingHint": "Solo istruzioni: skill, comandi o sotto-agenti che l'agente legge. Nessun hook, nessun server, nessuno script.",
+		"scripts": "File del plugin che avviano: {{files}}",
+		"fingerprint": "impronta {{value}}…",
+		"skills": "Skill",
+		"commands": "Comandi",
+		"agents": "Sotto-agenti",
+		"source": "Sorgente: {{where}} @ {{at}}"
 	}
 }

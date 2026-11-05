@@ -1381,5 +1381,36 @@
 			"button": "{{name}} 삭제"
 		},
 		"none": "worktree 없음"
+	},
+	"methods": {
+		"title": "메서드",
+		"subtitle": "이 프로젝트가 도입할 수 있는 플러그인 — 스킬, 명령, 하위 에이전트, 훅, MCP 서버",
+		"noProject": "도입할 수 있는 플러그인을 보려면 프로젝트를 여세요.",
+		"refresh": "새로 고침",
+		"search": "이름이나 설명으로 플러그인 검색…",
+		"installed": "설치됨",
+		"available": "마켓플레이스에서 제공",
+		"noneInstalled": "설치된 플러그인이 없습니다.",
+		"noneAvailable": "일치하는 플러그인이 없습니다.",
+		"more": "{{total}}개 중 {{shown}}개 표시 — 나머지를 보려면 검색을 좁히세요.",
+		"installs_other": "설치 {{count}}회",
+		"scope": {
+			"user": "나",
+			"project": "프로젝트",
+			"local": "이 컴퓨터"
+		},
+		"pick": "플러그인을 선택하면 내용을 볼 수 있습니다.",
+		"pickHint": "마켓플레이스가 고정한 커밋에서 소스를 읽으며, 아무것도 설치하지 않습니다.",
+		"reading": "플러그인 소스를 읽는 중…",
+		"alwaysOn": "세션마다 약 {{tokens}} 토큰 추가",
+		"executes": "이 컴퓨터에서 코드를 실행합니다",
+		"executesNothing": "아무것도 실행하지 않습니다",
+		"executesNothingHint": "에이전트가 읽는 지시(스킬, 명령, 하위 에이전트)뿐입니다. 훅도, 서버도, 스크립트도 없습니다.",
+		"scripts": "이들이 실행하는 플러그인 파일: {{files}}",
+		"fingerprint": "지문 {{value}}…",
+		"skills": "스킬",
+		"commands": "명령",
+		"agents": "하위 에이전트",
+		"source": "소스: {{where}} @ {{at}}"
 	}
 }

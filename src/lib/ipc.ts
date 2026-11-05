@@ -103,6 +103,8 @@ import type {
 	TourStory,
 	Voice,
 	CloudVoice,
+	MethodCatalog,
+	MethodInspection,
 } from "./types";
 
 /** Toutes les erreurs backend remontent en `string` : on les normalise ici. */
@@ -639,6 +641,15 @@ export const api = {
 		/** Cesse de regarder ; l'agent garde son navigateur. */
 		unwatch: (cwd: string) => call<void>("browser_unwatch", { cwd }),
 		stop: (cwd: string) => call<void>("browser_stop", { cwd }),
+	},
+
+	/** Méthodes : les plugins qu'un projet peut adopter. */
+	methods: {
+		/** Les plugins du projet, et ceux des marketplaces connues. */
+		catalog: (project: string) => call<MethodCatalog>("methods_catalog", { project }),
+		/** Ce qu'un plugin contient et exécute, lu sans l'installer. */
+		inspect: (project: string, pluginId: string) =>
+			call<MethodInspection>("methods_inspect", { project, pluginId }),
 	},
 
 	/** Missions : un ticket, un plan, des exécutants. */

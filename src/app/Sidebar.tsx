@@ -7,6 +7,7 @@ import {
 	ChevronRight,
 	ChevronsUpDown,
 	Boxes,
+	Blocks,
 	Bot,
 	FileText,
 	GitBranch,
@@ -124,6 +125,7 @@ const GROUPS: Array<{ id: string; entries: Entry[] }> = [
 			// ⌘N ouvre le lanceur, pas l'écran : pas de raccourci affiché ici.
 			{ id: "libres", icon: SquareTerminal, shortcut: "" },
 			{ id: "agents", icon: Bot, shortcut: "4" },
+			{ id: "methods", icon: Blocks, shortcut: "" },
 			{ id: "docs", icon: FileText, shortcut: "5" },
 		],
 	},

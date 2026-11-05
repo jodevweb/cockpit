@@ -107,3 +107,18 @@ test("la croix retire un élément du bandeau « ça t'attend »", async ({ page
 	await expect(page.getByText("Show delivery estimates at checkout").first()).toBeVisible();
 	expect(errors).toEqual([]);
 });
+
+test("les méthodes montrent ce qu'un plugin exécute avant de l'installer", async ({ page }) => {
+	const errors = watchErrors(page);
+	await page.goto("/");
+	await topTab(page, "Workshop").click();
+	await atelierNav(page).locator("button", { hasText: "Methods" }).click();
+	// Un plugin qui exécute du code : le hook et sa commande sont en tête.
+	await page.locator("button", { hasText: "security-guard" }).first().click();
+	await expect(page.getByText("Runs code on this machine")).toBeVisible();
+	await expect(page.getByText("check_command.py").first()).toBeVisible();
+	// Un plugin de skills seuls : rien ne s'exécute, et il le dit.
+	await page.locator("button", { hasText: "test-first" }).first().click();
+	await expect(page.getByText("Runs nothing")).toBeVisible();
+	expect(errors).toEqual([]);
+});

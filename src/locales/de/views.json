@@ -1467,5 +1467,37 @@
 			"button": "{{name}} löschen"
 		},
 		"none": "Kein Worktree"
+	},
+	"methods": {
+		"title": "Methoden",
+		"subtitle": "Plugins, die dieses Projekt übernehmen kann — Skills, Befehle, Sub-Agenten, Hooks, MCP-Server",
+		"noProject": "Öffne ein Projekt, um die Plugins zu sehen, die es übernehmen kann.",
+		"refresh": "Aktualisieren",
+		"search": "Plugin nach Name oder Beschreibung suchen…",
+		"installed": "Installiert",
+		"available": "In den Marketplaces verfügbar",
+		"noneInstalled": "Kein Plugin installiert.",
+		"noneAvailable": "Kein Plugin passt.",
+		"more": "{{shown}} von {{total}} angezeigt — verfeinere die Suche, um die anderen zu sehen.",
+		"installs_one": "{{count}} Installation",
+		"installs_other": "{{count}} Installationen",
+		"scope": {
+			"user": "du",
+			"project": "Projekt",
+			"local": "dieser Rechner"
+		},
+		"pick": "Wähle ein Plugin, um es zu lesen.",
+		"pickHint": "Seine Quelle wird beim Commit gelesen, den die Marketplace festlegt, ohne etwas zu installieren.",
+		"reading": "Quelle des Plugins wird gelesen…",
+		"alwaysOn": "≈ {{tokens}} Tokens zusätzlich in jeder Sitzung",
+		"executes": "Führt Code auf diesem Rechner aus",
+		"executesNothing": "Führt nichts aus",
+		"executesNothingHint": "Nur Anweisungen: Skills, Befehle oder Sub-Agenten, die der Agent liest. Kein Hook, kein Server, kein Skript.",
+		"scripts": "Plugin-Dateien, die sie starten: {{files}}",
+		"fingerprint": "Fingerabdruck {{value}}…",
+		"skills": "Skills",
+		"commands": "Befehle",
+		"agents": "Sub-Agenten",
+		"source": "Quelle: {{where}} @ {{at}}"
 	}
 }

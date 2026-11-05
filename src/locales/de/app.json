@@ -34,7 +34,8 @@
 			"observability": "Beobachtbarkeit",
 			"delivery": "Fluss · Linear, PRs, CI, Deployments",
 			"infra": "Server & Container · was auf diesem Rechner läuft",
-			"settings": "Einstellungen"
+			"settings": "Einstellungen",
+			"methods": "Methoden · Plugins, die dieses Projekt übernehmen kann, vor der Installation gelesen"
 		},
 		"hint": {
 			"goTo": "gehe zu"
@@ -185,7 +186,8 @@
 			"git": "Git",
 			"scripts": "Skripte",
 			"infra": "Server & Container",
-			"settings": "Einstellungen"
+			"settings": "Einstellungen",
+			"methods": "Methoden"
 		},
 		"groups": {
 			"pilot": "Steuern",
