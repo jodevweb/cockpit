@@ -1235,7 +1235,15 @@ pub async fn sync_verifier_worktree(
 		if branche.is_empty() || branche == task.branch {
 			continue;
 		}
-		match crate::git::run_git(path, &["merge", "--no-ff", "--no-edit", &branche]).await {
+		// Avance rapide permise, et demandée : sans elle, une vérification qui
+		// n'a encore rien commité gagnait un commit de fusion vide à chaque
+		// lancement. Ces commits remontaient ensuite dans la PR de la mission
+		// — « Merge backend into qa », « into review », puis « into » la
+		// branche d'intégration : trois fusions du même travail pour une
+		// seule modification. `--ff` l'emporte sur un `merge.ff = false`
+		// réglé sur le poste. La fusion de chaque tâche dans la branche
+		// d'intégration, elle, garde son commit (`integrate`).
+		match crate::git::run_git(path, &["merge", "--ff", "--no-edit", &branche]).await {
 			Ok(_) => report.merged.push(branche),
 			Err(error) => {
 				let _ = crate::git::run_git(path, &["merge", "--abort"]).await;
@@ -1543,6 +1551,50 @@ mod tests {
 		assert_eq!(rapport.merged, vec!["feat/x-backend".to_string()]);
 		assert!(rapport.conflicts.is_empty());
 		assert!(qa.join("backend.txt").exists(), "le fichier du lot backend doit être là");
+
+		std::fs::remove_dir_all(&depot).ok();
+		std::fs::remove_dir_all(&backend).ok();
+		std::fs::remove_dir_all(&qa).ok();
+	}
+
+	/// Une vérification qui n'a rien commité avance sur le lot de sa sœur au
+	/// lieu de s'offrir un commit de fusion vide : c'est ce commit, répété par
+	/// chaque vérification, qui faisait apparaître la même fusion trois fois
+	/// dans la PR de la mission.
+	#[tokio::test]
+	async fn une_verification_sans_commit_avance_sans_fusion_vide() {
+		let depot = depot_jetable("avance");
+		let backend = worktree_de(&depot, "feat/z-backend", "feat/x");
+		commit_dans(&backend, "backend.txt", "api\n", "Le lot backend");
+		let qa = worktree_de(&depot, "feat/z-qa", "feat/x");
+
+		let mission = mission_avec(
+			&depot.to_string_lossy(),
+			"feat/x",
+			vec![
+				tache_de_test("backend", "feat/z-backend", TaskState::Delivered),
+				tache_de_test("qa", "feat/z-qa", TaskState::Running),
+			],
+		);
+		let tache_qa = mission.tasks[1].clone();
+		let rapport = sync_verifier_worktree(&mission, &tache_qa, &qa.to_string_lossy())
+			.await
+			.unwrap();
+		assert_eq!(rapport.merged, vec!["feat/z-backend".to_string()]);
+
+		let tete = |dossier: &std::path::Path, reference: &str| {
+			let sortie = std::process::Command::new("git")
+				.args(["rev-parse", reference])
+				.current_dir(dossier)
+				.output()
+				.unwrap();
+			String::from_utf8_lossy(&sortie.stdout).trim().to_string()
+		};
+		assert_eq!(
+			tete(&qa, "HEAD"),
+			tete(&qa, "feat/z-backend"),
+			"la vérification doit pointer sur le lot backend, sans commit de fusion"
+		);
 
 		std::fs::remove_dir_all(&depot).ok();
 		std::fs::remove_dir_all(&backend).ok();
