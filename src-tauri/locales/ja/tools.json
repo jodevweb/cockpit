@@ -4,5 +4,9 @@
 		"bridgeUnavailableDetail": "エージェントの権限リクエストや質問がインターフェースに届きません。Node（`winget install OpenJS.NodeJS.LTS`）をインストールすると復旧します。エージェントはモードに従って動作し続けます。",
 		"ffmpegHint": "検収のスクリーンショットは保持されますが、動画は作成されません。ffmpeg（`winget install Gyan.FFmpeg`）をインストールすると、指摘の下に動画が戻ります。",
 		"nodeMissing": "このマシンに Node が見つかりません。ミッションのツールは Node が動かす MCP ブリッジを経由します。Node（`winget install OpenJS.NodeJS.LTS`）をインストールしてから、ミッションを再起動してください。通常のエージェントは引き続き動作します。"
+	},
+	"methods": {
+		"unsupportedSource": "このプラグインのソースはここでは読めません（{{kind}}）。",
+		"unknownPlugin": "不明なプラグイン：{{id}}。"
 	}
 }

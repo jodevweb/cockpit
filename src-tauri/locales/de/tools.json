@@ -4,5 +4,9 @@
 		"bridgeUnavailableDetail": "Berechtigungsanfragen und Fragen der Agenten erreichen die Oberfläche nicht. Installiere Node (`winget install OpenJS.NodeJS.LTS`), um sie zurückzubekommen; die Agenten laufen trotzdem, je nach Modus.",
 		"ffmpegHint": "Die Screenshots der Abnahme bleiben erhalten, aber es wird kein Video daraus erstellt. Installiere ffmpeg (`winget install Gyan.FFmpeg`), um es unter den Befunden zurückzubekommen.",
 		"nodeMissing": "Node wurde auf diesem Rechner nicht gefunden: Die Missionswerkzeuge laufen über eine MCP-Brücke, die Node ausführt. Installiere Node (`winget install OpenJS.NodeJS.LTS`) und starte die Mission neu. Normale Agenten funktionieren weiterhin."
+	},
+	"methods": {
+		"unsupportedSource": "Die Quelle dieses Plugins lässt sich hier nicht lesen ({{kind}}).",
+		"unknownPlugin": "Unbekanntes Plugin: {{id}}."
 	}
 }

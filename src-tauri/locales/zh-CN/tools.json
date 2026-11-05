@@ -4,5 +4,9 @@
 		"bridgeUnavailableDetail": "代理的权限请求和问题将无法到达界面。安装 Node（`winget install OpenJS.NodeJS.LTS`）即可恢复；代理仍会按其模式运行。",
 		"ffmpegHint": "验收截图会保留，但不会合成视频。安装 ffmpeg（`winget install Gyan.FFmpeg`）即可在发现下方重新看到视频。",
 		"nodeMissing": "此电脑上找不到 Node：任务工具通过由它运行的 MCP 桥接。请安装 Node（`winget install OpenJS.NodeJS.LTS`），然后重新启动任务。普通代理仍可正常工作。"
+	},
+	"methods": {
+		"unsupportedSource": "无法在此读取该插件的源（{{kind}}）。",
+		"unknownPlugin": "未知插件：{{id}}。"
 	}
 }

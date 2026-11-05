@@ -24,6 +24,7 @@ pub mod journal;
 pub mod libre;
 pub mod mcp;
 pub mod metrics;
+pub mod methods;
 pub mod mission;
 mod mission_commands;
 use mission_commands::*;
