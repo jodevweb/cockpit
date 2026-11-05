@@ -1,7 +1,7 @@
 {
 	"name": "cockpit",
 	"private": true,
-	"version": "0.86.3",
+	"version": "0.86.4",
 	"license": "MIT",
 	"type": "module",
 	"scripts": {
