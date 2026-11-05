@@ -97,8 +97,30 @@ jobs:
           $env:WEBVIEW2_ADDITIONAL_BROWSER_ARGUMENTS = "--remote-debugging-port=9333"
           Start-Process "$env:LOCALAPPDATA\Cockpit\cockpit.exe" -RedirectStandardError "$env:SORTIE\stderr.log" -RedirectStandardOutput "$env:SORTIE\stdout.log"
 
+          # L'écran entier, comme sur les autres systèmes : il montre la fenêtre
+          # même quand le port de débogage ne répond pas.
+          Add-Type -AssemblyName System.Windows.Forms, System.Drawing
+          function Capturer($nom) {
+            $ecran = [System.Windows.Forms.Screen]::PrimaryScreen.Bounds
+            $image = New-Object System.Drawing.Bitmap $ecran.Width, $ecran.Height
+            $g = [System.Drawing.Graphics]::FromImage($image)
+            $g.CopyFromScreen($ecran.Location, [System.Drawing.Point]::Empty, $ecran.Size)
+            $image.Save((Join-Path $env:SORTIE "$nom.png"))
+            $g.Dispose(); $image.Dispose()
+          }
+          Start-Sleep 5; Capturer "windows-5s"
+
           node (Join-Path $outil "premier-lancement.mjs") (Join-Path $PWD $env:SORTIE)
           $parcours = $LASTEXITCODE
+          if ($parcours -ne 0) {
+            "--- processus WebView2"
+            Get-Process msedgewebview2 -ErrorAction SilentlyContinue | Select-Object Id, StartTime | Format-Table | Out-String
+            "--- port 9333"
+            netstat -ano | Select-String ":9333"
+            "--- runtime WebView2"
+            Get-ItemProperty "HKLM:\SOFTWARE\WOW6432Node\Microsoft\EdgeUpdate\Clients\{F3017226-FE2A-4295-8BDF-00C3A9A7E4C5}" -ErrorAction SilentlyContinue | Select-Object -ExpandProperty pv
+          }
+          Capturer "windows-fin"
 
           Start-Sleep 20
           if (-not (Get-Process cockpit -ErrorAction SilentlyContinue)) { Write-Error "L'app s'est arrêtée"; exit 1 }
