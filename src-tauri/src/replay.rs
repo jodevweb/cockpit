@@ -42,7 +42,7 @@ pub struct Case {
 }
 
 /// Ce qu'un essai a donné.
-#[derive(Debug, Clone, Serialize, PartialEq)]
+#[derive(Debug, Clone, Serialize, serde::Deserialize, PartialEq)]
 #[serde(tag = "kind", rename_all = "camelCase")]
 pub enum Verdict {
 	/// Les tests de l'humain passent sur le résultat de l'agent.
@@ -55,7 +55,7 @@ pub enum Verdict {
 }
 
 /// Le jugement d'un essai, avec de quoi comparer à la solution humaine.
-#[derive(Debug, Clone, Serialize, PartialEq)]
+#[derive(Debug, Clone, Serialize, serde::Deserialize, PartialEq)]
 #[serde(rename_all = "camelCase")]
 pub struct Judgement {
 	pub verdict: Verdict,
@@ -218,6 +218,167 @@ pub async fn judge(worktree: &Path, case: &Case, commands: &[String], timeout: D
 	Judgement { verdict, agent_files, shared_files }
 }
 
+// ── Les essais ───────────────────────────────────────────────────────────────
+
+/// La configuration qu'on juge : ce qui change d'un essai à l'autre.
+#[derive(Debug, Clone, Serialize, serde::Deserialize, PartialEq, Default)]
+#[serde(rename_all = "camelCase", default)]
+pub struct Setup {
+	/// Le nom qu'on lui donne dans le rapport (« Sonnet », « avec le skill X »).
+	pub label: String,
+	/// Moteur et modèle ; vides, ceux du poste.
+	pub engine: String,
+	pub model: String,
+	pub depth: String,
+	/// Une consigne ajoutée à la tâche — c'est elle qu'on veut souvent juger.
+	pub instructions: String,
+}
+
+/// Ce qu'un essai a donné, tel qu'il s'enregistre.
+#[derive(Debug, Clone, Serialize, serde::Deserialize, PartialEq)]
+#[serde(rename_all = "camelCase")]
+pub struct Trial {
+	pub at: String,
+	pub number: Option<u32>,
+	pub title: String,
+	pub setup: Setup,
+	/// Le jugement ; absent quand l'agent n'a pas pu travailler.
+	pub judgement: Option<Judgement>,
+	/// Pourquoi l'agent n'a pas pu travailler (délai, CLI introuvable…).
+	pub error: Option<String>,
+	pub cost_usd: f64,
+	pub duration_ms: u64,
+}
+
+/// Les outils qu'un essai ne doit jamais toucher : rien ne quitte le
+/// worktree jetable, ni vers le dépôt distant, ni vers le réseau.
+pub const FORBIDDEN: [&str; 4] = ["Bash(git push:*)", "Bash(gh:*)", "WebFetch", "WebSearch"];
+
+/// La consigne d'un essai : ce qu'avait l'humain, rien de sa solution.
+///
+/// Le titre seul, jamais la description de la PR — elle raconte souvent la
+/// solution — ni ses fichiers, ni ses tests. Les portes sont données : un
+/// agent en vrai travail les connaît aussi.
+pub fn trial_prompt(case: &Case, setup: &Setup, commands: &[String]) -> String {
+	let mut prompt = format!(
+		"You are working in this repository. Resolve the following issue, as a developer of \
+		 this project would, then stop.\n\n## The issue\n\n{}\n",
+		case.title.trim()
+	);
+	if !commands.is_empty() {
+		prompt.push_str(&format!(
+			"\nThe repository's checks are: {}. Make them pass.\n",
+			commands.iter().map(|command| format!("`{command}`")).collect::<Vec<_>>().join(", ")
+		));
+	}
+	prompt.push_str(
+		"\nDo not commit, do not push, do not open a pull request: leave your changes in the \
+		 working tree.\n",
+	);
+	if !setup.instructions.trim().is_empty() {
+		prompt.push_str(&format!("\n## Instructions\n\n{}\n", setup.instructions.trim()));
+	}
+	prompt
+}
+
+/// Ce que rend un agent d'essai : son coût et sa durée, ou pourquoi il n'a pas
+/// pu travailler.
+pub struct Worked {
+	pub cost_usd: f64,
+	pub duration_ms: u64,
+}
+
+/// Joue un essai : prépare le worktree, laisse l'agent travailler, juge, range.
+///
+/// `work` est l'agent : en vrai `agent::run_once` (voir [`trial`]) ; dans les
+/// tests, une fonction qui écrit une solution. Le worktree est rangé quoi qu'il
+/// arrive.
+pub async fn trial_with<F, Fut>(
+	repo: &Path,
+	case: &Case,
+	setup: &Setup,
+	commands: &[String],
+	dir: &Path,
+	timeout: Duration,
+	work: F,
+) -> Result<Trial>
+where
+	F: FnOnce(String, String) -> Fut,
+	Fut: std::future::Future<Output = Result<Worked>>,
+{
+	prepare(repo, case, dir).await?;
+	let worked = work(dir.to_string_lossy().to_string(), trial_prompt(case, setup, commands)).await;
+	let (judgement, error, cost_usd, duration_ms) = match worked {
+		Ok(worked) => {
+			(Some(judge(dir, case, commands, timeout).await), None, worked.cost_usd, worked.duration_ms)
+		}
+		Err(error) => (None, Some(error.to_string()), 0.0, 0),
+	};
+	discard(repo, dir).await;
+	Ok(Trial {
+		at: chrono::Utc::now().to_rfc3339(),
+		number: case.number,
+		title: case.title.clone(),
+		setup: setup.clone(),
+		judgement,
+		error,
+		cost_usd,
+		duration_ms,
+	})
+}
+
+/// Joue un essai avec un vrai agent, et l'enregistre.
+pub async fn trial(repo: &Path, case: &Case, setup: &Setup, commands: &[String], timeout: Duration) -> Result<Trial> {
+	let stamp = chrono::Utc::now().timestamp_millis();
+	let dir = trials_dir(repo).join(format!("essai-{stamp}"));
+	if let Some(parent) = dir.parent() {
+		std::fs::create_dir_all(parent)?;
+	}
+	let engine = setup.engine.clone();
+	let model = setup.model.clone();
+	let depth = setup.depth.clone();
+	let done = trial_with(repo, case, setup, commands, &dir, timeout, |cwd, prompt| async move {
+		let shot = crate::agent::run_once(
+			&cwd,
+			&prompt,
+			&engine,
+			&model,
+			&depth,
+			&FORBIDDEN,
+			crate::executions::Origin::cockpit("rejeu"),
+		)
+		.await?;
+		Ok(Worked { cost_usd: shot.cost_usd, duration_ms: shot.duration_ms })
+	})
+	.await?;
+	record(repo, &done)?;
+	Ok(done)
+}
+
+/// Où vivent les essais d'un dépôt : sous la configuration, jamais dans le dépôt.
+fn trials_dir(repo: &Path) -> std::path::PathBuf {
+	crate::config::config_dir().join("rejeu").join(crate::mcp::key_of(&repo.to_string_lossy()))
+}
+
+/// Ajoute un essai au relevé du dépôt — en ajout seul, comme les exécutions.
+pub fn record(repo: &Path, trial: &Trial) -> Result<()> {
+	use std::io::Write;
+	let dir = trials_dir(repo);
+	std::fs::create_dir_all(&dir)?;
+	let mut file = std::fs::OpenOptions::new().create(true).append(true).open(dir.join("essais.jsonl"))?;
+	let line = serde_json::to_string(trial).map_err(|e| crate::error::CockpitError::msg(e.to_string()))?;
+	writeln!(file, "{line}")?;
+	Ok(())
+}
+
+/// Les essais enregistrés pour ce dépôt, les plus récents d'abord.
+pub fn trials(repo: &Path) -> Vec<Trial> {
+	let raw = std::fs::read_to_string(trials_dir(repo).join("essais.jsonl")).unwrap_or_default();
+	let mut all: Vec<Trial> = raw.lines().filter_map(|line| serde_json::from_str(line).ok()).collect();
+	all.reverse();
+	all
+}
+
 /// Range le worktree d'un essai, quoi qu'il contienne.
 pub async fn discard(repo: &Path, dir: &Path) {
 	let path = dir.to_string_lossy();
@@ -351,6 +512,67 @@ mod tests {
 		let jugement = judge(&essai, case, &[], timeout).await;
 		assert!(matches!(jugement.verdict, Verdict::NotJudgeable { .. }));
 		discard(&repo, &essai).await;
+
+		let _ = std::fs::remove_dir_all(&repo);
+	}
+
+	/// La consigne ne dit rien de la solution : ni ses fichiers, ni ses tests.
+	#[test]
+	fn la_consigne_ne_livre_pas_la_solution() {
+		let case = Case {
+			number: Some(7),
+			title: "Cart total uses quantities".into(),
+			base: "a".into(),
+			head: "b".into(),
+			tests: vec!["tests/total.test.sh".into()],
+			sources: vec!["src/cart.txt".into()],
+		};
+		let setup = Setup { instructions: "Write the test first.".into(), ..Default::default() };
+		let prompt = trial_prompt(&case, &setup, &["npm test".to_string()]);
+		assert!(prompt.contains("Cart total uses quantities"));
+		assert!(prompt.contains("`npm test`"));
+		assert!(prompt.contains("Write the test first."));
+		for fuite in ["total.test.sh", "src/cart.txt", "quantity)"] {
+			assert!(!prompt.contains(fuite), "{fuite}");
+		}
+	}
+
+	/// Un essai complet, avec un agent simulé : il travaille dans le worktree
+	/// préparé, le jugement suit, et le worktree est rangé — y compris quand
+	/// l'agent échoue.
+	#[tokio::test]
+	async fn un_essai_se_joue_se_juge_et_se_range() {
+		let repo = depot_avec_une_pr("essai");
+		let case = cases(&repo, "main", 10).await.unwrap().remove(0);
+		let commands = vec!["bash tests/total.test.sh".to_string()];
+		let timeout = Duration::from_secs(60);
+		let dir = repo.with_file_name(format!("{}-w", repo.file_name().unwrap().to_string_lossy()));
+		let setup = Setup { label: "simulé".into(), ..Default::default() };
+
+		let reussi = trial_with(&repo, &case, &setup, &commands, &dir, timeout, |cwd, prompt| async move {
+			assert!(prompt.contains("Cart total uses quantities"));
+			std::fs::write(Path::new(&cwd).join("src/cart.txt"), "total = sum(price * quantity)\n").unwrap();
+			Ok(Worked { cost_usd: 0.12, duration_ms: 900 })
+		})
+		.await
+		.unwrap();
+		assert_eq!(reussi.judgement.as_ref().map(|j| &j.verdict), Some(&Verdict::Resolved));
+		assert_eq!(reussi.cost_usd, 0.12);
+		assert_eq!(reussi.setup.label, "simulé");
+		assert!(!dir.exists(), "rangé après un essai");
+
+		let rate = trial_with(&repo, &case, &setup, &commands, &dir, timeout, |_, _| async {
+			Err(crate::error::CockpitError::msg("délai dépassé"))
+		})
+		.await
+		.unwrap();
+		assert!(rate.judgement.is_none());
+		assert_eq!(rate.error.as_deref(), Some("délai dépassé"));
+		assert!(!dir.exists(), "rangé même quand l'agent échoue");
+
+		// Un essai enregistré se relit.
+		let relu: Trial = serde_json::from_str(&serde_json::to_string(&reussi).unwrap()).unwrap();
+		assert_eq!(relu, reussi);
 
 		let _ = std::fs::remove_dir_all(&repo);
 	}
