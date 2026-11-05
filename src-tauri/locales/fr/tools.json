@@ -9,6 +9,8 @@
 		"unsupportedSource": "La source de ce plugin ne se lit pas ici ({{kind}}).",
 		"unknownPlugin": "Plugin inconnu : {{id}}.",
 		"badScope": "Portée inconnue : {{scope}}. Un plugin s'installe pour le projet ou pour ce poste.",
-		"changedSinceReading": "Ce que ce plugin exécute a changé depuis ta lecture : relis-le avant de l'installer."
+		"changedSinceReading": "Ce que ce plugin exécute a changé depuis ta lecture : relis-le avant de l'installer.",
+		"unsafePath": "Ce chemin sort du dossier du plugin, il n'est pas suivi : {{path}}",
+		"installedDiffers": "Ce qui a été installé n'est pas ce que tu as lu : le plugin a été désinstallé. Relis-le, puis recommence."
 	}
 }

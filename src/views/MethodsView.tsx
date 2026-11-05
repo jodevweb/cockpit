@@ -95,7 +95,10 @@ export function MethodsView() {
 	}
 
 	const detail = inspection.data;
-	const executes = detail ? detail.inventory.hooks.length + detail.inventory.servers.length > 0 : false;
+	// `bin/` compte aussi : des exécutables que le plugin met à disposition.
+	const executes = detail
+		? detail.inventory.hooks.length + detail.inventory.servers.length + detail.inventory.scripts.length > 0
+		: false;
 	const changedSinceApproval =
 		detail != null && installedEntry != null && detail.approved != null && detail.approved !== detail.inventory.fingerprint;
 

@@ -9,6 +9,8 @@
 		"unsupportedSource": "无法在此读取该插件的源（{{kind}}）。",
 		"unknownPlugin": "未知插件：{{id}}。",
 		"badScope": "未知范围：{{scope}}。插件可安装到项目或本机。",
-		"changedSinceReading": "该插件执行的内容在你查看后已更改：安装前请重新查看。"
+		"changedSinceReading": "该插件执行的内容在你查看后已更改：安装前请重新查看。",
+		"unsafePath": "此路径指向插件文件夹之外，不予采用：{{path}}",
+		"installedDiffers": "安装的内容与你查看的不一致：插件已被卸载。请重新查看后再试。"
 	}
 }
