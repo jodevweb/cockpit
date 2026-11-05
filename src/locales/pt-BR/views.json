@@ -1297,12 +1297,12 @@
 		},
 		"resume": {
 			"resume": "Retomar o trabalho",
-			"resumeHint": "reabre tudo e pede a cada agente que continue de onde parou",
+			"resumeHint": "reabre tudo e pede aos agentes interrompidos no meio do trabalho que continuem de onde pararam",
 			"reopen": "Reabrir sem relançar",
 			"reopenHint": "as conversas estão lá, recarregadas, mas ninguém recomeça sozinho",
 			"off": "Não reabrir nada",
 			"offHint": "os workspaces esperam na barra; um clique os acorda",
-			"resumeHelp": "Cada agente reaberto recebe uma instrução de retomada: verificar o estado real do repositório antes de continuar, em vez de recomeçar da última ação. O contexto dele está intacto — a CLI retoma a conversa pelo identificador.",
+			"resumeHelp": "Um agente interrompido no meio do trabalho recebe uma instrução de retomada: verificar o estado real do repositório antes de continuar, em vez de recomeçar da última ação. O que já tinha terminado o turno é apenas reaberto: ele espera a sua próxima instrução. O contexto dele está intacto — a CLI retoma a conversa pelo identificador.",
 			"reopenHelp": "As conversas são reabertas e legíveis; você mesmo retoma o trabalho.",
 			"offHelp": "Nada recomeça: o que estava rodando ontem aparece adormecido na barra de workspaces.",
 			"note": "Esta escolha vale no próximo lançamento do cockpit. As missões em andamento sempre são retomadas — tanto os executores quanto o agente principal."

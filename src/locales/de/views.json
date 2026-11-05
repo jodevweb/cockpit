@@ -1297,12 +1297,12 @@
 		},
 		"resume": {
 			"resume": "Arbeit fortsetzen",
-			"resumeHint": "öffnet alles wieder und bittet jeden Agenten, dort weiterzumachen, wo er aufgehört hat",
+			"resumeHint": "öffnet alles wieder und bittet Agenten, die mitten in der Arbeit unterbrochen wurden, dort weiterzumachen, wo sie aufgehört haben",
 			"reopen": "Wieder öffnen ohne Neustart",
 			"reopenHint": "die Unterhaltungen sind da, neu geladen, aber niemand legt von selbst wieder los",
 			"off": "Nichts wieder öffnen",
 			"offHint": "Workspaces warten in der Leiste; ein Klick weckt sie",
-			"resumeHelp": "Jeder wieder geöffnete Agent bekommt eine Fortsetzungsanweisung: den tatsächlichen Zustand des Repositorys prüfen, bevor er weitermacht, statt bei seiner letzten Aktion neu anzusetzen. Sein Kontext ist intakt — die CLI setzt die Unterhaltung über ihre Kennung fort.",
+			"resumeHelp": "Ein mitten in der Arbeit unterbrochener Agent erhält eine Anweisung zur Wiederaufnahme: vor dem Weitermachen den tatsächlichen Zustand des Repositorys prüfen, statt bei seiner letzten Aktion neu anzusetzen. Ein Agent, der seinen Durchgang beendet hatte, wird nur wieder geöffnet: Er wartet auf deine nächste Anweisung. Sein Kontext bleibt erhalten — die CLI setzt die Unterhaltung über ihre Kennung fort.",
 			"reopenHelp": "Unterhaltungen werden wieder geöffnet und sind lesbar; die Arbeit startest du selbst neu.",
 			"offHelp": "Nichts startet neu: Was gestern lief, erscheint in der Workspace-Leiste als schlafend.",
 			"note": "Diese Wahl gilt beim nächsten Start des Cockpits. Laufende Missionen werden immer fortgesetzt — ihre Ausführer ebenso wie ihr Hauptagent."
