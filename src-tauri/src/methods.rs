@@ -35,6 +35,8 @@ pub struct Installed {
 	pub enabled: bool,
 	#[serde(default)]
 	pub install_path: String,
+	#[serde(default)]
+	pub installed_at: String,
 }
 
 /// D'où vient un plugin disponible : un dépôt, un chemin, un commit épinglé.
@@ -143,6 +145,9 @@ pub struct Inspection {
 	pub always_on_tokens: Option<u32>,
 	/// Où la source a été lue, et à quel commit.
 	pub source: Source,
+	/// L'empreinte que tu as approuvée en l'installant d'ici, s'il y en a une.
+	/// Différente de l'empreinte actuelle : ce qui s'exécute a changé depuis.
+	pub approved: Option<String>,
 }
 
 fn read_json(path: &Path) -> Option<serde_json::Value> {
@@ -313,6 +318,16 @@ pub fn parse_always_on(details: &str) -> Option<u32> {
 
 /// Lance le CLI `claude` avec ces arguments, dans ce dossier.
 async fn claude(cwd: &Path, args: &[&str]) -> Result<String> {
+	let (ok, stdout, stderr) = claude_raw(cwd, args).await?;
+	if !ok {
+		return Err(CockpitError::msg(if stderr.trim().is_empty() { stdout.trim().to_string() } else { stderr.trim().to_string() }));
+	}
+	Ok(stdout)
+}
+
+/// Le même, sans juger le code de sortie : `install --json` rend sa réponse
+/// sur la sortie standard même quand il refuse.
+async fn claude_raw(cwd: &Path, args: &[&str]) -> Result<(bool, String, String)> {
 	let binary = crate::agent::claude_binary().ok_or_else(|| CockpitError::msg(crate::i18n::t("agent.claudeNotFound")))?;
 	let output = crate::platform::quiet_async(&mut tokio::process::Command::new(&binary))
 		.args(args)
@@ -320,12 +335,11 @@ async fn claude(cwd: &Path, args: &[&str]) -> Result<String> {
 		.output()
 		.await
 		.map_err(|e| CockpitError::msg(e.to_string()))?;
-	if !output.status.success() {
-		let stderr = String::from_utf8_lossy(&output.stderr).trim().to_string();
-		let stdout = String::from_utf8_lossy(&output.stdout).trim().to_string();
-		return Err(CockpitError::msg(if stderr.is_empty() { stdout } else { stderr }));
-	}
-	Ok(String::from_utf8_lossy(&output.stdout).to_string())
+	Ok((
+		output.status.success(),
+		String::from_utf8_lossy(&output.stdout).to_string(),
+		String::from_utf8_lossy(&output.stderr).to_string(),
+	))
 }
 
 /// Le catalogue vu depuis le projet : ses plugins (portées utilisateur, projet,
@@ -411,12 +425,316 @@ pub async fn inspect(project: &Path, plugin_id: &str) -> Result<Inspection> {
 		.await
 		.ok()
 		.and_then(|details| parse_always_on(&details));
-	Ok(Inspection { inventory, always_on_tokens, source })
+	let approved = approval(project, plugin_id).map(|entry| entry.fingerprint);
+	Ok(Inspection { inventory, always_on_tokens, source, approved })
+}
+
+// ── Installer ────────────────────────────────────────────────────────────────
+
+/// Ce qu'on a approuvé en installant un plugin d'ici : son empreinte, sa
+/// portée, la date. C'est la date qui sert de point de bascule à la mesure.
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq)]
+#[serde(rename_all = "camelCase")]
+pub struct Approval {
+	pub fingerprint: String,
+	pub scope: String,
+	pub at: String,
+}
+
+fn approvals_path() -> PathBuf {
+	crate::config::config_dir().join("methodes").join("approbations.json")
+}
+
+/// projet → plugin → approbation.
+type Approvals = std::collections::BTreeMap<String, std::collections::BTreeMap<String, Approval>>;
+
+fn load_approvals() -> Approvals {
+	std::fs::read_to_string(approvals_path())
+		.ok()
+		.and_then(|raw| serde_json::from_str(&raw).ok())
+		.unwrap_or_default()
+}
+
+fn project_key(project: &Path) -> String {
+	crate::platform::path_key(&project.to_string_lossy())
+}
+
+/// L'approbation d'un plugin pour ce projet, s'il a été installé d'ici.
+pub fn approval(project: &Path, plugin_id: &str) -> Option<Approval> {
+	load_approvals().get(&project_key(project))?.get(plugin_id).cloned()
+}
+
+fn set_approval(project: &Path, plugin_id: &str, approval: Option<Approval>) -> Result<()> {
+	let mut all = load_approvals();
+	let entries = all.entry(project_key(project)).or_default();
+	match approval {
+		Some(approval) => {
+			entries.insert(plugin_id.to_string(), approval);
+		}
+		None => {
+			entries.remove(plugin_id);
+		}
+	}
+	let path = approvals_path();
+	if let Some(parent) = path.parent() {
+		std::fs::create_dir_all(parent)?;
+	}
+	let raw = serde_json::to_string_pretty(&all).map_err(|e| CockpitError::msg(e.to_string()))?;
+	std::fs::write(path, raw)?;
+	Ok(())
+}
+
+/// Ce que rend une installation.
+#[derive(Debug, Clone, Serialize, PartialEq)]
+#[serde(tag = "kind", rename_all = "camelCase")]
+pub enum Installation {
+	/// Installé ; le message du CLI.
+	Installed { message: String },
+	/// La marketplace déclare une commande à lancer pour installer : elle doit
+	/// être montrée, et acceptée par son empreinte, avant de recommencer.
+	NeedsCommand { command: String, sha256: String },
+}
+
+/// La réponse de `claude plugin install --json`.
+fn parse_installation(raw: &str) -> Result<Installation> {
+	let line = raw.lines().rev().find(|line| line.trim_start().starts_with('{')).unwrap_or_default();
+	let value: serde_json::Value = serde_json::from_str(line).map_err(|_| CockpitError::msg(raw.trim().to_string()))?;
+	let text = |v: &serde_json::Value, key: &str| v.get(key).and_then(|x| x.as_str()).unwrap_or_default().to_string();
+	if text(&value, "outcome") == "ok" {
+		return Ok(Installation::Installed { message: text(&value, "message") });
+	}
+	if let Some(shown) = value.get("shownCommand").filter(|shown| shown.is_object()) {
+		let sha256 = text(shown, "sha256");
+		if !sha256.is_empty() {
+			let command = ["command", "text", "display"]
+				.iter()
+				.map(|key| text(shown, key))
+				.find(|found| !found.is_empty())
+				.unwrap_or_else(|| shown.to_string());
+			return Ok(Installation::NeedsCommand { command, sha256 });
+		}
+	}
+	let message = text(&value, "message");
+	Err(CockpitError::msg(if message.is_empty() { raw.trim().to_string() } else { message }))
+}
+
+/// Installe un plugin pour le projet (`project`, commité et partagé) ou pour ce
+/// poste seulement (`local`).
+///
+/// `approved` est l'empreinte de ce que tu as lu : le plugin est relu au moment
+/// d'installer, et si ce qu'il exécute a changé entre-temps, on refuse — on
+/// n'installe que ce qui a été lu. `accept` est l'empreinte d'une commande de
+/// marketplace déjà montrée et acceptée (voir [`Installation::NeedsCommand`]).
+pub async fn install(project: &Path, plugin_id: &str, scope: &str, approved: &str, accept: Option<&str>) -> Result<Installation> {
+	if !matches!(scope, "project" | "local") {
+		return Err(CockpitError::msg(crate::i18n::tf("methods.badScope", &[("scope", &scope)])));
+	}
+	let fresh = inspect(project, plugin_id).await?;
+	if fresh.inventory.fingerprint != approved {
+		return Err(CockpitError::msg(crate::i18n::t("methods.changedSinceReading")));
+	}
+	let mut args = vec!["plugin", "install", plugin_id, "--scope", scope, "--json"];
+	if let Some(sha) = accept {
+		args.extend(["--accept-command", sha]);
+	}
+	let (_, stdout, stderr) = claude_raw(project, &args).await?;
+	let result = parse_installation(if stdout.trim().is_empty() { &stderr } else { &stdout })?;
+	if matches!(result, Installation::Installed { .. }) {
+		set_approval(
+			project,
+			plugin_id,
+			Some(Approval { fingerprint: approved.to_string(), scope: scope.to_string(), at: chrono::Utc::now().to_rfc3339() }),
+		)?;
+	}
+	Ok(result)
+}
+
+/// Désinstalle un plugin de la portée où il est installé.
+pub async fn uninstall(project: &Path, plugin_id: &str, scope: &str) -> Result<String> {
+	let raw = claude(project, &["plugin", "uninstall", plugin_id, "--scope", scope, "--json"]).await?;
+	set_approval(project, plugin_id, None)?;
+	let value: serde_json::Value = serde_json::from_str(raw.trim()).unwrap_or_default();
+	Ok(value.get("message").and_then(|m| m.as_str()).unwrap_or_default().to_string())
+}
+
+// ── Mesurer ──────────────────────────────────────────────────────────────────
+
+/// Ce que les agents du projet ont donné sur une période.
+#[derive(Debug, Clone, Serialize, PartialEq, Default)]
+#[serde(rename_all = "camelCase")]
+pub struct Period {
+	/// Exécutions terminées.
+	pub executions: usize,
+	/// Celles qui ont échoué ou ne sont jamais parties.
+	pub failed: usize,
+	pub median_turns: Option<f64>,
+	pub median_cost_usd: Option<f64>,
+}
+
+/// Avant et après l'installation d'un plugin, à durée égale.
+#[derive(Debug, Clone, Serialize, PartialEq)]
+#[serde(rename_all = "camelCase")]
+pub struct Measure {
+	pub since: String,
+	pub days: i64,
+	pub before: Period,
+	pub after: Period,
+}
+
+fn median(mut values: Vec<f64>) -> Option<f64> {
+	if values.is_empty() {
+		return None;
+	}
+	values.sort_by(|a, b| a.partial_cmp(b).unwrap_or(std::cmp::Ordering::Equal));
+	let middle = values.len() / 2;
+	Some(if values.len() % 2 == 1 { values[middle] } else { (values[middle - 1] + values[middle]) / 2.0 })
+}
+
+fn period(executions: &[&crate::executions::Execution]) -> Period {
+	use crate::executions::Outcome;
+	let done: Vec<_> = executions.iter().filter(|e| !matches!(e.outcome, Outcome::Running)).collect();
+	Period {
+		executions: done.len(),
+		failed: done.iter().filter(|e| matches!(e.outcome, Outcome::Failed | Outcome::LostAtLaunch)).count(),
+		median_turns: median(done.iter().map(|e| e.tally.turns as f64).collect()),
+		median_cost_usd: median(
+			done.iter()
+				.map(|e| e.tally.cost.reported_usd + e.tally.cost.estimated_usd)
+				.filter(|cost| *cost > 0.0)
+				.collect(),
+		),
+	}
+}
+
+/// Compare les exécutions du projet avant et après `since`, sur autant de jours
+/// de part et d'autre — au plus trente. Les exécutions du projet sont celles
+/// lancées pendant qu'il était actif (`Opening::project`).
+pub fn measure_between(all: &[crate::executions::Execution], project_id: &str, since: chrono::DateTime<chrono::Utc>, now: chrono::DateTime<chrono::Utc>) -> Measure {
+	let days = (now - since).num_days().clamp(1, 30);
+	let window = chrono::Duration::days(days);
+	let at = |e: &crate::executions::Execution| chrono::DateTime::parse_from_rfc3339(&e.started_at).ok().map(|d| d.with_timezone(&chrono::Utc));
+	let mine: Vec<_> = all.iter().filter(|e| e.opening.project == project_id).collect();
+	let before: Vec<_> = mine.iter().copied().filter(|e| at(e).is_some_and(|d| d < since && d >= since - window)).collect();
+	let after: Vec<_> = mine.iter().copied().filter(|e| at(e).is_some_and(|d| d >= since && d < since + window)).collect();
+	Measure { since: since.to_rfc3339(), days, before: period(&before), after: period(&after) }
+}
+
+/// L'avant/après d'un plugin installé : depuis ton accord, ou à défaut depuis
+/// son installation selon le CLI.
+pub async fn measure(project: &Path, project_id: &str, plugin_id: &str) -> Result<Measure> {
+	let since = match approval(project, plugin_id) {
+		Some(approved) => approved.at,
+		None => catalog(project)
+			.await?
+			.installed
+			.into_iter()
+			.find(|p| p.id == plugin_id)
+			.map(|p| p.installed_at)
+			.unwrap_or_default(),
+	};
+	let since = chrono::DateTime::parse_from_rfc3339(&since)
+		.map_err(|_| CockpitError::msg(crate::i18n::tf("methods.unknownPlugin", &[("id", &plugin_id)])))?
+		.with_timezone(&chrono::Utc);
+	Ok(measure_between(&crate::executions::fold(), project_id, since, chrono::Utc::now()))
 }
 
 #[cfg(test)]
 mod tests {
 	use super::*;
+
+	/// Bout en bout, avec le vrai CLI : installer pour un projet jetable un
+	/// plugin qui n'exécute rien, retrouver l'accord et le réglage du projet,
+	/// refuser une empreinte qui n'est pas celle lue, puis désinstaller.
+	#[tokio::test]
+	#[ignore]
+	async fn un_plugin_s_installe_pour_le_projet_puis_se_desinstalle() {
+		let project = std::env::temp_dir().join(format!("cockpit-methodes-projet-{}", std::process::id()));
+		let _ = std::fs::remove_dir_all(&project);
+		std::fs::create_dir_all(&project).unwrap();
+		let id = "agent-sdk-dev@claude-plugins-official";
+		let read = inspect(&project, id).await.unwrap();
+		assert!(read.inventory.hooks.is_empty() && read.inventory.servers.is_empty());
+
+		// Une empreinte qui n'est pas celle lue : refusé, rien n'est installé.
+		assert!(install(&project, id, "project", "pas-la-bonne", None).await.is_err());
+
+		let done = install(&project, id, "project", &read.inventory.fingerprint, None).await.unwrap();
+		assert!(matches!(done, Installation::Installed { .. }), "{done:?}");
+		let settings = std::fs::read_to_string(project.join(".claude").join("settings.json")).unwrap();
+		assert!(settings.contains(id), "{settings}");
+		assert_eq!(approval(&project, id).map(|a| a.scope), Some("project".into()));
+
+		uninstall(&project, id, "project").await.unwrap();
+		assert!(approval(&project, id).is_none());
+		let settings = std::fs::read_to_string(project.join(".claude").join("settings.json")).unwrap();
+		assert!(!settings.contains(&format!("\"{id}\": true")), "{settings}");
+		let _ = std::fs::remove_dir_all(&project);
+	}
+
+	/// Les réponses de `install --json` : installé, commande à accepter, refus.
+	#[test]
+	fn la_reponse_d_installation_se_lit() {
+		assert_eq!(
+			parse_installation(r#"{"command":"install","outcome":"ok","message":"Successfully installed plugin: a@m (scope: project)"}"#).unwrap(),
+			Installation::Installed { message: "Successfully installed plugin: a@m (scope: project)".into() }
+		);
+		assert_eq!(
+			parse_installation(r#"{"outcome":"needs-confirmation","shownCommand":{"command":"npx a-installer","sha256":"ab12"}}"#).unwrap(),
+			Installation::NeedsCommand { command: "npx a-installer".into(), sha256: "ab12".into() }
+		);
+		let refus = parse_installation(r#"{"outcome":"error","message":"Plugin not found"}"#).unwrap_err();
+		assert!(refus.to_string().contains("Plugin not found"));
+	}
+
+	/// L'avant/après compare deux fenêtres de même durée, et seulement les
+	/// exécutions du projet.
+	#[test]
+	fn l_avant_apres_compare_des_fenetres_egales() {
+		use crate::executions::{Execution, Outcome};
+		let since = chrono::DateTime::parse_from_rfc3339("2026-11-10T00:00:00Z").unwrap().with_timezone(&chrono::Utc);
+		let now = since + chrono::Duration::days(5);
+		let exec = |day: i64, project: &str, outcome: Outcome, turns: u32, usd: f64| {
+			let mut tally = crate::executions::Tally::default();
+			tally.turns = turns;
+			tally.cost.reported_usd = usd;
+			Execution {
+				id: String::new(),
+				started_at: (since + chrono::Duration::days(day)).to_rfc3339(),
+				ended_at: String::new(),
+				opening: crate::executions::Opening { project: project.into(), ..Default::default() },
+				engine_session: String::new(),
+				models: Vec::new(),
+				verdict: String::new(),
+				outcome,
+				tally,
+				note: String::new(),
+				events_dropped: 0,
+				steps: Vec::new(),
+				observability: crate::executions::Observability {
+					reports_cost: true,
+					reports_token_split: true,
+					reports_tool_results: true,
+					reports_thinking: true,
+					resumable: true,
+				},
+			}
+		};
+		let all = vec![
+			exec(-3, "shop", Outcome::Answered, 10, 1.0),
+			exec(-2, "shop", Outcome::Failed, 14, 2.0),
+			exec(-20, "shop", Outcome::Answered, 50, 9.0), // hors fenêtre : 5 jours avant seulement
+			exec(1, "shop", Outcome::Answered, 6, 0.6),
+			exec(2, "shop", Outcome::Answered, 8, 0.8),
+			exec(2, "blog", Outcome::Failed, 99, 9.9), // un autre projet
+			exec(3, "shop", Outcome::Running, 1, 0.1), // pas terminée
+		];
+		let measure = measure_between(&all, "shop", since, now);
+		assert_eq!(measure.days, 5);
+		assert_eq!((measure.before.executions, measure.before.failed), (2, 1));
+		assert_eq!(measure.before.median_turns, Some(12.0));
+		assert_eq!((measure.after.executions, measure.after.failed), (2, 0));
+		assert_eq!(measure.after.median_cost_usd, Some(0.7));
+	}
 
 	fn plugin(nom: &str) -> PathBuf {
 		let dir = std::env::temp_dir().join(format!("cockpit-methodes-{}-{nom}", std::process::id()));

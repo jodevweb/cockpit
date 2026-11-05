@@ -120,5 +120,14 @@ test("les méthodes montrent ce qu'un plugin exécute avant de l'installer", asy
 	// Un plugin de skills seuls : rien ne s'exécute, et il le dit.
 	await page.locator("button", { hasText: "test-first" }).first().click();
 	await expect(page.getByText("Runs nothing")).toBeVisible();
+	// L'installer : une confirmation, puis le rappel de commiter les réglages.
+	await page.getByRole("button", { name: "Install", exact: true }).click();
+	// La confirmation s'ouvre par-dessus : son bouton est le dernier « Install ».
+	await page.getByRole("button", { name: "Install", exact: true }).last().click();
+	await expect(page.getByText(/commit \.claude\/settings\.json/).first()).toBeVisible();
+	// Un plugin installé : l'avant/après de ses agents.
+	await page.locator("button", { hasText: "review-kit" }).first().click();
+	await expect(page.getByText("Before", { exact: true })).toBeVisible();
+	await expect(page.getByText("27 runs · 2 failed")).toBeVisible();
 	expect(errors).toEqual([]);
 });

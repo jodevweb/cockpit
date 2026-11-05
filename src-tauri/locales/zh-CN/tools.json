@@ -7,6 +7,8 @@
 	},
 	"methods": {
 		"unsupportedSource": "无法在此读取该插件的源（{{kind}}）。",
-		"unknownPlugin": "未知插件：{{id}}。"
+		"unknownPlugin": "未知插件：{{id}}。",
+		"badScope": "未知范围：{{scope}}。插件可安装到项目或本机。",
+		"changedSinceReading": "该插件执行的内容在你查看后已更改：安装前请重新查看。"
 	}
 }

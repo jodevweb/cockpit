@@ -105,6 +105,8 @@ import type {
 	CloudVoice,
 	MethodCatalog,
 	MethodInspection,
+	MethodInstallation,
+	MethodMeasure,
 } from "./types";
 
 /** Toutes les erreurs backend remontent en `string` : on les normalise ici. */
@@ -650,6 +652,14 @@ export const api = {
 		/** Ce qu'un plugin contient et exécute, lu sans l'installer. */
 		inspect: (project: string, pluginId: string) =>
 			call<MethodInspection>("methods_inspect", { project, pluginId }),
+		/** Installe pour le projet ou ce poste, si ce qu'il exécute est encore ce qu'on a lu. */
+		install: (project: string, pluginId: string, scope: string, approved: string, accept?: string) =>
+			call<MethodInstallation>("methods_install", { project, pluginId, scope, approved, accept: accept ?? null }),
+		uninstall: (project: string, pluginId: string, scope: string) =>
+			call<string>("methods_uninstall", { project, pluginId, scope }),
+		/** Les agents du projet avant et après l'installation. */
+		measure: (project: string, projectId: string, pluginId: string) =>
+			call<MethodMeasure>("methods_measure", { project, projectId, pluginId }),
 	},
 
 	/** Missions : un ticket, un plan, des exécutants. */

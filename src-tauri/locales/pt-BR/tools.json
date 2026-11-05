@@ -7,6 +7,8 @@
 	},
 	"methods": {
 		"unsupportedSource": "A fonte deste plugin não pode ser lida aqui ({{kind}}).",
-		"unknownPlugin": "Plugin desconhecido: {{id}}."
+		"unknownPlugin": "Plugin desconhecido: {{id}}.",
+		"badScope": "Escopo desconhecido: {{scope}}. Um plugin se instala para o projeto ou para esta máquina.",
+		"changedSinceReading": "O que este plugin executa mudou desde a sua leitura: leia de novo antes de instalar."
 	}
 }

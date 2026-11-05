@@ -7,6 +7,8 @@
 	},
 	"methods": {
 		"unsupportedSource": "このプラグインのソースはここでは読めません（{{kind}}）。",
-		"unknownPlugin": "不明なプラグイン：{{id}}。"
+		"unknownPlugin": "不明なプラグイン：{{id}}。",
+		"badScope": "不明なスコープ：{{scope}}。プラグインはプロジェクトまたはこのマシンにインストールします。",
+		"changedSinceReading": "このプラグインが実行する内容は、確認後に変更されています。インストール前にもう一度確認してください。"
 	}
 }

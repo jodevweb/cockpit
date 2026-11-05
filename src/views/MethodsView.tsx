@@ -1,8 +1,9 @@
 import clsx from "clsx";
-import { Blocks, RefreshCw, ShieldAlert, ShieldCheck } from "lucide-react";
+import { Blocks, Download, RefreshCw, ShieldAlert, ShieldCheck, Trash2 } from "lucide-react";
 import { useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useCockpit } from "@/app/store";
+import { useConfirm } from "@/components/Confirm";
 import { Badge, Button, Empty, ErrorNote, Section, Spinner, ViewHeader } from "@/components/ui";
 import { api } from "@/lib/ipc";
 import type { MethodAvailable, MethodInstalled } from "@/lib/types";
@@ -28,7 +29,8 @@ type Row = { id: string; name: string; description: string; marketplace: string;
  * installation, avec ce que le plugin coûte en contexte à chaque session.
  */
 export function MethodsView() {
-	const { activeProject } = useCockpit();
+	const { activeProject, notify } = useCockpit();
+	const { confirm } = useConfirm();
 	const { t } = useTranslation("views");
 	const project = activeProject?.mainRepo ?? "";
 	const catalog = useAsync(() => (project ? api.methods.catalog(project) : Promise.resolve(null)), [project]);
@@ -37,6 +39,17 @@ export function MethodsView() {
 	const inspection = useAsync(
 		() => (project && selected ? api.methods.inspect(project, selected) : Promise.resolve(null)),
 		[project, selected],
+	);
+
+	const [scope, setScope] = useState<"project" | "local">("project");
+	const [busy, setBusy] = useState(false);
+	const installedEntry = catalog.data?.installed.find((plugin) => plugin.id === selected) ?? null;
+	const measure = useAsync(
+		() =>
+			project && installedEntry && activeProject?.id
+				? api.methods.measure(project, activeProject.id, installedEntry.id)
+				: Promise.resolve(null),
+		[project, installedEntry?.id, activeProject?.id],
 	);
 
 	const rows = useMemo(() => {
@@ -83,6 +96,70 @@ export function MethodsView() {
 
 	const detail = inspection.data;
 	const executes = detail ? detail.inventory.hooks.length + detail.inventory.servers.length > 0 : false;
+	const changedSinceApproval =
+		detail != null && installedEntry != null && detail.approved != null && detail.approved !== detail.inventory.fingerprint;
+
+	const install = async () => {
+		if (!detail || !selected) return;
+		const name = detail.inventory.name || selected;
+		const ok = await confirm({
+			title: t("methods.installTitle", { name }),
+			message: executes
+				? t("methods.installRuns", {
+						hooks: detail.inventory.hooks.length,
+						servers: detail.inventory.servers.length,
+					})
+				: t("methods.installSafe"),
+			confirmLabel: t("methods.install"),
+			danger: executes,
+		});
+		if (!ok) return;
+		setBusy(true);
+		try {
+			let result = await api.methods.install(project, selected, scope, detail.inventory.fingerprint);
+			// La marketplace veut lancer une commande pour installer : on la montre
+			// telle quelle, et on ne l'accepte que pour cette empreinte-là.
+			if (result.kind === "needsCommand") {
+				const accepted = await confirm({
+					title: t("methods.commandTitle"),
+					message: t("methods.commandMessage", { command: result.command }),
+					confirmLabel: t("methods.commandAccept"),
+					danger: true,
+				});
+				if (!accepted) return;
+				result = await api.methods.install(project, selected, scope, detail.inventory.fingerprint, result.sha256);
+			}
+			if (result.kind === "installed") {
+				notify(scope === "project" ? t("methods.installedProject", { name }) : t("methods.installedLocal", { name }));
+				catalog.reload();
+				inspection.reload();
+			}
+		} catch (error) {
+			notify(String(error));
+		} finally {
+			setBusy(false);
+		}
+	};
+
+	const uninstall = async () => {
+		if (!installedEntry) return;
+		const ok = await confirm({
+			title: t("methods.uninstallTitle", { name: installedEntry.id.split("@")[0] }),
+			confirmLabel: t("methods.uninstall"),
+			danger: true,
+		});
+		if (!ok) return;
+		setBusy(true);
+		try {
+			await api.methods.uninstall(project, installedEntry.id, installedEntry.scope);
+			notify(t("methods.uninstalled"));
+			catalog.reload();
+		} catch (error) {
+			notify(String(error));
+		} finally {
+			setBusy(false);
+		}
+	};
 
 	const item = (row: Row) => (
 		<button
@@ -172,6 +249,46 @@ export function MethodsView() {
 								) : null}
 							</div>
 
+							<div className="flex flex-wrap items-center gap-2">
+								{installedEntry ? (
+									<>
+										<Badge tone="success">
+											{t("methods.installedFor", {
+												scope: t(`methods.scope.${installedEntry.scope}`, { defaultValue: installedEntry.scope }),
+											})}
+										</Badge>
+										{installedEntry.scope !== "user" ? (
+											<Button size="sm" icon={Trash2} loading={busy} onClick={() => void uninstall()}>
+												{t("methods.uninstall")}
+											</Button>
+										) : (
+											<span className="text-[11px] text-ink-faint">{t("methods.userScopeHint")}</span>
+										)}
+									</>
+								) : (
+									<>
+										<select
+											value={scope}
+											onChange={(event) => setScope(event.target.value as "project" | "local")}
+											className={clsx(FIELD, "w-auto")}
+											title={t("methods.scopeTitle")}
+										>
+											<option value="project">{t("methods.forProject")}</option>
+											<option value="local">{t("methods.forMachine")}</option>
+										</select>
+										<Button variant="solid" icon={Download} loading={busy} onClick={() => void install()}>
+											{t("methods.install")}
+										</Button>
+									</>
+								)}
+							</div>
+
+							{changedSinceApproval ? (
+								<div className="rounded-xl border border-critical/30 bg-critical/8 p-3 text-[12px] text-ink">
+									{t("methods.changedSinceApproval")}
+								</div>
+							) : null}
+
 							<div
 								className={clsx(
 									"rounded-xl border p-3",
@@ -213,6 +330,39 @@ export function MethodsView() {
 									<p className="mt-1 text-[11.5px] text-ink-muted">{t("methods.executesNothingHint")}</p>
 								)}
 							</div>
+
+							{installedEntry && measure.data ? (
+								<Section title={t("methods.measureTitle", { days: measure.data.days })}>
+									<div className="grid grid-cols-2 gap-2.5">
+										{(["before", "after"] as const).map((side) => {
+											const period = measure.data![side];
+											return (
+												<div key={side} className="panel p-3">
+													<div className="text-[10.5px] font-medium tracking-[0.06em] text-ink-faint uppercase">
+														{t(`methods.${side}`)}
+													</div>
+													<div className="mt-1 text-[12px] text-ink">
+														{t("methods.periodRuns", { count: period.executions, failed: period.failed })}
+													</div>
+													<div className="text-[11px] text-ink-muted">
+														{[
+															period.medianTurns != null ? t("methods.periodTurns", { turns: Math.round(period.medianTurns) }) : null,
+															period.medianCostUsd != null
+																? t("methods.periodCost", { cost: period.medianCostUsd.toFixed(2) })
+																: null,
+														]
+															.filter(Boolean)
+															.join(" · ")}
+													</div>
+												</div>
+											);
+										})}
+									</div>
+									{measure.data.before.executions < 5 || measure.data.after.executions < 5 ? (
+										<p className="mt-2 text-[11px] text-ink-faint">{t("methods.measureFew")}</p>
+									) : null}
+								</Section>
+							) : null}
 
 							{(
 								[
