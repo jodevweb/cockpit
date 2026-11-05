@@ -11,6 +11,7 @@
 		"nothingToRun": "Kein Versuch zu starten: Wähle mindestens einen Fall.",
 		"tooMany": "{{count}} Versuche angefragt, höchstens {{max}} pro Kampagne.",
 		"alreadyRunning": "Es läuft bereits eine Kampagne.",
-		"passesBefore": "Die Tests des Pull Requests bestehen bereits mit dem Code davor: Dieser Fall unterscheidet keine Lösung von keiner Lösung."
+		"passesBefore": "Die Tests des Pull Requests bestehen bereits mit dem Code davor: Dieser Fall unterscheidet keine Lösung von keiner Lösung.",
+		"installFailed": "Die Installation der Abhängigkeiten ist fehlgeschlagen ({{command}}): {{output}}"
 	}
 }

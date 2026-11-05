@@ -11,6 +11,7 @@
 		"nothingToRun": "Nessuna prova da avviare: scegli almeno un caso.",
 		"tooMany": "{{count}} prove richieste, al massimo {{max}} per campagna.",
 		"alreadyRunning": "Una campagna è già in corso.",
-		"passesBefore": "I test della pull request passano già sul codice precedente: questo caso non distingue una soluzione dall'assenza di soluzione."
+		"passesBefore": "I test della pull request passano già sul codice precedente: questo caso non distingue una soluzione dall'assenza di soluzione.",
+		"installFailed": "L'installazione delle dipendenze non è riuscita ({{command}}): {{output}}"
 	}
 }

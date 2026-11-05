@@ -154,9 +154,51 @@ pub async fn cases(repo: &Path, branch: &str, limit: usize) -> Result<Vec<Case>>
 
 /// Prépare le worktree d'un essai : détaché, au commit d'avant la PR.
 pub async fn prepare(repo: &Path, case: &Case, dir: &Path) -> Result<()> {
-	let dir = dir.to_string_lossy();
-	crate::git::run_git(repo, &["worktree", "add", "--detach", "--quiet", &dir, &case.base]).await?;
+	let path = dir.to_string_lossy();
+	crate::git::run_git(repo, &["worktree", "add", "--detach", "--quiet", &path, &case.base]).await?;
+	// Un worktree neuf n'a pas ses dépendances : sans elles, les tests d'un
+	// projet JavaScript échouent tous, et le contrôle d'un cas conclurait qu'il
+	// « sait échouer » sur une simple absence de `node_modules`.
+	if let Some(command) = install_command(dir) {
+		let outcome = crate::gates::run(&path, &[command.clone()], INSTALL_TIMEOUT).await;
+		if !outcome.passed {
+			discard(repo, dir).await;
+			return Err(crate::error::CockpitError::msg(crate::i18n::tf(
+				"replay.installFailed",
+				&[("command", &command), ("output", &outcome.output)],
+			)));
+		}
+	}
 	Ok(())
+}
+
+/// Le temps laissé à l'installation des dépendances d'un essai.
+const INSTALL_TIMEOUT: Duration = Duration::from_secs(10 * 60);
+
+/// La commande qui installe les dépendances d'un worktree, d'après son
+/// fichier de verrouillage — la version figée, comme en CI.
+///
+/// `None` quand il n'y a rien à installer, ou rien qu'on sache installer : un
+/// projet Rust ou Go se compile en jouant ses tests, sans étape à part.
+pub fn install_command(dir: &Path) -> Option<String> {
+	let has = |name: &str| dir.join(name).exists();
+	if !has("package.json") {
+		return None;
+	}
+	Some(
+		if has("pnpm-lock.yaml") {
+			"pnpm install --frozen-lockfile"
+		} else if has("yarn.lock") {
+			"yarn install --frozen-lockfile"
+		} else if has("bun.lockb") || has("bun.lock") {
+			"bun install --frozen-lockfile"
+		} else if has("package-lock.json") {
+			"npm ci"
+		} else {
+			"npm install"
+		}
+		.to_string(),
+	)
 }
 
 /// Pose dans le worktree les fichiers de test de la PR humaine.
@@ -626,6 +668,44 @@ mod tests {
 		assert!(matches!(jugement.verdict, Verdict::NotJudgeable { .. }));
 		discard(&repo, &essai).await;
 
+		let _ = std::fs::remove_dir_all(&repo);
+	}
+
+	/// Les dépendances s'installent d'après le fichier de verrouillage, et rien
+	/// ne s'installe là où il n'y a pas de `package.json`.
+	#[test]
+	fn l_installation_suit_le_fichier_de_verrouillage() {
+		let dir = depot("verrou");
+		assert_eq!(install_command(&dir), None);
+		std::fs::write(dir.join("package.json"), "{}").unwrap();
+		assert_eq!(install_command(&dir).as_deref(), Some("npm install"));
+		std::fs::write(dir.join("package-lock.json"), "{}").unwrap();
+		assert_eq!(install_command(&dir).as_deref(), Some("npm ci"));
+		std::fs::write(dir.join("pnpm-lock.yaml"), "").unwrap();
+		assert_eq!(install_command(&dir).as_deref(), Some("pnpm install --frozen-lockfile"));
+		let _ = std::fs::remove_dir_all(&dir);
+	}
+
+	/// Un projet JavaScript : le worktree d'essai reçoit ses dépendances avant
+	/// tout jugement. Sans réseau ni dépendance déclarée, `npm install` passe.
+	#[tokio::test]
+	async fn le_worktree_d_un_projet_js_recoit_ses_dependances() {
+		let repo = depot_avec_une_pr("js");
+		std::fs::write(repo.join("package.json"), r#"{"name":"essai","version":"1.0.0","private":true}"#).unwrap();
+		git(&repo, &["add", "."]);
+		git(&repo, &["commit", "--quiet", "-m", "Un package.json"]);
+		let case = Case {
+			number: Some(1),
+			title: "essai".into(),
+			base: "HEAD".into(),
+			head: "HEAD".into(),
+			tests: Vec::new(),
+			sources: Vec::new(),
+		};
+		let dir = repo.with_file_name(format!("{}-w", repo.file_name().unwrap().to_string_lossy()));
+		prepare(&repo, &case, &dir).await.unwrap();
+		assert!(dir.join("package-lock.json").exists(), "npm install a tourné dans le worktree");
+		discard(&repo, &dir).await;
 		let _ = std::fs::remove_dir_all(&repo);
 	}
 

@@ -11,6 +11,7 @@
 		"nothingToRun": "No trial to run: pick at least one case.",
 		"tooMany": "{{count}} trials asked, at most {{max}} per campaign.",
 		"alreadyRunning": "A campaign is already running.",
-		"passesBefore": "The pull request's tests already pass on the code before it: this case cannot tell a solution from no solution."
+		"passesBefore": "The pull request's tests already pass on the code before it: this case cannot tell a solution from no solution.",
+		"installFailed": "Installing the dependencies failed ({{command}}): {{output}}"
 	}
 }

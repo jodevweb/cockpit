@@ -11,6 +11,7 @@
 		"nothingToRun": "No hay ningún ensayo que lanzar: elige al menos un caso.",
 		"tooMany": "{{count}} ensayos pedidos, {{max}} como máximo por campaña.",
 		"alreadyRunning": "Ya hay una campaña en curso.",
-		"passesBefore": "Las pruebas de la pull request ya pasan con el código anterior: este caso no distingue una solución de la ausencia de solución."
+		"passesBefore": "Las pruebas de la pull request ya pasan con el código anterior: este caso no distingue una solución de la ausencia de solución.",
+		"installFailed": "La instalación de las dependencias falló ({{command}}): {{output}}"
 	}
 }

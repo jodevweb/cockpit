@@ -11,6 +11,7 @@
 		"nothingToRun": "没有可运行的试验：请至少选择一个案例。",
 		"tooMany": "请求了 {{count}} 次试验，每次活动最多 {{max}} 次。",
 		"alreadyRunning": "已有一个活动正在运行。",
-		"passesBefore": "拉取请求的测试在修改前的代码上已经通过：此案例无法区分有无解决方案。"
+		"passesBefore": "拉取请求的测试在修改前的代码上已经通过：此案例无法区分有无解决方案。",
+		"installFailed": "安装依赖失败（{{command}}）：{{output}}"
 	}
 }
