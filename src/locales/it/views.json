@@ -1297,12 +1297,12 @@
 		},
 		"resume": {
 			"resume": "Riprendi il lavoro",
-			"resumeHint": "riapre tutto e chiede a ogni agente di ripartire da dove si era fermato",
+			"resumeHint": "riapre tutto e chiede agli agenti interrotti a metà lavoro di ripartire da dove si erano fermati",
 			"reopen": "Riapri senza ripartire",
 			"reopenHint": "le conversazioni ci sono, ricaricate, ma nessuno riparte da solo",
 			"off": "Non riaprire nulla",
 			"offHint": "i workspace aspettano nella barra; un clic li risveglia",
-			"resumeHelp": "Ogni agente riaperto riceve un'istruzione di ripresa: verificare lo stato reale del repository prima di continuare, invece di ripartire dalla sua ultima azione. Il suo contesto è intatto — la CLI riprende la conversazione dal suo identificativo.",
+			"resumeHelp": "Un agente interrotto a metà lavoro riceve un'istruzione di ripresa: verificare lo stato reale del repository prima di continuare, invece di ripartire dalla sua ultima azione. Quello che aveva finito il suo turno viene solo riaperto: aspetta la tua prossima istruzione. Il suo contesto è intatto — la CLI riprende la conversazione dal suo identificativo.",
 			"reopenHelp": "Le conversazioni vengono riaperte e sono leggibili; il lavoro lo fai ripartire tu.",
 			"offHelp": "Nulla riparte: ciò che girava ieri appare addormentato nella barra dei workspace.",
 			"note": "Questa scelta vale al prossimo avvio del cockpit. Le missioni in corso riprendono sempre — i loro esecutori come il loro agente principale."

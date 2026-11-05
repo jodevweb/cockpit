@@ -1297,12 +1297,12 @@
 		},
 		"resume": {
 			"resume": "Resume work",
-			"resumeHint": "reopens everything and asks each agent to pick up where it left off",
+			"resumeHint": "reopens everything and asks agents cut off mid-task to pick up where they left off",
 			"reopen": "Reopen without restarting",
 			"reopenHint": "the conversations are there, reloaded, but nobody starts again on their own",
 			"off": "Reopen nothing",
 			"offHint": "workspaces wait in the bar; one click wakes them up",
-			"resumeHelp": "Each reopened agent receives a resume instruction: check the actual state of the repository before continuing, rather than restarting from its last action. Its context is intact — the CLI resumes the conversation by its identifier.",
+			"resumeHelp": "An agent cut off mid-task receives a resume instruction: check the actual state of the repository before continuing, rather than restarting from its last action. One that had finished its turn is only reopened: it waits for your next instruction. Its context is intact — the CLI resumes the conversation by its identifier.",
 			"reopenHelp": "Conversations are reopened and readable; you restart the work yourself.",
 			"offHelp": "Nothing restarts: what was running yesterday shows as asleep in the workspace bar.",
 			"note": "This choice applies at the next cockpit launch. Running missions always resume — their executors as well as their lead agent."

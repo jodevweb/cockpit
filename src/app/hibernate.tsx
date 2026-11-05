@@ -52,6 +52,17 @@ export interface SleepingAgent {
 	claudeSessionId: string | null;
 	/** Ce qu'on lui avait demandé, pour reconnaître l'onglet avant de l'ouvrir. */
 	title: string;
+	/**
+	 * Il était en plein tour quand le cockpit s'est fermé.
+	 *
+	 * Seul celui-là a un travail à reprendre. Un agent qui avait rendu sa
+	 * réponse attendait la consigne suivante : lui dire « continue » au
+	 * démarrage le remettait au travail sans que personne l'ait demandé — sur
+	 * une tâche déjà livrée, avec des demandes d'autorisation à la clé.
+	 * Absent dans une empreinte d'avant ce champ : traité comme un tour fini,
+	 * le cas qui ne lance rien.
+	 */
+	working?: boolean;
 }
 
 export interface SleepingGroup {
@@ -68,7 +79,8 @@ export interface SleepingGroup {
  *
  * `off` : les workspaces attendent dans la barre, un clic les réveille.
  * `reopen` : ils se rouvrent, conversations relues, sans rien demander aux agents.
- * `resume` : ils se rouvrent et chaque agent est invité à reprendre son travail.
+ * `resume` : ils se rouvrent, et les agents coupés en plein tour sont invités à
+ * reprendre leur travail ; ceux qui l'avaient fini sont seulement rouverts.
  */
 export type ResumeMode = "off" | "reopen" | "resume";
 
@@ -148,6 +160,7 @@ export function HibernateProvider({ children }: { children: ReactNode }) {
 			agents: group.runs.map((run) => ({
 				claudeSessionId: run.claudeSessionId,
 				title: run.turns.find((turn) => turn.kind === "user")?.text.slice(0, 120) ?? "",
+				working: run.running && run.thinking,
 			})),
 			terminals: group.terminals.map((terminal) => ({ label: terminal.label })),
 			at: Date.now(),
@@ -234,21 +247,23 @@ export function HibernateProvider({ children }: { children: ReactNode }) {
 	/**
 	 * Rouvre ce qu'un instantané décrit : ses conversations, puis ses shells.
 	 *
-	 * `prompt` est ce qu'on adresse aux agents en les rouvrant — vide pour les
-	 * rendre simplement disponibles, une consigne de reprise pour les remettre au
-	 * travail. Partagé entre le réveil d'un clic et la reprise du démarrage : les
-	 * deux rouvrent la même chose, seule l'intention diffère.
+	 * `prompt` est ce qu'on adresse aux agents coupés en plein tour — vide pour
+	 * les rendre simplement disponibles, une consigne de reprise pour les remettre
+	 * au travail. Un agent qui avait fini son tour ne la reçoit jamais : il n'a
+	 * rien à reprendre. Partagé entre le réveil d'un clic et la reprise du
+	 * démarrage : les deux rouvrent la même chose, seule l'intention diffère.
 	 */
 	const restore = useCallback(
 		(entry: SleepingGroup, prompt: string) => {
 			for (const agent of entry.agents) {
+				const said = agent.working ? prompt : "";
 				// Le journal de la session dit ce qui s'est dit avant : on le
 				// retrouve par son identifiant parmi les sessions indexées, faute
 				// de quoi l'agent rouvre sur une conversation vide.
 				const file = agent.claudeSessionId
 					? index.current.find((session) => session.id === agent.claudeSessionId)?.file
 					: undefined;
-				agents.open(entry.cwd, prompt, agent.claudeSessionId ?? undefined, file, true);
+				agents.open(entry.cwd, said, agent.claudeSessionId ?? undefined, file, true);
 			}
 			for (const terminal of entry.terminals) {
 				terminals.open(entry.cwd, terminal.label ? { label: terminal.label } : undefined);
@@ -278,11 +293,17 @@ export function HibernateProvider({ children }: { children: ReactNode }) {
 	// fermeture peut être brutale — plantage, redémarrage du poste — et il n'y a
 	// alors personne pour enregistrer quoi que ce soit.
 	//
-	// La signature ne bouge qu'à l'ouverture ou à la fermeture d'un onglet, pas
-	// à chaque phrase reçue : sans elle, on écrirait dans le stockage local
-	// plusieurs fois par seconde.
+	// La signature ne bouge qu'à l'ouverture ou à la fermeture d'un onglet, et
+	// quand un agent commence ou finit un tour — pas à chaque phrase reçue : sans
+	// elle, on écrirait dans le stockage local plusieurs fois par seconde. Le
+	// tour en compte : c'est lui qui dit, au lancement suivant, qui reprendre.
 	const signature = groups
-		.map((group) => `${group.cwd}:${group.runs.length}:${group.terminals.length}`)
+		.map(
+			(group) =>
+				`${group.cwd}:${group.runs
+					.map((run) => (run.running && run.thinking ? "1" : "0"))
+					.join("")}:${group.terminals.length}`,
+		)
 		.join("|");
 	useEffect(() => {
 		if (!restored.current) return;

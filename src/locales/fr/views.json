@@ -1297,12 +1297,12 @@
 		},
 		"resume": {
 			"resume": "Reprendre le travail",
-			"resumeHint": "rouvre tout et demande à chaque agent de reprendre où il en était",
+			"resumeHint": "rouvre tout et demande aux agents coupés en plein travail de reprendre où ils en étaient",
 			"reopen": "Rouvrir sans relancer",
 			"reopenHint": "les conversations sont là, relues, mais personne ne repart de lui-même",
 			"off": "Ne rien rouvrir",
 			"offHint": "les workspaces attendent dans la barre ; un clic les réveille",
-			"resumeHelp": "Chaque agent rouvert reçoit une consigne de reprise : faire le point sur l'état réel du dépôt avant de continuer, plutôt que de repartir sur sa dernière action. Son contexte, lui, est intact — le CLI reprend la conversation par son identifiant.",
+			"resumeHelp": "Un agent coupé en plein travail reçoit une consigne de reprise : faire le point sur l'état réel du dépôt avant de continuer, plutôt que de repartir sur sa dernière action. Celui qui avait fini son tour est seulement rouvert : il attend ta prochaine consigne. Son contexte, lui, est intact — le CLI reprend la conversation par son identifiant.",
 			"reopenHelp": "Les conversations sont rouvertes et relisibles ; c'est toi qui relances le travail.",
 			"offHelp": "Rien ne repart : ce qui tournait hier s'affiche endormi dans la barre des workspaces.",
 			"note": "Ce choix s'applique au prochain lancement du cockpit. Les missions en cours, elles, reprennent toujours — leurs exécutants comme leur agent maître."
