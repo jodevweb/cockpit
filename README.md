@@ -521,7 +521,8 @@ native speakers are welcome.
 
 ## Contributing
 
-Issues and pull requests are welcome; CI checks every pull request on macOS and
+Issues and pull requests are welcome: start with
+[CONTRIBUTING.md](CONTRIBUTING.md) (running it, checks, conventions); CI checks every pull request on macOS and
 Windows (types, translation catalogs, Rust tests) and the interface in a browser
 (`pnpm test:ui`, Playwright on the preview data; run
 `pnpm exec playwright install chromium` once beforehand). The source code and its

@@ -1,0 +1,49 @@
+name: Bug
+description: Something does not work as it should.
+labels: [bug]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for reporting. For a security vulnerability, do not open an issue: see SECURITY.md.
+  - type: input
+    id: version
+    attributes:
+      label: Cockpit version
+      description: Settings → Version.
+      placeholder: 0.86.2
+    validations:
+      required: true
+  - type: dropdown
+    id: system
+    attributes:
+      label: System
+      options:
+        - macOS (Apple Silicon)
+        - macOS (Intel)
+        - Windows
+        - Linux
+    validations:
+      required: true
+  - type: input
+    id: engine
+    attributes:
+      label: Agent engine, if relevant
+      placeholder: Claude Code 2.x, Codex, Gemini…
+  - type: textarea
+    id: what
+    attributes:
+      label: What happened
+      description: What you did, what you saw, and what you expected instead.
+    validations:
+      required: true
+  - type: textarea
+    id: reproduce
+    attributes:
+      label: How to reproduce
+      description: The shortest sequence of steps that shows it, if you have one.
+  - type: textarea
+    id: evidence
+    attributes:
+      label: Screenshots, logs or agent output
+      description: Remove tokens, paths or anything you would not want public.
