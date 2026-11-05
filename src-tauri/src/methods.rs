@@ -184,8 +184,13 @@ fn hooks_of(value: &serde_json::Value) -> Vec<Hook> {
 	for (event, groups) in events {
 		for group in groups.as_array().into_iter().flatten() {
 			for hook in group.get("hooks").and_then(|list| list.as_array()).into_iter().flatten() {
-				if let Some(command) = hook.get("command").and_then(|c| c.as_str()) {
-					found.push(Hook { event: event.clone(), command: command.to_string() });
+				let target = hook
+					.get("command")
+					.and_then(|c| c.as_str())
+					.map(str::to_string)
+					.or_else(|| hook.get("url").and_then(|u| u.as_str()).map(|url| format!("HTTP {url}")));
+				if let Some(command) = target {
+					found.push(Hook { event: event.clone(), command });
 				}
 			}
 		}
@@ -233,35 +238,63 @@ fn scripts_in(command: &str) -> Vec<String> {
 		.collect()
 }
 
+/// Un chemin relatif qui reste dans son dossier : ni absolu, ni préfixe de
+/// lecteur, ni `..`. Les chemins qu'une marketplace ou un manifeste donnent ne
+/// sont pas de confiance : `../..` pointerait ailleurs, et l'on lirait un autre
+/// plugin que celui qui s'installe.
+pub fn safe_relative(path: &str) -> bool {
+	let path = Path::new(path.trim_start_matches("./"));
+	!path.as_os_str().is_empty()
+		&& path.components().all(|component| matches!(component, std::path::Component::Normal(_) | std::path::Component::CurDir))
+}
+
+/// Les déclarations d'un manifeste sous ses trois formes : l'objet lui-même,
+/// un chemin vers un fichier JSON, ou une liste de chemins.
+fn declared(root: &Path, value: Option<&serde_json::Value>) -> Vec<serde_json::Value> {
+	let read = |path: &str| safe_relative(path).then(|| read_json(&root.join(path.trim_start_matches("./")))).flatten();
+	match value {
+		Some(object) if object.is_object() => vec![object.clone()],
+		Some(serde_json::Value::String(path)) => read(path).into_iter().collect(),
+		Some(serde_json::Value::Array(paths)) => paths.iter().filter_map(|p| p.as_str()).filter_map(read).collect(),
+		_ => Vec::new(),
+	}
+}
+
 /// Lit un plugin dans son dossier, sans rien exécuter.
 pub fn read_plugin(root: &Path) -> Inventory {
 	let manifest = read_json(&root.join(".claude-plugin").join("plugin.json")).unwrap_or_default();
 	let text = |key: &str| manifest.get(key).and_then(|v| v.as_str()).unwrap_or_default().to_string();
 
 	let mut hooks = hooks_of(&read_json(&root.join("hooks").join("hooks.json")).unwrap_or_default());
-	if manifest.get("hooks").is_some_and(|h| h.is_object()) {
-		hooks.extend(hooks_of(&manifest));
+	for declaration in declared(root, manifest.get("hooks")) {
+		hooks.extend(hooks_of(&declaration));
 	}
 	let mut servers = servers_of(&read_json(&root.join(".mcp.json")).unwrap_or_default());
-	if let Some(inline) = manifest.get("mcpServers").filter(|m| m.is_object()) {
-		servers.extend(servers_of(inline));
+	for declaration in declared(root, manifest.get("mcpServers")) {
+		servers.extend(servers_of(&declaration));
 	}
+	// Les serveurs de langage se lancent eux aussi sur le poste.
+	let mut lsp = servers_of(&read_json(&root.join(".lsp.json")).unwrap_or_default());
+	for declaration in declared(root, manifest.get("lspServers")) {
+		lsp.extend(servers_of(&declaration));
+	}
+	servers.extend(lsp.into_iter().map(|server| Server { name: format!("LSP · {}", server.name), ..server }));
 
 	let mut scripts: Vec<String> = hooks
 		.iter()
 		.map(|hook| hook.command.as_str())
 		.chain(servers.iter().map(|server| server.target.as_str()))
 		.flat_map(scripts_in)
-		.filter(|path| root.join(path).is_file())
+		.filter(|path| safe_relative(path) && root.join(path).is_file())
 		.collect();
+	// `bin/` : des exécutables que le plugin met à disposition.
+	if let Ok(entries) = std::fs::read_dir(root.join("bin")) {
+		scripts.extend(
+			entries.flatten().filter(|entry| entry.path().is_file()).map(|entry| format!("bin/{}", entry.file_name().to_string_lossy())),
+		);
+	}
 	scripts.sort();
 	scripts.dedup();
-
-	let fingerprint = if hooks.is_empty() && servers.is_empty() {
-		String::new()
-	} else {
-		fingerprint(root, &hooks, &servers, &scripts)
-	};
 
 	Inventory {
 		name: text("name"),
@@ -273,29 +306,53 @@ pub fn read_plugin(root: &Path) -> Inventory {
 		hooks,
 		servers,
 		scripts,
-		fingerprint,
+		fingerprint: fingerprint(root),
 	}
 }
 
-/// L'empreinte de ce qui s'exécute : les commandes des hooks, les cibles des
-/// serveurs, et le contenu des scripts qu'ils lancent. Un script modifié par
-/// une mise à jour change l'empreinte, même si la déclaration ne bouge pas.
-fn fingerprint(root: &Path, hooks: &[Hook], servers: &[Server], scripts: &[String]) -> String {
+/// Ce que le cache de Claude Code écrit dans le dossier d'un plugin installé
+/// pour son propre suivi : ni la source, ni ce qui s'exécute.
+const BOOKKEEPING: [&str; 3] = [".git", ".in_use", ".orphaned_at"];
+
+/// L'empreinte du plugin entier : chaque fichier, son chemin et son contenu.
+///
+/// Pas seulement ce que déclarent les hooks et les serveurs : un script en
+/// appelle un autre, un module s'importe, un hook peut se déclarer d'une façon
+/// qu'on ne lit pas encore. Toute modification d'un fichier du plugin change
+/// donc l'empreinte — c'est la seule façon d'être sûr qu'un accord porte sur
+/// ce qui s'exécutera. Les fins de ligne sont ramenées à `\n` : la même source
+/// extraite sous Windows et sous macOS donne la même empreinte.
+fn fingerprint(root: &Path) -> String {
 	use sha2::{Digest, Sha256};
-	let mut lines: Vec<String> = hooks.iter().map(|hook| format!("hook {} {}", hook.event, hook.command)).collect();
-	lines.extend(servers.iter().map(|server| format!("mcp {} {}", server.name, server.target)));
-	lines.sort();
-	let mut hasher = Sha256::new();
-	for line in &lines {
-		hasher.update(line.as_bytes());
-		hasher.update(b"\n");
+	fn walk(root: &Path, dir: &Path, files: &mut Vec<String>) {
+		let Ok(entries) = std::fs::read_dir(dir) else { return };
+		for entry in entries.flatten() {
+			let name = entry.file_name().to_string_lossy().to_string();
+			if dir == root && BOOKKEEPING.contains(&name.as_str()) {
+				continue;
+			}
+			let path = entry.path();
+			// Pas de lien suivi : il mènerait hors du plugin.
+			let Ok(kind) = entry.file_type() else { continue };
+			if kind.is_dir() {
+				walk(root, &path, files);
+			} else if kind.is_file() {
+				if let Ok(relative) = path.strip_prefix(root) {
+					files.push(relative.to_string_lossy().replace('\\', "/"));
+				}
+			}
+		}
 	}
-	for script in scripts {
-		hasher.update(script.as_bytes());
-		// Fins de ligne ramenées à `\n` : la même source extraite sous Windows
-		// et sous macOS doit donner la même empreinte.
-		let content = std::fs::read(root.join(script)).unwrap_or_default();
-		let content: Vec<u8> = content.into_iter().filter(|byte| *byte != b'\r').collect();
+	let mut files = Vec::new();
+	walk(root, root, &mut files);
+	files.sort();
+	let mut hasher = Sha256::new();
+	for file in &files {
+		let content: Vec<u8> = std::fs::read(root.join(file)).unwrap_or_default().into_iter().filter(|byte| *byte != b'\r').collect();
+		// Longueurs en tête : « a » + « bc » et « ab » + « c » ne se confondent pas.
+		hasher.update((file.len() as u64).to_le_bytes());
+		hasher.update(file.as_bytes());
+		hasher.update((content.len() as u64).to_le_bytes());
 		hasher.update(&content);
 	}
 	hasher.finalize().iter().map(|byte| format!("{byte:02x}")).collect()
@@ -366,9 +423,20 @@ async fn fetch(plugin_id: &str, source: &Source) -> Result<PathBuf> {
 	} else {
 		return Err(CockpitError::msg(crate::i18n::tf("methods.unsupportedSource", &[("kind", &source.source)])));
 	};
+	if !source.path.is_empty() && !safe_relative(&source.path) {
+		return Err(CockpitError::msg(crate::i18n::tf("methods.unsafePath", &[("path", &source.path)])));
+	}
+	// Un commit épinglé est une empreinte hexadécimale, rien d'autre : c'est elle
+	// qui part en argument à git.
+	let pinned = source.sha.len() >= 7 && source.sha.chars().all(|c| c.is_ascii_hexdigit());
+	if !source.sha.is_empty() && !pinned {
+		return Err(CockpitError::msg(crate::i18n::tf("methods.unsafePath", &[("path", &source.sha)])));
+	}
 	let dir = source_dir(plugin_id, &source.sha);
-	let root = if source.path.is_empty() { dir.clone() } else { dir.join(&source.path) };
-	if root.join(".claude-plugin").exists() || root.join("skills").exists() {
+	let root = if source.path.is_empty() { dir.clone() } else { dir.join(source.path.trim_start_matches("./")) };
+	// Le cache ne vaut que pour un commit épinglé : une source sans épingle peut
+	// avoir bougé, et l'on relirait une copie périmée.
+	if pinned && (root.join(".claude-plugin").exists() || root.join("skills").exists()) {
 		return Ok(root);
 	}
 	let _ = std::fs::remove_dir_all(&dir);
@@ -377,9 +445,11 @@ async fn fetch(plugin_id: &str, source: &Source) -> Result<PathBuf> {
 	}
 	let parent = dir.parent().unwrap_or(&dir).to_path_buf();
 	let target = dir.to_string_lossy().to_string();
-	crate::git::run_git(&parent, &["clone", "--quiet", "--filter=blob:none", "--no-checkout", &url, &target]).await?;
+	// `--` : l'adresse vient de la marketplace, elle ne doit jamais se lire
+	// comme une option de git (`--upload-pack=…`).
+	crate::git::run_git(&parent, &["clone", "--quiet", "--filter=blob:none", "--no-checkout", "--", &url, &target]).await?;
 	if !source.path.is_empty() {
-		crate::git::run_git(&dir, &["sparse-checkout", "set", "--no-cone", &source.path]).await?;
+		crate::git::run_git(&dir, &["sparse-checkout", "set", "--no-cone", "--", &source.path]).await?;
 	}
 	let at = if !source.sha.is_empty() {
 		source.sha.as_str()
@@ -388,8 +458,22 @@ async fn fetch(plugin_id: &str, source: &Source) -> Result<PathBuf> {
 	} else {
 		"HEAD"
 	};
+	if at.starts_with('-') {
+		return Err(CockpitError::msg(crate::i18n::tf("methods.unsafePath", &[("path", &at)])));
+	}
 	crate::git::run_git(&dir, &["checkout", "--quiet", at]).await?;
-	Ok(root)
+	inside(&root, &dir)
+}
+
+/// Le dossier lu reste-t-il dans celui où il doit se trouver ? Vérifié sur les
+/// chemins résolus : un lien ou un `..` n'en sortent pas.
+fn inside(root: &Path, base: &Path) -> Result<PathBuf> {
+	let resolved = std::fs::canonicalize(root)?;
+	let base = std::fs::canonicalize(base)?;
+	if !resolved.starts_with(&base) {
+		return Err(CockpitError::msg(crate::i18n::tf("methods.unsafePath", &[("path", &root.display())])));
+	}
+	Ok(root.to_path_buf())
 }
 
 /// Inspecte un plugin : installé, dans son dossier d'installation ; sinon, dans
@@ -412,7 +496,11 @@ pub async fn inspect(project: &Path, plugin_id: &str) -> Result<Inspection> {
 				.iter()
 				.find(|m| m.name == available.marketplace_name && !m.install_location.is_empty())
 				.ok_or_else(|| CockpitError::msg(crate::i18n::tf("methods.unsupportedSource", &[("kind", &"relative")])))?;
-			PathBuf::from(&market.install_location).join(&available.source.path)
+			if !safe_relative(&available.source.path) {
+				return Err(CockpitError::msg(crate::i18n::tf("methods.unsafePath", &[("path", &available.source.path)])));
+			}
+			let location = PathBuf::from(&market.install_location);
+			inside(&location.join(available.source.path.trim_start_matches("./")), &location)?
 		} else {
 			fetch(plugin_id, &available.source).await?
 		};
@@ -421,10 +509,17 @@ pub async fn inspect(project: &Path, plugin_id: &str) -> Result<Inspection> {
 	let inventory = read_plugin(&root);
 	let name = if inventory.name.is_empty() { plugin_id.split('@').next().unwrap_or(plugin_id).to_string() } else { inventory.name.clone() };
 	let root_arg = root.to_string_lossy().to_string();
-	let always_on_tokens = claude(project, &["--plugin-dir", &root_arg, "plugin", "details", &name])
-		.await
-		.ok()
-		.and_then(|details| parse_always_on(&details));
+	// Le nom vient du manifeste du plugin : on ne le passe au CLI que s'il a la
+	// forme d'un nom.
+	let plain = !name.is_empty() && name.chars().all(|c| c.is_ascii_alphanumeric() || matches!(c, '-' | '_' | '.'));
+	let always_on_tokens = if plain {
+		claude(project, &["--plugin-dir", &root_arg, "plugin", "details", &name])
+			.await
+			.ok()
+			.and_then(|details| parse_always_on(&details))
+	} else {
+		None
+	};
 	let approved = approval(project, plugin_id).map(|entry| entry.fingerprint);
 	Ok(Inspection { inventory, always_on_tokens, source, approved })
 }
@@ -540,6 +635,17 @@ pub async fn install(project: &Path, plugin_id: &str, scope: &str, approved: &st
 	let (_, stdout, stderr) = claude_raw(project, &args).await?;
 	let result = parse_installation(if stdout.trim().is_empty() { &stderr } else { &stdout })?;
 	if matches!(result, Installation::Installed { .. }) {
+		// Le CLI récupère le plugin de son côté, peut-être après avoir rafraîchi
+		// la marketplace : on relit ce qu'il a réellement installé. Si ce n'est
+		// pas ce qui a été lu, il repart aussitôt.
+		let installed = catalog(project).await?.installed.into_iter().find(|p| p.id == plugin_id && p.scope == scope);
+		let matches_reading = installed
+			.as_ref()
+			.is_some_and(|p| read_plugin(Path::new(&p.install_path)).fingerprint == approved);
+		if !matches_reading {
+			let _ = claude(project, &["plugin", "uninstall", plugin_id, "--scope", scope, "--json"]).await;
+			return Err(CockpitError::msg(crate::i18n::t("methods.installedDiffers")));
+		}
 		set_approval(
 			project,
 			plugin_id,
@@ -552,7 +658,10 @@ pub async fn install(project: &Path, plugin_id: &str, scope: &str, approved: &st
 /// Désinstalle un plugin de la portée où il est installé.
 pub async fn uninstall(project: &Path, plugin_id: &str, scope: &str) -> Result<String> {
 	let raw = claude(project, &["plugin", "uninstall", plugin_id, "--scope", scope, "--json"]).await?;
-	set_approval(project, plugin_id, None)?;
+	// L'accord ne part qu'avec la portée qu'il couvrait.
+	if approval(project, plugin_id).is_some_and(|approved| approved.scope == scope) {
+		set_approval(project, plugin_id, None)?;
+	}
 	let value: serde_json::Value = serde_json::from_str(raw.trim()).unwrap_or_default();
 	Ok(value.get("message").and_then(|m| m.as_str()).unwrap_or_default().to_string())
 }
@@ -761,8 +870,8 @@ mod tests {
 		assert_eq!(inventory.name, "commit-tools");
 		assert_eq!(inventory.skills, vec!["commit"]);
 		assert_eq!(inventory.commands, vec!["push"]);
-		assert!(inventory.hooks.is_empty() && inventory.servers.is_empty());
-		assert!(inventory.fingerprint.is_empty());
+		assert!(inventory.hooks.is_empty() && inventory.servers.is_empty() && inventory.scripts.is_empty());
+		assert_eq!(inventory.fingerprint.len(), 64, "l'empreinte couvre aussi les instructions");
 		let _ = std::fs::remove_dir_all(&dir);
 	}
 
@@ -793,6 +902,18 @@ mod tests {
 		assert_eq!(inventory.scripts, vec!["hooks/pre.py", "server.js"]);
 		assert_eq!(inventory.fingerprint.len(), 64);
 
+		// Un fichier qu'aucune déclaration ne nomme, mais que le script importe :
+		// le modifier change l'empreinte aussi.
+		write(&dir, "hooks/lib/impl.py", "OK = 1\n");
+		let avec_import = read_plugin(&dir).fingerprint;
+		write(&dir, "hooks/lib/impl.py", "OK = 2\n");
+		assert_ne!(read_plugin(&dir).fingerprint, avec_import);
+		// Les marqueurs du cache de Claude Code, eux, ne comptent pas.
+		let avant_marqueurs = read_plugin(&dir).fingerprint;
+		write(&dir, ".in_use/1234", "");
+		write(&dir, ".orphaned_at", "2026");
+		assert_eq!(read_plugin(&dir).fingerprint, avant_marqueurs);
+
 		// Même déclaration, script modifié : l'empreinte change.
 		let before = inventory.fingerprint.clone();
 		write(&dir, "hooks/pre.py", "import os; os.system('curl …')\n");
@@ -802,6 +923,47 @@ mod tests {
 		let crlf = read_plugin(&dir).fingerprint;
 		write(&dir, "hooks/pre.py", "import os; os.system('curl …')\n");
 		assert_eq!(read_plugin(&dir).fingerprint, crlf);
+		let _ = std::fs::remove_dir_all(&dir);
+	}
+
+	/// Ce qui s'exécute se lit sous toutes ses formes : hooks déclarés par un
+	/// chemin, hooks HTTP, serveurs de langage, exécutables de `bin/`.
+	#[test]
+	fn ce_qui_s_execute_se_lit_sous_toutes_ses_formes() {
+		let dir = plugin("formes");
+		write(
+			&dir,
+			".claude-plugin/plugin.json",
+			r#"{"name":"formes","hooks":"./config/hooks.json","lspServers":{"rust":{"command":"rust-analyzer"}}}"#,
+		);
+		write(
+			&dir,
+			"config/hooks.json",
+			r#"{"hooks":{"Stop":[{"hooks":[{"type":"command","command":"sh run.sh"},{"type":"http","url":"https://hook.example.com"}]}]}}"#,
+		);
+		write(&dir, "bin/outil", "#!/bin/sh\n");
+		let inventory = read_plugin(&dir);
+		let hooks: Vec<_> = inventory.hooks.iter().map(|h| h.command.as_str()).collect();
+		assert_eq!(hooks, vec!["sh run.sh", "HTTP https://hook.example.com"]);
+		assert!(inventory.servers.iter().any(|s| s.name == "LSP · rust" && s.target == "rust-analyzer"));
+		assert_eq!(inventory.scripts, vec!["bin/outil"]);
+		let _ = std::fs::remove_dir_all(&dir);
+	}
+
+	/// Un chemin venu d'une marketplace ou d'un manifeste ne sort pas de son
+	/// dossier.
+	#[test]
+	fn les_chemins_hors_du_plugin_sont_refuses() {
+		for bon in ["plugins/a", "./plugins/a", "a"] {
+			assert!(safe_relative(bon), "{bon}");
+		}
+		for mauvais in ["../a", "plugins/../../a", "/etc/passwd", "C:/Users/x", ""] {
+			assert!(!safe_relative(mauvais), "{mauvais}");
+		}
+		// Un manifeste qui désigne un fichier hors du plugin n'est pas suivi.
+		let dir = plugin("hors");
+		write(&dir, ".claude-plugin/plugin.json", r#"{"name":"hors","hooks":"../ailleurs.json"}"#);
+		assert!(read_plugin(&dir).hooks.is_empty());
 		let _ = std::fs::remove_dir_all(&dir);
 	}
 
