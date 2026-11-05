@@ -34,7 +34,8 @@
 			"observability": "可观测性",
 			"delivery": "流程 · Linear、PR、CI、部署",
 			"infra": "服务器与容器 · 本机正在运行的内容",
-			"settings": "设置"
+			"settings": "设置",
+			"replay": "回放 · 用过去的 PR 评估智能体配置"
 		},
 		"hint": {
 			"goTo": "前往"
@@ -181,7 +182,8 @@
 			"git": "Git",
 			"scripts": "脚本",
 			"infra": "服务器与容器",
-			"settings": "设置"
+			"settings": "设置",
+			"replay": "回放"
 		},
 		"groups": {
 			"pilot": "指挥",

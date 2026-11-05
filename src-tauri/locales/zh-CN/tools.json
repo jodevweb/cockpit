@@ -7,6 +7,12 @@
 	},
 	"replay": {
 		"noGates": "仓库没有声明任何检查：无法评判结果。",
-		"testsDontApply": "拉取请求的测试无法应用于此结果：{{error}}"
+		"testsDontApply": "拉取请求的测试无法应用于此结果：{{error}}",
+		"nothingToRun": "没有可运行的试验：请至少选择一个案例。",
+		"tooMany": "请求了 {{count}} 次试验，每次活动最多 {{max}} 次。",
+		"alreadyRunning": "已有一个活动正在运行。",
+		"passesBefore": "拉取请求的测试在修改前的代码上已经通过：此案例无法区分有无解决方案。",
+		"installFailed": "安装依赖失败（{{command}}）：{{output}}",
+		"humanFails": "即使使用拉取请求自身的解决方案，仓库检查如今也会失败（{{command}}）：任何智能体都会失败。{{output}}"
 	}
 }
