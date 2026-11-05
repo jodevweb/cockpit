@@ -2446,6 +2446,30 @@ async fn methods_inspect(project: String, plugin_id: String) -> Result<methods::
 	methods::inspect(Path::new(&project), &plugin_id).await
 }
 
+/// Installe un plugin pour le projet ou ce poste — seulement si ce qu'il
+/// exécute est encore ce que tu as lu (`approved`).
+#[tauri::command]
+async fn methods_install(
+	project: String,
+	plugin_id: String,
+	scope: String,
+	approved: String,
+	accept: Option<String>,
+) -> Result<methods::Installation> {
+	methods::install(Path::new(&project), &plugin_id, &scope, &approved, accept.as_deref()).await
+}
+
+#[tauri::command]
+async fn methods_uninstall(project: String, plugin_id: String, scope: String) -> Result<String> {
+	methods::uninstall(Path::new(&project), &plugin_id, &scope).await
+}
+
+/// Les agents du projet avant et après l'installation d'un plugin.
+#[tauri::command]
+async fn methods_measure(project: String, project_id: String, plugin_id: String) -> Result<methods::Measure> {
+	methods::measure(Path::new(&project), &project_id, &plugin_id).await
+}
+
 #[tauri::command]
 fn terminals_list(terminals: State<'_, terminal::SharedTerminals>) -> Vec<terminal::TerminalInfo> {
 	terminals.snapshot()
@@ -3336,6 +3360,9 @@ pub fn run() {
 			browser_stop,
 			methods_catalog,
 			methods_inspect,
+			methods_install,
+			methods_uninstall,
+			methods_measure,
 			terminal_resize,
 			terminal_close,
 			terminals_list,

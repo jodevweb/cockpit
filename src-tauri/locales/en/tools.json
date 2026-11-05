@@ -7,6 +7,10 @@
 	},
 	"methods": {
 		"unsupportedSource": "This plugin's source cannot be read here ({{kind}}).",
-		"unknownPlugin": "Unknown plugin: {{id}}."
+		"unknownPlugin": "Unknown plugin: {{id}}.",
+		"badScope": "Unknown scope: {{scope}}. A plugin installs for the project or for this machine.",
+		"changedSinceReading": "What this plugin runs has changed since you read it: read it again before installing.",
+		"unsafePath": "This path leaves the plugin's folder, it is not followed: {{path}}",
+		"installedDiffers": "What was installed is not what you read: the plugin has been uninstalled. Read it again, then try again."
 	}
 }

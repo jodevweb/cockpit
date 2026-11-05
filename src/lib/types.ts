@@ -2512,6 +2512,7 @@ export interface MethodInstalled {
 	scope: string;
 	enabled: boolean;
 	installPath: string;
+	installedAt: string;
 }
 
 export interface MethodSource {
@@ -2554,4 +2555,25 @@ export interface MethodInspection {
 	};
 	alwaysOnTokens: number | null;
 	source: MethodSource;
+	/** L'empreinte approuvée en l'installant d'ici ; différente de l'actuelle =
+	    ce qui s'exécute a changé depuis ton accord. */
+	approved: string | null;
+}
+
+export type MethodInstallation =
+	| { kind: "installed"; message: string }
+	| { kind: "needsCommand"; command: string; sha256: string };
+
+export interface MethodPeriod {
+	executions: number;
+	failed: number;
+	medianTurns: number | null;
+	medianCostUsd: number | null;
+}
+
+export interface MethodMeasure {
+	since: string;
+	days: number;
+	before: MethodPeriod;
+	after: MethodPeriod;
 }

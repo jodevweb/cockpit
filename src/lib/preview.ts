@@ -841,8 +841,8 @@ const REPONSES: Record<string, unknown> = {
 	// d'un plugin qui exécute quelque chose — c'est le cas qu'il faut voir.
 	methods_catalog: () => ({
 		installed: [
-			{ id: "commit-commands@claude-plugins-official", version: "1.0.1", scope: "user", enabled: true, installPath: "" },
-			{ id: "review-kit@northwind-tools", version: "2.3.0", scope: "project", enabled: true, installPath: "" },
+			{ id: "commit-commands@claude-plugins-official", version: "1.0.1", scope: "user", enabled: true, installPath: "", installedAt: "2026-09-07T18:44:12Z" },
+			{ id: "review-kit@northwind-tools", version: "2.3.0", scope: "project", enabled: true, installPath: "", installedAt: "2026-10-20T09:00:00Z" },
 		],
 		available: [
 			{
@@ -871,6 +871,14 @@ const REPONSES: Record<string, unknown> = {
 			},
 		],
 	}),
+	methods_install: () => ({ kind: "installed", message: "Installed for the project." }),
+	methods_uninstall: () => "Uninstalled.",
+	methods_measure: () => ({
+		since: "2026-10-20T09:00:00Z",
+		days: 14,
+		before: { executions: 31, failed: 6, medianTurns: 18, medianCostUsd: 0.62 },
+		after: { executions: 27, failed: 2, medianTurns: 14, medianCostUsd: 0.55 },
+	}),
 	methods_inspect: (args: Record<string, unknown>) => {
 		const guard = args.pluginId === "security-guard@claude-plugins-official";
 		return {
@@ -892,6 +900,7 @@ const REPONSES: Record<string, unknown> = {
 			source: guard
 				? { source: "git-subdir", url: "https://github.com/example/guards.git", repo: "", path: "plugins/security-guard", ref: "v1.4.0", sha: "a1b2c3d4e5f60718293a4b5c6d7e8f9012345678" }
 				: { source: "relative", url: "", repo: "", path: "plugins/test-first", ref: "", sha: "" },
+			approved: null,
 		};
 	},
 	tour_changes: ({ cwd }: Record<string, unknown>) => ({
