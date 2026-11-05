@@ -2668,6 +2668,51 @@ static ZOOM_MEMORY: std::sync::OnceLock<
 /// la rétrécissait au lieu de finir le travail — impossible d'occuper l'écran.
 /// On applique donc nous-mêmes la zone de travail du moniteur où la fenêtre se
 /// trouve, barre de menus et Dock exclus.
+/// Le cadre à donner à une fenêtre qui ne tient pas dans la zone de travail de
+/// son écran, ou `None` quand elle y tient déjà.
+///
+/// La taille par défaut (1480 × 940) dépasse un MacBook Air réglé par défaut
+/// (1470 points de large), et une taille retenue sur un grand écran dépasse le
+/// petit sur lequel on rouvre l'app. Centrer ne suffisait pas : la fenêtre
+/// débordait des deux côtés, barre de titre et boutons hors de portée. Elle est
+/// ramenée à 95 % de la zone, et recentrée.
+fn fitted_frame(
+	area: (i32, i32, u32, u32),
+	window: (i32, i32, u32, u32),
+) -> Option<((i32, i32), (u32, u32))> {
+	let (ax, ay, aw, ah) = area;
+	let (wx, wy, ww, wh) = window;
+	let inside = wx >= ax
+		&& wy >= ay
+		&& wx + ww as i32 <= ax + aw as i32
+		&& wy + wh as i32 <= ay + ah as i32;
+	if inside || aw == 0 || ah == 0 {
+		return None;
+	}
+	let width = ww.min(aw * 95 / 100);
+	let height = wh.min(ah * 95 / 100);
+	let x = ax + ((aw - width) / 2) as i32;
+	let y = ay + ((ah - height) / 2) as i32;
+	Some(((x, y), (width, height)))
+}
+
+/// Ramène la fenêtre dans son écran au démarrage, si elle en dépasse.
+fn fit_to_screen(window: &tauri::WebviewWindow) {
+	let (Ok(Some(monitor)), Ok(size), Ok(position)) =
+		(window.current_monitor(), window.outer_size(), window.outer_position())
+	else {
+		return;
+	};
+	let area = monitor.work_area();
+	if let Some(((x, y), (width, height))) = fitted_frame(
+		(area.position.x, area.position.y, area.size.width, area.size.height),
+		(position.x, position.y, size.width, size.height),
+	) {
+		let _ = window.set_size(tauri::PhysicalSize::new(width, height));
+		let _ = window.set_position(tauri::PhysicalPosition::new(x, y));
+	}
+}
+
 #[tauri::command]
 fn window_zoom_toggle(window: tauri::WebviewWindow) -> Result<()> {
 	let monitor = window
@@ -3026,6 +3071,12 @@ pub fn run() {
 	});
 	builder
 		.setup(|app| {
+			{
+				use tauri::Manager;
+				if let Some(window) = app.get_webview_window("main") {
+					fit_to_screen(&window);
+				}
+			}
 			// Pris par une autre application, le raccourci ne fait pas échouer
 			// le démarrage : l'échec est retenu, et les Réglages le disent.
 			register_talk(app.handle(), &voice_input::saved_shortcut());
@@ -3393,6 +3444,37 @@ pub fn run() {
 				_ => {}
 			}
 		});
+}
+
+#[cfg(test)]
+mod window_tests {
+	use super::fitted_frame;
+
+	/// Le premier lancement sur l'écran du runner macOS : 1024 × 768, la
+	/// fenêtre par défaut centrée débordait des deux côtés.
+	#[test]
+	fn une_fenetre_trop_grande_est_ramenee_dans_l_ecran() {
+		let area = (0, 25, 1024, 743);
+		let window = (-228, -61, 1480, 940);
+		let ((x, y), (w, h)) = fitted_frame(area, window).expect("elle déborde");
+		assert!(w <= 1024 && h <= 743);
+		assert!(x >= 0 && y >= 25);
+		assert!(x + w as i32 <= 1024 && y + h as i32 <= 25 + 743);
+	}
+
+	/// Une fenêtre qui tient déjà ne bouge pas : sa place est un choix.
+	#[test]
+	fn une_fenetre_qui_tient_ne_bouge_pas() {
+		assert_eq!(fitted_frame((0, 0, 2560, 1400), (200, 100, 1480, 940)), None);
+	}
+
+	/// Second écran à gauche : des coordonnées négatives restent valides.
+	#[test]
+	fn un_ecran_a_gauche_garde_ses_coordonnees() {
+		assert_eq!(fitted_frame((-1920, 0, 1920, 1040), (-1700, 50, 1480, 940)), None);
+		let ((x, _), (w, _)) = fitted_frame((-1440, 0, 1440, 860), (-1500, 0, 1480, 940)).unwrap();
+		assert!(x >= -1440 && x + w as i32 <= 0);
+	}
 }
 
 #[cfg(test)]
