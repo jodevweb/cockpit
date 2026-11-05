@@ -419,19 +419,42 @@ impl Tail {
 
 /// Le dernier tour était-il fini au moment où on le retrouve ?
 ///
-/// Lu sur la sortie elle-même : la dernière ligne JSON est un `result` quand le
-/// CLI a rendu la main. C'est ce qui dit à l'écran si l'agent retrouvé travaille
-/// encore ou attend qu'on lui parle.
+/// Lu sur la sortie elle-même : un `result` quand le CLI a rendu la main. C'est
+/// ce qui dit à l'écran si l'agent retrouvé travaille encore ou attend qu'on lui
+/// parle — et à la reprise suivante s'il faut le remettre au travail.
+///
+/// Deux sortes de lignes ne disent rien du tour, et sont sautées : les réponses
+/// de contrôle (le relevé de contexte que l'écran demande) et les lignes
+/// `system` — l'ouverture de session, les hooks du poste, qui s'écrivent aussi
+/// après un `result`. Les prendre pour le dernier mot faisait passer pour « en
+/// plein travail » un agent qui avait fini.
+///
+/// Un CLI qui n'a encore rien dit d'autre n'a fini aucun tour : il travaille si
+/// on lui a écrit, il attend sinon. C'est le cas d'un agent rouvert sans
+/// consigne — `--resume` sur une conversation close — que la reprise suivante
+/// relançait sinon, persuadée qu'on l'avait coupé en plein tour.
 pub fn turn_done(dir: &Path) -> bool {
 	let Ok(raw) = std::fs::read_to_string(dir.join("out.jsonl")) else {
 		return true;
 	};
-	raw.lines()
+	let kind = |value: &serde_json::Value| {
+		value.get("type").and_then(|kind| kind.as_str()).map(str::to_string)
+	};
+	let last = raw
+		.lines()
 		.rev()
 		.filter_map(|line| serde_json::from_str::<serde_json::Value>(line).ok())
-		.find(|value| value.get("type").and_then(|kind| kind.as_str()) != Some("control_response"))
-		.map(|value| value.get("type").and_then(|kind| kind.as_str()) == Some("result"))
-		.unwrap_or(false)
+		.filter_map(|value| kind(&value))
+		.find(|kind| kind != "control_response" && kind != "system");
+	match last.as_deref() {
+		Some("result") => true,
+		Some(_) => false,
+		None => !std::fs::read_to_string(dir.join("in.jsonl"))
+			.unwrap_or_default()
+			.lines()
+			.filter_map(|line| serde_json::from_str::<serde_json::Value>(line).ok())
+			.any(|value| kind(&value).as_deref() == Some("user")),
+	}
 }
 
 // ───────────────────────────── Le démarrage ─────────────────────────────
@@ -513,6 +536,42 @@ mod tests {
 		));
 		std::fs::create_dir_all(&dir).unwrap();
 		dir
+	}
+
+	/// Ce que l'écran lit d'un relais retrouvé au démarrage : fini ou en plein
+	/// tour. Les hooks et les relevés de contexte qui suivent un `result` ne
+	/// rouvrent pas le tour ; un agent rouvert sans consigne n'en a aucun.
+	#[test]
+	fn le_tour_se_lit_sans_les_lignes_systeme() {
+		let dir = base();
+		let ecrire = |nom: &str, lignes: &[&str]| {
+			std::fs::write(dir.join(nom), lignes.join("\n") + "\n").unwrap()
+		};
+		let fini = r#"{"type":"result","subtype":"success"}"#;
+		let hook = r#"{"type":"system","subtype":"hook_response"}"#;
+		let controle = r#"{"type":"control_response","response":{"subtype":"success"}}"#;
+		let parle = r#"{"type":"assistant","message":{}}"#;
+		let message = r#"{"type":"user","message":{"role":"user","content":"go"}}"#;
+		let releve = r#"{"type":"control_request","request":{"subtype":"get_context_usage"}}"#;
+
+		// Fini, puis des hooks et des relevés : toujours fini.
+		ecrire("out.jsonl", &[parle, fini, hook, controle, controle]);
+		assert!(turn_done(&dir));
+
+		// En pleine réponse.
+		ecrire("out.jsonl", &[fini, parle, hook]);
+		assert!(!turn_done(&dir));
+
+		// Rouvert sans consigne : l'ouverture de session, des relevés, rien d'autre.
+		ecrire("out.jsonl", &[hook, hook, controle]);
+		ecrire("in.jsonl", &[releve, releve]);
+		assert!(turn_done(&dir));
+
+		// Même début, mais un message est parti : le premier tour commence.
+		ecrire("in.jsonl", &[releve, message]);
+		assert!(!turn_done(&dir));
+
+		let _ = std::fs::remove_dir_all(dir);
 	}
 
 	/// Un faux CLI : il répond à chaque ligne reçue par un objet JSON, et rend
