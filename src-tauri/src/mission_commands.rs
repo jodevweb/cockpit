@@ -1006,8 +1006,9 @@ pub(crate) async fn launch_master(
 		 A worker only sees its own instructions: what you do not write to it, it \
 		 does not have. Two workers writing in the same place will get in each \
 		 other's way whatever you tell them.\n\n\
-		 {directive}\n\n{guided}{lessons}{brief}",
+		 {directive}\n\n{guided}{lessons}{conventions}{brief}",
 		directive = i18n::reply_directive(),
+		conventions = brief::conventions_for(&mission.cwd),
 		guided = if mission.guided {
 			format!("{}\n\n", guided_brief(&mission))
 		} else {

@@ -223,7 +223,7 @@ pub fn assemble(sections: &[BriefSection], prompt: &str) -> String {
 /// écran.
 ///
 /// Pour les agents que personne ne regarde partir : les exécutants d'une
-/// mission, le maître. Il n'y a là ni champ de saisie ni case à décocher — ce
+/// mission, la Permanence. Il n'y a là ni champ de saisie ni case à décocher — ce
 /// sont justement ceux qui travaillent le plus longtemps seuls, et à qui il
 /// manque le plus de savoir ce que le cockpit sait déjà.
 ///
@@ -918,6 +918,23 @@ const INSTRUCTION_FILES: [&str; 5] = [
 	".github/copilot-instructions.md",
 ];
 
+/// La section des règles du dépôt pour le maître d'une mission, ou rien si le
+/// dépôt n'en déclare pas ou que le contexte est coupé dans ses réglages. Un
+/// maître qui les ignore découpe et consigne ses exécutants à côté de ce que le
+/// dépôt demande.
+pub fn conventions_for(repo: &str) -> String {
+	conventions_text(Path::new(repo), Config::for_repo(repo).brief.enabled)
+}
+
+fn conventions_text(repo: &Path, enabled: bool) -> String {
+	if !enabled {
+		return String::new();
+	}
+	conventions_section(repo)
+		.map(|section| format!("{}\n\n", section.text.trim_end()))
+		.unwrap_or_default()
+}
+
 /// Où le dépôt range ses règles, et ce qu'il en attend.
 ///
 /// Un moteur lit le fichier de sa propre famille et ignore les autres : Claude
@@ -931,6 +948,9 @@ const INSTRUCTION_FILES: [&str; 5] = [
 /// La section ne recopie pas ces fichiers — ils font des centaines de lignes,
 /// et un agent sait lire. Elle dit qu'ils sont là et où, ce qui coûte quelques
 /// centaines de caractères et suffit à transformer une ignorance en lecture.
+///
+/// Le maître n'en reçoit pas davantage (`conventions_for`) : il part du ticket,
+/// et le reste du contexte décrit un travail qu'il n'a pas encore commencé.
 fn conventions_section(repo: &Path) -> Option<BriefSection> {
 	let found: Vec<&str> = INSTRUCTION_FILES
 		.iter()
@@ -1144,6 +1164,16 @@ mod tests {
 	fn un_depot_sans_regles_na_pas_de_section() {
 		let dir = depot_jetable("conventions-nues");
 		assert!(conventions_section(&dir).is_none());
+	}
+
+	#[test]
+	fn le_maitre_recoit_les_regles_sauf_si_le_contexte_est_coupe() {
+		let dir = depot_jetable("conventions-maitre");
+		assert_eq!(conventions_text(&dir, true), "", "aucune règle, aucun texte");
+
+		std::fs::write(dir.join("AGENTS.md"), "# Règles\n").unwrap();
+		assert!(conventions_text(&dir, true).contains("`AGENTS.md`"));
+		assert_eq!(conventions_text(&dir, false), "");
 	}
 
 	/// Le cas qui motive la section : les compétences sont rangées sous
