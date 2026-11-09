@@ -2,7 +2,13 @@ import clsx from "clsx";
 import { AssistantSettings } from "@/components/Assistant";
 import { VoiceSettings } from "@/components/NarrationToggle";
 import { Check, ExternalLink, FolderOpen, KeyRound, Plus, Save } from "lucide-react";
-import { useEffect, useMemo, useState } from "react";
+import {
+	useEffect,
+	useMemo,
+	useState,
+	type Dispatch,
+	type SetStateAction,
+} from "react";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
 import { LANGUAGES } from "@/i18n";
@@ -430,45 +436,37 @@ function Projects() {
 	);
 }
 
-export function SettingsView() {
-	const { t } = useTranslation("views");
-	const { config, configError, reloadConfig, notify, activeProject, focus, clearFocus } =
-		useCockpit();
-	const [draft, setDraft] = useState({
-		projectsRoot: "",
-		mainRepo: "",
-		editor: "zed",
-		githubRepo: "",
-		sentryOrg: "",
-		sentryProjects: "",
-		linearTeamKey: "",
-		triggerProjectRef: "",
-		railwayProjectId: "",
-		gitlabProject: "",
-		gitlabHost: "",
-	});
-	const [secrets, setSecrets] = useState<Record<string, string>>({});
-	const [saving, setSaving] = useState(false);
-	/**
-	 * Où va l'enregistrement.
-	 *
-	 * « Projet » écrit dans le projet actif, « Défauts » dans les valeurs
-	 * partagées dont héritent les projets qui ne disent rien. Sans ce choix, le
-	 * multi-projets se réduirait à changer de dépôt : deux projets sur des
-	 * comptes GitHub différents seraient impossibles.
-	 */
-	const [scope, setScope] = useState<"project" | "global">("project");
-	/**
-	 * La rubrique affichée.
-	 *
-	 * L'écran était une seule page : douze sections à la file, où l'on cherchait
-	 * l'équipe en passant devant les jetons d'accès. Le découpage suit ce qu'on
-	 * vient y faire — brancher un service, décrire une équipe, régler son poste —
-	 * et non l'ordre dans lequel ces réglages sont apparus.
-	 *
-	 * Retenue d'une fois sur l'autre : on revient dans les réglages pour finir ce
-	 * qu'on y faisait.
-	 */
+/** Les champs du fichier de configuration que l'écran édite. */
+type SettingsDraft = {
+	projectsRoot: string;
+	mainRepo: string;
+	editor: string;
+	githubRepo: string;
+	sentryOrg: string;
+	sentryProjects: string;
+	linearTeamKey: string;
+	triggerProjectRef: string;
+	railwayProjectId: string;
+	gitlabProject: string;
+	gitlabHost: string;
+};
+
+type SetDraft = Dispatch<SetStateAction<SettingsDraft>>;
+type SettingsScope = "project" | "global";
+
+/**
+ * La rubrique affichée.
+ *
+ * L'écran était une seule page : douze sections à la file, où l'on cherchait
+ * l'équipe en passant devant les jetons d'accès. Le découpage suit ce qu'on
+ * vient y faire — brancher un service, décrire une équipe, régler son poste —
+ * et non l'ordre dans lequel ces réglages sont apparus.
+ *
+ * Retenue d'une fois sur l'autre : on revient dans les réglages pour finir ce
+ * qu'on y faisait.
+ */
+function useSettingsTab() {
+	const { focus, clearFocus } = useCockpit();
 	const [tab, setTab] = usePersistentState<SettingsTab>("settings.tab", "projects");
 
 	// En aperçu, la rubrique se demande par l'adresse : c'est ce qui permet de
@@ -492,15 +490,32 @@ export function SettingsView() {
 			clearFocus();
 		}
 	}, [focus.settingsTab, clearFocus, setTab]);
-	// Les rubriques qui écrivent dans le fichier de configuration : la portée et
-	// le bouton « Enregistrer » ne concernent qu'elles. Ailleurs, chaque panneau a
-	// son propre bouton — l'en-tête en montrait un qui n'enregistrait pas ce qu'on
-	// venait de modifier.
-	const declaresConfig = tab === "services" || tab === "workstation";
-	const scoped = declaresConfig || tab === "team" || tab === "agents";
-	// Dès qu'un second projet existe, les cibles ne s'héritent plus : ce que
-	// l'écran dit doit suivre ce que le backend fait.
-	const cloisonne = (config?.projects.length ?? 0) > 1;
+
+	return [tab, setTab] as const;
+}
+
+/**
+ * Le formulaire du fichier de configuration : les champs déclarés dans la
+ * portée choisie, les secrets collés, et leur enregistrement.
+ */
+function useSettingsForm(scope: SettingsScope) {
+	const { t } = useTranslation("views");
+	const { config, reloadConfig, notify } = useCockpit();
+	const [draft, setDraft] = useState<SettingsDraft>({
+		projectsRoot: "",
+		mainRepo: "",
+		editor: "zed",
+		githubRepo: "",
+		sentryOrg: "",
+		sentryProjects: "",
+		linearTeamKey: "",
+		triggerProjectRef: "",
+		railwayProjectId: "",
+		gitlabProject: "",
+		gitlabHost: "",
+	});
+	const [secrets, setSecrets] = useState<Record<string, string>>({});
+	const [saving, setSaving] = useState(false);
 
 	// Ce qu'on édite est ce que la portée choisie déclare — jamais la fusion des
 	// deux. Le formulaire se remplissait des valeurs résolues : sur un second
@@ -588,6 +603,31 @@ export function SettingsView() {
 		}
 	};
 
+	return { draft, setDraft, secrets, setSecrets, saving, save };
+}
+
+export function SettingsView() {
+	const { t } = useTranslation("views");
+	const { config, configError, reloadConfig } = useCockpit();
+	/**
+	 * Où va l'enregistrement.
+	 *
+	 * « Projet » écrit dans le projet actif, « Défauts » dans les valeurs
+	 * partagées dont héritent les projets qui ne disent rien. Sans ce choix, le
+	 * multi-projets se réduirait à changer de dépôt : deux projets sur des
+	 * comptes GitHub différents seraient impossibles.
+	 */
+	const [scope, setScope] = useState<SettingsScope>("project");
+	const [tab, setTab] = useSettingsTab();
+	const { draft, setDraft, secrets, setSecrets, saving, save } = useSettingsForm(scope);
+
+	// Les rubriques qui écrivent dans le fichier de configuration : la portée et
+	// le bouton « Enregistrer » ne concernent qu'elles. Ailleurs, chaque panneau a
+	// son propre bouton — l'en-tête en montrait un qui n'enregistrait pas ce qu'on
+	// venait de modifier.
+	const declaresConfig = tab === "services" || tab === "workstation";
+	const scoped = declaresConfig || tab === "team" || tab === "agents";
+
 	return (
 		<>
 			<ViewHeader
@@ -625,27 +665,7 @@ export function SettingsView() {
 			{configError ? <ErrorNote error={configError} onRetry={reloadConfig} /> : null}
 
 			<div className="flex min-h-0 flex-1">
-				{/* Le menu tient dans une colonne fixe : ces libellés ne changent pas,
-				    et une largeur qui suit le texte ferait danser le contenu d'une
-				    rubrique à l'autre. */}
-				<nav className="hairline-r flex w-48 shrink-0 flex-col gap-0.5 overflow-y-auto p-2.5">
-					{TABS.map((entry) => (
-						<button
-							key={entry.id}
-							type="button"
-							onClick={() => setTab(entry.id)}
-							title={t(`settings.tabs.${entry.id}.hint`)}
-							className={clsx(
-								"focus-ring rounded-lg px-2.5 py-1.5 text-left text-[12.5px] transition-colors",
-								tab === entry.id
-									? "bg-accent-dim font-medium text-accent-soft"
-									: "text-ink-muted hover:bg-hover hover:text-ink",
-							)}
-						>
-							{t(`settings.tabs.${entry.id}.label`)}
-						</button>
-					))}
-				</nav>
+				<SettingsNav tab={tab} onSelect={setTab} />
 
 				<div className="min-h-0 flex-1 overflow-y-auto p-5">
 				<div className="flex max-w-3xl flex-col gap-6">
@@ -657,51 +677,7 @@ export function SettingsView() {
 
 					{/* La portée décide de tout ce qui suit : elle doit se lire avant
 					    de toucher au moindre champ, pas se deviner dans un coin. */}
-					{scoped ? (
-					<div
-						className={clsx(
-							"flex items-center gap-3 rounded-xl border p-3",
-							scope === "project"
-								? "border-accent/30 bg-accent/[0.06]"
-								: "border-line-soft bg-surface/40",
-						)}
-					>
-						<div className="min-w-0 flex-1">
-							<p className="text-[12.5px] font-medium text-ink">
-								{scope === "project"
-									? t("settings.scope.projectTitle", {
-											name: activeProject?.name ?? t("settings.scope.thisProject"),
-										})
-									: t("settings.scope.globalTitle")}
-							</p>
-							<p className="mt-0.5 text-[10px] leading-snug text-ink-faint">
-								{scope === "project"
-									? cloisonne
-										? t("settings.scope.projectHintIsolated")
-										: t("settings.scope.projectHint")
-									: cloisonne
-										? t("settings.scope.globalHintIsolated")
-										: t("settings.scope.globalHint")}
-							</p>
-						</div>
-						<div className="flex shrink-0 items-center gap-1 rounded-lg border border-line-soft p-0.5">
-							<Button
-								size="sm"
-								active={scope === "project"}
-								onClick={() => setScope("project")}
-							>
-								{activeProject?.name ?? t("settings.scope.project")}
-							</Button>
-							<Button
-								size="sm"
-								active={scope === "global"}
-								onClick={() => setScope("global")}
-							>
-								{t("settings.scope.defaults")}
-							</Button>
-						</div>
-					</div>
-					) : null}
+					{scoped ? <ScopePicker scope={scope} onChange={setScope} /> : null}
 
 					{tab === "services" ? (
 						<Section title={t("settings.sections.services")}>
@@ -709,92 +685,9 @@ export function SettingsView() {
 						</Section>
 					) : null}
 
-					{tab === "team" ? (
-						<>
-							<Section title={t("settings.sections.workflow")}>
-								<WorkflowSettings />
-							</Section>
+					{tab === "team" ? <TeamTab /> : null}
 
-							{/* L'équipe juste après le flux de travail : les deux décrivent
-							    la même chose — comment ce projet travaille — et se règlent
-							    au même moment, quand on branche un nouveau dépôt. */}
-							<Section title={t("settings.sections.team")}>
-								<TeamSettings />
-							</Section>
-						</>
-					) : null}
-
-					{tab === "agents" ? (
-						<>
-							{/* Les comptes en tête : c'est sous eux que tout le reste tourne,
-							    et un moteur réglé au détail près sur la mauvaise identité ne
-							    sert à rien. */}
-							<Section title={t("settings.sections.accounts")}>
-								<AccountsSettings />
-							</Section>
-
-							{/* Les moteurs avant les rôles : un rôle choisit son moteur, et
-							    on ne choisit pas dans une liste qu'on n'a pas encore
-							    remplie. */}
-							<Section title={t("settings.sections.engines")}>
-								<EnginesSettings />
-							</Section>
-
-							{/* Juste après les moteurs : un rôle choisit son moteur, ses
-							    outils viennent du dépôt. Les deux décident de ce qu'un agent
-							    peut faire, et l'un sans l'autre ne dit rien. */}
-							<Section title={t("settings.sections.mcp")}>
-								<McpSettings />
-							</Section>
-
-							<Section title={t("settings.sections.roles")}>
-								<RolesSettings />
-							</Section>
-
-							<Section title={t("settings.sections.missionMode")}>
-								<MissionModeSettings />
-							</Section>
-
-							{/* Ce qu'une mission a le droit de coûter, juste après les rôles
-							    qui la peuplent : c'est le même sujet vu par la dépense. */}
-							<Section title={t("settings.sections.missionBudget")}>
-								<MissionBudgetSettings />
-							</Section>
-
-							{/* Juste après la dépense : la même question posée à la
-							    machine plutôt qu'au portefeuille. */}
-							<Section title={t("settings.sections.sandbox")}>
-								<SandboxSettings />
-							</Section>
-
-							{/* Ce qui doit rester vrai vient en premier : c'est la seule
-							    chose de cet onglet qu'une machine puisse vérifier, et le
-							    reste — contexte, rôles, lectures — sert à s'en approcher. */}
-							<Section title={t("settings.sections.properties")}>
-								<PropertiesSettings />
-							</Section>
-
-							{/* Les commandes du dépôt : ce que le cockpit sait lancer en
-							    ton nom, à côté de ce qu'il sait vérifier. */}
-							<Section title={t("settings.sections.commands")}>
-								<CommandsSettings />
-							</Section>
-
-							{/* Ce qu'un agent sait avant de commencer se règle au même
-							    endroit que ce qu'il a le droit de faire : les deux décident
-							    de ce qu'il produira. */}
-							<Section title={t("settings.sections.brief")}>
-								<BriefSettings />
-							</Section>
-
-							{/* La lecture des changements est un agent comme les autres :
-							    elle a son moteur et sa profondeur, et se règle donc ici
-							    plutôt que dans un coin de l'écran qui l'utilise. */}
-							<Section title={t("settings.sections.impact")}>
-								<ImpactSettings />
-							</Section>
-						</>
-					) : null}
+					{tab === "agents" ? <AgentsTab /> : null}
 
 					{/* La Permanence a sa propre rubrique : ce n'est pas un agent qu'on
 					    lance mais un service qui tourne, et la seule chose du cockpit
@@ -803,19 +696,7 @@ export function SettingsView() {
 
 					{/* Un réglage de poste : la clé ElevenLabs est dans le trousseau du
 					    Mac, pas dans la configuration d'un projet. */}
-					{tab === "voice" ? (
-						<>
-							<Section title={t("settings.sections.voice")}>
-								<p className="mb-3 max-w-xl text-[12px] leading-relaxed text-ink-muted">
-									{t("settings.voice.intro")}
-								</p>
-								<VoiceSettings />
-							</Section>
-							<Section title={t("settings.sections.assistant")}>
-								<AssistantSettings />
-							</Section>
-						</>
-					) : null}
+					{tab === "voice" ? <VoiceTab /> : null}
 
 					{tab === "mobile" ? (
 						<Section title={t("settings.sections.mobile")}>
@@ -823,272 +704,18 @@ export function SettingsView() {
 						</Section>
 					) : null}
 
-					{tab === "version" ? (
-					<Section title={t("settings.sections.version")}>
-						{/* Le texte cède avant le bouton : à cette largeur, une phrase qui
-						    ne se replie pas pousse l'action hors du cadre. */}
-						<div className="panel flex flex-wrap items-center justify-between gap-x-3 gap-y-2.5 p-3.5">
-							<p className="min-w-[16rem] flex-1 text-[11px] leading-relaxed text-ink-muted">
-								{t("settings.version.intro")}
-							</p>
-							<UpdateCheck />
-						</div>
-					</Section>
-					) : null}
+					{tab === "version" ? <VersionTab /> : null}
 
-					{tab === "workstation" ? (
-					<>
-					<Section title={t("settings.sections.language")}>
-						<LanguageSetting />
-					</Section>
-
-					<Section title={t("settings.sections.appearance")}>
-						<ThemeSetting />
-					</Section>
-
-					<Section title={t("settings.sections.onClose")}>
-						<RelaySetting />
-					</Section>
-
-					<Section title={t("settings.sections.onStart")}>
-						<ResumeSetting />
-					</Section>
-
-					<Section title={t("settings.sections.dock")}>
-						<DockSetting />
-					</Section>
-
-					<Section title={t("settings.sections.workstation")}>
-						<div className="panel grid grid-cols-2 gap-3 p-3.5">
-							<Field
-								label={t("settings.workstation.projectsRoot")}
-								hint={t("settings.workstation.projectsRootHint")}
-							>
-								<TextInput
-									value={draft.projectsRoot}
-									onChange={(value) =>
-										setDraft((current) => ({ ...current, projectsRoot: value }))
-									}
-									mono
-								/>
-							</Field>
-							<Field
-								label={t("settings.workstation.mainRepo")}
-								hint={t("settings.workstation.mainRepoHint")}
-							>
-								<TextInput
-									value={draft.mainRepo}
-									onChange={(value) =>
-										setDraft((current) => ({ ...current, mainRepo: value }))
-									}
-									mono
-								/>
-							</Field>
-							<Field label={t("settings.workstation.editor")} hint="zed · cursor · code">
-								<TextInput
-									value={draft.editor}
-									onChange={(value) =>
-										setDraft((current) => ({ ...current, editor: value }))
-									}
-									mono
-								/>
-							</Field>
-						</div>
-					</Section>
-					</>
-					) : null}
+					{tab === "workstation" ? <WorkstationTab draft={draft} setDraft={setDraft} /> : null}
 
 					{tab === "services" ? (
-					<>
-					<Section title={t("settings.sections.identifiers")}>
-						<div className="panel grid grid-cols-2 gap-3 p-3.5">
-							<Field label={t("settings.services.githubRepo")} hint="owner/repo">
-								<TextInput
-									value={draft.githubRepo}
-									onChange={(value) =>
-										setDraft((current) => ({ ...current, githubRepo: value }))
-									}
-									placeholder="northwind/storefront"
-									mono
-								/>
-							</Field>
-							<Field label={t("settings.services.sentryOrg")}>
-								<TextInput
-									value={draft.sentryOrg}
-									onChange={(value) =>
-										setDraft((current) => ({ ...current, sentryOrg: value }))
-									}
-									mono
-								/>
-							</Field>
-							<Field
-								label={t("settings.services.sentryProjects")}
-								hint={t("settings.services.sentryProjectsHint")}
-							>
-								<SentryProjectPicker
-									selected={draft.sentryProjects}
-									onChange={(value) =>
-										setDraft((current) => ({ ...current, sentryProjects: value }))
-									}
-								/>
-							</Field>
-							{/* Ce champ ne désigne pas l'équipe du daily : il sert à lire un
-							    numéro de ticket (ABC-3044). Nommé « Équipe Linear », il
-							    passait pour le réglage qui manquait au daily — lequel
-							    attend un UUID et des membres, dans la section Équipe. */}
-							<Field
-								label={t("settings.services.ticketKey")}
-								hint={t("settings.services.ticketKeyHint")}
-							>
-								<TextInput
-									value={draft.linearTeamKey}
-									onChange={(value) =>
-										setDraft((current) => ({ ...current, linearTeamKey: value }))
-									}
-									mono
-								/>
-							</Field>
-							{/* Le suivi de tâches se déduit de ce qui est renseigné : Linear
-							    s'il a un jeton, sinon GitLab si son projet est là, sinon les
-							    issues du dépôt GitHub. Un réglage de plus pour le redire
-							    serait un réglage de plus à oublier de changer. */}
-							<Field
-								label={t("settings.services.gitlabProject")}
-								hint={t("settings.services.gitlabProjectHint")}
-							>
-								<TextInput
-									value={draft.gitlabProject}
-									onChange={(value) =>
-										setDraft((current) => ({ ...current, gitlabProject: value }))
-									}
-									placeholder={t("settings.services.gitlabProjectPlaceholder")}
-									mono
-								/>
-							</Field>
-							<Field
-								label={t("settings.services.gitlabHost")}
-								hint={t("settings.services.gitlabHostHint")}
-							>
-								<TextInput
-									value={draft.gitlabHost}
-									onChange={(value) =>
-										setDraft((current) => ({ ...current, gitlabHost: value }))
-									}
-									placeholder={t("settings.services.gitlabHostPlaceholder")}
-									mono
-								/>
-							</Field>
-							<Field label={t("settings.services.triggerProject")}>
-								<TextInput
-									value={draft.triggerProjectRef}
-									onChange={(value) =>
-										setDraft((current) => ({ ...current, triggerProjectRef: value }))
-									}
-									placeholder="proj_…"
-									mono
-								/>
-							</Field>
-							<Field label={t("settings.services.railwayProject")}>
-								<TextInput
-									value={draft.railwayProjectId}
-									onChange={(value) =>
-										setDraft((current) => ({ ...current, railwayProjectId: value }))
-									}
-									mono
-								/>
-							</Field>
-						</div>
-					</Section>
-
-					<Section title={t("settings.sections.triggerEnvironments")}>
-						<TriggerEnvironments />
-						<p className="mt-1.5 px-1 text-[10px] leading-relaxed text-ink-faint">
-							{t("settings.trigger.help")}
-						</p>
-					</Section>
-
-					<Section title={t("settings.sections.secrets")}>
-						<div className="panel flex flex-col divide-y divide-line-soft">
-							{config?.secrets.map((secret) => (
-								<div key={secret.key} className="flex items-start gap-3 p-3.5">
-									<div className="w-32 shrink-0">
-										<div className="flex items-center gap-1.5">
-											<Dot tone={secret.configured ? "success" : "neutral"} />
-											<span className="text-[12.5px] font-medium text-ink">
-												{secret.label}
-											</span>
-										</div>
-										{/* Distinguer « défini ici » de « hérité » : un champ vide
-										    ne dit pas la même chose dans les deux cas. */}
-										{scope === "project" &&
-										activeProject?.overrides.includes(secret.key) ? (
-											<Badge tone="accent">{t("settings.secrets.override")}</Badge>
-										) : secret.configured ? (
-											<Badge tone="success">
-												{scope === "project"
-													? t("settings.secrets.inherited")
-													: t("settings.secrets.configured")}
-											</Badge>
-										) : (
-											<Badge tone="neutral">{t("settings.secrets.missing")}</Badge>
-										)}
-									</div>
-									<div className="min-w-0 flex-1">
-										<TextInput
-											type="password"
-											value={secrets[secret.key] ?? ""}
-											onChange={(value) =>
-												setSecrets((current) => ({ ...current, [secret.key]: value }))
-											}
-											placeholder={
-												secret.configured
-													? t("settings.secrets.keepPlaceholder")
-													: t("settings.secrets.pastePlaceholder")
-											}
-											mono
-										/>
-										<p className="mt-1 text-[10px] leading-snug text-ink-faint">
-											{secret.hint}
-										</p>
-									</div>
-								</div>
-							))}
-						</div>
-						<p className="mt-2 flex items-start gap-2 px-1 text-[10px] leading-relaxed text-ink-faint">
-							<KeyRound size={11} className="mt-0.5 shrink-0" />
-							{t("settings.secrets.storage", { path: config?.configPath ?? "" })}
-						</p>
-					</Section>
-
-					<Section title={t("settings.sections.links")}>
-						<div className="panel flex flex-col gap-2 p-3.5 text-[11px] text-ink-muted">
-							{[
-								["Sentry", "https://sentry.io/settings/account/api/auth-tokens/"],
-								["Linear", "https://linear.app/settings/api"],
-								["GitLab", "https://gitlab.com/-/user_settings/personal_access_tokens"],
-								["Trigger.dev", "https://cloud.trigger.dev"],
-								["Railway", "https://railway.app/account/tokens"],
-								["Better Stack", "https://uptime.betterstack.com/team/api-tokens"],
-								["Stripe", "https://dashboard.stripe.com/apikeys"],
-							].map(([label, url]) => (
-								<button
-									key={label}
-									type="button"
-									onClick={() => {
-										void api.system.openUrl(url).catch(() => undefined);
-									}}
-									className="flex items-center gap-2 rounded-lg px-1.5 py-1 text-left hover:bg-surface"
-								>
-									<ExternalLink size={11} className="text-ink-faint" />
-									<span className="w-24 shrink-0">{label}</span>
-									<span className="truncate font-mono text-[10px] text-ink-faint">
-										{url}
-									</span>
-								</button>
-							))}
-						</div>
-					</Section>
-					</>
+						<ServicesTab
+							draft={draft}
+							setDraft={setDraft}
+							secrets={secrets}
+							setSecrets={setSecrets}
+							scope={scope}
+						/>
 					) : null}
 
 					{declaresConfig ? (
@@ -1107,6 +734,530 @@ export function SettingsView() {
 				</div>
 			</div>
 		</>
+	);
+}
+
+/** Le menu des rubriques, à gauche de l'écran. */
+function SettingsNav({
+	tab,
+	onSelect,
+}: {
+	tab: SettingsTab;
+	onSelect: (tab: SettingsTab) => void;
+}) {
+	const { t } = useTranslation("views");
+	return (
+		// Le menu tient dans une colonne fixe : ces libellés ne changent pas, et
+		// une largeur qui suit le texte ferait danser le contenu d'une rubrique à
+		// l'autre.
+		<nav className="hairline-r flex w-48 shrink-0 flex-col gap-0.5 overflow-y-auto p-2.5">
+			{TABS.map((entry) => (
+				<button
+					key={entry.id}
+					type="button"
+					onClick={() => onSelect(entry.id)}
+					title={t(`settings.tabs.${entry.id}.hint`)}
+					className={clsx(
+						"focus-ring rounded-lg px-2.5 py-1.5 text-left text-[12.5px] transition-colors",
+						tab === entry.id
+							? "bg-accent-dim font-medium text-accent-soft"
+							: "text-ink-muted hover:bg-hover hover:text-ink",
+					)}
+				>
+					{t(`settings.tabs.${entry.id}.label`)}
+				</button>
+			))}
+		</nav>
+	);
+}
+
+/** Le choix de la portée : le projet actif, ou les valeurs partagées. */
+function ScopePicker({
+	scope,
+	onChange,
+}: {
+	scope: SettingsScope;
+	onChange: (scope: SettingsScope) => void;
+}) {
+	const { t } = useTranslation("views");
+	const { config, activeProject } = useCockpit();
+	// Dès qu'un second projet existe, les cibles ne s'héritent plus : ce que
+	// l'écran dit doit suivre ce que le backend fait.
+	const cloisonne = (config?.projects.length ?? 0) > 1;
+	return (
+		<div
+			className={clsx(
+				"flex items-center gap-3 rounded-xl border p-3",
+				scope === "project"
+					? "border-accent/30 bg-accent/[0.06]"
+					: "border-line-soft bg-surface/40",
+			)}
+		>
+			<div className="min-w-0 flex-1">
+				<p className="text-[12.5px] font-medium text-ink">
+					{scope === "project"
+						? t("settings.scope.projectTitle", {
+								name: activeProject?.name ?? t("settings.scope.thisProject"),
+							})
+						: t("settings.scope.globalTitle")}
+				</p>
+				<p className="mt-0.5 text-[10px] leading-snug text-ink-faint">
+					{scope === "project"
+						? cloisonne
+							? t("settings.scope.projectHintIsolated")
+							: t("settings.scope.projectHint")
+						: cloisonne
+							? t("settings.scope.globalHintIsolated")
+							: t("settings.scope.globalHint")}
+				</p>
+			</div>
+			<div className="flex shrink-0 items-center gap-1 rounded-lg border border-line-soft p-0.5">
+				<Button size="sm" active={scope === "project"} onClick={() => onChange("project")}>
+					{activeProject?.name ?? t("settings.scope.project")}
+				</Button>
+				<Button size="sm" active={scope === "global"} onClick={() => onChange("global")}>
+					{t("settings.scope.defaults")}
+				</Button>
+			</div>
+		</div>
+	);
+}
+
+/** La rubrique « Équipe » : comment ce projet travaille, et avec qui. */
+function TeamTab() {
+	const { t } = useTranslation("views");
+	return (
+		<>
+			<Section title={t("settings.sections.workflow")}>
+				<WorkflowSettings />
+			</Section>
+
+			{/* L'équipe juste après le flux de travail : les deux décrivent
+			    la même chose — comment ce projet travaille — et se règlent
+			    au même moment, quand on branche un nouveau dépôt. */}
+			<Section title={t("settings.sections.team")}>
+				<TeamSettings />
+			</Section>
+		</>
+	);
+}
+
+/** La rubrique « Agents » : sous quelle identité, avec quoi, et dans quelles limites. */
+function AgentsTab() {
+	const { t } = useTranslation("views");
+	return (
+		<>
+			{/* Les comptes en tête : c'est sous eux que tout le reste tourne,
+			    et un moteur réglé au détail près sur la mauvaise identité ne
+			    sert à rien. */}
+			<Section title={t("settings.sections.accounts")}>
+				<AccountsSettings />
+			</Section>
+
+			{/* Les moteurs avant les rôles : un rôle choisit son moteur, et
+			    on ne choisit pas dans une liste qu'on n'a pas encore
+			    remplie. */}
+			<Section title={t("settings.sections.engines")}>
+				<EnginesSettings />
+			</Section>
+
+			{/* Juste après les moteurs : un rôle choisit son moteur, ses
+			    outils viennent du dépôt. Les deux décident de ce qu'un agent
+			    peut faire, et l'un sans l'autre ne dit rien. */}
+			<Section title={t("settings.sections.mcp")}>
+				<McpSettings />
+			</Section>
+
+			<Section title={t("settings.sections.roles")}>
+				<RolesSettings />
+			</Section>
+
+			<Section title={t("settings.sections.missionMode")}>
+				<MissionModeSettings />
+			</Section>
+
+			{/* Ce qu'une mission a le droit de coûter, juste après les rôles
+			    qui la peuplent : c'est le même sujet vu par la dépense. */}
+			<Section title={t("settings.sections.missionBudget")}>
+				<MissionBudgetSettings />
+			</Section>
+
+			{/* Juste après la dépense : la même question posée à la
+			    machine plutôt qu'au portefeuille. */}
+			<Section title={t("settings.sections.sandbox")}>
+				<SandboxSettings />
+			</Section>
+
+			{/* Ce qui doit rester vrai vient en premier : c'est la seule
+			    chose de cet onglet qu'une machine puisse vérifier, et le
+			    reste — contexte, rôles, lectures — sert à s'en approcher. */}
+			<Section title={t("settings.sections.properties")}>
+				<PropertiesSettings />
+			</Section>
+
+			{/* Les commandes du dépôt : ce que le cockpit sait lancer en
+			    ton nom, à côté de ce qu'il sait vérifier. */}
+			<Section title={t("settings.sections.commands")}>
+				<CommandsSettings />
+			</Section>
+
+			{/* Ce qu'un agent sait avant de commencer se règle au même
+			    endroit que ce qu'il a le droit de faire : les deux décident
+			    de ce qu'il produira. */}
+			<Section title={t("settings.sections.brief")}>
+				<BriefSettings />
+			</Section>
+
+			{/* La lecture des changements est un agent comme les autres :
+			    elle a son moteur et sa profondeur, et se règle donc ici
+			    plutôt que dans un coin de l'écran qui l'utilise. */}
+			<Section title={t("settings.sections.impact")}>
+				<ImpactSettings />
+			</Section>
+		</>
+	);
+}
+
+/** La rubrique « Voix et assistant ». */
+function VoiceTab() {
+	const { t } = useTranslation("views");
+	return (
+		<>
+			<Section title={t("settings.sections.voice")}>
+				<p className="mb-3 max-w-xl text-[12px] leading-relaxed text-ink-muted">
+					{t("settings.voice.intro")}
+				</p>
+				<VoiceSettings />
+			</Section>
+			<Section title={t("settings.sections.assistant")}>
+				<AssistantSettings />
+			</Section>
+		</>
+	);
+}
+
+/** La rubrique « Version » : la vérification des mises à jour. */
+function VersionTab() {
+	const { t } = useTranslation("views");
+	return (
+		<Section title={t("settings.sections.version")}>
+			{/* Le texte cède avant le bouton : à cette largeur, une phrase qui
+			    ne se replie pas pousse l'action hors du cadre. */}
+			<div className="panel flex flex-wrap items-center justify-between gap-x-3 gap-y-2.5 p-3.5">
+				<p className="min-w-[16rem] flex-1 text-[11px] leading-relaxed text-ink-muted">
+					{t("settings.version.intro")}
+				</p>
+				<UpdateCheck />
+			</div>
+		</Section>
+	);
+}
+
+/** La rubrique « Poste » : langue, apparence, démarrage, dossiers et éditeur. */
+function WorkstationTab({ draft, setDraft }: { draft: SettingsDraft; setDraft: SetDraft }) {
+	const { t } = useTranslation("views");
+	return (
+		<>
+			<Section title={t("settings.sections.language")}>
+				<LanguageSetting />
+			</Section>
+
+			<Section title={t("settings.sections.appearance")}>
+				<ThemeSetting />
+			</Section>
+
+			<Section title={t("settings.sections.onClose")}>
+				<RelaySetting />
+			</Section>
+
+			<Section title={t("settings.sections.onStart")}>
+				<ResumeSetting />
+			</Section>
+
+			<Section title={t("settings.sections.dock")}>
+				<DockSetting />
+			</Section>
+
+			<Section title={t("settings.sections.workstation")}>
+				<div className="panel grid grid-cols-2 gap-3 p-3.5">
+					<Field
+						label={t("settings.workstation.projectsRoot")}
+						hint={t("settings.workstation.projectsRootHint")}
+					>
+						<TextInput
+							value={draft.projectsRoot}
+							onChange={(value) =>
+								setDraft((current) => ({ ...current, projectsRoot: value }))
+							}
+							mono
+						/>
+					</Field>
+					<Field
+						label={t("settings.workstation.mainRepo")}
+						hint={t("settings.workstation.mainRepoHint")}
+					>
+						<TextInput
+							value={draft.mainRepo}
+							onChange={(value) =>
+								setDraft((current) => ({ ...current, mainRepo: value }))
+							}
+							mono
+						/>
+					</Field>
+					<Field label={t("settings.workstation.editor")} hint="zed · cursor · code">
+						<TextInput
+							value={draft.editor}
+							onChange={(value) =>
+								setDraft((current) => ({ ...current, editor: value }))
+							}
+							mono
+						/>
+					</Field>
+				</div>
+			</Section>
+		</>
+	);
+}
+
+/** La rubrique « Services » : identifiants, environnements, secrets et liens. */
+function ServicesTab({
+	draft,
+	setDraft,
+	secrets,
+	setSecrets,
+	scope,
+}: {
+	draft: SettingsDraft;
+	setDraft: SetDraft;
+	secrets: Record<string, string>;
+	setSecrets: Dispatch<SetStateAction<Record<string, string>>>;
+	scope: SettingsScope;
+}) {
+	const { t } = useTranslation("views");
+	return (
+		<>
+			<ServiceIdentifiers draft={draft} setDraft={setDraft} />
+
+			<Section title={t("settings.sections.triggerEnvironments")}>
+				<TriggerEnvironments />
+				<p className="mt-1.5 px-1 text-[10px] leading-relaxed text-ink-faint">
+					{t("settings.trigger.help")}
+				</p>
+			</Section>
+
+			<ServiceSecrets secrets={secrets} setSecrets={setSecrets} scope={scope} />
+
+			<ServiceLinks />
+		</>
+	);
+}
+
+/** Les identifiants des services : dépôt, organisation, projets, clé de ticket. */
+function ServiceIdentifiers({ draft, setDraft }: { draft: SettingsDraft; setDraft: SetDraft }) {
+	const { t } = useTranslation("views");
+	return (
+		<Section title={t("settings.sections.identifiers")}>
+			<div className="panel grid grid-cols-2 gap-3 p-3.5">
+				<Field label={t("settings.services.githubRepo")} hint="owner/repo">
+					<TextInput
+						value={draft.githubRepo}
+						onChange={(value) =>
+							setDraft((current) => ({ ...current, githubRepo: value }))
+						}
+						placeholder="northwind/storefront"
+						mono
+					/>
+				</Field>
+				<Field label={t("settings.services.sentryOrg")}>
+					<TextInput
+						value={draft.sentryOrg}
+						onChange={(value) =>
+							setDraft((current) => ({ ...current, sentryOrg: value }))
+						}
+						mono
+					/>
+				</Field>
+				<Field
+					label={t("settings.services.sentryProjects")}
+					hint={t("settings.services.sentryProjectsHint")}
+				>
+					<SentryProjectPicker
+						selected={draft.sentryProjects}
+						onChange={(value) =>
+							setDraft((current) => ({ ...current, sentryProjects: value }))
+						}
+					/>
+				</Field>
+				{/* Ce champ ne désigne pas l'équipe du daily : il sert à lire un
+				    numéro de ticket (ABC-3044). Nommé « Équipe Linear », il
+				    passait pour le réglage qui manquait au daily — lequel
+				    attend un UUID et des membres, dans la section Équipe. */}
+				<Field
+					label={t("settings.services.ticketKey")}
+					hint={t("settings.services.ticketKeyHint")}
+				>
+					<TextInput
+						value={draft.linearTeamKey}
+						onChange={(value) =>
+							setDraft((current) => ({ ...current, linearTeamKey: value }))
+						}
+						mono
+					/>
+				</Field>
+				{/* Le suivi de tâches se déduit de ce qui est renseigné : Linear
+				    s'il a un jeton, sinon GitLab si son projet est là, sinon les
+				    issues du dépôt GitHub. Un réglage de plus pour le redire
+				    serait un réglage de plus à oublier de changer. */}
+				<Field
+					label={t("settings.services.gitlabProject")}
+					hint={t("settings.services.gitlabProjectHint")}
+				>
+					<TextInput
+						value={draft.gitlabProject}
+						onChange={(value) =>
+							setDraft((current) => ({ ...current, gitlabProject: value }))
+						}
+						placeholder={t("settings.services.gitlabProjectPlaceholder")}
+						mono
+					/>
+				</Field>
+				<Field
+					label={t("settings.services.gitlabHost")}
+					hint={t("settings.services.gitlabHostHint")}
+				>
+					<TextInput
+						value={draft.gitlabHost}
+						onChange={(value) =>
+							setDraft((current) => ({ ...current, gitlabHost: value }))
+						}
+						placeholder={t("settings.services.gitlabHostPlaceholder")}
+						mono
+					/>
+				</Field>
+				<Field label={t("settings.services.triggerProject")}>
+					<TextInput
+						value={draft.triggerProjectRef}
+						onChange={(value) =>
+							setDraft((current) => ({ ...current, triggerProjectRef: value }))
+						}
+						placeholder="proj_…"
+						mono
+					/>
+				</Field>
+				<Field label={t("settings.services.railwayProject")}>
+					<TextInput
+						value={draft.railwayProjectId}
+						onChange={(value) =>
+							setDraft((current) => ({ ...current, railwayProjectId: value }))
+						}
+						mono
+					/>
+				</Field>
+			</div>
+		</Section>
+	);
+}
+
+/** Les jetons d'accès : un champ par service, vide tant qu'on n'y colle rien. */
+function ServiceSecrets({
+	secrets,
+	setSecrets,
+	scope,
+}: {
+	secrets: Record<string, string>;
+	setSecrets: Dispatch<SetStateAction<Record<string, string>>>;
+	scope: SettingsScope;
+}) {
+	const { t } = useTranslation("views");
+	const { config, activeProject } = useCockpit();
+	return (
+		<Section title={t("settings.sections.secrets")}>
+			<div className="panel flex flex-col divide-y divide-line-soft">
+				{config?.secrets.map((secret) => (
+					<div key={secret.key} className="flex items-start gap-3 p-3.5">
+						<div className="w-32 shrink-0">
+							<div className="flex items-center gap-1.5">
+								<Dot tone={secret.configured ? "success" : "neutral"} />
+								<span className="text-[12.5px] font-medium text-ink">
+									{secret.label}
+								</span>
+							</div>
+							{/* Distinguer « défini ici » de « hérité » : un champ vide
+							    ne dit pas la même chose dans les deux cas. */}
+							{scope === "project" &&
+							activeProject?.overrides.includes(secret.key) ? (
+								<Badge tone="accent">{t("settings.secrets.override")}</Badge>
+							) : secret.configured ? (
+								<Badge tone="success">
+									{scope === "project"
+										? t("settings.secrets.inherited")
+										: t("settings.secrets.configured")}
+								</Badge>
+							) : (
+								<Badge tone="neutral">{t("settings.secrets.missing")}</Badge>
+							)}
+						</div>
+						<div className="min-w-0 flex-1">
+							<TextInput
+								type="password"
+								value={secrets[secret.key] ?? ""}
+								onChange={(value) =>
+									setSecrets((current) => ({ ...current, [secret.key]: value }))
+								}
+								placeholder={
+									secret.configured
+										? t("settings.secrets.keepPlaceholder")
+										: t("settings.secrets.pastePlaceholder")
+								}
+								mono
+							/>
+							<p className="mt-1 text-[10px] leading-snug text-ink-faint">
+								{secret.hint}
+							</p>
+						</div>
+					</div>
+				))}
+			</div>
+			<p className="mt-2 flex items-start gap-2 px-1 text-[10px] leading-relaxed text-ink-faint">
+				<KeyRound size={11} className="mt-0.5 shrink-0" />
+				{t("settings.secrets.storage", { path: config?.configPath ?? "" })}
+			</p>
+		</Section>
+	);
+}
+
+/** Où créer les jetons de chaque service. */
+function ServiceLinks() {
+	const { t } = useTranslation("views");
+	return (
+		<Section title={t("settings.sections.links")}>
+			<div className="panel flex flex-col gap-2 p-3.5 text-[11px] text-ink-muted">
+				{[
+					["Sentry", "https://sentry.io/settings/account/api/auth-tokens/"],
+					["Linear", "https://linear.app/settings/api"],
+					["GitLab", "https://gitlab.com/-/user_settings/personal_access_tokens"],
+					["Trigger.dev", "https://cloud.trigger.dev"],
+					["Railway", "https://railway.app/account/tokens"],
+					["Better Stack", "https://uptime.betterstack.com/team/api-tokens"],
+					["Stripe", "https://dashboard.stripe.com/apikeys"],
+				].map(([label, url]) => (
+					<button
+						key={label}
+						type="button"
+						onClick={() => {
+							void api.system.openUrl(url).catch(() => undefined);
+						}}
+						className="flex items-center gap-2 rounded-lg px-1.5 py-1 text-left hover:bg-surface"
+					>
+						<ExternalLink size={11} className="text-ink-faint" />
+						<span className="w-24 shrink-0">{label}</span>
+						<span className="truncate font-mono text-[10px] text-ink-faint">
+							{url}
+						</span>
+					</button>
+				))}
+			</div>
+		</Section>
 	);
 }
 
