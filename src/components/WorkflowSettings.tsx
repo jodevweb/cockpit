@@ -5,7 +5,7 @@ import { Trans, useTranslation } from "react-i18next";
 import { Badge, Button, Field, Spinner, TextInput } from "@/components/ui";
 import { api } from "@/lib/ipc";
 import { useAsync } from "@/lib/useAsync";
-import type { Engine, Role, TeamMember } from "@/lib/types";
+import type { Engine, RepoRoles, Role, TeamMember } from "@/lib/types";
 import { useCockpit } from "@/app/store";
 import { useTerminals } from "@/app/terminals";
 import { isMac, platformContext } from "@/lib/platform";
@@ -487,7 +487,10 @@ export function RolesSettings() {
 	const { t } = useTranslation("components3");
 	const [roles, setRoles] = useState<Role[]>([]);
 	const [saving, setSaving] = useState(false);
-	const repo = useAsync(() => api.missions.repoRoles(), []);
+	const loaded = useAsync(() => api.missions.repoRoles(), []);
+	// Ce que la validation vient de rendre : plus frais que la première lecture.
+	const [validated, setValidated] = useState<RepoRoles | null>(null);
+	const repo = { data: validated ?? loaded.data };
 
 	// Une configuration vierge ne déclare aucun rôle : le cockpit applique alors
 	// ceux du catalogue. Les montrer vides laisserait croire qu'il n'y en a pas,
@@ -565,6 +568,40 @@ export function RolesSettings() {
 				<p className="text-[11px] leading-relaxed text-ink-muted">
 					{t("workflowSettings.roles.repoDeclared", { file: repo.data.file, ids: repo.data.ids.join(", ") })}
 				</p>
+			) : null}
+
+			{/* Un dépôt cloné peut réorienter un rôle qui agit sans rien demander :
+			    tant que son fichier n'est pas validé, ce rôle demande l'accord. */}
+			{repo.data && !repo.data.error && repo.data.restricted.length > 0 ? (
+				repo.data.trusted ? (
+					<p className="text-[11px] leading-relaxed text-ink-muted" data-testid="repo-roles-trusted">
+						{t("workflowSettings.roles.repoTrusted", { file: repo.data.file })}
+					</p>
+				) : (
+					<div
+						className="flex flex-wrap items-center gap-2 text-[11px] leading-relaxed text-warning"
+						data-testid="repo-roles-untrusted"
+					>
+						<span className="min-w-0 flex-1">
+							{t("workflowSettings.roles.repoUntrusted", {
+								file: repo.data.file,
+								ids: repo.data.restricted.join(", "),
+							})}
+						</span>
+						<Button
+							size="sm"
+							icon={Check}
+							onClick={() =>
+								void api.missions
+									.trustRepoRoles()
+									.then(setValidated)
+									.catch((error) => notify(String(error)))
+							}
+						>
+							{t("workflowSettings.roles.repoTrust")}
+						</Button>
+					</div>
+				)
 			) : null}
 
 			{roles.map((role, index) => (

@@ -8,4 +8,13 @@ export type RepoRoles = { file: string,
 /**
  * Les rôles que le dépôt déclare ; vide sans fichier.
  */
-ids: Array<string>, error: string | null, };
+ids: Array<string>, error: string | null, 
+/**
+ * Les rôles à pleins droits que le dépôt oriente : ceux qui redemandent l'accord
+ * tant que le fichier n'est pas validé.
+ */
+restricted: Array<string>, 
+/**
+ * L'utilisateur a validé le fichier tel qu'il est.
+ */
+trusted: boolean, };

@@ -791,6 +791,9 @@
 			"intro": "Cosa riceve un esecutore all'avvio: le sue istruzioni permanenti, il suo modello, e i percorsi in cui può scrivere. L'ambito è imposto — una scrittura fuori viene rifiutata, non solo sconsigliata.",
 			"masterNote": "Questo ruolo guida la missione: legge il ticket, propone la suddivisione e rimette tutto insieme alla fine. La sua chiave è riservata — i passaggi e gli strumenti di orchestrazione vengono da Cockpit; qui si impostano solo il comando, le istruzioni e il modello.",
 			"repoDeclared": "Questo repository dichiara anche ruoli in {{file}}: {{ids}}. All'avvio si applicano sopra queste impostazioni, tranne i permessi e il motore, che restano qui.",
+			"repoUntrusted": "Finché non convalidi {{file}}, {{ids}} chiedono l'approvazione prima di ogni modifica: questo file cambia le loro istruzioni, e di solito agiscono senza chiedere.",
+			"repoTrust": "Convalida questo file",
+			"repoTrusted": "{{file}} è convalidato così com'è: i suoi ruoli mantengono i loro permessi. Ogni modifica al file richiederà una nuova convalida.",
 			"repoInvalid": "{{file}} non è valido e le missioni non partiranno: {{error}}",
 			"keyHint": "citato dalle attività",
 			"engine": {

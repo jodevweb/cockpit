@@ -765,6 +765,8 @@ export const api = {
 		cleanup: (id: string) => call<string[]>("mission_cleanup", { id }),
 		roles: () => call<Role[]>("roles_list"),
 		repoRoles: () => call<RepoRoles>("repo_roles"),
+		/** Valide le fichier de rôles du dépôt tel qu'il est. */
+		trustRepoRoles: () => call<RepoRoles>("repo_roles_trust"),
 	},
 
 	/** Accès mobile : serveur local exposé au tailnet. */
