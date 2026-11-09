@@ -584,6 +584,8 @@ export function RolesSettings() {
 					>
 						<span className="min-w-0 flex-1">
 							{t("workflowSettings.roles.repoUntrusted", {
+								// Le verbe s'accorde : « backend demande », « backend, review demandent ».
+								count: repo.data.restricted.length,
 								file: repo.data.file,
 								ids: repo.data.restricted.join(", "),
 							})}
