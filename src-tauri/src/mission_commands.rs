@@ -726,7 +726,8 @@ pub async fn launch_task_agent(
 		"No scope declared: still stay within your responsibility.".to_string()
 	} else {
 		format!(
-			"You only modify these paths: {}. Any write elsewhere will be refused.",
+			"You only modify these paths: {}. File edits elsewhere are refused, and a branch \
+			 that changes anything else is not merged, however the change was made.",
 			task.scope.join(", ")
 		)
 	};
@@ -1000,8 +1001,9 @@ pub(crate) async fn launch_master(
 		 each one says what it does.\n\n\
 		 Two things you do not decide. Your plan waits for the user's agreement: \
 		 nothing starts before that, whatever you think of it. And the path scopes \
-		 you declare are enforced — a write outside them will be refused; it is not \
-		 an instruction but a barrier.\n\n\
+		 you declare are enforced — a file edit outside them is refused and a branch \
+		 that changes anything else is not merged; it is not an instruction but a \
+		 barrier.\n\n\
 		 Available roles:\n{roles}\n\n\
 		 A worker only sees its own instructions: what you do not write to it, it \
 		 does not have. Two workers writing in the same place will get in each \

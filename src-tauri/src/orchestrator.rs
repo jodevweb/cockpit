@@ -143,7 +143,7 @@ const TOOLS = [
               scope: {
                 type: "array",
                 items: { type: "string" },
-                description: "Paths this task may write to. Any write elsewhere will be refused.",
+                description: "Paths this task may write to. File edits elsewhere are refused, and a branch that changes anything else is not merged.",
               },
               base: { type: "string", description: "Starting branch; empty = integration branch." },
               branch: { type: "string" },
@@ -237,7 +237,7 @@ const TOOLS = [
   {
     name: "integrate",
     description:
-      "Merges the delivered branches into the integration branch. Returns the conflicts to resolve, without forcing anything. When the repository declares checks, a task is merged only once they pass: failed ones come back in `gatesFailed` with their output (send them to `rework`), running ones in `gatesPending`.",
+      "Merges the delivered branches into the integration branch. Returns the conflicts to resolve, without forcing anything. When the repository declares checks, a task is merged only once they pass: failed ones come back in `gatesFailed` with their output (send them to `rework`), running ones in `gatesPending`. A task whose branch changes files outside its scope comes back in `scopeFailed` with those files (send it to `rework` too).",
     inputSchema: { type: "object", properties: {} },
   },
 ];
@@ -524,7 +524,7 @@ async fn run(app: &tauri::AppHandle, call: &Call) -> Result<Value> {
 				"sessionId": session,
 				"worktree": worktree,
 				"branch": task.branch,
-				"message": "Worker launched. Its writes outside its scope will be refused.",
+				"message": "Worker launched. Its file edits outside its scope will be refused, and its branch will not be merged if it changes anything else.",
 			}))
 		}
 
@@ -658,6 +658,7 @@ async fn run(app: &tauri::AppHandle, call: &Call) -> Result<Value> {
 				.collect();
 			let mut gates_pending = Vec::new();
 			let mut gates_failed = Vec::new();
+			let mut scope_failed = Vec::new();
 
 			for task in &mission.tasks {
 				// La branche qui porte le travail, pas celle qu'on lui avait
@@ -703,6 +704,26 @@ async fn run(app: &tauri::AppHandle, call: &Call) -> Result<Value> {
 							"task": task.title,
 							"output": output,
 						}));
+						continue;
+					}
+				}
+				// Le pont d'autorisation ne voit que les outils d'édition : une
+				// écriture par `Bash` lui échappe. Le diff, lui, dit ce que la branche
+				// change, quel que soit le moyen. Sans objet pour une tâche qui juge :
+				// sa branche porte aussi les fusions de ses sœurs.
+				if !task.scope.is_empty() && !juges.contains(&task.role) {
+					let base = if task.base.trim().is_empty() { &mission.branch } else { &task.base };
+					// Un diff illisible ne vaut pas un diff propre : on ne fusionne pas.
+					let refus = match files_outside_scope(cwd, base, &branche, &task.scope).await {
+						Ok(files) if files.is_empty() => None,
+						Ok(files) => Some(json!({ "files": files })),
+						Err(error) => Some(json!({ "error": error.to_string() })),
+					};
+					if let Some(mut refus) = refus {
+						refus["taskId"] = json!(task.id);
+						refus["task"] = json!(task.title);
+						refus["scope"] = json!(task.scope);
+						scope_failed.push(refus);
 						continue;
 					}
 				}
@@ -815,6 +836,13 @@ async fn run(app: &tauri::AppHandle, call: &Call) -> Result<Value> {
 						titres(&gates_failed)
 					));
 				}
+				if !scope_failed.is_empty() {
+					texte.push_str(&format!(
+						" Not merged, the branch changes files outside its scope for {}: send \
+						 them back with `rework`, quoting the files given in `scopeFailed`.",
+						titres(&scope_failed)
+					));
+				}
 				if !gates_pending.is_empty() {
 					texte.push_str(&format!(
 						" Not merged yet, the repository checks are still running for {}: \
@@ -830,6 +858,7 @@ async fn run(app: &tauri::AppHandle, call: &Call) -> Result<Value> {
 				"conflicts": conflicts,
 				"gatesFailed": gates_failed,
 				"gatesPending": gates_pending,
+				"scopeFailed": scope_failed,
 				"worktree": worktree,
 				"evidence": evidence,
 				"evidenceMissing": recettes_muettes,
@@ -1278,6 +1307,31 @@ async fn brings_own_commits(cwd: &std::path::Path, branch: &str) -> bool {
 		.map_or(true, |count| count > 0)
 }
 
+/// Les fichiers qu'une branche change hors de son périmètre, depuis qu'elle a
+/// quitté `base`.
+///
+/// Trois points : ce que l'intégration a reçu entre-temps ne compte pas pour elle.
+/// `--no-renames` : un renommage sort aussi du dossier qu'il quitte. `-z` : git
+/// citerait sinon les noms accentués, qui ne se compareraient plus au périmètre.
+async fn files_outside_scope(
+	cwd: &std::path::Path,
+	base: &str,
+	branch: &str,
+	scope: &[String],
+) -> Result<Vec<String>> {
+	let changed = crate::git::run_git(
+		cwd,
+		&["diff", "--name-only", "--no-renames", "-z", &format!("{base}...{branch}")],
+	)
+	.await?;
+	Ok(changed
+		.split('\0')
+		.map(str::trim)
+		.filter(|path| !path.is_empty() && !mission::within_scope(scope, path))
+		.map(str::to_string)
+		.collect())
+}
+
 /// Deux chemins qui désignent le même dossier.
 ///
 /// Comparaison textuelle après résolution des liens : `~/Sites/app`,
@@ -1490,6 +1544,33 @@ mod tests {
 		};
 		git(&["add", "."]);
 		git(&["commit", "--quiet", "-m", message]);
+	}
+
+	/// Ce que l'écriture par `Bash` laisse derrière elle : le diff la voit, là où
+	/// le pont d'autorisation ne voit que les outils d'édition.
+	#[tokio::test]
+	async fn une_branche_qui_sort_de_son_perimetre_se_voit_au_diff() {
+		let depot = depot_jetable("perimetre");
+		let lot = worktree_de(&depot, "feat/x-lot", "feat/x");
+		let perimetre = vec!["api.txt".to_string()];
+
+		commit_dans(&lot, "api.txt", "a\n", "Dans le périmètre");
+		let dehors = files_outside_scope(&depot, "feat/x", "feat/x-lot", &perimetre).await.unwrap();
+		assert!(dehors.is_empty(), "{dehors:?}");
+
+		// Ce que l'intégration reçoit ensuite n'est pas le fait de cette branche.
+		commit_dans(&depot, "sœur.txt", "s\n", "Une tâche sœur");
+		let dehors = files_outside_scope(&depot, "feat/x", "feat/x-lot", &perimetre).await.unwrap();
+		assert!(dehors.is_empty(), "{dehors:?}");
+
+		commit_dans(&lot, "écran.txt", "e\n", "Hors du périmètre");
+		let dehors = files_outside_scope(&depot, "feat/x", "feat/x-lot", &perimetre).await.unwrap();
+		assert_eq!(dehors, vec!["écran.txt".to_string()]);
+
+		assert!(files_outside_scope(&depot, "feat/x", "branche-absente", &perimetre).await.is_err());
+
+		std::fs::remove_dir_all(&depot).ok();
+		std::fs::remove_dir_all(&lot).ok();
 	}
 
 	fn mission_avec(cwd: &str, branch: &str, tasks: Vec<Task>) -> mission::Mission {
