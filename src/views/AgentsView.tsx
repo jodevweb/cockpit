@@ -504,8 +504,7 @@ export function AgentsView() {
 			setSelectedFile(focus.sessionFile);
 			clearFocus();
 		}
-		// eslint-disable-next-line react-hooks/exhaustive-deps
-	}, [focus.sessionFile]);
+	}, [focus.sessionFile, clearFocus]);
 
 	const [scope, setScope] = useState<"live" | "recent" | "all">("recent");
 

@@ -198,6 +198,7 @@ export function MissionJourney({
 			.then(refresh)
 			.catch((error) => notify(String(error)))
 			.finally(() => setAutoStarting(false));
+		// `refresh` et `notify` ne servent qu'à la fin d'un lancement qu'`autoLaunched` rend unique.
 		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, [awaitsMaster, masterAlive, mission.id, mission.paused]);
 

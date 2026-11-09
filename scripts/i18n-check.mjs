@@ -30,7 +30,7 @@ function flatten(value, prefix = "", out = {}) {
 const vars = (text) => [...text.matchAll(/\{\{\s*([\w.]+)[^}]*\}\}/g)].map((m) => m[1]).sort().join(",");
 const stem = (key) => key.replace(PLURAL, "");
 const sansCount = (list) => list.split(",").filter((name) => name && name !== "count").join(",");
-let PLURAL_STEMS = new Set();
+let PLURAL_STEMS;
 
 let problems = 0;
 for (const base of bases) {

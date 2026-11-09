@@ -142,7 +142,7 @@ function Tour({ runId, onClose }: { runId: string; onClose: () => void }) {
 	const { runs } = useAgentRuns();
 	const { notify } = useCockpit();
 	const run = runs.find((entry) => entry.id === runId);
-	const turns = run?.turns ?? [];
+	const turns = useMemo(() => run?.turns ?? [], [run?.turns]);
 	const cwd = run?.cwd ?? "";
 	const since = useMemo(() => firstCommit(turns), [turns]);
 

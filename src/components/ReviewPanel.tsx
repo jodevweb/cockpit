@@ -249,7 +249,8 @@ function FindingCard({
 		let alive = true;
 		void diffAnchor(finding.file).then((hash) => {
 			if (!alive) return;
-			const range = lines ? (lines.start === lines.end ? `R${lines.start}` : `R${lines.start}-R${lines.end}`) : "";
+			const at = span(finding.lines);
+			const range = at ? (at.start === at.end ? `R${at.start}` : `R${at.start}-R${at.end}`) : "";
 			setLink(`${review.url}/files#diff-${hash}${range}`);
 		});
 		return () => {

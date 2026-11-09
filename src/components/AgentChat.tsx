@@ -477,7 +477,7 @@ function useBrief(run: AgentRun) {
 				return { text: consigne, joined: null };
 			}
 		},
-		[brief, fresh],
+		[brief, fresh, run.cwd],
 	);
 
 	return { brief: fresh ? brief : null, loading, toggle, refresh: compose, join };

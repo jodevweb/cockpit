@@ -36,7 +36,9 @@ function bashDeGit() {
 		for (const ligne of execFileSync("where", ["git"], { encoding: "utf8" }).split(/\r?\n/)) {
 			if (ligne.trim()) candidats.push(join(dirname(dirname(ligne.trim())), "bin", "bash.exe"));
 		}
-	} catch {}
+	} catch {
+		// Git absent du PATH : on essaie les emplacements ordinaires.
+	}
 	for (const base of [process.env.ProgramFiles, process.env.ProgramW6432, process.env.LOCALAPPDATA && join(process.env.LOCALAPPDATA, "Programs")]) {
 		if (base) candidats.push(join(base, "Git", "bin", "bash.exe"));
 	}

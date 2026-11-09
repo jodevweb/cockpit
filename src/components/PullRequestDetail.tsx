@@ -24,6 +24,8 @@ export function PullRequestDetail({ item }: { item: FeedItem }) {
 	const { notify, worktrees, go } = useCockpit();
 	const { confirm } = useConfirm();
 	const { open: openAgent } = useAgentActions();
+	// La réponse de GitHub telle quelle : chaque champ lu ici est converti à l'usage.
+	// eslint-disable-next-line @typescript-eslint/no-explicit-any
 	const raw = (item.payload ?? {}) as Record<string, any>;
 
 	const meta = (label: string) =>

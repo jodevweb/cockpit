@@ -121,6 +121,7 @@ export function FileFinder({ group }: { group: WorkGroup }) {
 		}
 		found.sort((a, b) => b.score - a.score || a.relative.length - b.relative.length);
 		return found.length > 0 ? [{ title: t("fileFinder.files", { count: found.length }), rows: found.slice(0, SHOWN) }] : [];
+		// `row` est refaite à chaque rendu et ne lit que `cwd`.
 		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, [query, index, known, recent, written, changed, cwd, t]);
 

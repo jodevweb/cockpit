@@ -129,6 +129,7 @@ export function ConfirmProvider({ children }: { children: ReactNode }) {
 		};
 		window.addEventListener("keydown", handler);
 		return () => window.removeEventListener("keydown", handler);
+		// `accept` et `close` sont refaits à chaque rendu et ne lisent que ces deux valeurs.
 		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, [request, draft]);
 

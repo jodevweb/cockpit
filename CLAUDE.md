@@ -15,6 +15,7 @@ pnpm vite:dev                     # the interface alone in a browser, on preview
 pnpm install:app                  # build + install locally (scripts/plateforme.mjs picks .sh or .ps1)
 
 pnpm exec tsc --noEmit            # types
+pnpm lint                         # ESLint
 node scripts/i18n-check.mjs       # translation catalogs (optionally: <language>)
 pnpm test:ui                      # Playwright, against the preview (vite on port 41730)
 pnpm exec playwright test -g "<test name>"   # a single UI test

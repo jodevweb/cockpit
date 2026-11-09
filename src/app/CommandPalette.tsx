@@ -336,7 +336,6 @@ export function CommandPalette({ onClose }: { onClose: () => void }) {
 		});
 
 		return list;
-		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, [
 		go,
 		worktrees,

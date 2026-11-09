@@ -259,8 +259,7 @@ export function MissionsView() {
 			clearFocus();
 			missions.reload();
 		}
-		// eslint-disable-next-line react-hooks/exhaustive-deps
-	}, [focus.missionId]);
+	}, [focus.missionId, clearFocus, missions]);
 
 	const remove = async (mission: Mission) => {
 		// Ce que la suppression emporte est énuméré : c'est du travail sur

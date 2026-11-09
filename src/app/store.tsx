@@ -218,6 +218,7 @@ export function CockpitProvider({ children }: { children: ReactNode }) {
 			window.clearTimeout(timer);
 			void unlisten.then((off) => off());
 		};
+		// `reload` est stable : l'abonnement se pose une fois, pour toute la session.
 		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, []);
 
@@ -347,6 +348,7 @@ export function CockpitProvider({ children }: { children: ReactNode }) {
 				(HANDBACK_SILENCE + 1) * 1000,
 			);
 		}
+		// Seule une nouvelle lecture des sessions relance ce calcul : `reload` est stable.
 		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, [sessionState.data]);
 
@@ -522,8 +524,7 @@ export function CockpitProvider({ children }: { children: ReactNode }) {
 				})
 				.catch((error) => setToast(String(error)));
 		},
-		// eslint-disable-next-line react-hooks/exhaustive-deps
-		[configState.reload, worktreeState.reload, sessionState.reload],
+		[],
 	);
 
 	const go = useCallback((next: ViewId, nextFocus?: Focus) => {
