@@ -469,8 +469,8 @@ câblés :
   relance un process (`codex exec resume <fil>` pour les suivants), qui se
   termine de lui-même une fois la réponse rendue. Le cockpit traduit ce qu'il
   peut vers la forme que le fil de discussion sait déjà lire — texte de
-  l'agent, commande lancée, fin de tour — et laisse le reste de côté plutôt
-  que d'afficher un champ deviné (voir `codex.rs`).
+  l'agent, commandes, outils MCP, fichiers modifiés, fin de tour — et laisse le
+  reste de côté plutôt que d'afficher un champ deviné (voir `codex.rs`).
 - **`gemini-stream-json`** — Google Gemini CLI (`gemini --output-format
   stream-json`). Un seul tour possible : aucune source ne documente de
   mécanisme de reprise pour ce mode (voir `gemini.rs`), donc un agent Gemini
@@ -479,16 +479,19 @@ câblés :
   fonctionnalité, pas d'une documentation stabilisée : deux pages officielles
   se contredisaient sur son existence même au moment où ceci a été écrit.
 
-`codex-exec` et `gemini-stream-json` ne peuvent pas encore être le moteur
-d'une mission (maître ou exécutant) : les outils de mission et le pont
-d'autorisation sont des mécanismes du protocole par défaut.
+`codex-exec` peut être le moteur d'une mission (maître ou exécutant), hors
+conteneur. Le mode de permission d'un rôle s'applique comme avec Claude Code :
+`bypassPermissions` lance Codex sans son bac à sable, et les autres modes le
+lancent dans ce bac à sable, où un worktree ne peut pas commiter. Les commandes
+d'équipe passent en texte simple, car Codex ne les résout pas.
+`gemini-stream-json` ne peut pas encore être le moteur d'une mission.
 
 Leur historique, en revanche, se relit désormais. Le cockpit tient son propre
 relevé de ce que font les agents (`executions.rs`), écrit au fil de l'eau et
 valable pour les trois moteurs : l'écran Agents s'y replie quand il n'y a pas
 de journal Claude Code à lire. Un historique Codex reste incomplet par
-construction — ni son raisonnement ni les sorties de ses commandes n'ont de
-forme vérifiée — et le relevé le dit plutôt que de le combler.
+construction — son raisonnement n'a pas de forme vérifiée — et le relevé le dit
+plutôt que de le combler.
 
 ## Limites connues
 
@@ -501,12 +504,10 @@ forme vérifiée — et le relevé le dit plutôt que de le combler.
   SmartScreen, voir « Windows »).
 - **Cursor** n'expose pas ses conversations en fichiers lisibles (SQLite interne) :
   seuls ses livrables écrits sur disque apparaissent, dans l'écran Documents.
-- **Codex et Gemini** (`codex-exec`, `gemini-stream-json`) n'ont pas été
-  vérifiés contre leur vrai binaire, absent de tout poste où ces protocoles
-  ont été écrits — seulement contre leur documentation officielle et un faux
-  CLI de test qui en imite le comportement. Gemini avec moins de certitude que
-  Codex : sa documentation était contradictoire d'une page à l'autre au
-  moment où ceci a été écrit. Voir « Moteurs d'agents » ci-dessus.
+- **Codex** (`codex-exec`) a été vérifié contre codex-cli 0.167, sous Windows
+  uniquement. **Gemini** (`gemini-stream-json`) n'a pas été vérifié contre son
+  vrai binaire, seulement contre sa documentation et un faux CLI de test. Voir
+  « Moteurs d'agents » ci-dessus.
 
 ## Langues
 

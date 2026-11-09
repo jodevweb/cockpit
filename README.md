@@ -456,8 +456,8 @@ wired:
   relaunches a process (`codex exec resume <thread>` for the following ones),
   which ends by itself once the answer is given. The cockpit translates what it
   can into the shape the conversation thread already knows how to read — agent
-  text, command run, end of turn — and leaves the rest aside rather than
-  showing a guessed field (see `codex.rs`).
+  text, commands, MCP tools, file changes, end of turn — and leaves the rest
+  aside rather than showing a guessed field (see `codex.rs`).
 - **`gemini-stream-json`** — Google Gemini CLI (`gemini --output-format
   stream-json`). A single turn only: no source documents a resume mechanism for
   this mode (see `gemini.rs`), so a Gemini agent receives one message and stops
@@ -466,16 +466,19 @@ wired:
   documentation: two official pages contradicted each other on its very
   existence when this was written.
 
-`codex-exec` and `gemini-stream-json` cannot yet be the engine of a mission
-(master or worker): mission tools and the permission bridge are mechanisms of
-the default protocol.
+`codex-exec` can be the engine of a mission (master or worker), outside a
+container. A role's permission mode applies as it does with Claude Code:
+`bypassPermissions` runs Codex without its sandbox, and the other modes run it
+in its own sandbox, where a worktree cannot commit. Team slash commands are
+passed as plain text, since Codex does not resolve them.
+`gemini-stream-json` cannot yet be the engine of a mission.
 
 Their history, on the other hand, can now be read back. The cockpit keeps its
 own record of what agents do (`executions.rs`), written as it happens and valid
 for all three engines: the Agents screen falls back to it when there is no
 Claude Code log to read. A Codex history remains incomplete by construction —
-neither its reasoning nor its command outputs have a verified shape — and the
-record says so rather than filling the gap.
+its reasoning has no verified shape — and the record says so rather than
+filling the gap.
 
 ## Known limitations
 
@@ -489,12 +492,10 @@ record says so rather than filling the gap.
 - **Cursor** does not expose its conversations as readable files (internal
   SQLite): only its deliverables written to disk show up, in the Documents
   screen.
-- **Codex and Gemini** (`codex-exec`, `gemini-stream-json`) have not been
-  checked against their real binary, absent from every machine where these
-  protocols were written — only against their official documentation and a fake
-  test CLI that mimics their behavior. Gemini with less certainty than Codex:
-  its documentation contradicted itself from one page to the next when this
-  was written. See "Agent engines" above.
+- **Codex** (`codex-exec`) was checked against codex-cli 0.167 on Windows only.
+  **Gemini** (`gemini-stream-json`) has not been checked against
+  its real binary, only against its documentation and a fake test CLI. See
+  "Agent engines" above.
 
 ## Languages
 

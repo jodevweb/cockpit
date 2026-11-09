@@ -170,6 +170,13 @@ struct PerTurn {
 	/// suivant de reprendre la même conversation plutôt que d'en ouvrir une
 	/// autre. Absent tant que le premier tour n'a encore rien annoncé.
 	thread_id: Option<String>,
+	/// Les réglages du lancement : une reprise n'en hérite aucun, ni son mode, ni
+	/// ses outils, ni son modèle.
+	args: String,
+	/// Son environnement : sans lui, le pont de mission d'un tour suivant ne sait
+	/// plus sur quelle mission il agit, et l'agent change de compte.
+	env: Vec<(String, String)>,
+	env_removals: Vec<String>,
 }
 
 #[derive(Default)]
@@ -227,17 +234,22 @@ impl AgentRegistry {
 			.collect()
 	}
 
-	/// L'identifiant de session du moteur (`claude_session_id`), pendant que
-	/// l'agent est encore vivant.
+	/// L'identifiant de session du moteur (`claude_session_id`, ou le fil d'un
+	/// agent par tour), pendant que l'agent est encore vivant. C'est par lui
+	/// qu'une tâche renvoyée en correction reprend sa conversation.
 	///
 	/// À appeler avant `stop`, jamais après : une fois l'agent arrêté et retiré
 	/// du registre, plus rien ne sait retrouver cet identifiant — c'est
 	/// exactement ce qui laissait `task.engine_session` vide (voir
 	/// `collect_finished_tasks`, qui l'appelle désormais avant de libérer
 	/// l'agent, pas dans `rework` où il était déjà trop tard).
-	pub fn claude_session_of(&self, session_id: &str) -> Option<String> {
+	pub fn engine_session_of(&self, session_id: &str) -> Option<String> {
 		let sessions = self.sessions.lock().unwrap_or_else(|e| e.into_inner());
-		sessions.get(session_id)?.claude_session_id.clone()
+		let running = sessions.get(session_id)?;
+		running
+			.claude_session_id
+			.clone()
+			.or_else(|| running.per_turn.as_ref()?.thread_id.clone())
 	}
 }
 
@@ -883,6 +895,66 @@ fn launch_config(mission: Option<&str>) -> crate::config::Config {
 		.unwrap_or_else(crate::config::Config::active)
 }
 
+/// Les consignes permanentes d'un agent : le rendu en images et la liste
+/// d'étapes (dont l'outil vit dans le pont d'autorisation, d'où `steps`), et la
+/// langue de réponse, pour tout agent : les prompts sont en anglais.
+fn standing_instructions(reviewing: bool, steps: bool) -> String {
+	let consignes: Vec<String> = [
+		(!reviewing && steps).then(|| crate::prompts::STEPS_TEMPLATE.to_string()),
+		if reviewing { None } else { crate::prompts::visual() },
+		Some(crate::i18n::reply_directive()),
+	]
+	.into_iter()
+	.flatten()
+	.collect();
+	consignes.join("\n\n")
+}
+
+/// Les outils et le garde-fou d'un agent Codex, les mêmes que ceux que Claude
+/// Code reçoit plus bas. Hors conteneur seulement : voir `Protocol::runs_missions`.
+fn codex_equipment(cwd: &str, reviewing: bool, seat: MissionSeat) -> String {
+	let read = |path: String| -> String {
+		std::fs::read_to_string(path)
+			.ok()
+			.and_then(|raw| serde_json::from_str::<Value>(&raw).ok())
+			.map(|config| crate::codex::mcp_args(&config))
+			.unwrap_or_default()
+	};
+	let lossy = |path: std::path::PathBuf| path.to_string_lossy().to_string();
+
+	let mut args = String::new();
+	if let Some(declares) = crate::mcp::config_for(cwd, false) {
+		args.push_str(&read(lossy(declares)));
+	}
+	if !reviewing {
+		if let Some(browser) = crate::browser::mcp_config(cwd, false) {
+			args.push_str(&read(lossy(browser)));
+		}
+	}
+	let bridge = crate::permissions::bridge_arguments(false);
+	let steps = bridge.is_some();
+	if let Some((config, _tool)) = bridge {
+		args.push_str(&read(config));
+	}
+	if reviewing {
+		if let Some(config) = crate::review::bridge_config(false) {
+			args.push_str(&read(config));
+		}
+	}
+	if seat == MissionSeat::Master {
+		if let Some(config) = crate::orchestrator::bridge_config(false) {
+			args.push_str(&read(config));
+		}
+	}
+	if seat == MissionSeat::Executor {
+		if let Some(hook) = crate::guard::codex_hook_args() {
+			args.push_str(&hook);
+		}
+	}
+	args.push_str(&crate::codex::instructions_args(&standing_instructions(reviewing, steps)));
+	args
+}
+
 /// Un agent lancé depuis l'écran, avec un profil : `review` le met en lecture
 /// seule (voir `review.rs`).
 #[allow(clippy::too_many_arguments)]
@@ -1009,11 +1081,9 @@ async fn start_inner(
 			],
 		)));
 	};
-	// Les outils de mission et le pont d'autorisation sont des mécanismes du
-	// protocole par défaut, pas du dialogue lui-même : sans eux, un maître ne
-	// peut ni planifier ni lancer d'exécutant, et un exécutant ne peut pas se
-	// faire relire — voir la doctrine de `PROTOCOL_CODEX_EXEC`.
-	if mission.is_some() && dialect != crate::protocol::Protocol::Claude {
+	// Sans ses outils, un maître ne peut ni planifier ni lancer d'exécutant :
+	// mieux vaut refuser au lancement que laisser partir un agent démuni.
+	if mission.is_some() && !dialect.runs_missions(config.sandbox.enabled) {
 		return Err(CockpitError::msg(crate::i18n::tf(
 			"agent.protocolNoMission",
 			&[("protocol", &protocol)],
@@ -1049,28 +1119,36 @@ async fn start_inner(
 		binary
 	};
 
+	// Ce qu'un tour de Codex doit redonner à chaque reprise : voir `PerTurn`.
+	let mut codex_args = String::new();
 	let command = if dialect == crate::protocol::Protocol::Codex {
-		// `codex exec` prend le message en argument, jamais sur son entrée
-		// standard — voir `codex.rs`. Un message vide n'a rien à ouvrir.
+		// Un message vide n'a rien à ouvrir — voir `codex.rs`.
 		if prompt.trim().is_empty() {
 			return Err(CockpitError::msg(crate::i18n::t("agent.codexNeedsMessage")));
 		}
-		let mut built = match resume.filter(|s| !s.trim().is_empty()) {
-			Some(thread) => crate::codex::resume_turn(&binary, &thread, prompt.trim()),
-			None => crate::codex::first_turn(&binary, prompt.trim()),
-		};
+		// Une revue verrouillée ne gagne pas l'écriture par son mode `default`.
+		codex_args.push_str(&crate::codex::permission_args(if locked { "plan" } else { &mode }));
+		if let Some(model) = model.as_deref().filter(|m| !m.trim().is_empty()) {
+			codex_args.push_str(&format!(" --model {}", shell_quote(model.trim())));
+		}
+		if !config.sandbox.enabled {
+			codex_args.push_str(&codex_equipment(&cwd, reviewing, seat));
+		}
 		if !depth.trim().is_empty() {
 			let args = engine.depth_args(&depth);
 			if !args.is_empty() {
-				built.push(' ');
-				built.push_str(args);
+				codex_args.push(' ');
+				codex_args.push_str(args);
 			}
 		}
 		if !engine.extra_args.trim().is_empty() {
-			built.push(' ');
-			built.push_str(engine.extra_args.trim());
+			codex_args.push(' ');
+			codex_args.push_str(engine.extra_args.trim());
 		}
-		built
+		match resume.filter(|s| !s.trim().is_empty()) {
+			Some(thread) => crate::codex::resume_turn(&binary, &thread, &codex_args),
+			None => crate::codex::first_turn(&binary, &codex_args),
+		}
 	} else if dialect == crate::protocol::Protocol::Gemini {
 		// Un seul tour possible, jamais de reprise : voir `gemini.rs`. Même
 		// garde qu'en `codex-exec`, pour la même raison — rien à ouvrir sur un
@@ -1243,25 +1321,9 @@ async fn start_inner(
 		// doit être là avant le premier geste — une capture « avant » ne se prend
 		// plus une fois le code changé — et ne rien écrire dans la conversation.
 		// Un agent de revue ne produit rien : il n'en reçoit pas.
-		//
-		// La liste d'étapes s'y joint, dans le même ajout : son outil vit dans
-		// le pont d'autorisation, et la demander sans lui serait une consigne
-		// impossible à suivre.
-		//
-		// La consigne de langue, elle, part pour tout agent, revue comprise : les
-		// prompts sont en anglais, la réponse doit venir dans la langue de
-		// l'utilisateur.
-		let consignes: Vec<String> = [
-			(!reviewing && steps).then(|| crate::prompts::STEPS_TEMPLATE.to_string()),
-			if reviewing { None } else { crate::prompts::visual() },
-			Some(crate::i18n::reply_directive()),
-		]
-		.into_iter()
-		.flatten()
-		.collect();
 		command.push_str(&format!(
 			" --append-system-prompt {}",
-			shell_quote(&consignes.join("\n\n"))
+			shell_quote(&standing_instructions(reviewing, steps))
 		));
 		if let Some(session) = resume.filter(|s| !s.trim().is_empty()) {
 			command.push_str(&format!(" --resume {}", shell_quote(&session)));
@@ -1498,19 +1560,36 @@ async fn start_inner(
 		.as_ref()
 		.map(|runtime| (runtime.clone(), session_id.clone()));
 
-	// `codex-exec` a déjà reçu son message dans la ligne de commande — l'y
-	// écrire une seconde fois sur son entrée standard le dédoublerait, et le
-	// CLI n'attend de toute façon rien dessus. Voir `codex.rs`.
-	if dialect.prompt_on_stdin() && !prompt.trim().is_empty() {
-		stdin
-			.write(&user_message(prompt.trim()))
-			.await
-			.map_err(|e| CockpitError::msg(crate::i18n::tf("agent.firstMessageError", &[("error", &e)])))?;
-	}
+	// Seul Claude Code lit la suite sur son entrée, qui reste donc ouverte. Pour
+	// les deux autres, elle se referme ici : `codex exec` l'attendrait sans fin
+	// (« Reading additional input from stdin… »), et Gemini y ajoute lui aussi ce
+	// qu'il y lit à son message.
+	let stdin = match dialect {
+		crate::protocol::Protocol::Claude => {
+			if !prompt.trim().is_empty() {
+				stdin
+					.write(&user_message(prompt.trim()))
+					.await
+					.map_err(|e| CockpitError::msg(crate::i18n::tf("agent.firstMessageError", &[("error", &e)])))?;
+			}
+			Some(stdin)
+		}
+		crate::protocol::Protocol::Codex => {
+			stdin
+				.write(prompt.trim())
+				.await
+				.map_err(|e| CockpitError::msg(crate::i18n::tf("agent.firstMessageError", &[("error", &e)])))?;
+			None
+		}
+		crate::protocol::Protocol::Gemini => None,
+	};
 
 	let per_turn = (!dialect.keeps_process()).then(|| PerTurn {
 		binary: binary.clone(),
 		thread_id: None,
+		args: codex_args.clone(),
+		env: env_vars.clone(),
+		env_removals: env_removals.clone(),
 	});
 
 	agents.sessions.lock().unwrap().insert(
@@ -1518,7 +1597,7 @@ async fn start_inner(
 		Running {
 			cwd: cwd.clone(),
 			execution: execution.clone(),
-			stdin: Some(stdin),
+			stdin,
 			child,
 			relay,
 			protocol: dialect,
@@ -1978,7 +2057,7 @@ async fn respawn_turn(
 	let thread = per_turn.thread_id.as_deref().ok_or_else(|| {
 		CockpitError::msg(crate::i18n::t("agent.noThreadYet"))
 	})?;
-	let command = crate::codex::resume_turn(&per_turn.binary, thread, text);
+	let command = crate::codex::resume_turn(&per_turn.binary, thread, &per_turn.args);
 
 	let sandbox_cfg = &config.sandbox;
 	let runtime = if sandbox_cfg.enabled {
@@ -2003,6 +2082,12 @@ async fn respawn_turn(
 		None => {
 			let mut native = crate::platform::shell_async(&command);
 			native.current_dir(cwd);
+			for (name, value) in &per_turn.env {
+				native.env(name, value);
+			}
+			for name in &per_turn.env_removals {
+				native.env_remove(name);
+			}
 			native
 		}
 	};
@@ -2023,7 +2108,16 @@ async fn respawn_turn(
 		.take()
 		.ok_or_else(|| CockpitError::msg(crate::i18n::t("agent.outputUnavailable")))?;
 	let stderr = child.stderr.take();
-	let stdin = child.stdin.take();
+	// Le message, puis l'entrée refermée : voir `start_inner`.
+	let mut stdin = child
+		.stdin
+		.take()
+		.ok_or_else(|| CockpitError::msg(crate::i18n::t("agent.inputUnavailable")))?;
+	stdin
+		.write_all(text.as_bytes())
+		.await
+		.map_err(|e| CockpitError::msg(crate::i18n::tf("agent.sendError", &[("error", &e)])))?;
+	drop(stdin);
 
 	let execution;
 	{
@@ -2036,7 +2130,7 @@ async fn respawn_turn(
 			return Err(CockpitError::msg(crate::i18n::t("agent.notActive")));
 		};
 		running.child = Some(child);
-		running.stdin = stdin.map(Input::Pipe);
+		running.stdin = None;
 		running.container = container;
 		running.turn_done = false;
 		running.turn_started_at = std::time::Instant::now();

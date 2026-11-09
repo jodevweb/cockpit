@@ -13,30 +13,12 @@ use crate::error::{CockpitError, Result};
 use serde::{Deserialize, Serialize};
 use std::path::PathBuf;
 
-/// Le script MCP, écrit à côté de la configuration au premier lancement.
-///
-/// Il parle JSON-RPC sur son entrée/sortie standard — le strict nécessaire du
-/// protocole : `initialize`, `tools/list`, `tools/call`.
-const BRIDGE: &str = r#"#!/usr/bin/env node
-// Pont d'autorisation du cockpit — généré, ne pas éditer à la main.
-import { mkdirSync, writeFileSync, readFileSync, existsSync, unlinkSync } from "node:fs";
-import { join } from "node:path";
-import { homedir } from "node:os";
-
-const DIR = join(homedir(), ".config", "cockpit", "permissions");
-mkdirSync(DIR, { recursive: true });
-
-// L'agent qui nous a lancés, transmis par le cockpit. Sans lui, une demande
-// s'afficherait dans toutes les conversations ouvertes au lieu de la sienne.
-const SESSION = process.env.COCKPIT_AGENT_SESSION ?? null;
-
-// Le mode de l'agent. Fournir un `--permission-prompt-tool` fait passer par ici
-// chaque outil que l'agent veut employer, `bypassPermissions` compris : le mode
-// seul ne suffisait donc pas, et un agent censé être autonome demandait la
-// permission de chaque commande. On tranche ici plutôt que de déranger.
-const BYPASS = process.env.COCKPIT_PERMISSION_MODE === "bypassPermissions";
-
-// Chemins où cet agent a le droit d'écrire, passés par le cockpit. Vide = tout.
+/// Le périmètre d'écriture d'un agent, en JavaScript. Une seule écriture pour le
+/// pont d'autorisation (Claude Code) et le hook du garde-fou (Codex) : le même
+/// chemin ne doit pas être accepté par l'un et refusé par l'autre.
+macro_rules! scope_rules {
+	() => {
+		r#"// Chemins où cet agent a le droit d'écrire, passés par le cockpit. Vide = tout.
 //
 // Le périmètre était vérifié côté cockpit, en relisant les demandes déposées
 // sur le disque. Or en mode `bypassPermissions` — celui des exécutants de
@@ -47,11 +29,6 @@ const SCOPE = (process.env.COCKPIT_SCOPE ?? "")
   .split("\n")
   .map((entry) => entry.trim())
   .filter(Boolean);
-
-// Les outils dont on sait lire la cible sans l'interpréter. `Bash` en est
-// exclu : deviner ce qu'une ligne de commande touche serait une promesse qu'on
-// ne peut pas tenir.
-const ECRITURES = { Write: "file_path", Edit: "file_path", MultiEdit: "file_path", NotebookEdit: "notebook_path" };
 
 // Le dossier de travail de l'agent : les chemins que le CLI passe à `Write` et
 // `Edit` sont absolus, le périmètre est relatif à ce dossier.
@@ -103,6 +80,39 @@ function dansLePerimetre(chemin) {
     return cible === prefixe || cible.startsWith(`${prefixe}/`);
   });
 }
+
+"#
+	};
+}
+pub(crate) use scope_rules;
+
+/// Le script MCP, écrit à côté de la configuration au premier lancement.
+///
+/// Il parle JSON-RPC sur son entrée/sortie standard — le strict nécessaire du
+/// protocole : `initialize`, `tools/list`, `tools/call`.
+const BRIDGE: &str = concat!(r#"#!/usr/bin/env node
+// Pont d'autorisation du cockpit — généré, ne pas éditer à la main.
+import { mkdirSync, writeFileSync, readFileSync, existsSync, unlinkSync } from "node:fs";
+import { join } from "node:path";
+import { homedir } from "node:os";
+
+const DIR = join(homedir(), ".config", "cockpit", "permissions");
+mkdirSync(DIR, { recursive: true });
+
+// L'agent qui nous a lancés, transmis par le cockpit. Sans lui, une demande
+// s'afficherait dans toutes les conversations ouvertes au lieu de la sienne.
+const SESSION = process.env.COCKPIT_AGENT_SESSION ?? null;
+
+// Le mode de l'agent. Fournir un `--permission-prompt-tool` fait passer par ici
+// chaque outil que l'agent veut employer, `bypassPermissions` compris : le mode
+// seul ne suffisait donc pas, et un agent censé être autonome demandait la
+// permission de chaque commande. On tranche ici plutôt que de déranger.
+const BYPASS = process.env.COCKPIT_PERMISSION_MODE === "bypassPermissions";
+
+"#, scope_rules!(), r#"// Les outils dont on sait lire la cible sans l'interpréter. `Bash` en est
+// exclu : deviner ce qu'une ligne de commande touche serait une promesse qu'on
+// ne peut pas tenir.
+const ECRITURES = { Write: "file_path", Edit: "file_path", MultiEdit: "file_path", NotebookEdit: "notebook_path" };
 
 // Ce qui remonte toujours, quel que soit le mode : une question posée à
 // l'utilisateur n'est pas une permission à accorder, c'est une réponse à
@@ -422,7 +432,7 @@ process.stdin.on("data", async (chunk) => {
     }
   }
 });
-"#;
+"#);
 
 pub fn permissions_dir() -> PathBuf {
 	config_dir().join("permissions")

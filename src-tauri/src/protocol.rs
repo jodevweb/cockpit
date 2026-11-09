@@ -79,12 +79,17 @@ impl Protocol {
 		!matches!(self, Protocol::Codex)
 	}
 
-	/// Le message de départ passe-t-il par l'entrée standard ?
+	/// Ce moteur peut-il tenir une mission, comme maître ou comme exécutant ?
 	///
-	/// Non chez Codex, qui le prend en argument : l'y écrire une seconde fois le
-	/// dédoublerait.
-	pub fn prompt_on_stdin(&self) -> bool {
-		matches!(self, Protocol::Claude)
+	/// Gemini ne reçoit pas encore les outils de mission. Codex les reçoit, mais
+	/// pas dans un conteneur : sa configuration MCP se lit depuis l'hôte, où les
+	/// chemins vus par le conteneur n'existent pas, et son image n'est pas prévue.
+	pub fn runs_missions(&self, sandboxed: bool) -> bool {
+		match self {
+			Protocol::Claude => true,
+			Protocol::Codex => !sandboxed,
+			Protocol::Gemini => false,
+		}
 	}
 
 	/// L'identifiant à retenir pour reprendre la conversation.
@@ -149,12 +154,12 @@ impl Protocol {
 	pub fn observability(&self) -> crate::executions::Observability {
 		use crate::executions::Observability;
 		match self {
-			// Chaque tour relance un process, aucun coût annoncé, et les
-			// sorties d'outils n'ont pas de forme vérifiée — voir `codex.rs`.
+			// Chaque tour relance un process, et aucun coût annoncé — voir
+			// `codex.rs`.
 			Protocol::Codex => Observability {
 				reports_cost: false,
 				reports_token_split: true,
-				reports_tool_results: false,
+				reports_tool_results: true,
 				reports_thinking: false,
 				resumable: true,
 			},
@@ -270,10 +275,12 @@ mod tests {
 	}
 
 	#[test]
-	fn seul_claude_recoit_sa_consigne_sur_l_entree_standard() {
-		assert!(Protocol::Claude.prompt_on_stdin());
-		assert!(!Protocol::Codex.prompt_on_stdin());
-		assert!(!Protocol::Gemini.prompt_on_stdin());
+	fn codex_tient_une_mission_hors_conteneur_et_gemini_pas_encore() {
+		assert!(Protocol::Claude.runs_missions(false));
+		assert!(Protocol::Claude.runs_missions(true));
+		assert!(Protocol::Codex.runs_missions(false));
+		assert!(!Protocol::Codex.runs_missions(true));
+		assert!(!Protocol::Gemini.runs_missions(false));
 	}
 
 	#[test]
@@ -363,7 +370,7 @@ mod tests {
 		// jamais comme une économie.
 		let codex = Protocol::Codex.observability();
 		assert!(!codex.reports_cost);
-		assert!(!codex.reports_tool_results);
+		assert!(codex.reports_tool_results);
 		assert!(codex.resumable);
 
 		let gemini = Protocol::Gemini.observability();

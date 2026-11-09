@@ -28,6 +28,10 @@
 //! `$(…)`, `{ …; }`, `then`, `do` — et les options longues abrégées que git
 //! accepte (`--forc`, `--dele`) valent les entières.
 //!
+//! Codex reçoit le même script (`codex::hook_args`), qui y juge aussi
+//! `apply_patch` : ce moteur n'a pas de pont d'autorisation où faire tenir le
+//! périmètre. Claude Code n'envoie jamais cet outil ici, son matcher est `Bash`.
+//!
 //! Ce qu'il ne fait pas, exprès : deviner ce qu'une ligne de commande écrit
 //! sur le disque. Il ne reconnaît que des commandes git dont la forme se lit
 //! sans ambiguïté, et laisse passer tout le reste. Il reste donc des chemins
@@ -40,7 +44,7 @@ use std::path::PathBuf;
 use crate::config::config_dir;
 
 /// Le hook. Lit l'appel d'outil sur son entrée, rend un refus ou rien.
-pub(crate) const GUARD: &str = r#"#!/usr/bin/env node
+pub(crate) const GUARD: &str = concat!(r#"#!/usr/bin/env node
 // Garde-fou git des exécutants de mission — écrit par le cockpit (guard.rs).
 const PROTECTED = (process.env.COCKPIT_PROTECTED_BRANCHES ?? "")
   .split("\n").map((b) => b.trim()).filter(Boolean);
@@ -219,13 +223,30 @@ function judge(line, protectedBranches, depth = 0) {
 }
 
 
+"#, crate::permissions::scope_rules!(), r#"
+/** Les fichiers que touche un `apply_patch` de Codex, lus sur ses en-têtes. */
+function patchedFiles(patch) {
+  const headers = /^\*\*\* (?:Add File|Update File|Delete File|Move to): (.+)$/gm;
+  return [...String(patch ?? "").matchAll(headers)].map((match) => match[1].trim());
+}
+
+/** La raison du refus d'un `apply_patch`, ou `null` quand il reste chez lui. */
+function judgePatch(patch) {
+  const outside = patchedFiles(patch).filter((path) => !dansLePerimetre(path));
+  if (outside.length === 0) return null;
+  return `Outside your scope: ${outside.join(", ")}. You only modify ${SCOPE.join(", ")}. ` +
+    "If this file needs to change, report it instead of modifying it.";
+}
+
 let raw = "";
 process.stdin.on("data", (chunk) => (raw += chunk));
 process.stdin.on("end", () => {
   let input = {};
   try { input = JSON.parse(raw || "{}"); } catch { return; }
-  if (input.tool_name !== "Bash") return;
-  const reason = judge(input.tool_input?.command, PROTECTED);
+  if (input.tool_name !== "Bash" && input.tool_name !== "apply_patch") return;
+  const reason = input.tool_name === "apply_patch"
+    ? judgePatch(input.tool_input?.command)
+    : judge(input.tool_input?.command, PROTECTED);
   if (reason) {
     // Pas de `process.exit` juste derrière : la sortie partirait peut-être
     // sans le refus, et le CLI lirait un accord.
@@ -235,7 +256,7 @@ process.stdin.on("end", () => {
   }
   process.exitCode = 0;
 });
-"#;
+"#);
 
 fn guard_path() -> PathBuf {
 	config_dir().join("mission-guard.mjs")
@@ -253,10 +274,7 @@ pub fn settings_argument(sandboxed: bool) -> Option<String> {
 	} else {
 		crate::agent::node_binary()?
 	};
-	std::fs::create_dir_all(config_dir()).ok()?;
-	// Écrit à côté puis renommé : plusieurs exécutants partent souvent ensemble,
-	// et un hook qui lirait un script à moitié écrit laisserait tout passer.
-	write_atomic(&guard_path(), GUARD).ok()?;
+	write_script()?;
 
 	let seen = |path: &std::path::Path| {
 		let path = path.to_string_lossy().to_string();
@@ -281,6 +299,21 @@ pub fn settings_argument(sandboxed: bool) -> Option<String> {
 
 /// Écrit un fichier sans qu'on puisse jamais le lire à moitié : une copie
 /// propre à ce processus, puis un renommage, qui remplace d'un coup.
+/// Le hook pour Codex, jamais dans un conteneur (`Protocol::runs_missions`) :
+/// `None` sans Node, comme `settings_argument`.
+pub fn codex_hook_args() -> Option<String> {
+	let node = crate::agent::node_binary()?;
+	write_script()?;
+	Some(crate::codex::hook_args(&node, &guard_path().to_string_lossy()))
+}
+
+/// Écrit à côté puis renommé : plusieurs exécutants partent souvent ensemble,
+/// et un hook qui lirait un script à moitié écrit laisserait tout passer.
+fn write_script() -> Option<()> {
+	std::fs::create_dir_all(config_dir()).ok()?;
+	write_atomic(&guard_path(), GUARD).ok()
+}
+
 fn write_atomic(path: &std::path::Path, content: &str) -> std::io::Result<()> {
 	static SEQ: std::sync::atomic::AtomicUsize = std::sync::atomic::AtomicUsize::new(0);
 	let n = SEQ.fetch_add(1, std::sync::atomic::Ordering::SeqCst);
@@ -354,6 +387,72 @@ mod tests {
 		let value: serde_json::Value = serde_json::from_str(&text).unwrap();
 		assert_eq!(value["hookSpecificOutput"]["permissionDecision"], "deny");
 		Some(value["hookSpecificOutput"]["permissionDecisionReason"].as_str().unwrap().to_string())
+	}
+
+	/// Le verdict du hook sur un `apply_patch`, dans un périmètre donné.
+	fn patch_refuse(patch: &str) -> Option<bool> {
+		patch_refuse_depuis("/wt/feat-x", patch)
+	}
+
+	fn patch_refuse_depuis(racine: &str, patch: &str) -> Option<bool> {
+		static RANG: std::sync::atomic::AtomicUsize = std::sync::atomic::AtomicUsize::new(0);
+		let node = which_node()?;
+		let rang = RANG.fetch_add(1, std::sync::atomic::Ordering::Relaxed);
+		let dir = std::env::temp_dir().join(format!("cockpit-guard-patch-{}-{rang}", std::process::id()));
+		std::fs::create_dir_all(&dir).unwrap();
+		let script = dir.join("guard.mjs");
+		std::fs::write(&script, GUARD).unwrap();
+		let mut child = Command::new(node)
+			.arg(&script)
+			.env("COCKPIT_SCOPE", "apps/api\npackages/core/")
+			.env("COCKPIT_CWD", racine)
+			.stdin(Stdio::piped())
+			.stdout(Stdio::piped())
+			.spawn()
+			.unwrap();
+		let input = serde_json::json!({ "tool_name": "apply_patch", "tool_input": { "command": patch } });
+		child.stdin.take().unwrap().write_all(input.to_string().as_bytes()).unwrap();
+		let output = child.wait_with_output().unwrap();
+		let _ = std::fs::remove_dir_all(&dir);
+		Some(!String::from_utf8_lossy(&output.stdout).trim().is_empty())
+	}
+
+	#[test]
+	fn un_patch_ne_sort_pas_du_perimetre() {
+		let Some(dedans) = patch_refuse("*** Begin Patch\n*** Update File: apps/api/main.rs\n@@\n-a\n+b\n*** End Patch\n") else {
+			return;
+		};
+		assert!(!dedans);
+		for dehors in [
+			"*** Add File: apps/web/page.tsx\n+x\n",
+			"*** Update File: apps/api/ok.rs\n*** Delete File: README.md\n",
+			// Un renommage écrit à sa destination, même depuis le périmètre.
+			"*** Update File: apps/api/a.rs\n*** Move to: apps/web/a.rs\n",
+			"*** Add File: apps/api/../web/page.tsx\n+x\n",
+			"*** Add File: /wt/feat-y/apps/api/x.rs\n+x\n",
+		] {
+			assert_eq!(patch_refuse(dehors), Some(true), "{dehors}");
+		}
+		assert_eq!(patch_refuse("*** Add File: /wt/feat-x/packages/core/x.rs\n+x\n"), Some(false));
+	}
+
+	/// La forme relevée sur codex-cli 0.167 sous Windows : un chemin absolu, avec
+	/// des `/`, là où le cockpit connaît son dossier avec des `\`.
+	#[test]
+	fn un_patch_en_chemin_absolu_windows_se_lit_depuis_le_worktree() {
+		let racine = r"C:\Users\a\wt\feat-x";
+		let Some(dedans) = patch_refuse_depuis(racine, "*** Add File: C:/Users/a/wt/feat-x/apps/api/e.txt\n+x\n") else {
+			return;
+		};
+		assert!(!dedans);
+		assert_eq!(
+			patch_refuse_depuis(racine, "*** Add File: C:/Users/a/wt/feat-x/e.txt\n+x\n"),
+			Some(true)
+		);
+		assert_eq!(
+			patch_refuse_depuis(racine, "*** Add File: C:/Users/a/wt/feat-y/apps/api/e.txt\n+x\n"),
+			Some(true)
+		);
 	}
 
 	fn which_node() -> Option<String> {
