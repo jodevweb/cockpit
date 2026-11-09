@@ -644,7 +644,7 @@ async fn run(app: &tauri::AppHandle, call: &Call) -> Result<Value> {
 			// Les rôles du projet de la mission, comme au ramassage des tâches
 			// rendues (`collect_finished_tasks`) : les deux doivent s'accorder
 			// sur qui juge, sans quoi une recette passerait les portes ici.
-			let juges: std::collections::HashSet<String> = crate::roles_for(&mission.cwd)
+			let verifiers: std::collections::HashSet<String> = crate::roles_for(&mission.cwd)
 				.into_iter()
 				.filter(|role| role.verifies)
 				.map(|role| role.id)
@@ -662,7 +662,7 @@ async fn run(app: &tauri::AppHandle, call: &Call) -> Result<Value> {
 				if task.state != TaskState::Delivered || branche.is_empty() {
 					continue;
 				}
-				let decision = mission::gate_decision(task.gate, !gate_commands.is_empty(), juges.contains(&task.role));
+				let decision = mission::gate_decision(task.gate, !gate_commands.is_empty(), verifiers.contains(&task.role));
 				// Rendue avant que les portes existent, ou retrouvée au démarrage :
 				// elle passe les portes comme les autres.
 				let decision = if decision == mission::GateDecision::Start {
@@ -700,7 +700,7 @@ async fn run(app: &tauri::AppHandle, call: &Call) -> Result<Value> {
 				// écriture par `Bash` lui échappe. Le diff, lui, dit ce que la branche
 				// change, quel que soit le moyen. Sans objet pour une tâche qui juge :
 				// sa branche porte aussi les fusions de ses sœurs.
-				if !task.scope.is_empty() && !juges.contains(&task.role) {
+				if !task.scope.is_empty() && !verifiers.contains(&task.role) {
 					let base = if task.base.trim().is_empty() {
 						&mission.branch
 					} else {
