@@ -57,7 +57,33 @@ fn setting(key: &str, value: &str) -> String {
 
 /// Une chaîne TOML. Les échappements que produit JSON y sont tous valides.
 fn toml_string(value: &str) -> String {
-	Value::from(value).to_string()
+	toml_value(&Value::from(value))
+}
+
+/// Une valeur JSON écrite en TOML, à une exception près : `\\` devient `\u005C`.
+///
+/// Le bash de Git réduit `\\` à `\` en passant l'argument à un programme natif.
+/// `"C:\\Users"` arrivait donc en `"C:\Users"`, faux en TOML (`\U`), et Codex refusait
+/// de démarrer sur tout chemin Windows. L'échappement Unicode n'a rien à réduire.
+fn toml_value(value: &Value) -> String {
+	let json = value.to_string();
+	let mut out = String::with_capacity(json.len());
+	let mut chars = json.chars();
+	while let Some(c) = chars.next() {
+		if c != '\\' {
+			out.push(c);
+			continue;
+		}
+		match chars.next() {
+			Some('\\') => out.push_str("\\u005C"),
+			Some(escaped) => {
+				out.push('\\');
+				out.push(escaped);
+			}
+			None => out.push('\\'),
+		}
+	}
+	out
 }
 
 /// Le mode de permission du cockpit, dans les termes de Codex.
@@ -112,7 +138,7 @@ pub fn mcp_args(config: &Value) -> String {
 		if let Some(command) = server.get("command").and_then(|v| v.as_str()) {
 			out.push_str(&setting(&format!("{key}.command"), &toml_string(command)));
 			if let Some(args) = server.get("args").filter(|args| args.is_array()) {
-				out.push_str(&setting(&format!("{key}.args"), &args.to_string()));
+				out.push_str(&setting(&format!("{key}.args"), &toml_value(args)));
 			}
 			if let Some(env) = server
 				.get("env")
@@ -128,7 +154,7 @@ pub fn mcp_args(config: &Value) -> String {
 			}
 			out.push_str(&setting(
 				&format!("{key}.env_vars"),
-				&Value::from(SERVER_ENV.to_vec()).to_string(),
+				&toml_value(&Value::from(SERVER_ENV.to_vec())),
 			));
 		} else if let Some(url) = server.get("url").and_then(|v| v.as_str()) {
 			out.push_str(&setting(&format!("{key}.url"), &toml_string(url)));
@@ -313,6 +339,42 @@ fn mcp_output(item: &Value) -> String {
 #[cfg(test)]
 mod tests {
 	use super::*;
+
+	/// Lue comme la lit Codex : `clé=valeur` en TOML, valeur intacte.
+	fn relu(setting: &str) -> toml::Value {
+		toml::from_str::<toml::Table>(setting).unwrap().remove("v").unwrap()
+	}
+
+	#[test]
+	fn une_valeur_toml_garde_ses_barres_obliques_inverses() {
+		let chemin = r#"C:\Users\jorda\pont.mjs"#;
+		let ecrit = toml_string(chemin);
+		assert!(!ecrit.contains(r"\\"), "{ecrit}");
+		assert_eq!(relu(&format!("v={ecrit}")).as_str(), Some(chemin));
+
+		// Une barre seule devant une lettre reste du texte, pas un saut de ligne.
+		let piege = "a\\nb\nc\"d";
+		assert_eq!(relu(&format!("v={}", toml_string(piege))).as_str(), Some(piege));
+
+		let liste = toml_value(&json!([chemin]));
+		assert_eq!(relu(&format!("v={liste}"))[0].as_str(), Some(chemin));
+	}
+
+	/// L'incident : le bash de Git réduisait `\\` en route. Seul un vrai passage par
+	/// ce shell le montre, et Codex ne démarrait pas sous Windows.
+	#[cfg(windows)]
+	#[test]
+	fn un_chemin_windows_survit_au_shell() {
+		let chemin = r#"C:\Users\jorda\pont.mjs"#;
+		let valeur = format!("v={}", toml_value(&json!([chemin])));
+		let commande = format!(
+			"node -e 'process.stdout.write(process.argv[1])' {}",
+			shell_quote(&valeur)
+		);
+		let sortie = crate::platform::shell(&commande).output().expect("node");
+		let recu = String::from_utf8_lossy(&sortie.stdout).to_string();
+		assert_eq!(relu(&recu)[0].as_str(), Some(chemin), "{recu}");
+	}
 	use serde_json::json;
 
 	#[test]
