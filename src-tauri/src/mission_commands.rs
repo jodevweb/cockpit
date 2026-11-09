@@ -904,6 +904,13 @@ pub(crate) async fn launch_master(
 	use tauri::Manager;
 	let mission = mission::get(&id)?;
 
+	crate::roles::check(&mission.cwd).map_err(|error| {
+		CockpitError::msg(i18n::tf(
+			"lib.mission.invalidRepoRoles",
+			&[("file", &crate::roles::FILE), ("error", &error)],
+		))
+	})?;
+
 	// Un maître lancé sans brief explicite (le bouton « Lancer le maître »
 	// d'une mission déjà ouverte, par opposition au geste qui ouvre et lance
 	// d'un coup) partait sans rien du ticket qui l'a pourtant fait naître —
@@ -1312,10 +1319,7 @@ pub(crate) async fn fetch_ticket_brief(mission: &mission::Mission) -> Option<Str
 /// `/code-review-process` — et une mission qui les perd tourne avec les rôles
 /// génériques sans que rien ne le dise.
 pub(crate) fn role_config(repo: &str, id: &str) -> Option<config::RoleConfig> {
-	let configured = config::Config::for_repo(repo)
-		.roles
-		.into_iter()
-		.find(|role| role.id == id);
+	let configured = roles_for(repo).into_iter().find(|role| role.id == id);
 	configured.or_else(|| config::default_roles().into_iter().find(|role| role.id == id))
 }
 
@@ -1508,9 +1512,10 @@ pub(crate) fn roles_list() -> Vec<config::RoleConfig> {
 /// depuis le projet de la mission, il ne dépend plus de l'écran ouvert.
 pub(crate) fn roles_for(repo: &str) -> Vec<config::RoleConfig> {
 	let roles = config::Config::for_repo(repo).roles;
-	if roles.is_empty() {
+	let local = if roles.is_empty() {
 		config::default_roles()
 	} else {
 		roles
-	}
+	};
+	crate::roles::with_repo(repo, local)
 }

@@ -382,6 +382,13 @@ credentials (`~/.claude`, `~/.gitconfig`, `~/.ssh`) read-only. When isolation
 is enabled without a runtime installed, the agent launch is refused with a
 clear message rather than silently falling back to a direct launch.
 
+A repository can version its roles in `.cockpit/roles.toml`, with the same fields
+as `[[roles]]` in the config. They apply over the machine's roles, matched by `id`.
+`permissionMode` and `engine` stay on the machine, and a file that sets them is
+refused when the master starts: cloning a repository must not be enough to run its
+agents without guardrails. A role only the repository knows starts in `acceptEdits`;
+to change that, declare the same `id` in your config.
+
 While isolation is off, the plan approval screen names the roles that will run
 in `bypassPermissions` directly on the machine: their Bash tool then has the
 session's rights, and the write scope only covers file edits.

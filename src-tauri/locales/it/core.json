@@ -421,6 +421,7 @@
 			"quotaFloor": "Sotto il {{floor}}% di quota rimanente, nessun nuovo compito parte.",
 			"launchSuspended": "Avvio sospeso",
 			"tooManyWorkers": "{{count}} esecutori già in corso sulla macchina",
+			"invalidRepoRoles": "{{file}} non è valido: {{error}}",
 			"taskWithoutId": "Compito senza identificatore: ripianifica la missione.",
 			"taskBlocked": "Compito bloccato",
 			"worktreeFailed": "Worktree impossibile: {{error}}",

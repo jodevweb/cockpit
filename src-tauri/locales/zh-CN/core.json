@@ -421,6 +421,7 @@
 			"quotaFloor": "剩余配额低于 {{floor}}% 时，不会开始新的子任务。",
 			"launchSuspended": "启动已暂缓",
 			"tooManyWorkers": "本机上已有 {{count}} 个执行者在运行",
+			"invalidRepoRoles": "{{file}} 无效：{{error}}",
 			"taskWithoutId": "子任务没有标识符：请重新规划任务。",
 			"taskBlocked": "子任务被阻塞",
 			"worktreeFailed": "无法创建 worktree：{{error}}",

@@ -394,6 +394,13 @@ conteneur, et les identifiants (`~/.claude`, `~/.gitconfig`, `~/.ssh`) en
 lecture seule. Activée sans runtime installé, le lancement de l'agent est
 refusé avec un message clair plutôt que de retomber en direct sans le dire.
 
+Un dépôt peut versionner ses rôles dans `.cockpit/roles.toml`, avec les mêmes champs
+que `[[roles]]` dans la configuration. Ils se posent sur ceux du poste, à `id` égal.
+`permissionMode` et `engine` restent sur le poste, et un fichier qui les fixe est
+refusé au lancement du maître : cloner un dépôt ne doit pas suffire à lancer ses
+agents sans garde-fou. Un rôle que seul le dépôt connaît part en `acceptEdits` ; pour
+changer cela, déclarez le même `id` dans votre configuration.
+
 Tant qu'elle est éteinte, l'écran d'approbation d'un plan nomme les rôles qui
 partiront en `bypassPermissions` directement sur le poste : leur outil Bash a
 alors les droits de la session, et le périmètre d'écriture ne couvre que les

@@ -421,6 +421,7 @@
 			"quotaFloor": "Por debajo del {{floor}} % de cuota restante, no arranca ninguna tarea nueva.",
 			"launchSuspended": "Lanzamiento suspendido",
 			"tooManyWorkers": "{{count}} ejecutores ya en marcha en la máquina",
+			"invalidRepoRoles": "{{file}} no es válido: {{error}}",
 			"taskWithoutId": "Tarea sin identificador: vuelve a planificar la misión.",
 			"taskBlocked": "Tarea bloqueada",
 			"worktreeFailed": "Worktree imposible: {{error}}",

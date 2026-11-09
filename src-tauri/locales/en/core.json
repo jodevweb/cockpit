@@ -421,6 +421,7 @@
 			"quotaFloor": "Below {{floor}}% of remaining quota, no new task starts.",
 			"launchSuspended": "Launch suspended",
 			"tooManyWorkers": "{{count}} workers already running on the machine",
+			"invalidRepoRoles": "{{file}} is invalid: {{error}}",
 			"taskWithoutId": "Task without an identifier: re-plan the mission.",
 			"taskBlocked": "Task blocked",
 			"worktreeFailed": "Worktree impossible: {{error}}",

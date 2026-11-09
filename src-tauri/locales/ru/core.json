@@ -421,6 +421,7 @@
 			"quotaFloor": "При остатке квоты ниже {{floor}}% новые задачи не запускаются.",
 			"launchSuspended": "Запуск приостановлен",
 			"tooManyWorkers": "На машине уже работают исполнители: {{count}}",
+			"invalidRepoRoles": "Файл {{file}} содержит ошибку: {{error}}",
 			"taskWithoutId": "Задача без идентификатора: перепланируйте миссию.",
 			"taskBlocked": "Задача заблокирована",
 			"worktreeFailed": "Невозможно создать worktree: {{error}}",

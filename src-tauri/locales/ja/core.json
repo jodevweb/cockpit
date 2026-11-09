@@ -421,6 +421,7 @@
 			"quotaFloor": "残りクォータが {{floor}}% を下回ると、新しいタスクは開始されません。",
 			"launchSuspended": "起動を保留",
 			"tooManyWorkers": "マシン上ですでに {{count}} 件の実行役が動いています",
+			"invalidRepoRoles": "{{file}} が正しくありません: {{error}}",
 			"taskWithoutId": "識別子のないタスクです：ミッションを計画し直してください。",
 			"taskBlocked": "タスクがブロックされています",
 			"worktreeFailed": "worktree を作成できません：{{error}}",

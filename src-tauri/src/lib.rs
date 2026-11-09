@@ -47,6 +47,7 @@ pub mod remote;
 pub mod replay;
 pub mod resources;
 pub mod review;
+mod roles;
 pub mod runner;
 pub mod sandbox;
 pub mod sessions;
