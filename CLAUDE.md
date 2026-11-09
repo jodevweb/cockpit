@@ -21,6 +21,7 @@ pnpm test:ui                      # Playwright, against the preview (vite on por
 pnpm exec playwright test -g "<test name>"   # a single UI test
 
 cd src-tauri && cargo clippy --lib --tests -- -D warnings   # Rust lints
+cd src-tauri && cargo fmt --check                 # Rust format
 cd src-tauri && cargo test --lib                  # Rust tests
 cd src-tauri && cargo test --lib orchestrator::   # one module
 cd src-tauri && cargo test --lib <module>::tests::<name>   # one test
