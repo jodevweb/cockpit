@@ -527,7 +527,7 @@ fn ranked(map: HashMap<String, Totals>, label: impl Fn(&str) -> String) -> Vec<B
 		})
 		.collect();
 	// Les jetons produits pèsent le plus lourd : on classe dessus.
-	buckets.sort_by(|a, b| (b.totals.output + b.totals.input).cmp(&(a.totals.output + a.totals.input)));
+	buckets.sort_by_key(|a| std::cmp::Reverse(a.totals.output + a.totals.input));
 	buckets
 }
 
