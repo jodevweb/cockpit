@@ -790,6 +790,8 @@
 			"saved": "Rôles enregistrés.",
 			"intro": "Ce que reçoit un exécutant au lancement : sa consigne permanente, son modèle, et les chemins où il a le droit d'écrire. Le périmètre est appliqué — une écriture en dehors est refusée, pas seulement déconseillée.",
 			"masterNote": "Ce rôle pilote la mission : il lit le ticket, propose le découpage et recompose à la fin. Sa clé est réservée — les étapes et les outils d'orchestration viennent du cockpit, seuls sa commande, sa consigne et son modèle se règlent ici.",
+			"repoDeclared": "Ce dépôt déclare aussi des rôles dans {{file}} : {{ids}}. Ils s'appliquent par-dessus ces réglages au lancement, sauf les droits et le moteur, qui restent ici.",
+			"repoInvalid": "{{file}} n'est pas valide, et les missions refuseront de démarrer : {{error}}",
 			"keyHint": "référencée par les tâches",
 			"engine": {
 				"label": "Moteur",

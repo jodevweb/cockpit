@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { Trans, useTranslation } from "react-i18next";
 import { Badge, Button, Field, Spinner, TextInput } from "@/components/ui";
 import { api } from "@/lib/ipc";
+import { useAsync } from "@/lib/useAsync";
 import type { Engine, Role, TeamMember } from "@/lib/types";
 import { useCockpit } from "@/app/store";
 import { useTerminals } from "@/app/terminals";
@@ -486,6 +487,7 @@ export function RolesSettings() {
 	const { t } = useTranslation("components3");
 	const [roles, setRoles] = useState<Role[]>([]);
 	const [saving, setSaving] = useState(false);
+	const repo = useAsync(() => api.missions.repoRoles(), []);
 
 	// Une configuration vierge ne déclare aucun rôle : le cockpit applique alors
 	// ceux du catalogue. Les montrer vides laisserait croire qu'il n'y en a pas,
@@ -554,6 +556,16 @@ export function RolesSettings() {
 			<p className="text-[11px] leading-relaxed text-ink-faint">
 				{t("workflowSettings.roles.intro")}
 			</p>
+
+			{repo.data?.error ? (
+				<p className="text-[11px] leading-relaxed text-critical">
+					{t("workflowSettings.roles.repoInvalid", { file: repo.data.file, error: repo.data.error })}
+				</p>
+			) : repo.data && repo.data.ids.length > 0 ? (
+				<p className="text-[11px] leading-relaxed text-ink-muted">
+					{t("workflowSettings.roles.repoDeclared", { file: repo.data.file, ids: repo.data.ids.join(", ") })}
+				</p>
+			) : null}
 
 			{roles.map((role, index) => (
 				<div

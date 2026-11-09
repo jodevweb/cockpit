@@ -790,6 +790,8 @@
 			"saved": "Ruoli salvati.",
 			"intro": "Cosa riceve un esecutore all'avvio: le sue istruzioni permanenti, il suo modello, e i percorsi in cui può scrivere. L'ambito è imposto — una scrittura fuori viene rifiutata, non solo sconsigliata.",
 			"masterNote": "Questo ruolo guida la missione: legge il ticket, propone la suddivisione e rimette tutto insieme alla fine. La sua chiave è riservata — i passaggi e gli strumenti di orchestrazione vengono da Cockpit; qui si impostano solo il comando, le istruzioni e il modello.",
+			"repoDeclared": "Questo repository dichiara anche ruoli in {{file}}: {{ids}}. All'avvio si applicano sopra queste impostazioni, tranne i permessi e il motore, che restano qui.",
+			"repoInvalid": "{{file}} non è valido e le missioni non partiranno: {{error}}",
 			"keyHint": "citato dalle attività",
 			"engine": {
 				"label": "Motore",
