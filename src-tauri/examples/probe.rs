@@ -57,7 +57,10 @@ async fn main() {
 				let file = Path::new(&first.file);
 				match sessions::read_timeline(file, 400) {
 					Ok(events) => {
-						println!("\n── timeline de la session la plus fraîche : {} événements ──", events.len());
+						println!(
+							"\n── timeline de la session la plus fraîche : {} événements ──",
+							events.len()
+						);
 						for event in events.iter().rev().take(5).rev() {
 							println!(
 								"  {:<12} {}",

@@ -74,9 +74,7 @@ pub(crate) fn mission_create(
 /// Le nécessaire pour ouvrir une mission depuis un ticket, et le ticket
 /// lui-même — `mission_start_from_ticket` s'en sert pour donner au maître ce
 /// qu'il sait déjà, sans lui faire redemander la même chose par MCP.
-pub(crate) async fn create_mission_from_ticket(
-	reference: &str,
-) -> Result<(mission::Mission, tickets::TicketDetail)> {
+pub(crate) async fn create_mission_from_ticket(reference: &str) -> Result<(mission::Mission, tickets::TicketDetail)> {
 	let config = cfg();
 	let identifier = mission::ticket_reference(reference);
 	if identifier.is_empty() {
@@ -108,9 +106,7 @@ pub(crate) async fn create_mission_from_ticket(
 /// recopier ce que la machine sait lire.
 #[tauri::command]
 pub(crate) async fn mission_from_ticket(reference: String) -> Result<mission::Mission> {
-	create_mission_from_ticket(&reference)
-		.await
-		.map(|(mission, _)| mission)
+	create_mission_from_ticket(&reference).await.map(|(mission, _)| mission)
 }
 
 /// Ce que le ticket dit déjà, mis en forme pour le premier prompt du maître.
@@ -134,11 +130,7 @@ pub(crate) fn ticket_brief(ticket: &tickets::TicketDetail) -> String {
 		}
 		brief.push_str("── Comments, oldest to newest ──\n");
 		for comment in ticket.comments.iter().rev().take(5).rev() {
-			brief.push_str(&format!(
-				"- {}: {}\n",
-				comment.author,
-				comment.body.trim()
-			));
+			brief.push_str(&format!("- {}: {}\n", comment.author, comment.body.trim()));
 		}
 	}
 	brief
@@ -234,8 +226,7 @@ pub(crate) fn mission_activity(app: AppHandle, id: String) -> Result<serde_json:
 
 		let (last, working) = match file.as_deref() {
 			Some(path) => {
-				let events = sessions::read_timeline(std::path::Path::new(path), 200)
-					.unwrap_or_default();
+				let events = sessions::read_timeline(std::path::Path::new(path), 200).unwrap_or_default();
 				let last = events
 					.iter()
 					.rev()
@@ -258,8 +249,7 @@ pub(crate) fn mission_activity(app: AppHandle, id: String) -> Result<serde_json:
 					.find(|entry| {
 						entry.kind == "agent"
 							&& entry.target == session
-							&& (entry.label == died
-								|| entry.label == "Agent arrêté avant sa première réponse")
+							&& (entry.label == died || entry.label == "Agent arrêté avant sa première réponse")
 					})
 					.map(|entry| entry.detail);
 				(cause.unwrap_or_default(), false)
@@ -319,10 +309,7 @@ pub(crate) fn agent_timeline(session_id: String, app: AppHandle) -> Result<Vec<s
 ///
 /// Détaché de la commande pour être éprouvé pour de vrai : une recette qui
 /// réimplémenterait ce choix ne prouverait que sa propre copie.
-pub fn timeline_of(
-	session_id: &str,
-	claude_session: Option<&str>,
-) -> Result<Vec<sessions::SessionEvent>> {
+pub fn timeline_of(session_id: &str, claude_session: Option<&str>) -> Result<Vec<sessions::SessionEvent>> {
 	// Le journal de Claude Code d'abord, quand il existe : c'est la source la
 	// plus riche, et la seule à porter les sous-agents.
 	if let Some(file) = claude_session.and_then(remote::session_file) {
@@ -378,10 +365,7 @@ pub(crate) async fn mission_task_rerun(app: AppHandle, id: String, task_id: Stri
 
 	// L'agent en place travaille sur l'ancienne consigne : on le coupe avant
 	// d'en lancer un autre, sinon les deux écrivent au même endroit.
-	if let (Some(agents), Some(session)) = (
-		app.try_state::<agent::SharedAgents>(),
-		task.session_id.as_ref(),
-	) {
+	if let (Some(agents), Some(session)) = (app.try_state::<agent::SharedAgents>(), task.session_id.as_ref()) {
 		let _ = agent::stop(agents.inner(), session);
 	}
 
@@ -504,13 +488,7 @@ pub(crate) async fn mission_resume(app: AppHandle, id: String) -> Result<mission
 	let mission = mission::get(&id)?;
 	if mission.master_session.is_none() && mission.state != mission::MissionState::Done {
 		let brief = resume_brief(&mission);
-		let _ = launch_master(
-			app.clone(),
-			id.clone(),
-			Some(brief),
-			executions::Origin::human(),
-		)
-		.await;
+		let _ = launch_master(app.clone(), id.clone(), Some(brief), executions::Origin::human()).await;
 	}
 	launch_ready_tasks(app, &id).await;
 	mission::get(&id)
@@ -544,8 +522,8 @@ pub(crate) async fn relaunch_mission_masters(app: &AppHandle) -> usize {
 			Some(brief),
 			executions::Origin::cockpit(config::MASTER_ROLE),
 		)
-			.await
-			.is_ok()
+		.await
+		.is_ok()
 		{
 			relancés += 1;
 		}
@@ -558,11 +536,7 @@ pub(crate) async fn relaunch_mission_masters(app: &AppHandle) -> usize {
 pub(crate) fn mission_stop(app: AppHandle, id: String) -> Result<mission::Mission> {
 	stop_mission_agents(&app, &id);
 	mission::set_paused(&id, true)?;
-	mission::set_state(
-		&id,
-		mission::MissionState::Failed,
-		&i18n::t("lib.mission.stopped"),
-	)
+	mission::set_state(&id, mission::MissionState::Failed, &i18n::t("lib.mission.stopped"))
 }
 
 /// Enregistre un plan et le met en attente d'approbation.
@@ -580,7 +554,11 @@ pub(crate) async fn mission_approve(app: AppHandle, id: String) -> Result<missio
 }
 
 #[tauri::command]
-pub(crate) fn mission_state(id: String, state: mission::MissionState, note: Option<String>) -> Result<mission::Mission> {
+pub(crate) fn mission_state(
+	id: String,
+	state: mission::MissionState,
+	note: Option<String>,
+) -> Result<mission::Mission> {
 	mission::set_state(&id, state, &note.unwrap_or_default())
 }
 
@@ -632,12 +610,7 @@ pub(crate) async fn mission_task_launch(
 /// la mission, [`journal::HUMAN`] pour un geste dans l'interface,
 /// [`executions::COCKPIT`] pour une boucle qui lance ce qui est devenu prêt. Le
 /// rôle, la tâche et le numéro de tentative, eux, se lisent sur la tâche.
-pub async fn launch_task_agent(
-	app: AppHandle,
-	id: &str,
-	task_id: &str,
-	actor: &str,
-) -> Result<String> {
+pub async fn launch_task_agent(app: AppHandle, id: &str, task_id: &str, actor: &str) -> Result<String> {
 	use tauri::Manager;
 	let agents = app
 		.try_state::<agent::SharedAgents>()
@@ -679,12 +652,7 @@ pub async fn launch_task_agent(
 			}
 			Err(error) => {
 				let raison = i18n::tf("lib.mission.workerWorktreeFailed", &[("error", &error)]);
-				let _ = mission::set_task_state(
-					&mission.id,
-					&task.id,
-					mission::TaskState::Failed,
-					&raison,
-				);
+				let _ = mission::set_task_state(&mission.id, &task.id, mission::TaskState::Failed, &raison);
 				return Err(CockpitError::msg(raison));
 			}
 		}
@@ -900,13 +868,7 @@ pub(crate) async fn mission_start_from_ticket(app: AppHandle, reference: String)
 	// Le maître lancé dans la foulée : une mission ouverte et laissée sans maître
 	// n'a rien fait avancer, et il faudrait revenir la démarrer à la main.
 	let brief = ticket_brief(&ticket);
-	let session = launch_master(
-		app,
-		mission.id.clone(),
-		Some(brief),
-		executions::Origin::human(),
-	)
-	.await?;
+	let session = launch_master(app, mission.id.clone(), Some(brief), executions::Origin::human()).await?;
 	let message = if guided {
 		i18n::tf("lib.mission.openedGuided", &[("identifier", &identifier)])
 	} else {
@@ -958,7 +920,11 @@ pub(crate) async fn launch_master(
 	// exécutant. Mieux vaut ne pas le lancer et dire ce qui manque — c'est
 	// exactement l'échec qu'on voyait passer pour un problème d'agent.
 	if agent::node_binary().is_none() {
-		return Err(CockpitError::msg(i18n::t(if cfg!(windows) { "windowsAgents.nodeMissing" } else { "lib.mission.nodeMissing" })));
+		return Err(CockpitError::msg(i18n::t(if cfg!(windows) {
+			"windowsAgents.nodeMissing"
+		} else {
+			"lib.mission.nodeMissing"
+		})));
 	}
 
 	let agents = app
@@ -1106,10 +1072,7 @@ pub(crate) async fn launch_master(
 			.as_ref()
 			.map(|role| role.engine.clone())
 			.filter(|engine| !engine.trim().is_empty()),
-		master
-			.as_ref()
-			.map(|role| role.depth.clone())
-			.unwrap_or_default(),
+		master.as_ref().map(|role| role.depth.clone()).unwrap_or_default(),
 		// Le maître écrit les contrats de la mission dans son propre worktree :
 		// le borner reviendrait à l'empêcher de faire son travail.
 		Vec::new(),
@@ -1121,7 +1084,13 @@ pub(crate) async fn launch_master(
 	.await?;
 
 	mission::attach_master(&id, &session)?;
-	journal::record("mission", &i18n::t("lib.mission.masterLaunched"), &mission.title, true, "");
+	journal::record(
+		"mission",
+		&i18n::t("lib.mission.masterLaunched"),
+		&mission.title,
+		true,
+		"",
+	);
 	Ok(session)
 }
 
@@ -1355,11 +1324,7 @@ pub(crate) fn role_config(repo: &str, id: &str) -> Option<config::RoleConfig> {
 /// Les commandes d'équipe attendent un argument — l'adresse du ticket, le plus
 /// souvent. L'écrire à la main dans la configuration reviendrait à figer une
 /// mission ; on substitue donc au lancement.
-pub(crate) fn fill_command(
-	template: &str,
-	mission: &mission::Mission,
-	task: Option<&mission::Task>,
-) -> String {
+pub(crate) fn fill_command(template: &str, mission: &mission::Mission, task: Option<&mission::Task>) -> String {
 	let mut filled = template.trim().to_string();
 	for (motif, valeur) in [
 		("{ticket}", mission.ticket.as_str()),
@@ -1400,13 +1365,7 @@ pub async fn mission_base(mission: &mission::Mission) -> String {
 	}
 }
 
-pub async fn open_mission_pr(
-	cwd: &str,
-	branch: &str,
-	base: &str,
-	title: &str,
-	body: &str,
-) -> Result<String> {
+pub async fn open_mission_pr(cwd: &str, branch: &str, base: &str, title: &str, body: &str) -> Result<String> {
 	// La branche est nommée, jamais déduite de `HEAD` : le dossier d'où l'on
 	// pousse n'a aucune raison d'être posé sur celle de la mission, et la PR
 	// partait donc de ce qui traînait là.
@@ -1480,7 +1439,10 @@ pub(crate) async fn mission_pr(id: String, title: Option<String>, body: Option<S
 			.map(|task| i18n::tf("lib.quoted", &[("text", &task.title)]))
 			.collect::<Vec<_>>()
 			.join(", ");
-		return Err(CockpitError::msg(i18n::tf("lib.mission.unclearVerdict", &[("tasks", &liste)])));
+		return Err(CockpitError::msg(i18n::tf(
+			"lib.mission.unclearVerdict",
+			&[("tasks", &liste)],
+		)));
 	}
 
 	let refus = mission::blocking_verdicts(&mission, &verifiers);
@@ -1490,7 +1452,10 @@ pub(crate) async fn mission_pr(id: String, title: Option<String>, body: Option<S
 			.map(|task| i18n::tf("lib.quoted", &[("text", &task.title)]))
 			.collect::<Vec<_>>()
 			.join(", ");
-		return Err(CockpitError::msg(i18n::tf("lib.mission.blockingVerdict", &[("tasks", &liste)])));
+		return Err(CockpitError::msg(i18n::tf(
+			"lib.mission.blockingVerdict",
+			&[("tasks", &liste)],
+		)));
 	}
 
 	let dehors = mission::unintegrated(&mission);
@@ -1498,7 +1463,11 @@ pub(crate) async fn mission_pr(id: String, title: Option<String>, body: Option<S
 		let liste = dehors
 			.iter()
 			.map(|task| {
-				format!("{} ({:?})", i18n::tf("lib.quoted", &[("text", &task.title)]), task.state)
+				format!(
+					"{} ({:?})",
+					i18n::tf("lib.quoted", &[("text", &task.title)]),
+					task.state
+				)
 			})
 			.collect::<Vec<_>>()
 			.join(", ");

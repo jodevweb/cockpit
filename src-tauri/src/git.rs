@@ -160,19 +160,13 @@ async fn list_raw(main_repo: &Path) -> Result<Vec<(PathBuf, String, Option<Strin
 	let mut locked = false;
 
 	let flush = |path: &mut Option<PathBuf>,
-	                 head: &mut String,
-	                 branch: &mut Option<String>,
-	                 detached: &mut bool,
-	                 locked: &mut bool,
-	                 out: &mut Vec<_>| {
+	             head: &mut String,
+	             branch: &mut Option<String>,
+	             detached: &mut bool,
+	             locked: &mut bool,
+	             out: &mut Vec<_>| {
 		if let Some(p) = path.take() {
-			out.push((
-				p,
-				std::mem::take(head),
-				branch.take(),
-				*detached,
-				*locked,
-			));
+			out.push((p, std::mem::take(head), branch.take(), *detached, *locked));
 			*detached = false;
 			*locked = false;
 		}
@@ -180,14 +174,7 @@ async fn list_raw(main_repo: &Path) -> Result<Vec<(PathBuf, String, Option<Strin
 
 	for line in raw.lines() {
 		if let Some(rest) = line.strip_prefix("worktree ") {
-			flush(
-				&mut path,
-				&mut head,
-				&mut branch,
-				&mut detached,
-				&mut locked,
-				&mut out,
-			);
+			flush(&mut path, &mut head, &mut branch, &mut detached, &mut locked, &mut out);
 			path = Some(PathBuf::from(rest));
 		} else if let Some(rest) = line.strip_prefix("HEAD ") {
 			head = rest.to_string();
@@ -199,14 +186,7 @@ async fn list_raw(main_repo: &Path) -> Result<Vec<(PathBuf, String, Option<Strin
 			locked = true;
 		}
 	}
-	flush(
-		&mut path,
-		&mut head,
-		&mut branch,
-		&mut detached,
-		&mut locked,
-		&mut out,
-	);
+	flush(&mut path, &mut head, &mut branch, &mut detached, &mut locked, &mut out);
 
 	Ok(out)
 }
@@ -263,12 +243,9 @@ async fn read_status(path: &Path) -> WorktreeStatus {
 }
 
 async fn read_last_commit(path: &Path) -> Option<Commit> {
-	let raw = run_git(
-		path,
-		&["log", "-1", "--format=%h%x1f%s%x1f%an%x1f%ar%x1f%at"],
-	)
-	.await
-	.ok()?;
+	let raw = run_git(path, &["log", "-1", "--format=%h%x1f%s%x1f%an%x1f%ar%x1f%at"])
+		.await
+		.ok()?;
 	parse_commit_line(raw.trim())
 }
 
@@ -385,9 +362,8 @@ const PARALLEL_MEASURES: usize = 4;
 const MEASURE_TTL_SECONDS: i64 = 600;
 
 fn usage_cache() -> &'static std::sync::Mutex<std::collections::HashMap<String, DiskUsage>> {
-	static CACHE: std::sync::OnceLock<
-		std::sync::Mutex<std::collections::HashMap<String, DiskUsage>>,
-	> = std::sync::OnceLock::new();
+	static CACHE: std::sync::OnceLock<std::sync::Mutex<std::collections::HashMap<String, DiskUsage>>> =
+		std::sync::OnceLock::new();
 	CACHE.get_or_init(Default::default)
 }
 
@@ -535,9 +511,7 @@ pub async fn purge_rebuildable(path: &Path, deps: bool) -> Result<u64> {
 	}
 	let (builds, dependencies) = rebuildable_dirs(path);
 	let mut libéré = 0;
-	let cibles = builds
-		.into_iter()
-		.chain(if deps { dependencies } else { Vec::new() });
+	let cibles = builds.into_iter().chain(if deps { dependencies } else { Vec::new() });
 	for dossier in cibles {
 		let poids = du_bytes(&dossier).await.unwrap_or(0);
 		if std::fs::remove_dir_all(&dossier).is_ok() {
@@ -588,11 +562,7 @@ pub async fn list_worktrees(main_repo: &Path) -> Result<Vec<Worktree>> {
 pub async fn recent_commits(path: &Path, limit: usize) -> Result<Vec<Commit>> {
 	let raw = run_git(
 		path,
-		&[
-			"log",
-			&format!("-{limit}"),
-			"--format=%h%x1f%s%x1f%an%x1f%ar%x1f%at",
-		],
+		&["log", &format!("-{limit}"), "--format=%h%x1f%s%x1f%an%x1f%ar%x1f%at"],
 	)
 	.await?;
 	Ok(raw.lines().filter_map(parse_commit_line).collect())
@@ -674,7 +644,7 @@ pub struct Branch {
 	/// worktree, ni avancement local, et il faut d'abord la sortir pour y
 	/// travailler.
 	pub remote_only: bool,
-    /// Le serveur qui la porte (`origin`), quand elle vient de là.
+	/// Le serveur qui la porte (`origin`), quand elle vient de là.
 	pub remote: String,
 	pub last_commit: Option<Commit>,
 }
@@ -749,11 +719,17 @@ pub async fn create_branch(repo: &Path, name: &str, base: Option<&str>) -> Resul
 	run_git(repo, &["check-ref-format", "--branch", name])
 		.await
 		.map_err(|_| CockpitError::msg(crate::i18n::tf("git.invalidBranchName", &[("name", &name)])))?;
-	if run_git(repo, &["rev-parse", "--verify", "--quiet", &format!("refs/heads/{name}")])
-		.await
-		.is_ok()
+	if run_git(
+		repo,
+		&["rev-parse", "--verify", "--quiet", &format!("refs/heads/{name}")],
+	)
+	.await
+	.is_ok()
 	{
-		return Err(CockpitError::msg(crate::i18n::tf("git.branchExists", &[("name", &name)])));
+		return Err(CockpitError::msg(crate::i18n::tf(
+			"git.branchExists",
+			&[("name", &name)],
+		)));
 	}
 	let base = match base.map(str::trim).filter(|b| !b.is_empty()) {
 		Some(base) => base.to_string(),
@@ -765,7 +741,10 @@ pub async fn create_branch(repo: &Path, name: &str, base: Option<&str>) -> Resul
 	// Sans suivi : une branche créée depuis `origin/dev` le suivrait, et un
 	// simple `git push` voudrait alors pousser sur `dev`.
 	run_git(repo, &["branch", "--no-track", "--end-of-options", name, &base]).await?;
-	Ok(crate::i18n::tf("git.branchCreated", &[("name", &name), ("base", &base)]))
+	Ok(crate::i18n::tf(
+		"git.branchCreated",
+		&[("name", &name), ("base", &base)],
+	))
 }
 
 /// La version la plus à jour d'une branche, pour **comparer** contre elle.
@@ -782,13 +761,22 @@ pub async fn create_branch(repo: &Path, name: &str, base: Option<&str>) -> Resul
 /// le nom tel que [`default_branch`] le rend.
 pub async fn freshest(repo: &Path, name: &str) -> String {
 	let remote = format!("origin/{name}");
-	if run_git(repo, &["rev-parse", "--verify", "--quiet", &remote]).await.is_err() {
+	if run_git(repo, &["rev-parse", "--verify", "--quiet", &remote])
+		.await
+		.is_err()
+	{
 		return name.to_string();
 	}
-	if run_git(repo, &["rev-parse", "--verify", "--quiet", name]).await.is_err() {
+	if run_git(repo, &["rev-parse", "--verify", "--quiet", name])
+		.await
+		.is_err()
+	{
 		return remote;
 	}
-	if run_git(repo, &["merge-base", "--is-ancestor", name, &remote]).await.is_ok() {
+	if run_git(repo, &["merge-base", "--is-ancestor", name, &remote])
+		.await
+		.is_ok()
+	{
 		remote
 	} else {
 		name.to_string()
@@ -807,11 +795,7 @@ pub async fn default_branch(repo: &Path) -> String {
 	let published = run_git(repo, &["symbolic-ref", "--quiet", "refs/remotes/origin/HEAD"])
 		.await
 		.ok()
-		.and_then(|raw| {
-			raw.trim()
-				.strip_prefix("refs/remotes/origin/")
-				.map(str::to_string)
-		})
+		.and_then(|raw| raw.trim().strip_prefix("refs/remotes/origin/").map(str::to_string))
 		.filter(|name| !name.is_empty());
 
 	let mut candidates: Vec<String> = ["dev", "develop", "main", "master"]
@@ -1028,7 +1012,12 @@ pub async fn branch_diff(repo: &Path, branch: &str, base: &str) -> Result<Branch
 	// Les états viennent de `--name-status`, les volumes de `--numstat` : deux
 	// passes sur le même diff, recoupées par chemin.
 	let mut states = std::collections::HashMap::new();
-	if let Ok(raw) = run_git(repo, &["diff", "--name-status", "--end-of-options", &merge_base, branch]).await {
+	if let Ok(raw) = run_git(
+		repo,
+		&["diff", "--name-status", "--end-of-options", &merge_base, branch],
+	)
+	.await
+	{
 		for line in raw.lines() {
 			let mut parts = line.split('\t');
 			let Some(code) = parts.next() else { continue };
@@ -1055,18 +1044,19 @@ pub async fn branch_diff(repo: &Path, branch: &str, base: &str) -> Result<Branch
 				path: path.to_string(),
 				added,
 				removed,
-				state: states
-					.get(path)
-					.copied()
-					.unwrap_or("modified")
-					.to_string(),
+				state: states.get(path).copied().unwrap_or("modified").to_string(),
 			});
 		}
 	}
 
 	let commits_raw = run_git(
 		repo,
-		&["log", "--format=%h%x1f%s%x1f%an%x1f%ar%x1f%at", "--end-of-options", &range],
+		&[
+			"log",
+			"--format=%h%x1f%s%x1f%an%x1f%ar%x1f%at",
+			"--end-of-options",
+			&range,
+		],
 	)
 	.await
 	.unwrap_or_default();
@@ -1082,12 +1072,7 @@ pub async fn branch_diff(repo: &Path, branch: &str, base: &str) -> Result<Branch
 	})
 }
 
-pub async fn branch_file_diff(
-	repo: &Path,
-	branch: &str,
-	base: &str,
-	file: &str,
-) -> Result<String> {
+pub async fn branch_file_diff(repo: &Path, branch: &str, base: &str, file: &str) -> Result<String> {
 	let merge_base = run_git(repo, &["merge-base", "--end-of-options", base, branch])
 		.await
 		.map(|raw| raw.trim().to_string())?;
@@ -1153,10 +1138,7 @@ mod usage_tests {
 	/// Un worktree de monorepo en miniature : un build au fond d'une app, des
 	/// dépendances à la racine, et les pièges qu'il ne faut pas confondre avec.
 	fn faux_worktree(nom: &str) -> PathBuf {
-		let racine = std::env::temp_dir().join(format!(
-			"cockpit-usage-{}-{nom}",
-			std::process::id()
-		));
+		let racine = std::env::temp_dir().join(format!("cockpit-usage-{}-{nom}", std::process::id()));
 		let _ = std::fs::remove_dir_all(&racine);
 		let p = racine.as_path();
 		for chemin in [

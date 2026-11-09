@@ -167,8 +167,7 @@ fn write(panel: &Panel) -> Result<()> {
 /// Les confrontations en cours : quatre agents partent d'un coup, on ne les
 /// lance pas deux fois pour un double clic.
 fn running() -> &'static Mutex<std::collections::HashSet<String>> {
-	static RUNNING: std::sync::OnceLock<Mutex<std::collections::HashSet<String>>> =
-		std::sync::OnceLock::new();
+	static RUNNING: std::sync::OnceLock<Mutex<std::collections::HashSet<String>>> = std::sync::OnceLock::new();
 	RUNNING.get_or_init(|| Mutex::new(std::collections::HashSet::new()))
 }
 
@@ -308,9 +307,7 @@ async fn confront_inner(key: &str) -> Result<Panel> {
 		.changes
 		.into_iter()
 		.find(|change| change.key == key)
-		.ok_or_else(|| {
-			CockpitError::msg(crate::i18n::t("panel.changeGone"))
-		})?;
+		.ok_or_else(|| CockpitError::msg(crate::i18n::t("panel.changeGone")))?;
 
 	let base = Config::load();
 	let cloisonne = base.projects.len() > 1;
@@ -415,11 +412,7 @@ async fn confront_inner(key: &str) -> Result<Panel> {
 /// Sans synthèse, la confrontation garde sa valeur la plus dure — le verdict le
 /// plus sévère et les avis bruts. C'est le confort de lecture qu'on perd, pas la
 /// vérification.
-async fn merge(
-	voices: &[Voice],
-	cwd: &str,
-	settings: &crate::config::ImpactConfig,
-) -> (String, Vec<Dispute>, f64) {
+async fn merge(voices: &[Voice], cwd: &str, settings: &crate::config::ImpactConfig) -> (String, Vec<Dispute>, f64) {
 	let avis = voices
 		.iter()
 		.map(|voice| {
@@ -576,10 +569,7 @@ fn parse_voice(lens: &str, label: &str, text: &str, cost: f64) -> Voice {
 			resume.push(rest.trim().to_string());
 			continue;
 		}
-		if let Some(rest) = trimmed
-			.strip_prefix("- ")
-			.or_else(|| trimmed.strip_prefix("* "))
-		{
+		if let Some(rest) = trimmed.strip_prefix("- ").or_else(|| trimmed.strip_prefix("* ")) {
 			let point = rest.trim();
 			if !point.is_empty() {
 				voice.points.push(point.to_string());
@@ -643,9 +633,7 @@ fn parse_merge(text: &str) -> (String, Vec<Dispute>) {
 		let Some(current) = disputes.last_mut() else {
 			continue;
 		};
-		let champ = trimmed
-			.trim_start_matches(['-', '*', ' '])
-			.trim_start_matches("**");
+		let champ = trimmed.trim_start_matches(['-', '*', ' ']).trim_start_matches("**");
 		let bas = champ.to_lowercase();
 		let valeur = |raw: &str| {
 			raw.split_once(':')
@@ -668,10 +656,7 @@ fn parse_merge(text: &str) -> (String, Vec<Dispute>) {
 	// cherche à faire gagner.
 	disputes.retain(|dispute| !dispute.why.trim().is_empty() || !dispute.check.trim().is_empty());
 
-	(
-		agreed.join(" ").chars().take(600).collect(),
-		disputes,
-	)
+	(agreed.join(" ").chars().take(600).collect(), disputes)
 }
 
 fn noms(raw: &str) -> Vec<String> {
@@ -699,14 +684,8 @@ mod tests {
 	/// angle survit à deux angles qui ne l'ont pas vu.
 	#[test]
 	fn le_verdict_le_plus_severe_l_emporte() {
-		assert_eq!(
-			harshest(&[voice("ok"), voice("ok"), voice("bloquant")]),
-			"bloquant"
-		);
-		assert_eq!(
-			harshest(&[voice("ok"), voice("réserves"), voice("ok")]),
-			"réserves"
-		);
+		assert_eq!(harshest(&[voice("ok"), voice("ok"), voice("bloquant")]), "bloquant");
+		assert_eq!(harshest(&[voice("ok"), voice("réserves"), voice("ok")]), "réserves");
 		assert_eq!(harshest(&[voice("ok"), voice("ok")]), "ok");
 		assert_eq!(harshest(&[]), "ok");
 	}

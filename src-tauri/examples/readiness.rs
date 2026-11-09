@@ -14,7 +14,13 @@ async fn main() {
 	for check in &vue.checks {
 		println!(
 			"{} {:<11} {}{}",
-			if check.ok { "ok  " } else if check.required { "MANQUE" } else { "—   " },
+			if check.ok {
+				"ok  "
+			} else if check.required {
+				"MANQUE"
+			} else {
+				"—   "
+			},
 			check.id,
 			check.detail,
 			if check.required { "" } else { " (facultatif)" },

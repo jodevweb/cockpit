@@ -123,13 +123,14 @@ pub(crate) async fn launch_ready_tasks(app: AppHandle, id: &str) {
 		// faire » indéfiniment dans une mission « en cours » que plus rien ne
 		// faisait avancer, sans que rien ne le dise.
 		if let Some(raison) = mission::blocking_reason(&mission, task) {
-			let _ = mission::set_task_state(
-				&mission.id,
-				&task.id,
-				mission::TaskState::Failed,
+			let _ = mission::set_task_state(&mission.id, &task.id, mission::TaskState::Failed, &raison);
+			journal::record(
+				"mission",
+				&i18n::t("lib.mission.taskBlocked"),
+				&task.title,
+				false,
 				&raison,
 			);
-			journal::record("mission", &i18n::t("lib.mission.taskBlocked"), &task.title, false, &raison);
 			continue;
 		}
 		if !task.base.trim().is_empty() && task.base != mission.branch {
@@ -171,12 +172,7 @@ pub(crate) async fn launch_ready_tasks(app: AppHandle, id: &str) {
 		match launch_task_agent(app.clone(), &mission.id, &task.id, executions::COCKPIT).await {
 			Ok(_) => {}
 			Err(error) => {
-				let _ = mission::set_task_state(
-					&mission.id,
-					&task.id,
-					mission::TaskState::Failed,
-					&error.to_string(),
-				);
+				let _ = mission::set_task_state(&mission.id, &task.id, mission::TaskState::Failed, &error.to_string());
 				running -= 1;
 			}
 		}
@@ -416,8 +412,7 @@ pub(crate) async fn collect_finished_tasks(app: &AppHandle, id: &str) -> bool {
 			// le maître est libre de ne pas relire. Une vérification qui a rendu
 			// sans conclure n'est pas une vérification sans reproche : faute de
 			// conclusion lisible, elle est indécise, et le dira.
-			let verdict = verdict_of(session, claude_session.as_deref())
-				.unwrap_or(mission::Verdict::Undecided);
+			let verdict = verdict_of(session, claude_session.as_deref()).unwrap_or(mission::Verdict::Undecided);
 			{
 				let _ = mission::set_task_verdict(id, &task.id, verdict);
 				if verdict == mission::Verdict::Undecided {
@@ -468,8 +463,7 @@ pub(crate) fn reap_stray_agents(app: &AppHandle) -> usize {
 
 	let mut reaped = 0;
 	for mission in mission::list() {
-		let close = mission.state == mission::MissionState::Done
-			|| mission.state == mission::MissionState::Failed;
+		let close = mission.state == mission::MissionState::Done || mission.state == mission::MissionState::Failed;
 
 		if let Some(session) = &mission.master_session {
 			if close && !agent::is_working(&agents, session) {
@@ -627,14 +621,21 @@ pub(crate) async fn revive_integration(app: &AppHandle, mission: &mission::Missi
 	// `MAX_FRUITLESS_REVIVALS` relances sans le moindre progrès, la mission se
 	// met en pause et dit pourquoi : c'est un humain qu'il faut, pas un maître
 	// de plus.
-	if !mission::note_revival(&mission.id, &mission::progress_fingerprint(mission), MAX_FRUITLESS_REVIVALS) {
+	if !mission::note_revival(
+		&mission.id,
+		&mission::progress_fingerprint(mission),
+		MAX_FRUITLESS_REVIVALS,
+	) {
 		if mission::set_paused(&mission.id, true).is_ok() {
 			journal::record(
 				"mission",
 				&i18n::t("lib.mission.revivalsExhausted"),
 				&mission.title,
 				false,
-				&i18n::tf("lib.mission.revivalsExhaustedDetail", &[("count", &MAX_FRUITLESS_REVIVALS)]),
+				&i18n::tf(
+					"lib.mission.revivalsExhaustedDetail",
+					&[("count", &MAX_FRUITLESS_REVIVALS)],
+				),
 			);
 		}
 		return;
@@ -798,7 +799,13 @@ pub(crate) fn watch_scopes() {
 					scope.join(", ")
 				);
 				let _ = permissions::answer(&request.id, false, Some(reason));
-				journal::record("mission", &i18n::t("lib.mission.outOfScopeRefused"), &outside.join(", "), false, &task);
+				journal::record(
+					"mission",
+					&i18n::t("lib.mission.outOfScopeRefused"),
+					&outside.join(", "),
+					false,
+					&task,
+				);
 			}
 		}
 	});
@@ -986,10 +993,6 @@ mod file_descriptor_limit_tests {
 		raise_file_descriptor_limit();
 
 		let apres = lire();
-		assert!(
-			apres.rlim_cur > 64,
-			"le plafond n'a pas bougé : {}",
-			apres.rlim_cur
-		);
+		assert!(apres.rlim_cur > 64, "le plafond n'a pas bougé : {}", apres.rlim_cur);
 	}
 }

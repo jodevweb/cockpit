@@ -64,10 +64,7 @@ impl JobRegistry {
 	}
 
 	fn set(&self, status: JobStatus) {
-		self.jobs
-			.lock()
-			.unwrap()
-			.insert(status.job_id.clone(), status);
+		self.jobs.lock().unwrap().insert(status.job_id.clone(), status);
 	}
 
 	fn finish(&self, job_id: &str, state: &str, exit_code: Option<i32>) -> Option<JobStatus> {
@@ -216,11 +213,7 @@ pub async fn capture(cwd: &str, command: &str) -> Result<String> {
 /// Un `SECRET=… commande` est lisible dans `ps` par tout processus du poste, et
 /// se retrouve dans l'historique du shell ; l'environnement d'un processus, lui,
 /// n'est lisible que par son propriétaire.
-pub async fn capture_with_env(
-	cwd: &str,
-	command: &str,
-	env: &[(&str, &str)],
-) -> Result<String> {
+pub async fn capture_with_env(cwd: &str, command: &str, env: &[(&str, &str)]) -> Result<String> {
 	let mut builder = crate::platform::shell_async(command);
 	builder.current_dir(cwd);
 	for (name, value) in env {

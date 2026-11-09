@@ -179,7 +179,10 @@ pub async fn finish(cwd: &str, session: &str) -> Option<Film> {
 		let _ = std::fs::remove_dir_all(&recording.dir);
 		return None;
 	}
-	tokio::task::spawn_blocking(move || assemble(recording)).await.ok().flatten()
+	tokio::task::spawn_blocking(move || assemble(recording))
+		.await
+		.ok()
+		.flatten()
 }
 
 /// Oublie un enregistrement sans le monter : l'agent est arrêté.
@@ -241,7 +244,11 @@ fn ffmpeg_candidates() -> Vec<PathBuf> {
 	}
 	#[cfg(not(windows))]
 	{
-		vec!["/opt/homebrew/bin/ffmpeg".into(), "/usr/local/bin/ffmpeg".into(), "/usr/bin/ffmpeg".into()]
+		vec![
+			"/opt/homebrew/bin/ffmpeg".into(),
+			"/usr/local/bin/ffmpeg".into(),
+			"/usr/bin/ffmpeg".into(),
+		]
 	}
 }
 
@@ -250,15 +257,24 @@ fn concat_list(frames: &[(PathBuf, Duration)]) -> (String, f64) {
 	let mut list = String::from("ffconcat version 1.0\n");
 	let mut total = 0.0;
 	for (index, (path, at)) in frames.iter().enumerate() {
-		let next = frames.get(index + 1).map(|(_, next)| *next).unwrap_or(*at + Duration::from_millis(1200));
+		let next = frames
+			.get(index + 1)
+			.map(|(_, next)| *next)
+			.unwrap_or(*at + Duration::from_millis(1200));
 		let hold = (next.saturating_sub(*at)).as_secs_f64().clamp(0.08, MAX_HOLD);
 		total += hold;
-		list.push_str(&format!("file '{}'\nduration {hold:.3}\n", crate::platform::display_path(path).replace('\'', "'\\''")));
+		list.push_str(&format!(
+			"file '{}'\nduration {hold:.3}\n",
+			crate::platform::display_path(path).replace('\'', "'\\''")
+		));
 	}
 	// ffmpeg ignore la durée de la dernière entrée : on la répète pour qu'elle
 	// reste à l'écran.
 	if let Some((last, _)) = frames.last() {
-		list.push_str(&format!("file '{}'\n", crate::platform::display_path(last).replace('\'', "'\\''")));
+		list.push_str(&format!(
+			"file '{}'\n",
+			crate::platform::display_path(last).replace('\'', "'\\''")
+		));
 	}
 	(list, total)
 }
@@ -285,7 +301,11 @@ fn assemble(recording: Recording) -> Option<Film> {
 				&crate::i18n::t("proof.unavailable"),
 				&crate::i18n::t("proof.ffmpegMissing"),
 				false,
-				&crate::i18n::t(if cfg!(windows) { "windowsAgents.ffmpegHint" } else { "proof.ffmpegHint" }),
+				&crate::i18n::t(if cfg!(windows) {
+					"windowsAgents.ffmpegHint"
+				} else {
+					"proof.ffmpegHint"
+				}),
 			);
 		});
 		return None;

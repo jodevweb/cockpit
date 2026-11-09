@@ -103,10 +103,7 @@ fn main() {
 	println!("moteur      : {} · {}", exec.opening.engine_label, exec.opening.model);
 	println!(
 		"origine     : {} · rôle {} · tâche {} · tentative {}",
-		exec.opening.origin.actor,
-		exec.opening.origin.role,
-		exec.opening.origin.task,
-		exec.opening.origin.attempt
+		exec.opening.origin.actor, exec.opening.origin.role, exec.opening.origin.task, exec.opening.origin.attempt
 	);
 	println!("conversation: {}", exec.engine_session);
 	println!(
@@ -117,7 +114,10 @@ fn main() {
 		"coût        : {:.4} $ annoncés · {:.4} $ estimés · {} tour(s) muet(s)",
 		exec.tally.cost.reported_usd, exec.tally.cost.estimated_usd, exec.tally.cost.unknown_turns
 	);
-	println!("étapes      : {:?}", exec.steps.iter().map(|m| m.step).collect::<Vec<_>>());
+	println!(
+		"étapes      : {:?}",
+		exec.steps.iter().map(|m| m.step).collect::<Vec<_>>()
+	);
 
 	// Le détail relu depuis le disque, dans la forme que l'écran Agents affiche
 	// déjà : c'est le critère qui prouve que le trou est bouché.
@@ -125,7 +125,12 @@ fn main() {
 	println!("\ntimeline    : {} événements", timeline.len());
 	for event in &timeline {
 		let tool = event.tool.as_deref().map(|t| format!(" [{t}]")).unwrap_or_default();
-		println!("  {:<12}{}{}", event.kind, tool, cockpit_lib::executions::clip_input(&event.text));
+		println!(
+			"  {:<12}{}{}",
+			event.kind,
+			tool,
+			cockpit_lib::executions::clip_input(&event.text)
+		);
 	}
 	assert!(
 		timeline.iter().any(|e| e.kind == "user"),

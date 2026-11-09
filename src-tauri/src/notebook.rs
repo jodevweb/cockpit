@@ -277,10 +277,7 @@ fn bump(cwd: &str, delivered: u64, taken_back: u64) {
 		current.taken_back_briefed += taken_back;
 	}
 	let _ = std::fs::create_dir_all(notebook_dir());
-	let _ = std::fs::write(
-		tally_path(),
-		serde_json::to_string(&current).unwrap_or_default(),
-	);
+	let _ = std::fs::write(tally_path(), serde_json::to_string(&current).unwrap_or_default());
 }
 
 /// Marque qu'un dossier de contexte est parti avec un agent, dans ce dossier.
@@ -307,8 +304,7 @@ async fn touched(cwd: &Path) -> Vec<String> {
 	if let Ok(raw) = crate::git::run_git(cwd, &["diff", "HEAD", "--name-only"]).await {
 		files.extend(raw.lines().map(|line| line.trim().to_string()));
 	}
-	if let Ok(raw) = crate::git::run_git(cwd, &["ls-files", "--others", "--exclude-standard"]).await
-	{
+	if let Ok(raw) = crate::git::run_git(cwd, &["ls-files", "--others", "--exclude-standard"]).await {
 		files.extend(raw.lines().map(|line| line.trim().to_string()));
 	}
 	files.retain(|file| !file.is_empty());
@@ -376,10 +372,7 @@ fn bump_delivered_back(cwd: &str) {
 	if briefed(cwd) {
 		current.delivered_briefed = current.delivered_briefed.saturating_sub(1);
 	}
-	let _ = std::fs::write(
-		tally_path(),
-		serde_json::to_string(&current).unwrap_or_default(),
-	);
+	let _ = std::fs::write(tally_path(), serde_json::to_string(&current).unwrap_or_default());
 }
 
 fn sealed_files(cwd: &str) -> Vec<String> {

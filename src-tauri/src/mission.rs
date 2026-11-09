@@ -232,7 +232,10 @@ pub fn exposure(tasks: &[Task], roles: &[crate::config::RoleConfig], sandboxed: 
 			}
 		}
 	}
-	Exposure { sandboxed, unguarded_roles: unguarded }
+	Exposure {
+		sandboxed,
+		unguarded_roles: unguarded,
+	}
 }
 
 #[cfg(test)]
@@ -293,7 +296,10 @@ pub fn progress_fingerprint(mission: &Mission) -> String {
 		mission.summary.len().to_string(),
 	];
 	for task in &mission.tasks {
-		parts.push(format!("{}:{:?}:{:?}:{}", task.id, task.state, task.gate, task.attempts));
+		parts.push(format!(
+			"{}:{:?}:{:?}:{}",
+			task.id, task.state, task.gate, task.attempts
+		));
 	}
 	parts.join("|")
 }
@@ -312,7 +318,11 @@ fn revivals() -> &'static std::sync::Mutex<std::collections::HashMap<String, (St
 /// celle qui tourne en rond.
 pub fn note_revival(mission_id: &str, fingerprint: &str, max: u32) -> bool {
 	let mut table = revivals().lock().unwrap_or_else(|poisoned| poisoned.into_inner());
-	revival_allowed(table.entry(mission_id.to_string()).or_insert((String::new(), 0)), fingerprint, max)
+	revival_allowed(
+		table.entry(mission_id.to_string()).or_insert((String::new(), 0)),
+		fingerprint,
+		max,
+	)
 }
 
 fn revival_allowed(entry: &mut (String, u32), fingerprint: &str, max: u32) -> bool {
@@ -336,7 +346,10 @@ mod revival_tests {
 		assert!(revival_allowed(&mut entry, "a", 3));
 		assert!(revival_allowed(&mut entry, "a", 3));
 		assert!(revival_allowed(&mut entry, "a", 3));
-		assert!(!revival_allowed(&mut entry, "a", 3), "la quatrième relance sans progrès est refusée");
+		assert!(
+			!revival_allowed(&mut entry, "a", 3),
+			"la quatrième relance sans progrès est refusée"
+		);
 	}
 
 	#[test]
@@ -685,15 +698,12 @@ impl Mission {
 	/// terminée — la retenir indéfiniment bloquerait la mission en silence,
 	/// alors qu'une recette sur un travail partiel dit au moins ce qui manque.
 	pub fn implementation_done(&self, verifies: impl Fn(&str) -> bool) -> bool {
-		self.tasks
-			.iter()
-			.filter(|task| !verifies(&task.role))
-			.all(|task| {
-				matches!(
-					task.state,
-					TaskState::Delivered | TaskState::Integrated | TaskState::Failed
-				)
-			})
+		self.tasks.iter().filter(|task| !verifies(&task.role)).all(|task| {
+			matches!(
+				task.state,
+				TaskState::Delivered | TaskState::Integrated | TaskState::Failed
+			)
+		})
 	}
 
 	/// Avancement de la mission, du point de vue de ses tâches.
@@ -805,14 +815,7 @@ pub(crate) fn identifier() -> String {
 /// Ouvre une mission. Rien n'est lancé : elle attend son plan.
 /// `guided` : la mission passe par les trois accords — compréhension,
 /// approche, découpage — au lieu de partir directement sur un découpage.
-pub fn create(
-	title: &str,
-	ticket: &str,
-	ticket_url: &str,
-	cwd: &str,
-	branch: &str,
-	guided: bool,
-) -> Result<Mission> {
+pub fn create(title: &str, ticket: &str, ticket_url: &str, cwd: &str, branch: &str, guided: bool) -> Result<Mission> {
 	let title = title.trim();
 	if title.is_empty() {
 		return Err(CockpitError::msg(crate::i18n::t("mission.titleRequired")));
@@ -847,7 +850,13 @@ pub fn create(
 		updated_at: now(),
 	};
 	save(&mission)?;
-	crate::journal::record("mission", &crate::i18n::t("mission.journal.opened"), &mission.title, true, &mission.ticket);
+	crate::journal::record(
+		"mission",
+		&crate::i18n::t("mission.journal.opened"),
+		&mission.title,
+		true,
+		&mission.ticket,
+	);
 	Ok(mission)
 }
 
@@ -905,9 +914,7 @@ pub fn rework(id: &str, task_id: &str, reproche: &str, verifies: impl Fn(&str) -
 			.reproaches
 			.iter()
 			.enumerate()
-			.map(|(rang, motif)| {
-				format!("\n  {}. {}", rang + 1, motif.chars().take(200).collect::<String>())
-			})
+			.map(|(rang, motif)| format!("\n  {}. {}", rang + 1, motif.chars().take(200).collect::<String>()))
 			.collect::<String>();
 		return Err(CockpitError::msg(format!(
 			"{}{déjà}",
@@ -942,13 +949,8 @@ pub fn rework(id: &str, task_id: &str, reproche: &str, verifies: impl Fn(&str) -
 				entry.reproaches.push(reproche.clone());
 				// La consigne s'accumule : l'exécutant reprend son propre travail,
 				// il doit savoir ce qui lui est reproché sans perdre l'énoncé.
-				entry.brief = format!(
-					"{}\n\n── Rework requested ──\n{reproche}",
-					entry.brief.trim()
-				);
-			} else if verifies(&entry.role)
-				&& matches!(entry.state, TaskState::Delivered | TaskState::Integrated)
-			{
+				entry.brief = format!("{}\n\n── Rework requested ──\n{reproche}", entry.brief.trim());
+			} else if verifies(&entry.role) && matches!(entry.state, TaskState::Delivered | TaskState::Integrated) {
 				// Ce qui a été jugé va changer : les vérifications rejugent.
 				entry.state = TaskState::Planned;
 				entry.session_id = None;
@@ -978,7 +980,11 @@ pub fn set_paused(id: &str, paused: bool) -> Result<Mission> {
 	let mission = update(id, |mission| mission.paused = paused)?;
 	crate::journal::record(
 		"mission",
-		&crate::i18n::t(if paused { "mission.journal.paused" } else { "mission.journal.resumed" }),
+		&crate::i18n::t(if paused {
+			"mission.journal.paused"
+		} else {
+			"mission.journal.resumed"
+		}),
 		&mission.title,
 		true,
 		"",
@@ -1150,7 +1156,10 @@ pub fn submit_plan(id: &str, plan: &str, mut tasks: Vec<Task>) -> Result<Mission
 		&crate::i18n::t("mission.journal.planSubmitted"),
 		&mission.title,
 		true,
-		&crate::i18n::tf("mission.journal.planSubmittedDetail", &[("count", &mission.tasks.len())]),
+		&crate::i18n::tf(
+			"mission.journal.planSubmittedDetail",
+			&[("count", &mission.tasks.len())],
+		),
 	);
 	Ok(mission)
 }
@@ -1164,7 +1173,13 @@ pub fn approve(id: &str) -> Result<Mission> {
 			mission.started_at = Some(now());
 		}
 	})?;
-	crate::journal::record("mission", &crate::i18n::t("mission.journal.planApproved"), &mission.title, true, "");
+	crate::journal::record(
+		"mission",
+		&crate::i18n::t("mission.journal.planApproved"),
+		&mission.title,
+		true,
+		"",
+	);
 	Ok(mission)
 }
 
@@ -1173,9 +1188,7 @@ impl MissionState {
 	pub fn awaits_human(self) -> bool {
 		matches!(
 			self,
-			MissionState::AwaitingUnderstanding
-				| MissionState::AwaitingApproach
-				| MissionState::AwaitingApproval
+			MissionState::AwaitingUnderstanding | MissionState::AwaitingApproach | MissionState::AwaitingApproval
 		)
 	}
 
@@ -1309,24 +1322,14 @@ pub fn decide(state: MissionState, step: Step, approved: bool) -> Result<Mission
 			&[("step", &step.label()), ("state", &format!("{state:?}"))],
 		)));
 	}
-	Ok(if approved {
-		step.approved()
-	} else {
-		step.working()
-	})
+	Ok(if approved { step.approved() } else { step.working() })
 }
 
 /// Valide ou corrige la dernière proposition d'une étape.
 ///
 /// Une correction sans motif est refusée : le maître n'aurait rien pour faire
 /// mieux, et reproduirait la même version.
-pub fn review(
-	id: &str,
-	step: Step,
-	approved: bool,
-	feedback: &str,
-	answers: Vec<String>,
-) -> Result<Mission> {
+pub fn review(id: &str, step: Step, approved: bool, feedback: &str, answers: Vec<String>) -> Result<Mission> {
 	let feedback = feedback.trim().to_string();
 	let answers: Vec<String> = answers.into_iter().map(|a| a.trim().to_string()).collect();
 	if !approved && feedback.is_empty() && answers.iter().all(|a| a.is_empty()) {
@@ -1359,7 +1362,11 @@ pub fn review(
 	crate::journal::record(
 		"mission",
 		&crate::i18n::tf(
-			if approved { "mission.journal.stepApproved" } else { "mission.journal.stepCorrected" },
+			if approved {
+				"mission.journal.stepApproved"
+			} else {
+				"mission.journal.stepCorrected"
+			},
 			&[("step", &step.label())],
 		),
 		&mission.title,
@@ -1438,7 +1445,10 @@ pub fn attach_task(id: &str, task_id: &str, session_id: &str) -> Result<Mission>
 		}
 	})?;
 	if !found {
-		return Err(CockpitError::msg(crate::i18n::tf("mission.unknownTask", &[("id", &task_id)])));
+		return Err(CockpitError::msg(crate::i18n::tf(
+			"mission.unknownTask",
+			&[("id", &task_id)],
+		)));
 	}
 	Ok(mission)
 }
@@ -1453,7 +1463,13 @@ pub fn finish(id: &str, pr_url: &str) -> Result<Mission> {
 		mission.state = MissionState::Done;
 		mission.finished_at = Some(now());
 	})?;
-	crate::journal::record("mission", &crate::i18n::t("mission.journal.closed"), &mission.title, true, &mission.pr_url);
+	crate::journal::record(
+		"mission",
+		&crate::i18n::t("mission.journal.closed"),
+		&mission.title,
+		true,
+		&mission.pr_url,
+	);
 	Ok(mission)
 }
 
@@ -1503,9 +1519,7 @@ pub async fn cleanup(id: &str) -> Result<Vec<String>> {
 	// touchait. On ne le supprime pas — il porte la branche de la mission — on
 	// le vide de ce qu'une commande refait.
 	if let Ok(Some(intégration)) = crate::git::worktree_for_branch(repo, &mission.branch).await {
-		libéré += crate::git::purge_rebuildable(&intégration, true)
-			.await
-			.unwrap_or(0);
+		libéré += crate::git::purge_rebuildable(&intégration, true).await.unwrap_or(0);
 	}
 
 	if !removed.is_empty() || libéré > 0 {
@@ -1798,7 +1812,11 @@ pub fn relative_to(root: &str, path: &str) -> Option<String> {
 				}
 				// `C:` et `/c/` désignent le même lecteur : la seconde est la
 				// forme du conteneur sous Windows (`sandbox::container_path`).
-				part if index == 0 && part.len() == 2 && part.ends_with(':') && part.as_bytes()[0].is_ascii_alphabetic() => {
+				part if index == 0
+					&& part.len() == 2
+					&& part.ends_with(':')
+					&& part.as_bytes()[0].is_ascii_alphabetic() =>
+				{
 					out.push(part[..1].to_ascii_lowercase());
 				}
 				part if absolute && out.is_empty() && part.len() == 1 => {
@@ -1810,16 +1828,17 @@ pub fn relative_to(root: &str, path: &str) -> Option<String> {
 		(absolute, out)
 	}
 	let same = |a: &str, b: &str| {
-		if cfg!(windows) { a.eq_ignore_ascii_case(b) } else { a == b }
+		if cfg!(windows) {
+			a.eq_ignore_ascii_case(b)
+		} else {
+			a == b
+		}
 	};
 
 	let (absolute, mut target) = parts(path);
 	if absolute {
 		let (_, root) = parts(root);
-		if root.is_empty()
-			|| target.len() < root.len()
-			|| !root.iter().zip(&target).all(|(a, b)| same(a, b))
-		{
+		if root.is_empty() || target.len() < root.len() || !root.iter().zip(&target).all(|(a, b)| same(a, b)) {
 			return None;
 		}
 		target.drain(..root.len());
@@ -1931,7 +1950,10 @@ mod tests {
 	fn la_verification_attend_l_implementation() {
 		let verifie = |role: &str| role == "qa";
 
-		let qa = |state| Task { role: "qa".into(), ..task(state) };
+		let qa = |state| Task {
+			role: "qa".into(),
+			..task(state)
+		};
 
 		// Un backend qui travaille encore : la recette ne part pas.
 		let en_cours = mission(
@@ -2006,10 +2028,7 @@ mod tests {
 			ticket_reference("https://linear.app/acme/issue/NW-42/facturation-a-l-usage"),
 			"NW-42"
 		);
-		assert_eq!(
-			ticket_reference("https://github.com/acme/produit/issues/317"),
-			"317"
-		);
+		assert_eq!(ticket_reference("https://github.com/acme/produit/issues/317"), "317");
 		assert_eq!(ticket_reference("  NW-42  "), "NW-42");
 	}
 
@@ -2055,7 +2074,11 @@ mod tests {
 		let scope = vec!["apps/api".to_string()];
 		let root = "/Users/a/wt/feat-x";
 		assert!(!within_scope_at(root, &scope, "apps/api/../web/page.tsx"));
-		assert!(!within_scope_at(root, &scope, "/Users/a/wt/feat-x/apps/api/../../../etc/x"));
+		assert!(!within_scope_at(
+			root,
+			&scope,
+			"/Users/a/wt/feat-x/apps/api/../../../etc/x"
+		));
 		assert!(!within_scope_at(root, &scope, "../feat-y/apps/api/main.rs"));
 		assert!(within_scope_at(root, &scope, "./apps/api/./src/../lib.rs"));
 	}
@@ -2104,10 +2127,7 @@ mod tests {
 	#[test]
 	fn une_mission_sans_tache_avance_quand_meme() {
 		assert_eq!(mission(Vec::new(), MissionState::Planning).progress(), 5);
-		assert_eq!(
-			mission(Vec::new(), MissionState::AwaitingApproval).progress(),
-			15
-		);
+		assert_eq!(mission(Vec::new(), MissionState::AwaitingApproval).progress(), 15);
 	}
 }
 
@@ -2169,9 +2189,7 @@ pub fn estimate(task_count: usize) -> Estimate {
 	// tâches et douze tâches ne racontent pas la même histoire.
 	let proches: Vec<&Mission> = closes
 		.iter()
-		.filter(|mission| {
-			task_count == 0 || mission.tasks.len().abs_diff(task_count) <= 2
-		})
+		.filter(|mission| task_count == 0 || mission.tasks.len().abs_diff(task_count) <= 2)
 		.collect();
 	let retenues: Vec<&Mission> = if proches.len() >= 3 {
 		proches
@@ -2310,7 +2328,10 @@ pub fn lessons(limit: usize) -> String {
 		}
 	}
 
-	let mut texte = format!("Missions already carried out on this repository:\n{}", lignes.join("\n"));
+	let mut texte = format!(
+		"Missions already carried out on this repository:\n{}",
+		lignes.join("\n")
+	);
 	if !motifs.is_empty() {
 		texte.push_str("\n\nWhat failed, and why:\n");
 		texte.push_str(&motifs.join("\n"));
@@ -2397,9 +2418,10 @@ pub fn blocking_reason(mission: &Mission, task: &Task) -> Option<String> {
 	if soeurs.is_empty() {
 		return Some(crate::i18n::tf("mission.blocked.unknownBase", &[("base", &base)]));
 	}
-	if soeurs.iter().any(|soeur| {
-		matches!(soeur.state, TaskState::Delivered | TaskState::Integrated)
-	}) {
+	if soeurs
+		.iter()
+		.any(|soeur| matches!(soeur.state, TaskState::Delivered | TaskState::Integrated))
+	{
 		return None;
 	}
 	if soeurs
@@ -2443,13 +2465,7 @@ pub(crate) mod blocking_tests {
 		}
 	}
 
-	pub(crate) fn tache(
-		id: &str,
-		branch: &str,
-		base: &str,
-		state: TaskState,
-		attempts: u32,
-	) -> Task {
+	pub(crate) fn tache(id: &str, branch: &str, base: &str, state: TaskState, attempts: u32) -> Task {
 		Task {
 			id: id.into(),
 			role: "backend".into(),
@@ -2550,13 +2566,7 @@ pub(crate) mod blocking_tests {
 
 	#[test]
 	fn une_base_qui_ne_designe_rien_bloque() {
-		let mission = mission_test(vec![tache(
-			"b",
-			"feat-b",
-			"branche-inventee",
-			TaskState::Planned,
-			0,
-		)]);
+		let mission = mission_test(vec![tache("b", "feat-b", "branche-inventee", TaskState::Planned, 0)]);
 		let raison = blocking_reason(&mission, &mission.tasks[0]);
 		assert!(raison.is_some_and(|texte| texte.contains("any task")));
 	}
@@ -2572,13 +2582,7 @@ pub(crate) mod blocking_tests {
 
 	#[test]
 	fn partir_de_l_integration_ne_bloque_jamais() {
-		let mission = mission_test(vec![tache(
-			"a",
-			"feat-a",
-			"integration",
-			TaskState::Planned,
-			0,
-		)]);
+		let mission = mission_test(vec![tache("a", "feat-a", "integration", TaskState::Planned, 0)]);
 		assert!(blocking_reason(&mission, &mission.tasks[0]).is_none());
 	}
 }
@@ -2741,15 +2745,10 @@ pub fn read_verdict(rapport: &str) -> Option<Verdict> {
 		// explicite : un jour il y aura un quatrième verdict.
 		let lu = match mot {
 			m if m.starts_with("bloqu") || m.starts_with("block") => Some(Verdict::Blocking),
-			m if m.starts_with("réserve")
-				|| m.starts_with("reserve")
-				|| m.starts_with("concern") =>
-			{
+			m if m.starts_with("réserve") || m.starts_with("reserve") || m.starts_with("concern") => {
 				Some(Verdict::Reserves)
 			}
-			m if m.starts_with("ok") || m.starts_with("pass") || m.starts_with("clean") => {
-				Some(Verdict::Ok)
-			}
+			m if m.starts_with("ok") || m.starts_with("pass") || m.starts_with("clean") => Some(Verdict::Ok),
 			_ => None,
 		};
 		if lu.is_some() {
@@ -2865,11 +2864,7 @@ mod verdict_tests {
 	#[test]
 	fn lindécidable_ne_bloque_pas_mais_ne_valide_pas() {
 		let roles = vec!["qa".to_string()];
-		let mission = super::blocking_tests::mission_test(vec![verifiee(
-			"qa",
-			"undecided",
-			TaskState::Delivered,
-		)]);
+		let mission = super::blocking_tests::mission_test(vec![verifiee("qa", "undecided", TaskState::Delivered)]);
 		// Ce n'est pas un refus…
 		assert!(blocking_verdicts(&mission, &roles).is_empty());
 		// …mais ce n'est surtout pas un accord.
@@ -2880,11 +2875,7 @@ mod verdict_tests {
 	fn une_vérification_qui_a_conclu_nest_jamais_indécise() {
 		let roles = vec!["qa".to_string()];
 		for conclusion in ["ok", "reserves", "blocking"] {
-			let mission = super::blocking_tests::mission_test(vec![verifiee(
-				"qa",
-				conclusion,
-				TaskState::Delivered,
-			)]);
+			let mission = super::blocking_tests::mission_test(vec![verifiee("qa", conclusion, TaskState::Delivered)]);
 			assert!(
 				unclear_verdicts(&mission, &roles).is_empty(),
 				"« {conclusion} » est une conclusion"
@@ -2897,10 +2888,7 @@ mod verdict_tests {
 		// Le verdict voyage en texte jusque dans la fiche de mission : une
 		// valeur qui ne se relit pas se lirait comme une absence de verdict,
 		// c'est-à-dire comme un accord.
-		assert_eq!(
-			Verdict::parse(Verdict::Undecided.as_str()),
-			Some(Verdict::Undecided)
-		);
+		assert_eq!(Verdict::parse(Verdict::Undecided.as_str()), Some(Verdict::Undecided));
 	}
 
 	#[test]
@@ -2979,9 +2967,7 @@ mod overrun_tests {
 
 	fn en_cours(depuis_secondes: i64) -> Task {
 		let mut task = super::blocking_tests::tache("t", "b", "", TaskState::Running, 0);
-		task.started_at = Some(
-			(chrono::Utc::now() - chrono::Duration::seconds(depuis_secondes)).to_rfc3339(),
-		);
+		task.started_at = Some((chrono::Utc::now() - chrono::Duration::seconds(depuis_secondes)).to_rfc3339());
 		task
 	}
 

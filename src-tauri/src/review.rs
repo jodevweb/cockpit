@@ -112,7 +112,13 @@ fn reviews_dir() -> PathBuf {
 fn path_for(repo: &str, number: i64) -> PathBuf {
 	let slug: String = repo
 		.chars()
-		.map(|c| if c.is_ascii_alphanumeric() || c == '-' || c == '_' || c == '.' { c } else { '_' })
+		.map(|c| {
+			if c.is_ascii_alphanumeric() || c == '-' || c == '_' || c == '.' {
+				c
+			} else {
+				'_'
+			}
+		})
 		.collect();
 	reviews_dir().join(format!("{slug}-{number}.json"))
 }
@@ -292,14 +298,22 @@ process.stdin.on("data", (chunk) => {
 
 /// Écrit le pont et rend le chemin de sa configuration MCP ; `None` sans Node.
 pub fn bridge_config(sandboxed: bool) -> Option<String> {
-	let node = if sandboxed { "node".to_string() } else { crate::agent::node_binary()? };
+	let node = if sandboxed {
+		"node".to_string()
+	} else {
+		crate::agent::node_binary()?
+	};
 	std::fs::write(bridge_path(), BRIDGE).ok()?;
 	let config = config_dir().join("mcp-revue.json");
 	// Isolé, le CLI lit ces chemins depuis le conteneur : sous Windows, ils y
 	// ont la forme `/c/Users/…` (voir `sandbox::container_path`).
 	let seen = |path: &std::path::Path| {
 		let path = path.to_string_lossy().to_string();
-		if sandboxed { crate::sandbox::container_path(&path) } else { path }
+		if sandboxed {
+			crate::sandbox::container_path(&path)
+		} else {
+			path
+		}
 	};
 	let payload = json!({
 		"mcpServers": { "revue": { "command": node, "args": [seen(&bridge_path())] } }
@@ -369,7 +383,13 @@ pub async fn prepare(config: &Config, number: i64, kind: &str) -> Result<Prepare
 	}
 	let conversation = crate::integrations::github_pull_conversation(config, &number.to_string()).await?;
 	let detail = &conversation["detail"];
-	let text = |pointer: &str| detail.pointer(pointer).and_then(Value::as_str).unwrap_or_default().to_string();
+	let text = |pointer: &str| {
+		detail
+			.pointer(pointer)
+			.and_then(Value::as_str)
+			.unwrap_or_default()
+			.to_string()
+	};
 	let title = text("/title");
 	let author = text("/user/login");
 	let branch = text("/head/ref");
@@ -436,17 +456,20 @@ pub async fn prepare(config: &Config, number: i64, kind: &str) -> Result<Prepare
 		})
 		.collect();
 	if !reviews.is_empty() {
-		prompt.push_str(&format!("- Reviews already published on the PR:\n{}\n", reviews.join("\n")));
+		prompt.push_str(&format!(
+			"- Reviews already published on the PR:\n{}\n",
+			reviews.join("\n")
+		));
 	}
 
 	if kind == "verification" {
-		match previous.as_ref().and_then(|review| review.rounds.last().map(|round| (review, round))) {
+		match previous
+			.as_ref()
+			.and_then(|review| review.rounds.last().map(|round| (review, round)))
+		{
 			Some((review, last)) => {
 				if !last.head_sha.is_empty() && last.head_sha == head_sha {
-					warning = Some(crate::i18n::tf(
-						"review.noNewCommit",
-						&[("round", &last.number)],
-					));
+					warning = Some(crate::i18n::tf("review.noNewCommit", &[("round", &last.number)]));
 				}
 				prompt.push_str(&format!(
 					"- Last reviewed round: commit `{}`. What changed since: `git diff {}..HEAD`.\n",
@@ -460,7 +483,11 @@ pub async fn prepare(config: &Config, number: i64, kind: &str) -> Result<Prepare
 					for finding in open {
 						prompt.push_str(&format!(
 							"  · {} [{}] {}:{} — {}\n",
-							finding.id, finding.severity, finding.file, finding.lines, clip(&finding.problem, 300)
+							finding.id,
+							finding.severity,
+							finding.file,
+							finding.lines,
+							clip(&finding.problem, 300)
 						));
 					}
 				}
@@ -480,7 +507,11 @@ pub async fn prepare(config: &Config, number: i64, kind: &str) -> Result<Prepare
 	prompt.push_str(&format!(
 		" When you are done, call the `remettre_revue` tool once (pr = {number}, kind = \"{}\"), \
 		 with your summary, your verdict and your points. Number new points after the ones already raised.",
-		if kind == "verification" && previous.is_some() { "verification" } else { "revue" }
+		if kind == "verification" && previous.is_some() {
+			"verification"
+		} else {
+			"revue"
+		}
 	));
 	prompt.push_str("\n\n");
 	prompt.push_str(&crate::i18n::reply_directive());
@@ -509,7 +540,10 @@ pub async fn record(config: &Config, cwd: &str, input: &Value) -> Result<Review>
 	let repo = config.github.repo.trim().to_string();
 	let number = input
 		.get("pr")
-		.and_then(|v| v.as_i64().or_else(|| v.as_str().and_then(|s| s.trim_start_matches('#').parse().ok())))
+		.and_then(|v| {
+			v.as_i64()
+				.or_else(|| v.as_str().and_then(|s| s.trim_start_matches('#').parse().ok()))
+		})
 		.ok_or_else(|| CockpitError::msg(crate::i18n::t("review.noPrNumber")))?;
 	let head_sha = crate::git::run_git(Path::new(cwd), &["rev-parse", "HEAD"])
 		.await
@@ -519,10 +553,20 @@ pub async fn record(config: &Config, cwd: &str, input: &Value) -> Result<Review>
 	let mut review = match load(&repo, number) {
 		Some(review) => review,
 		None => {
-			let mut fresh = Review { repo: repo.clone(), number, ..Default::default() };
+			let mut fresh = Review {
+				repo: repo.clone(),
+				number,
+				..Default::default()
+			};
 			if let Ok(conversation) = crate::integrations::github_pull_conversation(config, &number.to_string()).await {
 				let detail = &conversation["detail"];
-				let text = |pointer: &str| detail.pointer(pointer).and_then(Value::as_str).unwrap_or_default().to_string();
+				let text = |pointer: &str| {
+					detail
+						.pointer(pointer)
+						.and_then(Value::as_str)
+						.unwrap_or_default()
+						.to_string()
+				};
 				fresh.title = text("/title");
 				fresh.author = text("/user/login");
 				fresh.branch = text("/head/ref");
@@ -533,12 +577,18 @@ pub async fn record(config: &Config, cwd: &str, input: &Value) -> Result<Review>
 		}
 	};
 
-	let findings: Vec<Finding> = serde_json::from_value(input.get("findings").cloned().unwrap_or(json!([]))).unwrap_or_default();
-	let checks: Vec<Check> = serde_json::from_value(input.get("checks").cloned().unwrap_or(json!([]))).unwrap_or_default();
+	let findings: Vec<Finding> =
+		serde_json::from_value(input.get("findings").cloned().unwrap_or(json!([]))).unwrap_or_default();
+	let checks: Vec<Check> =
+		serde_json::from_value(input.get("checks").cloned().unwrap_or(json!([]))).unwrap_or_default();
 	let string = |key: &str| input.get(key).and_then(Value::as_str).unwrap_or_default().to_string();
 	let round = Round {
 		number: review.rounds.len() as u32 + 1,
-		kind: if string("kind") == "verification" { "verification".into() } else { "revue".into() },
+		kind: if string("kind") == "verification" {
+			"verification".into()
+		} else {
+			"revue".into()
+		},
 		at: chrono::Utc::now().to_rfc3339(),
 		head_sha,
 		summary: string("summary"),
@@ -556,19 +606,34 @@ mod tests {
 	use super::*;
 
 	fn finding(id: &str) -> Finding {
-		Finding { id: id.into(), severity: "important".into(), ..Default::default() }
+		Finding {
+			id: id.into(),
+			severity: "important".into(),
+			..Default::default()
+		}
 	}
 
 	#[test]
 	fn les_points_ouverts_suivent_les_verifications() {
 		let review = Review {
 			rounds: vec![
-				Round { findings: vec![finding("R1"), finding("R2"), finding("R3")], ..Default::default() },
+				Round {
+					findings: vec![finding("R1"), finding("R2"), finding("R3")],
+					..Default::default()
+				},
 				Round {
 					kind: "verification".into(),
 					checks: vec![
-						Check { id: "R1".into(), status: "corrige".into(), note: String::new() },
-						Check { id: "R2".into(), status: "partiel".into(), note: String::new() },
+						Check {
+							id: "R1".into(),
+							status: "corrige".into(),
+							note: String::new(),
+						},
+						Check {
+							id: "R2".into(),
+							status: "partiel".into(),
+							note: String::new(),
+						},
 					],
 					findings: vec![finding("R4")],
 					..Default::default()
@@ -584,8 +649,14 @@ mod tests {
 	fn un_point_repris_a_un_tour_suivant_n_est_pas_double() {
 		let review = Review {
 			rounds: vec![
-				Round { findings: vec![finding("R1")], ..Default::default() },
-				Round { findings: vec![finding("R1")], ..Default::default() },
+				Round {
+					findings: vec![finding("R1")],
+					..Default::default()
+				},
+				Round {
+					findings: vec![finding("R1")],
+					..Default::default()
+				},
 			],
 			..Default::default()
 		};

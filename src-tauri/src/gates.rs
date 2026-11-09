@@ -105,7 +105,11 @@ pub struct Outcome {
 #[derive(Debug, Clone)]
 pub enum Runner {
 	Host,
-	Container { sandbox: crate::config::SandboxConfig, runtime: String, seed: String },
+	Container {
+		sandbox: crate::config::SandboxConfig,
+		runtime: String,
+		seed: String,
+	},
 }
 
 /// La fin d'un texte, coupée sur une frontière de caractère.
@@ -169,9 +173,7 @@ pub async fn run_with(runner: &Runner, cwd: &str, commands: &[String], timeout: 
 		// test, un watcher — ne lui survit pas, qu'elle ait passé ou non.
 		match runner {
 			Runner::Host => crate::platform::kill_group(leader),
-			Runner::Container { runtime, seed, .. } => {
-				crate::sandbox::kill(runtime, &format!("gate-{seed}-{index}"))
-			}
+			Runner::Container { runtime, seed, .. } => crate::sandbox::kill(runtime, &format!("gate-{seed}-{index}")),
 		}
 		let waited = match waited {
 			Some(result) => Some(result.await),
@@ -218,7 +220,11 @@ pub async fn run_with(runner: &Runner, cwd: &str, commands: &[String], timeout: 
 			}
 		}
 	}
-	Outcome { passed: true, failed: String::new(), output: String::new() }
+	Outcome {
+		passed: true,
+		failed: String::new(),
+		output: String::new(),
+	}
 }
 
 /// Attend la fin de la commande, pas celle de sa sortie.
@@ -254,8 +260,18 @@ async fn wait(
 			buffer
 		})
 	};
-	let stdout = lire(child.stdout.take().map(|pipe| Box::new(pipe) as Box<dyn tokio::io::AsyncRead + Unpin + Send>));
-	let stderr = lire(child.stderr.take().map(|pipe| Box::new(pipe) as Box<dyn tokio::io::AsyncRead + Unpin + Send>));
+	let stdout = lire(
+		child
+			.stdout
+			.take()
+			.map(|pipe| Box::new(pipe) as Box<dyn tokio::io::AsyncRead + Unpin + Send>),
+	);
+	let stderr = lire(
+		child
+			.stderr
+			.take()
+			.map(|pipe| Box::new(pipe) as Box<dyn tokio::io::AsyncRead + Unpin + Send>),
+	);
 	let status = match tokio::time::timeout(timeout, child.wait()).await {
 		Ok(status) => status,
 		Err(_) => {
@@ -269,8 +285,16 @@ async fn wait(
 		// La descendance vient d'être arrêtée : les tuyaux se ferment. Le délai
 		// borne le cas d'un processus qui aurait échappé au groupe.
 		let grace = Duration::from_secs(5);
-		let stdout = tokio::time::timeout(grace, stdout).await.ok().and_then(Result::ok).unwrap_or_default();
-		let stderr = tokio::time::timeout(grace, stderr).await.ok().and_then(Result::ok).unwrap_or_default();
+		let stdout = tokio::time::timeout(grace, stdout)
+			.await
+			.ok()
+			.and_then(Result::ok)
+			.unwrap_or_default();
+		let stderr = tokio::time::timeout(grace, stderr)
+			.await
+			.ok()
+			.and_then(Result::ok)
+			.unwrap_or_default();
 		Ok(std::process::Output { status, stdout, stderr })
 	})
 }
@@ -431,7 +455,11 @@ mod tests {
 	async fn la_premiere_qui_echoue_arrete_tout_et_dit_pourquoi() {
 		let outcome = run(
 			&dossier(),
-			&["echo avant".into(), "echo raté >&2; exit 3".into(), "echo jamais".into()],
+			&[
+				"echo avant".into(),
+				"echo raté >&2; exit 3".into(),
+				"echo jamais".into(),
+			],
 			TIMEOUT,
 		)
 		.await;

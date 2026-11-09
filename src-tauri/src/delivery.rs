@@ -145,15 +145,19 @@ pub struct Dossier {
 /// une seule porte rouge suffit, et un verdict indécis n'est pas un accord.
 pub fn overall(gates: &[GateLine], verdicts: &[VerdictLine], properties: Option<&PropertiesLine>) -> Overall {
 	let failed = gates.iter().any(|line| line.gate == Gate::Failed)
-		|| verdicts.iter().any(|line| Verdict::parse(&line.verdict) == Some(Verdict::Blocking))
+		|| verdicts
+			.iter()
+			.any(|line| Verdict::parse(&line.verdict) == Some(Verdict::Blocking))
 		|| properties.is_some_and(|line| line.broken > 0);
 	if failed {
 		return Overall::Failure;
 	}
-	let pending = gates.iter().any(|line| line.gate == Gate::Running || line.gate == Gate::None)
-		|| verdicts.iter().any(|line| {
-			!line.delivered || matches!(Verdict::parse(&line.verdict), None | Some(Verdict::Undecided))
-		})
+	let pending = gates
+		.iter()
+		.any(|line| line.gate == Gate::Running || line.gate == Gate::None)
+		|| verdicts
+			.iter()
+			.any(|line| !line.delivered || matches!(Verdict::parse(&line.verdict), None | Some(Verdict::Undecided)))
 		|| properties.is_some_and(|line| line.unsettled > 0);
 	if pending {
 		Overall::Pending
@@ -175,20 +179,47 @@ fn tf(key: &str, args: &[(&str, &dyn std::fmt::Display)]) -> String {
 /// Le dossier en markdown. Pur : tout ce qu'il dit vient de `dossier`.
 pub fn render(dossier: &Dossier) -> String {
 	let mut lines = vec![format!("### {}", t("title")), String::new()];
-	let quoted = |tasks: &[&str]| tasks.iter().map(|task| format!("« {task} »")).collect::<Vec<_>>().join(", ");
+	let quoted = |tasks: &[&str]| {
+		tasks
+			.iter()
+			.map(|task| format!("« {task} »"))
+			.collect::<Vec<_>>()
+			.join(", ")
+	};
 
 	// Portes.
 	if dossier.gate_commands.is_empty() {
 		lines.push(format!("- ➖ {}", t("gates.none")));
 	} else {
-		let commands = dossier.gate_commands.iter().map(|c| format!("`{c}`")).collect::<Vec<_>>().join(", ");
-		let of = |gate: Gate| dossier.gates.iter().filter(|line| line.gate == gate).map(|line| line.task.as_str()).collect::<Vec<_>>();
+		let commands = dossier
+			.gate_commands
+			.iter()
+			.map(|c| format!("`{c}`"))
+			.collect::<Vec<_>>()
+			.join(", ");
+		let of = |gate: Gate| {
+			dossier
+				.gates
+				.iter()
+				.filter(|line| line.gate == gate)
+				.map(|line| line.task.as_str())
+				.collect::<Vec<_>>()
+		};
 		let failed = of(Gate::Failed);
 		let waiting: Vec<&str> = of(Gate::Running).into_iter().chain(of(Gate::None)).collect();
 		if !failed.is_empty() {
-			lines.push(format!("- ❌ {}", tf("gates.failed", &[("commands", &commands), ("tasks", &quoted(&failed))])));
+			lines.push(format!(
+				"- ❌ {}",
+				tf("gates.failed", &[("commands", &commands), ("tasks", &quoted(&failed))])
+			));
 		} else if !waiting.is_empty() {
-			lines.push(format!("- ⏳ {}", tf("gates.waiting", &[("commands", &commands), ("tasks", &quoted(&waiting))])));
+			lines.push(format!(
+				"- ⏳ {}",
+				tf(
+					"gates.waiting",
+					&[("commands", &commands), ("tasks", &quoted(&waiting))]
+				)
+			));
 		} else {
 			lines.push(format!("- ✅ {}", tf("gates.passed", &[("commands", &commands)])));
 		}
@@ -206,23 +237,38 @@ pub fn render(dossier: &Dossier) -> String {
 			(true, Some(Verdict::Blocking)) => ("❌", t("verdicts.blocking")),
 			(true, Some(Verdict::Undecided) | None) => ("⚠️", t("verdicts.undecided")),
 		};
-		lines.push(format!("- {mark} {}", tf("verdicts.line", &[("task", &line.task), ("verdict", &label)])));
+		lines.push(format!(
+			"- {mark} {}",
+			tf("verdicts.line", &[("task", &line.task), ("verdict", &label)])
+		));
 	}
 
 	// Propriétés.
 	match &dossier.properties {
 		None => lines.push(format!("- ➖ {}", t("properties.none"))),
 		Some(p) => {
-			let mark = if p.broken > 0 { "❌" } else if p.unsettled > 0 || p.decorative > 0 { "⚠️" } else { "✅" };
+			let mark = if p.broken > 0 {
+				"❌"
+			} else if p.unsettled > 0 || p.decorative > 0 {
+				"⚠️"
+			} else {
+				"✅"
+			};
 			let mut text = tf("properties.held", &[("held", &p.held), ("total", &p.total)]);
 			if p.broken > 0 {
 				text.push_str(&format!(" · {}", tf("properties.broken", &[("count", &p.broken)])));
 			}
 			if p.unsettled > 0 {
-				text.push_str(&format!(" · {}", tf("properties.unsettled", &[("count", &p.unsettled)])));
+				text.push_str(&format!(
+					" · {}",
+					tf("properties.unsettled", &[("count", &p.unsettled)])
+				));
 			}
 			if p.decorative > 0 {
-				text.push_str(&format!(" · {}", tf("properties.decorative", &[("count", &p.decorative)])));
+				text.push_str(&format!(
+					" · {}",
+					tf("properties.decorative", &[("count", &p.decorative)])
+				));
 			}
 			lines.push(format!("- {mark} {text}"));
 		}
@@ -232,7 +278,14 @@ pub fn render(dossier: &Dossier) -> String {
 	if let Some(changes) = &dossier.changes {
 		lines.push(format!(
 			"- 📄 {}",
-			tf("changes", &[("files", &changes.files), ("insertions", &changes.insertions), ("deletions", &changes.deletions)])
+			tf(
+				"changes",
+				&[
+					("files", &changes.files),
+					("insertions", &changes.insertions),
+					("deletions", &changes.deletions)
+				]
+			)
 		));
 	}
 	if !dossier.films.is_empty() {
@@ -334,7 +387,11 @@ fn parse_shortstat(raw: &str) -> Option<Changes> {
 			.unwrap_or(0)
 	};
 	let files = number("file");
-	(files > 0).then(|| Changes { files, insertions: number("insertion"), deletions: number("deletion") })
+	(files > 0).then(|| Changes {
+		files,
+		insertions: number("insertion"),
+		deletions: number("deletion"),
+	})
 }
 
 fn properties_of(mission: &Mission) -> Option<PropertiesLine> {
@@ -345,12 +402,18 @@ fn properties_of(mission: &Mission) -> Option<PropertiesLine> {
 		.find(|project| crate::platform::same_path(&project.main_repo, &mission.cwd))?;
 	let audit = crate::properties::read_audit(&format!("local:{}@{}", project.id, mission.branch))?;
 	let calibrations = crate::properties::read_calibrations(&project.id);
-	let mut line = PropertiesLine { total: audit.checks.len(), ..Default::default() };
+	let mut line = PropertiesLine {
+		total: audit.checks.len(),
+		..Default::default()
+	};
 	for check in &audit.checks {
 		match check.verdict.as_str() {
 			"tenue" => {
 				line.held += 1;
-				if calibrations.iter().any(|c| c.property_id == check.property_id && c.decorative()) {
+				if calibrations
+					.iter()
+					.any(|c| c.property_id == check.property_id && c.decorative())
+				{
 					line.decorative += 1;
 				}
 			}
@@ -384,10 +447,17 @@ pub async fn compose(mission_id: &str) -> Result<Dossier> {
 				delivered: matches!(task.state, TaskState::Delivered | TaskState::Integrated),
 			});
 		} else if !gate_commands.is_empty() {
-			gates.push(GateLine { task: task.title.clone(), gate: task.gate });
+			gates.push(GateLine {
+				task: task.title.clone(),
+				gate: task.gate,
+			});
 		}
 		for (path, bytes) in films_of(&task.worktree, since) {
-			films.push(FilmLine { task: task.title.clone(), path, bytes });
+			films.push(FilmLine {
+				task: task.title.clone(),
+				path,
+				bytes,
+			});
 		}
 	}
 
@@ -406,7 +476,10 @@ pub async fn compose(mission_id: &str) -> Result<Dossier> {
 		worked_seconds: mission.tasks.iter().map(|task| task.worked_seconds).sum(),
 		..Default::default()
 	};
-	for execution in crate::executions::fold().into_iter().filter(|e| e.opening.mission == mission.id) {
+	for execution in crate::executions::fold()
+		.into_iter()
+		.filter(|e| e.opening.mission == mission.id)
+	{
 		cost.tokens += execution.tally.input_tokens + execution.tally.output_tokens + execution.tally.cache_tokens;
 		cost.usd += execution.tally.cost.reported_usd + execution.tally.cost.estimated_usd;
 	}
@@ -463,7 +536,11 @@ pub async fn publish(mission_id: &str) -> Result<String> {
 		.await
 		.map_err(CockpitError::from)?;
 	let body = pull.get("body").and_then(|b| b.as_str()).unwrap_or_default();
-	let head = pull.pointer("/head/sha").and_then(|s| s.as_str()).unwrap_or_default().to_string();
+	let head = pull
+		.pointer("/head/sha")
+		.and_then(|s| s.as_str())
+		.unwrap_or_default()
+		.to_string();
 
 	client
 		.patch(api(format!("pulls/{number}")))
@@ -498,10 +575,22 @@ pub async fn publish(mission_id: &str) -> Result<String> {
 			.await
 			.and_then(|response| response.error_for_status())
 		{
-			crate::journal::record("mission", &t("journal.statusFailed"), &mission.title, false, &error.to_string());
+			crate::journal::record(
+				"mission",
+				&t("journal.statusFailed"),
+				&mission.title,
+				false,
+				&error.to_string(),
+			);
 		}
 	}
-	crate::journal::record("mission", &t("journal.published"), &mission.title, true, &mission.pr_url);
+	crate::journal::record(
+		"mission",
+		&t("journal.published"),
+		&mission.title,
+		true,
+		&mission.pr_url,
+	);
 	Ok(mission.pr_url.clone())
 }
 
@@ -510,14 +599,22 @@ pub async fn publish(mission_id: &str) -> Result<String> {
 /// pas empêcher la mission de se clore.
 pub fn publish_on_close(mission_id: &str) {
 	let Ok(mission) = mission::get(mission_id) else { return };
-	if !crate::config::Config::for_repo(&mission.cwd).workflow.delivery_dossier || github_pull(&mission.pr_url).is_none() {
+	if !crate::config::Config::for_repo(&mission.cwd).workflow.delivery_dossier
+		|| github_pull(&mission.pr_url).is_none()
+	{
 		return;
 	}
 	let id = mission_id.to_string();
 	tauri::async_runtime::spawn(async move {
 		if let Err(error) = publish(&id).await {
 			if let Ok(mission) = mission::get(&id) {
-				crate::journal::record("mission", &t("journal.publishFailed"), &mission.title, false, &error.to_string());
+				crate::journal::record(
+					"mission",
+					&t("journal.publishFailed"),
+					&mission.title,
+					false,
+					&error.to_string(),
+				);
 			}
 		}
 	});
@@ -528,11 +625,19 @@ mod tests {
 	use super::*;
 
 	fn gate(task: &str, gate: Gate) -> GateLine {
-		GateLine { task: task.into(), gate }
+		GateLine {
+			task: task.into(),
+			gate,
+		}
 	}
 
 	fn verdict(task: &str, verdict: &str, delivered: bool) -> VerdictLine {
-		VerdictLine { task: task.into(), role: "qa".into(), verdict: verdict.into(), delivered }
+		VerdictLine {
+			task: task.into(),
+			role: "qa".into(),
+			verdict: verdict.into(),
+			delivered,
+		}
 	}
 
 	#[test]
@@ -544,21 +649,37 @@ mod tests {
 	#[test]
 	fn un_verdict_indecis_n_est_pas_un_accord() {
 		let gates = [gate("a", Gate::Passed)];
-		assert_eq!(overall(&gates, &[verdict("qa", "undecided", true)], None), Overall::Pending);
+		assert_eq!(
+			overall(&gates, &[verdict("qa", "undecided", true)], None),
+			Overall::Pending
+		);
 		assert_eq!(overall(&gates, &[verdict("qa", "", true)], None), Overall::Pending);
 		assert_eq!(overall(&gates, &[verdict("qa", "ok", false)], None), Overall::Pending);
 	}
 
 	#[test]
 	fn une_propriete_enfreinte_fait_echouer() {
-		let props = PropertiesLine { total: 3, held: 2, broken: 1, ..Default::default() };
+		let props = PropertiesLine {
+			total: 3,
+			held: 2,
+			broken: 1,
+			..Default::default()
+		};
 		assert_eq!(overall(&[], &[], Some(&props)), Overall::Failure);
 	}
 
 	#[test]
 	fn tout_tient_alors_c_est_un_succes() {
-		let props = PropertiesLine { total: 2, held: 2, decorative: 1, ..Default::default() };
-		assert_eq!(overall(&[gate("a", Gate::Passed)], &[verdict("qa", "ok", true)], Some(&props)), Overall::Success);
+		let props = PropertiesLine {
+			total: 2,
+			held: 2,
+			decorative: 1,
+			..Default::default()
+		};
+		assert_eq!(
+			overall(&[gate("a", Gate::Passed)], &[verdict("qa", "ok", true)], Some(&props)),
+			Overall::Success
+		);
 	}
 
 	#[test]
@@ -575,7 +696,10 @@ mod tests {
 	#[test]
 	fn l_adresse_d_une_pr_github_se_lit() {
 		assert_eq!(github_pull("https://github.com/o/r/pull/42"), Some(("o/r".into(), 42)));
-		assert_eq!(github_pull("https://github.com/o/r/pull/42#discussion"), Some(("o/r".into(), 42)));
+		assert_eq!(
+			github_pull("https://github.com/o/r/pull/42#discussion"),
+			Some(("o/r".into(), 42))
+		);
 		assert_eq!(github_pull("https://gitlab.com/o/r/-/merge_requests/1"), None);
 		assert_eq!(github_pull(""), None);
 	}
@@ -583,8 +707,18 @@ mod tests {
 	#[test]
 	fn git_shortstat_se_lit() {
 		let changes = parse_shortstat(" 7 files changed, 120 insertions(+), 14 deletions(-)\n").unwrap();
-		assert_eq!(changes, Changes { files: 7, insertions: 120, deletions: 14 });
-		assert_eq!(parse_shortstat(" 1 file changed, 3 deletions(-)").unwrap().insertions, 0);
+		assert_eq!(
+			changes,
+			Changes {
+				files: 7,
+				insertions: 120,
+				deletions: 14
+			}
+		);
+		assert_eq!(
+			parse_shortstat(" 1 file changed, 3 deletions(-)").unwrap().insertions,
+			0
+		);
 		assert!(parse_shortstat("").is_none());
 	}
 
@@ -597,7 +731,12 @@ mod tests {
 			gate_commands: vec!["pnpm test".into()],
 			gates: vec![gate("Back", Gate::Failed)],
 			verdicts: vec![verdict("Recette", "undecided", true)],
-			properties: Some(PropertiesLine { total: 2, held: 2, decorative: 1, ..Default::default() }),
+			properties: Some(PropertiesLine {
+				total: 2,
+				held: 2,
+				decorative: 1,
+				..Default::default()
+			}),
 			films: vec![],
 			changes: None,
 			cost: CostLine::default(),
@@ -606,11 +745,24 @@ mod tests {
 		};
 		let text = render(&dossier);
 		assert!(text.contains("❌"), "porte en échec : {text}");
-		assert!(!text.lines().any(|line| line.starts_with("- ✅") && line.contains("Recette")), "{text}");
-		assert!(text.lines().any(|line| line.starts_with("- ⚠️")), "propriété décorative signalée : {text}");
+		assert!(
+			!text
+				.lines()
+				.any(|line| line.starts_with("- ✅") && line.contains("Recette")),
+			"{text}"
+		);
+		assert!(
+			text.lines().any(|line| line.starts_with("- ⚠️")),
+			"propriété décorative signalée : {text}"
+		);
 		// Une liste, pas des lignes nues : un simple retour à la ligne se fond
 		// dans le paragraphe en markdown.
-		assert!(text.lines().filter(|line| !line.is_empty() && !line.starts_with('#') && !line.starts_with('*')).all(|line| line.starts_with("- ")), "{text}");
+		assert!(
+			text.lines()
+				.filter(|line| !line.is_empty() && !line.starts_with('#') && !line.starts_with('*'))
+				.all(|line| line.starts_with("- ")),
+			"{text}"
+		);
 		assert!(!text.contains("<sub>"), "pas de HTML : l'interface ne le rend pas");
 	}
 }

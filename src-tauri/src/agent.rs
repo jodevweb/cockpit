@@ -274,9 +274,7 @@ pub(crate) fn forwards_subagents(binary: &str) -> bool {
 	*SUPPORTE.get_or_init(|| {
 		crate::platform::shell(&format!("{} --help", shell_quote(binary)))
 			.output()
-			.map(|out| {
-				String::from_utf8_lossy(&out.stdout).contains("--forward-subagent-text")
-			})
+			.map(|out| String::from_utf8_lossy(&out.stdout).contains("--forward-subagent-text"))
 			.unwrap_or(false)
 	})
 }
@@ -402,7 +400,10 @@ fn path_with(dir: &std::path::Path) -> String {
 	}
 	#[cfg(not(windows))]
 	{
-		format!("{}:{inherited}:/usr/local/bin:/opt/homebrew/bin:/usr/bin:/bin", dir.display())
+		format!(
+			"{}:{inherited}:/usr/local/bin:/opt/homebrew/bin:/usr/bin:/bin",
+			dir.display()
+		)
 	}
 }
 
@@ -462,13 +463,7 @@ pub async fn ask_quick(system: &str, prompt: &str, model: &str) -> Result<String
 /// qui n'a aucun outil ne peut rien pousser, commenter ni déplacer, quoi qu'on
 /// lui demande. Le lui interdire par consigne ne vaudrait rien face à un
 /// serveur MCP de suivi de tâches resté branché sur le poste.
-pub async fn ask_bare(
-	system: &str,
-	prompt: &str,
-	model: &str,
-	timeout: Duration,
-	thinking: bool,
-) -> Result<OneShot> {
+pub async fn ask_bare(system: &str, prompt: &str, model: &str, timeout: Duration, thinking: bool) -> Result<OneShot> {
 	let started = std::time::Instant::now();
 	let binary = claude_binary().ok_or_else(|| CockpitError::msg(crate::i18n::t("agent.claudeNotFound")))?;
 	let config = crate::config::Config::active();
@@ -484,7 +479,13 @@ pub async fn ask_bare(
 	crate::platform::quiet_async(&mut command);
 	command
 		.args(["-p", "--output-format", "json", "--model", model])
-		.args(["--tools", "", "--strict-mcp-config", "--disable-slash-commands", "--no-session-persistence"])
+		.args([
+			"--tools",
+			"",
+			"--strict-mcp-config",
+			"--disable-slash-commands",
+			"--no-session-persistence",
+		])
 		.args(["--system-prompt", system])
 		.current_dir(&neutral)
 		.env("PATH", path)
@@ -509,7 +510,12 @@ pub async fn ask_bare(
 	}
 	let output = tokio::time::timeout(timeout, child.wait_with_output())
 		.await
-		.map_err(|_| CockpitError::msg(crate::i18n::tf("agent.claudeTimeout", &[("seconds", &timeout.as_secs())])))?
+		.map_err(|_| {
+			CockpitError::msg(crate::i18n::tf(
+				"agent.claudeTimeout",
+				&[("seconds", &timeout.as_secs())],
+			))
+		})?
 		.map_err(|e| CockpitError::msg(crate::i18n::tf("agent.claudeError", &[("error", &e)])))?;
 	let stdout = String::from_utf8_lossy(&output.stdout).to_string();
 	if !output.status.success() {
@@ -520,13 +526,17 @@ pub async fn ask_bare(
 			&[("detail", &detail.chars().take(300).collect::<String>())],
 		)));
 	}
-	let value: Value = serde_json::from_str(stdout.trim())
-		.map_err(|_| CockpitError::msg(crate::i18n::t("agent.claudeUnreadable")))?;
+	let value: Value =
+		serde_json::from_str(stdout.trim()).map_err(|_| CockpitError::msg(crate::i18n::t("agent.claudeUnreadable")))?;
 	Ok(OneShot {
 		text: value.get("result").and_then(Value::as_str).unwrap_or("").to_string(),
 		duration_ms: started.elapsed().as_millis() as u64,
 		cost_usd: value.get("total_cost_usd").and_then(Value::as_f64).unwrap_or(0.0),
-		session_id: value.get("session_id").and_then(Value::as_str).unwrap_or("").to_string(),
+		session_id: value
+			.get("session_id")
+			.and_then(Value::as_str)
+			.unwrap_or("")
+			.to_string(),
 	})
 }
 
@@ -576,7 +586,18 @@ pub async fn run_once_with_tools(
 	mcp: &str,
 	origin: crate::executions::Origin,
 ) -> Result<OneShot> {
-	run_once_with_config(crate::config::Config::active(), cwd, prompt, engine_id, model, depth, disallowed, mcp, origin).await
+	run_once_with_config(
+		crate::config::Config::active(),
+		cwd,
+		prompt,
+		engine_id,
+		model,
+		depth,
+		disallowed,
+		mcp,
+		origin,
+	)
+	.await
 }
 
 /// Le même, sous une configuration donnée plutôt que celle du projet affiché.
@@ -597,7 +618,10 @@ pub async fn run_once_with_config(
 	origin: crate::executions::Origin,
 ) -> Result<OneShot> {
 	if !std::path::Path::new(cwd).is_dir() {
-		return Err(CockpitError::msg(crate::i18n::tf("agent.folderNotFound", &[("path", &cwd)])));
+		return Err(CockpitError::msg(crate::i18n::tf(
+			"agent.folderNotFound",
+			&[("path", &cwd)],
+		)));
 	}
 
 	let engine = crate::config::engine_for(&config, engine_id);
@@ -605,9 +629,7 @@ pub async fn run_once_with_config(
 	// protocole par défaut sait rendre : ce n'est pas un dialogue, il n'y a rien
 	// à traduire, et un autre moteur répondrait dans une forme qu'on ne relit
 	// pas ici.
-	if crate::protocol::Protocol::parse(engine.protocol_or_default())
-		!= Some(crate::protocol::Protocol::Claude)
-	{
+	if crate::protocol::Protocol::parse(engine.protocol_or_default()) != Some(crate::protocol::Protocol::Claude) {
 		return Err(CockpitError::msg(crate::i18n::tf(
 			"agent.oneShotProtocol",
 			&[("engine", &engine.label), ("protocol", &engine.protocol_or_default())],
@@ -615,9 +637,7 @@ pub async fn run_once_with_config(
 	}
 
 	let binary = match engine.command.trim() {
-		"" => claude_binary().ok_or_else(|| {
-			CockpitError::msg(crate::i18n::t("agent.claudeNotFound"))
-		})?,
+		"" => claude_binary().ok_or_else(|| CockpitError::msg(crate::i18n::t("agent.claudeNotFound")))?,
 		declared => declared.to_string(),
 	};
 
@@ -634,10 +654,7 @@ pub async fn run_once_with_config(
 		shell_quote(&binary)
 	));
 	if !disallowed.is_empty() {
-		command.push_str(&format!(
-			" --disallowedTools {}",
-			shell_quote(&disallowed.join(" "))
-		));
+		command.push_str(&format!(" --disallowedTools {}", shell_quote(&disallowed.join(" "))));
 	}
 	if !mcp.trim().is_empty() {
 		command.push_str(&format!(" --mcp-config {}", shell_quote(mcp.trim())));
@@ -697,9 +714,7 @@ pub async fn run_once_with_config(
 
 	let output = match tokio::time::timeout(ONE_SHOT_TIMEOUT, child.wait_with_output()).await {
 		Ok(result) => result.map_err(|e| CockpitError::msg(crate::i18n::tf("agent.agentError", &[("error", &e)])))?,
-		Err(_) => {
-			return Err(CockpitError::msg(crate::i18n::t("agent.oneShotTimeout")))
-		}
+		Err(_) => return Err(CockpitError::msg(crate::i18n::t("agent.oneShotTimeout"))),
 	};
 
 	let stdout = String::from_utf8_lossy(&output.stdout).to_string();
@@ -748,14 +763,8 @@ pub async fn run_once_with_config(
 
 	let rendu = OneShot {
 		text,
-		duration_ms: value
-			.get("duration_ms")
-			.and_then(|v| v.as_u64())
-			.unwrap_or(0),
-		cost_usd: value
-			.get("total_cost_usd")
-			.and_then(|v| v.as_f64())
-			.unwrap_or(0.0),
+		duration_ms: value.get("duration_ms").and_then(|v| v.as_u64()).unwrap_or(0),
+		cost_usd: value.get("total_cost_usd").and_then(|v| v.as_f64()).unwrap_or(0.0),
 		session_id: value
 			.get("session_id")
 			.and_then(|v| v.as_str())
@@ -786,11 +795,7 @@ pub async fn run_once_with_config(
 		..Default::default()
 	});
 	crate::executions::note_turn(&execution, crate::protocol::Protocol::Claude, &value);
-	crate::executions::note_step(
-		&execution,
-		crate::executions::Step::Answered,
-		&rendu.session_id,
-	);
+	crate::executions::note_step(&execution, crate::executions::Step::Answered, &rendu.session_id);
 
 	Ok(rendu)
 }
@@ -857,7 +862,19 @@ pub async fn start_with_mission(
 	origin: crate::executions::Origin,
 ) -> Result<String> {
 	start_inner(
-		app, agents, cwd, prompt, permission_mode, model, resume, mission, engine_id, depth, scope, origin, None,
+		app,
+		agents,
+		cwd,
+		prompt,
+		permission_mode,
+		model,
+		resume,
+		mission,
+		engine_id,
+		depth,
+		scope,
+		origin,
+		None,
 		None,
 	)
 	.await
@@ -953,7 +970,9 @@ fn codex_equipment(cwd: &str, reviewing: bool, seat: MissionSeat) -> String {
 			args.push_str(&hook);
 		}
 	}
-	args.push_str(&crate::codex::instructions_args(&standing_instructions(reviewing, steps)));
+	args.push_str(&crate::codex::instructions_args(&standing_instructions(
+		reviewing, steps,
+	)));
 	args
 }
 
@@ -977,8 +996,20 @@ pub async fn start_profiled(
 	origin: crate::executions::Origin,
 ) -> Result<String> {
 	start_inner(
-		app, agents, cwd, prompt, permission_mode, model, resume, None, engine_id, depth, Vec::new(), origin,
-		profile, account,
+		app,
+		agents,
+		cwd,
+		prompt,
+		permission_mode,
+		model,
+		resume,
+		None,
+		engine_id,
+		depth,
+		Vec::new(),
+		origin,
+		profile,
+		account,
 	)
 	.await
 }
@@ -1021,7 +1052,10 @@ async fn start_inner(
 	// agent de revue sans elle garde son outil de remise, rien d'autre.
 	let locked = reviewing && crate::config::Config::active().workflow.review_read_only;
 	if !std::path::Path::new(&cwd).is_dir() {
-		return Err(CockpitError::msg(crate::i18n::tf("agent.folderNotFound", &[("path", &cwd)])));
+		return Err(CockpitError::msg(crate::i18n::tf(
+			"agent.folderNotFound",
+			&[("path", &cwd)],
+		)));
 	}
 
 	let session_id = format!("agent-{}", uuid_like());
@@ -1097,7 +1131,11 @@ async fn start_inner(
 	// c'est le seul CLI que le cockpit sache trouver tout seul.
 	let binary = match engine.command.trim() {
 		"" if dialect == crate::protocol::Protocol::Claude => claude_binary().ok_or_else(|| {
-			CockpitError::msg(crate::i18n::t(if cfg!(windows) { "windowsAgents.claudeNotFoundHint" } else { "agent.claudeNotFoundHint" }))
+			CockpitError::msg(crate::i18n::t(if cfg!(windows) {
+				"windowsAgents.claudeNotFoundHint"
+			} else {
+				"agent.claudeNotFoundHint"
+			}))
 		})?,
 		"" => {
 			return Err(CockpitError::msg(crate::i18n::tf(
@@ -1360,16 +1398,17 @@ async fn start_inner(
 	let mut env_vars: Vec<(String, String)> = vec![
 		("COCKPIT_AGENT_SESSION".to_string(), session_id.clone()),
 		("COCKPIT_PERMISSION_MODE".to_string(), mode.clone()),
-		(
-			"COCKPIT_MISSION_ID".to_string(),
-			mission.clone().unwrap_or_default(),
-		),
+		("COCKPIT_MISSION_ID".to_string(), mission.clone().unwrap_or_default()),
 		("COCKPIT_SCOPE".to_string(), scope.join("\n")),
 		// Les branches qu'un exécutant ne pousse jamais : lues par le garde-fou.
 		(
 			"COCKPIT_PROTECTED_BRANCHES".to_string(),
 			if executor {
-				mission.as_deref().map(crate::guard::protected_branches).unwrap_or_default().join("\n")
+				mission
+					.as_deref()
+					.map(crate::guard::protected_branches)
+					.unwrap_or_default()
+					.join("\n")
 			} else {
 				String::new()
 			},
@@ -1378,7 +1417,11 @@ async fn start_inner(
 		// Isolé, l'agent les écrit sous la forme que le conteneur connaît.
 		(
 			"COCKPIT_CWD".to_string(),
-			if config.sandbox.enabled { crate::sandbox::container_path(&cwd) } else { cwd.clone() },
+			if config.sandbox.enabled {
+				crate::sandbox::container_path(&cwd)
+			} else {
+				cwd.clone()
+			},
 		),
 	];
 	// Sous quel compte cet agent travaille — le dossier de configuration décidé
@@ -1423,16 +1466,13 @@ async fn start_inner(
 
 	let sandbox_cfg = &config.sandbox;
 	let runtime = if sandbox_cfg.enabled {
-		let runtime = crate::sandbox::resolve_runtime(&sandbox_cfg.runtime).ok_or_else(|| {
-			CockpitError::msg(crate::i18n::t("agent.sandboxNoRuntimeHint"))
-		})?;
+		let runtime = crate::sandbox::resolve_runtime(&sandbox_cfg.runtime)
+			.ok_or_else(|| CockpitError::msg(crate::i18n::t("agent.sandboxNoRuntimeHint")))?;
 		// Manque à l'appel : Cockpit la construit lui-même plutôt que de refuser
 		// en laissant deviner comment la fabriquer — voir `sandbox::ensure_image`.
 		crate::sandbox::ensure_image(&runtime, sandbox_cfg)
 			.await
-			.map_err(|error| {
-				CockpitError::msg(crate::i18n::tf("agent.sandboxImageFailed", &[("error", &error)]))
-			})?;
+			.map_err(|error| CockpitError::msg(crate::i18n::tf("agent.sandboxImageFailed", &[("error", &error)])))?;
 		Some(runtime)
 	} else {
 		None
@@ -1453,8 +1493,7 @@ async fn start_inner(
 		&& crate::relay::setting().enabled;
 
 	let (child, mut stdin, stdout, stderr, relay) = if detach {
-		let handle =
-			crate::relay::spawn(&session_id, &cwd, &command, &env_vars, &env_removals, "")?;
+		let handle = crate::relay::spawn(&session_id, &cwd, &command, &env_vars, &env_removals, "")?;
 		(
 			None,
 			Input::Relay(handle.clone()),
@@ -1558,9 +1597,7 @@ async fn start_inner(
 	// Nom du conteneur, pour que `stop`/`stop_all` puisse le tuer explicitement :
 	// `child.start_kill()` seul n'arrête que le client, jamais le conteneur lui-
 	// même (vérifié empiriquement, voir la doc de `sandbox.rs`).
-	let container = runtime
-		.as_ref()
-		.map(|runtime| (runtime.clone(), session_id.clone()));
+	let container = runtime.as_ref().map(|runtime| (runtime.clone(), session_id.clone()));
 
 	// Seul Claude Code lit la suite sur son entrée, qui reste donc ouverte. Pour
 	// les deux autres, elle se referme ici : `codex exec` l'attendrait sans fin
@@ -1644,7 +1681,13 @@ fn film_the_proof(app: &AppHandle, agents: &SharedAgents, session_id: &str, payl
 	if !touches_browser && !turn_over {
 		return;
 	}
-	let Some(cwd) = agents.sessions.lock().unwrap().get(session_id).map(|running| running.cwd.clone()) else {
+	let Some(cwd) = agents
+		.sessions
+		.lock()
+		.unwrap()
+		.get(session_id)
+		.map(|running| running.cwd.clone())
+	else {
 		return;
 	};
 	let session = session_id.to_string();
@@ -1817,9 +1860,7 @@ fn spawn_reader(
 							// l'écran relira l'historique d'un agent retrouvé.
 							if let Some(relay) = &running.relay {
 								let marker = marker.to_string();
-								crate::relay::update_meta(&relay.dir, |meta| {
-									meta.claude_session_id = Some(marker)
-								});
+								crate::relay::update_meta(&relay.dir, |meta| meta.claude_session_id = Some(marker));
 							}
 						}
 					}
@@ -1879,10 +1920,7 @@ fn spawn_reader(
 					// **après** l'émission : le direct est le chemin vivant, le
 					// relevé n'en est qu'une dérivation. Journaliser d'abord
 					// ferait payer un écrivain disque à chaque ligne lue.
-					crate::executions::note_events(
-						&execution,
-						&crate::executions::from_claude_shaped(&payload),
-					);
+					crate::executions::note_events(&execution, &crate::executions::from_claude_shaped(&payload));
 					// Le verdict se lit sur le message entier, ici et pas plus
 					// tard : ce qui part au relevé est déjà borné, et un rapport
 					// de recette conclut au-delà de la borne.
@@ -1936,11 +1974,7 @@ fn spawn_reader(
 						false,
 						&detail,
 					);
-					crate::executions::note_step(
-						&execution,
-						crate::executions::Step::LostAtLaunch,
-						&detail,
-					);
+					crate::executions::note_step(&execution, crate::executions::Step::LostAtLaunch, &detail);
 				} else if last_turn_failed {
 					crate::executions::note_step(
 						&execution,
@@ -1948,11 +1982,7 @@ fn spawn_reader(
 						&crate::i18n::t("agent.step.lastTurnFailed"),
 					);
 				} else {
-					crate::executions::note_step(
-						&execution,
-						crate::executions::Step::Answered,
-						"",
-					);
+					crate::executions::note_step(&execution, crate::executions::Step::Answered, "");
 				}
 				let ended = agents.sessions.lock().unwrap().remove(&session_id);
 				// Un relais fini n'a plus rien à porter : son dossier part avec
@@ -1971,7 +2001,6 @@ fn spawn_reader(
 			}
 		});
 	}
-
 }
 
 pub async fn send(app: &AppHandle, agents: &SharedAgents, session_id: &str, text: &str) -> Result<()> {
@@ -2056,21 +2085,19 @@ async fn respawn_turn(
 		)));
 	}
 
-	let thread = per_turn.thread_id.as_deref().ok_or_else(|| {
-		CockpitError::msg(crate::i18n::t("agent.noThreadYet"))
-	})?;
+	let thread = per_turn
+		.thread_id
+		.as_deref()
+		.ok_or_else(|| CockpitError::msg(crate::i18n::t("agent.noThreadYet")))?;
 	let command = crate::codex::resume_turn(&per_turn.binary, thread, &per_turn.args);
 
 	let sandbox_cfg = &config.sandbox;
 	let runtime = if sandbox_cfg.enabled {
-		let runtime = crate::sandbox::resolve_runtime(&sandbox_cfg.runtime).ok_or_else(|| {
-			CockpitError::msg(crate::i18n::t("agent.sandboxNoRuntime"))
-		})?;
+		let runtime = crate::sandbox::resolve_runtime(&sandbox_cfg.runtime)
+			.ok_or_else(|| CockpitError::msg(crate::i18n::t("agent.sandboxNoRuntime")))?;
 		crate::sandbox::ensure_image(&runtime, sandbox_cfg)
 			.await
-			.map_err(|error| {
-				CockpitError::msg(crate::i18n::tf("agent.sandboxImageFailed", &[("error", &error)]))
-			})?;
+			.map_err(|error| CockpitError::msg(crate::i18n::tf("agent.sandboxImageFailed", &[("error", &error)])))?;
 		Some(runtime)
 	} else {
 		None
@@ -2214,12 +2241,7 @@ pub fn interrupt(agents: &SharedAgents, session_id: &str) -> Result<()> {
 /// Même canal que `interrupt`, même absence de corrélation : le CLI répond par
 /// un `control_response` qui traverse la boucle de lecture comme tout le reste,
 /// et c'est l'écran qui le reconnaît. Rien à attendre ici, donc rien à bloquer.
-fn control(
-	agents: &SharedAgents,
-	session_id: &str,
-	label: &str,
-	request: Value,
-) -> Result<()> {
+fn control(agents: &SharedAgents, session_id: &str, label: &str, request: Value) -> Result<()> {
 	let mut sessions = agents.sessions.lock().unwrap_or_else(|e| e.into_inner());
 	let running = sessions
 		.get_mut(session_id)
@@ -2257,12 +2279,7 @@ fn control(
 /// l'état réel — et distingue le serveur qui met du temps de celui qui ne
 /// viendra jamais.
 pub fn probe_mcp(agents: &SharedAgents, session_id: &str) -> Result<()> {
-	control(
-		agents,
-		session_id,
-		"mcp-status",
-		json!({ "subtype": "mcp_status" }),
-	)
+	control(agents, session_id, "mcp-status", json!({ "subtype": "mcp_status" }))
 }
 
 /// Demande au CLI de quoi est rempli le contexte de cet agent, maintenant.
@@ -2445,14 +2462,8 @@ pub fn adopt_relays(app: &AppHandle, agents: &SharedAgents) -> Adopted {
 				.ok()
 				.map(|raw| raw.trim().to_string());
 			let (step, note) = match code.as_deref() {
-				Some("0") => (
-					crate::executions::Step::Answered,
-					"agent.step.detachedFinished",
-				),
-				_ => (
-					crate::executions::Step::Stopped,
-					"agent.step.detachedStopped",
-				),
+				Some("0") => (crate::executions::Step::Answered, "agent.step.detachedFinished"),
+				_ => (crate::executions::Step::Stopped, "agent.step.detachedStopped"),
 			};
 			crate::executions::note_step(&found.meta.execution, step, &crate::i18n::t(note));
 		}

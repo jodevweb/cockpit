@@ -69,7 +69,12 @@ pub struct Sources {
 
 impl Default for Sources {
 	fn default() -> Self {
-		Sources { github: true, tracker: true, cockpit: true, sentry: false }
+		Sources {
+			github: true,
+			tracker: true,
+			cockpit: true,
+			sentry: false,
+		}
 	}
 }
 
@@ -195,7 +200,10 @@ pub fn save(mut automation: Automation) -> Result<Automation> {
 	automation.days.sort_unstable();
 	automation.days.dedup();
 	let mut all = list();
-	match all.iter_mut().find(|entry| entry.id == automation.id && !automation.id.is_empty()) {
+	match all
+		.iter_mut()
+		.find(|entry| entry.id == automation.id && !automation.id.is_empty())
+	{
 		Some(existing) => {
 			// Le webhook ne redescend jamais dans l'interface (voir `overview`) :
 			// la marque qu'elle renvoie veut dire « garder celui qu'on a ».
@@ -340,11 +348,21 @@ pub enum Record {
 	#[serde(rename_all = "camelCase")]
 	Failed { run: String, at: String, reason: String },
 	#[serde(rename_all = "camelCase")]
-	Missed { run: String, at: String, occurrence: String, reason: String },
+	Missed {
+		run: String,
+		at: String,
+		occurrence: String,
+		reason: String,
+	},
 	/// Une ligne écartée de la présentation, ou remise. Un enregistrement de
 	/// plus : le rendu d'origine reste lisible tel que l'agent l'a écrit.
 	#[serde(rename_all = "camelCase")]
-	Dropped { run: String, at: String, line: String, dropped: bool },
+	Dropped {
+		run: String,
+		at: String,
+		line: String,
+		dropped: bool,
+	},
 	/// Le rendu a été mis en PDF, à cet endroit.
 	#[serde(rename_all = "camelCase")]
 	Exported { run: String, at: String, path: String },
@@ -435,7 +453,9 @@ fn append(id: &str, record: &Record) {
 	if let Some(dir) = path.parent() {
 		let _ = std::fs::create_dir_all(dir);
 	}
-	let Ok(line) = serde_json::to_string(record) else { return };
+	let Ok(line) = serde_json::to_string(record) else {
+		return;
+	};
 	if let Ok(mut file) = std::fs::OpenOptions::new().create(true).append(true).open(&path) {
 		let _ = writeln!(file, "{line}");
 	}
@@ -479,14 +499,27 @@ pub fn fold(automation: &str, records: &[Record]) -> Vec<Run> {
 		}
 		let run = runs.get_mut(&id).expect("inséré juste avant");
 		match record {
-			Record::Started { at, occurrence, trigger, from, to, .. } => {
+			Record::Started {
+				at,
+				occurrence,
+				trigger,
+				from,
+				to,
+				..
+			} => {
 				run.started_at = at.clone();
 				run.occurrence = occurrence.clone();
 				run.trigger = Some(*trigger);
 				run.from = from.clone();
 				run.to = to.clone();
 			}
-			Record::Source { source, state, count, note, .. } => {
+			Record::Source {
+				source,
+				state,
+				count,
+				note,
+				..
+			} => {
 				run.sources.retain(|entry| &entry.source != source);
 				run.sources.push(SourceReport {
 					source: source.clone(),
@@ -495,7 +528,16 @@ pub fn fold(automation: &str, records: &[Record]) -> Vec<Run> {
 					note: note.clone(),
 				});
 			}
-			Record::Finished { at, headline, items, parts, valuation, duration_ms, viewer, .. } => {
+			Record::Finished {
+				at,
+				headline,
+				items,
+				parts,
+				valuation,
+				duration_ms,
+				viewer,
+				..
+			} => {
 				run.ended_at = at.clone();
 				run.headline = headline.clone();
 				run.items = items.clone();
@@ -514,7 +556,9 @@ pub fn fold(automation: &str, records: &[Record]) -> Vec<Run> {
 				run.reason = reason.clone();
 				run.state = RunState::Failed;
 			}
-			Record::Missed { at, occurrence, reason, .. } => {
+			Record::Missed {
+				at, occurrence, reason, ..
+			} => {
 				run.started_at = at.clone();
 				run.ended_at = at.clone();
 				run.occurrence = occurrence.clone();
@@ -571,8 +615,14 @@ pub fn drop_line(id: &str, run: &str, line: &str, dropped: bool) {
 #[derive(Debug, Clone, PartialEq)]
 pub enum Decision {
 	Nothing,
-	Run { occurrence: NaiveDateTime, trigger: Trigger },
-	Miss { occurrence: NaiveDateTime, reason: String },
+	Run {
+		occurrence: NaiveDateTime,
+		trigger: Trigger,
+	},
+	Miss {
+		occurrence: NaiveDateTime,
+		reason: String,
+	},
 }
 
 /// La marge pendant laquelle un lancement compte encore comme « à l'heure » :
@@ -628,11 +678,17 @@ pub fn decide(
 		return Decision::Nothing;
 	}
 	if now - ready <= Duration::minutes(GRACE_MINUTES) {
-		return Decision::Run { occurrence, trigger: Trigger::Schedule };
+		return Decision::Run {
+			occurrence,
+			trigger: Trigger::Schedule,
+		};
 	}
 	if now < occurrence {
 		if automation.catch_up {
-			return Decision::Run { occurrence, trigger: Trigger::CatchUp };
+			return Decision::Run {
+				occurrence,
+				trigger: Trigger::CatchUp,
+			};
 		}
 		return Decision::Miss {
 			occurrence,
@@ -683,7 +739,11 @@ struct Collected {
 }
 
 fn text(value: &Value, pointer: &str) -> String {
-	value.pointer(pointer).and_then(Value::as_str).unwrap_or_default().to_string()
+	value
+		.pointer(pointer)
+		.and_then(Value::as_str)
+		.unwrap_or_default()
+		.to_string()
 }
 
 fn in_window(at: &str, from: DateTime<Utc>, to: DateTime<Utc>) -> bool {
@@ -700,8 +760,14 @@ fn repo_of(url: &str) -> String {
 	url.split("/repos/").nth(1).unwrap_or(url).to_string()
 }
 
-async fn read_github(config: &Config, from: DateTime<Utc>, to: DateTime<Utc>) -> std::result::Result<(Vec<Item>, String), String> {
-	let viewer = crate::integrations::github_viewer(config).await.map_err(|e| e.to_string())?;
+async fn read_github(
+	config: &Config,
+	from: DateTime<Utc>,
+	to: DateTime<Utc>,
+) -> std::result::Result<(Vec<Item>, String), String> {
+	let viewer = crate::integrations::github_viewer(config)
+		.await
+		.map_err(|e| e.to_string())?;
 	let since = from.format("%Y-%m-%dT%H:%M:%SZ").to_string();
 	let mine = crate::integrations::github_search_prs(config, &format!("is:pr author:{viewer} updated:>={since}"))
 		.await
@@ -714,7 +780,11 @@ async fn read_github(config: &Config, from: DateTime<Utc>, to: DateTime<Utc>) ->
 	.unwrap_or_default();
 
 	let mut items = Vec::new();
-	for (pr, mine) in mine.iter().map(|pr| (pr, true)).chain(reviewed.iter().map(|pr| (pr, false))) {
+	for (pr, mine) in mine
+		.iter()
+		.map(|pr| (pr, true))
+		.chain(reviewed.iter().map(|pr| (pr, false)))
+	{
 		let repo = repo_of(&text(pr, "/repository_url"));
 		let number = pr.get("number").and_then(Value::as_i64).unwrap_or(0);
 		let merged_at = text(pr, "/pull_request/merged_at");
@@ -803,7 +873,9 @@ fn read_cockpit(from: DateTime<Utc>, to: DateTime<Utc>) -> Vec<Item> {
 			(Ok(start), Ok(end)) => (end - start).num_minutes().max(0),
 			_ => 0,
 		};
-		let entry = by_folder.entry(exec.opening.cwd.clone()).or_insert((0, 0, String::new()));
+		let entry = by_folder
+			.entry(exec.opening.cwd.clone())
+			.or_insert((0, 0, String::new()));
 		entry.0 += exec.tally.turns.max(1);
 		entry.1 += minutes;
 		if exec.ended_at > entry.2 {
@@ -858,7 +930,11 @@ fn read_cockpit(from: DateTime<Utc>, to: DateTime<Utc>) -> Vec<Item> {
 }
 
 /// Mes erreurs : celles qui me sont assignées et qui ont bougé sur la période.
-async fn read_sentry(config: &Config, from: DateTime<Utc>, to: DateTime<Utc>) -> std::result::Result<Vec<Item>, String> {
+async fn read_sentry(
+	config: &Config,
+	from: DateTime<Utc>,
+	to: DateTime<Utc>,
+) -> std::result::Result<Vec<Item>, String> {
 	let issues = crate::integrations::sentry_issues(config, "assigned:me")
 		.await
 		.map_err(|e| e.to_string())?;
@@ -873,7 +949,12 @@ async fn read_sentry(config: &Config, from: DateTime<Utc>, to: DateTime<Utc>) ->
 				source: "sentry".into(),
 				title: issue.title.clone(),
 				url: issue.url.clone(),
-				event: if issue.status == "resolved" { "resolved" } else { "assigned" }.into(),
+				event: if issue.status == "resolved" {
+					"resolved"
+				} else {
+					"assigned"
+				}
+				.into(),
 				detail: [short, issue.subtitle.clone(), issue.status.clone()]
 					.into_iter()
 					.filter(|part| !part.is_empty())
@@ -945,10 +1026,25 @@ async fn collect(automation: &Automation, config: &Config, from: DateTime<Utc>, 
 			Read::Found(found) => {
 				let count = found.len();
 				items.extend(found);
-				SourceReport { source: source.into(), state: SourceState::Read, count, note: String::new() }
+				SourceReport {
+					source: source.into(),
+					state: SourceState::Read,
+					count,
+					note: String::new(),
+				}
 			}
-			Read::Silent(note) => SourceReport { source: source.into(), state: SourceState::Silent, count: 0, note },
-			Read::Unconfigured(note) => SourceReport { source: source.into(), state: SourceState::Unconfigured, count: 0, note },
+			Read::Silent(note) => SourceReport {
+				source: source.into(),
+				state: SourceState::Silent,
+				count: 0,
+				note,
+			},
+			Read::Unconfigured(note) => SourceReport {
+				source: source.into(),
+				state: SourceState::Unconfigured,
+				count: 0,
+				note,
+			},
 		});
 	}
 	Collected { items, reports, viewer }
@@ -970,7 +1066,14 @@ fn system() -> String {
 	)
 }
 
-fn prompt_for(automation: &Automation, items: &[Item], reports: &[SourceReport], from: DateTime<Utc>, to: DateTime<Utc>, previous: Option<&Run>) -> String {
+fn prompt_for(
+	automation: &Automation,
+	items: &[Item],
+	reports: &[SourceReport],
+	from: DateTime<Utc>,
+	to: DateTime<Utc>,
+	previous: Option<&Run>,
+) -> String {
 	let local = |at: DateTime<Utc>| at.with_timezone(&Local).format("%A %d %B %H:%M").to_string();
 	let mut prompt = String::new();
 	prompt.push_str(&format!("Instructions:\n{}\n\n", automation.prompt.trim()));
@@ -1037,7 +1140,12 @@ pub fn read_answer(text: &str, items: &[Item]) -> Option<(String, Vec<Part>)> {
 		.iter()
 		.enumerate()
 		.map(|(p, part)| Part {
-			title: part.get("title").and_then(Value::as_str).unwrap_or("").trim().to_string(),
+			title: part
+				.get("title")
+				.and_then(Value::as_str)
+				.unwrap_or("")
+				.trim()
+				.to_string(),
 			lines: part
 				.get("lines")
 				.and_then(Value::as_array)
@@ -1059,8 +1167,18 @@ pub fn read_answer(text: &str, items: &[Item]) -> Option<(String, Vec<Part>)> {
 								.unwrap_or_default();
 							Line {
 								id: format!("p{p}l{l}"),
-								title: line.get("title").and_then(Value::as_str).unwrap_or("").trim().to_string(),
-								detail: line.get("detail").and_then(Value::as_str).unwrap_or("").trim().to_string(),
+								title: line
+									.get("title")
+									.and_then(Value::as_str)
+									.unwrap_or("")
+									.trim()
+									.to_string(),
+								detail: line
+									.get("detail")
+									.and_then(Value::as_str)
+									.unwrap_or("")
+									.trim()
+									.to_string(),
 								unsourced: refs.is_empty(),
 								refs,
 							}
@@ -1072,7 +1190,12 @@ pub fn read_answer(text: &str, items: &[Item]) -> Option<(String, Vec<Part>)> {
 		})
 		.filter(|part| !part.title.is_empty())
 		.collect();
-	let headline = value.get("headline").and_then(Value::as_str).unwrap_or("").trim().to_string();
+	let headline = value
+		.get("headline")
+		.and_then(Value::as_str)
+		.unwrap_or("")
+		.trim()
+		.to_string();
 	Some((headline, parts))
 }
 
@@ -1117,7 +1240,10 @@ pub fn start(app: tauri::AppHandle, automation: Automation, occurrence: String, 
 	announce(&app, &automation.id, &run);
 	let id = run.clone();
 	tauri::async_runtime::spawn(async move {
-		let previous = history.iter().find(|r| matches!(r.state, RunState::Ready | RunState::Partial)).cloned();
+		let previous = history
+			.iter()
+			.find(|r| matches!(r.state, RunState::Ready | RunState::Partial))
+			.cloned();
 		execute(&app, &automation, &id, from, now, previous.as_ref()).await;
 		release(&automation.id);
 		announce(&app, &automation.id, &id);
@@ -1140,7 +1266,12 @@ struct Composed {
 
 /// Lire puis faire rédiger. Commun à l'exécution et à l'essai à blanc : ce
 /// qu'on essaie doit être exactement ce qui tournera.
-async fn compose(automation: &Automation, from: DateTime<Utc>, to: DateTime<Utc>, previous: Option<&Run>) -> (Collected, std::result::Result<(String, Vec<Part>, Valuation), String>) {
+async fn compose(
+	automation: &Automation,
+	from: DateTime<Utc>,
+	to: DateTime<Utc>,
+	previous: Option<&Run>,
+) -> (Collected, std::result::Result<(String, Vec<Part>, Valuation), String>) {
 	let config = Config::active();
 	let collected = collect(automation, &config, from, to).await;
 	if collected.items.is_empty() {
@@ -1148,26 +1279,40 @@ async fn compose(automation: &Automation, from: DateTime<Utc>, to: DateTime<Utc>
 		let answer = (
 			crate::i18n::t("automations.nothingFound"),
 			Vec::new(),
-			Valuation { usd: None, provenance: "none".into() },
+			Valuation {
+				usd: None,
+				provenance: "none".into(),
+			},
 		);
 		return (collected, Ok(answer));
 	}
 	let prompt = prompt_for(automation, &collected.items, &collected.reports, from, to, previous);
-	let outcome = match crate::agent::ask_bare(&system(), &prompt, "sonnet", std::time::Duration::from_secs(300), true).await {
-		Ok(answer) => match read_answer(&answer.text, &collected.items) {
-			Some((headline, parts)) => Ok((
-				headline,
-				parts,
-				Valuation { usd: (answer.cost_usd > 0.0).then_some(answer.cost_usd), provenance: "cli".into() },
-			)),
-			None => Err(crate::i18n::t("automations.errors.unreadableAnswer")),
-		},
-		Err(error) => Err(error.to_string()),
-	};
+	let outcome =
+		match crate::agent::ask_bare(&system(), &prompt, "sonnet", std::time::Duration::from_secs(300), true).await {
+			Ok(answer) => match read_answer(&answer.text, &collected.items) {
+				Some((headline, parts)) => Ok((
+					headline,
+					parts,
+					Valuation {
+						usd: (answer.cost_usd > 0.0).then_some(answer.cost_usd),
+						provenance: "cli".into(),
+					},
+				)),
+				None => Err(crate::i18n::t("automations.errors.unreadableAnswer")),
+			},
+			Err(error) => Err(error.to_string()),
+		};
 	(collected, outcome)
 }
 
-async fn execute(app: &tauri::AppHandle, automation: &Automation, run: &str, from: DateTime<Utc>, to: DateTime<Utc>, previous: Option<&Run>) {
+async fn execute(
+	app: &tauri::AppHandle,
+	automation: &Automation,
+	run: &str,
+	from: DateTime<Utc>,
+	to: DateTime<Utc>,
+	previous: Option<&Run>,
+) {
 	let started = std::time::Instant::now();
 	let (collected, outcome) = compose(automation, from, to, previous).await;
 	for report in &collected.reports {
@@ -1184,7 +1329,12 @@ async fn execute(app: &tauri::AppHandle, automation: &Automation, run: &str, fro
 		);
 	}
 	let composed = match outcome {
-		Ok((headline, parts, valuation)) => Composed { collected, headline, parts, valuation },
+		Ok((headline, parts, valuation)) => Composed {
+			collected,
+			headline,
+			parts,
+			valuation,
+		},
 		Err(reason) => {
 			fail(app, automation, run, &reason);
 			return;
@@ -1222,7 +1372,10 @@ async fn execute(app: &tauri::AppHandle, automation: &Automation, run: &str, fro
 		let mut body = crate::brief::counted("automations.notify.linesReady", lines);
 		if !silent.is_empty() {
 			body.push(' ');
-			body.push_str(&crate::i18n::tf("automations.notify.silent", &[("sources", &silent.join(", "))]));
+			body.push_str(&crate::i18n::tf(
+				"automations.notify.silent",
+				&[("sources", &silent.join(", "))],
+			));
 		}
 		let title = crate::i18n::tf("automations.notify.ready", &[("name", &automation.name)]);
 		notify(app, &title, &body).await;
@@ -1234,13 +1387,23 @@ async fn execute(app: &tauri::AppHandle, automation: &Automation, run: &str, fro
 /// consigne en voyant ce qu'elle donne, avant de l'enregistrer.
 pub async fn try_once(automation: Automation) -> Result<Run> {
 	let now = Utc::now();
-	let history = if automation.id.is_empty() { Vec::new() } else { runs(&automation.id) };
+	let history = if automation.id.is_empty() {
+		Vec::new()
+	} else {
+		runs(&automation.id)
+	};
 	let from = window_start(&automation, &history, now);
-	let previous = history.iter().find(|r| matches!(r.state, RunState::Ready | RunState::Partial)).cloned();
+	let previous = history
+		.iter()
+		.find(|r| matches!(r.state, RunState::Ready | RunState::Partial))
+		.cloned();
 	let started = std::time::Instant::now();
 	let (collected, outcome) = compose(&automation, from, now, previous.as_ref()).await;
 	let (headline, parts, valuation) = outcome.map_err(CockpitError::msg)?;
-	let partial = collected.reports.iter().any(|report| report.state == SourceState::Silent);
+	let partial = collected
+		.reports
+		.iter()
+		.any(|report| report.state == SourceState::Silent);
 	Ok(Run {
 		id: "essai".into(),
 		automation: automation.id.clone(),
@@ -1275,7 +1438,10 @@ pub fn add_correction(id: &str, text: &str) -> Result<Automation> {
 		.into_iter()
 		.find(|entry| entry.id == id)
 		.ok_or_else(|| CockpitError::msg(crate::i18n::t("automations.errors.notFound")))?;
-	automation.corrections.push(Correction { at: Utc::now().to_rfc3339(), text: text.to_string() });
+	automation.corrections.push(Correction {
+		at: Utc::now().to_rfc3339(),
+		text: text.to_string(),
+	});
 	save(automation)
 }
 
@@ -1297,7 +1463,10 @@ fn find_run(id: &str, run: &str) -> Result<(Automation, Run)> {
 }
 
 fn escape(text: &str) -> String {
-	text.replace('&', "&amp;").replace('<', "&lt;").replace('>', "&gt;").replace('"', "&quot;")
+	text.replace('&', "&amp;")
+		.replace('<', "&lt;")
+		.replace('>', "&gt;")
+		.replace('"', "&quot;")
 }
 
 fn local_stamp(at: &str) -> String {
@@ -1323,7 +1492,11 @@ pub fn render_html(automation: &Automation, run: &Run) -> String {
 	}
 	for part in &run.parts {
 		body.push_str(&format!("<h2>{}</h2><ul>", escape(&part.title)));
-		let kept: Vec<&Line> = part.lines.iter().filter(|line| !run.dropped.contains(&line.id)).collect();
+		let kept: Vec<&Line> = part
+			.lines
+			.iter()
+			.filter(|line| !run.dropped.contains(&line.id))
+			.collect();
 		if kept.is_empty() {
 			body.push_str("<li class=\"empty\">—</li>");
 		}
@@ -1344,8 +1517,16 @@ pub fn render_html(automation: &Automation, run: &Run) -> String {
 			body.push_str(&format!(
 				"<li><strong>{}</strong>{}{}</li>",
 				escape(&line.title),
-				if line.detail.is_empty() { String::new() } else { format!("<span class=\"detail\">{}</span>", escape(&line.detail)) },
-				if refs.is_empty() { String::new() } else { format!("<span class=\"refs\">{}</span>", refs.join(" ")) },
+				if line.detail.is_empty() {
+					String::new()
+				} else {
+					format!("<span class=\"detail\">{}</span>", escape(&line.detail))
+				},
+				if refs.is_empty() {
+					String::new()
+				} else {
+					format!("<span class=\"refs\">{}</span>", refs.join(" "))
+				},
 			));
 		}
 		body.push_str("</ul>");
@@ -1359,7 +1540,10 @@ pub fn render_html(automation: &Automation, run: &Run) -> String {
 	if !silent.is_empty() {
 		body.push_str(&format!(
 			"<p class=\"note\">{}</p>",
-			escape(&crate::i18n::tf("automations.render.silent", &[("sources", &silent.join(", "))]))
+			escape(&crate::i18n::tf(
+				"automations.render.silent",
+				&[("sources", &silent.join(", "))]
+			))
 		));
 	}
 	format!(
@@ -1398,9 +1582,19 @@ fn chromium() -> Option<PathBuf> {
 	for base in ["ProgramFiles", "ProgramW6432", "ProgramFiles(x86)", "LOCALAPPDATA"] {
 		if let Some(dir) = env_dir(base) {
 			candidates.push(dir.join("Google").join("Chrome").join("Application").join("chrome.exe"));
-			candidates.push(dir.join("BraveSoftware").join("Brave-Browser").join("Application").join("brave.exe"));
+			candidates.push(
+				dir.join("BraveSoftware")
+					.join("Brave-Browser")
+					.join("Application")
+					.join("brave.exe"),
+			);
 			candidates.push(dir.join("Chromium").join("Application").join("chrome.exe"));
-			candidates.push(dir.join("Microsoft").join("Edge").join("Application").join("msedge.exe"));
+			candidates.push(
+				dir.join("Microsoft")
+					.join("Edge")
+					.join("Application")
+					.join("msedge.exe"),
+			);
 		}
 	}
 	candidates.into_iter().find(|path| path.is_file())
@@ -1437,9 +1631,7 @@ pub fn exports_dir(id: &str) -> PathBuf {
 /// Met le rendu en PDF, le range, et le note dans l'historique.
 pub async fn export_pdf(id: &str, run: &str) -> Result<String> {
 	let (automation, found) = find_run(id, run)?;
-	let browser = chromium().ok_or_else(|| {
-		CockpitError::msg(crate::i18n::t("automations.errors.noChromium"))
-	})?;
+	let browser = chromium().ok_or_else(|| CockpitError::msg(crate::i18n::t("automations.errors.noChromium")))?;
 	let dir = exports_dir(id);
 	std::fs::create_dir_all(&dir)?;
 	let stamp = DateTime::parse_from_rfc3339(&found.to)
@@ -1466,11 +1658,25 @@ pub async fn export_pdf(id: &str, run: &str) -> Result<String> {
 		.map_err(|_| CockpitError::msg(crate::i18n::t("automations.errors.pdfTimeout")))??;
 	let _ = std::fs::remove_file(&html);
 	if !pdf.exists() {
-		let detail = String::from_utf8_lossy(&output.stderr).trim().chars().take(200).collect::<String>();
-		return Err(CockpitError::msg(crate::i18n::tf("automations.errors.pdfNotProduced", &[("detail", &detail)])));
+		let detail = String::from_utf8_lossy(&output.stderr)
+			.trim()
+			.chars()
+			.take(200)
+			.collect::<String>();
+		return Err(CockpitError::msg(crate::i18n::tf(
+			"automations.errors.pdfNotProduced",
+			&[("detail", &detail)],
+		)));
 	}
 	let path = pdf.display().to_string();
-	append(id, &Record::Exported { run: run.to_string(), at: Utc::now().to_rfc3339(), path: path.clone() });
+	append(
+		id,
+		&Record::Exported {
+			run: run.to_string(),
+			at: Utc::now().to_rfc3339(),
+			path: path.clone(),
+		},
+	);
 	Ok(path)
 }
 
@@ -1489,7 +1695,11 @@ pub fn render_slack(automation: &Automation, run: &Run) -> String {
 		text.push_str(&format!("{}\n", run.headline));
 	}
 	for part in &run.parts {
-		let kept: Vec<&Line> = part.lines.iter().filter(|line| !run.dropped.contains(&line.id)).collect();
+		let kept: Vec<&Line> = part
+			.lines
+			.iter()
+			.filter(|line| !run.dropped.contains(&line.id))
+			.collect();
 		if kept.is_empty() {
 			continue;
 		}
@@ -1500,13 +1710,27 @@ pub fn render_slack(automation: &Automation, run: &Run) -> String {
 				.iter()
 				.filter_map(|reference| items.get(reference.as_str()))
 				.filter(|item| !item.url.is_empty())
-				.map(|item| format!("<{}|{}>", item.url, item.id.split_once(':').map(|(_, rest)| rest).unwrap_or(&item.id)))
+				.map(|item| {
+					format!(
+						"<{}|{}>",
+						item.url,
+						item.id.split_once(':').map(|(_, rest)| rest).unwrap_or(&item.id)
+					)
+				})
 				.collect();
 			text.push_str(&format!(
 				"• {}{}{}\n",
 				line.title,
-				if line.detail.is_empty() { String::new() } else { format!(" — {}", line.detail) },
-				if links.is_empty() { String::new() } else { format!(" ({})", links.join(", ")) },
+				if line.detail.is_empty() {
+					String::new()
+				} else {
+					format!(" — {}", line.detail)
+				},
+				if links.is_empty() {
+					String::new()
+				} else {
+					format!(" ({})", links.join(", "))
+				},
 			));
 		}
 	}
@@ -1532,7 +1756,13 @@ pub async fn post_slack(id: &str, run: &str) -> Result<()> {
 			&[("status", &response.status())],
 		)));
 	}
-	append(id, &Record::Posted { run: run.to_string(), at: Utc::now().to_rfc3339() });
+	append(
+		id,
+		&Record::Posted {
+			run: run.to_string(),
+			at: Utc::now().to_rfc3339(),
+		},
+	);
 	Ok(())
 }
 
@@ -1550,7 +1780,11 @@ fn source_label(source: &str) -> String {
 fn fail(app: &tauri::AppHandle, automation: &Automation, run: &str, reason: &str) {
 	append(
 		&automation.id,
-		&Record::Failed { run: run.to_string(), at: Utc::now().to_rfc3339(), reason: reason.to_string() },
+		&Record::Failed {
+			run: run.to_string(),
+			at: Utc::now().to_rfc3339(),
+			reason: reason.to_string(),
+		},
 	);
 	if automation.notify {
 		let app = app.clone();
@@ -1583,7 +1817,12 @@ pub fn tick(app: &tauri::AppHandle) {
 				let run = format!("run-{:x}", Utc::now().timestamp_millis());
 				append(
 					&automation.id,
-					&Record::Missed { run: run.clone(), at: Utc::now().to_rfc3339(), occurrence: occurrence_key(occurrence), reason },
+					&Record::Missed {
+						run: run.clone(),
+						at: Utc::now().to_rfc3339(),
+						occurrence: occurrence_key(occurrence),
+						reason,
+					},
 				);
 				announce(app, &automation.id, &run);
 			}
@@ -1624,7 +1863,11 @@ pub struct Overview {
 
 pub fn overview() -> Vec<Overview> {
 	let now = Local::now().naive_local();
-	let running = RUNNING.lock().unwrap_or_else(|e| e.into_inner()).clone().unwrap_or_default();
+	let running = RUNNING
+		.lock()
+		.unwrap_or_else(|e| e.into_inner())
+		.clone()
+		.unwrap_or_default();
 	list()
 		.into_iter()
 		.map(|automation| {
@@ -1682,11 +1925,19 @@ mod tests {
 
 	fn at(day: u32, hour: u32, minute: u32) -> NaiveDateTime {
 		// Octobre 2026 : le 26 est un lundi.
-		NaiveDate::from_ymd_opt(2026, 10, day).unwrap().and_hms_opt(hour, minute, 0).unwrap()
+		NaiveDate::from_ymd_opt(2026, 10, day)
+			.unwrap()
+			.and_hms_opt(hour, minute, 0)
+			.unwrap()
 	}
 
 	fn daily() -> Automation {
-		Automation { id: "a".into(), name: "Mon daily".into(), template: "daily".into(), ..Default::default() }
+		Automation {
+			id: "a".into(),
+			name: "Mon daily".into(),
+			template: "daily".into(),
+			..Default::default()
+		}
 	}
 
 	#[test]
@@ -1697,7 +1948,10 @@ mod tests {
 		assert_eq!(decide(&daily(), at(26, 13, 29), created, &none), Decision::Nothing);
 		assert_eq!(
 			decide(&daily(), at(26, 13, 31), created, &none),
-			Decision::Run { occurrence: at(26, 14, 0), trigger: Trigger::Schedule }
+			Decision::Run {
+				occurrence: at(26, 14, 0),
+				trigger: Trigger::Schedule
+			}
 		);
 	}
 
@@ -1706,21 +1960,30 @@ mod tests {
 		let created = at(1, 0, 0);
 		assert_eq!(
 			decide(&daily(), at(26, 13, 52), created, &HashSet::new()),
-			Decision::Run { occurrence: at(26, 14, 0), trigger: Trigger::CatchUp }
+			Decision::Run {
+				occurrence: at(26, 14, 0),
+				trigger: Trigger::CatchUp
+			}
 		);
 	}
 
 	#[test]
 	fn apres_le_rendez_vous_c_est_manque_et_dit_une_seule_fois() {
 		let created = at(1, 0, 0);
-		assert!(matches!(decide(&daily(), at(26, 15, 10), created, &HashSet::new()), Decision::Miss { .. }));
+		assert!(matches!(
+			decide(&daily(), at(26, 15, 10), created, &HashSet::new()),
+			Decision::Miss { .. }
+		));
 		let handled: HashSet<String> = ["2026-10-26T14:00".to_string()].into();
 		assert_eq!(decide(&daily(), at(26, 15, 10), created, &handled), Decision::Nothing);
 	}
 
 	#[test]
 	fn un_rendez_vous_d_avant_la_creation_n_est_pas_manque() {
-		assert_eq!(decide(&daily(), at(26, 15, 10), at(26, 15, 0), &HashSet::new()), Decision::Nothing);
+		assert_eq!(
+			decide(&daily(), at(26, 15, 10), at(26, 15, 0), &HashSet::new()),
+			Decision::Nothing
+		);
 	}
 
 	#[test]
@@ -1733,29 +1996,95 @@ mod tests {
 	#[test]
 	fn la_periode_part_de_la_derniere_reussite_hors_essais_a_la_main() {
 		let records = vec![
-			Record::Started { run: "r1".into(), at: "2026-10-23T11:30:00Z".into(), occurrence: "2026-10-23T14:00".into(), trigger: Trigger::Schedule, from: "2026-10-21T11:30:00Z".into(), to: "2026-10-23T11:30:00Z".into() },
-			Record::Finished { run: "r1".into(), at: "2026-10-23T11:31:00Z".into(), headline: String::new(), items: vec![], parts: vec![], valuation: Valuation { usd: None, provenance: "none".into() }, duration_ms: 1, viewer: String::new() },
-			Record::Started { run: "r2".into(), at: "2026-10-26T09:00:00Z".into(), occurrence: "manual-1".into(), trigger: Trigger::Manual, from: "2026-10-23T11:30:00Z".into(), to: "2026-10-26T09:00:00Z".into() },
-			Record::Finished { run: "r2".into(), at: "2026-10-26T09:01:00Z".into(), headline: String::new(), items: vec![], parts: vec![], valuation: Valuation { usd: None, provenance: "none".into() }, duration_ms: 1, viewer: String::new() },
+			Record::Started {
+				run: "r1".into(),
+				at: "2026-10-23T11:30:00Z".into(),
+				occurrence: "2026-10-23T14:00".into(),
+				trigger: Trigger::Schedule,
+				from: "2026-10-21T11:30:00Z".into(),
+				to: "2026-10-23T11:30:00Z".into(),
+			},
+			Record::Finished {
+				run: "r1".into(),
+				at: "2026-10-23T11:31:00Z".into(),
+				headline: String::new(),
+				items: vec![],
+				parts: vec![],
+				valuation: Valuation {
+					usd: None,
+					provenance: "none".into(),
+				},
+				duration_ms: 1,
+				viewer: String::new(),
+			},
+			Record::Started {
+				run: "r2".into(),
+				at: "2026-10-26T09:00:00Z".into(),
+				occurrence: "manual-1".into(),
+				trigger: Trigger::Manual,
+				from: "2026-10-23T11:30:00Z".into(),
+				to: "2026-10-26T09:00:00Z".into(),
+			},
+			Record::Finished {
+				run: "r2".into(),
+				at: "2026-10-26T09:01:00Z".into(),
+				headline: String::new(),
+				items: vec![],
+				parts: vec![],
+				valuation: Valuation {
+					usd: None,
+					provenance: "none".into(),
+				},
+				duration_ms: 1,
+				viewer: String::new(),
+			},
 		];
 		let history = fold("a", &records);
-		let now = DateTime::parse_from_rfc3339("2026-10-26T11:30:00Z").unwrap().with_timezone(&Utc);
-		assert_eq!(window_start(&daily(), &history, now).to_rfc3339(), "2026-10-23T11:30:00+00:00");
+		let now = DateTime::parse_from_rfc3339("2026-10-26T11:30:00Z")
+			.unwrap()
+			.with_timezone(&Utc);
+		assert_eq!(
+			window_start(&daily(), &history, now).to_rfc3339(),
+			"2026-10-23T11:30:00+00:00"
+		);
 	}
 
 	#[test]
 	fn une_ligne_ecartee_se_lit_puis_se_remet() {
 		let records = vec![
-			Record::Dropped { run: "r".into(), at: "1".into(), line: "p0l1".into(), dropped: true },
-			Record::Dropped { run: "r".into(), at: "2".into(), line: "p0l2".into(), dropped: true },
-			Record::Dropped { run: "r".into(), at: "3".into(), line: "p0l1".into(), dropped: false },
+			Record::Dropped {
+				run: "r".into(),
+				at: "1".into(),
+				line: "p0l1".into(),
+				dropped: true,
+			},
+			Record::Dropped {
+				run: "r".into(),
+				at: "2".into(),
+				line: "p0l2".into(),
+				dropped: true,
+			},
+			Record::Dropped {
+				run: "r".into(),
+				at: "3".into(),
+				line: "p0l1".into(),
+				dropped: false,
+			},
 		];
 		assert_eq!(fold("a", &records)[0].dropped, vec!["p0l2".to_string()]);
 	}
 
 	#[test]
 	fn une_reference_inventee_est_ecartee() {
-		let items = vec![Item { id: "gh:acme/web#12".into(), source: "github".into(), title: "t".into(), url: String::new(), event: "merged".into(), detail: String::new(), at: String::new() }];
+		let items = vec![Item {
+			id: "gh:acme/web#12".into(),
+			source: "github".into(),
+			title: "t".into(),
+			url: String::new(),
+			event: "merged".into(),
+			detail: String::new(),
+			at: String::new(),
+		}];
 		let answer = "Voici :\n```json\n{\"headline\":\"h\",\"parts\":[{\"title\":\"Livré\",\"lines\":[{\"title\":\"A\",\"detail\":\"\",\"refs\":[\"gh:acme/web#12\",\"gh:acme/web#999\"]},{\"title\":\"B\",\"detail\":\"\",\"refs\":[\"tk:FAUX-1\"]}]}]}\n```";
 		let (_, parts) = read_answer(answer, &items).unwrap();
 		assert_eq!(parts[0].lines[0].refs, vec!["gh:acme/web#12".to_string()]);
@@ -1764,10 +2093,32 @@ mod tests {
 	}
 
 	fn rendered() -> (Automation, Run) {
-		let items = vec![Item { id: "gh:acme/web#12".into(), source: "github".into(), title: "t".into(), url: "https://github.com/acme/web/pull/12".into(), event: "merged".into(), detail: String::new(), at: String::new() }];
+		let items = vec![Item {
+			id: "gh:acme/web#12".into(),
+			source: "github".into(),
+			title: "t".into(),
+			url: "https://github.com/acme/web/pull/12".into(),
+			event: "merged".into(),
+			detail: String::new(),
+			at: String::new(),
+		}];
 		let records = vec![
-			Record::Started { run: "r".into(), at: "2026-10-26T11:30:00Z".into(), occurrence: "2026-10-26T14:00".into(), trigger: Trigger::Schedule, from: "2026-10-23T11:30:00Z".into(), to: "2026-10-26T11:30:00Z".into() },
-			Record::Source { run: "r".into(), at: String::new(), source: "sentry".into(), state: SourceState::Unconfigured, count: 0, note: String::new() },
+			Record::Started {
+				run: "r".into(),
+				at: "2026-10-26T11:30:00Z".into(),
+				occurrence: "2026-10-26T14:00".into(),
+				trigger: Trigger::Schedule,
+				from: "2026-10-23T11:30:00Z".into(),
+				to: "2026-10-26T11:30:00Z".into(),
+			},
+			Record::Source {
+				run: "r".into(),
+				at: String::new(),
+				source: "sentry".into(),
+				state: SourceState::Unconfigured,
+				count: 0,
+				note: String::new(),
+			},
 			Record::Finished {
 				run: "r".into(),
 				at: "2026-10-26T11:31:00Z".into(),
@@ -1776,15 +2127,35 @@ mod tests {
 				parts: vec![Part {
 					title: "Livré".into(),
 					lines: vec![
-						Line { id: "p0l0".into(), title: "Le catalogue".into(), detail: "Fusionné.".into(), refs: vec!["gh:acme/web#12".into()], unsourced: false },
-						Line { id: "p0l1".into(), title: "Les dépendances".into(), detail: String::new(), refs: vec![], unsourced: true },
+						Line {
+							id: "p0l0".into(),
+							title: "Le catalogue".into(),
+							detail: "Fusionné.".into(),
+							refs: vec!["gh:acme/web#12".into()],
+							unsourced: false,
+						},
+						Line {
+							id: "p0l1".into(),
+							title: "Les dépendances".into(),
+							detail: String::new(),
+							refs: vec![],
+							unsourced: true,
+						},
 					],
 				}],
-				valuation: Valuation { usd: None, provenance: "none".into() },
+				valuation: Valuation {
+					usd: None,
+					provenance: "none".into(),
+				},
 				duration_ms: 1,
 				viewer: String::new(),
 			},
-			Record::Dropped { run: "r".into(), at: String::new(), line: "p0l1".into(), dropped: true },
+			Record::Dropped {
+				run: "r".into(),
+				at: String::new(),
+				line: "p0l1".into(),
+				dropped: true,
+			},
 		];
 		(daily(), fold("a", &records).remove(0))
 	}
@@ -1812,5 +2183,4 @@ mod tests {
 		assert!(text.contains("• Le catalogue — Fusionné. (<https://github.com/acme/web/pull/12|acme/web#12>)"));
 		assert!(!text.contains("dépendances"));
 	}
-
 }

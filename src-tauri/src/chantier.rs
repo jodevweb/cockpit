@@ -59,12 +59,7 @@ pub fn slim(payload: Value) -> Value {
 	// Un serveur, ses outils chargés et ceux laissés en attente : c'est ce qui
 	// dit si un MCP coûte vraiment de la place ou attend qu'on le cherche.
 	let mut servers: BTreeMap<String, (u64, u64, u64)> = BTreeMap::new();
-	for tool in usage
-		.get("mcpTools")
-		.and_then(Value::as_array)
-		.into_iter()
-		.flatten()
-	{
+	for tool in usage.get("mcpTools").and_then(Value::as_array).into_iter().flatten() {
 		let name = tool
 			.get("serverName")
 			.and_then(Value::as_str)
@@ -202,11 +197,7 @@ const MAX_FILES: usize = 40_000;
 /// `target` pèsent des gigaoctets et ne disent rien de là où l'on travaille.
 pub async fn territory(cwd: &str) -> Result<Territory> {
 	let root = Path::new(cwd);
-	let raw = crate::git::run_git(
-		root,
-		&["ls-files", "-z", "--cached", "--others", "--exclude-standard"],
-	)
-	.await?;
+	let raw = crate::git::run_git(root, &["ls-files", "-z", "--cached", "--others", "--exclude-standard"]).await?;
 	let mut seen = std::collections::HashSet::new();
 	let mut files = Vec::new();
 	let mut truncated = false;
@@ -281,7 +272,10 @@ mod tests {
 		assert_eq!(usage["totalTokens"], 16355);
 		assert!(usage.get("gridRows").is_none());
 		assert!(usage["categories"][0].get("color").is_none());
-		assert_eq!(usage["mcpServers"][0], json!({ "name": "linear", "tokens": 400, "loaded": 1, "deferred": 1 }));
+		assert_eq!(
+			usage["mcpServers"][0],
+			json!({ "name": "linear", "tokens": 400, "loaded": 1, "deferred": 1 })
+		);
 		assert_eq!(usage["mcpServers"][1]["deferred"], 1);
 		assert_eq!(usage["skills"], json!({ "total": 39, "tokens": 6636 }));
 		assert!(usage["messages"].get("attachmentTokens").is_none());

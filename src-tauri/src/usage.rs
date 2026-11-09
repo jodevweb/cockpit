@@ -148,10 +148,7 @@ pub fn spend(roots: &[String], last_limits: Option<&Limits>) -> Spend {
 		Ok(report) => report,
 		Err(_) => return Spend::default(),
 	};
-	let today = report.today.input
-		+ report.today.output
-		+ report.today.cache_read
-		+ report.today.cache_write;
+	let today = report.today.input + report.today.output + report.today.cache_read + report.today.cache_write;
 
 	// La contrainte qui mordra la première, jamais une moyenne : c'est elle qui
 	// décidera, et c'est donc elle qu'on veut sous les yeux.
@@ -161,10 +158,7 @@ pub fn spend(roots: &[String], last_limits: Option<&Limits>) -> Spend {
 
 	Spend {
 		today,
-		window: report.last_5h.input
-			+ report.last_5h.output
-			+ report.last_5h.cache_read
-			+ report.last_5h.cache_write,
+		window: report.last_5h.input + report.last_5h.output + report.last_5h.cache_read + report.last_5h.cache_write,
 		remaining: tightest.map(|limit| 100u32.saturating_sub(limit.percent)),
 		tightest: tightest.map(|limit| limit.label.clone()).unwrap_or_default(),
 		resets_at: tightest.map(|limit| limit.resets_at.clone()).unwrap_or_default(),
@@ -202,11 +196,7 @@ pub struct SessionSpend {
 }
 
 /// Ce qu'a coûté une conversation, retrouvée par son identifiant.
-pub fn session_spend(
-	session_id: &str,
-	roots: &[String],
-	last_limits: Option<&Limits>,
-) -> SessionSpend {
+pub fn session_spend(session_id: &str, roots: &[String], last_limits: Option<&Limits>) -> SessionSpend {
 	let Ok(projects) = crate::sessions::scan_all(60) else {
 		return SessionSpend::default();
 	};
@@ -218,17 +208,11 @@ pub fn session_spend(
 		return SessionSpend::default();
 	};
 
-	let total = session.usage.input
-		+ session.usage.output
-		+ session.usage.cache_read
-		+ session.usage.cache_write;
+	let total = session.usage.input + session.usage.output + session.usage.cache_read + session.usage.cache_write;
 
 	let window = report_for(roots, &[])
 		.map(|report| {
-			report.last_5h.input
-				+ report.last_5h.output
-				+ report.last_5h.cache_read
-				+ report.last_5h.cache_write
+			report.last_5h.input + report.last_5h.output + report.last_5h.cache_read + report.last_5h.cache_write
 		})
 		.unwrap_or(0);
 
@@ -496,7 +480,10 @@ fn model_label(model: &str) -> String {
 	let trimmed = model.trim_start_matches("claude-");
 	let mut parts: Vec<&str> = trimmed.split('-').collect();
 	// La date de version en fin de nom n'apprend rien ici.
-	if parts.last().is_some_and(|last| last.len() == 8 && last.chars().all(|c| c.is_ascii_digit())) {
+	if parts
+		.last()
+		.is_some_and(|last| last.len() == 8 && last.chars().all(|c| c.is_ascii_digit()))
+	{
 		parts.pop();
 	}
 	if parts.is_empty() {
@@ -540,9 +527,7 @@ fn ranked(map: HashMap<String, Totals>, label: impl Fn(&str) -> String) -> Vec<B
 		})
 		.collect();
 	// Les jetons produits pèsent le plus lourd : on classe dessus.
-	buckets.sort_by(|a, b| {
-		(b.totals.output + b.totals.input).cmp(&(a.totals.output + a.totals.input))
-	});
+	buckets.sort_by_key(|a| std::cmp::Reverse(a.totals.output + a.totals.input));
 	buckets
 }
 
@@ -586,10 +571,7 @@ pub fn report_for(roots: &[String], missions: &[(String, String)]) -> Result<Usa
 				.entry(sample.at.date_naive().to_string())
 				.or_default()
 				.add(&sample.totals);
-			by_model
-				.entry(sample.model.clone())
-				.or_default()
-				.add(&sample.totals);
+			by_model.entry(sample.model.clone()).or_default().add(&sample.totals);
 			let chantier = rattach(&sample.cwd, roots)
 				.cloned()
 				.unwrap_or_else(|| sample.cwd.clone());
@@ -601,10 +583,7 @@ pub fn report_for(roots: &[String], missions: &[(String, String)]) -> Result<Usa
 				.iter()
 				.find(|(path, _)| path == &chantier || chantier.starts_with(&format!("{path}/")))
 			{
-				by_mission
-					.entry(titre.clone())
-					.or_default()
-					.add(&sample.totals);
+				by_mission.entry(titre.clone()).or_default().add(&sample.totals);
 			}
 		}
 	}

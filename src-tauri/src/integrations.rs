@@ -99,9 +99,8 @@ fn text(value: &Value, pointer: &str) -> String {
 const GET_CACHE_TTL: std::time::Duration = std::time::Duration::from_secs(60);
 
 fn get_cache() -> &'static std::sync::Mutex<HashMap<String, (std::time::Instant, Value)>> {
-	static CACHE: std::sync::OnceLock<
-		std::sync::Mutex<HashMap<String, (std::time::Instant, Value)>>,
-	> = std::sync::OnceLock::new();
+	static CACHE: std::sync::OnceLock<std::sync::Mutex<HashMap<String, (std::time::Instant, Value)>>> =
+		std::sync::OnceLock::new();
 	CACHE.get_or_init(|| std::sync::Mutex::new(HashMap::new()))
 }
 
@@ -152,13 +151,12 @@ async fn json_get_uncached(url: &str, token: &str, scheme: &str) -> Result<Value
 			body.chars().take(400).collect::<String>()
 		)));
 	}
-	serde_json::from_str(&body)
-		.map_err(|e| {
-			CockpitError::msg(crate::i18n::tf(
-				"integrations.unreadableResponseBody",
-				&[("error", &e), ("body", &&body[..body.len().min(200)])],
-			))
-		})
+	serde_json::from_str(&body).map_err(|e| {
+		CockpitError::msg(crate::i18n::tf(
+			"integrations.unreadableResponseBody",
+			&[("error", &e), ("body", &&body[..body.len().min(200)])],
+		))
+	})
 }
 
 /// Refuse un token dont le préfixe ne correspond pas à ce qu'attend l'API.
@@ -186,12 +184,7 @@ async fn sentry_org(config: &Config) -> Result<String> {
 		return Ok(configured.to_string());
 	}
 
-	let value = json_get(
-		"https://sentry.io/api/0/organizations/",
-		&config.sentry.token,
-		"Bearer",
-	)
-	.await?;
+	let value = json_get("https://sentry.io/api/0/organizations/", &config.sentry.token, "Bearer").await?;
 
 	let slugs: Vec<String> = value
 		.as_array()
@@ -286,10 +279,7 @@ pub async fn sentry_issues(config: &Config, query: &str) -> Result<Vec<FeedItem>
 				}
 				.into(),
 				url: text(issue, "/permalink"),
-				timestamp: issue
-					.get("lastSeen")
-					.and_then(|v| v.as_str())
-					.map(String::from),
+				timestamp: issue.get("lastSeen").and_then(|v| v.as_str()).map(String::from),
 				meta: vec![
 					meta("projet", text(issue, "/project/slug")),
 					meta(
@@ -301,10 +291,7 @@ pub async fn sentry_issues(config: &Config, query: &str) -> Result<Vec<FeedItem>
 					),
 					meta(
 						"utilisateurs",
-						issue
-							.get("userCount")
-							.map(|v| v.to_string())
-							.unwrap_or_default(),
+						issue.get("userCount").map(|v| v.to_string()).unwrap_or_default(),
 					),
 					meta("niveau", level),
 				],
@@ -348,10 +335,7 @@ pub async fn linear_create_issue(
 		.and_then(|v| v.as_array())
 		.and_then(|errors| errors.first())
 	{
-		return Err(CockpitError::msg(format!(
-			"Linear : {}",
-			text(first, "/message")
-		)));
+		return Err(CockpitError::msg(format!("Linear : {}", text(first, "/message"))));
 	}
 
 	let identifier = text(&body, "/data/issueCreate/issue/identifier");
@@ -367,7 +351,10 @@ pub async fn linear_create_issue(
 fn sentry_issue_segment(issue_id: &str) -> Result<&str> {
 	let id = issue_id.trim();
 	if id.is_empty() || !id.chars().all(|c| c.is_ascii_alphanumeric() || c == '-' || c == '_') {
-		return Err(CockpitError::msg(crate::i18n::tf("integrations.sentryInvalidIssue", &[("id", &issue_id)])));
+		return Err(CockpitError::msg(crate::i18n::tf(
+			"integrations.sentryInvalidIssue",
+			&[("id", &issue_id)],
+		)));
 	}
 	Ok(id)
 }
@@ -628,7 +615,10 @@ async fn clickhouse_access(config: &Config) -> Result<ClickhouseAccess> {
 		}
 		return Err(CockpitError::msg(crate::i18n::tf(
 			"integrations.betterstackConnection",
-			&[("status", &status), ("body", &body.chars().take(300).collect::<String>())],
+			&[
+				("status", &status),
+				("body", &body.chars().take(300).collect::<String>()),
+			],
 		)));
 	}
 
@@ -648,7 +638,9 @@ async fn clickhouse_access(config: &Config) -> Result<ClickhouseAccess> {
 		data_sources: fields.get("data_sources").cloned().unwrap_or(Value::Null),
 	};
 	if access.host.is_empty() || access.password.is_empty() {
-		return Err(CockpitError::msg(crate::i18n::t("integrations.betterstackNoCredentials")));
+		return Err(CockpitError::msg(crate::i18n::t(
+			"integrations.betterstackNoCredentials",
+		)));
 	}
 
 	// Le mot de passe n'est rendu qu'à la création : sans ce cache, chaque
@@ -700,9 +692,7 @@ async fn betterstack_team_id(config: &Config) -> Option<i64> {
 	)
 	.await
 	.ok()?;
-	sources
-		.pointer("/data/0/attributes/team_id")
-		.and_then(|v| v.as_i64())
+	sources.pointer("/data/0/attributes/team_id").and_then(|v| v.as_i64())
 }
 
 /// Exécute une requête sur ClickHouse via l'interface HTTP de Better Stack.
@@ -730,7 +720,8 @@ async fn clickhouse_query(access: &ClickhouseAccess, sql: &str) -> Result<Value>
 			body.chars().take(300).collect::<String>()
 		)));
 	}
-	serde_json::from_str(&body).map_err(|e| CockpitError::msg(crate::i18n::tf("integrations.unreadableResponse", &[("error", &e)])))
+	serde_json::from_str(&body)
+		.map_err(|e| CockpitError::msg(crate::i18n::tf("integrations.unreadableResponse", &[("error", &e)])))
 }
 
 /// Nom à substituer à `{{source}}` dans la requête d'un graphique.
@@ -744,9 +735,7 @@ fn remote_table(access: &ClickhouseAccess, team_id: &str, table: &str) -> String
 		return String::new();
 	}
 	let suffix = format!("_{table}_logs");
-	if let Some(found) = find_string(&access.data_sources, &|candidate: &str| {
-		candidate.ends_with(&suffix)
-	}) {
+	if let Some(found) = find_string(&access.data_sources, &|candidate: &str| candidate.ends_with(&suffix)) {
 		return format!("remote({found})");
 	}
 	if team_id.is_empty() {
@@ -776,22 +765,12 @@ fn fill_query(sql: &str, table: &str, hours: i64) -> String {
 	let end = chrono::Utc::now();
 	let start = end - chrono::Duration::hours(hours.max(1));
 	sql.replace("{{source}}", table)
-		.replace(
-			"{{start_time}}",
-			&format!("toDateTime64({}, 3)", start.timestamp()),
-		)
-		.replace(
-			"{{end_time}}",
-			&format!("toDateTime64({}, 3)", end.timestamp()),
-		)
+		.replace("{{start_time}}", &format!("toDateTime64({}, 3)", start.timestamp()))
+		.replace("{{end_time}}", &format!("toDateTime64({}, 3)", end.timestamp()))
 }
 
 /// Valeurs courantes d'un dashboard : chaque graphique est calculé pour de vrai.
-pub async fn betterstack_kpi_values(
-	config: &Config,
-	dashboard_id: &str,
-	hours: i64,
-) -> Result<Vec<KpiValue>> {
+pub async fn betterstack_kpi_values(config: &Config, dashboard_id: &str, hours: i64) -> Result<Vec<KpiValue>> {
 	if config.betterstack.telemetry_token.is_empty() {
 		return Err(CockpitError::msg(crate::i18n::t("integrations.telemetryTokenMissing")));
 	}
@@ -1026,10 +1005,7 @@ pub async fn betterstack_incidents(config: &Config) -> Result<Vec<FeedItem>> {
 				} else {
 					"critical".into()
 				},
-				url: format!(
-					"https://uptime.betterstack.com/team/incidents/{}",
-					text(item, "/id")
-				),
+				url: format!("https://uptime.betterstack.com/team/incidents/{}", text(item, "/id")),
 				timestamp: item
 					.pointer("/attributes/started_at")
 					.and_then(|v| v.as_str())
@@ -1067,10 +1043,7 @@ async fn linear_graphql(config: &Config, query: &str, variables: Value) -> Resul
 	}
 	if let Some(errors) = body.get("errors").and_then(|v| v.as_array()) {
 		if let Some(first) = errors.first() {
-			return Err(CockpitError::msg(format!(
-				"Linear : {}",
-				text(first, "/message")
-			)));
+			return Err(CockpitError::msg(format!("Linear : {}", text(first, "/message"))));
 		}
 	}
 	Ok(body)
@@ -1245,11 +1218,7 @@ pub async fn linear_update_issue(config: &Config, id: &str, patch: Value) -> Res
 	)
 	.await?;
 
-	if body
-		.pointer("/data/issueUpdate/success")
-		.and_then(|v| v.as_bool())
-		!= Some(true)
-	{
+	if body.pointer("/data/issueUpdate/success").and_then(|v| v.as_bool()) != Some(true) {
 		return Err(CockpitError::msg(crate::i18n::t("integrations.linearUpdateRefused")));
 	}
 	Ok(())
@@ -1275,10 +1244,7 @@ pub async fn linear_issues(config: &Config, only_mine: bool) -> Result<Vec<FeedI
 		.iter()
 		.map(|issue| {
 			let state_type = text(issue, "/state/type");
-			let priority = issue
-				.get("priority")
-				.and_then(|v| v.as_f64())
-				.unwrap_or(0.0) as i64;
+			let priority = issue.get("priority").and_then(|v| v.as_f64()).unwrap_or(0.0) as i64;
 			// Échelle Linear : 0 = non définie, 1 = urgent … 4 = basse.
 			let (priority_label, priority_tone) = match priority {
 				1 => (crate::i18n::t("integrations.priority.urgent"), "critical"),
@@ -1373,9 +1339,7 @@ fn urlencoding_query(query: &str) -> String {
 	let mut out = String::new();
 	for byte in query.bytes() {
 		match byte {
-			b'A'..=b'Z' | b'a'..=b'z' | b'0'..=b'9' | b'-' | b'_' | b'.' | b':' | b'@' | b'/' => {
-				out.push(byte as char)
-			}
+			b'A'..=b'Z' | b'a'..=b'z' | b'0'..=b'9' | b'-' | b'_' | b'.' | b':' | b'@' | b'/' => out.push(byte as char),
 			b' ' => out.push('+'),
 			other => out.push_str(&format!("%{other:02X}")),
 		}
@@ -1433,9 +1397,7 @@ pub struct BranchPr {
 /// Une seule page de cent PR triées par fraîcheur suffit : les worktrees encore
 /// sur le disque correspondent à des branches récentes. Aller chercher tout
 /// l'historique coûterait des dizaines d'appels pour rien.
-pub async fn github_pulls_by_branch(
-	config: &Config,
-) -> Result<std::collections::HashMap<String, BranchPr>> {
+pub async fn github_pulls_by_branch(config: &Config) -> Result<std::collections::HashMap<String, BranchPr>> {
 	if config.github.repo.is_empty() {
 		return Err(CockpitError::msg(crate::i18n::t("integrations.githubRepoMissing")));
 	}
@@ -1652,17 +1614,10 @@ pub async fn github_pulls(config: &Config) -> Result<Vec<FeedItem>> {
 				.collect();
 			let reviewers = logins("/requested_reviewers");
 			FeedItem {
-				id: pr
-					.get("number")
-					.map(|n| n.to_string())
-					.unwrap_or_default(),
+				id: pr.get("number").map(|n| n.to_string()).unwrap_or_default(),
 				source: "github".into(),
 				title: text(pr, "/title"),
-				subtitle: format!(
-					"@{author} · {} → {}",
-					text(pr, "/head/ref"),
-					text(pr, "/base/ref")
-				),
+				subtitle: format!("@{author} · {} → {}", text(pr, "/head/ref"), text(pr, "/base/ref")),
 				status: if draft { "draft".into() } else { "open".into() },
 				severity: if draft { "info".into() } else { "warning".into() },
 				url: text(pr, "/html_url"),
@@ -1831,7 +1786,10 @@ pub async fn trigger_runs(config: &Config, environment: Option<&str>) -> Result<
 					meta("tâche", text(run, "/taskIdentifier")),
 					meta("run", run_id),
 					meta("version", version),
-					meta("essai", run.get("attemptCount").map(|v| v.to_string()).unwrap_or_default()),
+					meta(
+						"essai",
+						run.get("attemptCount").map(|v| v.to_string()).unwrap_or_default(),
+					),
 					meta(
 						"coût",
 						run.get("costInCents")
@@ -1890,10 +1848,7 @@ async fn railway_graphql(token: &str, query: &str, variables: Value) -> Result<V
 		.and_then(|v| v.as_array())
 		.and_then(|errors| errors.first())
 	{
-		return Err(CockpitError::msg(format!(
-			"Railway : {}",
-			text(first, "/message")
-		)));
+		return Err(CockpitError::msg(format!("Railway : {}", text(first, "/message"))));
 	}
 	Ok(body)
 }
@@ -1918,12 +1873,7 @@ async fn railway_project_id(config: &Config) -> Result<String> {
 		return Ok(configured.to_string());
 	}
 
-	let body = railway_graphql(
-		&config.railway.token,
-		RAILWAY_PROJECTS_QUERY,
-		json!({}),
-	)
-	.await?;
+	let body = railway_graphql(&config.railway.token, RAILWAY_PROJECTS_QUERY, json!({})).await?;
 
 	let projects: Vec<(String, String)> = body
 		.pointer("/data/projects/edges")
@@ -1961,17 +1911,9 @@ pub async fn railway_deployments(config: &Config) -> Result<Vec<FeedItem>> {
 	}
 
 	let project_id = railway_project_id(config).await?;
-	let body = railway_graphql(
-		&config.railway.token,
-		RAILWAY_QUERY,
-		json!({ "projectId": project_id }),
-	)
-	.await?;
+	let body = railway_graphql(&config.railway.token, RAILWAY_QUERY, json!({ "projectId": project_id })).await?;
 
-	let Some(edges) = body
-		.pointer("/data/deployments/edges")
-		.and_then(|v| v.as_array())
-	else {
+	let Some(edges) = body.pointer("/data/deployments/edges").and_then(|v| v.as_array()) else {
 		return Ok(Vec::new());
 	};
 
@@ -2002,7 +1944,10 @@ pub async fn railway_deployments(config: &Config) -> Result<Vec<FeedItem>> {
 					}
 				},
 				timestamp: node.get("createdAt").and_then(|v| v.as_str()).map(String::from),
-				meta: vec![meta("déploiement", text(node, "/id").chars().take(8).collect::<String>())],
+				meta: vec![meta(
+					"déploiement",
+					text(node, "/id").chars().take(8).collect::<String>(),
+				)],
 				tags: Vec::new(),
 				payload: node.clone(),
 			}
@@ -2061,17 +2006,13 @@ pub async fn stripe_events(config: &Config) -> Result<Vec<FeedItem>> {
 					.and_then(|v| v.as_i64())
 					.and_then(|secs| chrono::DateTime::from_timestamp(secs, 0))
 					.map(|dt| dt.to_rfc3339()),
-				meta: vec![meta(
-					"objet",
-					text(event, "/data/object/object"),
-				)],
+				meta: vec![meta("objet", text(event, "/data/object/object"))],
 				tags: Vec::new(),
 				payload: event.clone(),
 			}
 		})
 		.collect())
 }
-
 
 // ────────────────────────────── GitHub Issues ──────────────────────────────
 //
@@ -2108,11 +2049,20 @@ pub async fn github_issues(config: &Config, only_mine: bool) -> Result<Vec<FeedI
 	// défaut le compte qui porte le jeton — celui-là même qui lit.
 	let login = if only_mine {
 		let declared = config.github.user.trim();
-		Some(if declared.is_empty() { github_viewer(config).await? } else { declared.to_string() })
+		Some(if declared.is_empty() {
+			github_viewer(config).await?
+		} else {
+			declared.to_string()
+		})
 	} else {
 		None
 	};
-	let value = json_get(&github_issues_url(&config.github.repo, login.as_deref()), &token, "Bearer").await?;
+	let value = json_get(
+		&github_issues_url(&config.github.repo, login.as_deref()),
+		&token,
+		"Bearer",
+	)
+	.await?;
 
 	let Some(issues) = value.as_array() else {
 		return Ok(Vec::new());
@@ -2164,10 +2114,7 @@ pub async fn github_issues(config: &Config, only_mine: bool) -> Result<Vec<FeedI
 		.collect())
 }
 
-pub async fn github_issue(
-	config: &Config,
-	number: &str,
-) -> Result<crate::tickets::TicketDetail> {
+pub async fn github_issue(config: &Config, number: &str) -> Result<crate::tickets::TicketDetail> {
 	let token = github_token(config).await?;
 	let repo = &config.github.repo;
 	let issue = json_get(
@@ -2356,9 +2303,7 @@ pub async fn github_issue_update(config: &Config, number: &str, patch: Value) ->
 	}
 
 	let response = client()?
-		.patch(format!(
-			"https://api.github.com/repos/{repo}/issues/{number}"
-		))
+		.patch(format!("https://api.github.com/repos/{repo}/issues/{number}"))
 		.header("Authorization", format!("Bearer {token}"))
 		.header("Accept", "application/vnd.github+json")
 		.json(&Value::Object(body))
@@ -2464,10 +2409,7 @@ pub async fn gitlab_merge_requests(config: &Config) -> Result<Vec<Value>> {
 /// `state=all` et non `opened` : une branche dont la demande vient d'être
 /// fermée ou fusionnée a une histoire à raconter, et la taire ferait croire à
 /// un travail neuf.
-pub async fn gitlab_merge_request_for_branch(
-	config: &Config,
-	branch: &str,
-) -> Result<Option<Value>> {
+pub async fn gitlab_merge_request_for_branch(config: &Config, branch: &str) -> Result<Option<Value>> {
 	if branch.trim().is_empty() {
 		return Ok(None);
 	}
@@ -2484,10 +2426,7 @@ pub async fn gitlab_merge_request_for_branch(
 		"Bearer",
 	)
 	.await?;
-	Ok(value
-		.as_array()
-		.and_then(|list| list.first())
-		.cloned())
+	Ok(value.as_array().and_then(|list| list.first()).cloned())
 }
 
 /// Les échanges déposés sur une merge request.
@@ -2610,12 +2549,7 @@ pub async fn gitlab_issue(config: &Config, iid: &str) -> Result<crate::tickets::
 	let token = gitlab_token(config)?;
 	let project = gitlab_project(config)?;
 	let api = gitlab_api(config);
-	let issue = json_get(
-		&format!("{api}/projects/{project}/issues/{iid}"),
-		&token,
-		"Bearer",
-	)
-	.await?;
+	let issue = json_get(&format!("{api}/projects/{project}/issues/{iid}"), &token, "Bearer").await?;
 
 	let raw_notes = json_get(
 		&format!("{api}/projects/{project}/issues/{iid}/notes?per_page=50&sort=asc"),
@@ -2654,10 +2588,7 @@ pub async fn gitlab_issue(config: &Config, iid: &str) -> Result<crate::tickets::
 			None
 		} else {
 			Some(NamedRef {
-				id: issue
-					.pointer("/assignee/id")
-					.map(|v| v.to_string())
-					.unwrap_or_default(),
+				id: issue.pointer("/assignee/id").map(|v| v.to_string()).unwrap_or_default(),
 				name,
 				color: String::new(),
 			})
@@ -2754,10 +2685,7 @@ pub async fn gitlab_issue_options(config: &Config) -> Result<crate::tickets::Opt
 					Some(NamedRef {
 						// L'assignation se fait par identifiant numérique : c'est lui
 						// qu'on garde, pas le login.
-						id: entry
-							.get("id")
-							.map(|v| v.to_string())
-							.unwrap_or_default(),
+						id: entry.get("id").map(|v| v.to_string()).unwrap_or_default(),
 						name,
 						color: String::new(),
 					})
@@ -2823,10 +2751,7 @@ pub async fn gitlab_issue_update(config: &Config, iid: &str, patch: Value) -> Re
 	}
 
 	let response = client()?
-		.put(format!(
-			"{}/projects/{project}/issues/{iid}",
-			gitlab_api(config)
-		))
+		.put(format!("{}/projects/{project}/issues/{iid}", gitlab_api(config)))
 		.header("Authorization", format!("Bearer {token}"))
 		.header("Accept", "application/json")
 		.json(&Value::Object(body))
@@ -2847,10 +2772,7 @@ pub async fn gitlab_issue_update(config: &Config, iid: &str, patch: Value) -> Re
 /// Une requête par login plutôt qu'un filtre unique : GitLab n'accepte
 /// `assignee_username` qu'une valeur à la fois, et cinq appels courts valent
 /// mieux qu'une pagination sur tout le projet à filtrer ensuite chez nous.
-pub async fn gitlab_team_issues(
-	config: &Config,
-	logins: &[String],
-) -> Result<Vec<crate::tickets::TeamIssue>> {
+pub async fn gitlab_team_issues(config: &Config, logins: &[String]) -> Result<Vec<crate::tickets::TeamIssue>> {
 	let token = gitlab_token(config)?;
 	let project = gitlab_project(config)?;
 	let api = gitlab_api(config);
@@ -2901,10 +2823,7 @@ pub async fn gitlab_team_issues(
 }
 
 /// Les issues ouvertes de ces personnes sur le dépôt GitHub.
-pub async fn github_team_issues(
-	config: &Config,
-	logins: &[String],
-) -> Result<Vec<crate::tickets::TeamIssue>> {
+pub async fn github_team_issues(config: &Config, logins: &[String]) -> Result<Vec<crate::tickets::TeamIssue>> {
 	if config.github.repo.trim().is_empty() {
 		return Err(CockpitError::msg(crate::i18n::t("integrations.githubRepoMissing")));
 	}
@@ -2972,12 +2891,12 @@ pub async fn github_login(config: &Config) -> String {
 }
 
 /* ── Gestes de la Permanence ────────────────────────────────────────────────
-   Les seuls appels d'écriture de ce module qui ne partent pas d'un clic.
+Les seuls appels d'écriture de ce module qui ne partent pas d'un clic.
 
-   Ils sont volontairement peu nombreux et tous **réversibles** : relancer une
-   CI ne casse rien, un label se retire. Un geste qui ne se défait pas n'a rien
-   à faire dans une liste blanche qu'on coche une fois pour toutes.
-   ────────────────────────────────────────────────────────────────────────── */
+Ils sont volontairement peu nombreux et tous **réversibles** : relancer une
+CI ne casse rien, un label se retire. Un geste qui ne se défait pas n'a rien
+à faire dans une liste blanche qu'on coche une fois pour toutes.
+────────────────────────────────────────────────────────────────────────── */
 
 /// Relance les jobs en échec du dernier run d'une branche.
 ///
@@ -3025,7 +2944,10 @@ pub async fn github_rerun(config: &Config, branch: &str) -> Result<String> {
 		let body = response.text().await.unwrap_or_default();
 		return Err(CockpitError::msg(crate::i18n::tf(
 			"integrations.githubRerunRefused",
-			&[("status", &status), ("body", &body.chars().take(200).collect::<String>())],
+			&[
+				("status", &status),
+				("body", &body.chars().take(200).collect::<String>()),
+			],
 		)));
 	}
 	Ok(id.to_string())
@@ -3053,7 +2975,10 @@ pub async fn github_add_label(config: &Config, number: u64, label: &str) -> Resu
 		let body = response.text().await.unwrap_or_default();
 		return Err(CockpitError::msg(crate::i18n::tf(
 			"integrations.githubLabelRefused",
-			&[("status", &status), ("body", &body.chars().take(200).collect::<String>())],
+			&[
+				("status", &status),
+				("body", &body.chars().take(200).collect::<String>()),
+			],
 		)));
 	}
 	Ok(())
@@ -3099,11 +3024,7 @@ pub async fn github_comment(config: &Config, number: u64, body: &str) -> Result<
 		return Err(CockpitError::msg(crate::i18n::t("integrations.githubRepoMissing")));
 	}
 	let token = github_token(config).await?;
-	let signed = format!(
-		"{}\n\n_{}_",
-		body.trim(),
-		crate::config::COMMENT_SIGNATURE
-	);
+	let signed = format!("{}\n\n_{}_", body.trim(), crate::config::COMMENT_SIGNATURE);
 
 	let response = client()?
 		.post(format!(
@@ -3121,7 +3042,10 @@ pub async fn github_comment(config: &Config, number: u64, body: &str) -> Result<
 		let body = response.text().await.unwrap_or_default();
 		return Err(CockpitError::msg(crate::i18n::tf(
 			"integrations.githubCommentRefused",
-			&[("status", &status), ("body", &body.chars().take(200).collect::<String>())],
+			&[
+				("status", &status),
+				("body", &body.chars().take(200).collect::<String>()),
+			],
 		)));
 	}
 	let value: Value = response.json().await.unwrap_or(Value::Null);
@@ -3218,7 +3142,10 @@ pub async fn create_pull_request(
 			.ok()
 			.and_then(|value| value.get("message").and_then(|m| m.as_str()).map(String::from))
 			.unwrap_or(raw);
-		return Err(CockpitError::msg(crate::i18n::tf("integrations.prRefused", &[("status", &status), ("message", &message)])));
+		return Err(CockpitError::msg(crate::i18n::tf(
+			"integrations.prRefused",
+			&[("status", &status), ("message", &message)],
+		)));
 	}
 	Ok(serde_json::from_str::<Value>(&raw)
 		.ok()
