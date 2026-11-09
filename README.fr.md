@@ -504,9 +504,8 @@ plutôt que de le combler.
   SmartScreen, voir « Windows »).
 - **Cursor** n'expose pas ses conversations en fichiers lisibles (SQLite interne) :
   seuls ses livrables écrits sur disque apparaissent, dans l'écran Documents.
-- **Codex** (`codex-exec`) a été vérifié contre codex-cli 0.167 sous Windows,
-  sauf ses hooks et son mode `bypassPermissions`, écrits d'après la documentation
-  officielle. **Gemini** (`gemini-stream-json`) n'a pas été vérifié contre son
+- **Codex** (`codex-exec`) a été vérifié contre codex-cli 0.167, sous Windows
+  uniquement. **Gemini** (`gemini-stream-json`) n'a pas été vérifié contre son
   vrai binaire, seulement contre sa documentation et un faux CLI de test. Voir
   « Moteurs d'agents » ci-dessus.
 

@@ -10,13 +10,12 @@
 //! `codex exec resume <fil>`, jamais par une écriture sur un canal qui n'existe
 //! déjà plus — voir `agent::send` et le champ `Running::per_turn`.
 //!
-//! Ligne de commande, événements, outils MCP et reprise vérifiés contre le
-//! binaire (codex-cli 0.167, sous Windows). Deux constats en ont découlé : le
-//! message passe par l'entrée standard, qu'il faut refermer — ouverte, `codex
-//! exec` l'attend sans fin — et chaque tour redonne tous ses réglages, qu'une
-//! reprise n'hérite pas. Les hooks, eux, ne s'exécutent qu'avec
-//! `--dangerously-bypass-hook-trust` : leur forme vient de la documentation, et
-//! leur effet n'a pas été observé. Le format des fichiers de
+//! Ligne de commande, événements, outils MCP, reprise, accès complet et hooks
+//! vérifiés contre le binaire (codex-cli 0.167, sous Windows). Deux constats en
+//! ont découlé : le message passe par l'entrée standard, qu'il faut refermer —
+//! ouverte, `codex exec` l'attend sans fin — et chaque tour redonne tous ses
+//! réglages, qu'une reprise n'hérite pas. Un hook hérite de l'environnement de
+//! l'agent, et ne s'exécute qu'avec `--dangerously-bypass-hook-trust`. Le format des fichiers de
 //! session sur disque (`~/.codex/sessions/**/rollout-*.jsonl`), lui, est
 //! documenté comme divergeant de ce qu'écrit réellement le CLI (rapports de
 //! rétro-ingénierie tiers, non vérifiables ici non plus) : le cockpit ne le

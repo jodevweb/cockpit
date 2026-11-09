@@ -492,9 +492,8 @@ filling the gap.
 - **Cursor** does not expose its conversations as readable files (internal
   SQLite): only its deliverables written to disk show up, in the Documents
   screen.
-- **Codex** (`codex-exec`) was checked against codex-cli 0.167 on Windows,
-  except its hooks and its `bypassPermissions` mode, written from the official
-  documentation. **Gemini** (`gemini-stream-json`) has not been checked against
+- **Codex** (`codex-exec`) was checked against codex-cli 0.167 on Windows only.
+  **Gemini** (`gemini-stream-json`) has not been checked against
   its real binary, only against its documentation and a fake test CLI. See
   "Agent engines" above.
 

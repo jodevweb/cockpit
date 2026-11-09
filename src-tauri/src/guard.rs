@@ -391,6 +391,10 @@ mod tests {
 
 	/// Le verdict du hook sur un `apply_patch`, dans un périmètre donné.
 	fn patch_refuse(patch: &str) -> Option<bool> {
+		patch_refuse_depuis("/wt/feat-x", patch)
+	}
+
+	fn patch_refuse_depuis(racine: &str, patch: &str) -> Option<bool> {
 		static RANG: std::sync::atomic::AtomicUsize = std::sync::atomic::AtomicUsize::new(0);
 		let node = which_node()?;
 		let rang = RANG.fetch_add(1, std::sync::atomic::Ordering::Relaxed);
@@ -401,7 +405,7 @@ mod tests {
 		let mut child = Command::new(node)
 			.arg(&script)
 			.env("COCKPIT_SCOPE", "apps/api\npackages/core/")
-			.env("COCKPIT_CWD", "/wt/feat-x")
+			.env("COCKPIT_CWD", racine)
 			.stdin(Stdio::piped())
 			.stdout(Stdio::piped())
 			.spawn()
@@ -430,6 +434,25 @@ mod tests {
 			assert_eq!(patch_refuse(dehors), Some(true), "{dehors}");
 		}
 		assert_eq!(patch_refuse("*** Add File: /wt/feat-x/packages/core/x.rs\n+x\n"), Some(false));
+	}
+
+	/// La forme relevée sur codex-cli 0.167 sous Windows : un chemin absolu, avec
+	/// des `/`, là où le cockpit connaît son dossier avec des `\`.
+	#[test]
+	fn un_patch_en_chemin_absolu_windows_se_lit_depuis_le_worktree() {
+		let racine = r"C:\Users\a\wt\feat-x";
+		let Some(dedans) = patch_refuse_depuis(racine, "*** Add File: C:/Users/a/wt/feat-x/apps/api/e.txt\n+x\n") else {
+			return;
+		};
+		assert!(!dedans);
+		assert_eq!(
+			patch_refuse_depuis(racine, "*** Add File: C:/Users/a/wt/feat-x/e.txt\n+x\n"),
+			Some(true)
+		);
+		assert_eq!(
+			patch_refuse_depuis(racine, "*** Add File: C:/Users/a/wt/feat-y/apps/api/e.txt\n+x\n"),
+			Some(true)
+		);
 	}
 
 	fn which_node() -> Option<String> {
