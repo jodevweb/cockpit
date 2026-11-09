@@ -94,6 +94,13 @@ test("les portes se règlent dans Équipe & flux", async ({ page }) => {
 	await expect(field).toHaveAttribute("placeholder", "pnpm test, pnpm lint");
 });
 
+test("les réglages disent quels rôles viennent du dépôt", async ({ page }) => {
+	await page.goto("/?tab=agents");
+	await topTab(page, "Workshop").click();
+	await atelierNav(page).locator("button", { hasText: "Settings" }).click();
+	await expect(page.getByText(/also declares roles in \.cockpit\/roles\.toml: backend/)).toBeVisible();
+});
+
 test("la croix retire un élément du bandeau « ça t'attend »", async ({ page }) => {
 	const errors = watchErrors(page);
 	await page.goto("/");

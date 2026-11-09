@@ -790,6 +790,8 @@
 			"saved": "Roles guardados.",
 			"intro": "Lo que recibe un ejecutor al lanzarse: sus instrucciones permanentes, su modelo y las rutas en las que puede escribir. El alcance se impone — una escritura fuera de él se rechaza, no solo se desaconseja.",
 			"masterNote": "Este rol dirige la misión: lee el ticket, propone el desglose y lo junta todo al final. Su clave está reservada — los pasos y las herramientas de orquestación vienen de Cockpit; aquí solo se ajustan su comando, sus instrucciones y su modelo.",
+			"repoDeclared": "Este repositorio también declara roles en {{file}}: {{ids}}. Se aplican sobre estos ajustes al iniciar, salvo los permisos y el motor, que permanecen aquí.",
+			"repoInvalid": "{{file}} no es válido y las misiones no podrán iniciarse: {{error}}",
 			"keyHint": "referenciada por las tareas",
 			"engine": {
 				"label": "Motor",

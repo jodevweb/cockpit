@@ -3404,6 +3404,7 @@ pub fn run() {
 			readiness_check,
 			mission_cleanup,
 			roles_list,
+			repo_roles,
 			remote_status,
 			remote_enable,
 			remote_ntfy,

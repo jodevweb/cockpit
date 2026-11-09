@@ -71,6 +71,7 @@ import type {
 	MissionActivity,
 	MissionEstimate,
 	MissionExposure,
+	RepoRoles,
 	DeliveryDossier,
 	MissionOverrun,
 	MissionState,
@@ -763,6 +764,7 @@ export const api = {
 		/** Range les worktrees des tâches intégrées. */
 		cleanup: (id: string) => call<string[]>("mission_cleanup", { id }),
 		roles: () => call<Role[]>("roles_list"),
+		repoRoles: () => call<RepoRoles>("repo_roles"),
 	},
 
 	/** Accès mobile : serveur local exposé au tailnet. */

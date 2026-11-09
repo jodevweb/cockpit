@@ -10,7 +10,7 @@
 //! lu à moitié. Sans ça, cloner un dépôt suffirait à lancer ses agents sans garde-fou.
 
 use crate::config::RoleConfig;
-use serde::Deserialize;
+use serde::{Deserialize, Serialize};
 use std::path::Path;
 
 pub const FILE: &str = ".cockpit/roles.toml";
@@ -121,6 +121,31 @@ pub fn with_repo(repo: &str, local: Vec<RoleConfig>) -> Vec<RoleConfig> {
 	}
 }
 
+/// Ce que les réglages disent du fichier : sans ça, un rôle y change de consigne sans
+/// que rien, sur l'écran où on le règle, n'explique pourquoi.
+#[cfg_attr(test, derive(ts_rs::TS))]
+#[cfg_attr(test, ts(export))]
+#[derive(Debug, Clone, Serialize, PartialEq, Eq)]
+#[serde(rename_all = "camelCase")]
+pub struct RepoRoles {
+	pub file: String,
+	/// Les rôles que le dépôt déclare ; vide sans fichier.
+	pub ids: Vec<String>,
+	pub error: Option<String>,
+}
+
+pub fn summary(repo: &str) -> RepoRoles {
+	let (ids, error) = match declared(repo) {
+		Ok(roles) => (roles.into_iter().map(|role| role.id).collect(), None),
+		Err(error) => (Vec::new(), Some(error)),
+	};
+	RepoRoles {
+		file: FILE.to_string(),
+		ids,
+		error,
+	}
+}
+
 /// Dit pourquoi le fichier du dépôt ne peut pas être lu. Une mission partie sur les
 /// rôles génériques sans le dire, c'est une équipe qui croit suivre ses consignes.
 pub fn check(repo: &str) -> Result<(), String> {
@@ -192,6 +217,26 @@ mod tests {
 		std::fs::write(dir.join(FILE), "[[roles]]\nid = \"qa\"\nprompt = \"Du dépôt\"\n").unwrap();
 		assert!(check(&repo).is_ok());
 		assert_eq!(with_repo(&repo, vec![local("qa", "default")])[0].prompt, "Du dépôt");
+
+		std::fs::remove_dir_all(dir).ok();
+	}
+
+	#[test]
+	fn le_resume_nomme_les_roles_ou_l_erreur() {
+		assert_eq!(summary("").ids, Vec::<String>::new());
+		assert_eq!(summary("").error, None);
+
+		let dir = std::env::temp_dir().join(format!("cockpit-roles-resume-{}", std::process::id()));
+		std::fs::create_dir_all(dir.join(".cockpit")).unwrap();
+		let repo = dir.to_string_lossy().to_string();
+
+		std::fs::write(dir.join(FILE), "[[roles]]\nid = \"qa\"\n[[roles]]\nid = \"data\"\n").unwrap();
+		assert_eq!(summary(&repo).ids, vec!["qa".to_string(), "data".to_string()]);
+
+		std::fs::write(dir.join(FILE), "[[roles]]\nid = \"qa\"\nengine = \"x\"\n").unwrap();
+		let faux = summary(&repo);
+		assert!(faux.ids.is_empty());
+		assert!(faux.error.unwrap().contains("engine"));
 
 		std::fs::remove_dir_all(dir).ok();
 	}

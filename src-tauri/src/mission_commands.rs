@@ -1525,6 +1525,11 @@ pub(crate) fn roles_list() -> Vec<config::RoleConfig> {
 	roles_for(&cfg().general.main_repo)
 }
 
+#[tauri::command(async)]
+pub(crate) fn repo_roles() -> crate::roles::RepoRoles {
+	crate::roles::summary(&cfg().general.main_repo)
+}
+
 /// Le catalogue de rôles d'un dépôt, jamais vide.
 ///
 /// Ce que le lanceur consulte pour savoir qui juge le travail des autres : lu
