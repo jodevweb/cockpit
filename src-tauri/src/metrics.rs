@@ -228,10 +228,7 @@ pub fn collect(project: &str) -> Metrics {
 	let guardrails = Guardrails {
 		properties: config.properties.len(),
 		calibrated: calibrations.iter().filter(|entry| entry.tried > 0).count(),
-		decorative: calibrations
-			.iter()
-			.filter(|entry| entry.decorative())
-			.count(),
+		decorative: calibrations.iter().filter(|entry| entry.decorative()).count(),
 		..Default::default()
 	};
 
@@ -241,10 +238,7 @@ pub fn collect(project: &str) -> Metrics {
 		lessons: lessons.len(),
 		uses: lessons.iter().map(|lesson| lesson.uses).sum(),
 		idle: lessons.iter().filter(|lesson| lesson.uses == 0).count(),
-		stale: lessons
-			.iter()
-			.filter(|lesson| crate::notebook::stale(lesson))
-			.count(),
+		stale: lessons.iter().filter(|lesson| crate::notebook::stale(lesson)).count(),
 	};
 
 	// ── Ce que le cockpit a fait ────────────────────────────────────────
@@ -319,7 +313,10 @@ fn warnings(metrics: &Metrics) -> Vec<String> {
 	}
 
 	if metrics.handbacks.rate >= 50 && metrics.handbacks.delivered >= 10 {
-		out.push(crate::i18n::tf("metrics.takeBackRate", &[("rate", &metrics.handbacks.rate)]));
+		out.push(crate::i18n::tf(
+			"metrics.takeBackRate",
+			&[("rate", &metrics.handbacks.rate)],
+		));
 	}
 
 	if metrics.turns.long_haul > 0 && metrics.turns.sessions > 0 {
@@ -367,9 +364,7 @@ mod tests {
 	/// chiffre qu'on croit.
 	#[test]
 	fn la_comparaison_attend_d_avoir_les_deux_cotes() {
-		let comparable = |briefed: u64, plain: u64| {
-			briefed >= COMPARABLE_AT && plain >= COMPARABLE_AT
-		};
+		let comparable = |briefed: u64, plain: u64| briefed >= COMPARABLE_AT && plain >= COMPARABLE_AT;
 		assert!(!comparable(20, 0), "rien sans contexte : rien à comparer");
 		assert!(!comparable(0, 20), "rien avec contexte : rien à comparer");
 		assert!(!comparable(4, 40), "quatre rendus d'un côté ne disent rien");
@@ -390,9 +385,7 @@ mod tests {
 	fn des_proprietes_jamais_eprouvees_sont_signalees() {
 		let mut metrics = base();
 		metrics.guardrails.calibrated = 0;
-		assert!(warnings(&metrics)
-			.iter()
-			.any(|line| line.contains("can fail")));
+		assert!(warnings(&metrics).iter().any(|line| line.contains("can fail")));
 	}
 
 	#[test]

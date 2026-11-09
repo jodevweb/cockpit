@@ -19,9 +19,9 @@ use serde::Serialize;
 use std::collections::HashMap;
 use std::io::{Read, Write};
 use std::sync::atomic::{AtomicU64, Ordering};
-use std::sync::{Arc, Mutex};
 #[cfg(not(windows))]
 use std::sync::OnceLock;
+use std::sync::{Arc, Mutex};
 use tauri::{AppHandle, Emitter};
 
 static TERMINAL_SEQUENCE: AtomicU64 = AtomicU64::new(1);
@@ -121,9 +121,12 @@ fn login_shell() -> String {
 
 			let user = std::env::var("USER").unwrap_or_default();
 			if !user.is_empty() {
-				if let Ok(output) = crate::platform::quiet_std(
-					std::process::Command::new("dscl").args([".", "-read", &format!("/Users/{user}"), "UserShell"]),
-				)
+				if let Ok(output) = crate::platform::quiet_std(std::process::Command::new("dscl").args([
+					".",
+					"-read",
+					&format!("/Users/{user}"),
+					"UserShell",
+				]))
 				.output()
 				{
 					let text = String::from_utf8_lossy(&output.stdout);
@@ -161,7 +164,10 @@ pub fn open(
 	account: Option<String>,
 ) -> Result<TerminalInfo> {
 	if !std::path::Path::new(&cwd).is_dir() {
-		return Err(CockpitError::msg(crate::i18n::tf("terminal.folderNotFound", &[("path", &cwd)])));
+		return Err(CockpitError::msg(crate::i18n::tf(
+			"terminal.folderNotFound",
+			&[("path", &cwd)],
+		)));
 	}
 
 	let id = format!("term-{}", TERMINAL_SEQUENCE.fetch_add(1, Ordering::SeqCst));
@@ -207,10 +213,12 @@ pub fn open(
 		builder.env(name, value);
 	}
 
-	let child = pair
-		.slave
-		.spawn_command(builder)
-		.map_err(|e| CockpitError::msg(crate::i18n::tf("terminal.shellLaunch", &[("shell", &shell), ("error", &e)])))?;
+	let child = pair.slave.spawn_command(builder).map_err(|e| {
+		CockpitError::msg(crate::i18n::tf(
+			"terminal.shellLaunch",
+			&[("shell", &shell), ("error", &e)],
+		))
+	})?;
 	// L'esclave n'a plus lieu d'être ouvert ici : le garder empêcherait la
 	// lecture de voir la fin de flux quand le shell se termine.
 	drop(pair.slave);
@@ -376,10 +384,8 @@ fn descendants_of(pid: u32) -> Vec<u32> {
 	let mut a_visiter = vec![pid];
 	for _ in 0..64 {
 		let Some(courant) = a_visiter.pop() else { break };
-		let Ok(sortie) = crate::platform::quiet_std(
-			std::process::Command::new("pgrep").args(["-P", &courant.to_string()]),
-		)
-		.output()
+		let Ok(sortie) =
+			crate::platform::quiet_std(std::process::Command::new("pgrep").args(["-P", &courant.to_string()])).output()
 		else {
 			continue;
 		};

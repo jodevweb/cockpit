@@ -157,7 +157,9 @@ fn read_json(path: &Path) -> Option<serde_json::Value> {
 /// Les noms des entrées d'un dossier : sous-dossiers (`skills/`) ou fichiers
 /// markdown (`agents/`, `commands/`).
 fn names(dir: &Path, folders: bool) -> Vec<String> {
-	let Ok(entries) = std::fs::read_dir(dir) else { return Vec::new() };
+	let Ok(entries) = std::fs::read_dir(dir) else {
+		return Vec::new();
+	};
 	let mut found: Vec<String> = entries
 		.flatten()
 		.filter_map(|entry| {
@@ -179,18 +181,32 @@ fn names(dir: &Path, folders: bool) -> Vec<String> {
 /// "command" } ] } ] } }` ou la même chose sans l'enveloppe.
 fn hooks_of(value: &serde_json::Value) -> Vec<Hook> {
 	let events = value.get("hooks").filter(|inner| inner.is_object()).unwrap_or(value);
-	let Some(events) = events.as_object() else { return Vec::new() };
+	let Some(events) = events.as_object() else {
+		return Vec::new();
+	};
 	let mut found = Vec::new();
 	for (event, groups) in events {
 		for group in groups.as_array().into_iter().flatten() {
-			for hook in group.get("hooks").and_then(|list| list.as_array()).into_iter().flatten() {
+			for hook in group
+				.get("hooks")
+				.and_then(|list| list.as_array())
+				.into_iter()
+				.flatten()
+			{
 				let target = hook
 					.get("command")
 					.and_then(|c| c.as_str())
 					.map(str::to_string)
-					.or_else(|| hook.get("url").and_then(|u| u.as_str()).map(|url| format!("HTTP {url}")));
+					.or_else(|| {
+						hook.get("url")
+							.and_then(|u| u.as_str())
+							.map(|url| format!("HTTP {url}"))
+					});
 				if let Some(command) = target {
-					found.push(Hook { event: event.clone(), command });
+					found.push(Hook {
+						event: event.clone(),
+						command,
+					});
 				}
 			}
 		}
@@ -201,7 +217,10 @@ fn hooks_of(value: &serde_json::Value) -> Vec<Hook> {
 /// Les serveurs MCP d'une déclaration — `{ "mcpServers": { nom: … } }` ou la
 /// carte seule.
 fn servers_of(value: &serde_json::Value) -> Vec<Server> {
-	let map = value.get("mcpServers").filter(|inner| inner.is_object()).unwrap_or(value);
+	let map = value
+		.get("mcpServers")
+		.filter(|inner| inner.is_object())
+		.unwrap_or(value);
 	let Some(map) = map.as_object() else { return Vec::new() };
 	map.iter()
 		.filter(|(_, server)| server.is_object())
@@ -217,7 +236,10 @@ fn servers_of(value: &serde_json::Value) -> Vec<Server> {
 					.unwrap_or_default();
 				std::iter::once(command).chain(args).collect::<Vec<_>>().join(" ")
 			};
-			Server { name: name.clone(), target }
+			Server {
+				name: name.clone(),
+				target,
+			}
 		})
 		.collect()
 }
@@ -251,13 +273,22 @@ pub fn safe_relative(path: &str) -> bool {
 	}
 	let path = Path::new(path.trim_start_matches("./"));
 	!path.as_os_str().is_empty()
-		&& path.components().all(|component| matches!(component, std::path::Component::Normal(_) | std::path::Component::CurDir))
+		&& path.components().all(|component| {
+			matches!(
+				component,
+				std::path::Component::Normal(_) | std::path::Component::CurDir
+			)
+		})
 }
 
 /// Les déclarations d'un manifeste sous ses trois formes : l'objet lui-même,
 /// un chemin vers un fichier JSON, ou une liste de chemins.
 fn declared(root: &Path, value: Option<&serde_json::Value>) -> Vec<serde_json::Value> {
-	let read = |path: &str| safe_relative(path).then(|| read_json(&root.join(path.trim_start_matches("./")))).flatten();
+	let read = |path: &str| {
+		safe_relative(path)
+			.then(|| read_json(&root.join(path.trim_start_matches("./"))))
+			.flatten()
+	};
 	match value {
 		Some(object) if object.is_object() => vec![object.clone()],
 		Some(serde_json::Value::String(path)) => read(path).into_iter().collect(),
@@ -269,7 +300,13 @@ fn declared(root: &Path, value: Option<&serde_json::Value>) -> Vec<serde_json::V
 /// Lit un plugin dans son dossier, sans rien exécuter.
 pub fn read_plugin(root: &Path) -> Inventory {
 	let manifest = read_json(&root.join(".claude-plugin").join("plugin.json")).unwrap_or_default();
-	let text = |key: &str| manifest.get(key).and_then(|v| v.as_str()).unwrap_or_default().to_string();
+	let text = |key: &str| {
+		manifest
+			.get(key)
+			.and_then(|v| v.as_str())
+			.unwrap_or_default()
+			.to_string()
+	};
 
 	let mut hooks = hooks_of(&read_json(&root.join("hooks").join("hooks.json")).unwrap_or_default());
 	for declaration in declared(root, manifest.get("hooks")) {
@@ -284,7 +321,10 @@ pub fn read_plugin(root: &Path) -> Inventory {
 	for declaration in declared(root, manifest.get("lspServers")) {
 		lsp.extend(servers_of(&declaration));
 	}
-	servers.extend(lsp.into_iter().map(|server| Server { name: format!("LSP · {}", server.name), ..server }));
+	servers.extend(lsp.into_iter().map(|server| Server {
+		name: format!("LSP · {}", server.name),
+		..server
+	}));
 
 	let mut scripts: Vec<String> = hooks
 		.iter()
@@ -296,7 +336,10 @@ pub fn read_plugin(root: &Path) -> Inventory {
 	// `bin/` : des exécutables que le plugin met à disposition.
 	if let Ok(entries) = std::fs::read_dir(root.join("bin")) {
 		scripts.extend(
-			entries.flatten().filter(|entry| entry.path().is_file()).map(|entry| format!("bin/{}", entry.file_name().to_string_lossy())),
+			entries
+				.flatten()
+				.filter(|entry| entry.path().is_file())
+				.map(|entry| format!("bin/{}", entry.file_name().to_string_lossy())),
 		);
 	}
 	scripts.sort();
@@ -354,7 +397,11 @@ fn fingerprint(root: &Path) -> String {
 	files.sort();
 	let mut hasher = Sha256::new();
 	for file in &files {
-		let content: Vec<u8> = std::fs::read(root.join(file)).unwrap_or_default().into_iter().filter(|byte| *byte != b'\r').collect();
+		let content: Vec<u8> = std::fs::read(root.join(file))
+			.unwrap_or_default()
+			.into_iter()
+			.filter(|byte| *byte != b'\r')
+			.collect();
 		// Longueurs en tête : « a » + « bc » et « ab » + « c » ne se confondent pas.
 		hasher.update((file.len() as u64).to_le_bytes());
 		hasher.update(file.as_bytes());
@@ -367,7 +414,9 @@ fn fingerprint(root: &Path) -> String {
 /// Le coût permanent en contexte, lu dans la sortie de `claude plugin details`
 /// (`Always-on:   ~105 tok`).
 pub fn parse_always_on(details: &str) -> Option<u32> {
-	let line = details.lines().find(|line| line.trim_start().starts_with("Always-on:"))?;
+	let line = details
+		.lines()
+		.find(|line| line.trim_start().starts_with("Always-on:"))?;
 	let digits: String = line
 		.split(':')
 		.nth(1)?
@@ -383,7 +432,11 @@ pub fn parse_always_on(details: &str) -> Option<u32> {
 async fn claude(cwd: &Path, args: &[&str]) -> Result<String> {
 	let (ok, stdout, stderr) = claude_raw(cwd, args).await?;
 	if !ok {
-		return Err(CockpitError::msg(if stderr.trim().is_empty() { stdout.trim().to_string() } else { stderr.trim().to_string() }));
+		return Err(CockpitError::msg(if stderr.trim().is_empty() {
+			stdout.trim().to_string()
+		} else {
+			stderr.trim().to_string()
+		}));
 	}
 	Ok(stdout)
 }
@@ -391,7 +444,8 @@ async fn claude(cwd: &Path, args: &[&str]) -> Result<String> {
 /// Le même, sans juger le code de sortie : `install --json` rend sa réponse
 /// sur la sortie standard même quand il refuse.
 async fn claude_raw(cwd: &Path, args: &[&str]) -> Result<(bool, String, String)> {
-	let binary = crate::agent::claude_binary().ok_or_else(|| CockpitError::msg(crate::i18n::t("agent.claudeNotFound")))?;
+	let binary =
+		crate::agent::claude_binary().ok_or_else(|| CockpitError::msg(crate::i18n::t("agent.claudeNotFound")))?;
 	let output = crate::platform::quiet_async(&mut tokio::process::Command::new(&binary))
 		.args(args)
 		.current_dir(cwd)
@@ -415,8 +469,14 @@ pub async fn catalog(project: &Path) -> Result<Catalog> {
 /// Où l'on garde la source d'un plugin, par commit : relue telle quelle tant
 /// que la marketplace ne change pas d'épingle.
 fn source_dir(plugin_id: &str, sha: &str) -> PathBuf {
-	let safe: String = plugin_id.chars().map(|c| if c.is_alphanumeric() || c == '-' { c } else { '_' }).collect();
-	crate::config::config_dir().join("methodes").join(safe).join(if sha.is_empty() { "tete" } else { sha })
+	let safe: String = plugin_id
+		.chars()
+		.map(|c| if c.is_alphanumeric() || c == '-' { c } else { '_' })
+		.collect();
+	crate::config::config_dir()
+		.join("methodes")
+		.join(safe)
+		.join(if sha.is_empty() { "tete" } else { sha })
 }
 
 /// Récupère la source d'un plugin à son commit épinglé, sans rien installer :
@@ -427,19 +487,32 @@ async fn fetch(plugin_id: &str, source: &Source) -> Result<PathBuf> {
 	} else if !source.repo.is_empty() {
 		format!("https://github.com/{}.git", source.repo)
 	} else {
-		return Err(CockpitError::msg(crate::i18n::tf("methods.unsupportedSource", &[("kind", &source.source)])));
+		return Err(CockpitError::msg(crate::i18n::tf(
+			"methods.unsupportedSource",
+			&[("kind", &source.source)],
+		)));
 	};
 	if !source.path.is_empty() && !safe_relative(&source.path) {
-		return Err(CockpitError::msg(crate::i18n::tf("methods.unsafePath", &[("path", &source.path)])));
+		return Err(CockpitError::msg(crate::i18n::tf(
+			"methods.unsafePath",
+			&[("path", &source.path)],
+		)));
 	}
 	// Un commit épinglé est une empreinte hexadécimale, rien d'autre : c'est elle
 	// qui part en argument à git.
 	let pinned = source.sha.len() >= 7 && source.sha.chars().all(|c| c.is_ascii_hexdigit());
 	if !source.sha.is_empty() && !pinned {
-		return Err(CockpitError::msg(crate::i18n::tf("methods.unsafePath", &[("path", &source.sha)])));
+		return Err(CockpitError::msg(crate::i18n::tf(
+			"methods.unsafePath",
+			&[("path", &source.sha)],
+		)));
 	}
 	let dir = source_dir(plugin_id, &source.sha);
-	let root = if source.path.is_empty() { dir.clone() } else { dir.join(source.path.trim_start_matches("./")) };
+	let root = if source.path.is_empty() {
+		dir.clone()
+	} else {
+		dir.join(source.path.trim_start_matches("./"))
+	};
 	// Le cache ne vaut que pour un commit épinglé : une source sans épingle peut
 	// avoir bougé, et l'on relirait une copie périmée.
 	if pinned && (root.join(".claude-plugin").exists() || root.join("skills").exists()) {
@@ -453,7 +526,19 @@ async fn fetch(plugin_id: &str, source: &Source) -> Result<PathBuf> {
 	let target = dir.to_string_lossy().to_string();
 	// `--` : l'adresse vient de la marketplace, elle ne doit jamais se lire
 	// comme une option de git (`--upload-pack=…`).
-	crate::git::run_git(&parent, &["clone", "--quiet", "--filter=blob:none", "--no-checkout", "--", &url, &target]).await?;
+	crate::git::run_git(
+		&parent,
+		&[
+			"clone",
+			"--quiet",
+			"--filter=blob:none",
+			"--no-checkout",
+			"--",
+			&url,
+			&target,
+		],
+	)
+	.await?;
 	if !source.path.is_empty() {
 		crate::git::run_git(&dir, &["sparse-checkout", "set", "--no-cone", "--", &source.path]).await?;
 	}
@@ -465,7 +550,10 @@ async fn fetch(plugin_id: &str, source: &Source) -> Result<PathBuf> {
 		"HEAD"
 	};
 	if at.starts_with('-') {
-		return Err(CockpitError::msg(crate::i18n::tf("methods.unsafePath", &[("path", &at)])));
+		return Err(CockpitError::msg(crate::i18n::tf(
+			"methods.unsafePath",
+			&[("path", &at)],
+		)));
 	}
 	crate::git::run_git(&dir, &["checkout", "--quiet", at]).await?;
 	inside(&root, &dir)
@@ -477,7 +565,10 @@ fn inside(root: &Path, base: &Path) -> Result<PathBuf> {
 	let resolved = std::fs::canonicalize(root)?;
 	let base = std::fs::canonicalize(base)?;
 	if !resolved.starts_with(&base) {
-		return Err(CockpitError::msg(crate::i18n::tf("methods.unsafePath", &[("path", &root.display())])));
+		return Err(CockpitError::msg(crate::i18n::tf(
+			"methods.unsafePath",
+			&[("path", &root.display())],
+		)));
 	}
 	Ok(root.to_path_buf())
 }
@@ -501,23 +592,38 @@ pub async fn inspect(project: &Path, plugin_id: &str) -> Result<Inspection> {
 			let market = markets
 				.iter()
 				.find(|m| m.name == available.marketplace_name && !m.install_location.is_empty())
-				.ok_or_else(|| CockpitError::msg(crate::i18n::tf("methods.unsupportedSource", &[("kind", &"relative")])))?;
+				.ok_or_else(|| {
+					CockpitError::msg(crate::i18n::tf("methods.unsupportedSource", &[("kind", &"relative")]))
+				})?;
 			if !safe_relative(&available.source.path) {
-				return Err(CockpitError::msg(crate::i18n::tf("methods.unsafePath", &[("path", &available.source.path)])));
+				return Err(CockpitError::msg(crate::i18n::tf(
+					"methods.unsafePath",
+					&[("path", &available.source.path)],
+				)));
 			}
 			let location = PathBuf::from(&market.install_location);
-			inside(&location.join(available.source.path.trim_start_matches("./")), &location)?
+			inside(
+				&location.join(available.source.path.trim_start_matches("./")),
+				&location,
+			)?
 		} else {
 			fetch(plugin_id, &available.source).await?
 		};
 		(root, available.source.clone())
 	};
 	let inventory = read_plugin(&root);
-	let name = if inventory.name.is_empty() { plugin_id.split('@').next().unwrap_or(plugin_id).to_string() } else { inventory.name.clone() };
+	let name = if inventory.name.is_empty() {
+		plugin_id.split('@').next().unwrap_or(plugin_id).to_string()
+	} else {
+		inventory.name.clone()
+	};
 	let root_arg = root.to_string_lossy().to_string();
 	// Le nom vient du manifeste du plugin : on ne le passe au CLI que s'il a la
 	// forme d'un nom.
-	let plain = !name.is_empty() && name.chars().all(|c| c.is_ascii_alphanumeric() || matches!(c, '-' | '_' | '.'));
+	let plain = !name.is_empty()
+		&& name
+			.chars()
+			.all(|c| c.is_ascii_alphanumeric() || matches!(c, '-' | '_' | '.'));
 	let always_on_tokens = if plain {
 		claude(project, &["--plugin-dir", &root_arg, "plugin", "details", &name])
 			.await
@@ -527,7 +633,12 @@ pub async fn inspect(project: &Path, plugin_id: &str) -> Result<Inspection> {
 		None
 	};
 	let approved = approval(project, plugin_id).map(|entry| entry.fingerprint);
-	Ok(Inspection { inventory, always_on_tokens, source, approved })
+	Ok(Inspection {
+		inventory,
+		always_on_tokens,
+		source,
+		approved,
+	})
 }
 
 // ── Installer ────────────────────────────────────────────────────────────────
@@ -598,11 +709,17 @@ pub enum Installation {
 
 /// La réponse de `claude plugin install --json`.
 fn parse_installation(raw: &str) -> Result<Installation> {
-	let line = raw.lines().rev().find(|line| line.trim_start().starts_with('{')).unwrap_or_default();
+	let line = raw
+		.lines()
+		.rev()
+		.find(|line| line.trim_start().starts_with('{'))
+		.unwrap_or_default();
 	let value: serde_json::Value = serde_json::from_str(line).map_err(|_| CockpitError::msg(raw.trim().to_string()))?;
 	let text = |v: &serde_json::Value, key: &str| v.get(key).and_then(|x| x.as_str()).unwrap_or_default().to_string();
 	if text(&value, "outcome") == "ok" {
-		return Ok(Installation::Installed { message: text(&value, "message") });
+		return Ok(Installation::Installed {
+			message: text(&value, "message"),
+		});
 	}
 	if let Some(shown) = value.get("shownCommand").filter(|shown| shown.is_object()) {
 		let sha256 = text(shown, "sha256");
@@ -616,7 +733,11 @@ fn parse_installation(raw: &str) -> Result<Installation> {
 		}
 	}
 	let message = text(&value, "message");
-	Err(CockpitError::msg(if message.is_empty() { raw.trim().to_string() } else { message }))
+	Err(CockpitError::msg(if message.is_empty() {
+		raw.trim().to_string()
+	} else {
+		message
+	}))
 }
 
 /// Installe un plugin pour le projet (`project`, commité et partagé) ou pour ce
@@ -626,9 +747,18 @@ fn parse_installation(raw: &str) -> Result<Installation> {
 /// d'installer, et si ce qu'il exécute a changé entre-temps, on refuse — on
 /// n'installe que ce qui a été lu. `accept` est l'empreinte d'une commande de
 /// marketplace déjà montrée et acceptée (voir [`Installation::NeedsCommand`]).
-pub async fn install(project: &Path, plugin_id: &str, scope: &str, approved: &str, accept: Option<&str>) -> Result<Installation> {
+pub async fn install(
+	project: &Path,
+	plugin_id: &str,
+	scope: &str,
+	approved: &str,
+	accept: Option<&str>,
+) -> Result<Installation> {
 	if !matches!(scope, "project" | "local") {
-		return Err(CockpitError::msg(crate::i18n::tf("methods.badScope", &[("scope", &scope)])));
+		return Err(CockpitError::msg(crate::i18n::tf(
+			"methods.badScope",
+			&[("scope", &scope)],
+		)));
 	}
 	let fresh = inspect(project, plugin_id).await?;
 	if fresh.inventory.fingerprint != approved {
@@ -644,7 +774,11 @@ pub async fn install(project: &Path, plugin_id: &str, scope: &str, approved: &st
 		// Le CLI récupère le plugin de son côté, peut-être après avoir rafraîchi
 		// la marketplace : on relit ce qu'il a réellement installé. Si ce n'est
 		// pas ce qui a été lu, il repart aussitôt.
-		let installed = catalog(project).await?.installed.into_iter().find(|p| p.id == plugin_id && p.scope == scope);
+		let installed = catalog(project)
+			.await?
+			.installed
+			.into_iter()
+			.find(|p| p.id == plugin_id && p.scope == scope);
 		let matches_reading = installed
 			.as_ref()
 			.is_some_and(|p| read_plugin(Path::new(&p.install_path)).fingerprint == approved);
@@ -655,7 +789,11 @@ pub async fn install(project: &Path, plugin_id: &str, scope: &str, approved: &st
 		set_approval(
 			project,
 			plugin_id,
-			Some(Approval { fingerprint: approved.to_string(), scope: scope.to_string(), at: chrono::Utc::now().to_rfc3339() }),
+			Some(Approval {
+				fingerprint: approved.to_string(),
+				scope: scope.to_string(),
+				at: chrono::Utc::now().to_rfc3339(),
+			}),
 		)?;
 	}
 	Ok(result)
@@ -669,7 +807,11 @@ pub async fn uninstall(project: &Path, plugin_id: &str, scope: &str) -> Result<S
 		set_approval(project, plugin_id, None)?;
 	}
 	let value: serde_json::Value = serde_json::from_str(raw.trim()).unwrap_or_default();
-	Ok(value.get("message").and_then(|m| m.as_str()).unwrap_or_default().to_string())
+	Ok(value
+		.get("message")
+		.and_then(|m| m.as_str())
+		.unwrap_or_default()
+		.to_string())
 }
 
 // ── Mesurer ──────────────────────────────────────────────────────────────────
@@ -702,15 +844,25 @@ fn median(mut values: Vec<f64>) -> Option<f64> {
 	}
 	values.sort_by(|a, b| a.partial_cmp(b).unwrap_or(std::cmp::Ordering::Equal));
 	let middle = values.len() / 2;
-	Some(if values.len() % 2 == 1 { values[middle] } else { (values[middle - 1] + values[middle]) / 2.0 })
+	Some(if values.len() % 2 == 1 {
+		values[middle]
+	} else {
+		(values[middle - 1] + values[middle]) / 2.0
+	})
 }
 
 fn period(executions: &[&crate::executions::Execution]) -> Period {
 	use crate::executions::Outcome;
-	let done: Vec<_> = executions.iter().filter(|e| !matches!(e.outcome, Outcome::Running)).collect();
+	let done: Vec<_> = executions
+		.iter()
+		.filter(|e| !matches!(e.outcome, Outcome::Running))
+		.collect();
 	Period {
 		executions: done.len(),
-		failed: done.iter().filter(|e| matches!(e.outcome, Outcome::Failed | Outcome::LostAtLaunch)).count(),
+		failed: done
+			.iter()
+			.filter(|e| matches!(e.outcome, Outcome::Failed | Outcome::LostAtLaunch))
+			.count(),
 		median_turns: median(done.iter().map(|e| e.tally.turns as f64).collect()),
 		median_cost_usd: median(
 			done.iter()
@@ -724,14 +876,36 @@ fn period(executions: &[&crate::executions::Execution]) -> Period {
 /// Compare les exécutions du projet avant et après `since`, sur autant de jours
 /// de part et d'autre — au plus trente. Les exécutions du projet sont celles
 /// lancées pendant qu'il était actif (`Opening::project`).
-pub fn measure_between(all: &[crate::executions::Execution], project_id: &str, since: chrono::DateTime<chrono::Utc>, now: chrono::DateTime<chrono::Utc>) -> Measure {
+pub fn measure_between(
+	all: &[crate::executions::Execution],
+	project_id: &str,
+	since: chrono::DateTime<chrono::Utc>,
+	now: chrono::DateTime<chrono::Utc>,
+) -> Measure {
 	let days = (now - since).num_days().clamp(1, 30);
 	let window = chrono::Duration::days(days);
-	let at = |e: &crate::executions::Execution| chrono::DateTime::parse_from_rfc3339(&e.started_at).ok().map(|d| d.with_timezone(&chrono::Utc));
+	let at = |e: &crate::executions::Execution| {
+		chrono::DateTime::parse_from_rfc3339(&e.started_at)
+			.ok()
+			.map(|d| d.with_timezone(&chrono::Utc))
+	};
 	let mine: Vec<_> = all.iter().filter(|e| e.opening.project == project_id).collect();
-	let before: Vec<_> = mine.iter().copied().filter(|e| at(e).is_some_and(|d| d < since && d >= since - window)).collect();
-	let after: Vec<_> = mine.iter().copied().filter(|e| at(e).is_some_and(|d| d >= since && d < since + window)).collect();
-	Measure { since: since.to_rfc3339(), days, before: period(&before), after: period(&after) }
+	let before: Vec<_> = mine
+		.iter()
+		.copied()
+		.filter(|e| at(e).is_some_and(|d| d < since && d >= since - window))
+		.collect();
+	let after: Vec<_> = mine
+		.iter()
+		.copied()
+		.filter(|e| at(e).is_some_and(|d| d >= since && d < since + window))
+		.collect();
+	Measure {
+		since: since.to_rfc3339(),
+		days,
+		before: period(&before),
+		after: period(&after),
+	}
 }
 
 /// L'avant/après d'un plugin installé : depuis ton accord, ou à défaut depuis
@@ -750,7 +924,12 @@ pub async fn measure(project: &Path, project_id: &str, plugin_id: &str) -> Resul
 	let since = chrono::DateTime::parse_from_rfc3339(&since)
 		.map_err(|_| CockpitError::msg(crate::i18n::tf("methods.unknownPlugin", &[("id", &plugin_id)])))?
 		.with_timezone(&chrono::Utc);
-	Ok(measure_between(&crate::executions::fold(), project_id, since, chrono::Utc::now()))
+	Ok(measure_between(
+		&crate::executions::fold(),
+		project_id,
+		since,
+		chrono::Utc::now(),
+	))
 }
 
 #[cfg(test)]
@@ -773,7 +952,9 @@ mod tests {
 		// Une empreinte qui n'est pas celle lue : refusé, rien n'est installé.
 		assert!(install(&project, id, "project", "pas-la-bonne", None).await.is_err());
 
-		let done = install(&project, id, "project", &read.inventory.fingerprint, None).await.unwrap();
+		let done = install(&project, id, "project", &read.inventory.fingerprint, None)
+			.await
+			.unwrap();
 		assert!(matches!(done, Installation::Installed { .. }), "{done:?}");
 		let settings = std::fs::read_to_string(project.join(".claude").join("settings.json")).unwrap();
 		assert!(settings.contains(id), "{settings}");
@@ -790,12 +971,23 @@ mod tests {
 	#[test]
 	fn la_reponse_d_installation_se_lit() {
 		assert_eq!(
-			parse_installation(r#"{"command":"install","outcome":"ok","message":"Successfully installed plugin: a@m (scope: project)"}"#).unwrap(),
-			Installation::Installed { message: "Successfully installed plugin: a@m (scope: project)".into() }
+			parse_installation(
+				r#"{"command":"install","outcome":"ok","message":"Successfully installed plugin: a@m (scope: project)"}"#
+			)
+			.unwrap(),
+			Installation::Installed {
+				message: "Successfully installed plugin: a@m (scope: project)".into()
+			}
 		);
 		assert_eq!(
-			parse_installation(r#"{"outcome":"needs-confirmation","shownCommand":{"command":"npx a-installer","sha256":"ab12"}}"#).unwrap(),
-			Installation::NeedsCommand { command: "npx a-installer".into(), sha256: "ab12".into() }
+			parse_installation(
+				r#"{"outcome":"needs-confirmation","shownCommand":{"command":"npx a-installer","sha256":"ab12"}}"#
+			)
+			.unwrap(),
+			Installation::NeedsCommand {
+				command: "npx a-installer".into(),
+				sha256: "ab12".into()
+			}
 		);
 		let refus = parse_installation(r#"{"outcome":"error","message":"Plugin not found"}"#).unwrap_err();
 		assert!(refus.to_string().contains("Plugin not found"));
@@ -806,7 +998,9 @@ mod tests {
 	#[test]
 	fn l_avant_apres_compare_des_fenetres_egales() {
 		use crate::executions::{Execution, Outcome};
-		let since = chrono::DateTime::parse_from_rfc3339("2026-11-10T00:00:00Z").unwrap().with_timezone(&chrono::Utc);
+		let since = chrono::DateTime::parse_from_rfc3339("2026-11-10T00:00:00Z")
+			.unwrap()
+			.with_timezone(&chrono::Utc);
 		let now = since + chrono::Duration::days(5);
 		let exec = |day: i64, project: &str, outcome: Outcome, turns: u32, usd: f64| {
 			let mut tally = crate::executions::Tally::default();
@@ -816,7 +1010,10 @@ mod tests {
 				id: String::new(),
 				started_at: (since + chrono::Duration::days(day)).to_rfc3339(),
 				ended_at: String::new(),
-				opening: crate::executions::Opening { project: project.into(), ..Default::default() },
+				opening: crate::executions::Opening {
+					project: project.into(),
+					..Default::default()
+				},
 				engine_session: String::new(),
 				models: Vec::new(),
 				verdict: String::new(),
@@ -868,7 +1065,11 @@ mod tests {
 	#[test]
 	fn un_plugin_de_skills_n_execute_rien() {
 		let dir = plugin("skills");
-		write(&dir, ".claude-plugin/plugin.json", r#"{"name":"commit-tools","version":"1.0.1","description":"Git"}"#);
+		write(
+			&dir,
+			".claude-plugin/plugin.json",
+			r#"{"name":"commit-tools","version":"1.0.1","description":"Git"}"#,
+		);
 		write(&dir, "skills/commit/SKILL.md", "---\nname: commit\n---\n");
 		write(&dir, "skills/brouillon/notes.txt", "pas un skill");
 		write(&dir, "commands/push.md", "push");
@@ -877,7 +1078,11 @@ mod tests {
 		assert_eq!(inventory.skills, vec!["commit"]);
 		assert_eq!(inventory.commands, vec!["push"]);
 		assert!(inventory.hooks.is_empty() && inventory.servers.is_empty() && inventory.scripts.is_empty());
-		assert_eq!(inventory.fingerprint.len(), 64, "l'empreinte couvre aussi les instructions");
+		assert_eq!(
+			inventory.fingerprint.len(),
+			64,
+			"l'empreinte couvre aussi les instructions"
+		);
 		let _ = std::fs::remove_dir_all(&dir);
 	}
 
@@ -896,15 +1101,35 @@ mod tests {
 			"hooks/hooks.json",
 			r#"{"hooks":{"PreToolUse":[{"hooks":[{"type":"command","command":"python3 \"${CLAUDE_PLUGIN_ROOT}/hooks/pre.py\"","timeout":10}]}]}}"#,
 		);
-		write(&dir, ".mcp.json", r#"{"mcpServers":{"local":{"command":"node","args":["${CLAUDE_PLUGIN_ROOT}/server.js","--port","0"]}}}"#);
+		write(
+			&dir,
+			".mcp.json",
+			r#"{"mcpServers":{"local":{"command":"node","args":["${CLAUDE_PLUGIN_ROOT}/server.js","--port","0"]}}}"#,
+		);
 		write(&dir, "hooks/pre.py", "print('ok')\n");
 		write(&dir, "server.js", "console.log(1)\n");
 
 		let inventory = read_plugin(&dir);
-		assert_eq!(inventory.hooks, vec![Hook { event: "PreToolUse".into(), command: "python3 \"${CLAUDE_PLUGIN_ROOT}/hooks/pre.py\"".into() }]);
-		let mut servers: Vec<_> = inventory.servers.iter().map(|s| (s.name.as_str(), s.target.as_str())).collect();
+		assert_eq!(
+			inventory.hooks,
+			vec![Hook {
+				event: "PreToolUse".into(),
+				command: "python3 \"${CLAUDE_PLUGIN_ROOT}/hooks/pre.py\"".into()
+			}]
+		);
+		let mut servers: Vec<_> = inventory
+			.servers
+			.iter()
+			.map(|s| (s.name.as_str(), s.target.as_str()))
+			.collect();
 		servers.sort();
-		assert_eq!(servers, vec![("docs", "https://mcp.example.com/mcp"), ("local", "node ${CLAUDE_PLUGIN_ROOT}/server.js --port 0")]);
+		assert_eq!(
+			servers,
+			vec![
+				("docs", "https://mcp.example.com/mcp"),
+				("local", "node ${CLAUDE_PLUGIN_ROOT}/server.js --port 0")
+			]
+		);
 		assert_eq!(inventory.scripts, vec!["hooks/pre.py", "server.js"]);
 		assert_eq!(inventory.fingerprint.len(), 64);
 
@@ -951,7 +1176,10 @@ mod tests {
 		let inventory = read_plugin(&dir);
 		let hooks: Vec<_> = inventory.hooks.iter().map(|h| h.command.as_str()).collect();
 		assert_eq!(hooks, vec!["sh run.sh", "HTTP https://hook.example.com"]);
-		assert!(inventory.servers.iter().any(|s| s.name == "LSP · rust" && s.target == "rust-analyzer"));
+		assert!(inventory
+			.servers
+			.iter()
+			.any(|s| s.name == "LSP · rust" && s.target == "rust-analyzer"));
 		assert_eq!(inventory.scripts, vec!["bin/outil"]);
 		let _ = std::fs::remove_dir_all(&dir);
 	}
@@ -968,14 +1196,19 @@ mod tests {
 		}
 		// Un manifeste qui désigne un fichier hors du plugin n'est pas suivi.
 		let dir = plugin("hors");
-		write(&dir, ".claude-plugin/plugin.json", r#"{"name":"hors","hooks":"../ailleurs.json"}"#);
+		write(
+			&dir,
+			".claude-plugin/plugin.json",
+			r#"{"name":"hors","hooks":"../ailleurs.json"}"#,
+		);
 		assert!(read_plugin(&dir).hooks.is_empty());
 		let _ = std::fs::remove_dir_all(&dir);
 	}
 
 	#[test]
 	fn le_cout_permanent_se_lit_dans_details() {
-		let details = "commit-commands 1.0.1\n\nProjected token cost\n  Always-on:   ~105 tok   added to every session\n";
+		let details =
+			"commit-commands 1.0.1\n\nProjected token cost\n  Always-on:   ~105 tok   added to every session\n";
 		assert_eq!(parse_always_on(details), Some(105));
 		assert_eq!(parse_always_on("  Always-on:   ~1,240 tok"), Some(1240));
 		assert_eq!(parse_always_on("rien"), None);

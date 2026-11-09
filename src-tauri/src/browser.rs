@@ -323,7 +323,11 @@ pub async fn running(cwd: &str) -> bool {
 /// en temps. Rien n'est lancé pour lui ; sans navigateur, pas d'image.
 pub async fn snapshot(cwd: &str) -> Option<(Vec<u8>, String)> {
 	use base64::Engine;
-	let port = std::fs::read_to_string(port_path(cwd)).ok()?.trim().parse::<u16>().ok()?;
+	let port = std::fs::read_to_string(port_path(cwd))
+		.ok()?
+		.trim()
+		.parse::<u16>()
+		.ok()?;
 	let targets: Vec<serde_json::Value> = reqwest::Client::new()
 		.get(format!("http://127.0.0.1:{port}/json/list"))
 		.timeout(Duration::from_millis(800))
@@ -347,7 +351,9 @@ pub async fn snapshot(cwd: &str) -> Option<(Vec<u8>, String)> {
 	let answer = tokio::time::timeout(Duration::from_secs(4), async {
 		while let Some(Ok(message)) = socket.next().await {
 			let Message::Text(raw) = message else { continue };
-			let Ok(value) = serde_json::from_str::<serde_json::Value>(raw.as_str()) else { continue };
+			let Ok(value) = serde_json::from_str::<serde_json::Value>(raw.as_str()) else {
+				continue;
+			};
 			if value["id"] == 1 {
 				return value["result"]["data"].as_str().map(str::to_string);
 			}
@@ -427,7 +433,9 @@ pub async fn inspect(cwd: &str, x: f64, y: f64) -> Result<serde_json::Value> {
 	let (mut socket, _) = tokio_tungstenite::connect_async(socket_url)
 		.await
 		.map_err(|e| CockpitError::msg(crate::i18n::tf("browser.pageConnection", &[("error", &e)])))?;
-	let expression = INSPECT.replace("__X__", &format!("{x:.1}")).replace("__Y__", &format!("{y:.1}"));
+	let expression = INSPECT
+		.replace("__X__", &format!("{x:.1}"))
+		.replace("__Y__", &format!("{y:.1}"));
 	let ask = serde_json::json!({
 		"id": 1, "method": "Runtime.evaluate",
 		"params": { "expression": expression, "returnByValue": true },
@@ -439,7 +447,9 @@ pub async fn inspect(cwd: &str, x: f64, y: f64) -> Result<serde_json::Value> {
 	let answer = tokio::time::timeout(Duration::from_secs(3), async {
 		while let Some(Ok(message)) = socket.next().await {
 			let Message::Text(raw) = message else { continue };
-			let Ok(value) = serde_json::from_str::<serde_json::Value>(raw.as_str()) else { continue };
+			let Ok(value) = serde_json::from_str::<serde_json::Value>(raw.as_str()) else {
+				continue;
+			};
 			if value["id"] == 1 {
 				return Some(value["result"]["result"]["value"].clone());
 			}
@@ -456,14 +466,11 @@ pub async fn inspect(cwd: &str, x: f64, y: f64) -> Result<serde_json::Value> {
 
 /// Lance le navigateur s'il ne tourne pas, et rend son port.
 async fn ensure(cwd: &str) -> Result<u16> {
-	let port = port_for(cwd)
-		.ok_or_else(|| CockpitError::msg(crate::i18n::t("browser.noPort")))?;
+	let port = port_for(cwd).ok_or_else(|| CockpitError::msg(crate::i18n::t("browser.noPort")))?;
 	if alive(port).await {
 		return Ok(port);
 	}
-	let line = launch_line(cwd, port).ok_or_else(|| {
-		CockpitError::msg(crate::i18n::t("browser.notFound"))
-	})?;
+	let line = launch_line(cwd, port).ok_or_else(|| CockpitError::msg(crate::i18n::t("browser.notFound")))?;
 	let child = crate::platform::quiet_std(&mut std::process::Command::new(&line[0]))
 		.args(&line[1..])
 		.stdin(std::process::Stdio::null())
@@ -633,9 +640,7 @@ pub fn release_after_recording(cwd: &str) {
 	}
 }
 
-type Socket = tokio_tungstenite::WebSocketStream<
-	tokio_tungstenite::MaybeTlsStream<tokio::net::TcpStream>,
->;
+type Socket = tokio_tungstenite::WebSocketStream<tokio_tungstenite::MaybeTlsStream<tokio::net::TcpStream>>;
 
 /// La boucle d'un navigateur regardé : ses pages, leurs images, nos gestes.
 async fn stream(socket: Socket, mut inbox: mpsc::UnboundedReceiver<Action>, feed: Arc<Feed>, cwd: String) {
@@ -671,7 +676,11 @@ async fn stream(socket: Socket, mut inbox: mpsc::UnboundedReceiver<Action>, feed
 		close(&feed);
 		return;
 	}
-	let discover = command("Target.setDiscoverTargets", serde_json::json!({ "discover": true }), None);
+	let discover = command(
+		"Target.setDiscoverTargets",
+		serde_json::json!({ "discover": true }),
+		None,
+	);
 	let _ = out.send(discover).await;
 
 	let mut pages: HashMap<String, Page> = HashMap::new();
@@ -685,9 +694,7 @@ async fn stream(socket: Socket, mut inbox: mpsc::UnboundedReceiver<Action>, feed
 	// pour une, dont une vide qui pouvait reprendre la vue.
 	let mut pending: Option<String> = None;
 	let mut seen_page = false;
-	let metrics = |width: u32, height: u32| {
-		serde_json::json!({ "width": width, "height": height, "deviceScaleFactor": 1, "mobile": false })
-	};
+	let metrics = |width: u32, height: u32| serde_json::json!({ "width": width, "height": height, "deviceScaleFactor": 1, "mobile": false });
 
 	loop {
 		tokio::select! {
@@ -1058,11 +1065,24 @@ mod tests {
 			sizes.push(block.len());
 		}
 		let took = started.elapsed();
-		println!("{} images en {:?}, {} octets en moyenne", sizes.len(), took, sizes.iter().sum::<usize>() / sizes.len().max(1));
+		println!(
+			"{} images en {:?}, {} octets en moyenne",
+			sizes.len(),
+			took,
+			sizes.iter().sum::<usize>() / sizes.len().max(1)
+		);
 		assert!(sizes.len() >= 30, "trop peu d'images : {}", sizes.len());
 
 		// La page prend la taille qu'on lui demande.
-		act(&shared, &cwd, Action::Resize { width: 900, height: 600 }).unwrap();
+		act(
+			&shared,
+			&cwd,
+			Action::Resize {
+				width: 900,
+				height: 600,
+			},
+		)
+		.unwrap();
 		let mut width = 0.0;
 		let resized = Instant::now();
 		while width != 900.0 && resized.elapsed() < Duration::from_secs(5) {
@@ -1088,23 +1108,43 @@ mod tests {
 
 	/// Une touche, comme l'interface l'envoie : enfoncée puis relâchée.
 	fn tape(shared: &SharedBrowsers, cwd: &str, key: &str, code: u32) {
-		let text = if key.chars().count() == 1 { key.to_string() } else { String::new() };
+		let text = if key.chars().count() == 1 {
+			key.to_string()
+		} else {
+			String::new()
+		};
 		for event in ["keyDown", "keyUp"] {
-			act(shared, cwd, Action::Key {
-				event: event.into(),
-				key: key.into(),
-				code: String::new(),
-				text: text.clone(),
-				key_code: code,
-				modifiers: 0,
-			})
+			act(
+				shared,
+				cwd,
+				Action::Key {
+					event: event.into(),
+					key: key.into(),
+					code: String::new(),
+					text: text.clone(),
+					key_code: code,
+					modifiers: 0,
+				},
+			)
 			.unwrap();
 		}
 	}
 
 	fn clic(shared: &SharedBrowsers, cwd: &str, x: f64, y: f64) {
 		for event in ["mousePressed", "mouseReleased"] {
-			act(shared, cwd, Action::Mouse { event: event.into(), x, y, button: "left".into(), click_count: 1, modifiers: 0 }).unwrap();
+			act(
+				shared,
+				cwd,
+				Action::Mouse {
+					event: event.into(),
+					x,
+					y,
+					button: "left".into(),
+					click_count: 1,
+					modifiers: 0,
+				},
+			)
+			.unwrap();
 		}
 	}
 
@@ -1142,7 +1182,15 @@ mod tests {
 		let cwd = cwd.to_string_lossy().to_string();
 		let shared = SharedBrowsers::default();
 		watch(shared.clone(), cwd.clone()).await.expect("le navigateur démarre");
-		act(&shared, &cwd, Action::Resize { width: 1100, height: 700 }).unwrap();
+		act(
+			&shared,
+			&cwd,
+			Action::Resize {
+				width: 1100,
+				height: 700,
+			},
+		)
+		.unwrap();
 
 		// La page recopie l'état de son formulaire dans son adresse, que chaque
 		// image porte. Elle bat : une page immobile ne produit pas d'image.
@@ -1175,7 +1223,11 @@ mod tests {
 			.json()
 			.await
 			.unwrap();
-		assert_eq!(targets.iter().filter(|target| target["type"] == "page").count(), 1, "une seule page");
+		assert_eq!(
+			targets.iter().filter(|target| target["type"] == "page").count(),
+			1,
+			"une seule page"
+		);
 
 		clic(&shared, &cwd, 250.0, 115.0);
 		for (key, code) in [("a", 65), ("@", 50), ("b", 66), (".", 190), ("c", 67)] {
@@ -1185,24 +1237,40 @@ mod tests {
 
 		// La souris traverse la page jusqu'au second champ, comme une main.
 		for step in 0..40 {
-			act(&shared, &cwd, Action::Mouse {
-				event: "mouseMoved".into(), x: 250.0, y: 115.0 + step as f64 * 2.5,
-				button: "none".into(), click_count: 0, modifiers: 0,
-			})
+			act(
+				&shared,
+				&cwd,
+				Action::Mouse {
+					event: "mouseMoved".into(),
+					x: 250.0,
+					y: 115.0 + step as f64 * 2.5,
+					button: "none".into(),
+					click_count: 0,
+					modifiers: 0,
+				},
+			)
 			.unwrap();
 		}
 		clic(&shared, &cwd, 250.0, 215.0);
 		for (key, code) in [("x", 88), ("y", 89), ("z", 90)] {
 			tape(&shared, &cwd, key, code);
 		}
-		assert_eq!(etat(&shared, &cwd, &mut seq, &at("a@b.c~xyz~p")).await, at("a@b.c~xyz~p"), "le mot de passe se saisit au clic");
+		assert_eq!(
+			etat(&shared, &cwd, &mut seq, &at("a@b.c~xyz~p")).await,
+			at("a@b.c~xyz~p"),
+			"le mot de passe se saisit au clic"
+		);
 
 		// Et à la tabulation, depuis le premier champ : arriver ainsi dans un
 		// champ en sélectionne le contenu, que la frappe remplace.
 		clic(&shared, &cwd, 250.0, 115.0);
 		tape(&shared, &cwd, "Tab", 9);
 		tape(&shared, &cwd, "w", 87);
-		assert_eq!(etat(&shared, &cwd, &mut seq, &at("a@b.c~w~p")).await, at("a@b.c~w~p"), "le mot de passe se saisit à la tabulation");
+		assert_eq!(
+			etat(&shared, &cwd, &mut seq, &at("a@b.c~w~p")).await,
+			at("a@b.c~w~p"),
+			"le mot de passe se saisit à la tabulation"
+		);
 
 		// Un mot de passe a des majuscules et des chiffres : autant d'appuis sur
 		// Maj, que la page ne consomme pas. Au troisième, Chrome se figeait pour
@@ -1219,14 +1287,18 @@ mod tests {
 		for (letter, code) in [("A", 65), ("B", 66), ("C", 67), ("D", 68), ("E", 69)] {
 			act(&shared, &cwd, maj("keyDown", 8)).unwrap();
 			for event in ["keyDown", "keyUp"] {
-				act(&shared, &cwd, Action::Key {
-					event: event.into(),
-					key: letter.into(),
-					code: format!("Key{letter}"),
-					text: letter.into(),
-					key_code: code,
-					modifiers: 8,
-				})
+				act(
+					&shared,
+					&cwd,
+					Action::Key {
+						event: event.into(),
+						key: letter.into(),
+						code: format!("Key{letter}"),
+						text: letter.into(),
+						key_code: code,
+						modifiers: 8,
+					},
+				)
 				.unwrap();
 			}
 			act(&shared, &cwd, maj("keyUp", 0)).unwrap();

@@ -129,9 +129,7 @@ impl EngineConfig {
 	/// Vrai quand au moins un niveau est déclaré : sans ça, le réglage n'a
 	/// aucun effet et l'interface ne doit pas le proposer.
 	pub fn knows_depth(&self) -> bool {
-		!self.depth_fast.trim().is_empty()
-			|| !self.depth_normal.trim().is_empty()
-			|| !self.depth_deep.trim().is_empty()
+		!self.depth_fast.trim().is_empty() || !self.depth_normal.trim().is_empty() || !self.depth_deep.trim().is_empty()
 	}
 }
 
@@ -731,8 +729,7 @@ impl WorkflowConfig {
 				.into_iter()
 				.find(|value| !inert_in_shell(value))
 			{
-				let message =
-					crate::i18n::tf("config.worktreeHostileValue", &[("value", &hostile)]);
+				let message = crate::i18n::tf("config.worktreeHostileValue", &[("value", &hostile)]);
 				return (format!("echo {} >&2; exit 1", shell_arg(&message)), false);
 			}
 		}
@@ -748,9 +745,9 @@ impl WorkflowConfig {
 /// gabarit où elle tombe : ni métacaractère, ni guillemet, ni option.
 fn inert_in_shell(value: &str) -> bool {
 	!value.starts_with('-')
-		&& !value.chars().any(|c| {
-			c.is_control() || "`$;&|<>()'\"\\*?[]{}".contains(c)
-		})
+		&& !value
+			.chars()
+			.any(|c| c.is_control() || "`$;&|<>()'\"\\*?[]{}".contains(c))
 }
 
 /// Un argument de shell qui survit aux espaces et aux apostrophes.
@@ -928,13 +925,13 @@ impl BriefConfig {
 }
 
 /* ── La Permanence ──────────────────────────────────────────────────────────
-   Un opérateur qui tient l'écosystème pendant qu'on fait autre chose. Il ne
-   décide pas quoi construire : il répare, relance, met à jour, et prouve qu'il
-   a réussi — l'opération a des oracles que le produit n'a pas.
+Un opérateur qui tient l'écosystème pendant qu'on fait autre chose. Il ne
+décide pas quoi construire : il répare, relance, met à jour, et prouve qu'il
+a réussi — l'opération a des oracles que le produit n'a pas.
 
-   Tout est déclaré et rien n'est en dur, à une exception près qui est le sujet
-   même du dispositif : ce qu'elle ne fera jamais. Voir `NEVER`.
-   ────────────────────────────────────────────────────────────────────────── */
+Tout est déclaré et rien n'est en dur, à une exception près qui est le sujet
+même du dispositif : ce qu'elle ne fera jamais. Voir `NEVER`.
+────────────────────────────────────────────────────────────────────────── */
 
 /// D'où l'oracle d'un engagement tire sa preuve.
 ///
@@ -1091,13 +1088,7 @@ pub const PROTECTED_BRANCHES: [&str; 9] = [
 /// mais **ce qui engage une décision plutôt qu'un compte rendu**.
 /// En anglais : la liste n'est lue que dans la consigne de la Permanence, et
 /// les consignes s'écrivent en anglais (voir `i18n::reply_directive`).
-pub const NEVER: [&str; 5] = [
-	"approve or reject a review",
-	"assign",
-	"close",
-	"merge",
-	"deploy",
-];
+pub const NEVER: [&str; 5] = ["approve or reject a review", "assign", "close", "merge", "deploy"];
 
 #[derive(Debug, Clone, Serialize, Deserialize, Default)]
 #[serde(default, rename_all = "camelCase")]
@@ -1262,8 +1253,7 @@ impl PermanenceConfig {
 			.filter(|power| !power.is_empty())
 			.collect();
 		if self.comment.enabled {
-			let mut scopes: Vec<&str> =
-				self.comment.scopes.iter().map(|scope| scope.trim()).collect();
+			let mut scopes: Vec<&str> = self.comment.scopes.iter().map(|scope| scope.trim()).collect();
 			scopes.sort_unstable();
 			all.push(format!("comment:{}", scopes.join("+")));
 		}
@@ -1326,12 +1316,8 @@ impl PermanenceConfig {
 		if cleaned.is_empty() {
 			return true;
 		}
-		PROTECTED_BRANCHES
-			.iter()
-			.any(|entry| *entry == cleaned)
-			|| declared
-				.iter()
-				.any(|entry| entry.trim().to_lowercase() == cleaned)
+		PROTECTED_BRANCHES.iter().any(|entry| *entry == cleaned)
+			|| declared.iter().any(|entry| entry.trim().to_lowercase() == cleaned)
 	}
 
 	/// Sommes-nous dans la plage de service ?
@@ -1684,12 +1670,7 @@ fn default_roles_in(lang: &str) -> Vec<RoleConfig> {
 		// surtout sa commande de démarrage se règlent où se règlent les leurs.
 		// Ce qui le distingue — les outils d'orchestration, les étapes de la
 		// mission — reste posé par le cockpit et ne se configure pas.
-		role(
-			MASTER_ROLE,
-			label("config.roles.master"),
-			"",
-			&[],
-		),
+		role(MASTER_ROLE, label("config.roles.master"), "", &[]),
 		role(
 			"backend",
 			label("config.roles.backend"),
@@ -1891,8 +1872,7 @@ impl ProjectConfig {
 			base.sentry.org = inherit(&self.sentry.org, &base.sentry.org);
 			base.sentry.projects = inherit_list(&self.sentry.projects, &base.sentry.projects);
 			base.linear.team_key = inherit(&self.linear.team_key, &base.linear.team_key);
-			base.trigger.project_ref =
-				inherit(&self.trigger.project_ref, &base.trigger.project_ref);
+			base.trigger.project_ref = inherit(&self.trigger.project_ref, &base.trigger.project_ref);
 			base.gitlab.project = inherit(&self.gitlab.project, &base.gitlab.project);
 		}
 		// Les environnements ne se fusionnent pas un à un : une liste propre au
@@ -2026,14 +2006,10 @@ impl ProjectConfig {
 		};
 
 		base.betterstack.token = inherit(&self.betterstack.token, &base.betterstack.token);
-		base.betterstack.telemetry_token = inherit(
-			&self.betterstack.telemetry_token,
-			&base.betterstack.telemetry_token,
-		);
-		base.betterstack.clickhouse_host = inherit(
-			&self.betterstack.clickhouse_host,
-			&base.betterstack.clickhouse_host,
-		);
+		base.betterstack.telemetry_token =
+			inherit(&self.betterstack.telemetry_token, &base.betterstack.telemetry_token);
+		base.betterstack.clickhouse_host =
+			inherit(&self.betterstack.clickhouse_host, &base.betterstack.clickhouse_host);
 		base.betterstack.clickhouse_username = inherit(
 			&self.betterstack.clickhouse_username,
 			&base.betterstack.clickhouse_username,
@@ -2068,8 +2044,7 @@ impl ProjectConfig {
 			base.team.linear_team_id = self.team.linear_team_id.trim().to_string();
 			base.team.members = self.team.members.clone();
 		} else {
-			base.team.linear_team_id =
-				inherit(&self.team.linear_team_id, &base.team.linear_team_id);
+			base.team.linear_team_id = inherit(&self.team.linear_team_id, &base.team.linear_team_id);
 			if !self.team.members.is_empty() {
 				base.team.members = self.team.members.clone();
 			}
@@ -2110,14 +2085,8 @@ impl ProjectConfig {
 		mark("betterstack", &self.betterstack.token);
 		mark("betterstack_telemetry", &self.betterstack.telemetry_token);
 		mark("betterstack_clickhouse_host", &self.betterstack.clickhouse_host);
-		mark(
-			"betterstack_clickhouse_username",
-			&self.betterstack.clickhouse_username,
-		);
-		mark(
-			"betterstack_clickhouse_password",
-			&self.betterstack.clickhouse_password,
-		);
+		mark("betterstack_clickhouse_username", &self.betterstack.clickhouse_username);
+		mark("betterstack_clickhouse_password", &self.betterstack.clickhouse_password);
 		mark("stripe", &self.stripe.token);
 		mark("impact_brief", &self.impact.brief);
 		if !self.sentry.projects.is_empty() {
@@ -2248,9 +2217,7 @@ pub fn project_named(repo: &str) -> String {
 	config
 		.projects
 		.iter()
-		.find(|project| {
-			inherit(&project.main_repo, &config.general.main_repo).trim_end_matches('/') == repo
-		})
+		.find(|project| inherit(&project.main_repo, &config.general.main_repo).trim_end_matches('/') == repo)
 		.map(|project| {
 			if project.name.trim().is_empty() {
 				project.id.clone()
@@ -2312,17 +2279,11 @@ pub fn resolve_path(raw: &str, projects_root: &str) -> String {
 	if root.is_empty() {
 		return expanded.to_string_lossy().to_string();
 	}
-	PathBuf::from(root)
-		.join(expanded)
-		.to_string_lossy()
-		.to_string()
+	PathBuf::from(root).join(expanded).to_string_lossy().to_string()
 }
 
 pub fn config_dir() -> PathBuf {
-	dirs::home_dir()
-		.unwrap_or_default()
-		.join(".config")
-		.join("cockpit")
+	dirs::home_dir().unwrap_or_default().join(".config").join("cockpit")
 }
 
 pub fn config_path() -> PathBuf {
@@ -2394,8 +2355,7 @@ impl Config {
 				"trigger",
 				"Trigger.dev",
 				"ci",
-				!self.trigger.token.trim().is_empty()
-					|| !self.trigger.environments.is_empty(),
+				!self.trigger.token.trim().is_empty() || !self.trigger.environments.is_empty(),
 				&crate::i18n::t("config.connectorMissing.trigger"),
 			),
 			entry(
@@ -2434,8 +2394,7 @@ impl Config {
 				self.workflow.worktree_command = "/create-worktree {branch}".into();
 			}
 			if self.workflow.worktree_remove_command.is_empty() {
-				self.workflow.worktree_remove_command =
-					"pnpm worktree:remove {folder} --force".into();
+				self.workflow.worktree_remove_command = "pnpm worktree:remove {folder} --force".into();
 			}
 			if self.workflow.dev_command.is_empty() {
 				self.workflow.dev_command = "pnpm dev".into();
@@ -2454,9 +2413,7 @@ impl Config {
 		// Un fichier déjà présent vient d'une version qui gardait ces réglages
 		// dans son code : il faut les lui rendre, écrits cette fois.
 		let existing_install = raw.is_some();
-		let mut cfg: Config = raw
-			.and_then(|raw| toml::from_str(&raw).ok())
-			.unwrap_or_default();
+		let mut cfg: Config = raw.and_then(|raw| toml::from_str(&raw).ok()).unwrap_or_default();
 
 		// Ni dossier de projets, ni éditeur imposés : ce sont des choix, et un
 		// choix pris à la place de quelqu'un se découvre toujours au mauvais
@@ -2473,7 +2430,11 @@ impl Config {
 		cfg.seed_workflow(existing_install);
 		if cfg.roles.is_empty() {
 			// Pas `i18n::lang()` : elle relit la config qu'on est en train de charger.
-			let lang = if cfg!(test) { "en" } else { crate::i18n::resolve(&cfg.general.language) };
+			let lang = if cfg!(test) {
+				"en"
+			} else {
+				crate::i18n::resolve(&cfg.general.language)
+			};
 			cfg.roles = default_roles_in(lang);
 		}
 
@@ -2483,10 +2444,8 @@ impl Config {
 		cfg.trigger.token = env_override(&cfg.trigger.token, "COCKPIT_TRIGGER_TOKEN");
 		cfg.railway.token = env_override(&cfg.railway.token, "COCKPIT_RAILWAY_TOKEN");
 		cfg.betterstack.token = env_override(&cfg.betterstack.token, "COCKPIT_BETTERSTACK_TOKEN");
-		cfg.betterstack.telemetry_token = env_override(
-			&cfg.betterstack.telemetry_token,
-			"COCKPIT_BETTERSTACK_TELEMETRY_TOKEN",
-		);
+		cfg.betterstack.telemetry_token =
+			env_override(&cfg.betterstack.telemetry_token, "COCKPIT_BETTERSTACK_TELEMETRY_TOKEN");
 		cfg.stripe.token = env_override(&cfg.stripe.token, "COCKPIT_STRIPE_TOKEN");
 
 		if cfg.trigger.api_url.trim().is_empty() {
@@ -2514,10 +2473,7 @@ impl Config {
 			});
 		}
 
-		let known = self
-			.projects
-			.iter()
-			.any(|project| project.id == self.active_project);
+		let known = self.projects.iter().any(|project| project.id == self.active_project);
 		if !known {
 			self.active_project = self.projects[0].id.clone();
 		}
@@ -2594,16 +2550,14 @@ impl Config {
 	/// une comparaison exacte retombait en silence sur le projet affiché.
 	fn project_of_repo(&self, repo: &str) -> Option<&ProjectConfig> {
 		let repo = crate::platform::path_key(repo);
-		self.projects.iter().find(|project| {
-			crate::platform::path_key(&inherit(&project.main_repo, &self.general.main_repo)) == repo
-		})
+		self.projects
+			.iter()
+			.find(|project| crate::platform::path_key(&inherit(&project.main_repo, &self.general.main_repo)) == repo)
 	}
 
 	/// Projet actif, tel que déclaré.
 	pub fn active_project(&self) -> Option<&ProjectConfig> {
-		self.projects
-			.iter()
-			.find(|project| project.id == self.active_project)
+		self.projects.iter().find(|project| project.id == self.active_project)
 	}
 
 	pub fn save(&self) -> anyhow::Result<()> {
@@ -3287,7 +3241,10 @@ mod tests {
 		let workflow = WorkflowConfig::default();
 		let (commande, par_agent) = workflow.worktree_creation("fix/x", "/tmp/fix-x");
 		assert!(commande.contains("git worktree add '/tmp/fix-x' 'fix/x'"), "{commande}");
-		assert!(commande.contains("git worktree add -b 'fix/x' '/tmp/fix-x'"), "{commande}");
+		assert!(
+			commande.contains("git worktree add -b 'fix/x' '/tmp/fix-x'"),
+			"{commande}"
+		);
 		assert!(!par_agent, "git se lance dans un shell, pas dans un agent");
 
 		let (commande, _) = workflow.worktree_removal("fix/x", "/tmp/fix-x");
@@ -3314,15 +3271,32 @@ mod tests {
 			assert!(status.success(), "git {args:?}");
 		};
 		git(&["init", "-q", "-b", "main"]);
-		git(&["-c", "user.name=t", "-c", "user.email=t@t", "commit", "-q", "--allow-empty", "-m", "base"]);
+		git(&[
+			"-c",
+			"user.name=t",
+			"-c",
+			"user.email=t@t",
+			"commit",
+			"-q",
+			"--allow-empty",
+			"-m",
+			"base",
+		]);
 
 		let workflow = WorkflowConfig::default();
 		let (commande, _) = workflow.worktree_creation("feat/currency-selector", "");
-		let out = crate::platform::shell(&commande).current_dir(&repo).output().expect("shell");
+		let out = crate::platform::shell(&commande)
+			.current_dir(&repo)
+			.output()
+			.expect("shell");
 		assert!(out.status.success(), "{}", String::from_utf8_lossy(&out.stderr));
 
 		let tree = root.join("shop-feat-currency-selector");
-		assert!(tree.join(".git").exists(), "worktree attendu à côté du dépôt : {}", tree.display());
+		assert!(
+			tree.join(".git").exists(),
+			"worktree attendu à côté du dépôt : {}",
+			tree.display()
+		);
 		assert!(!repo.join("feat").exists(), "rien ne doit naître dans le dépôt");
 		let head = std::process::Command::new("git")
 			.args(["rev-parse", "--abbrev-ref", "HEAD"])
@@ -3334,7 +3308,10 @@ mod tests {
 		// Une branche qui existe déjà se sort telle quelle, sans `-b` qui échouerait.
 		git(&["branch", "fix/existante"]);
 		let (commande, _) = workflow.worktree_creation("fix/existante", "");
-		let out = crate::platform::shell(&commande).current_dir(&repo).output().expect("shell");
+		let out = crate::platform::shell(&commande)
+			.current_dir(&repo)
+			.output()
+			.expect("shell");
 		assert!(out.status.success(), "{}", String::from_utf8_lossy(&out.stderr));
 		assert!(root.join("shop-fix-existante").join(".git").exists());
 		let _ = std::fs::remove_dir_all(&base);
@@ -3357,8 +3334,7 @@ mod tests {
 			worktree_remove_command: "outil rm {folder} --branch {branch} --at {path}".into(),
 			..Default::default()
 		};
-		let (commande, par_agent) =
-			workflow.worktree_removal("fix/x", "/Users/moi/Sites/produit-fix-x");
+		let (commande, par_agent) = workflow.worktree_removal("fix/x", "/Users/moi/Sites/produit-fix-x");
 		assert_eq!(
 			commande,
 			"outil rm produit-fix-x --branch fix/x --at /Users/moi/Sites/produit-fix-x"
@@ -3452,10 +3428,7 @@ mod workflow_tests {
 		config.seed_workflow(true);
 
 		assert!(config.team.members.is_empty(), "aucun membre par défaut");
-		assert!(
-			config.team.linear_team_id.is_empty(),
-			"aucune équipe par défaut"
-		);
+		assert!(config.team.linear_team_id.is_empty(), "aucune équipe par défaut");
 		assert!(config.workflow.themes.is_empty(), "aucun sujet métier");
 		assert!(config.workflow.active_states.is_empty(), "aucune colonne imposée");
 
@@ -3550,7 +3523,10 @@ mod cloisonnement_tests {
 		global.github.repo = "acme/monorepo".into();
 		global.linear.team_key = "DEMO".into();
 
-		let seul = ProjectConfig { id: "principal".into(), ..Default::default() };
+		let seul = ProjectConfig {
+			id: "principal".into(),
+			..Default::default()
+		};
 		let mut resolu = global.clone();
 		seul.merge_into(&mut resolu, false);
 

@@ -13,20 +13,20 @@ pub mod error;
 pub mod executions;
 pub mod files;
 pub mod gates;
-pub mod guard;
 pub mod gemini;
 pub mod git;
+pub mod guard;
 pub mod i18n;
-pub mod platform;
 pub mod impact;
 pub mod integrations;
 pub mod journal;
 pub mod libre;
 pub mod mcp;
-pub mod metrics;
 pub mod methods;
+pub mod metrics;
 pub mod mission;
 mod mission_commands;
+pub mod platform;
 use mission_commands::*;
 mod watchers;
 use watchers::*;
@@ -35,19 +35,19 @@ pub mod notebook;
 pub mod orchestrator;
 pub mod panel;
 pub mod permanence;
-pub mod runner;
 pub mod permissions;
 pub mod prompts;
 pub mod proof;
-pub mod protocol;
-pub mod readiness;
 pub mod properties;
+pub mod protocol;
 pub mod qa;
+pub mod readiness;
 pub mod relay;
-pub mod replay;
 pub mod remote;
+pub mod replay;
 pub mod resources;
 pub mod review;
+pub mod runner;
 pub mod sandbox;
 pub mod sessions;
 pub mod slash;
@@ -56,8 +56,8 @@ pub mod strays;
 pub mod system;
 pub mod tasks;
 pub mod team;
-pub mod tickets;
 pub mod terminal;
+pub mod tickets;
 pub mod tour;
 pub mod usage;
 pub mod voice_input;
@@ -189,11 +189,7 @@ fn accounts_refresh() {
 /// redescendant jamais dans le webview, celui-ci ne peut pas renvoyer la liste
 /// complète sans les effacer. Un `token` absent ou vide conserve donc l'existant.
 #[tauri::command]
-fn trigger_env_save(
-	name: String,
-	token: Option<String>,
-	project_ref: Option<String>,
-) -> Result<ConfigView> {
+fn trigger_env_save(name: String, token: Option<String>, project_ref: Option<String>) -> Result<ConfigView> {
 	let name = name.trim().to_string();
 	if name.is_empty() {
 		return Err(CockpitError::msg(i18n::t("lib.trigger.envNameRequired")));
@@ -203,12 +199,7 @@ fn trigger_env_save(
 	let token = token.unwrap_or_default().trim().to_string();
 	let project_ref = project_ref.unwrap_or_default().trim().to_string();
 
-	match config
-		.trigger
-		.environments
-		.iter_mut()
-		.find(|env| env.name == name)
-	{
+	match config.trigger.environments.iter_mut().find(|env| env.name == name) {
 		Some(existing) => {
 			if !token.is_empty() {
 				existing.token = token;
@@ -258,11 +249,7 @@ fn tasks_list() -> Vec<tasks::Task> {
 
 #[tauri::command]
 fn task_add(text: String, priority: Option<String>) -> Result<Vec<tasks::Task>> {
-	tasks::add(
-		&task_scope(),
-		&text,
-		&priority.unwrap_or_else(|| "normal".into()),
-	)
+	tasks::add(&task_scope(), &text, &priority.unwrap_or_else(|| "normal".into()))
 }
 
 #[tauri::command]
@@ -398,9 +385,7 @@ async fn project_inspect(path: String) -> Ground {
 /// est le cas normal dès qu'on mélange travail et projets personnels, et faire
 /// retaper un identifiant qu'on connaît déjà est une occasion de se tromper.
 async fn gh_accounts() -> Vec<String> {
-	let raw = runner::capture("/", "gh auth status 2>&1")
-		.await
-		.unwrap_or_default();
+	let raw = runner::capture("/", "gh auth status 2>&1").await.unwrap_or_default();
 	let mut accounts = Vec::new();
 	for line in raw.lines() {
 		if let Some(rest) = line.split("account ").nth(1) {
@@ -462,7 +447,10 @@ async fn project_prepare(request: Groundwork) -> Result<Ground> {
 		journal::record("projet", &i18n::t("lib.project.dirCreated"), &path, true, "");
 	}
 	if !folder.is_dir() {
-		return Err(CockpitError::msg(i18n::tf("lib.project.pathMissing", &[("path", &path)])));
+		return Err(CockpitError::msg(i18n::tf(
+			"lib.project.pathMissing",
+			&[("path", &path)],
+		)));
 	}
 
 	if request.git_init && !folder.join(".git").exists() {
@@ -493,16 +481,15 @@ async fn create_remote(folder: &Path, repo: &str, account: &str, public: bool) -
 	let token = if account.is_empty() {
 		runner::capture("/", "gh auth token 2>/dev/null").await
 	} else {
-		runner::capture(
-			"/",
-			&format!("gh auth token --user {} 2>/dev/null", quote(account)),
-		)
-		.await
+		runner::capture("/", &format!("gh auth token --user {} 2>/dev/null", quote(account))).await
 	}
 	.map_err(|_| CockpitError::msg(i18n::t("lib.project.noGhSession")))?;
 	let token = token.trim().to_string();
 	if token.is_empty() {
-		return Err(CockpitError::msg(i18n::tf("lib.project.noGhToken", &[("account", &account)])));
+		return Err(CockpitError::msg(i18n::tf(
+			"lib.project.noGhToken",
+			&[("account", &account)],
+		)));
 	}
 
 	let visibility = if public { "--public" } else { "--private" };
@@ -514,12 +501,7 @@ async fn create_remote(folder: &Path, repo: &str, account: &str, public: bool) -
 	// Le jeton par l'environnement, jamais par la ligne de commande : celle-ci
 	// est lisible dans `ps` par tout processus du poste, et se retrouve dans
 	// l'historique du shell.
-	let out = runner::capture_with_env(
-		&folder.to_string_lossy(),
-		&command,
-		&[("GH_TOKEN", token.as_str())],
-	)
-	.await?;
+	let out = runner::capture_with_env(&folder.to_string_lossy(), &command, &[("GH_TOKEN", token.as_str())]).await?;
 	journal::record(
 		"projet",
 		&if public {
@@ -545,7 +527,10 @@ fn project_save(project: config::ProjectConfig) -> Result<ConfigView> {
 		return Err(CockpitError::msg(i18n::t("lib.project.mainRepoRequired")));
 	}
 	if !Path::new(&main_repo).join(".git").exists() {
-		return Err(CockpitError::msg(i18n::tf("lib.project.notGitRepo", &[("path", &main_repo)])));
+		return Err(CockpitError::msg(i18n::tf(
+			"lib.project.notGitRepo",
+			&[("path", &main_repo)],
+		)));
 	}
 
 	let id = if project.id.trim().is_empty() {
@@ -684,7 +669,9 @@ async fn repos_of(paths: Vec<String>) -> std::collections::HashMap<String, Strin
 			Err(_) => String::new(),
 		};
 		if let Ok(mut cache) = CACHE.lock() {
-			cache.get_or_insert_with(Default::default).insert(path.clone(), repo.clone());
+			cache
+				.get_or_insert_with(Default::default)
+				.insert(path.clone(), repo.clone());
 		}
 		resolus.insert(path, repo);
 	}
@@ -693,10 +680,7 @@ async fn repos_of(paths: Vec<String>) -> std::collections::HashMap<String, Strin
 }
 
 #[tauri::command]
-async fn git_branches(
-	base: Option<String>,
-	include_remote: Option<bool>,
-) -> Result<git::BranchOverview> {
+async fn git_branches(base: Option<String>, include_remote: Option<bool>) -> Result<git::BranchOverview> {
 	let repo = main_repo()?;
 	let base = match base.filter(|b| !b.trim().is_empty()) {
 		Some(base) => base,
@@ -760,7 +744,11 @@ fn register_talk(app: &AppHandle, accelerator: &str) -> voice_input::ShortcutSta
 			error: Some(i18n::tf("lib.shortcut.unreadable", &[("error", &error)])),
 		},
 		Ok(shortcut) => match app.global_shortcut().register(shortcut) {
-			Ok(()) => voice_input::ShortcutStatus { accelerator: accelerator.to_string(), registered: true, error: None },
+			Ok(()) => voice_input::ShortcutStatus {
+				accelerator: accelerator.to_string(),
+				registered: true,
+				error: None,
+			},
 			Err(error) => voice_input::ShortcutStatus {
 				accelerator: accelerator.to_string(),
 				registered: false,
@@ -797,7 +785,9 @@ fn folders_list() -> Vec<Folder> {
 	} else {
 		config::resolve_path(&config.general.projects_root, "")
 	};
-	let Ok(entries) = std::fs::read_dir(&root) else { return Vec::new() };
+	let Ok(entries) = std::fs::read_dir(&root) else {
+		return Vec::new();
+	};
 	let mut folders: Vec<Folder> = entries
 		.flatten()
 		.filter(|entry| entry.file_type().map(|kind| kind.is_dir()).unwrap_or(false))
@@ -826,7 +816,8 @@ fn assistant_set_shortcut(app: AppHandle, accelerator: String) -> Result<voice_i
 	use std::str::FromStr;
 	use tauri_plugin_global_shortcut::{GlobalShortcutExt, Shortcut};
 	let accelerator = accelerator.trim().to_string();
-	Shortcut::from_str(&accelerator).map_err(|e| CockpitError::msg(i18n::tf("lib.shortcut.unreadable", &[("error", &e)])))?;
+	Shortcut::from_str(&accelerator)
+		.map_err(|e| CockpitError::msg(i18n::tf("lib.shortcut.unreadable", &[("error", &e)])))?;
 	let previous = voice_input::shortcut_status();
 	if previous.registered {
 		if let Ok(old) = Shortcut::from_str(&previous.accelerator) {
@@ -838,7 +829,9 @@ fn assistant_set_shortcut(app: AppHandle, accelerator: String) -> Result<voice_i
 		if previous.registered {
 			register_talk(&app, &previous.accelerator);
 		}
-		return Err(CockpitError::msg(status.error.unwrap_or_else(|| i18n::t("lib.shortcut.refused"))));
+		return Err(CockpitError::msg(
+			status.error.unwrap_or_else(|| i18n::t("lib.shortcut.refused")),
+		));
 	}
 	voice_input::save_shortcut(&accelerator)?;
 	Ok(status)
@@ -855,34 +848,32 @@ fn voice_shortcut() -> tauri::plugin::TauriPlugin<tauri::Wry> {
 		// cockpit. Il s'enregistre plus loin, dans `setup`, où l'échec se dit.
 		// Le greffon ne porte qu'un raccourci, celui de l'assistant, qu'on peut
 		// changer : tout événement est donc le sien.
-		.with_handler(move |app, _shortcut, event| {
-			match event.state() {
-				ShortcutState::Pressed => {
-					if voice_input::is_recording() {
-						return;
-					}
-					match voice_input::start() {
-						Ok(()) => emit(app, "listening", ""),
-						Err(error) => emit(app, "error", &error.to_string()),
-					}
+		.with_handler(move |app, _shortcut, event| match event.state() {
+			ShortcutState::Pressed => {
+				if voice_input::is_recording() {
+					return;
 				}
-				ShortcutState::Released => {
-					let app = app.clone();
-					tauri::async_runtime::spawn(async move {
-						match voice_input::stop() {
-							Ok(Some(audio)) => {
-								emit(&app, "transcribing", "");
-								match voice_input::transcribe(audio).await {
-									Ok(text) if !text.is_empty() => emit(&app, "heard", &text),
-									Ok(_) => emit(&app, "idle", ""),
-									Err(error) => emit(&app, "error", &error.to_string()),
-								}
+				match voice_input::start() {
+					Ok(()) => emit(app, "listening", ""),
+					Err(error) => emit(app, "error", &error.to_string()),
+				}
+			}
+			ShortcutState::Released => {
+				let app = app.clone();
+				tauri::async_runtime::spawn(async move {
+					match voice_input::stop() {
+						Ok(Some(audio)) => {
+							emit(&app, "transcribing", "");
+							match voice_input::transcribe(audio).await {
+								Ok(text) if !text.is_empty() => emit(&app, "heard", &text),
+								Ok(_) => emit(&app, "idle", ""),
+								Err(error) => emit(&app, "error", &error.to_string()),
 							}
-							Ok(None) => emit(&app, "idle", ""),
-							Err(error) => emit(&app, "error", &error.to_string()),
 						}
-					});
-				}
+						Ok(None) => emit(&app, "idle", ""),
+						Err(error) => emit(&app, "error", &error.to_string()),
+					}
+				});
 			}
 		})
 		.build()
@@ -909,11 +900,7 @@ async fn git_commit(path: String, message: String) -> Result<String> {
 /// Remise le travail en cours d'un worktree.
 #[tauri::command]
 async fn git_stash(path: String, message: Option<String>) -> Result<String> {
-	let result = git::stash_push(
-		std::path::Path::new(&path),
-		&message.unwrap_or_default(),
-	)
-	.await;
+	let result = git::stash_push(std::path::Path::new(&path), &message.unwrap_or_default()).await;
 	logged("git", "Stash", &path, result)
 }
 
@@ -935,12 +922,7 @@ async fn git_stash_list(path: String) -> Result<Vec<String>> {
 /// donc de publier avant de demander, ce qui est de toute façon ce qu'on
 /// s'apprêtait à faire.
 #[tauri::command]
-async fn git_create_pr(
-	path: String,
-	title: String,
-	body: Option<String>,
-	draft: Option<bool>,
-) -> Result<String> {
+async fn git_create_pr(path: String, title: String, body: Option<String>, draft: Option<bool>) -> Result<String> {
 	// Ouvrir une PR à la main, c'est publier la branche qu'on a sous les yeux :
 	// ici, `HEAD` est bien ce qu'on veut. Une mission, elle, nomme sa branche.
 	let folder = std::path::Path::new(&path);
@@ -977,7 +959,10 @@ async fn create_pr_on(
 
 	let folder = std::path::Path::new(path);
 	if branch == base {
-		return Err(CockpitError::msg(i18n::tf("lib.github.prFromBase", &[("branch", &branch)])));
+		return Err(CockpitError::msg(i18n::tf(
+			"lib.github.prFromBase",
+			&[("branch", &branch)],
+		)));
 	}
 
 	git::push_branch(folder, branch).await?;
@@ -1051,10 +1036,7 @@ async fn permanence_look(app: tauri::AppHandle) -> Result<permanence::State> {
 /// qu'une suspension : après un arrêt d'urgence, on regarde avant que ça
 /// reparte, et le réarmement se demande.
 #[tauri::command]
-fn permanence_halt(
-	agents: tauri::State<'_, agent::SharedAgents>,
-	reason: Option<String>,
-) -> permanence::Halt {
+fn permanence_halt(agents: tauri::State<'_, agent::SharedAgents>, reason: Option<String>) -> permanence::Halt {
 	permanence::halt(&agents, &reason.unwrap_or_default())
 }
 
@@ -1154,7 +1136,11 @@ fn language_get() -> LanguageView {
 /// Change la langue de l'interface et des agents. `""` = suivre le système.
 #[tauri::command]
 fn language_set(choice: String) -> Result<LanguageView> {
-	let choice = if choice.trim().is_empty() { String::new() } else { i18n::normalize(&choice).to_string() };
+	let choice = if choice.trim().is_empty() {
+		String::new()
+	} else {
+		i18n::normalize(&choice).to_string()
+	};
 	let mut config = config::Config::load();
 	config.general.language = choice;
 	config.save()?;
@@ -1243,25 +1229,23 @@ async fn worktrees_hygiene() -> Result<Vec<WorktreeHygiene>> {
 	let trees = git::list_worktrees(&main_repo()?).await?;
 	// GitHub peut manquer (hors ligne, token absent) : on dégrade en affichant
 	// l'état local plutôt que d'échouer.
-	let pulls = integrations::github_pulls_by_branch(&config)
-		.await
-		.unwrap_or_default();
+	let pulls = integrations::github_pulls_by_branch(&config).await.unwrap_or_default();
 
 	Ok(trees
 		.into_iter()
 		.map(|tree| {
 			let dirty = tree.status.modified + tree.status.staged + tree.status.untracked;
-			let pr = tree
-				.branch
-				.as_ref()
-				.and_then(|branch| pulls.get(branch).cloned());
+			let pr = tree.branch.as_ref().and_then(|branch| pulls.get(branch).cloned());
 
 			let (removable, reason) = if tree.is_main {
 				(false, i18n::t("lib.hygiene.mainRepo"))
 			} else if dirty > 0 {
 				(false, i18n::tf("lib.hygiene.dirty", &[("count", &dirty)]))
 			} else if tree.status.ahead > 0 {
-				(false, i18n::tf("lib.hygiene.unpushed", &[("count", &tree.status.ahead)]))
+				(
+					false,
+					i18n::tf("lib.hygiene.unpushed", &[("count", &tree.status.ahead)]),
+				)
 			} else {
 				match pr.as_ref().map(|pr| pr.state.as_str()) {
 					Some("merged") => (true, i18n::t("lib.hygiene.prMerged")),
@@ -1452,10 +1436,7 @@ fn properties_calibrations(project: String) -> Vec<properties::Calibration> {
 
 /// Rejoue une propriété sur les corrections passées du dépôt.
 #[tauri::command]
-async fn properties_calibrate(
-	project: String,
-	property: String,
-) -> Result<properties::Calibration> {
+async fn properties_calibrate(project: String, property: String) -> Result<properties::Calibration> {
 	properties::calibrate(project, property).await
 }
 
@@ -1537,9 +1518,7 @@ async fn projects_health() -> Result<Vec<ProjectHealth>> {
 		};
 		let dirty = trees
 			.iter()
-			.filter(|tree| {
-				tree.status.modified + tree.status.staged + tree.status.untracked > 0
-			})
+			.filter(|tree| tree.status.modified + tree.status.staged + tree.status.untracked > 0)
 			.count();
 		let unpushed = trees.iter().filter(|tree| tree.status.ahead > 0).count();
 
@@ -1551,28 +1530,21 @@ async fn projects_health() -> Result<Vec<ProjectHealth>> {
 		if !resolved.github.repo.trim().is_empty() {
 			match integrations::github_token(&resolved).await {
 				Ok(token) => match resolved.github.repo.split_once('/') {
-					Some((owner, name)) => match team::fetch_open_prs(
-						&token,
-						owner,
-						name,
-						&resolved.linear.team_key,
-					)
-					.await
-					{
-						Ok(prs) => {
-							open_prs = prs.len();
-							ci_failing = prs.iter().filter(|pr| pr.ci_state == "failing").count();
-							ready_to_merge = prs
-								.iter()
-								.filter(|pr| {
-									!pr.is_draft
-										&& pr.review_decision == "APPROVED"
-										&& pr.ci_state == "success"
-								})
-								.count();
+					Some((owner, name)) => {
+						match team::fetch_open_prs(&token, owner, name, &resolved.linear.team_key).await {
+							Ok(prs) => {
+								open_prs = prs.len();
+								ci_failing = prs.iter().filter(|pr| pr.ci_state == "failing").count();
+								ready_to_merge = prs
+									.iter()
+									.filter(|pr| {
+										!pr.is_draft && pr.review_decision == "APPROVED" && pr.ci_state == "success"
+									})
+									.count();
+							}
+							Err(e) => error = Some(e.to_string()),
 						}
-						Err(e) => error = Some(e.to_string()),
-					},
+					}
 					None => error = Some(i18n::t("lib.github.repoOwnerFormat")),
 				},
 				Err(e) => error = Some(e.to_string()),
@@ -1631,12 +1603,24 @@ async fn pull_request_merge(number: i64, method: Option<String>) -> Result<()> {
 			.and_then(|v| v.get("message").and_then(|m| m.as_str()).map(String::from))
 			.unwrap_or(body);
 		let error = i18n::tf("lib.github.mergeRefused", &[("status", &code), ("message", &message)]);
-		journal::record("github", &i18n::t("lib.github.prMerge"), &format!("#{number}"), false, &error);
+		journal::record(
+			"github",
+			&i18n::t("lib.github.prMerge"),
+			&format!("#{number}"),
+			false,
+			&error,
+		);
 		return Err(CockpitError::msg(error));
 	}
 	// Irréversible et visible de toute l'équipe : c'est le premier geste qu'on
 	// veut retrouver dans le carnet de bord.
-	journal::record("github", &i18n::t("lib.github.prMerge"), &format!("#{number}"), true, "");
+	journal::record(
+		"github",
+		&i18n::t("lib.github.prMerge"),
+		&format!("#{number}"),
+		true,
+		"",
+	);
 	Ok(())
 }
 
@@ -1754,10 +1738,7 @@ async fn agent_send(
 
 /// Arrête le tour en cours ; l'agent reste là, prêt pour la suite.
 #[tauri::command]
-fn agent_interrupt(
-	agents: State<'_, agent::SharedAgents>,
-	session_id: String,
-) -> Result<()> {
+fn agent_interrupt(agents: State<'_, agent::SharedAgents>, session_id: String) -> Result<()> {
 	agent::interrupt(&agents, &session_id)
 }
 
@@ -1768,10 +1749,7 @@ fn agent_interrupt(
 /// que le CLI raconte, et il évite d'ouvrir une attente que la mort de l'agent
 /// laisserait pendante.
 #[tauri::command]
-fn agent_probe_mcp(
-	agents: State<'_, agent::SharedAgents>,
-	session_id: String,
-) -> Result<()> {
+fn agent_probe_mcp(agents: State<'_, agent::SharedAgents>, session_id: String) -> Result<()> {
 	agent::probe_mcp(&agents, &session_id)
 }
 
@@ -1779,10 +1757,7 @@ fn agent_probe_mcp(
 ///
 /// Même chemin que l'état des MCP : la réponse traverse le flux de l'agent.
 #[tauri::command]
-fn agent_probe_context(
-	agents: State<'_, agent::SharedAgents>,
-	session_id: String,
-) -> Result<()> {
+fn agent_probe_context(agents: State<'_, agent::SharedAgents>, session_id: String) -> Result<()> {
 	agent::probe_context(&agents, &session_id)
 }
 
@@ -1800,11 +1775,7 @@ async fn chantier_territory(cwd: String) -> Result<chantier::Territory> {
 
 /// Relance un serveur MCP tombé, sans interrompre la conversation.
 #[tauri::command]
-fn agent_reconnect_mcp(
-	agents: State<'_, agent::SharedAgents>,
-	session_id: String,
-	server: String,
-) -> Result<()> {
+fn agent_reconnect_mcp(agents: State<'_, agent::SharedAgents>, session_id: String, server: String) -> Result<()> {
 	agent::reconnect_mcp(&agents, &session_id, &server)
 }
 
@@ -1869,11 +1840,7 @@ async fn brief_compose(cwd: String) -> brief::Brief {
 /// vraiment, et trois surfaces qui le composeraient chacune à leur façon,
 /// ce sont trois occasions de diverger.
 #[tauri::command]
-fn brief_assemble(
-	sections: Vec<brief::BriefSection>,
-	prompt: String,
-	cwd: Option<String>,
-) -> String {
+fn brief_assemble(sections: Vec<brief::BriefSection>, prompt: String, cwd: Option<String>) -> String {
 	// Une leçon sert quand elle part, pas quand elle est rassemblée : c'est ici
 	// qu'on le sait, et c'est ce comptage qui dira plus tard laquelle n'a jamais
 	// servi.
@@ -1921,11 +1888,7 @@ fn commands_detect(repo: String) -> Result<Vec<config::CommandConfig>> {
 /// Deux surfaces l'assemblaient chacune à leur façon : c'est ce qui part dans un
 /// terminal, un seul endroit doit le décider.
 #[tauri::command]
-fn command_line(
-	command: config::CommandConfig,
-	positional: String,
-	values: Vec<(String, String)>,
-) -> String {
+fn command_line(command: config::CommandConfig, positional: String, values: Vec<(String, String)>) -> String {
 	commands::build(&command, &positional, &values)
 }
 
@@ -1962,10 +1925,7 @@ fn notebook_handbacks(project: Option<String>) -> Vec<notebook::Handback> {
 /// feraient compter comme une reprise humaine, et le carnet apprendrait à
 /// l'agent à ne pas faire ce qu'il vient de faire.
 #[tauri::command]
-async fn notebook_collect(
-    agents: State<'_, agent::SharedAgents>,
-    cwd: String,
-) -> Result<Option<notebook::Handback>> {
+async fn notebook_collect(agents: State<'_, agent::SharedAgents>, cwd: String) -> Result<Option<notebook::Handback>> {
 	let busy = agents
 		.snapshot()
 		.into_iter()
@@ -2085,7 +2045,10 @@ fn pause_missions_hors_budget() {
 		// sans que ce plafond ne le voie jamais.
 		.filter(|mission| {
 			!mission.paused
-				&& matches!(mission.state, mission::MissionState::Running | mission::MissionState::Integrating)
+				&& matches!(
+					mission.state,
+					mission::MissionState::Running | mission::MissionState::Integrating
+				)
 		})
 		.map(|mission| (mission.id.clone(), mission.title.clone()))
 		.collect();
@@ -2101,22 +2064,13 @@ fn pause_missions_hors_budget() {
 		let Some(bucket) = report.by_mission.iter().find(|entry| &entry.key == id) else {
 			continue;
 		};
-		let total = bucket.totals.input
-			+ bucket.totals.output
-			+ bucket.totals.cache_read
-			+ bucket.totals.cache_write;
+		let total = bucket.totals.input + bucket.totals.output + bucket.totals.cache_read + bucket.totals.cache_write;
 		if total < budget {
 			continue;
 		}
 		let raison = i18n::tf("lib.budget.reason", &[("total", &total), ("budget", &budget)]);
 		if mission::set_paused(id, true).is_ok() {
-			journal::record(
-				"mission",
-				&i18n::t("lib.budget.paused"),
-				titre,
-				false,
-				&raison,
-			);
+			journal::record("mission", &i18n::t("lib.budget.paused"), titre, false, &raison);
 		}
 	}
 }
@@ -2267,11 +2221,7 @@ fn agent_attach(session_id: String, path: String) -> Result<files::Attachment> {
 
 /// Joint un contenu collé, qui n'existe que dans le presse-papier.
 #[tauri::command]
-fn agent_attach_clipboard(
-	session_id: String,
-	name: String,
-	data: String,
-) -> Result<files::Attachment> {
+fn agent_attach_clipboard(session_id: String, name: String, data: String) -> Result<files::Attachment> {
 	files::attach_bytes(session_id, name, data)
 }
 
@@ -2288,11 +2238,7 @@ fn scripts_list(path: String) -> Result<Vec<system::PackageScript>> {
 }
 
 #[tauri::command]
-async fn job_run(
-	app: AppHandle,
-	jobs: State<'_, SharedJobs>,
-	request: JobRequest,
-) -> Result<JobStatus> {
+async fn job_run(app: AppHandle, jobs: State<'_, SharedJobs>, request: JobRequest) -> Result<JobStatus> {
 	runner::spawn_job(app, jobs.inner().clone(), request).await
 }
 
@@ -2332,34 +2278,16 @@ fn terminal_open(
 	rows: Option<u16>,
 	account: Option<String>,
 ) -> Result<terminal::TerminalInfo> {
-	terminal::open(
-		app,
-		terminals.inner().clone(),
-		cwd,
-		command,
-		label,
-		cols,
-		rows,
-		account,
-	)
+	terminal::open(app, terminals.inner().clone(), cwd, command, label, cols, rows, account)
 }
 
 #[tauri::command]
-fn terminal_write(
-	terminals: State<'_, terminal::SharedTerminals>,
-	id: String,
-	data: String,
-) -> Result<()> {
+fn terminal_write(terminals: State<'_, terminal::SharedTerminals>, id: String, data: String) -> Result<()> {
 	terminal::write(terminals.inner(), &id, &data)
 }
 
 #[tauri::command]
-fn terminal_resize(
-	terminals: State<'_, terminal::SharedTerminals>,
-	id: String,
-	cols: u16,
-	rows: u16,
-) -> Result<()> {
+fn terminal_resize(terminals: State<'_, terminal::SharedTerminals>, id: String, cols: u16, rows: u16) -> Result<()> {
 	terminal::resize(terminals.inner(), &id, cols, rows)
 }
 
@@ -2382,7 +2310,9 @@ async fn browser_frame(
 	cwd: String,
 	after: u64,
 ) -> Result<tauri::ipc::Response> {
-	Ok(tauri::ipc::Response::new(browser::frame(browsers.inner(), &cwd, after).await?))
+	Ok(tauri::ipc::Response::new(
+		browser::frame(browsers.inner(), &cwd, after).await?,
+	))
 }
 
 /// Le navigateur de ce workspace tourne-t-il déjà — lancé par un agent, donc ?
@@ -2415,11 +2345,7 @@ async fn browser_snapshot(cwd: String) -> Result<tauri::ipc::Response> {
 }
 
 #[tauri::command]
-fn browser_act(
-	browsers: State<'_, browser::SharedBrowsers>,
-	cwd: String,
-	action: browser::Action,
-) -> Result<()> {
+fn browser_act(browsers: State<'_, browser::SharedBrowsers>, cwd: String, action: browser::Action) -> Result<()> {
 	browser::act(browsers.inner(), &cwd, action)
 }
 
@@ -2508,7 +2434,11 @@ async fn replay_run(project: String, numbers: Vec<u32>, setups: Vec<replay::Setu
 		.into_iter()
 		.filter(|case| case.number.is_some_and(|number| numbers.contains(&number)))
 		.collect();
-	let setups = if setups.is_empty() { vec![replay::Setup::default()] } else { setups };
+	let setups = if setups.is_empty() {
+		vec![replay::Setup::default()]
+	} else {
+		setups
+	};
 	let total = cases.len() * setups.len();
 	replay::reserve(&repo, total)?;
 	tauri::async_runtime::spawn(replay::run_campaign(repo, cases, setups, commands));
@@ -2760,16 +2690,10 @@ static ZOOM_MEMORY: std::sync::OnceLock<
 /// petit sur lequel on rouvre l'app. Centrer ne suffisait pas : la fenêtre
 /// débordait des deux côtés, barre de titre et boutons hors de portée. Elle est
 /// ramenée à 95 % de la zone, et recentrée.
-fn fitted_frame(
-	area: (i32, i32, u32, u32),
-	window: (i32, i32, u32, u32),
-) -> Option<((i32, i32), (u32, u32))> {
+fn fitted_frame(area: (i32, i32, u32, u32), window: (i32, i32, u32, u32)) -> Option<((i32, i32), (u32, u32))> {
 	let (ax, ay, aw, ah) = area;
 	let (wx, wy, ww, wh) = window;
-	let inside = wx >= ax
-		&& wy >= ay
-		&& wx + ww as i32 <= ax + aw as i32
-		&& wy + wh as i32 <= ay + ah as i32;
+	let inside = wx >= ax && wy >= ay && wx + ww as i32 <= ax + aw as i32 && wy + wh as i32 <= ay + ah as i32;
 	if inside || aw == 0 || ah == 0 {
 		return None;
 	}
@@ -2982,8 +2906,7 @@ async fn sentry_to_linear(
 		],
 	);
 
-	let (identifier, url) =
-		integrations::linear_create_issue(&config, &team_id, &title, &description).await?;
+	let (identifier, url) = integrations::linear_create_issue(&config, &team_id, &title, &description).await?;
 
 	// La note est un confort, pas une condition : si elle échoue, le ticket
 	// existe quand même et on ne veut pas faire croire à un échec.
@@ -3004,10 +2927,7 @@ async fn betterstack_dashboards() -> Result<Vec<integrations::KpiDashboard>> {
 }
 
 #[tauri::command]
-async fn betterstack_kpi_values(
-	dashboard_id: String,
-	hours: Option<i64>,
-) -> Result<Vec<integrations::KpiValue>> {
+async fn betterstack_kpi_values(dashboard_id: String, hours: Option<i64>) -> Result<Vec<integrations::KpiValue>> {
 	integrations::betterstack_kpi_values(&cfg(), &dashboard_id, hours.unwrap_or(24)).await
 }
 
@@ -3046,9 +2966,7 @@ fn ticket_provider() -> Result<TicketProviderInfo> {
 #[tauri::command]
 async fn feed_linear(only_mine: Option<bool>) -> Result<Vec<integrations::FeedItem>> {
 	let config = cfg();
-	tickets::provider(&config)?
-		.list(only_mine.unwrap_or(false))
-		.await
+	tickets::provider(&config)?.list(only_mine.unwrap_or(false)).await
 }
 
 #[tauri::command]

@@ -167,7 +167,11 @@ fn quote(value: &str) -> String {
 /// `tail`. Le CLI, lui, a déjà rendu la main à ce stade.
 fn script(dir: &Path, command: &str) -> String {
 	let at = |name: &str| quote(&crate::platform::display_path(&dir.join(name)));
-	let stop_tail = if cfg!(windows) { "kill -TERM $! 2>/dev/null\n" } else { "" };
+	let stop_tail = if cfg!(windows) {
+		"kill -TERM $! 2>/dev/null\n"
+	} else {
+		""
+	};
 	format!(
 		"( {command}
 ) < <(exec tail -n +1 -f {input}) > {output} 2> {error}\n\
@@ -211,8 +215,7 @@ pub fn spawn_in(
 	execution: &str,
 ) -> Result<Handle> {
 	let dir = base.join(session_id);
-	std::fs::create_dir_all(&dir)
-		.map_err(|e| CockpitError::msg(crate::i18n::tf("relay.dir", &[("error", &e)])))?;
+	std::fs::create_dir_all(&dir).map_err(|e| CockpitError::msg(crate::i18n::tf("relay.dir", &[("error", &e)])))?;
 	// Créés d'avance : `tail -f` doit trouver son fichier, et le lecteur le sien,
 	// avant même que le CLI ait écrit quoi que ce soit.
 	for name in ["in.jsonl", "out.jsonl", "err.log"] {
@@ -288,9 +291,7 @@ pub fn alive(pgid: i32) -> bool {
 /// En ajout seul : `tail -f` lit ce qui arrive en bout de fichier, et une
 /// écriture courte en `O_APPEND` ne se mêle pas à une autre.
 pub fn write(handle: &Handle, data: &str) -> std::io::Result<()> {
-	let mut file = std::fs::OpenOptions::new()
-		.append(true)
-		.open(handle.input())?;
+	let mut file = std::fs::OpenOptions::new().append(true).open(handle.input())?;
 	file.write_all(data.as_bytes())?;
 	file.flush()
 }
@@ -437,9 +438,7 @@ pub fn turn_done(dir: &Path) -> bool {
 	let Ok(raw) = std::fs::read_to_string(dir.join("out.jsonl")) else {
 		return true;
 	};
-	let kind = |value: &serde_json::Value| {
-		value.get("type").and_then(|kind| kind.as_str()).map(str::to_string)
-	};
+	let kind = |value: &serde_json::Value| value.get("type").and_then(|kind| kind.as_str()).map(str::to_string);
 	let last = raw
 		.lines()
 		.rev()
@@ -544,9 +543,7 @@ mod tests {
 	#[test]
 	fn le_tour_se_lit_sans_les_lignes_systeme() {
 		let dir = base();
-		let ecrire = |nom: &str, lignes: &[&str]| {
-			std::fs::write(dir.join(nom), lignes.join("\n") + "\n").unwrap()
-		};
+		let ecrire = |nom: &str, lignes: &[&str]| std::fs::write(dir.join(nom), lignes.join("\n") + "\n").unwrap();
 		let fini = r#"{"type":"result","subtype":"success"}"#;
 		let hook = r#"{"type":"system","subtype":"hook_response"}"#;
 		let controle = r#"{"type":"control_response","response":{"subtype":"success"}}"#;
@@ -584,16 +581,7 @@ mod tests {
 	async fn un_relais_parle_survit_et_s_arrete() {
 		let base = base();
 		let cwd = std::env::temp_dir();
-		let handle = spawn_in(
-			&base,
-			"agent-test",
-			&cwd.to_string_lossy(),
-			ECHO,
-			&[],
-			&[],
-			"exec-test",
-		)
-		.unwrap();
+		let handle = spawn_in(&base, "agent-test", &cwd.to_string_lossy(), ECHO, &[], &[], "exec-test").unwrap();
 
 		write(&handle, "{\"n\":1}\n").unwrap();
 		let mut out = Tail::from_start(&handle.dir, "out.jsonl");
@@ -664,10 +652,7 @@ mod tests {
 			.await
 			.expect("le flux se ferme");
 		assert!(end.is_none());
-		assert_eq!(
-			std::fs::read_to_string(handle.dir.join("exit")).unwrap().trim(),
-			"3"
-		);
+		assert_eq!(std::fs::read_to_string(handle.dir.join("exit")).unwrap().trim(), "3");
 		for _ in 0..30 {
 			if !alive(handle.pgid) {
 				break;
@@ -709,7 +694,16 @@ mod tests {
 			"{} -p --input-format stream-json --output-format stream-json --verbose --model haiku",
 			quote(&binary)
 		);
-		let handle = spawn_in(&base, "agent-claude", &cwd.to_string_lossy(), &command, &[], &[], "exec").unwrap();
+		let handle = spawn_in(
+			&base,
+			"agent-claude",
+			&cwd.to_string_lossy(),
+			&command,
+			&[],
+			&[],
+			"exec",
+		)
+		.unwrap();
 		write(
 			&handle,
 			"{\"type\":\"user\",\"message\":{\"role\":\"user\",\"content\":[{\"type\":\"text\",\"text\":\"Réponds juste: ok\"}]}}\n",

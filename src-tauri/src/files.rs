@@ -135,7 +135,10 @@ pub fn write(path: String, content: String) -> Result<()> {
 			.and_then(|mut file| file.write_all(content.as_bytes()));
 		if let Err(e) = written {
 			let _ = std::fs::remove_file(&temporary);
-			return Err(CockpitError::msg(crate::i18n::tf("files.writeFile", &[("path", &target.display()), ("error", &e)])));
+			return Err(CockpitError::msg(crate::i18n::tf(
+				"files.writeFile",
+				&[("path", &target.display()), ("error", &e)],
+			)));
 		}
 	}
 
@@ -157,7 +160,10 @@ pub fn write(path: String, content: String) -> Result<()> {
 
 	std::fs::rename(&temporary, &target).map_err(|e| {
 		let _ = std::fs::remove_file(&temporary);
-		CockpitError::msg(crate::i18n::tf("files.replaceFile", &[("path", &target.display()), ("error", &e)]))
+		CockpitError::msg(crate::i18n::tf(
+			"files.replaceFile",
+			&[("path", &target.display()), ("error", &e)],
+		))
 	})?;
 	Ok(())
 }
@@ -298,7 +304,10 @@ pub fn attach_bytes(session: String, name: String, data: String) -> Result<Attac
 	if bytes.len() as u64 > MAX_ATTACHMENT_BYTES {
 		return Err(CockpitError::msg(crate::i18n::tf(
 			"files.attachmentTooLarge",
-			&[("size", &(bytes.len() / 1_048_576)), ("max", &(MAX_ATTACHMENT_BYTES / 1_048_576))],
+			&[
+				("size", &(bytes.len() / 1_048_576)),
+				("max", &(MAX_ATTACHMENT_BYTES / 1_048_576)),
+			],
 		)));
 	}
 	if bytes.is_empty() {
@@ -370,10 +379,7 @@ mod tests {
 
 		let second = attachment_target(&session, "capture.png").unwrap();
 		assert_ne!(premier, second);
-		assert_eq!(
-			second.file_name().unwrap().to_string_lossy(),
-			"capture-2.png"
-		);
+		assert_eq!(second.file_name().unwrap().to_string_lossy(), "capture-2.png");
 		std::fs::remove_dir_all(attachments_dir(&session)).ok();
 	}
 
@@ -381,10 +387,7 @@ mod tests {
 	/// les deux — et surtout pas vide.
 	#[test]
 	fn l_ecriture_remplace_sans_etape_vide() {
-		let dossier = std::env::temp_dir().join(format!(
-			"cockpit-test-{}",
-			std::process::id()
-		));
+		let dossier = std::env::temp_dir().join(format!("cockpit-test-{}", std::process::id()));
 		std::fs::create_dir_all(&dossier).unwrap();
 		let fichier = dossier.join(".env");
 		std::fs::write(&fichier, "AVANT=1").unwrap();

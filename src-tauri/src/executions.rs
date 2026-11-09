@@ -350,7 +350,6 @@ pub struct Observability {
 	pub resumable: bool,
 }
 
-
 // ───────────────────────── Les enregistrements ─────────────────────────
 
 /// Un fait, daté, rattaché à une exécution. Une ligne du journal.
@@ -590,11 +589,7 @@ fn append(execution_id: &str, record: Record) {
 	let _ = std::fs::create_dir_all(dir());
 	let _guard = index_lock().lock();
 	let path = index_path();
-	if let Ok(mut file) = std::fs::OpenOptions::new()
-		.create(true)
-		.append(true)
-		.open(&path)
-	{
+	if let Ok(mut file) = std::fs::OpenOptions::new().create(true).append(true).open(&path) {
 		let _ = writeln!(file, "{line}");
 	}
 	// Une trace nomme des dossiers de travail, des tâches et des branches :
@@ -665,11 +660,7 @@ pub fn open(opening: Opening) -> String {
 	if let Some(parent) = path.parent() {
 		let _ = std::fs::create_dir_all(parent);
 	}
-	if let Ok(file) = std::fs::OpenOptions::new()
-		.create(true)
-		.append(true)
-		.open(&path)
-	{
+	if let Ok(file) = std::fs::OpenOptions::new().create(true).append(true).open(&path) {
 		// Une entrée d'outil porte des extraits de fichiers et des lignes de
 		// commande, donc parfois un secret : lisible par son seul propriétaire.
 		#[cfg(unix)]
@@ -860,8 +851,7 @@ fn spoken_in_full(payload: &serde_json::Value) -> Vec<String> {
 	let mut said = Vec::new();
 	match payload.get("type").and_then(|v| v.as_str()).unwrap_or("") {
 		"assistant" => {
-			let Some(items) = payload.pointer("/message/content").and_then(|v| v.as_array())
-			else {
+			let Some(items) = payload.pointer("/message/content").and_then(|v| v.as_array()) else {
 				return said;
 			};
 			for item in items {
@@ -883,11 +873,7 @@ fn spoken_in_full(payload: &serde_json::Value) -> Vec<String> {
 }
 
 /// Note un tour rendu, et ce que le moteur dit en avoir consommé.
-pub fn note_turn(
-	execution_id: &str,
-	dialect: crate::protocol::Protocol,
-	payload: &serde_json::Value,
-) {
+pub fn note_turn(execution_id: &str, dialect: crate::protocol::Protocol, payload: &serde_json::Value) {
 	append(
 		execution_id,
 		Record::Turn {
@@ -912,13 +898,7 @@ pub fn note_step(execution_id: &str, step: Step, note: &str) {
 			note: note.clone(),
 		},
 	);
-	note_events(
-		execution_id,
-		&[ExecEvent::Lifecycle {
-			step,
-			note,
-		}],
-	);
+	note_events(execution_id, &[ExecEvent::Lifecycle { step, note }]);
 	if step.is_final() {
 		close_detail(execution_id);
 	} else {
@@ -1159,17 +1139,13 @@ fn project(index: usize, beat: Beat) -> crate::sessions::SessionEvent {
 					event.kind = "thinking".into();
 					event.text = text;
 				}
-				ExecEvent::Tool {
-					name, hint, input, ..
-				} => {
+				ExecEvent::Tool { name, hint, input, .. } => {
 					event.kind = "tool".into();
 					event.text = hint;
 					event.tool = Some(name);
 					event.detail = Some(input);
 				}
-				ExecEvent::ToolDone {
-					ok, bytes, excerpt, ..
-				} => {
+				ExecEvent::ToolDone { ok, bytes, excerpt, .. } => {
 					event.kind = if ok { "tool-result" } else { "tool-error" }.into();
 					event.text = excerpt;
 					// La taille réelle plutôt que celle de l'extrait : une sortie
@@ -1310,15 +1286,10 @@ pub fn close_orphans(alive: &std::collections::HashSet<String>) {
 		// Sauf celles qu'un relais porte encore : leur agent a survécu au
 		// cockpit précédent, et celui-ci vient de le reprendre.
 		if exec.outcome == Outcome::Running && !alive.contains(&exec.id) {
-			note_step(
-				&exec.id,
-				Step::Orphaned,
-				&crate::i18n::t("executions.orphaned"),
-			);
+			note_step(&exec.id, Step::Orphaned, &crate::i18n::t("executions.orphaned"));
 		}
 	}
 }
-
 
 #[cfg(test)]
 mod tests {
@@ -1417,9 +1388,7 @@ mod tests {
 			ligne(
 				"exec-1",
 				"2026-08-28T10:30:00Z",
-				Record::Verdict {
-					verdict: "ok".into(),
-				},
+				Record::Verdict { verdict: "ok".into() },
 			),
 		]
 		.join("\n");
@@ -1527,9 +1496,7 @@ mod tests {
 		let journal = ligne(
 			"exec-parti",
 			"2026-08-28T10:00:00Z",
-			Record::Turn {
-				turn: Turn::default(),
-			},
+			Record::Turn { turn: Turn::default() },
 		);
 		assert!(fold_raw(&journal).is_empty());
 	}
@@ -1656,8 +1623,7 @@ mod tests {
 	fn une_ouverture_sans_champs_recents_se_relit() {
 		// Le précédent est le champ `actor` de `journal.rs` : un journal écrit
 		// par une version d'avant doit continuer de se lire.
-		let journal =
-			r#"{"v":1,"executionId":"exec-1","at":"2026-08-28T10:00:00Z","record":"opened","opening":{}}"#;
+		let journal = r#"{"v":1,"executionId":"exec-1","at":"2026-08-28T10:00:00Z","record":"opened","opening":{}}"#;
 		let found = fold_raw(journal);
 		assert_eq!(found.len(), 1);
 		assert_eq!(found[0].outcome, Outcome::Running);
@@ -1718,10 +1684,6 @@ mod tests {
 		assert_eq!(out, vec!["bancal".to_string()]);
 	}
 
-
-
-
-
 	// ── Les bornes ──
 
 	#[test]
@@ -1775,10 +1737,7 @@ mod tests {
 
 	#[test]
 	fn chaque_evenement_prend_la_forme_que_l_ecran_sait_deja_lire() {
-		assert_eq!(
-			projette(ExecEvent::Prompt { text: "salut".into() }).kind,
-			"user"
-		);
+		assert_eq!(projette(ExecEvent::Prompt { text: "salut".into() }).kind, "user");
 		assert_eq!(projette(ExecEvent::Say { text: "ok".into() }).kind, "assistant");
 		assert_eq!(projette(ExecEvent::Think { text: "hmm".into() }).kind, "thinking");
 		assert_eq!(
@@ -1811,10 +1770,7 @@ mod tests {
 			.kind,
 			"tool-error"
 		);
-		assert_eq!(
-			projette(ExecEvent::Stderr { text: "erreur".into() }).kind,
-			"tool-error"
-		);
+		assert_eq!(projette(ExecEvent::Stderr { text: "erreur".into() }).kind, "tool-error");
 	}
 
 	#[test]
@@ -1873,27 +1829,18 @@ mod tests {
 	fn un_detail_borne_se_dit_dans_l_index() {
 		let journal = [
 			ligne("exec-1", "2026-08-28T10:00:00Z", ouverture("claude-stream-json")),
-			ligne(
-				"exec-1",
-				"2026-08-28T10:30:00Z",
-				Record::Trimmed { dropped: 1_204 },
-			),
+			ligne("exec-1", "2026-08-28T10:30:00Z", Record::Trimmed { dropped: 1_204 }),
 		]
 		.join("\n");
 		assert_eq!(fold_raw(&journal)[0].events_dropped, 1_204);
 	}
-
 
 	#[test]
 	fn un_releve_ecrit_par_une_version_plus_recente_se_lit_quand_meme() {
 		// Un protocole inconnu ne doit ni faire tomber la lecture, ni se
 		// déclarer moins observable : supposer qu'un moteur inconnu rapporte
 		// peu produirait exactement le biais que cette table sert à éviter.
-		let journal = ligne(
-			"exec-1",
-			"2026-08-28T10:00:00Z",
-			ouverture("un-protocole-a-venir"),
-		);
+		let journal = ligne("exec-1", "2026-08-28T10:00:00Z", ouverture("un-protocole-a-venir"));
 		let found = fold_raw(&journal);
 		assert_eq!(found.len(), 1);
 		assert_eq!(

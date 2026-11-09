@@ -64,7 +64,11 @@ fn main() {
 			if output.status.success() {
 				String::new()
 			} else {
-				format!(" (sortie {:?} : {})", output.status.code(), String::from_utf8_lossy(&output.stderr).trim())
+				format!(
+					" (sortie {:?} : {})",
+					output.status.code(),
+					String::from_utf8_lossy(&output.stderr).trim()
+				)
 			},
 		);
 	}

@@ -45,8 +45,7 @@ struct Cached {
 }
 
 fn cache() -> &'static std::sync::Mutex<Option<Cached>> {
-	static CACHE: std::sync::OnceLock<std::sync::Mutex<Option<Cached>>> =
-		std::sync::OnceLock::new();
+	static CACHE: std::sync::OnceLock<std::sync::Mutex<Option<Cached>>> = std::sync::OnceLock::new();
 	CACHE.get_or_init(|| std::sync::Mutex::new(None))
 }
 
@@ -167,10 +166,7 @@ async fn read_status(account: &AccountConfig, projects: Vec<String>) -> AccountS
 			.unwrap_or_default()
 			.to_string()
 	};
-	status.logged_in = json
-		.get("loggedIn")
-		.and_then(|value| value.as_bool())
-		.unwrap_or(false);
+	status.logged_in = json.get("loggedIn").and_then(|value| value.as_bool()).unwrap_or(false);
 	status.email = field("email");
 	status.plan = field("subscriptionType");
 	status.organization = field("orgName");
@@ -252,9 +248,9 @@ pub fn save(accounts: Vec<AccountConfig>) -> Result<()> {
 	}
 
 	config.accounts = propres;
-	config.save().map_err(|error| {
-		CockpitError::msg(crate::i18n::tf("accounts.saveConfig", &[("error", &error)]))
-	})?;
+	config
+		.save()
+		.map_err(|error| CockpitError::msg(crate::i18n::tf("accounts.saveConfig", &[("error", &error)])))?;
 	if let Ok(mut store) = cache().lock() {
 		*store = None;
 	}

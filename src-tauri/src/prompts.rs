@@ -115,8 +115,18 @@ pub fn defaults() -> Vec<Prompt> {
 	vec![
 		// Les deux consignes du geste « Relire » (voir `review.rs`) : `{pr}`,
 		// `{titre}`, `{auteur}`, `{branche}` et `{base}` y sont remplacés.
-		prompt("revue", "prompts.group.review", "prompts.label.review", crate::review::REVIEW_TEMPLATE),
-		prompt("revue-suivi", "prompts.group.review", "prompts.label.reviewFollowup", crate::review::FOLLOWUP_TEMPLATE),
+		prompt(
+			"revue",
+			"prompts.group.review",
+			"prompts.label.review",
+			crate::review::REVIEW_TEMPLATE,
+		),
+		prompt(
+			"revue-suivi",
+			"prompts.group.review",
+			"prompts.label.reviewFollowup",
+			crate::review::FOLLOWUP_TEMPLATE,
+		),
 		// Ajoutée aux consignes de chaque agent, jamais envoyée comme message
 		// (voir `visual`).
 		prompt("rendu", "prompts.group.visual", "prompts.label.visual", VISUAL_TEMPLATE),

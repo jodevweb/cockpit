@@ -109,10 +109,9 @@ fn read_processes() -> HashMap<u32, Sample> {
 
 #[cfg(target_os = "macos")]
 fn read_processes() -> HashMap<u32, Sample> {
-	let output = crate::platform::quiet_std(
-		std::process::Command::new("ps").args(["-axo", "pid=,ppid=,rss=,cputime=,comm="]),
-	)
-	.output();
+	let output =
+		crate::platform::quiet_std(std::process::Command::new("ps").args(["-axo", "pid=,ppid=,rss=,cputime=,comm="]))
+			.output();
 	let Ok(output) = output else {
 		return HashMap::new();
 	};
@@ -242,8 +241,8 @@ pub(crate) fn machine_memory() -> (f64, f64) {
 					.map(|v| v.trim().trim_end_matches('.').parse::<f64>().unwrap_or(0.0))
 					.unwrap_or(0.0)
 			};
-			(value("Pages active") + value("Pages wired down") + value("Pages occupied by compressor"))
-				* page / 1024.0 / 1024.0
+			(value("Pages active") + value("Pages wired down") + value("Pages occupied by compressor")) * page
+				/ 1024.0 / 1024.0
 		})
 		.unwrap_or(0.0);
 
@@ -254,10 +253,7 @@ pub(crate) fn machine_memory() -> (f64, f64) {
 ///
 /// `agents` et `terminals` associent un identifiant côté interface au processus
 /// racine correspondant, pour que chaque mégaoctet ait un responsable nommé.
-pub fn report(
-	agents: Vec<(String, String, u32)>,
-	terminals: Vec<(String, String, u32)>,
-) -> Result<ResourceReport> {
+pub fn report(agents: Vec<(String, String, u32)>, terminals: Vec<(String, String, u32)>) -> Result<ResourceReport> {
 	let processes = read_processes();
 	let mut children: HashMap<u32, Vec<u32>> = HashMap::new();
 	for (pid, sample) in &processes {
@@ -337,9 +333,8 @@ pub fn report(
 					usage.processes += extra.processes;
 					// Un serveur lâché qui pèse : c'est lui qu'il faut nommer.
 					if heaviest.is_none() {
-						heaviest = extra_heaviest.or_else(|| {
-							walker.processes.get(stray).map(|s| short_name(&s.command))
-						});
+						heaviest =
+							extra_heaviest.or_else(|| walker.processes.get(stray).map(|s| short_name(&s.command)));
 					}
 				}
 				NamedUsage {

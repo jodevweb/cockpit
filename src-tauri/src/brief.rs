@@ -80,14 +80,22 @@ pub struct BriefSource {
 /// finit par ne plus désigner la même chose, et une case qui décoche une
 /// section inexistante ne se voit pas.
 pub fn sources() -> Vec<BriefSource> {
-	["conventions", "product", "lessons", "place", "ticket", "review", "attempts"]
-		.into_iter()
-		.map(|id| BriefSource {
-			id: id.into(),
-			label: crate::i18n::t(&format!("brief.sources.{id}.label")),
-			hint: crate::i18n::t(&format!("brief.sources.{id}.hint")),
-		})
-		.collect()
+	[
+		"conventions",
+		"product",
+		"lessons",
+		"place",
+		"ticket",
+		"review",
+		"attempts",
+	]
+	.into_iter()
+	.map(|id| BriefSource {
+		id: id.into(),
+		label: crate::i18n::t(&format!("brief.sources.{id}.label")),
+		hint: crate::i18n::t(&format!("brief.sources.{id}.hint")),
+	})
+	.collect()
 }
 
 /// Un décompte dans la langue de l'utilisateur : `<clé>_one`, `<clé>_other`…
@@ -230,11 +238,7 @@ pub fn assemble(sections: &[BriefSection], prompt: &str) -> String {
 /// Ne peut pas échouer : sans contexte joignable, la consigne part telle quelle.
 pub async fn for_agent(cwd: &str, prompt: &str) -> String {
 	let brief = compose(cwd).await;
-	let retained: Vec<BriefSection> = brief
-		.sections
-		.into_iter()
-		.filter(|section| section.on)
-		.collect();
+	let retained: Vec<BriefSection> = brief.sections.into_iter().filter(|section| section.on).collect();
 	if retained.is_empty() {
 		return prompt.to_string();
 	}
@@ -279,9 +283,7 @@ pub async fn compose(cwd: &str) -> Brief {
 	// Le dépôt principal porte la configuration : un worktree n'est pas un
 	// projet, c'est une sortie de projet. Résoudre depuis le projet actif ferait
 	// dépendre le contexte de l'onglet ouvert.
-	let repo = crate::git::main_worktree(&path)
-		.await
-		.unwrap_or_else(|_| path.clone());
+	let repo = crate::git::main_worktree(&path).await.unwrap_or_else(|_| path.clone());
 	let config = Config::for_repo(&repo.to_string_lossy());
 	if !config.brief.enabled {
 		return brief;
@@ -411,12 +413,7 @@ async fn place_section(path: &Path, branch: &str) -> Option<BriefSection> {
 	if !named.is_empty() && !branch.is_empty() && named != branch {
 		if let Ok(counts) = crate::git::run_git(
 			path,
-			&[
-				"rev-list",
-				"--left-right",
-				"--count",
-				&format!("{base}...{branch}"),
-			],
+			&["rev-list", "--left-right", "--count", &format!("{base}...{branch}")],
 		)
 		.await
 		{
@@ -518,10 +515,7 @@ async fn ticket_section(config: &Config, branch: &str) -> Result<Option<BriefSec
 /// Partagé avec la lecture des changements : les deux veulent la même chose —
 /// ce qui était demandé — et deux lectures différentes du même ticket finiraient
 /// par ne pas dire la même chose. Rend l'identifiant, le titre et le markdown.
-pub(crate) async fn ticket_markdown(
-	config: &Config,
-	branch: &str,
-) -> Result<Option<(String, String, String)>, String> {
+pub(crate) async fn ticket_markdown(config: &Config, branch: &str) -> Result<Option<(String, String, String)>, String> {
 	if branch.trim().is_empty() {
 		return Ok(None);
 	}
@@ -572,9 +566,7 @@ pub(crate) async fn ticket_markdown(
 
 	let description = ticket.description.trim();
 	if description.is_empty() {
-		out.push_str(
-			"The ticket has no description: do not assume what it meant, ask.\n",
-		);
+		out.push_str("The ticket has no description: do not assume what it meant, ask.\n");
 	} else {
 		out.push_str("### The request, as written\n\n");
 		out.push_str(description);
@@ -635,21 +627,18 @@ async fn github_review(config: &Config, branch: &str) -> Result<Option<BriefSect
 		Ok(Some(pr)) => pr,
 		// Aucune demande de fusion n'est un fait ordinaire, pas un manque.
 		Ok(None) => return Ok(None),
-		Err(error) => {
-			return Err(crate::i18n::tf("brief.missing.pullRequests", &[("error", &error)]))
-		}
+		Err(error) => return Err(crate::i18n::tf("brief.missing.pullRequests", &[("error", &error)])),
 	};
 
-	let conversation =
-		match crate::integrations::github_pull_conversation(config, &pr.number.to_string()).await {
-			Ok(value) => value,
-			Err(error) => {
-				return Err(crate::i18n::tf(
-					"brief.missing.pullRequest",
-					&[("number", &pr.number), ("error", &error)],
-				))
-			}
-		};
+	let conversation = match crate::integrations::github_pull_conversation(config, &pr.number.to_string()).await {
+		Ok(value) => value,
+		Err(error) => {
+			return Err(crate::i18n::tf(
+				"brief.missing.pullRequest",
+				&[("number", &pr.number), ("error", &error)],
+			))
+		}
+	};
 
 	let mut echanges = Vec::new();
 	for (pointer, kind) in [("/reviews", "review"), ("/comments", "comment")] {
@@ -657,11 +646,7 @@ async fn github_review(config: &Config, branch: &str) -> Result<Option<BriefSect
 			continue;
 		};
 		for entry in list {
-			let body = entry
-				.get("body")
-				.and_then(|v| v.as_str())
-				.unwrap_or_default()
-				.trim();
+			let body = entry.get("body").and_then(|v| v.as_str()).unwrap_or_default().trim();
 			if body.is_empty() {
 				continue;
 			}
@@ -707,9 +692,7 @@ async fn gitlab_review(config: &Config, branch: &str) -> Result<Option<BriefSect
 	let mr = match crate::integrations::gitlab_merge_request_for_branch(config, branch).await {
 		Ok(Some(mr)) => mr,
 		Ok(None) => return Ok(None),
-		Err(error) => {
-			return Err(crate::i18n::tf("brief.missing.mergeRequests", &[("error", &error)]))
-		}
+		Err(error) => return Err(crate::i18n::tf("brief.missing.mergeRequests", &[("error", &error)])),
 	};
 	let iid = mr
 		.get("iid")
@@ -729,11 +712,7 @@ async fn gitlab_review(config: &Config, branch: &str) -> Result<Option<BriefSect
 				if note.get("system").and_then(|v| v.as_bool()).unwrap_or(false) {
 					continue;
 				}
-				let body = note
-					.get("body")
-					.and_then(|v| v.as_str())
-					.unwrap_or_default()
-					.trim();
+				let body = note.get("body").and_then(|v| v.as_str()).unwrap_or_default().trim();
 				if body.is_empty() {
 					continue;
 				}
@@ -1022,7 +1001,10 @@ mod tests {
 
 	#[test]
 	fn sans_section_le_prompt_part_seul() {
-		assert_eq!(assemble(&[], "  corrige l’arrondi du panier  "), "corrige l’arrondi du panier");
+		assert_eq!(
+			assemble(&[], "  corrige l’arrondi du panier  "),
+			"corrige l’arrondi du panier"
+		);
 	}
 
 	#[test]
@@ -1084,15 +1066,8 @@ mod tests {
 
 	#[test]
 	fn une_revue_avec_un_seul_retour_compte_juste() {
-		let built = review_text(
-			"#1",
-			"Titre",
-			"url",
-			"open",
-			"",
-			&["- **alex** : revois ça".into()],
-		)
-		.expect("section produite");
+		let built = review_text("#1", "Titre", "url", "open", "", &["- **alex** : revois ça".into()])
+			.expect("section produite");
 		assert_eq!(built.detail, "1 comment");
 		assert!(built.text.contains("revois ça"));
 	}
@@ -1168,7 +1143,10 @@ mod tests {
 		assert!(section.text.contains("`.claude/CLAUDE.md`"));
 		assert!(section.text.contains("`managing-database`"));
 		assert!(section.text.contains("`writing-frontend-code`"));
-		assert!(!section.text.contains("brouillon"), "un dossier nu n'est pas une compétence");
+		assert!(
+			!section.text.contains("brouillon"),
+			"un dossier nu n'est pas une compétence"
+		);
 		assert!(section.on, "les règles du dépôt partent cochées");
 		assert!(
 			section.chars < 2_000,
@@ -1191,10 +1169,7 @@ mod tests {
 			.expect("la section existe toujours : elle ne dépend que de git");
 
 		assert!(built.text.contains("Pose le socle"), "le commit est cité");
-		assert!(
-			built.text.contains("lisez-moi.md"),
-			"le fichier modifié est cité"
-		);
+		assert!(built.text.contains("lisez-moi.md"), "le fichier modifié est cité");
 		assert!(
 			built.text.contains("`brouillon.txt` (new)"),
 			"le fichier non suivi est cité comme neuf : {}",

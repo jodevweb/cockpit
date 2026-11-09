@@ -79,10 +79,20 @@ fn folder_for(branch: &str) -> String {
 	let tail = branch.rsplit('/').next().unwrap_or(branch);
 	let cleaned: String = tail
 		.chars()
-		.map(|c| if c.is_ascii_alphanumeric() || c == '-' || c == '_' || c == '.' { c } else { '-' })
+		.map(|c| {
+			if c.is_ascii_alphanumeric() || c == '-' || c == '_' || c == '.' {
+				c
+			} else {
+				'-'
+			}
+		})
 		.collect();
 	let cleaned = cleaned.trim_matches('-').to_string();
-	if cleaned.is_empty() { "agent".into() } else { cleaned }
+	if cleaned.is_empty() {
+		"agent".into()
+	} else {
+		cleaned
+	}
 }
 
 /// Le dossier du worktree : à côté du dépôt, `<dépôt>-<branche>`, comme on le
@@ -90,7 +100,10 @@ fn folder_for(branch: &str) -> String {
 /// d'écraser quoi que ce soit.
 fn worktree_path(root: &Path, branch: &str) -> PathBuf {
 	let parent = root.parent().unwrap_or(root);
-	let repo = root.file_name().map(|n| n.to_string_lossy().to_string()).unwrap_or_else(|| "depot".into());
+	let repo = root
+		.file_name()
+		.map(|n| n.to_string_lossy().to_string())
+		.unwrap_or_else(|| "depot".into());
 	let base = format!("{repo}-{}", folder_for(branch));
 	let mut candidate = parent.join(&base);
 	let mut index = 2;
@@ -109,11 +122,18 @@ fn worktree_path(root: &Path, branch: &str) -> PathBuf {
 pub async fn prepare(raw: &str, place: &str, branch: &str) -> Result<Prepared> {
 	let found = inspect(raw).await;
 	if !found.exists {
-		return Err(CockpitError::msg(crate::i18n::tf("libre.folderNotFound", &[("path", &found.path)])));
+		return Err(CockpitError::msg(crate::i18n::tf(
+			"libre.folderNotFound",
+			&[("path", &found.path)],
+		)));
 	}
 	let branch = branch.trim();
 	if place == "ici" || !found.is_git {
-		return Ok(Prepared { cwd: found.path, branch: found.branch, worktree: String::new() });
+		return Ok(Prepared {
+			cwd: found.path,
+			branch: found.branch,
+			worktree: String::new(),
+		});
 	}
 	if branch.is_empty() {
 		return Err(CockpitError::msg(crate::i18n::t("libre.branchNameRequired")));
@@ -122,7 +142,11 @@ pub async fn prepare(raw: &str, place: &str, branch: &str) -> Result<Prepared> {
 	match place {
 		"branche" => {
 			run_git(&path, &["switch", "-c", branch]).await?;
-			Ok(Prepared { cwd: found.path, branch: branch.to_string(), worktree: String::new() })
+			Ok(Prepared {
+				cwd: found.path,
+				branch: branch.to_string(),
+				worktree: String::new(),
+			})
 		}
 		"worktree" => {
 			let root = PathBuf::from(&found.root);
@@ -131,7 +155,10 @@ pub async fn prepare(raw: &str, place: &str, branch: &str) -> Result<Prepared> {
 			run_git(&root, &["worktree", "add", "-b", branch, &target_str, "HEAD"]).await?;
 			// Lancé depuis un sous-dossier du dépôt : l'agent repart du même
 			// sous-dossier, dans sa copie.
-			let inside = Path::new(&found.path).strip_prefix(&root).map(Path::to_path_buf).unwrap_or_default();
+			let inside = Path::new(&found.path)
+				.strip_prefix(&root)
+				.map(Path::to_path_buf)
+				.unwrap_or_default();
 			let cwd = target.join(inside);
 			Ok(Prepared {
 				cwd: cwd.to_string_lossy().to_string(),
@@ -139,7 +166,10 @@ pub async fn prepare(raw: &str, place: &str, branch: &str) -> Result<Prepared> {
 				worktree: target_str,
 			})
 		}
-		other => Err(CockpitError::msg(crate::i18n::tf("libre.unknownPlace", &[("place", &other)]))),
+		other => Err(CockpitError::msg(crate::i18n::tf(
+			"libre.unknownPlace",
+			&[("place", &other)],
+		))),
 	}
 }
 
@@ -157,12 +187,15 @@ pub async fn archive(worktree: &str, branch: &str, action: &str) -> Result<()> {
 	// `git worktree remove` se joue depuis le dépôt principal : le dossier qu'on
 	// supprime ne peut pas être celui d'où l'on parle.
 	let common = run_git(&tree, &["rev-parse", "--path-format=absolute", "--git-common-dir"]).await?;
-	let main = PathBuf::from(common.trim()).parent().map(Path::to_path_buf).unwrap_or_else(|| tree.clone());
+	let main = PathBuf::from(common.trim())
+		.parent()
+		.map(Path::to_path_buf)
+		.unwrap_or_else(|| tree.clone());
 	match action {
 		"keep" => {
-			run_git(&main, &["worktree", "remove", worktree]).await.map_err(|error| {
-				CockpitError::msg(crate::i18n::tf("libre.worktreeDirty", &[("error", &error)]))
-			})?;
+			run_git(&main, &["worktree", "remove", worktree])
+				.await
+				.map_err(|error| CockpitError::msg(crate::i18n::tf("libre.worktreeDirty", &[("error", &error)])))?;
 		}
 		"discard" => {
 			run_git(&main, &["worktree", "remove", "--force", worktree]).await?;
@@ -193,7 +226,17 @@ mod tests {
 		std::fs::create_dir_all(&repo).unwrap();
 		for args in [
 			vec!["init", "-q", "-b", "main"],
-			vec!["-c", "user.email=t@t", "-c", "user.name=t", "commit", "-q", "--allow-empty", "-m", "init"],
+			vec![
+				"-c",
+				"user.email=t@t",
+				"-c",
+				"user.name=t",
+				"commit",
+				"-q",
+				"--allow-empty",
+				"-m",
+				"init",
+			],
 		] {
 			run_git(&repo, &args).await.unwrap();
 		}
@@ -209,7 +252,9 @@ mod tests {
 
 		archive(&ready.worktree, &ready.branch, "discard").await.unwrap();
 		assert!(!Path::new(&ready.worktree).exists());
-		assert!(run_git(&repo, &["rev-parse", "--verify", "refs/heads/agent/essai"]).await.is_err());
+		assert!(run_git(&repo, &["rev-parse", "--verify", "refs/heads/agent/essai"])
+			.await
+			.is_err());
 
 		let _ = std::fs::remove_dir_all(&base);
 	}

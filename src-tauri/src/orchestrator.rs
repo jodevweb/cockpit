@@ -313,7 +313,11 @@ pub fn bridge_config(sandboxed: bool) -> Option<String> {
 	// ont la forme `/c/Users/…` (voir `sandbox::container_path`).
 	let seen = |path: &std::path::Path| {
 		let path = path.to_string_lossy().to_string();
-		if sandboxed { crate::sandbox::container_path(&path) } else { path }
+		if sandboxed {
+			crate::sandbox::container_path(&path)
+		} else {
+			path
+		}
 	};
 	let payload = json!({
 		"mcpServers": {
@@ -439,7 +443,7 @@ async fn run(app: &tauri::AppHandle, call: &Call) -> Result<Value> {
 				"state": "awaitingApproval",
 				"tasks": count,
 				"message": "Plan recorded. It is waiting for the user's approval: \
-				            only call `spawn` once the mission has moved to `running`.",
+							only call `spawn` once the mission has moved to `running`.",
 			}))
 		}
 
@@ -501,10 +505,7 @@ async fn run(app: &tauri::AppHandle, call: &Call) -> Result<Value> {
 				.cloned()
 				.ok_or_else(|| CockpitError::msg("Unknown task."))?;
 			if task.state != TaskState::Planned {
-				return Err(CockpitError::msg(format!(
-					"This task is already {:?}.",
-					task.state
-				)));
+				return Err(CockpitError::msg(format!("This task is already {:?}.", task.state)));
 			}
 
 			// Branche et worktree d'abord : un exécutant sans terrain propre
@@ -513,13 +514,8 @@ async fn run(app: &tauri::AppHandle, call: &Call) -> Result<Value> {
 			mission::set_task_worktree(&mission.id, &task.id, &worktree)?;
 
 			// Le maître, et lui seul : c'est `spawn` qui passe par ici.
-			let session = crate::launch_task_agent(
-				app.clone(),
-				&mission.id,
-				&task.id,
-				crate::executions::MASTER,
-			)
-			.await?;
+			let session =
+				crate::launch_task_agent(app.clone(), &mission.id, &task.id, crate::executions::MASTER).await?;
 			Ok(json!({
 				"sessionId": session,
 				"worktree": worktree,
@@ -555,9 +551,7 @@ async fn run(app: &tauri::AppHandle, call: &Call) -> Result<Value> {
 				.filter(|task| task.id == task_id || verifiers.contains(&task.role))
 				.filter_map(|task| task.session_id.clone())
 				.collect();
-			let updated = mission::rework(&mission.id, task_id, reason, |role| {
-				verifiers.contains(role)
-			})?;
+			let updated = mission::rework(&mission.id, task_id, reason, |role| verifiers.contains(role))?;
 			if let Some(agents) = {
 				use tauri::Manager;
 				app.try_state::<crate::agent::SharedAgents>()
@@ -578,7 +572,7 @@ async fn run(app: &tauri::AppHandle, call: &Call) -> Result<Value> {
 				"remaining": mission::MAX_ATTEMPTS
 					.saturating_sub(task.map(|task| task.attempts).unwrap_or(0)),
 				"message": "Task sent back for rework. It restarts on its own, and the \
-				            checks will judge again once it has delivered.",
+							checks will judge again once it has delivered.",
 			}))
 		}
 		"collect" => {
@@ -636,7 +630,11 @@ async fn run(app: &tauri::AppHandle, call: &Call) -> Result<Value> {
 					"`{worktree}` is not on `{}` but on `{}`. Put it back on the \
 					 integration branch before merging.",
 					mission.branch,
-					if head.trim().is_empty() { "detached HEAD" } else { head.trim() },
+					if head.trim().is_empty() {
+						"detached HEAD"
+					} else {
+						head.trim()
+					},
 				)));
 			}
 
@@ -668,11 +666,7 @@ async fn run(app: &tauri::AppHandle, call: &Call) -> Result<Value> {
 				if task.state != TaskState::Delivered || branche.is_empty() {
 					continue;
 				}
-				let decision = mission::gate_decision(
-					task.gate,
-					!gate_commands.is_empty(),
-					juges.contains(&task.role),
-				);
+				let decision = mission::gate_decision(task.gate, !gate_commands.is_empty(), juges.contains(&task.role));
 				// Rendue avant que les portes existent, ou retrouvée au démarrage :
 				// elle passe les portes comme les autres.
 				let decision = if decision == mission::GateDecision::Start {
@@ -716,8 +710,7 @@ async fn run(app: &tauri::AppHandle, call: &Call) -> Result<Value> {
 					merged.push(branche.clone());
 					continue;
 				}
-				match crate::git::run_git(cwd, &["merge", "--no-ff", "--no-edit", &branche]).await
-				{
+				match crate::git::run_git(cwd, &["merge", "--no-ff", "--no-edit", &branche]).await {
 					Ok(_) => {
 						mission::set_task_state(&mission.id, &task.id, TaskState::Integrated, "")?;
 						merged.push(branche.clone());
@@ -759,14 +752,12 @@ async fn run(app: &tauri::AppHandle, call: &Call) -> Result<Value> {
 				if branche.is_empty() {
 					continue;
 				}
-				let restes = crate::git::run_git(
-					cwd,
-					&["rev-list", "--count", &format!("{}..{branche}", mission.branch)],
-				)
-				.await
-				.ok()
-				.and_then(|raw| raw.trim().parse::<u32>().ok())
-				.unwrap_or(0);
+				let restes =
+					crate::git::run_git(cwd, &["rev-list", "--count", &format!("{}..{branche}", mission.branch)])
+						.await
+						.ok()
+						.and_then(|raw| raw.trim().parse::<u32>().ok())
+						.unwrap_or(0);
 				if restes > 0 {
 					abandonne.push(json!({
 						"task": task.title,
@@ -792,9 +783,7 @@ async fn run(app: &tauri::AppHandle, call: &Call) -> Result<Value> {
 				.tasks
 				.iter()
 				.filter(|task| verifiers.contains(&task.role))
-				.filter(|task| {
-					matches!(task.state, TaskState::Delivered | TaskState::Integrated)
-				})
+				.filter(|task| matches!(task.state, TaskState::Delivered | TaskState::Integrated))
 				.filter(|_| evidence.is_empty())
 				.map(|task| task.title.clone())
 				.collect();
@@ -962,9 +951,7 @@ async fn run(app: &tauri::AppHandle, call: &Call) -> Result<Value> {
 				// qu'à en tirer les conséquences.
 				(Some(url), _) => {
 					if !url.starts_with("http") {
-						return Err(CockpitError::msg(
-							"`url` expects the URL of the opened pull request.",
-						));
+						return Err(CockpitError::msg("`url` expects the URL of the opened pull request."));
 					}
 					url
 				}
@@ -1057,11 +1044,7 @@ fn read_tasks(input: &Value, integration: &str) -> Result<Vec<Task>> {
 				scope: entry
 					.get("scope")
 					.and_then(|value| value.as_array())
-					.map(|list| {
-						list.iter()
-							.filter_map(|item| item.as_str().map(String::from))
-							.collect()
-					})
+					.map(|list| list.iter().filter_map(|item| item.as_str().map(String::from)).collect())
 					.unwrap_or_default(),
 				base: {
 					let base = text("base");
@@ -1075,7 +1058,7 @@ fn read_tasks(input: &Value, integration: &str) -> Result<Vec<Task>> {
 				worktree: String::new(),
 				session_id: None,
 				engine_session: String::new(),
-			verdict: String::new(),
+				verdict: String::new(),
 				actual_branch: String::new(),
 				state: TaskState::Planned,
 				note: String::new(),
@@ -1162,22 +1145,15 @@ pub async fn prepare_worktree(mission: &mission::Mission, task: &Task) -> Result
 	// Une branche qui existe déjà — mission relancée, travail repris — ne se
 	// recrée pas : `-b` échouerait, et l'appelant retomberait sur le dépôt
 	// principal. On l'extrait telle quelle.
-	let existe = crate::git::run_git(
-		repo,
-		&["rev-parse", "--verify", &format!("refs/heads/{}", task.branch)],
-	)
-	.await
-	.is_ok();
+	let existe = crate::git::run_git(repo, &["rev-parse", "--verify", &format!("refs/heads/{}", task.branch)])
+		.await
+		.is_ok();
 
 	let chemin = path.to_string_lossy().to_string();
 	if existe {
 		crate::git::run_git(repo, &["worktree", "add", &chemin, &task.branch]).await?;
 	} else {
-		crate::git::run_git(
-			repo,
-			&["worktree", "add", "-b", &task.branch, &chemin, &base],
-		)
-		.await?;
+		crate::git::run_git(repo, &["worktree", "add", "-b", &task.branch, &chemin, &base]).await?;
 	}
 	Ok(chemin)
 }
@@ -1223,11 +1199,7 @@ pub struct SyncReport {
 /// fusion : la tâche qui vérifie ne sait pas le résoudre, seul le maître le
 /// sait. Elle continue sur ce qu'elle a, et le conflit se dit dans sa
 /// consigne — un fait connu d'avance, pas une découverte au hasard des tours.
-pub async fn sync_verifier_worktree(
-	mission: &mission::Mission,
-	task: &Task,
-	worktree: &str,
-) -> Result<SyncReport> {
+pub async fn sync_verifier_worktree(mission: &mission::Mission, task: &Task, worktree: &str) -> Result<SyncReport> {
 	let path = std::path::Path::new(worktree);
 	let mut report = SyncReport {
 		merged: Vec::new(),
@@ -1309,10 +1281,7 @@ fn gather_evidence(mission: &mission::Mission, into: &str) -> Vec<String> {
 		if task.worktree.trim().is_empty() {
 			continue;
 		}
-		collected.extend(crate::qa::collect_into(
-			std::path::Path::new(&task.worktree),
-			into,
-		));
+		collected.extend(crate::qa::collect_into(std::path::Path::new(&task.worktree), into));
 	}
 	collected.sort();
 	collected.dedup();
@@ -1326,9 +1295,7 @@ fn gather_evidence(mission: &mission::Mission, into: &str) -> Vec<String> {
 /// fusionné. Il est créé s'il manque, et jamais remplacé par le dépôt principal.
 pub async fn integration_worktree(mission: &mission::Mission) -> Result<String> {
 	if mission.branch.trim().is_empty() {
-		return Err(CockpitError::msg(crate::i18n::t(
-			"orchestrator.noIntegrationBranch",
-		)));
+		return Err(CockpitError::msg(crate::i18n::t("orchestrator.noIntegrationBranch")));
 	}
 	let task = Task {
 		id: String::new(),
@@ -1341,7 +1308,7 @@ pub async fn integration_worktree(mission: &mission::Mission) -> Result<String> 
 		worktree: String::new(),
 		session_id: None,
 		engine_session: String::new(),
-			verdict: String::new(),
+		verdict: String::new(),
 		actual_branch: String::new(),
 		state: TaskState::Planned,
 		note: String::new(),
@@ -1573,7 +1540,10 @@ mod tests {
 
 		assert_eq!(rapport.merged, vec!["feat/x-backend".to_string()]);
 		assert!(rapport.conflicts.is_empty());
-		assert!(qa.join("backend.txt").exists(), "le fichier du lot backend doit être là");
+		assert!(
+			qa.join("backend.txt").exists(),
+			"le fichier du lot backend doit être là"
+		);
 
 		std::fs::remove_dir_all(&depot).ok();
 		std::fs::remove_dir_all(&backend).ok();
@@ -1626,7 +1596,10 @@ mod tests {
 
 		assert!(!brings_own_commits(&depot, "feat/w-backend").await, "lot déjà intégré");
 		assert!(!brings_own_commits(&depot, "feat/w-qa").await, "qa n'a rien commité");
-		assert!(brings_own_commits(&depot, "feat/w-review").await, "review a commité sa note");
+		assert!(
+			brings_own_commits(&depot, "feat/w-review").await,
+			"review a commité sa note"
+		);
 
 		std::fs::remove_dir_all(&depot).ok();
 		for dossier in [&backend, &frontend, &qa, &review] {

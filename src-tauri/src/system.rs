@@ -23,7 +23,10 @@ fn escape_applescript(input: &str) -> String {
 pub async fn open_in_editor(editor: &str, path: &str) -> Result<()> {
 	let target = Path::new(path);
 	if !target.exists() {
-		return Err(CockpitError::msg(crate::i18n::tf("system.pathNotFound", &[("path", &path)])));
+		return Err(CockpitError::msg(crate::i18n::tf(
+			"system.pathNotFound",
+			&[("path", &path)],
+		)));
 	}
 	// Aucun éditeur supposé : en lancer un que la personne n'utilise pas — ou
 	// n'a pas installé — échoue plus loin, avec un message qui parle d'un outil
@@ -54,7 +57,9 @@ pub async fn open_in_editor(editor: &str, path: &str) -> Result<()> {
 		// d'une sortie d'agent ou d'un dépôt cloné, et `"$(…)"` reste évalué par le
 		// shell — un fichier nommé `$(curl …|sh).md` s'exécutait à l'ouverture.
 		if has_cli {
-			return capture("/", &format!("{editor} {}", shell_quote(path))).await.map(|_| ());
+			return capture("/", &format!("{editor} {}", shell_quote(path)))
+				.await
+				.map(|_| ());
 		}
 		// Sans son outil en ligne de commande, l'éditeur s'ouvre par son nom
 		// d'application sous macOS ; sous Linux, il n'y a pas d'équivalent à
@@ -185,10 +190,16 @@ mod windows_editor {
 	pub fn open(editor: &str, path: &str) -> Result<()> {
 		// Un `-` initial serait pris pour une option de l'éditeur.
 		if path.trim_start().starts_with('-') {
-			return Err(CockpitError::msg(crate::i18n::tf("system.pathNotOpenable", &[("path", &path)])));
+			return Err(CockpitError::msg(crate::i18n::tf(
+				"system.pathNotOpenable",
+				&[("path", &path)],
+			)));
 		}
 		let Some(program) = resolve(editor) else {
-			return Err(CockpitError::msg(crate::i18n::tf("desktop.editorNotFound", &[("editor", &editor)])));
+			return Err(CockpitError::msg(crate::i18n::tf(
+				"desktop.editorNotFound",
+				&[("editor", &editor)],
+			)));
 		};
 		let mut command = std::process::Command::new(&program);
 		command
@@ -308,7 +319,10 @@ mod windows_terminal {
 
 	fn windows_terminal() -> Option<PathBuf> {
 		if let Ok(local) = std::env::var("LOCALAPPDATA") {
-			let alias = PathBuf::from(local).join("Microsoft").join("WindowsApps").join("wt.exe");
+			let alias = PathBuf::from(local)
+				.join("Microsoft")
+				.join("WindowsApps")
+				.join("wt.exe");
 			if alias.exists() {
 				return Some(alias);
 			}
@@ -359,8 +373,7 @@ mod windows_terminal {
 		// un shell interactif prend la suite, dans le même dossier
 		// (`CHERE_INVOKING` empêche le profil de Git Bash de repartir de `~`).
 		let body = format!("export CHERE_INVOKING=1\n{script_line}\nexec \"$BASH\" --login -i\n");
-		std::fs::write(&script, body)
-			.map_err(|e| CockpitError::msg(format!("{} : {e}", script.display())))?;
+		std::fs::write(&script, body).map_err(|e| CockpitError::msg(format!("{} : {e}", script.display())))?;
 
 		let bash_text = bash.to_string_lossy().to_string();
 		let script_text = script.to_string_lossy().to_string();
@@ -422,7 +435,10 @@ fn shell_quote(value: &str) -> String {
 pub async fn open_external(url: &str) -> Result<()> {
 	// Un `-` initial serait pris pour une option d'`open`.
 	if !url.starts_with("http://") && !url.starts_with("https://") {
-		return Err(CockpitError::msg(crate::i18n::tf("system.linkNotOpenable", &[("url", &url)])));
+		return Err(CockpitError::msg(crate::i18n::tf(
+			"system.linkNotOpenable",
+			&[("url", &url)],
+		)));
 	}
 
 	#[cfg(windows)]
@@ -434,7 +450,10 @@ pub async fn open_external(url: &str) -> Result<()> {
 			.await
 			.map_err(|e| CockpitError::msg(format!("open : {e}")))?;
 		if opened.is_err() {
-			return Err(CockpitError::msg(crate::i18n::tf("system.linkFailed", &[("url", &url)])));
+			return Err(CockpitError::msg(crate::i18n::tf(
+				"system.linkFailed",
+				&[("url", &url)],
+			)));
 		}
 		Ok(())
 	}
@@ -448,7 +467,10 @@ pub async fn open_external(url: &str) -> Result<()> {
 			.map_err(|e| CockpitError::msg(format!("open : {e}")))?;
 
 		if !status.success() {
-			return Err(CockpitError::msg(crate::i18n::tf("system.linkFailed", &[("url", &url)])));
+			return Err(CockpitError::msg(crate::i18n::tf(
+				"system.linkFailed",
+				&[("url", &url)],
+			)));
 		}
 		Ok(())
 	}
@@ -461,10 +483,16 @@ pub async fn open_external(url: &str) -> Result<()> {
 /// Chemin absolu exigé : un `-` initial serait pris pour une option d'`open`.
 pub async fn open_file(path: &str) -> Result<()> {
 	if !is_absolute_path(path) {
-		return Err(CockpitError::msg(crate::i18n::tf("system.pathNotOpenable", &[("path", &path)])));
+		return Err(CockpitError::msg(crate::i18n::tf(
+			"system.pathNotOpenable",
+			&[("path", &path)],
+		)));
 	}
 	if !std::path::Path::new(path).exists() {
-		return Err(CockpitError::msg(crate::i18n::tf("system.fileNotFound", &[("path", &path)])));
+		return Err(CockpitError::msg(crate::i18n::tf(
+			"system.fileNotFound",
+			&[("path", &path)],
+		)));
 	}
 	#[cfg(windows)]
 	{
@@ -472,7 +500,10 @@ pub async fn open_file(path: &str) -> Result<()> {
 		// programme ou un script : un `.bat` sorti d'un agent partirait sans un
 		// mot. La visionneuse montre des documents, pas des programmes.
 		if runs_as_program(path) {
-			return Err(CockpitError::msg(crate::i18n::tf("desktop.programRefused", &[("path", &path)])));
+			return Err(CockpitError::msg(crate::i18n::tf(
+				"desktop.programRefused",
+				&[("path", &path)],
+			)));
 		}
 		let target = path.to_string();
 		let opened = tokio::task::spawn_blocking(move || crate::platform::open(&target))
@@ -492,8 +523,8 @@ pub async fn open_file(path: &str) -> Result<()> {
 			.map_err(|e| CockpitError::msg(format!("open : {e}")))?;
 		if !status.success() {
 			return Err(CockpitError::msg(crate::i18n::tf("system.noApp", &[("path", &path)])));
-	}
-	Ok(())
+		}
+		Ok(())
 	}
 }
 
@@ -511,14 +542,17 @@ fn is_absolute_path(path: &str) -> bool {
 /// et les autres porteurs de code que l'Explorateur lance d'un double-clic.
 #[cfg_attr(not(windows), allow(dead_code))]
 fn runs_as_program(path: &str) -> bool {
-	let Some(ext) = Path::new(path).extension().map(|e| format!(".{}", e.to_string_lossy().to_lowercase())) else {
+	let Some(ext) = Path::new(path)
+		.extension()
+		.map(|e| format!(".{}", e.to_string_lossy().to_lowercase()))
+	else {
 		return false;
 	};
 	let declared = std::env::var("PATHEXT").unwrap_or_default().to_lowercase();
 	let declared = declared.split(';').map(str::trim).filter(|e| !e.is_empty());
 	const ALWAYS: [&str; 22] = [
-		".exe", ".com", ".bat", ".cmd", ".ps1", ".psm1", ".vbs", ".vbe", ".js", ".jse", ".wsf", ".wsh",
-		".msc", ".msi", ".msp", ".scr", ".pif", ".lnk", ".url", ".hta", ".cpl", ".reg",
+		".exe", ".com", ".bat", ".cmd", ".ps1", ".psm1", ".vbs", ".vbe", ".js", ".jse", ".wsf", ".wsh", ".msc", ".msi",
+		".msp", ".scr", ".pif", ".lnk", ".url", ".hta", ".cpl", ".reg",
 	];
 	ALWAYS.contains(&ext.as_str()) || declared.into_iter().any(|e| e == ext)
 }
@@ -527,7 +561,10 @@ pub async fn reveal_in_finder(path: &str) -> Result<()> {
 	// Un `-` initial serait pris pour une option d'`open` — le chemin vient
 	// parfois d'une sortie d'agent.
 	if path.trim_start().starts_with('-') {
-		return Err(CockpitError::msg(crate::i18n::tf("system.pathNotRevealable", &[("path", &path)])));
+		return Err(CockpitError::msg(crate::i18n::tf(
+			"system.pathNotRevealable",
+			&[("path", &path)],
+		)));
 	}
 	#[cfg(windows)]
 	{
@@ -663,13 +700,7 @@ pub async fn docker_containers() -> Result<Vec<Container>> {
 		let Ok(value) = serde_json::from_str::<Value>(line) else {
 			continue;
 		};
-		let get = |key: &str| {
-			value
-				.get(key)
-				.and_then(|v| v.as_str())
-				.unwrap_or_default()
-				.to_string()
-		};
+		let get = |key: &str| value.get(key).and_then(|v| v.as_str()).unwrap_or_default().to_string();
 		containers.push(Container {
 			id: get("ID"),
 			name: get("Names"),
@@ -719,7 +750,9 @@ fn parse_ss(raw: &str) -> Vec<ListeningPort> {
 		let Some(port) = local.rsplit(':').next().and_then(|port| port.parse::<u16>().ok()) else {
 			continue;
 		};
-		let Some(users) = fields.iter().find(|field| field.starts_with("users:")) else { continue };
+		let Some(users) = fields.iter().find(|field| field.starts_with("users:")) else {
+			continue;
+		};
 		let process = users.split('"').nth(1).unwrap_or_default().to_string();
 		let Some(pid) = users
 			.split("pid=")
@@ -732,7 +765,13 @@ fn parse_ss(raw: &str) -> Vec<ListeningPort> {
 		if ports.iter().any(|entry| entry.port == port && entry.pid == pid) {
 			continue;
 		}
-		ports.push(ListeningPort { port, process, pid, cwd: String::new(), memory_mb: 0.0 });
+		ports.push(ListeningPort {
+			port,
+			process,
+			pid,
+			cwd: String::new(),
+			memory_mb: 0.0,
+		});
 	}
 	ports.sort_by_key(|entry| entry.port);
 	ports
@@ -776,8 +815,7 @@ pub async fn listening_ports() -> Result<Vec<ListeningPort>> {
 				"p" => pid = value.parse().unwrap_or(0),
 				"c" => process = value.to_string(),
 				"n" => {
-					let Some(port) = value.rsplit(':').next().and_then(|p| p.parse::<u16>().ok())
-					else {
+					let Some(port) = value.rsplit(':').next().and_then(|p| p.parse::<u16>().ok()) else {
 						continue;
 					};
 					if ports.iter().any(|p| p.port == port && p.pid == pid) {
@@ -803,12 +841,7 @@ pub async fn listening_ports() -> Result<Vec<ListeningPort>> {
 				.map(|entry| entry.pid.to_string())
 				.collect::<Vec<_>>()
 				.join(",");
-			if let Ok(raw) = capture(
-				"/",
-				&format!("lsof -a -d cwd -p {pids} -Fpn 2>/dev/null || true"),
-			)
-			.await
-			{
+			if let Ok(raw) = capture("/", &format!("lsof -a -d cwd -p {pids} -Fpn 2>/dev/null || true")).await {
 				let mut pid: u32 = 0;
 				for line in raw.lines() {
 					let (tag, value) = line.split_at(1);
@@ -831,16 +864,13 @@ pub async fn listening_ports() -> Result<Vec<ListeningPort>> {
 		if !ports.is_empty() {
 			if let Ok(raw) = capture("/", "ps -axo pid=,ppid=,rss= 2>/dev/null || true").await {
 				let mut poids: std::collections::HashMap<u32, u64> = std::collections::HashMap::new();
-				let mut enfants: std::collections::HashMap<u32, Vec<u32>> =
-					std::collections::HashMap::new();
+				let mut enfants: std::collections::HashMap<u32, Vec<u32>> = std::collections::HashMap::new();
 				for ligne in raw.lines() {
 					let mut champs = ligne.split_whitespace();
-					let (Some(pid), Some(ppid), Some(rss)) = (champs.next(), champs.next(), champs.next())
-					else {
+					let (Some(pid), Some(ppid), Some(rss)) = (champs.next(), champs.next(), champs.next()) else {
 						continue;
 					};
-					let (Ok(pid), Ok(ppid), Ok(rss)) =
-						(pid.parse::<u32>(), ppid.parse::<u32>(), rss.parse::<u64>())
+					let (Ok(pid), Ok(ppid), Ok(rss)) = (pid.parse::<u32>(), ppid.parse::<u32>(), rss.parse::<u64>())
 					else {
 						continue;
 					};
@@ -897,7 +927,14 @@ mod windows_ports {
 	fn table(family: u32) -> Vec<(u16, u32)> {
 		let mut size: u32 = 0;
 		unsafe {
-			GetExtendedTcpTable(std::ptr::null_mut(), &mut size, 0, family, TCP_TABLE_OWNER_PID_LISTENER, 0);
+			GetExtendedTcpTable(
+				std::ptr::null_mut(),
+				&mut size,
+				0,
+				family,
+				TCP_TABLE_OWNER_PID_LISTENER,
+				0,
+			);
 		}
 		if size == 0 {
 			return Vec::new();
@@ -946,7 +983,11 @@ mod windows_ports {
 			entry.dwSize = std::mem::size_of::<PROCESSENTRY32W>() as u32;
 			let mut more = Process32FirstW(snapshot, &mut entry) != 0;
 			while more {
-				let length = entry.szExeFile.iter().position(|c| *c == 0).unwrap_or(entry.szExeFile.len());
+				let length = entry
+					.szExeFile
+					.iter()
+					.position(|c| *c == 0)
+					.unwrap_or(entry.szExeFile.len());
 				let name = String::from_utf16_lossy(&entry.szExeFile[..length]);
 				map.insert(entry.th32ProcessID, (name, entry.th32ParentProcessID));
 				more = Process32NextW(snapshot, &mut entry) != 0;
@@ -1004,7 +1045,13 @@ mod windows_ports {
 				.get(&pid)
 				.map(|(name, _)| short_name(name))
 				.unwrap_or_default();
-			ports.push(ListeningPort { port, process, pid, cwd: String::new(), memory_mb: 0.0 });
+			ports.push(ListeningPort {
+				port,
+				process,
+				pid,
+				cwd: String::new(),
+				memory_mb: 0.0,
+			});
 		}
 
 		// Ce que chaque serveur pèse, sa descendance comprise.
@@ -1062,8 +1109,14 @@ LISTEN 0 128 0.0.0.0:22 0.0.0.0:*
 ";
 		let ports = parse_ss(raw);
 		assert_eq!(ports.len(), 2, "{ports:?}");
-		assert_eq!((ports[0].port, ports[0].pid, ports[0].process.as_str()), (3000, 77, "next-server"));
-		assert_eq!((ports[1].port, ports[1].pid, ports[1].process.as_str()), (5173, 4242, "node"));
+		assert_eq!(
+			(ports[0].port, ports[0].pid, ports[0].process.as_str()),
+			(3000, 77, "next-server")
+		);
+		assert_eq!(
+			(ports[1].port, ports[1].pid, ports[1].process.as_str()),
+			(5173, 4242, "node")
+		);
 	}
 
 	#[test]

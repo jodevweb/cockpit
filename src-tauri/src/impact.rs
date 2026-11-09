@@ -174,8 +174,7 @@ pub fn forget(key: &str) -> Result<()> {
 /// lancer trois sur la même pull request en cliquant trois fois, et l'écran
 /// n'aurait aucun moyen de dire que la première travaille encore.
 fn running() -> &'static Mutex<std::collections::HashSet<String>> {
-	static RUNNING: std::sync::OnceLock<Mutex<std::collections::HashSet<String>>> =
-		std::sync::OnceLock::new();
+	static RUNNING: std::sync::OnceLock<Mutex<std::collections::HashSet<String>>> = std::sync::OnceLock::new();
 	RUNNING.get_or_init(|| Mutex::new(std::collections::HashSet::new()))
 }
 
@@ -298,43 +297,30 @@ pub(crate) async fn dossier(change: &crate::monitor::Change, config: &Config) ->
 		}
 	));
 	if change.forge == "local" {
-		out.push_str(
-			"- No merge request has been opened: this work exists only on this branch.\n",
-		);
+		out.push_str("- No merge request has been opened: this work exists only on this branch.\n");
 	}
 	out.push('\n');
 
 	let diff = match change.forge.as_str() {
 		"github" => {
-			let conversation = crate::integrations::github_pull_conversation(
-				config,
-				change.reference.trim_start_matches('#'),
-			)
-			.await
-			.ok();
+			let conversation =
+				crate::integrations::github_pull_conversation(config, change.reference.trim_start_matches('#'))
+					.await
+					.ok();
 			if let Some(conversation) = &conversation {
 				out.push_str(&github_conversation(conversation));
 			}
-			crate::integrations::github_pull_diff(
-				config,
-				change.reference.trim_start_matches('#'),
-			)
-			.await?
+			crate::integrations::github_pull_diff(config, change.reference.trim_start_matches('#')).await?
 		}
 		"gitlab" => {
-			crate::integrations::gitlab_merge_request_diff(
-				config,
-				change.reference.trim_start_matches('!'),
-			)
-			.await?
+			crate::integrations::gitlab_merge_request_diff(config, change.reference.trim_start_matches('!')).await?
 		}
 		_ => {
 			let repo = PathBuf::from(&change.repo_path);
-			let merge_base =
-				crate::git::run_git(&repo, &["merge-base", &change.base, &change.branch])
-					.await
-					.map(|raw| raw.trim().to_string())
-					.unwrap_or_else(|_| change.base.clone());
+			let merge_base = crate::git::run_git(&repo, &["merge-base", &change.base, &change.branch])
+				.await
+				.map(|raw| raw.trim().to_string())
+				.unwrap_or_else(|_| change.base.clone());
 			crate::git::run_git(&repo, &["diff", &merge_base, &change.branch]).await?
 		}
 	};
@@ -414,11 +400,7 @@ fn github_conversation(conversation: &serde_json::Value) -> String {
 	for (pointer, kind) in [("/reviews", "review"), ("/comments", "comment")] {
 		if let Some(list) = conversation.pointer(pointer).and_then(|v| v.as_array()) {
 			for entry in list {
-				let text = entry
-					.get("body")
-					.and_then(|v| v.as_str())
-					.unwrap_or_default()
-					.trim();
+				let text = entry.get("body").and_then(|v| v.as_str()).unwrap_or_default().trim();
 				if text.is_empty() {
 					continue;
 				}
@@ -426,10 +408,7 @@ fn github_conversation(conversation: &serde_json::Value) -> String {
 					.pointer("/user/login")
 					.and_then(|v| v.as_str())
 					.unwrap_or("someone");
-				let state = entry
-					.get("state")
-					.and_then(|v| v.as_str())
-					.unwrap_or_default();
+				let state = entry.get("state").and_then(|v| v.as_str()).unwrap_or_default();
 				echanges.push(format!(
 					"- **{author}** ({kind}{}): {}",
 					if state.is_empty() {
@@ -673,19 +652,17 @@ fn section_id(titre: &str) -> String {
 /// puce et on y cherche le mot, décoration comprise.
 fn severity_of(ligne: &str) -> (String, String) {
 	let debut: String = ligne.chars().take(24).collect::<String>().to_lowercase();
-	let (severite, marqueurs): (&str, &[&str]) = if debut.contains("élevé")
-		|| debut.contains("eleve")
-		|| debut.contains("high")
-		|| debut.contains("critique")
-	{
-		("critical", &["élevé", "eleve", "high", "critique"])
-	} else if debut.contains("moyen") || debut.contains("medium") {
-		("warning", &["moyen", "medium"])
-	} else if debut.contains("faible") || debut.contains("low") {
-		("info", &["faible", "low"])
-	} else {
-		return ("neutral".into(), ligne.trim().to_string())
-	};
+	let (severite, marqueurs): (&str, &[&str]) =
+		if debut.contains("élevé") || debut.contains("eleve") || debut.contains("high") || debut.contains("critique")
+		{
+			("critical", &["élevé", "eleve", "high", "critique"])
+		} else if debut.contains("moyen") || debut.contains("medium") {
+			("warning", &["moyen", "medium"])
+		} else if debut.contains("faible") || debut.contains("low") {
+			("info", &["faible", "low"])
+		} else {
+			return ("neutral".into(), ligne.trim().to_string());
+		};
 
 	// La marque enlevée, la puce doit se lire seule : la gravité s'affiche par
 	// la couleur, la répéter en toutes lettres vole une ligne pour rien.
@@ -775,15 +752,12 @@ pub fn parse(rapport: &str) -> Analysis {
 			continue;
 		};
 
-		if let Some(puce) = taille
-			.strip_prefix("- ")
-			.or(taille.strip_prefix("* "))
-			.or_else(|| {
-				taille
-					.split_once(". ")
-					.filter(|(tete, _)| tete.chars().all(|c| c.is_ascii_digit()))
-					.map(|(_, reste)| reste)
-			}) {
+		if let Some(puce) = taille.strip_prefix("- ").or(taille.strip_prefix("* ")).or_else(|| {
+			taille
+				.split_once(". ")
+				.filter(|(tete, _)| tete.chars().all(|c| c.is_ascii_digit()))
+				.map(|(_, reste)| reste)
+		}) {
 			let (severity, text) = if section.id == "risques" {
 				severity_of(puce)
 			} else {
@@ -838,20 +812,14 @@ pub fn parse(rapport: &str) -> Analysis {
 				.count()
 		})
 		.unwrap_or(0);
-	analysis.summary.check_count = section("verifier")
-		.map(|section| section.points.len())
-		.unwrap_or(0);
+	analysis.summary.check_count = section("verifier").map(|section| section.points.len()).unwrap_or(0);
 
 	// Un verdict absent se déduit de ce qui a été trouvé, plutôt que de laisser
 	// la carte muette : des risques élevés sans verdict, c'est au minimum des
 	// réserves.
 	if analysis.summary.verdict.is_empty() {
-		let grave = section("risques").is_some_and(|section| {
-			section
-				.points
-				.iter()
-				.any(|point| point.severity == "critical")
-		});
+		let grave =
+			section("risques").is_some_and(|section| section.points.iter().any(|point| point.severity == "critical"));
 		analysis.summary.verdict = if grave {
 			"réserves".into()
 		} else if analysis.summary.risk_count > 0 {
@@ -879,10 +847,7 @@ fn ligne_de(ligne: &str, mot: &str) -> Option<String> {
 		.collect();
 	let nu = nu.trim().trim_start_matches(['-', ' ']).to_lowercase();
 	let reste = nu.strip_prefix(mot)?;
-	let valeur = reste
-		.trim_start_matches([':', '=', ' ', '\u{a0}'])
-		.trim()
-		.to_string();
+	let valeur = reste.trim_start_matches([':', '=', ' ', '\u{a0}']).trim().to_string();
 	// Sans séparateur, « risquez » commencerait par « risque » : on exige que le
 	// mot soit suivi d'une ponctuation ou d'un espace, donc que le reste ait été
 	// effectivement rogné.
@@ -896,12 +861,7 @@ fn normalise_verdict(valeur: &str) -> String {
 	let mot = valeur.split_whitespace().next().unwrap_or("");
 	match mot {
 		m if m.starts_with("bloqu") || m.starts_with("block") => "bloquant".into(),
-		m if m.starts_with("réserve")
-			|| m.starts_with("reserve")
-			|| m.starts_with("concern") =>
-		{
-			"réserves".into()
-		}
+		m if m.starts_with("réserve") || m.starts_with("reserve") || m.starts_with("concern") => "réserves".into(),
 		m if m.starts_with("ok") || m.starts_with("pass") || m.starts_with("clean") => "ok".into(),
 		_ => String::new(),
 	}
@@ -910,9 +870,7 @@ fn normalise_verdict(valeur: &str) -> String {
 fn normalise_risque(valeur: &str) -> Option<String> {
 	let mot = valeur.split_whitespace().next().unwrap_or("");
 	match mot {
-		m if m.starts_with("élev") || m.starts_with("elev") || m.starts_with("high") => {
-			Some("élevé".into())
-		}
+		m if m.starts_with("élev") || m.starts_with("elev") || m.starts_with("high") => Some("élevé".into()),
 		m if m.starts_with("moyen") || m.starts_with("medium") => Some("moyen".into()),
 		m if m.starts_with("faible") || m.starts_with("low") => Some("faible".into()),
 		_ => None,
@@ -961,9 +919,7 @@ mod tests {
 
 	#[test]
 	fn reconnait_les_titres_anglais_et_decores() {
-		let analysis = parse(
-			"## **Why now**\nParce que.\n\n## What can break\n- [high] Ça casse.\n",
-		);
+		let analysis = parse("## **Why now**\nParce que.\n\n## What can break\n- [high] Ça casse.\n");
 		assert_eq!(analysis.sections[0].id, "pourquoi");
 		assert_eq!(analysis.sections[1].id, "risques");
 		assert_eq!(analysis.sections[1].points[0].severity, "critical");
@@ -998,10 +954,7 @@ mod tests {
 		// « Risquez » commence par « risque » : sans séparateur exigé, la phrase
 		// passait pour une déclaration de niveau et disparaissait du rapport.
 		assert_eq!(ligne_de("Risquez de perdre des données", "risque"), None);
-		assert_eq!(
-			ligne_de("**Risque :** élevé", "risque").as_deref(),
-			Some("élevé")
-		);
+		assert_eq!(ligne_de("**Risque :** élevé", "risque").as_deref(), Some("élevé"));
 	}
 
 	/// Le rapport tel que la consigne anglaise le demande désormais : il doit se
@@ -1028,7 +981,10 @@ mod tests {
 			 Risk: medium\n",
 		);
 		let ids: Vec<&str> = analysis.sections.iter().map(|s| s.id.as_str()).collect();
-		assert_eq!(ids, vec!["produit", "pourquoi", "choix", "risques", "verifier", "mieux"]);
+		assert_eq!(
+			ids,
+			vec!["produit", "pourquoi", "choix", "risques", "verifier", "mieux"]
+		);
 		assert_eq!(analysis.summary.verdict, "réserves");
 		assert_eq!(analysis.summary.risk, "moyen");
 		assert_eq!(analysis.summary.risk_count, 2);

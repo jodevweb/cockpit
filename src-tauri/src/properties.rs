@@ -71,10 +71,7 @@ pub struct Audit {
 
 impl Audit {
 	pub fn broken(&self) -> usize {
-		self.checks
-			.iter()
-			.filter(|check| check.verdict == "enfreinte")
-			.count()
+		self.checks.iter().filter(|check| check.verdict == "enfreinte").count()
 	}
 }
 
@@ -332,11 +329,7 @@ async fn changed_files(change: &crate::monitor::Change) -> Vec<String> {
 	let repo = PathBuf::from(&change.repo_path);
 	crate::git::run_git(
 		&repo,
-		&[
-			"diff",
-			"--name-only",
-			&format!("{}...{}", change.base, change.branch),
-		],
+		&["diff", "--name-only", &format!("{}...{}", change.base, change.branch)],
 	)
 	.await
 	.map(|raw| {
@@ -358,8 +351,18 @@ async fn changed_files(change: &crate::monitor::Change) -> Vec<String> {
 /// n'est propre à un projet : c'est ce qui rend la calibration possible dans
 /// n'importe quel dépôt.
 const FIX_MARKERS: [&str; 12] = [
-	"fix:", "fix(", "hotfix", "revert", "bugfix", "correctif", "corrige", "répare", "repare",
-	"regression", "régression", "patch:",
+	"fix:",
+	"fix(",
+	"hotfix",
+	"revert",
+	"bugfix",
+	"correctif",
+	"corrige",
+	"répare",
+	"repare",
+	"regression",
+	"régression",
+	"patch:",
 ];
 
 /// Sujet de commit qui ressemble à une correction.
@@ -368,29 +371,15 @@ pub fn looks_like_fix(subject: &str) -> bool {
 	// Un mot-clé en tête ou dans le sujet, mais jamais « prefix » ou
 	// « suffixe » : le marqueur doit commencer un mot.
 	FIX_MARKERS.iter().any(|marker| {
-		lower.match_indices(marker).any(|(at, _)| {
-			at == 0
-				|| lower[..at]
-					.chars()
-					.next_back()
-					.is_some_and(|c| !c.is_alphanumeric())
-		})
+		lower
+			.match_indices(marker)
+			.any(|(at, _)| at == 0 || lower[..at].chars().next_back().is_some_and(|c| !c.is_alphanumeric()))
 	})
 }
 
 /// Les corrections récentes du dépôt, les plus fraîches d'abord.
 async fn recent_fixes(repo: &Path, limit: usize) -> Vec<(String, String)> {
-	let Ok(raw) = crate::git::run_git(
-		repo,
-		&[
-			"log",
-			"-400",
-			"--no-merges",
-			"--format=%H%x1f%s",
-		],
-	)
-	.await
-	else {
+	let Ok(raw) = crate::git::run_git(repo, &["log", "-400", "--no-merges", "--format=%H%x1f%s"]).await else {
 		return Vec::new();
 	};
 	raw.lines()
@@ -447,7 +436,9 @@ pub async fn calibrate(project: String, property_id: String) -> Result<Calibrati
 
 	let fixes = recent_fixes(&repo, CALIBRATION_SAMPLES).await;
 	if fixes.is_empty() {
-		return Err(CockpitError::msg(crate::i18n::t("properties.errors.noFixesCalibration")));
+		return Err(CockpitError::msg(crate::i18n::t(
+			"properties.errors.noFixesCalibration",
+		)));
 	}
 
 	let settings = config.impact.clone();
@@ -699,9 +690,7 @@ fn parse_suggestions(text: &str) -> Vec<Suggestion> {
 			continue;
 		};
 		if let Some(rest) = after(line, &["Portée", "Portee", "Scope"]) {
-			if !rest.eq_ignore_ascii_case("tout")
-				&& !rest.trim_matches('`').eq_ignore_ascii_case("all")
-			{
+			if !rest.eq_ignore_ascii_case("tout") && !rest.trim_matches('`').eq_ignore_ascii_case("all") {
 				current.scope = rest
 					.split(',')
 					.map(|part| part.trim().trim_matches('`').to_string())

@@ -43,7 +43,13 @@ pub fn git_bash() -> Option<PathBuf> {
 		}
 	}
 	if let Ok(dir) = std::env::var("LOCALAPPDATA") {
-		candidates.push(PathBuf::from(dir).join("Programs").join("Git").join("bin").join("bash.exe"));
+		candidates.push(
+			PathBuf::from(dir)
+				.join("Programs")
+				.join("Git")
+				.join("bin")
+				.join("bash.exe"),
+		);
 	}
 	candidates.into_iter().find(|path| path.is_file())
 }
@@ -180,7 +186,9 @@ pub fn pid_alive(pid: u32) -> bool {
 	#[cfg(windows)]
 	{
 		use windows_sys::Win32::Foundation::{CloseHandle, STILL_ACTIVE};
-		use windows_sys::Win32::System::Threading::{GetExitCodeProcess, OpenProcess, PROCESS_QUERY_LIMITED_INFORMATION};
+		use windows_sys::Win32::System::Threading::{
+			GetExitCodeProcess, OpenProcess, PROCESS_QUERY_LIMITED_INFORMATION,
+		};
 		unsafe {
 			let handle = OpenProcess(PROCESS_QUERY_LIMITED_INFORMATION, 0, pid);
 			if handle.is_null() {
@@ -285,10 +293,9 @@ pub fn open(target: &str) -> std::io::Result<()> {
 	{
 		// `rundll32 url.dll,FileProtocolHandler` ouvre URL et fichiers sans
 		// passer par `cmd`, donc sans interprétation de `&` ou `^`.
-		let status = quiet_std(
-			std::process::Command::new("rundll32.exe").args(["url.dll,FileProtocolHandler", target]),
-		)
-		.status()?;
+		let status =
+			quiet_std(std::process::Command::new("rundll32.exe").args(["url.dll,FileProtocolHandler", target]))
+				.status()?;
 		ok(status)
 	}
 	#[cfg(all(unix, not(target_os = "macos")))]
@@ -302,7 +309,9 @@ pub fn open(target: &str) -> std::io::Result<()> {
 pub fn reveal(path: &str) -> std::io::Result<()> {
 	#[cfg(target_os = "macos")]
 	{
-		let status = std::process::Command::new("/usr/bin/open").args(["-R", path]).status()?;
+		let status = std::process::Command::new("/usr/bin/open")
+			.args(["-R", path])
+			.status()?;
 		ok(status)
 	}
 	#[cfg(windows)]
@@ -314,7 +323,10 @@ pub fn reveal(path: &str) -> std::io::Result<()> {
 	}
 	#[cfg(all(unix, not(target_os = "macos")))]
 	{
-		let parent = std::path::Path::new(path).parent().map(|p| p.to_string_lossy().to_string()).unwrap_or_default();
+		let parent = std::path::Path::new(path)
+			.parent()
+			.map(|p| p.to_string_lossy().to_string())
+			.unwrap_or_default();
 		let status = std::process::Command::new("xdg-open").arg(parent).status()?;
 		ok(status)
 	}
@@ -460,7 +472,11 @@ pub fn processes() -> Vec<ProcessEntry> {
 		entry.dwSize = std::mem::size_of::<PROCESSENTRY32W>() as u32;
 		let mut more = Process32FirstW(snapshot, &mut entry) != 0;
 		while more {
-			let length = entry.szExeFile.iter().position(|c| *c == 0).unwrap_or(entry.szExeFile.len());
+			let length = entry
+				.szExeFile
+				.iter()
+				.position(|c| *c == 0)
+				.unwrap_or(entry.szExeFile.len());
 			let exe = String::from_utf16_lossy(&entry.szExeFile[..length]);
 			let name = match exe.len().checked_sub(4) {
 				Some(cut) if exe[cut..].eq_ignore_ascii_case(".exe") => exe[..cut].to_string(),
@@ -481,7 +497,10 @@ pub fn processes() -> Vec<ProcessEntry> {
 				if GetProcessMemoryInfo(handle, &mut counters, counters.cb) != 0 {
 					process.rss_kb = (counters.WorkingSetSize / 1024) as u64;
 				}
-				let zero = FILETIME { dwLowDateTime: 0, dwHighDateTime: 0 };
+				let zero = FILETIME {
+					dwLowDateTime: 0,
+					dwHighDateTime: 0,
+				};
 				let (mut creation, mut exit, mut kernel, mut user) = (zero, zero, zero, zero);
 				if GetProcessTimes(handle, &mut creation, &mut exit, &mut kernel, &mut user) != 0 {
 					// Des tranches de 100 ns.
@@ -845,7 +864,11 @@ pub fn same_path(left: &str, right: &str) -> bool {
 /// ne sait pas exécuter.
 pub fn locate(name: &str) -> Option<String> {
 	// Le nom est joué par le shell : rien d'autre qu'un nom de programme.
-	if name.is_empty() || !name.chars().all(|c| c.is_ascii_alphanumeric() || matches!(c, '-' | '_' | '.')) {
+	if name.is_empty()
+		|| !name
+			.chars()
+			.all(|c| c.is_ascii_alphanumeric() || matches!(c, '-' | '_' | '.'))
+	{
 		return None;
 	}
 	#[cfg(windows)]
@@ -914,7 +937,9 @@ fn runnable(path: &std::path::Path) -> Option<String> {
 /// Un dossier désigné par une variable d'environnement (`APPDATA`,
 /// `LOCALAPPDATA`, `ProgramFiles`…), quand elle est posée.
 pub fn env_dir(name: &str) -> Option<PathBuf> {
-	std::env::var_os(name).filter(|value| !value.is_empty()).map(PathBuf::from)
+	std::env::var_os(name)
+		.filter(|value| !value.is_empty())
+		.map(PathBuf::from)
 }
 
 /// L'adresse `file://` d'un fichier local, lisible par un navigateur sur

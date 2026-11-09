@@ -44,7 +44,8 @@ use std::path::PathBuf;
 use crate::config::config_dir;
 
 /// Le hook. Lit l'appel d'outil sur son entrée, rend un refus ou rien.
-pub(crate) const GUARD: &str = concat!(r#"#!/usr/bin/env node
+pub(crate) const GUARD: &str = concat!(
+	r#"#!/usr/bin/env node
 // Garde-fou git des exécutants de mission — écrit par le cockpit (guard.rs).
 const PROTECTED = (process.env.COCKPIT_PROTECTED_BRANCHES ?? "")
   .split("\n").map((b) => b.trim()).filter(Boolean);
@@ -223,7 +224,9 @@ function judge(line, protectedBranches, depth = 0) {
 }
 
 
-"#, crate::permissions::scope_rules!(), r#"
+"#,
+	crate::permissions::scope_rules!(),
+	r#"
 /** Les fichiers que touche un `apply_patch` de Codex, lus sur ses en-têtes. */
 function patchedFiles(patch) {
   const headers = /^\*\*\* (?:Add File|Update File|Delete File|Move to): (.+)$/gm;
@@ -256,7 +259,8 @@ process.stdin.on("end", () => {
   }
   process.exitCode = 0;
 });
-"#);
+"#
+);
 
 fn guard_path() -> PathBuf {
 	config_dir().join("mission-guard.mjs")
@@ -278,7 +282,11 @@ pub fn settings_argument(sandboxed: bool) -> Option<String> {
 
 	let seen = |path: &std::path::Path| {
 		let path = path.to_string_lossy().to_string();
-		if sandboxed { crate::sandbox::container_path(&path) } else { path }
+		if sandboxed {
+			crate::sandbox::container_path(&path)
+		} else {
+			path
+		}
 	};
 	let quote = |text: &str| format!("\"{}\"", text.replace('"', "\\\""));
 	let settings = serde_json::json!({
@@ -325,7 +333,10 @@ fn write_atomic(path: &std::path::Path, content: &str) -> std::io::Result<()> {
 			let _ = std::fs::remove_file(&temp);
 			// Sous Windows, un hook qui lit le fichier à cet instant empêche de le
 			// remplacer. S'il porte déjà ce contenu, il n'y a rien à faire.
-			if std::fs::read_to_string(path).map(|present| present == content).unwrap_or(false) {
+			if std::fs::read_to_string(path)
+				.map(|present| present == content)
+				.unwrap_or(false)
+			{
 				Ok(())
 			} else {
 				Err(error)
@@ -377,7 +388,12 @@ mod tests {
 			.spawn()
 			.unwrap();
 		let input = serde_json::json!({ "tool_name": "Bash", "tool_input": { "command": command } });
-		child.stdin.take().unwrap().write_all(input.to_string().as_bytes()).unwrap();
+		child
+			.stdin
+			.take()
+			.unwrap()
+			.write_all(input.to_string().as_bytes())
+			.unwrap();
 		let output = child.wait_with_output().unwrap();
 		assert!(output.status.success());
 		let text = String::from_utf8_lossy(&output.stdout).to_string();
@@ -386,7 +402,12 @@ mod tests {
 		}
 		let value: serde_json::Value = serde_json::from_str(&text).unwrap();
 		assert_eq!(value["hookSpecificOutput"]["permissionDecision"], "deny");
-		Some(value["hookSpecificOutput"]["permissionDecisionReason"].as_str().unwrap().to_string())
+		Some(
+			value["hookSpecificOutput"]["permissionDecisionReason"]
+				.as_str()
+				.unwrap()
+				.to_string(),
+		)
 	}
 
 	/// Le verdict du hook sur un `apply_patch`, dans un périmètre donné.
@@ -411,7 +432,12 @@ mod tests {
 			.spawn()
 			.unwrap();
 		let input = serde_json::json!({ "tool_name": "apply_patch", "tool_input": { "command": patch } });
-		child.stdin.take().unwrap().write_all(input.to_string().as_bytes()).unwrap();
+		child
+			.stdin
+			.take()
+			.unwrap()
+			.write_all(input.to_string().as_bytes())
+			.unwrap();
 		let output = child.wait_with_output().unwrap();
 		let _ = std::fs::remove_dir_all(&dir);
 		Some(!String::from_utf8_lossy(&output.stdout).trim().is_empty())
@@ -419,7 +445,9 @@ mod tests {
 
 	#[test]
 	fn un_patch_ne_sort_pas_du_perimetre() {
-		let Some(dedans) = patch_refuse("*** Begin Patch\n*** Update File: apps/api/main.rs\n@@\n-a\n+b\n*** End Patch\n") else {
+		let Some(dedans) =
+			patch_refuse("*** Begin Patch\n*** Update File: apps/api/main.rs\n@@\n-a\n+b\n*** End Patch\n")
+		else {
 			return;
 		};
 		assert!(!dedans);
@@ -433,7 +461,10 @@ mod tests {
 		] {
 			assert_eq!(patch_refuse(dehors), Some(true), "{dehors}");
 		}
-		assert_eq!(patch_refuse("*** Add File: /wt/feat-x/packages/core/x.rs\n+x\n"), Some(false));
+		assert_eq!(
+			patch_refuse("*** Add File: /wt/feat-x/packages/core/x.rs\n+x\n"),
+			Some(false)
+		);
 	}
 
 	/// La forme relevée sur codex-cli 0.167 sous Windows : un chemin absolu, avec
@@ -441,7 +472,8 @@ mod tests {
 	#[test]
 	fn un_patch_en_chemin_absolu_windows_se_lit_depuis_le_worktree() {
 		let racine = r"C:\Users\a\wt\feat-x";
-		let Some(dedans) = patch_refuse_depuis(racine, "*** Add File: C:/Users/a/wt/feat-x/apps/api/e.txt\n+x\n") else {
+		let Some(dedans) = patch_refuse_depuis(racine, "*** Add File: C:/Users/a/wt/feat-x/apps/api/e.txt\n+x\n")
+		else {
 			return;
 		};
 		assert!(!dedans);
@@ -603,7 +635,12 @@ mod tests {
 			.spawn()
 			.unwrap();
 		let input = serde_json::json!({ "tool_name": "Write", "tool_input": { "command": "git push --force" } });
-		child.stdin.take().unwrap().write_all(input.to_string().as_bytes()).unwrap();
+		child
+			.stdin
+			.take()
+			.unwrap()
+			.write_all(input.to_string().as_bytes())
+			.unwrap();
 		let output = child.wait_with_output().unwrap();
 		assert!(String::from_utf8_lossy(&output.stdout).trim().is_empty());
 	}

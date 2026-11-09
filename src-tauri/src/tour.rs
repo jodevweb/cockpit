@@ -46,13 +46,16 @@ async fn pr_base(branch: &str) -> Option<String> {
 		}
 	}
 	let config = crate::config::Config::active();
-	let base = tokio::time::timeout(Duration::from_secs(4), crate::integrations::github_pull_for_branch(&config, branch))
-		.await
-		.ok()
-		.and_then(Result::ok)
-		.flatten()
-		.map(|pr| pr.base)
-		.filter(|base| !base.trim().is_empty());
+	let base = tokio::time::timeout(
+		Duration::from_secs(4),
+		crate::integrations::github_pull_for_branch(&config, branch),
+	)
+	.await
+	.ok()
+	.and_then(Result::ok)
+	.flatten()
+	.map(|pr| pr.base)
+	.filter(|base| !base.trim().is_empty());
 	if let Ok(mut cache) = cache.lock() {
 		cache.insert(branch.to_string(), (Instant::now(), base.clone()));
 	}
@@ -69,7 +72,10 @@ async fn closest_base(root: &Path, refs: &[String]) -> Option<(String, String)> 
 	let head = run_git(root, &["rev-parse", "HEAD"]).await.ok()?.trim().to_string();
 	let mut best: Option<(usize, String, String)> = None;
 	for reference in refs {
-		if run_git(root, &["rev-parse", "--verify", "--quiet", reference]).await.is_err() {
+		if run_git(root, &["rev-parse", "--verify", "--quiet", reference])
+			.await
+			.is_err()
+		{
 			continue;
 		}
 		let Ok(raw) = run_git(root, &["merge-base", reference, "HEAD"]).await else {
@@ -110,7 +116,10 @@ async fn closest_base(root: &Path, refs: &[String]) -> Option<(String, String)> 
 /// montrerait que ce qui n'est pas commité : on remonte alors au parent du
 /// premier commit de l'agent, quand la conversation en a gardé la trace.
 async fn base_of(root: &Path, since: Option<&str>) -> (String, String) {
-	let branch = crate::git::current_branch(root).await.ok().filter(|name| name != "HEAD");
+	let branch = crate::git::current_branch(root)
+		.await
+		.ok()
+		.filter(|name| name != "HEAD");
 	let on_integration = branch.as_deref().is_some_and(|name| INTEGRATION.contains(&name));
 	if let Some(branch) = branch.as_deref().filter(|_| !on_integration) {
 		if let Some(base) = pr_base(branch).await {
@@ -121,7 +130,11 @@ async fn base_of(root: &Path, since: Option<&str>) -> (String, String) {
 		}
 		let mut refs: Vec<String> = Vec::new();
 		let published = crate::git::default_branch(root).await;
-		for name in INTEGRATION.iter().map(|name| name.to_string()).chain(std::iter::once(published)) {
+		for name in INTEGRATION
+			.iter()
+			.map(|name| name.to_string())
+			.chain(std::iter::once(published))
+		{
 			for reference in [format!("origin/{name}"), name] {
 				if !refs.contains(&reference) {
 					refs.push(reference);
@@ -134,10 +147,15 @@ async fn base_of(root: &Path, since: Option<&str>) -> (String, String) {
 	}
 	if let Some(since) = since.map(str::trim).filter(|sha| !sha.is_empty()) {
 		let parent = format!("{since}^");
-		let ancestor = run_git(root, &["merge-base", "--is-ancestor", since, "HEAD"]).await.is_ok();
+		let ancestor = run_git(root, &["merge-base", "--is-ancestor", since, "HEAD"])
+			.await
+			.is_ok();
 		if ancestor {
 			if let Ok(raw) = run_git(root, &["rev-parse", "--verify", &parent]).await {
-				return (raw.trim().to_string(), crate::i18n::tf("tour.sinceBefore", &[("sha", &since)]));
+				return (
+					raw.trim().to_string(),
+					crate::i18n::tf("tour.sinceBefore", &[("sha", &since)]),
+				);
 			}
 		}
 	}
@@ -248,7 +266,9 @@ pub async fn file_diff(root: &Path, base: &str, file: &str, untracked: bool) -> 
 		.map_err(|e| CockpitError::msg(format!("git diff --no-index : {e}")))?;
 	match output.status.code() {
 		Some(0) | Some(1) => Ok(String::from_utf8_lossy(&output.stdout).to_string()),
-		_ => Err(CockpitError::msg(String::from_utf8_lossy(&output.stderr).trim().to_string())),
+		_ => Err(CockpitError::msg(
+			String::from_utf8_lossy(&output.stderr).trim().to_string(),
+		)),
 	}
 }
 
@@ -359,8 +379,8 @@ pub async fn story(cwd: &Path, since: Option<String>, notes: Vec<Note>, conclusi
 	)
 	.await?;
 
-	let mut story = parse_story(&rendu.text)
-		.ok_or_else(|| CockpitError::msg(crate::i18n::t("tour.unreadableStory")))?;
+	let mut story =
+		parse_story(&rendu.text).ok_or_else(|| CockpitError::msg(crate::i18n::t("tour.unreadableStory")))?;
 	story.cost_usd = rendu.cost_usd;
 	Ok(story)
 }
@@ -386,12 +406,23 @@ mod tests {
 
 	fn git(dir: &std::path::Path, args: &[&str]) {
 		let status = std::process::Command::new("git")
-			.args(["-c", "user.email=t@t", "-c", "user.name=t", "-c", "commit.gpgsign=false"])
+			.args([
+				"-c",
+				"user.email=t@t",
+				"-c",
+				"user.name=t",
+				"-c",
+				"commit.gpgsign=false",
+			])
 			.args(args)
 			.current_dir(dir)
 			.output()
 			.unwrap();
-		assert!(status.status.success(), "git {args:?} : {}", String::from_utf8_lossy(&status.stderr));
+		assert!(
+			status.status.success(),
+			"git {args:?} : {}",
+			String::from_utf8_lossy(&status.stderr)
+		);
 	}
 
 	fn repo(name: &str) -> std::path::PathBuf {
@@ -469,7 +500,12 @@ mod tests {
 		std::fs::write(dir.join("a.ts"), "un\ndeux\ntrois\n").unwrap();
 		git(&dir, &["commit", "-q", "-am", "travail de l'agent"]);
 		let sha = String::from_utf8(
-			std::process::Command::new("git").args(["rev-parse", "--short", "HEAD"]).current_dir(&dir).output().unwrap().stdout,
+			std::process::Command::new("git")
+				.args(["rev-parse", "--short", "HEAD"])
+				.current_dir(&dir)
+				.output()
+				.unwrap()
+				.stdout,
 		)
 		.unwrap()
 		.trim()
@@ -483,4 +519,3 @@ mod tests {
 		let _ = std::fs::remove_dir_all(&dir);
 	}
 }
-

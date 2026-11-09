@@ -78,27 +78,11 @@ pub fn record(kind: &str, label: &str, target: &str, ok: bool, detail: &str) {
 /// globalement finirait par signer tes propres gestes. Une attribution fausse
 /// coûte plus cher qu'une attribution absente — c'est tout ce que ce champ
 /// existe pour empêcher.
-pub fn record_as(
-	actor: &str,
-	engagement: &str,
-	kind: &str,
-	label: &str,
-	target: &str,
-	ok: bool,
-	detail: &str,
-) {
+pub fn record_as(actor: &str, engagement: &str, kind: &str, label: &str, target: &str, ok: bool, detail: &str) {
 	write(actor, engagement, kind, label, target, ok, detail);
 }
 
-fn write(
-	actor: &str,
-	engagement: &str,
-	kind: &str,
-	label: &str,
-	target: &str,
-	ok: bool,
-	detail: &str,
-) {
+fn write(actor: &str, engagement: &str, kind: &str, label: &str, target: &str, ok: bool, detail: &str) {
 	let entry = JournalEntry {
 		at: now(),
 		project: crate::config::Config::load().active_project,
@@ -141,11 +125,7 @@ pub fn list(limit: usize) -> Vec<JournalEntry> {
 	if entries.len() > MAX_ENTRIES {
 		let kept = entries.split_off(entries.len() - MAX_ENTRIES);
 		entries = kept;
-		if let Ok(compacted) = entries
-			.iter()
-			.map(serde_json::to_string)
-			.collect::<Result<Vec<_>, _>>()
-		{
+		if let Ok(compacted) = entries.iter().map(serde_json::to_string).collect::<Result<Vec<_>, _>>() {
 			let _ = std::fs::write(journal_path(), format!("{}\n", compacted.join("\n")));
 		}
 	}

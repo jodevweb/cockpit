@@ -65,8 +65,12 @@ pub fn start() -> Result<()> {
 		std::thread::spawn(move || {
 			let record = || -> std::result::Result<(), String> {
 				let host = cpal::default_host();
-				let device = host.default_input_device().ok_or_else(|| crate::i18n::t("voiceInput.noMic"))?;
-				let config = device.default_input_config().map_err(|e| crate::i18n::tf("voiceInput.mic", &[("error", &e)]))?;
+				let device = host
+					.default_input_device()
+					.ok_or_else(|| crate::i18n::t("voiceInput.noMic"))?;
+				let config = device
+					.default_input_config()
+					.map_err(|e| crate::i18n::tf("voiceInput.mic", &[("error", &e)]))?;
 				let channels = config.channels() as usize;
 				if let Ok(mut value) = rate.lock() {
 					*value = config.sample_rate().0;
@@ -94,10 +98,17 @@ pub fn start() -> Result<()> {
 							None,
 						)
 					}
-					other => return Err(crate::i18n::tf("voiceInput.unsupportedFormat", &[("format", &format!("{other:?}"))])),
+					other => {
+						return Err(crate::i18n::tf(
+							"voiceInput.unsupportedFormat",
+							&[("format", &format!("{other:?}"))],
+						))
+					}
 				}
 				.map_err(|e| crate::i18n::tf("voiceInput.micDenied", &[("error", &e)]))?;
-				stream.play().map_err(|e| crate::i18n::tf("voiceInput.mic", &[("error", &e)]))?;
+				stream
+					.play()
+					.map_err(|e| crate::i18n::tf("voiceInput.mic", &[("error", &e)]))?;
 				let _ = stopped.recv_timeout(Duration::from_secs(MAX_SECONDS));
 				drop(stream);
 				Ok(())
@@ -110,7 +121,13 @@ pub fn start() -> Result<()> {
 		})
 	};
 
-	*slot = Some(Recorder { stop, thread, samples, rate, failure });
+	*slot = Some(Recorder {
+		stop,
+		thread,
+		samples,
+		rate,
+		failure,
+	});
 	Ok(())
 }
 
@@ -163,8 +180,7 @@ fn wav(samples: &[f32], rate: u32) -> Result<Vec<u8>> {
 
 /// Ce que dit l'enregistrement, en texte, par Scribe.
 pub async fn transcribe(audio: Vec<u8>) -> Result<String> {
-	let key = crate::speech::api_key()
-		.ok_or_else(|| CockpitError::msg(crate::i18n::t("voiceInput.noKey")))?;
+	let key = crate::speech::api_key().ok_or_else(|| CockpitError::msg(crate::i18n::t("voiceInput.noKey")))?;
 	let started = Instant::now();
 	let form = |with_language: bool| {
 		let mut form = reqwest::multipart::Form::new().text("model_id", "scribe_v2").part(
@@ -205,14 +221,22 @@ pub async fn transcribe(audio: Vec<u8>) -> Result<String> {
 		let body = response.text().await.unwrap_or_default();
 		return Err(CockpitError::msg(crate::i18n::tf(
 			"voiceInput.refused",
-			&[("status", &status), ("body", &body.chars().take(200).collect::<String>())],
+			&[
+				("status", &status),
+				("body", &body.chars().take(200).collect::<String>()),
+			],
 		)));
 	}
 	let body: serde_json::Value = response
 		.json()
 		.await
 		.map_err(|e| CockpitError::msg(crate::i18n::tf("voiceInput.unreadable", &[("error", &e)])))?;
-	let text = body.get("text").and_then(|v| v.as_str()).unwrap_or("").trim().to_string();
+	let text = body
+		.get("text")
+		.and_then(|v| v.as_str())
+		.unwrap_or("")
+		.trim()
+		.to_string();
 	eprintln!("assistant : transcription en {} ms", started.elapsed().as_millis());
 	Ok(text)
 }
@@ -275,7 +299,11 @@ pub fn shortcut_status() -> ShortcutStatus {
 		.lock()
 		.ok()
 		.and_then(|slot| slot.clone())
-		.unwrap_or(ShortcutStatus { accelerator: saved_shortcut(), registered: false, error: None })
+		.unwrap_or(ShortcutStatus {
+			accelerator: saved_shortcut(),
+			registered: false,
+			error: None,
+		})
 }
 
 #[cfg(test)]
@@ -288,7 +316,14 @@ mod tests {
 	fn les_raccourcis_de_l_interface_se_lisent() {
 		use std::str::FromStr;
 		use tauri_plugin_global_shortcut::Shortcut;
-		for accelerator in [super::DEFAULT_SHORTCUT, "control+alt+Space", "shift+alt+Space", "super+shift+KeyJ", "alt+Digit1", "control+F5"] {
+		for accelerator in [
+			super::DEFAULT_SHORTCUT,
+			"control+alt+Space",
+			"shift+alt+Space",
+			"super+shift+KeyJ",
+			"alt+Digit1",
+			"control+F5",
+		] {
 			assert!(Shortcut::from_str(accelerator).is_ok(), "{accelerator}");
 		}
 		assert!(Shortcut::from_str("alt+").is_err());
@@ -335,7 +370,14 @@ mod live {
 		std::fs::create_dir_all(&dir).unwrap();
 		let git = |args: &[&str]| {
 			assert!(std::process::Command::new("git")
-				.args(["-c", "user.email=t@t", "-c", "user.name=t", "-c", "commit.gpgsign=false"])
+				.args([
+					"-c",
+					"user.email=t@t",
+					"-c",
+					"user.name=t",
+					"-c",
+					"commit.gpgsign=false"
+				])
 				.args(args)
 				.current_dir(&dir)
 				.status()
@@ -346,9 +388,13 @@ mod live {
 		std::fs::write(dir.join("a"), "a").unwrap();
 		git(&["add", "-A"]);
 		git(&["commit", "-q", "-m", "base"]);
-		let message = crate::git::create_branch(&dir, "fix/cart-rounding", None).await.unwrap();
+		let message = crate::git::create_branch(&dir, "fix/cart-rounding", None)
+			.await
+			.unwrap();
 		assert!(message.contains("fix/cart-rounding"));
-		assert!(crate::git::create_branch(&dir, "fix/cart-rounding", None).await.is_err());
+		assert!(crate::git::create_branch(&dir, "fix/cart-rounding", None)
+			.await
+			.is_err());
 		assert!(crate::git::create_branch(&dir, "nom avec espace", None).await.is_err());
 		assert_eq!(crate::git::current_branch(&dir).await.unwrap(), "main");
 		let _ = std::fs::remove_dir_all(&dir);

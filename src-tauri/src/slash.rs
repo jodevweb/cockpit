@@ -175,8 +175,7 @@ fn scan(root: &Path, scope: &str, prefix: Option<&str>, out: &mut Vec<SlashComma
 		.filter_map(|entry| entry.ok())
 	{
 		let path = entry.path();
-		if !entry.file_type().is_file() || path.extension().and_then(|e| e.to_str()) != Some("md")
-		{
+		if !entry.file_type().is_file() || path.extension().and_then(|e| e.to_str()) != Some("md") {
 			continue;
 		}
 		let Some(name) = command_name(root, path, prefix) else {
@@ -311,9 +310,8 @@ mod tests {
 
 	#[test]
 	fn len_tete_donne_la_description_et_les_arguments() {
-		let (description, hint, body) = front_matter(
-			"---\ndescription: Relit la PR\nargument-hint: [numéro]\n---\n\nCorps du prompt.\n",
-		);
+		let (description, hint, body) =
+			front_matter("---\ndescription: Relit la PR\nargument-hint: [numéro]\n---\n\nCorps du prompt.\n");
 		assert_eq!(description.as_deref(), Some("Relit la PR"));
 		assert_eq!(hint.as_deref(), Some("[numéro]"));
 		assert_eq!(body.trim(), "Corps du prompt.");
