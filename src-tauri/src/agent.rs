@@ -1126,333 +1126,42 @@ async fn start_inner(
 		)));
 	}
 
-	// Un binaire déclaré est pris tel quel — c'est le seul moyen de pointer vers
-	// un programme que le cockpit ne connaît pas. Sinon on cherche `claude` :
-	// c'est le seul CLI que le cockpit sache trouver tout seul.
-	let binary = match engine.command.trim() {
-		"" if dialect == crate::protocol::Protocol::Claude => claude_binary().ok_or_else(|| {
-			CockpitError::msg(crate::i18n::t(if cfg!(windows) {
-				"windowsAgents.claudeNotFoundHint"
-			} else {
-				"agent.claudeNotFoundHint"
-			}))
-		})?,
-		"" => {
-			return Err(CockpitError::msg(crate::i18n::tf(
-				"agent.noBinary",
-				&[("engine", &engine.label)],
-			)));
+	let binary = launch_binary(&engine, dialect, config.sandbox.enabled)?;
+
+	let request = CommandRequest {
+		engine: &engine,
+		binary: &binary,
+		cwd: &cwd,
+		mode: &mode,
+		model: model.as_deref(),
+		resume: resume.as_deref(),
+		depth: &depth,
+		sandboxed: config.sandbox.enabled,
+		reviewing,
+		locked,
+		seat,
+	};
+	// Le second terme : ce qu'un tour de Codex doit redonner à chaque reprise, voir `PerTurn`.
+	let (command, codex_args) = match dialect {
+		crate::protocol::Protocol::Codex => {
+			// Un message vide n'a rien à ouvrir — voir `codex.rs`.
+			if prompt.trim().is_empty() {
+				return Err(CockpitError::msg(crate::i18n::t("agent.codexNeedsMessage")));
+			}
+			let args = codex_turn_args(&request);
+			let command = match resume.as_deref().filter(|s| !s.trim().is_empty()) {
+				Some(thread) => crate::codex::resume_turn(&binary, thread, &args),
+				None => crate::codex::first_turn(&binary, &args),
+			};
+			(command, args)
 		}
-		declared => declared.to_string(),
+		crate::protocol::Protocol::Gemini => (gemini_command(&request, &prompt)?, String::new()),
+		crate::protocol::Protocol::Claude => (claude_command(&request), String::new()),
 	};
 
-	// Dans un conteneur, `claude` est celui de l'image — jamais le chemin
-	// absolu résolu ci-dessus, qui vient du poste macOS et n'existe pas côté
-	// Linux (vérifié empiriquement : `command -v claude` y répond
-	// `/usr/local/bin/claude`, pas le chemin hôte). Le nom nu suffit, l'image
-	// le pose déjà sur son PATH. Un binaire déclaré explicitement reste tel
-	// quel, sous la responsabilité de qui l'a écrit — le cockpit ne sait pas
-	// si son image sait aussi le trouver.
-	let binary = if config.sandbox.enabled && engine.command.trim().is_empty() {
-		"claude".to_string()
-	} else {
-		binary
-	};
+	let mut env_vars = agent_env(&session_id, &mode, mission.as_deref(), &scope, executor, &cwd, &config);
+	let env_removals = apply_engine_env(&engine, &mut env_vars);
 
-	// Ce qu'un tour de Codex doit redonner à chaque reprise : voir `PerTurn`.
-	let mut codex_args = String::new();
-	let command = if dialect == crate::protocol::Protocol::Codex {
-		// Un message vide n'a rien à ouvrir — voir `codex.rs`.
-		if prompt.trim().is_empty() {
-			return Err(CockpitError::msg(crate::i18n::t("agent.codexNeedsMessage")));
-		}
-		// Une revue verrouillée ne gagne pas l'écriture par son mode `default`.
-		codex_args.push_str(&crate::codex::permission_args(if locked { "plan" } else { &mode }));
-		if let Some(model) = model.as_deref().filter(|m| !m.trim().is_empty()) {
-			codex_args.push_str(&format!(" --model {}", shell_quote(model.trim())));
-		}
-		if !config.sandbox.enabled {
-			codex_args.push_str(&codex_equipment(&cwd, reviewing, seat));
-		}
-		if !depth.trim().is_empty() {
-			let args = engine.depth_args(&depth);
-			if !args.is_empty() {
-				codex_args.push(' ');
-				codex_args.push_str(args);
-			}
-		}
-		if !engine.extra_args.trim().is_empty() {
-			codex_args.push(' ');
-			codex_args.push_str(engine.extra_args.trim());
-		}
-		match resume.filter(|s| !s.trim().is_empty()) {
-			Some(thread) => crate::codex::resume_turn(&binary, &thread, &codex_args),
-			None => crate::codex::first_turn(&binary, &codex_args),
-		}
-	} else if dialect == crate::protocol::Protocol::Gemini {
-		// Un seul tour possible, jamais de reprise : voir `gemini.rs`. Même
-		// garde qu'en `codex-exec`, pour la même raison — rien à ouvrir sur un
-		// silence.
-		if prompt.trim().is_empty() {
-			return Err(CockpitError::msg(crate::i18n::t("agent.geminiNeedsMessage")));
-		}
-		if resume.filter(|s| !s.trim().is_empty()).is_some() {
-			return Err(CockpitError::msg(crate::i18n::t("agent.geminiNoResume")));
-		}
-		let mut built = crate::gemini::first_turn(&binary, prompt.trim());
-		if !depth.trim().is_empty() {
-			let args = engine.depth_args(&depth);
-			if !args.is_empty() {
-				built.push(' ');
-				built.push_str(args);
-			}
-		}
-		if !engine.extra_args.trim().is_empty() {
-			built.push(' ');
-			built.push_str(engine.extra_args.trim());
-		}
-		built
-	} else {
-		// Le chemin est résolu ici plutôt que laissé au shell : lancé depuis le
-		// Finder, le cockpit n'hérite pas du PATH de l'utilisateur. On le complète
-		// tout de même, pour les outils que `claude` appelle à son tour. Dans un
-		// conteneur ce problème n'existe pas — l'image pose son propre PATH — et
-		// `binary` n'a de toute façon plus de dossier à en tirer (voir plus haut).
-		let mut command = String::new();
-		if !config.sandbox.enabled {
-			if let Some(dir) = std::path::Path::new(&binary).parent() {
-				command.push_str(&export_path(dir));
-			}
-		}
-		command.push_str(&format!(
-			"{} -p --input-format stream-json --output-format stream-json --verbose",
-			shell_quote(&binary)
-		));
-		command.push_str(&format!(" --permission-mode {}", shell_quote(&mode)));
-
-		// Ce que font les sous-agents, ou rien du tout.
-		//
-		// Un agent à qui l'on demande de déléguer répond « d'accord » et lance ses
-		// sous-agents ; le CLI, lui, n'en dit pas un mot avant que le dernier ait
-		// rendu son résultat. On voyait donc un appel `Task` qui tournait, sans
-		// savoir qui travaillait, sur quoi, ni où il en était — et rien n'y
-		// paraissait quand il partait dans la mauvaise direction.
-		//
-		// Ce drapeau fait remonter leurs messages dans le flux, chacun étiqueté de
-		// l'appel qui l'a créé (`parent_tool_use_id`), de son type et de sa
-		// consigne. Vérifié sur une délégation réelle : la consigne reçue, chaque
-		// outil lancé, ce que ces outils ont répondu, et la conclusion.
-		if forwards_subagents(&binary) {
-			command.push_str(" --forward-subagent-text");
-		}
-
-		// Le modèle se choisit au lancement, comme les autorisations : en changer
-		// veut dire relancer le CLI sur la même session Claude. Sans consigne, on
-		// laisse le CLI appliquer le réglage du poste.
-		if let Some(model) = model.as_deref().filter(|m| !m.trim().is_empty()) {
-			command.push_str(&format!(" --model {}", shell_quote(model.trim())));
-		}
-
-		// Le pont d'autorisation transforme chaque demande de l'agent en question
-		// posée dans l'interface. Sans Node sur le poste il n'est pas installé, et
-		// l'agent s'en tient alors au mode choisi ci-dessus.
-		//
-		// Il est passé quel que soit le mode, `bypassPermissions` compris : ce n'est
-		// pas seulement le canal des autorisations, c'est le seul par lequel un agent
-		// sans terminal peut nous adresser un `AskUserQuestion`. En bypass il ne sert
-		// donc plus qu'à ça — et c'est justement ce qu'on ne veut pas perdre.
-		// Les outils que le dépôt déclare pour lui-même (`.mcp.json`). Le CLI lit
-		// bien ce fichier tout seul, mais n'active ses serveurs qu'après une
-		// approbation qu'il demande **par répertoire**, et de façon interactive.
-		// Un agent sans terminal ne peut pas y répondre : les serveurs restaient
-		// donc inactifs, en silence. Et comme chaque worktree est un répertoire
-		// neuf, aucun n'était jamais approuvé — un agent lancé sur un chantier
-		// n'avait aucun des outils de son propre dépôt, là où le même dépôt
-		// ouvert dans un terminal les avait tous.
-		//
-		// Les joindre explicitement les rend disponibles — une fois leur contenu
-		// approuvé dans les Réglages (`mcp::approve`) : ce sont des commandes que
-		// le dépôt fait lancer, et un dépôt cloné peut y écrire n'importe quoi.
-		// Vérifié sur un worktree réel : « aucun serveur » avant, les treize
-		// attendus après. `--mcp-config` ajoute, il ne remplace pas (ce serait
-		// `--strict-mcp-config`) : les serveurs du compte restent là.
-		if let Some(declares) = crate::mcp::config_for(&cwd, config.sandbox.enabled) {
-			command.push_str(&format!(
-				" --mcp-config {}",
-				shell_quote(&seen_by_agent(&declares, config.sandbox.enabled))
-			));
-		}
-
-		// Son navigateur : celui du workspace, qu'on regarde depuis l'onglet
-		// « Navigateur ». Il ne démarre qu'à son premier geste. Un agent de
-		// revue lit du code, il n'ouvre rien.
-		if !reviewing {
-			if let Some(browser) = crate::browser::mcp_config(&cwd, config.sandbox.enabled) {
-				command.push_str(&format!(
-					" --mcp-config {}",
-					shell_quote(&seen_by_agent(&browser, config.sandbox.enabled))
-				));
-			}
-		}
-
-		let bridge = crate::permissions::bridge_arguments(config.sandbox.enabled);
-		// Le pont porte aussi l'outil de liste d'étapes.
-		let steps = bridge.is_some();
-		match bridge {
-			Some((config, tool)) => command.push_str(&format!(
-				" --mcp-config {} --permission-prompt-tool {}",
-				shell_quote(&config),
-				shell_quote(&tool)
-			)),
-			// Dégradé, mais dit. Un agent qui ne peut plus poser de question s'arrête
-			// en silence sur un travail qui attendait une réponse : autant savoir que
-			// ce canal n'existe pas sur ce poste, et pourquoi.
-			None => {
-				static ANNONCE: OnceLock<()> = OnceLock::new();
-				ANNONCE.get_or_init(|| {
-					crate::journal::record(
-						"agent",
-						&crate::i18n::t("agent.bridgeUnavailable.title"),
-						&crate::i18n::t("agent.bridgeUnavailable.subject"),
-						false,
-						&crate::i18n::t(if cfg!(windows) {
-							"windowsAgents.bridgeUnavailableDetail"
-						} else {
-							"agent.bridgeUnavailable.detail"
-						}),
-					);
-				});
-			}
-		}
-		// La revue : son outil de remise, l'écriture retirée, la lecture permise
-		// sans demander. Le reste passe par le pont, qui le refuse.
-		if reviewing {
-			if let Some(config) = crate::review::bridge_config(config.sandbox.enabled) {
-				command.push_str(&format!(" --mcp-config {}", shell_quote(&config)));
-			}
-			if locked {
-				command.push_str(" --disallowedTools");
-				for tool in crate::review::WRITE_TOOLS {
-					command.push_str(&format!(" {}", shell_quote(tool)));
-				}
-				command.push_str(" --allowedTools");
-				for tool in crate::review::READ_TOOLS {
-					command.push_str(&format!(" {}", shell_quote(tool)));
-				}
-			}
-		}
-		// Les outils de mission ne sont donnés qu'au maître : un exécutant qui
-		// pourrait en lancer d'autres n'aurait plus de périmètre du tout.
-		if seat == MissionSeat::Master {
-			if let Some(config) = crate::orchestrator::bridge_config(config.sandbox.enabled) {
-				command.push_str(&format!(" --mcp-config {}", shell_quote(&config)));
-			}
-		}
-		// Un exécutant (une tâche de mission) reçoit le garde-fou git : pas de
-		// push forcé, pas de push sur une branche protégée, pas de branche à
-		// lui. Un hook du CLI, qui tient en `bypassPermissions` (voir `guard.rs`).
-		if executor {
-			if let Some(settings) = crate::guard::settings_argument(config.sandbox.enabled) {
-				command.push_str(&format!(" --settings {}", shell_quote(&settings)));
-			}
-		}
-		// Rendre compte en images, quand elles valent mieux que du texte. La
-		// consigne s'ajoute à celles du CLI plutôt que de partir en message : elle
-		// doit être là avant le premier geste — une capture « avant » ne se prend
-		// plus une fois le code changé — et ne rien écrire dans la conversation.
-		// Un agent de revue ne produit rien : il n'en reçoit pas.
-		command.push_str(&format!(
-			" --append-system-prompt {}",
-			shell_quote(&standing_instructions(reviewing, steps))
-		));
-		if let Some(session) = resume.filter(|s| !s.trim().is_empty()) {
-			command.push_str(&format!(" --resume {}", shell_quote(&session)));
-		}
-		// La profondeur demandée, traduite par le moteur lui-même. Le cockpit
-		// exprime une intention et n'invente aucun drapeau : un moteur qui ne
-		// déclare rien n'en reçoit rien, plutôt qu'une ligne de commande refusée.
-		if !depth.trim().is_empty() {
-			let args = engine.depth_args(&depth);
-			if !args.is_empty() {
-				command.push(' ');
-				command.push_str(args);
-			}
-		}
-
-		// Ce que le moteur ajoute de son côté, et que le cockpit ne connaît pas.
-		if !engine.extra_args.trim().is_empty() {
-			command.push(' ');
-			command.push_str(engine.extra_args.trim());
-		}
-		command
-	};
-
-	// Rassemblées une fois, pour être posées soit directement (lancement en
-	// direct), soit via `-e` (conteneur) — les deux ont besoin des mêmes
-	// variables, pas du même moyen de les poser.
-	//
-	// Le pont d'autorisation, lancé par le CLI, hérite de cet environnement :
-	// c'est ainsi qu'une demande sait à quelle conversation elle appartient, et
-	// qu'un exécutant ne peut agir que sur la mission qui l'a lancé —
-	// l'identifiant vient d'ici, jamais de ce que le maître écrit.
-	let mut env_vars: Vec<(String, String)> = vec![
-		("COCKPIT_AGENT_SESSION".to_string(), session_id.clone()),
-		("COCKPIT_PERMISSION_MODE".to_string(), mode.clone()),
-		("COCKPIT_MISSION_ID".to_string(), mission.clone().unwrap_or_default()),
-		("COCKPIT_SCOPE".to_string(), scope.join("\n")),
-		// Les branches qu'un exécutant ne pousse jamais : lues par le garde-fou.
-		(
-			"COCKPIT_PROTECTED_BRANCHES".to_string(),
-			if executor {
-				mission
-					.as_deref()
-					.map(crate::guard::protected_branches)
-					.unwrap_or_default()
-					.join("\n")
-			} else {
-				String::new()
-			},
-		),
-		// La racine contre laquelle le pont lit les chemins absolus du CLI.
-		// Isolé, l'agent les écrit sous la forme que le conteneur connaît.
-		(
-			"COCKPIT_CWD".to_string(),
-			if config.sandbox.enabled {
-				crate::sandbox::container_path(&cwd)
-			} else {
-				cwd.clone()
-			},
-		),
-	];
-	// Sous quel compte cet agent travaille — le dossier de configuration décidé
-	// par le projet. Posé avant l'environnement du moteur, pour la raison qui
-	// suit.
-	env_vars.extend(crate::config::account_env(&config));
-
-	// L'environnement du moteur passe en dernier : c'est par là qu'il pointe vers
-	// un autre service ou porte sa propre clé, et rien de ce que le cockpit ajoute
-	// ne doit s'y substituer. Une valeur vide efface la variable plutôt que de
-	// poser une chaîne vide, qu'un CLI lirait comme une adresse invalide — dans
-	// un conteneur, où rien n'est hérité par défaut, l'effacer revient à ne
-	// jamais la poser.
-	let mut env_removals: Vec<String> = Vec::new();
-	for entry in &engine.env {
-		let name = entry.name.trim();
-		if name.is_empty() {
-			continue;
-		}
-		if entry.value.trim().is_empty() {
-			env_removals.push(name.to_string());
-		} else {
-			env_vars.push((name.to_string(), entry.value.trim().to_string()));
-		}
-	}
-
-	// L'isolation par conteneurs est une intégration de plus, éteinte tant que
-	// personne ne l'a demandée : voir `sandbox.rs`. Activée sans runtime
-	// installé, on refuse plutôt que de retomber en direct sans le dire — un
-	// agent qu'on croit isolé et qui ne l'est pas est pire qu'un agent qui ne
-	// démarre pas.
 	// Le jeton de la forge, relevé une fois : dans un conteneur, c'est la seule
 	// façon pour l'agent de lire une pull request, d'en ouvrir une, ou de
 	// pousser sa branche. Sur le poste, `gh` s'en charge déjà tout seul — on ne
@@ -1464,19 +1173,7 @@ async fn start_inner(
 		String::new()
 	};
 
-	let sandbox_cfg = &config.sandbox;
-	let runtime = if sandbox_cfg.enabled {
-		let runtime = crate::sandbox::resolve_runtime(&sandbox_cfg.runtime)
-			.ok_or_else(|| CockpitError::msg(crate::i18n::t("agent.sandboxNoRuntimeHint")))?;
-		// Manque à l'appel : Cockpit la construit lui-même plutôt que de refuser
-		// en laissant deviner comment la fabriquer — voir `sandbox::ensure_image`.
-		crate::sandbox::ensure_image(&runtime, sandbox_cfg)
-			.await
-			.map_err(|error| CockpitError::msg(crate::i18n::tf("agent.sandboxImageFailed", &[("error", &error)])))?;
-		Some(runtime)
-	} else {
-		None
-	};
+	let runtime = sandbox_runtime(&config.sandbox).await?;
 
 	// Détaché ou non. Seuls les agents de workspace lancés à la main le sont :
 	// une mission, la Permanence ou une revue ont leur propre reprise, et un
@@ -1492,17 +1189,16 @@ async fn start_inner(
 		&& origin.role.is_empty()
 		&& crate::relay::setting().enabled;
 
-	let (child, mut stdin, stdout, stderr, relay) = if detach {
-		let handle = crate::relay::spawn(&session_id, &cwd, &command, &env_vars, &env_removals, "")?;
-		(
-			None,
-			Input::Relay(handle.clone()),
-			Lines::Tail(crate::relay::Tail::from_start(&handle.dir, "out.jsonl")),
-			Some(Lines::Tail(crate::relay::Tail::from_start(&handle.dir, "err.log"))),
-			Some(handle),
-		)
+	let Launched {
+		child,
+		mut stdin,
+		stdout,
+		stderr,
+		relay,
+	} = if detach {
+		spawn_detached(&session_id, &cwd, &command, &env_vars, &env_removals)?
 	} else {
-		let mut launcher = match &runtime {
+		spawn_piped(match &runtime {
 			Some(runtime) => {
 				let sandboxed: Vec<(String, String)> = env_vars
 					.iter()
@@ -1510,7 +1206,7 @@ async fn start_inner(
 					.cloned()
 					.collect();
 				crate::sandbox::build(
-					sandbox_cfg,
+					&config.sandbox,
 					runtime,
 					&session_id,
 					&cwd,
@@ -1519,45 +1215,8 @@ async fn start_inner(
 					&forge_token,
 				)
 			}
-			None => {
-				let mut native = crate::platform::shell_async(&command);
-				native.current_dir(&cwd);
-				for (name, value) in &env_vars {
-					native.env(name, value);
-				}
-				for name in &env_removals {
-					native.env_remove(name);
-				}
-				native
-			}
-		};
-
-		launcher
-			.stdin(Stdio::piped())
-			.stdout(Stdio::piped())
-			.stderr(Stdio::piped())
-			.kill_on_drop(true);
-
-		let mut child = launcher
-			.spawn()
-			.map_err(|e| CockpitError::msg(crate::i18n::tf("agent.launchError", &[("error", &e)])))?;
-
-		let stdout = child
-			.stdout
-			.take()
-			.ok_or_else(|| CockpitError::msg(crate::i18n::t("agent.outputUnavailable")))?;
-		let stderr = child.stderr.take();
-		let stdin = child
-			.stdin
-			.take()
-			.ok_or_else(|| CockpitError::msg(crate::i18n::t("agent.inputUnavailable")))?;
-		(
-			Some(child),
-			Input::Pipe(stdin),
-			Lines::Out(BufReader::new(stdout).lines()),
-			stderr.map(|stderr| Lines::Err(BufReader::new(stderr).lines())),
-			None,
-		)
+			None => native_launcher(&command, &cwd, &env_vars, &env_removals),
+		})?
 	};
 
 	// L'exécution s'ouvre ici, et pas avant : plus tôt, un lancement refusé
@@ -1662,6 +1321,459 @@ async fn start_inner(
 	);
 
 	Ok(session_id)
+}
+
+/// Le programme à lancer pour ce moteur.
+fn launch_binary(
+	engine: &crate::config::EngineConfig,
+	dialect: crate::protocol::Protocol,
+	sandboxed: bool,
+) -> Result<String> {
+	// Un binaire déclaré est pris tel quel — c'est le seul moyen de pointer vers
+	// un programme que le cockpit ne connaît pas. Sinon on cherche `claude` :
+	// c'est le seul CLI que le cockpit sache trouver tout seul.
+	let binary = match engine.command.trim() {
+		"" if dialect == crate::protocol::Protocol::Claude => claude_binary().ok_or_else(|| {
+			CockpitError::msg(crate::i18n::t(if cfg!(windows) {
+				"windowsAgents.claudeNotFoundHint"
+			} else {
+				"agent.claudeNotFoundHint"
+			}))
+		})?,
+		"" => {
+			return Err(CockpitError::msg(crate::i18n::tf(
+				"agent.noBinary",
+				&[("engine", &engine.label)],
+			)));
+		}
+		declared => declared.to_string(),
+	};
+
+	// Dans un conteneur, `claude` est celui de l'image — jamais le chemin
+	// absolu résolu ci-dessus, qui vient du poste macOS et n'existe pas côté
+	// Linux (vérifié empiriquement : `command -v claude` y répond
+	// `/usr/local/bin/claude`, pas le chemin hôte). Le nom nu suffit, l'image
+	// le pose déjà sur son PATH. Un binaire déclaré explicitement reste tel
+	// quel, sous la responsabilité de qui l'a écrit — le cockpit ne sait pas
+	// si son image sait aussi le trouver.
+	if sandboxed && engine.command.trim().is_empty() {
+		return Ok("claude".to_string());
+	}
+	Ok(binary)
+}
+
+/// Ce dont dépend la ligne de commande d'un agent, quel que soit son moteur.
+#[derive(Clone, Copy)]
+struct CommandRequest<'a> {
+	engine: &'a crate::config::EngineConfig,
+	binary: &'a str,
+	cwd: &'a str,
+	mode: &'a str,
+	model: Option<&'a str>,
+	resume: Option<&'a str>,
+	depth: &'a str,
+	sandboxed: bool,
+	reviewing: bool,
+	locked: bool,
+	seat: MissionSeat,
+}
+
+/// La profondeur demandée, puis les arguments propres au moteur.
+fn push_engine_args(command: &mut String, engine: &crate::config::EngineConfig, depth: &str) {
+	// La profondeur demandée, traduite par le moteur lui-même. Le cockpit
+	// exprime une intention et n'invente aucun drapeau : un moteur qui ne
+	// déclare rien n'en reçoit rien, plutôt qu'une ligne de commande refusée.
+	if !depth.trim().is_empty() {
+		let args = engine.depth_args(depth);
+		if !args.is_empty() {
+			command.push(' ');
+			command.push_str(args);
+		}
+	}
+
+	// Ce que le moteur ajoute de son côté, et que le cockpit ne connaît pas.
+	if !engine.extra_args.trim().is_empty() {
+		command.push(' ');
+		command.push_str(engine.extra_args.trim());
+	}
+}
+
+/// Les arguments d'un tour de Codex, les mêmes à l'ouverture et à chaque reprise.
+fn codex_turn_args(request: &CommandRequest) -> String {
+	let CommandRequest {
+		engine,
+		cwd,
+		mode,
+		model,
+		depth,
+		sandboxed,
+		reviewing,
+		locked,
+		seat,
+		..
+	} = *request;
+	let mut args = String::new();
+	// Une revue verrouillée ne gagne pas l'écriture par son mode `default`.
+	args.push_str(&crate::codex::permission_args(if locked { "plan" } else { mode }));
+	if let Some(model) = model.filter(|m| !m.trim().is_empty()) {
+		args.push_str(&format!(" --model {}", shell_quote(model.trim())));
+	}
+	if !sandboxed {
+		args.push_str(&codex_equipment(cwd, reviewing, seat));
+	}
+	push_engine_args(&mut args, engine, depth);
+	args
+}
+
+fn gemini_command(request: &CommandRequest, prompt: &str) -> Result<String> {
+	// Un seul tour possible, jamais de reprise : voir `gemini.rs`. Même
+	// garde qu'en `codex-exec`, pour la même raison — rien à ouvrir sur un
+	// silence.
+	if prompt.trim().is_empty() {
+		return Err(CockpitError::msg(crate::i18n::t("agent.geminiNeedsMessage")));
+	}
+	if request.resume.filter(|s| !s.trim().is_empty()).is_some() {
+		return Err(CockpitError::msg(crate::i18n::t("agent.geminiNoResume")));
+	}
+	let mut built = crate::gemini::first_turn(request.binary, prompt.trim());
+	push_engine_args(&mut built, request.engine, request.depth);
+	Ok(built)
+}
+
+fn claude_command(request: &CommandRequest) -> String {
+	let CommandRequest {
+		engine,
+		binary,
+		cwd,
+		mode,
+		model,
+		resume,
+		depth,
+		sandboxed,
+		reviewing,
+		locked,
+		seat,
+	} = *request;
+	// Le chemin est résolu ici plutôt que laissé au shell : lancé depuis le
+	// Finder, le cockpit n'hérite pas du PATH de l'utilisateur. On le complète
+	// tout de même, pour les outils que `claude` appelle à son tour. Dans un
+	// conteneur ce problème n'existe pas — l'image pose son propre PATH — et
+	// `binary` n'a de toute façon plus de dossier à en tirer (voir plus haut).
+	let mut command = String::new();
+	if !sandboxed {
+		if let Some(dir) = std::path::Path::new(binary).parent() {
+			command.push_str(&export_path(dir));
+		}
+	}
+	command.push_str(&format!(
+		"{} -p --input-format stream-json --output-format stream-json --verbose",
+		shell_quote(binary)
+	));
+	command.push_str(&format!(" --permission-mode {}", shell_quote(mode)));
+
+	// Ce que font les sous-agents, ou rien du tout.
+	//
+	// Un agent à qui l'on demande de déléguer répond « d'accord » et lance ses
+	// sous-agents ; le CLI, lui, n'en dit pas un mot avant que le dernier ait
+	// rendu son résultat. On voyait donc un appel `Task` qui tournait, sans
+	// savoir qui travaillait, sur quoi, ni où il en était — et rien n'y
+	// paraissait quand il partait dans la mauvaise direction.
+	//
+	// Ce drapeau fait remonter leurs messages dans le flux, chacun étiqueté de
+	// l'appel qui l'a créé (`parent_tool_use_id`), de son type et de sa
+	// consigne. Vérifié sur une délégation réelle : la consigne reçue, chaque
+	// outil lancé, ce que ces outils ont répondu, et la conclusion.
+	if forwards_subagents(binary) {
+		command.push_str(" --forward-subagent-text");
+	}
+
+	// Le modèle se choisit au lancement, comme les autorisations : en changer
+	// veut dire relancer le CLI sur la même session Claude. Sans consigne, on
+	// laisse le CLI appliquer le réglage du poste.
+	if let Some(model) = model.filter(|m| !m.trim().is_empty()) {
+		command.push_str(&format!(" --model {}", shell_quote(model.trim())));
+	}
+
+	// Les outils que le dépôt déclare pour lui-même (`.mcp.json`). Le CLI lit
+	// bien ce fichier tout seul, mais n'active ses serveurs qu'après une
+	// approbation qu'il demande **par répertoire**, et de façon interactive.
+	// Un agent sans terminal ne peut pas y répondre : les serveurs restaient
+	// donc inactifs, en silence. Et comme chaque worktree est un répertoire
+	// neuf, aucun n'était jamais approuvé — un agent lancé sur un chantier
+	// n'avait aucun des outils de son propre dépôt, là où le même dépôt
+	// ouvert dans un terminal les avait tous.
+	//
+	// Les joindre explicitement les rend disponibles — une fois leur contenu
+	// approuvé dans les Réglages (`mcp::approve`) : ce sont des commandes que
+	// le dépôt fait lancer, et un dépôt cloné peut y écrire n'importe quoi.
+	// Vérifié sur un worktree réel : « aucun serveur » avant, les treize
+	// attendus après. `--mcp-config` ajoute, il ne remplace pas (ce serait
+	// `--strict-mcp-config`) : les serveurs du compte restent là.
+	if let Some(declares) = crate::mcp::config_for(cwd, sandboxed) {
+		command.push_str(&format!(
+			" --mcp-config {}",
+			shell_quote(&seen_by_agent(&declares, sandboxed))
+		));
+	}
+
+	// Son navigateur : celui du workspace, qu'on regarde depuis l'onglet
+	// « Navigateur ». Il ne démarre qu'à son premier geste. Un agent de
+	// revue lit du code, il n'ouvre rien.
+	if !reviewing {
+		if let Some(browser) = crate::browser::mcp_config(cwd, sandboxed) {
+			command.push_str(&format!(
+				" --mcp-config {}",
+				shell_quote(&seen_by_agent(&browser, sandboxed))
+			));
+		}
+	}
+
+	// Le pont d'autorisation transforme chaque demande de l'agent en question
+	// posée dans l'interface. Sans Node sur le poste il n'est pas installé, et
+	// l'agent s'en tient alors au mode choisi ci-dessus.
+	//
+	// Il est passé quel que soit le mode, `bypassPermissions` compris : ce n'est
+	// pas seulement le canal des autorisations, c'est le seul par lequel un agent
+	// sans terminal peut nous adresser un `AskUserQuestion`. En bypass il ne sert
+	// donc plus qu'à ça — et c'est justement ce qu'on ne veut pas perdre.
+	let bridge = crate::permissions::bridge_arguments(sandboxed);
+	// Le pont porte aussi l'outil de liste d'étapes.
+	let steps = bridge.is_some();
+	match bridge {
+		Some((config, tool)) => command.push_str(&format!(
+			" --mcp-config {} --permission-prompt-tool {}",
+			shell_quote(&config),
+			shell_quote(&tool)
+		)),
+		// Dégradé, mais dit. Un agent qui ne peut plus poser de question s'arrête
+		// en silence sur un travail qui attendait une réponse : autant savoir que
+		// ce canal n'existe pas sur ce poste, et pourquoi.
+		None => {
+			static ANNONCE: OnceLock<()> = OnceLock::new();
+			ANNONCE.get_or_init(|| {
+				crate::journal::record(
+					"agent",
+					&crate::i18n::t("agent.bridgeUnavailable.title"),
+					&crate::i18n::t("agent.bridgeUnavailable.subject"),
+					false,
+					&crate::i18n::t(if cfg!(windows) {
+						"windowsAgents.bridgeUnavailableDetail"
+					} else {
+						"agent.bridgeUnavailable.detail"
+					}),
+				);
+			});
+		}
+	}
+	// La revue : son outil de remise, l'écriture retirée, la lecture permise
+	// sans demander. Le reste passe par le pont, qui le refuse.
+	if reviewing {
+		if let Some(config) = crate::review::bridge_config(sandboxed) {
+			command.push_str(&format!(" --mcp-config {}", shell_quote(&config)));
+		}
+		if locked {
+			command.push_str(" --disallowedTools");
+			for tool in crate::review::WRITE_TOOLS {
+				command.push_str(&format!(" {}", shell_quote(tool)));
+			}
+			command.push_str(" --allowedTools");
+			for tool in crate::review::READ_TOOLS {
+				command.push_str(&format!(" {}", shell_quote(tool)));
+			}
+		}
+	}
+	// Les outils de mission ne sont donnés qu'au maître : un exécutant qui
+	// pourrait en lancer d'autres n'aurait plus de périmètre du tout.
+	if seat == MissionSeat::Master {
+		if let Some(config) = crate::orchestrator::bridge_config(sandboxed) {
+			command.push_str(&format!(" --mcp-config {}", shell_quote(&config)));
+		}
+	}
+	// Un exécutant (une tâche de mission) reçoit le garde-fou git : pas de
+	// push forcé, pas de push sur une branche protégée, pas de branche à
+	// lui. Un hook du CLI, qui tient en `bypassPermissions` (voir `guard.rs`).
+	if seat == MissionSeat::Executor {
+		if let Some(settings) = crate::guard::settings_argument(sandboxed) {
+			command.push_str(&format!(" --settings {}", shell_quote(&settings)));
+		}
+	}
+	// Rendre compte en images, quand elles valent mieux que du texte. La
+	// consigne s'ajoute à celles du CLI plutôt que de partir en message : elle
+	// doit être là avant le premier geste — une capture « avant » ne se prend
+	// plus une fois le code changé — et ne rien écrire dans la conversation.
+	// Un agent de revue ne produit rien : il n'en reçoit pas.
+	command.push_str(&format!(
+		" --append-system-prompt {}",
+		shell_quote(&standing_instructions(reviewing, steps))
+	));
+	if let Some(session) = resume.filter(|s| !s.trim().is_empty()) {
+		command.push_str(&format!(" --resume {}", shell_quote(session)));
+	}
+	push_engine_args(&mut command, engine, depth);
+	command
+}
+
+/// Rassemblées une fois, pour être posées soit directement (lancement en
+/// direct), soit via `-e` (conteneur) — les deux ont besoin des mêmes
+/// variables, pas du même moyen de les poser.
+///
+/// Le pont d'autorisation, lancé par le CLI, hérite de cet environnement :
+/// c'est ainsi qu'une demande sait à quelle conversation elle appartient, et
+/// qu'un exécutant ne peut agir que sur la mission qui l'a lancé —
+/// l'identifiant vient d'ici, jamais de ce que le maître écrit.
+fn agent_env(
+	session_id: &str,
+	mode: &str,
+	mission: Option<&str>,
+	scope: &[String],
+	executor: bool,
+	cwd: &str,
+	config: &crate::config::Config,
+) -> Vec<(String, String)> {
+	let mut env_vars: Vec<(String, String)> = vec![
+		("COCKPIT_AGENT_SESSION".to_string(), session_id.to_string()),
+		("COCKPIT_PERMISSION_MODE".to_string(), mode.to_string()),
+		(
+			"COCKPIT_MISSION_ID".to_string(),
+			mission.unwrap_or_default().to_string(),
+		),
+		("COCKPIT_SCOPE".to_string(), scope.join("\n")),
+		// Les branches qu'un exécutant ne pousse jamais : lues par le garde-fou.
+		(
+			"COCKPIT_PROTECTED_BRANCHES".to_string(),
+			if executor {
+				mission
+					.map(crate::guard::protected_branches)
+					.unwrap_or_default()
+					.join("\n")
+			} else {
+				String::new()
+			},
+		),
+		// La racine contre laquelle le pont lit les chemins absolus du CLI.
+		// Isolé, l'agent les écrit sous la forme que le conteneur connaît.
+		(
+			"COCKPIT_CWD".to_string(),
+			if config.sandbox.enabled {
+				crate::sandbox::container_path(cwd)
+			} else {
+				cwd.to_string()
+			},
+		),
+	];
+	// Sous quel compte cet agent travaille — le dossier de configuration décidé
+	// par le projet. Posé avant l'environnement du moteur, pour la raison qui
+	// suit.
+	env_vars.extend(crate::config::account_env(config));
+	env_vars
+}
+
+/// L'environnement du moteur passe en dernier : c'est par là qu'il pointe vers
+/// un autre service ou porte sa propre clé, et rien de ce que le cockpit ajoute
+/// ne doit s'y substituer. Une valeur vide efface la variable plutôt que de
+/// poser une chaîne vide, qu'un CLI lirait comme une adresse invalide — dans
+/// un conteneur, où rien n'est hérité par défaut, l'effacer revient à ne
+/// jamais la poser.
+fn apply_engine_env(engine: &crate::config::EngineConfig, env_vars: &mut Vec<(String, String)>) -> Vec<String> {
+	let mut env_removals: Vec<String> = Vec::new();
+	for entry in &engine.env {
+		let name = entry.name.trim();
+		if name.is_empty() {
+			continue;
+		}
+		if entry.value.trim().is_empty() {
+			env_removals.push(name.to_string());
+		} else {
+			env_vars.push((name.to_string(), entry.value.trim().to_string()));
+		}
+	}
+	env_removals
+}
+
+/// L'isolation par conteneurs est une intégration de plus, éteinte tant que
+/// personne ne l'a demandée : voir `sandbox.rs`. Activée sans runtime
+/// installé, on refuse plutôt que de retomber en direct sans le dire — un
+/// agent qu'on croit isolé et qui ne l'est pas est pire qu'un agent qui ne
+/// démarre pas.
+async fn sandbox_runtime(sandbox_cfg: &crate::config::SandboxConfig) -> Result<Option<String>> {
+	if !sandbox_cfg.enabled {
+		return Ok(None);
+	}
+	let runtime = crate::sandbox::resolve_runtime(&sandbox_cfg.runtime)
+		.ok_or_else(|| CockpitError::msg(crate::i18n::t("agent.sandboxNoRuntimeHint")))?;
+	// Manque à l'appel : Cockpit la construit lui-même plutôt que de refuser
+	// en laissant deviner comment la fabriquer — voir `sandbox::ensure_image`.
+	crate::sandbox::ensure_image(&runtime, sandbox_cfg)
+		.await
+		.map_err(|error| CockpitError::msg(crate::i18n::tf("agent.sandboxImageFailed", &[("error", &error)])))?;
+	Ok(Some(runtime))
+}
+
+/// Un process d'agent parti, et de quoi lui parler.
+struct Launched {
+	child: Option<Child>,
+	stdin: Input,
+	stdout: Lines,
+	stderr: Option<Lines>,
+	relay: Option<crate::relay::Handle>,
+}
+
+fn spawn_detached(
+	session_id: &str,
+	cwd: &str,
+	command: &str,
+	env_vars: &[(String, String)],
+	env_removals: &[String],
+) -> Result<Launched> {
+	let handle = crate::relay::spawn(session_id, cwd, command, env_vars, env_removals, "")?;
+	Ok(Launched {
+		child: None,
+		stdin: Input::Relay(handle.clone()),
+		stdout: Lines::Tail(crate::relay::Tail::from_start(&handle.dir, "out.jsonl")),
+		stderr: Some(Lines::Tail(crate::relay::Tail::from_start(&handle.dir, "err.log"))),
+		relay: Some(handle),
+	})
+}
+
+fn native_launcher(command: &str, cwd: &str, env_vars: &[(String, String)], env_removals: &[String]) -> Command {
+	let mut native = crate::platform::shell_async(command);
+	native.current_dir(cwd);
+	for (name, value) in env_vars {
+		native.env(name, value);
+	}
+	for name in env_removals {
+		native.env_remove(name);
+	}
+	native
+}
+
+fn spawn_piped(mut launcher: Command) -> Result<Launched> {
+	launcher
+		.stdin(Stdio::piped())
+		.stdout(Stdio::piped())
+		.stderr(Stdio::piped())
+		.kill_on_drop(true);
+
+	let mut child = launcher
+		.spawn()
+		.map_err(|e| CockpitError::msg(crate::i18n::tf("agent.launchError", &[("error", &e)])))?;
+
+	let stdout = child
+		.stdout
+		.take()
+		.ok_or_else(|| CockpitError::msg(crate::i18n::t("agent.outputUnavailable")))?;
+	let stderr = child.stderr.take();
+	let stdin = child
+		.stdin
+		.take()
+		.ok_or_else(|| CockpitError::msg(crate::i18n::t("agent.inputUnavailable")))?;
+	Ok(Launched {
+		child: Some(child),
+		stdin: Input::Pipe(stdin),
+		stdout: Lines::Out(BufReader::new(stdout).lines()),
+		stderr: stderr.map(|stderr| Lines::Err(BufReader::new(stderr).lines())),
+		relay: None,
+	})
 }
 
 /// La preuve filmée d'un tour (voir `proof.rs`) : le premier geste dans le
