@@ -816,6 +816,7 @@ function Atelier({ onClose }: { onClose: () => void }) {
 										<button
 											key={entry.id}
 											type="button"
+											data-screen={entry.id}
 											onClick={() => open(entry.id)}
 											className={clsx(
 												"focus-ring group relative flex h-8 items-center gap-2.5 rounded-lg px-2.5 text-[12.5px] transition-colors duration-150",
@@ -843,6 +844,7 @@ function Atelier({ onClose }: { onClose: () => void }) {
 				<div className="hairline-b" />
 				<button
 					type="button"
+					data-screen="settings"
 					onClick={() => open("settings")}
 					className={clsx(
 						"focus-ring m-2 flex h-8 items-center gap-2.5 rounded-lg px-2.5 text-[12.5px] transition-colors duration-150",
