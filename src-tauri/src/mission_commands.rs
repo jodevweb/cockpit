@@ -1527,7 +1527,27 @@ pub(crate) fn roles_list() -> Vec<config::RoleConfig> {
 
 #[tauri::command(async)]
 pub(crate) fn repo_roles() -> crate::roles::RepoRoles {
-	crate::roles::summary(&cfg().general.main_repo)
+	let repo = cfg().general.main_repo;
+	crate::roles::summary(&repo, &local_roles(&repo))
+}
+
+/// Valide le fichier de rôles du dépôt tel qu'il est : ses rôles à pleins droits
+/// cessent de redemander l'accord, jusqu'à la prochaine modification du fichier.
+#[tauri::command(async)]
+pub(crate) fn repo_roles_trust() -> Result<crate::roles::RepoRoles> {
+	let repo = cfg().general.main_repo;
+	crate::roles::trust(&repo).map_err(CockpitError::msg)?;
+	Ok(crate::roles::summary(&repo, &local_roles(&repo)))
+}
+
+/// Les rôles du poste pour ce dépôt, avant ce qu'y ajoute son fichier.
+fn local_roles(repo: &str) -> Vec<config::RoleConfig> {
+	let roles = config::Config::for_repo(repo).roles;
+	if roles.is_empty() {
+		config::default_roles()
+	} else {
+		roles
+	}
 }
 
 /// Le catalogue de rôles d'un dépôt, jamais vide.
@@ -1535,13 +1555,7 @@ pub(crate) fn repo_roles() -> crate::roles::RepoRoles {
 /// Ce que le lanceur consulte pour savoir qui juge le travail des autres : lu
 /// depuis le projet de la mission, il ne dépend plus de l'écran ouvert.
 pub(crate) fn roles_for(repo: &str) -> Vec<config::RoleConfig> {
-	let roles = config::Config::for_repo(repo).roles;
-	let local = if roles.is_empty() {
-		config::default_roles()
-	} else {
-		roles
-	};
-	crate::roles::with_repo(repo, local)
+	crate::roles::with_repo(repo, local_roles(repo))
 }
 
 #[cfg(test)]

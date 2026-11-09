@@ -2436,7 +2436,8 @@ const REPONSES: Record<string, unknown> = {
 			},
 		],
 	},
-	repo_roles: { file: ".cockpit/roles.toml", ids: ["backend"], error: null },
+	repo_roles: { file: ".cockpit/roles.toml", ids: ["backend"], error: null, restricted: ["backend"], trusted: false },
+	repo_roles_trust: { file: ".cockpit/roles.toml", ids: ["backend"], error: null, restricted: ["backend"], trusted: true },
 	roles_list: [
 		["backend", "Back-end", false],
 		["frontend", "Front-end", false],

@@ -791,6 +791,9 @@
 			"intro": "What a worker receives at launch: its standing instructions, its model, and the paths it is allowed to write to. The scope is enforced — a write outside it is refused, not merely discouraged.",
 			"masterNote": "This role leads the mission: it reads the ticket, proposes the breakdown and puts everything back together at the end. Its key is reserved — the steps and orchestration tools come from Cockpit; only its command, instructions and model are set here.",
 			"repoDeclared": "This repository also declares roles in {{file}}: {{ids}}. They apply over these settings at launch, except permissions and engine, which stay here.",
+			"repoUntrusted": "Until you validate {{file}}, {{ids}} ask for approval before each change: this file changes their instructions, and they normally act without asking.",
+			"repoTrust": "Validate this file",
+			"repoTrusted": "{{file}} is validated as it is: its roles keep their rights. Any change to the file will ask for validation again.",
 			"repoInvalid": "{{file}} is invalid, and missions will refuse to start: {{error}}",
 			"keyHint": "referenced by tasks",
 			"engine": {

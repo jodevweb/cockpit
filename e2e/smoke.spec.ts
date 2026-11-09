@@ -105,6 +105,12 @@ test("les réglages disent quels rôles viennent du dépôt", async ({ page }) =
 	await topTab(page, "Workshop").click();
 	await atelierNav(page).locator("button", { hasText: "Settings" }).click();
 	await expect(page.getByText(/also declares roles in \.cockpit\/roles\.toml: backend/)).toBeVisible();
+	// `backend` tourne sans rien demander et le dépôt change sa consigne : il
+	// redemande l'accord jusqu'à ce qu'on valide le fichier.
+	const untrusted = page.getByTestId("repo-roles-untrusted");
+	await expect(untrusted).toContainText("backend ask for approval");
+	await untrusted.getByRole("button", { name: "Validate this file" }).click();
+	await expect(page.getByTestId("repo-roles-trusted")).toBeVisible();
 });
 
 test("la croix retire un élément du bandeau « ça t'attend »", async ({ page }) => {
