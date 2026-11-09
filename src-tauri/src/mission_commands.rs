@@ -494,6 +494,25 @@ pub(crate) async fn mission_resume(app: AppHandle, id: String) -> Result<mission
 	mission::get(&id)
 }
 
+/// La consigne d'un rôle, avec la forme de son verdict quand il en rend un.
+///
+/// Cette forme n'était écrite que dans les rôles par défaut. Un rôle `verifies` à la
+/// consigne maison n'en savait rien : vu sur une vraie mission, sa relecture finit sur
+/// « Approved », le cockpit lit `undecided`, et la tâche repart pour rien. C'est un
+/// contrat du cockpit, pas une préférence d'équipe.
+fn prompt_with_verdict(role: &config::RoleConfig) -> String {
+	if !role.verifies || role.prompt.contains("VERDICT:") {
+		return role.prompt.clone();
+	}
+	format!(
+		"{}\n\n\
+		 End with a verdict on a single line (keep these markers in English exactly): \
+		 `VERDICT: blocking`, `VERDICT: concerns` or `VERDICT: ok`. Under it, list what \
+		 must be fixed, one item per line, naming the file and what is wrong.",
+		role.prompt.trim_end()
+	)
+}
+
 /// Remet debout les maîtres des missions qu'un redémarrage a décapitées.
 ///
 /// `recover_all` rend leurs tâches reprenables et le lanceur les fait repartir :
@@ -714,7 +733,7 @@ pub async fn launch_task_agent(app: AppHandle, id: &str, task_id: &str, actor: &
 
 		 {directive}",
 		directive = i18n::reply_directive(),
-		role_prompt = role.prompt,
+		role_prompt = prompt_with_verdict(&role),
 		mission_title = mission.title,
 		ticket = if mission.ticket.is_empty() {
 			String::new()
@@ -1518,4 +1537,41 @@ pub(crate) fn roles_for(repo: &str) -> Vec<config::RoleConfig> {
 		roles
 	};
 	crate::roles::with_repo(repo, local)
+}
+
+#[cfg(test)]
+mod prompt_with_verdict_tests {
+	use super::*;
+
+	fn role(prompt: &str, verifies: bool) -> config::RoleConfig {
+		config::RoleConfig {
+			prompt: prompt.into(),
+			verifies,
+			..Default::default()
+		}
+	}
+
+	#[test]
+	fn un_role_qui_verifie_recoit_la_forme_du_verdict() {
+		let consigne = prompt_with_verdict(&role("Relis la branche.", true));
+		assert!(consigne.starts_with("Relis la branche."));
+		for verdict in ["VERDICT: blocking", "VERDICT: concerns", "VERDICT: ok"] {
+			assert!(mission::read_verdict(verdict).is_some());
+			assert!(consigne.contains(verdict), "{consigne}");
+		}
+	}
+
+	#[test]
+	fn les_autres_consignes_ne_changent_pas() {
+		assert_eq!(prompt_with_verdict(&role("Écris le code.", false)), "Écris le code.");
+		let deja = "Conclus par `VERDICT: ok`.";
+		assert_eq!(prompt_with_verdict(&role(deja, true)), deja);
+	}
+
+	#[test]
+	fn les_roles_par_defaut_n_ont_pas_de_verdict_en_double() {
+		for role in config::default_roles().iter().filter(|role| role.verifies) {
+			assert_eq!(prompt_with_verdict(role), role.prompt, "{}", role.id);
+		}
+	}
 }
