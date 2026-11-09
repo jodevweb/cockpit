@@ -1,0 +1,8 @@
+# La version de Rust est figée : Clippy gagne des lints à chaque version, et une
+# CI sur `stable` refusait un code que le poste, resté une version derrière, ne
+# signalait pas. Le poste et la CI lisent ce fichier, et voient donc les mêmes
+# avertissements. Pour monter de version, changer ce fichier et corriger ce que
+# Clippy relève dans la même pull request.
+[toolchain]
+channel = "1.99.1"
+components = ["clippy", "rustfmt"]
