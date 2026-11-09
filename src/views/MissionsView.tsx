@@ -59,6 +59,7 @@ import type {
 	AgentActivity,
 	Mission,
 	MissionActivity,
+	MissionEstimate,
 	MissionState,
 	MissionOverrun,
 	MissionTask,
@@ -424,6 +425,12 @@ export function MissionsView() {
 	);
 }
 
+/** Lance une action de la carte : la retient en cours, puis notifie et recharge. */
+type RunAction = (key: string, action: () => Promise<unknown>, done: string) => Promise<void>;
+
+/** Ce que l'étape d'exécution a réellement produit. */
+type Delivered = { total: number; done: number; reworked: number; readonly ratio: number };
+
 function MissionCard({
 	mission,
 	overruns,
@@ -439,9 +446,8 @@ function MissionCard({
 	/** Ouvre le parcours d'une mission guidée ; absent quand on y est déjà. */
 	onJourney?: () => void;
 }) {
-	const { notify, go, worktrees } = useCockpit();
+	const { notify, worktrees } = useCockpit();
 	const { t } = useTranslation("views");
-	const { show } = useWorkspace();
 	const [open, setOpen] = useState(mission.state !== "done");
 	const [adding, setAdding] = useState(false);
 	// Ce que les agents fabriquent : c'est cette information qui manquait, et
@@ -479,7 +485,7 @@ function MissionCard({
 
 	// Ce que l'étape d'exécution a réellement produit. Une reprise fait reculer
 	// ce compte, et c'est voulu : le travail est bien reparti en arrière.
-	const delivered = {
+	const delivered: Delivered = {
 		total: mission.tasks.length,
 		done: mission.tasks.filter((task) =>
 			["delivered", "integrated"].includes(task.state),
@@ -517,7 +523,7 @@ function MissionCard({
 	const indécises = mission.tasks
 		.filter((task) => task.verdict === "undecided" && task.state !== "failed");
 
-	const run = async (key: string, action: () => Promise<unknown>, done: string) => {
+	const run: RunAction = async (key, action, done) => {
 		setBusy(key);
 		try {
 			await action();
@@ -532,92 +538,204 @@ function MissionCard({
 
 	return (
 		<section className="panel flex flex-col gap-3 p-3">
-			<div className="flex items-start gap-2">
-				<button
-					type="button"
-					onClick={() => setOpen((value) => !value)}
-					className="focus-ring mt-0.5 rounded text-ink-faint"
-				>
-					{open ? <ChevronDown size={13} /> : <ChevronRight size={13} />}
-				</button>
-
-				<div className="min-w-0 flex-1">
-					<div className="flex flex-wrap items-center gap-2">
-						<h3 className="text-[13px] font-semibold text-ink">{mission.title}</h3>
-						{mission.guided ? <JourneyDots mission={mission} /> : null}
-						{mission.ticket ? (
-							<button
-								type="button"
-								onClick={() => {
-									if (mission.ticketUrl) {
-										void api.system.openUrl(mission.ticketUrl).catch(() => undefined);
-									}
-								}}
-								className="focus-ring rounded"
-							>
-								<Badge mono>{mission.ticket}</Badge>
-							</button>
-						) : null}
-					</div>
-					<div className="mt-1 flex flex-wrap items-center gap-2 font-mono text-[10px] text-ink-faint">
-						<span className="flex items-center gap-1">
-							<GitBranch size={10} />
-							{mission.branch || t("missions.card.noBranch")}
-						</span>
-						{/* Le temps depuis l'approbation, pas depuis l'ouverture : c'est
-						    ce que la mission a coûté, non ce qu'elle a attendu. */}
-						{mission.startedAt ? (
-							<span
-								className="flex items-center gap-1"
-								title={
-									mission.finishedAt
-										? t("missions.card.fromTo", {
-												from: fromIso(mission.startedAt),
-												to: fromIso(mission.finishedAt),
-											})
-										: t("missions.card.startedAt", { at: fromIso(mission.startedAt) })
-								}
-							>
-								<Clock size={10} />
-								{duration(elapsedSeconds(mission.startedAt, mission.finishedAt))}
-								{mission.finishedAt ? "" : "…"}
-							</span>
-						) : null}
-						{/* Sur quoi la PR se greffera. Modifiable tant que la mission
-						    n'est pas close : c'est en cours de route qu'on s'aperçoit
-						    qu'un travail en prolonge un autre. */}
-						<MissionBase mission={mission} onChange={onChange} />
-						{/* Ce qu'elle a coûté, juste après ce qu'elle a duré : c'est la
-						    même question posée par la dépense, et elle n'avait jusqu'ici
-						    aucune réponse à l'écran. */}
-						<MissionSpend missionId={mission.id} />
-						<span>· {fromIso(mission.updatedAt)}</span>
-					</div>
-				</div>
-
-				{onJourney ? (
-					<Button
-						variant={awaitsHuman(mission) ? "solid" : "outline"}
-						size="sm"
-						icon={Route}
-						onClick={onJourney}
-					>
-						{awaitsHuman(mission) ? t("missions.card.yourTurn") : t("missions.card.journey")}
-					</Button>
-				) : null}
-				<Button size="sm" icon={Trash2} title={t("missions.card.remove")} onClick={onRemove} />
-			</div>
+			<MissionCardHeader
+				mission={mission}
+				open={open}
+				onToggle={() => setOpen((value) => !value)}
+				onChange={onChange}
+				onRemove={onRemove}
+				onJourney={onJourney}
+			/>
 
 			{/* Les étapes disent où l'on en est, un pourcentage ne le dirait pas.
 			    Mais l'étape en cours dure : elle se remplit donc au fur et à mesure
 			    que les tâches rendent, faute de quoi rien ne bougeait pendant tout
 			    le travail — y compris quand une reprise défaisait ce qui était
 			    acquis. */}
+			<MissionProgress
+				mission={mission}
+				prelude={prelude}
+				steps={STEPS}
+				stepIndex={stepIndex}
+				delivered={delivered}
+			/>
+			<div className="flex flex-wrap items-center gap-2">
+				<Badge tone={mission.state === "failed" ? "critical" : "accent"}>
+					{now.label}
+				</Badge>
+				{now.live ? <Spinner className="shrink-0" /> : null}
+				<span className="min-w-0 flex-1 text-[11px] text-ink-muted">{now.detail}</span>
+
+				<MissionPlanActions
+					mission={mission}
+					busy={busy}
+					run={run}
+					estimate={attend ? estimate.data : null}
+				/>
+				{mission.state === "integrating" ? (
+					<MissionIntegration
+						mission={mission}
+						refus={refus}
+						indécises={indécises}
+						busy={busy}
+						run={run}
+					/>
+				) : null}
+				{mission.prUrl ? (
+					<Button
+						icon={GitPullRequest}
+						onClick={() => {
+							void api.system.openUrl(mission.prUrl).catch(() => undefined);
+						}}
+					>
+						{t("missions.card.viewPr")}
+					</Button>
+				) : null}
+
+				{/* Reprendre, suspendre, couper : les trois gestes qui manquaient
+				    quand une mission tournait toute seule et qu'on voulait la
+				    main. Ils n'ont de sens qu'une fois le plan approuvé. */}
+				{ONGOING.includes(mission.state) ? (
+					<MissionControls mission={mission} busy={busy} run={run} />
+				) : null}
+			</div>
+
+			{open ? (
+				<MissionDetails
+					mission={mission}
+					overruns={overruns}
+					activity={activity.data}
+					masterCwd={masterCwd}
+					verifying={verifying}
+					implementationDone={implementationDone}
+					prelude={prelude}
+					adding={adding}
+					setAdding={setAdding}
+					onChange={onChange}
+				/>
+			) : null}
+		</section>
+	);
+}
+
+/** L'en-tête de la carte : titre, ticket, branche, durée, base, dépense. */
+function MissionCardHeader({
+	mission,
+	open,
+	onToggle,
+	onChange,
+	onRemove,
+	onJourney,
+}: {
+	mission: Mission;
+	open: boolean;
+	onToggle: () => void;
+	onChange: () => void;
+	onRemove: () => void;
+	onJourney?: () => void;
+}) {
+	const { t } = useTranslation("views");
+	return (
+		<div className="flex items-start gap-2">
+			<button
+				type="button"
+				onClick={onToggle}
+				className="focus-ring mt-0.5 rounded text-ink-faint"
+			>
+				{open ? <ChevronDown size={13} /> : <ChevronRight size={13} />}
+			</button>
+
+			<div className="min-w-0 flex-1">
+				<div className="flex flex-wrap items-center gap-2">
+					<h3 className="text-[13px] font-semibold text-ink">{mission.title}</h3>
+					{mission.guided ? <JourneyDots mission={mission} /> : null}
+					{mission.ticket ? (
+						<button
+							type="button"
+							onClick={() => {
+								if (mission.ticketUrl) {
+									void api.system.openUrl(mission.ticketUrl).catch(() => undefined);
+								}
+							}}
+							className="focus-ring rounded"
+						>
+							<Badge mono>{mission.ticket}</Badge>
+						</button>
+					) : null}
+				</div>
+				<div className="mt-1 flex flex-wrap items-center gap-2 font-mono text-[10px] text-ink-faint">
+					<span className="flex items-center gap-1">
+						<GitBranch size={10} />
+						{mission.branch || t("missions.card.noBranch")}
+					</span>
+					{/* Le temps depuis l'approbation, pas depuis l'ouverture : c'est
+					    ce que la mission a coûté, non ce qu'elle a attendu. */}
+					{mission.startedAt ? (
+						<span
+							className="flex items-center gap-1"
+							title={
+								mission.finishedAt
+									? t("missions.card.fromTo", {
+											from: fromIso(mission.startedAt),
+											to: fromIso(mission.finishedAt),
+										})
+									: t("missions.card.startedAt", { at: fromIso(mission.startedAt) })
+							}
+						>
+							<Clock size={10} />
+							{duration(elapsedSeconds(mission.startedAt, mission.finishedAt))}
+							{mission.finishedAt ? "" : "…"}
+						</span>
+					) : null}
+					{/* Sur quoi la PR se greffera. Modifiable tant que la mission
+					    n'est pas close : c'est en cours de route qu'on s'aperçoit
+					    qu'un travail en prolonge un autre. */}
+					<MissionBase mission={mission} onChange={onChange} />
+					{/* Ce qu'elle a coûté, juste après ce qu'elle a duré : c'est la
+					    même question posée par la dépense, et elle n'avait jusqu'ici
+					    aucune réponse à l'écran. */}
+					<MissionSpend missionId={mission.id} />
+					<span>· {fromIso(mission.updatedAt)}</span>
+				</div>
+			</div>
+
+			{onJourney ? (
+				<Button
+					variant={awaitsHuman(mission) ? "solid" : "outline"}
+					size="sm"
+					icon={Route}
+					onClick={onJourney}
+				>
+					{awaitsHuman(mission) ? t("missions.card.yourTurn") : t("missions.card.journey")}
+				</Button>
+			) : null}
+			<Button size="sm" icon={Trash2} title={t("missions.card.remove")} onClick={onRemove} />
+		</div>
+	);
+}
+
+/** La barre des étapes, et ce que l'exécution a déjà rendu. */
+function MissionProgress({
+	mission,
+	prelude,
+	steps,
+	stepIndex,
+	delivered,
+}: {
+	mission: Mission;
+	prelude: boolean;
+	steps: Array<{ state: MissionState; label: string; waiting: string }>;
+	stepIndex: number;
+	delivered: Delivered;
+}) {
+	const { t } = useTranslation("views");
+	return (
+		<>
 			{/* Une mission guidée porte déjà ses étapes à côté du titre : cette
 			    barre-ci ne dit que l'exécution, qu'elle n'a pas encore atteinte. */}
 			{prelude ? null : (
 				<div className="flex items-center gap-1">
-					{STEPS.map((entry, index) => (
+					{steps.map((entry, index) => (
 						<div
 							key={entry.state}
 							className={clsx(
@@ -645,339 +763,398 @@ function MissionCard({
 						: ""}
 				</div>
 			) : null}
-			<div className="flex flex-wrap items-center gap-2">
-				<Badge tone={mission.state === "failed" ? "critical" : "accent"}>
-					{now.label}
-				</Badge>
-				{now.live ? <Spinner className="shrink-0" /> : null}
-				<span className="min-w-0 flex-1 text-[11px] text-ink-muted">{now.detail}</span>
+		</>
+	);
+}
 
-				{mission.state === "planning" && !mission.masterSession && !mission.guided ? (
-					<Button
-						variant="solid"
-						icon={Bot}
-						loading={busy === "master"}
-						onClick={() =>
-							void run(
-								"master",
-								() => api.missions.launchMaster(mission.id),
-								t("missions.card.masterLaunched"),
-							)
-						}
-					>
-						{busy === "master" ? t("missions.card.launching") : t("missions.card.launchMaster")}
-					</Button>
-				) : null}
-				{attend && estimate.data && estimate.data.sample > 0 ? (
-					// Un plan s'approuve sans savoir ce qu'il engage : quatre tâches
-					// confiées à des agents, c'est une nuit de machine ou dix minutes,
-					// et rien ne le disait avant de cliquer.
-					<span
-						className="flex items-center gap-1.5 text-[11px] text-ink-faint"
-						title={t("missions.card.estimateTitle", { count: estimate.data.sample })}
-					>
-						<Hourglass size={12} className="shrink-0" />
-						<span>
-							{t("missions.card.estimate", { duration: duration(estimate.data.expectedSeconds) })}
-							{estimate.data.failureRate > 0.25
-								? t("missions.card.estimateFailed", {
-										percent: Math.round(estimate.data.failureRate * 100),
-									})
-								: ""}
-							{estimate.data.thin ? t("missions.card.estimateThin") : ""}
-						</span>
-					</span>
-				) : null}
-				{mission.state === "awaitingApproval" && !mission.guided ? (
-					<Button
-						variant="solid"
-						icon={Play}
-						loading={busy === "approve"}
-						onClick={() =>
-							void run(
-								"approve",
-								() => api.missions.approve(mission.id),
-								t("missions.card.planApproved"),
-							)
-						}
-					>
-						{busy === "approve" ? t("missions.card.launchingRunners") : t("missions.card.approvePlan")}
-					</Button>
-				) : null}
-				{mission.state === "integrating" ? (
-					// Ce que la pull request emportera, avant de la demander. Le bouton
-					// refuse déjà de partir s'il reste du travail dehors, mais rien ne
-					// le disait : on cliquait sans savoir si la recomposition avait eu
-					// lieu, et une intégration silencieuse ressemble à une panne.
-					(() => {
-						const dedans = mission.tasks.filter(
-							(task) => task.state === "integrated",
-						).length;
-						const dehors = mission.tasks.filter((task) =>
-							["planned", "running", "delivered"].includes(task.state),
-						).length;
-						return (
-							<span
-								className={clsx(
-									"flex items-center gap-1.5 text-[11px]",
-									dehors > 0 ? "text-warning" : "text-success",
-								)}
-								title={
-									dehors > 0
-										? t("missions.card.outsideTitle")
-										: t("missions.card.allInsideTitle")
-								}
-							>
-								<GitMerge size={12} className="shrink-0" />
-								<span>
-									{t("missions.card.integrated", { done: dedans, total: mission.tasks.length })}
-									{dehors > 0 ? t("missions.card.outside", { count: dehors }) : ""}
-								</span>
-							</span>
-						);
-					})()
-				) : null}
-				{/* Une vérification qui refuse ferme la pull request. Le bouton le disait
-				    déjà en échouant, mais après le clic : on croyait à une panne là où
-				    quelqu'un avait simplement nommé un défaut. */}
-				{mission.state === "integrating" && refus.length > 0 ? (
-					<span
-						className="flex items-center gap-1.5 text-[11px] text-critical"
-						title={t("missions.card.refusedTitle", { tasks: refus.join(", ") })}
-					>
-						<ShieldAlert size={12} className="shrink-0" />
-						<span>
-							{t("missions.card.refused", { count: refus.length })}
-						</span>
-					</span>
-				) : null}
-				{/* Une vérification sans verdict ferme la PR. Le dire sans nommer
-				    laquelle, ni donner le geste qui en sort, laissait l'écran bloqué
-				    sans recours visible : on la nomme, et on la relance d'ici. */}
-				{mission.state === "integrating"
-					? indécises.map((task) => (
-							<span
-								key={task.id}
-								className="flex min-w-0 items-center gap-1.5 text-[11px] text-warning"
-								title={t("missions.card.undecidedTitle")}
-							>
-								<ShieldAlert size={12} className="shrink-0" />
-								<span className="min-w-0 truncate">
-									{t("missions.card.undecided", { title: task.title })}
-								</span>
-								<Button
-									size="sm"
-									icon={RotateCcw}
-									loading={busy === `rerun:${task.id}`}
-									onClick={() =>
-										void run(
-											`rerun:${task.id}`,
-											() => api.missions.rerun(mission.id, task.id),
-											t("missions.card.rerunDone", { title: task.title }),
-										)
-									}
-								>
-									{t("missions.rerun")}
-								</Button>
-							</span>
-						))
-					: null}
-				{mission.state === "integrating" ? (
-					<Button
-						variant="solid"
-						icon={GitPullRequest}
-						loading={busy === "pr"}
-						disabled={refus.length > 0 || indécises.length > 0}
-						title={
-							refus.length > 0
-								? t("missions.card.prBlockedRefused")
-								: indécises.length > 0
-									? t("missions.card.prBlockedUndecided")
-									: undefined
-						}
-						onClick={() =>
-							void run(
-								"pr",
-								() => api.missions.openPr(mission.id),
-								t("missions.card.prOpened"),
-							)
-						}
-					>
-						{busy === "pr" ? t("missions.card.opening") : t("missions.card.openPr")}
-					</Button>
-				) : null}
-				{mission.prUrl ? (
-					<Button
-						icon={GitPullRequest}
-						onClick={() => {
-							void api.system.openUrl(mission.prUrl).catch(() => undefined);
-						}}
-					>
-						{t("missions.card.viewPr")}
-					</Button>
-				) : null}
-
-				{/* Reprendre, suspendre, couper : les trois gestes qui manquaient
-				    quand une mission tournait toute seule et qu'on voulait la
-				    main. Ils n'ont de sens qu'une fois le plan approuvé. */}
-				{ONGOING.includes(mission.state) ? (
-					mission.paused ? (
-						<Button
-							variant="solid"
-							icon={PlayCircle}
-							loading={busy === "resume"}
-							title={t("missions.card.resumeTitle")}
-							onClick={() =>
-								void run(
-									"resume",
-									() => api.missions.resume(mission.id),
-									t("missions.card.resumed"),
-								)
-							}
-						>
-							{busy === "resume" ? t("missions.card.resuming") : t("missions.card.resume")}
-						</Button>
-					) : (
-						<>
-							<Button
-								icon={PauseCircle}
-								loading={busy === "pause"}
-								title={t("missions.card.pauseTitle")}
-								onClick={() =>
-									void run(
-										"pause",
-										() => api.missions.pause(mission.id),
-										t("missions.card.paused"),
-									)
-								}
-							>
-								{t("missions.card.pause")}
-							</Button>
-							<Button
-								variant="danger"
-								icon={StopCircle}
-								loading={busy === "stop"}
-								title={t("missions.card.stopTitle")}
-								onClick={() =>
-									void run("stop", () => api.missions.stop(mission.id), t("missions.card.stopped"))
-								}
-							>
-								{t("missions.card.stop")}
-							</Button>
-						</>
-					)
-				) : null}
-			</div>
-
-			{open ? (
-				<>
-					<Pending sessionId={mission.masterSession} />
-
-					{master ? (
-						<AgentLine
-							title={t("missions.card.master")}
-							activity={master}
-							onOpen={() => {
-								// On ouvre son onglet, pas seulement l'écran : « Suivre »
-								// doit mener à la conversation, pas à un sélecteur.
-								show(masterCwd, { kind: "agent", id: master.sessionId });
-								go("workspace");
-							}}
-						/>
-					) : null}
-
-					{/* Le compte rendu passe avant le plan : c'est ce qu'on relit après
-					    coup, quand quelqu'un demande comment ça marche. */}
-					{mission.summary ? (
-						<div className="rounded-lg border border-success/25 bg-success/[0.06] p-3">
-							<div className="mb-1.5 flex items-center gap-2">
-								<BookOpen size={12} className="shrink-0 text-success" />
-								<span className="text-[10px] font-semibold tracking-[0.08em] text-success uppercase">
-									{t("missions.card.summary")}
-								</span>
-								<div className="flex-1" />
-								<Button
-									size="sm"
-									icon={ClipboardCopy}
-									onClick={() => {
-										void navigator.clipboard
-											.writeText(
-												`# ${mission.title}${mission.ticket ? ` (${mission.ticket})` : ""}\n\n${mission.summary}${mission.prUrl ? `\n\n${t("missions.card.summaryPr", { url: mission.prUrl })}` : ""}`,
-											)
-											.then(() => notify(t("missions.card.summaryCopied")))
-											.catch(() => undefined);
-									}}
-								>
-									{t("missions.card.copy")}
-								</Button>
-							</div>
-							<Markdown source={mission.summary} />
-						</div>
-					) : null}
-
-					{mission.plan ? (
-						<div className="rounded-lg border border-accent/25 bg-accent/[0.06] p-2.5">
-							<div className="mb-1 text-[10px] font-semibold tracking-[0.08em] text-accent-soft uppercase">
-								{t("missions.card.proposedPlan")}
-							</div>
-							<p className="text-selectable text-[11px] leading-relaxed text-ink-muted">
-								{mission.plan}
-							</p>
-						</div>
-					) : null}
-					<IsolationNotice mission={mission} />
-
-					{mission.tasks.length > 0 ? (
-						<div className="flex flex-col gap-1">
-							{mission.tasks.map((task) => (
-								<TaskRow
-									key={task.id}
-									mission={mission}
-									task={task}
-									overrun={overruns.find(
-										(entry) => entry.taskId === task.id,
-									)}
-									activity={
-										activity.data?.tasks.find((entry) => entry.taskId === task.id)
-											?.activity ?? null
-									}
-									// Une recette qui ne démarre pas doit dire qu'elle attend son
-									// tour, sinon elle passe pour oubliée.
-									held={verifying.has(task.role) && !implementationDone}
-									onChange={onChange}
-								/>
-							))}
-						</div>
-					) : null}
-
-					{adding ? (
-						<TaskForm
-							mission={mission}
-							onDone={() => {
-								setAdding(false);
-								onChange();
-							}}
-						/>
-					) : mission.state !== "done" && !prelude ? (
-						<div className="flex justify-end">
-							<Button size="sm" icon={Plus} onClick={() => setAdding(true)}>
-								{t("missions.card.addTask")}
-							</Button>
-						</div>
-					) : null}
-					{/* Ce qui s'est réellement passé : la suite des agents qui ont
-					    tourné, leurs reprises, leurs coûts, et pourquoi ceux qui sont
-					    morts sont morts. Les états des tâches ci-dessus disent où l'on
-					    en est ; eux seuls disent comment on y est arrivé. */}
-					{/* Ce que le cockpit a mesuré, tel que la pull request le reçoit :
-					    dès qu'une tâche a rendu, il y a quelque chose à prouver. */}
-					{mission.tasks.some((task) => ["delivered", "integrated"].includes(task.state)) ? (
-						<DeliveryDossierPanel mission={mission} />
-					) : null}
-					<MissionHistory missionId={mission.id} />
-				</>
+/** Avant l'exécution : lancer le maître, chiffrer le plan, l'approuver. */
+function MissionPlanActions({
+	mission,
+	busy,
+	run,
+	estimate,
+}: {
+	mission: Mission;
+	busy: string | null;
+	run: RunAction;
+	/** Le chiffrage du plan, seulement tant qu'il attend son accord. */
+	estimate: MissionEstimate | null;
+}) {
+	const { t } = useTranslation("views");
+	return (
+		<>
+			{mission.state === "planning" && !mission.masterSession && !mission.guided ? (
+				<Button
+					variant="solid"
+					icon={Bot}
+					loading={busy === "master"}
+					onClick={() =>
+						void run(
+							"master",
+							() => api.missions.launchMaster(mission.id),
+							t("missions.card.masterLaunched"),
+						)
+					}
+				>
+					{busy === "master" ? t("missions.card.launching") : t("missions.card.launchMaster")}
+				</Button>
 			) : null}
-		</section>
+			{estimate && estimate.sample > 0 ? (
+				// Un plan s'approuve sans savoir ce qu'il engage : quatre tâches
+				// confiées à des agents, c'est une nuit de machine ou dix minutes,
+				// et rien ne le disait avant de cliquer.
+				<span
+					className="flex items-center gap-1.5 text-[11px] text-ink-faint"
+					title={t("missions.card.estimateTitle", { count: estimate.sample })}
+				>
+					<Hourglass size={12} className="shrink-0" />
+					<span>
+						{t("missions.card.estimate", { duration: duration(estimate.expectedSeconds) })}
+						{estimate.failureRate > 0.25
+							? t("missions.card.estimateFailed", {
+									percent: Math.round(estimate.failureRate * 100),
+								})
+							: ""}
+						{estimate.thin ? t("missions.card.estimateThin") : ""}
+					</span>
+				</span>
+			) : null}
+			{mission.state === "awaitingApproval" && !mission.guided ? (
+				<Button
+					variant="solid"
+					icon={Play}
+					loading={busy === "approve"}
+					onClick={() =>
+						void run(
+							"approve",
+							() => api.missions.approve(mission.id),
+							t("missions.card.planApproved"),
+						)
+					}
+				>
+					{busy === "approve" ? t("missions.card.launchingRunners") : t("missions.card.approvePlan")}
+				</Button>
+			) : null}
+		</>
+	);
+}
+
+/** Pendant l'intégration : ce qui est dedans, ce qui la retient, et la pull request. */
+function MissionIntegration({
+	mission,
+	refus,
+	indécises,
+	busy,
+	run,
+}: {
+	mission: Mission;
+	/** Les titres des vérifications qui refusent encore. */
+	refus: string[];
+	/** Les vérifications rendues sans verdict lisible. */
+	indécises: MissionTask[];
+	busy: string | null;
+	run: RunAction;
+}) {
+	const { t } = useTranslation("views");
+	// Ce que la pull request emportera, avant de la demander. Le bouton
+	// refuse déjà de partir s'il reste du travail dehors, mais rien ne
+	// le disait : on cliquait sans savoir si la recomposition avait eu
+	// lieu, et une intégration silencieuse ressemble à une panne.
+	const dedans = mission.tasks.filter(
+		(task) => task.state === "integrated",
+	).length;
+	const dehors = mission.tasks.filter((task) =>
+		["planned", "running", "delivered"].includes(task.state),
+	).length;
+	return (
+		<>
+			<span
+				className={clsx(
+					"flex items-center gap-1.5 text-[11px]",
+					dehors > 0 ? "text-warning" : "text-success",
+				)}
+				title={
+					dehors > 0
+						? t("missions.card.outsideTitle")
+						: t("missions.card.allInsideTitle")
+				}
+			>
+				<GitMerge size={12} className="shrink-0" />
+				<span>
+					{t("missions.card.integrated", { done: dedans, total: mission.tasks.length })}
+					{dehors > 0 ? t("missions.card.outside", { count: dehors }) : ""}
+				</span>
+			</span>
+			{/* Une vérification qui refuse ferme la pull request. Le bouton le disait
+			    déjà en échouant, mais après le clic : on croyait à une panne là où
+			    quelqu'un avait simplement nommé un défaut. */}
+			{refus.length > 0 ? (
+				<span
+					className="flex items-center gap-1.5 text-[11px] text-critical"
+					title={t("missions.card.refusedTitle", { tasks: refus.join(", ") })}
+				>
+					<ShieldAlert size={12} className="shrink-0" />
+					<span>
+						{t("missions.card.refused", { count: refus.length })}
+					</span>
+				</span>
+			) : null}
+			{/* Une vérification sans verdict ferme la PR. Le dire sans nommer
+			    laquelle, ni donner le geste qui en sort, laissait l'écran bloqué
+			    sans recours visible : on la nomme, et on la relance d'ici. */}
+			{indécises.map((task) => (
+				<span
+					key={task.id}
+					className="flex min-w-0 items-center gap-1.5 text-[11px] text-warning"
+					title={t("missions.card.undecidedTitle")}
+				>
+					<ShieldAlert size={12} className="shrink-0" />
+					<span className="min-w-0 truncate">
+						{t("missions.card.undecided", { title: task.title })}
+					</span>
+					<Button
+						size="sm"
+						icon={RotateCcw}
+						loading={busy === `rerun:${task.id}`}
+						onClick={() =>
+							void run(
+								`rerun:${task.id}`,
+								() => api.missions.rerun(mission.id, task.id),
+								t("missions.card.rerunDone", { title: task.title }),
+							)
+						}
+					>
+						{t("missions.rerun")}
+					</Button>
+				</span>
+			))}
+			<Button
+				variant="solid"
+				icon={GitPullRequest}
+				loading={busy === "pr"}
+				disabled={refus.length > 0 || indécises.length > 0}
+				title={
+					refus.length > 0
+						? t("missions.card.prBlockedRefused")
+						: indécises.length > 0
+							? t("missions.card.prBlockedUndecided")
+							: undefined
+				}
+				onClick={() =>
+					void run(
+						"pr",
+						() => api.missions.openPr(mission.id),
+						t("missions.card.prOpened"),
+					)
+				}
+			>
+				{busy === "pr" ? t("missions.card.opening") : t("missions.card.openPr")}
+			</Button>
+		</>
+	);
+}
+
+/** Reprendre une mission suspendue, ou la suspendre et la couper. */
+function MissionControls({
+	mission,
+	busy,
+	run,
+}: {
+	mission: Mission;
+	busy: string | null;
+	run: RunAction;
+}) {
+	const { t } = useTranslation("views");
+	return mission.paused ? (
+		<Button
+			variant="solid"
+			icon={PlayCircle}
+			loading={busy === "resume"}
+			title={t("missions.card.resumeTitle")}
+			onClick={() =>
+				void run(
+					"resume",
+					() => api.missions.resume(mission.id),
+					t("missions.card.resumed"),
+				)
+			}
+		>
+			{busy === "resume" ? t("missions.card.resuming") : t("missions.card.resume")}
+		</Button>
+	) : (
+		<>
+			<Button
+				icon={PauseCircle}
+				loading={busy === "pause"}
+				title={t("missions.card.pauseTitle")}
+				onClick={() =>
+					void run(
+						"pause",
+						() => api.missions.pause(mission.id),
+						t("missions.card.paused"),
+					)
+				}
+			>
+				{t("missions.card.pause")}
+			</Button>
+			<Button
+				variant="danger"
+				icon={StopCircle}
+				loading={busy === "stop"}
+				title={t("missions.card.stopTitle")}
+				onClick={() =>
+					void run("stop", () => api.missions.stop(mission.id), t("missions.card.stopped"))
+				}
+			>
+				{t("missions.card.stop")}
+			</Button>
+		</>
+	);
+}
+
+/** Le corps dépliable de la carte : maître, compte rendu, plan, tâches, historique. */
+function MissionDetails({
+	mission,
+	overruns,
+	activity,
+	masterCwd,
+	verifying,
+	implementationDone,
+	prelude,
+	adding,
+	setAdding,
+	onChange,
+}: {
+	mission: Mission;
+	overruns: MissionOverrun[];
+	activity: MissionActivity | null;
+	masterCwd: string;
+	/** Les rôles qui jugent le travail des autres. */
+	verifying: Set<string>;
+	implementationDone: boolean;
+	prelude: boolean;
+	adding: boolean;
+	setAdding: (adding: boolean) => void;
+	onChange: () => void;
+}) {
+	const { go } = useCockpit();
+	const { t } = useTranslation("views");
+	const { show } = useWorkspace();
+	const master = activity?.master ?? null;
+	return (
+		<>
+			<Pending sessionId={mission.masterSession} />
+
+			{master ? (
+				<AgentLine
+					title={t("missions.card.master")}
+					activity={master}
+					onOpen={() => {
+						// On ouvre son onglet, pas seulement l'écran : « Suivre »
+						// doit mener à la conversation, pas à un sélecteur.
+						show(masterCwd, { kind: "agent", id: master.sessionId });
+						go("workspace");
+					}}
+				/>
+			) : null}
+
+			{/* Le compte rendu passe avant le plan : c'est ce qu'on relit après
+			    coup, quand quelqu'un demande comment ça marche. */}
+			{mission.summary ? <MissionSummary mission={mission} summary={mission.summary} /> : null}
+
+			{mission.plan ? (
+				<div className="rounded-lg border border-accent/25 bg-accent/[0.06] p-2.5">
+					<div className="mb-1 text-[10px] font-semibold tracking-[0.08em] text-accent-soft uppercase">
+						{t("missions.card.proposedPlan")}
+					</div>
+					<p className="text-selectable text-[11px] leading-relaxed text-ink-muted">
+						{mission.plan}
+					</p>
+				</div>
+			) : null}
+			<IsolationNotice mission={mission} />
+
+			{mission.tasks.length > 0 ? (
+				<div className="flex flex-col gap-1">
+					{mission.tasks.map((task) => (
+						<TaskRow
+							key={task.id}
+							mission={mission}
+							task={task}
+							overrun={overruns.find(
+								(entry) => entry.taskId === task.id,
+							)}
+							activity={
+								activity?.tasks.find((entry) => entry.taskId === task.id)
+									?.activity ?? null
+							}
+							// Une recette qui ne démarre pas doit dire qu'elle attend son
+							// tour, sinon elle passe pour oubliée.
+							held={verifying.has(task.role) && !implementationDone}
+							onChange={onChange}
+						/>
+					))}
+				</div>
+			) : null}
+
+			{adding ? (
+				<TaskForm
+					mission={mission}
+					onDone={() => {
+						setAdding(false);
+						onChange();
+					}}
+				/>
+			) : mission.state !== "done" && !prelude ? (
+				<div className="flex justify-end">
+					<Button size="sm" icon={Plus} onClick={() => setAdding(true)}>
+						{t("missions.card.addTask")}
+					</Button>
+				</div>
+			) : null}
+			{/* Ce qui s'est réellement passé : la suite des agents qui ont
+			    tourné, leurs reprises, leurs coûts, et pourquoi ceux qui sont
+			    morts sont morts. Les états des tâches ci-dessus disent où l'on
+			    en est ; eux seuls disent comment on y est arrivé. */}
+			{/* Ce que le cockpit a mesuré, tel que la pull request le reçoit :
+			    dès qu'une tâche a rendu, il y a quelque chose à prouver. */}
+			{mission.tasks.some((task) => ["delivered", "integrated"].includes(task.state)) ? (
+				<DeliveryDossierPanel mission={mission} />
+			) : null}
+			<MissionHistory missionId={mission.id} />
+		</>
+	);
+}
+
+/** Le compte rendu d'une mission close, à copier tel quel. */
+function MissionSummary({ mission, summary }: { mission: Mission; summary: string }) {
+	const { notify } = useCockpit();
+	const { t } = useTranslation("views");
+	return (
+		<div className="rounded-lg border border-success/25 bg-success/[0.06] p-3">
+			<div className="mb-1.5 flex items-center gap-2">
+				<BookOpen size={12} className="shrink-0 text-success" />
+				<span className="text-[10px] font-semibold tracking-[0.08em] text-success uppercase">
+					{t("missions.card.summary")}
+				</span>
+				<div className="flex-1" />
+				<Button
+					size="sm"
+					icon={ClipboardCopy}
+					onClick={() => {
+						void navigator.clipboard
+							.writeText(
+								`# ${mission.title}${mission.ticket ? ` (${mission.ticket})` : ""}\n\n${summary}${mission.prUrl ? `\n\n${t("missions.card.summaryPr", { url: mission.prUrl })}` : ""}`,
+							)
+							.then(() => notify(t("missions.card.summaryCopied")))
+							.catch(() => undefined);
+					}}
+				>
+					{t("missions.card.copy")}
+				</Button>
+			</div>
+			<Markdown source={summary} />
+		</div>
 	);
 }
 
