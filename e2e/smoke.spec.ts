@@ -48,15 +48,21 @@ test("chaque écran de l'atelier s'ouvre sans erreur", async ({ page }) => {
 	await page.goto("/");
 	const atelier = topTab(page, "Workshop");
 	await atelier.click();
-	const entries = atelierNav(page).locator("button");
-	const count = await entries.count();
-	expect(count).toBeGreaterThan(5);
-	const labels = (await entries.allInnerTexts()).map((text) => text.split("\n")[0].trim());
-	for (let index = 0; index < count; index += 1) {
-		if (index > 0) await atelier.click();
-		await atelierNav(page).locator("button").nth(index).click();
+	// Les écrans seulement, par leur identifiant. Le premier bouton du menu était
+	// le sélecteur de projet : il ne referme pas l'atelier, et le clic suivant sur
+	// « Workshop » le refermait au lieu de l'ouvrir. L'écran d'après ne passait
+	// que si le clic tombait pendant l'animation de fermeture — en local, oui ;
+	// sur une CI chargée, le menu avait disparu et le test attendait deux minutes.
+	const screens = await atelierNav(page)
+		.locator("[data-screen]")
+		.evaluateAll((buttons) => buttons.map((button) => button.getAttribute("data-screen") ?? ""));
+	expect(screens.length).toBeGreaterThan(5);
+	for (const screen of screens) {
+		if (!(await atelierNav(page).isVisible())) await atelier.click();
+		await atelierNav(page).locator(`[data-screen="${screen}"]`).click();
+		await expect(atelierNav(page)).toBeHidden();
 		await page.waitForTimeout(400);
-		expect(errors, `en ouvrant ${labels[index]}`).toEqual([]);
+		expect(errors, `en ouvrant ${screen}`).toEqual([]);
 	}
 });
 
