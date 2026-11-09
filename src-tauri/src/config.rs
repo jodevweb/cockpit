@@ -2580,25 +2580,26 @@ impl Config {
 	///
 	/// Dépôt inconnu : on retombe sur le projet actif, faute de mieux.
 	pub fn for_repo(repo: &str) -> Self {
-		let repo = repo.trim().trim_end_matches('/');
-		if repo.is_empty() {
+		if repo.trim().is_empty() {
 			return Self::active();
 		}
-		let cfg = Self::load();
-		let found = cfg
-			.projects
-			.iter()
-			.find(|project| {
-				inherit(&project.main_repo, &cfg.general.main_repo).trim_end_matches('/') == repo
-			})
-			.cloned();
-		let Some(project) = found else {
+		let mut cfg = Self::load();
+		let Some(project) = cfg.project_of_repo(repo).cloned() else {
 			return Self::active();
 		};
 		let cloisonne = cfg.projects.len() > 1;
-		let mut cfg = cfg;
 		project.merge_into(&mut cfg, cloisonne);
 		cfg
+	}
+
+	/// Le projet déclaré pour un dépôt, à l'écriture du chemin près : sous
+	/// Windows, le même dossier arrive en `D:\x` ou `D:/x` selon sa source, et
+	/// une comparaison exacte retombait en silence sur le projet affiché.
+	fn project_of_repo(&self, repo: &str) -> Option<&ProjectConfig> {
+		let repo = crate::platform::path_key(repo);
+		self.projects.iter().find(|project| {
+			crate::platform::path_key(&inherit(&project.main_repo, &self.general.main_repo)) == repo
+		})
 	}
 
 	/// Projet actif, tel que déclaré.
@@ -2981,6 +2982,37 @@ mod tests {
 		cfg.linear.team_key = "NW".into();
 		cfg.team.members = vec![TeamMemberConfig::default()];
 		cfg
+	}
+
+	#[test]
+	fn le_projet_d_un_depot_ne_depend_pas_de_l_ecriture_du_chemin() {
+		let mut cfg = base();
+		let projet = |id: &str, main_repo: &str| ProjectConfig {
+			id: id.into(),
+			main_repo: main_repo.into(),
+			..Default::default()
+		};
+		cfg.projects = vec![projet("herite", ""), projet("autre", "/repos/autre")];
+		let id = |repo: &str| cfg.project_of_repo(repo).map(|project| project.id.as_str());
+
+		assert_eq!(id("/repos/autre/"), Some("autre"));
+		assert_eq!(id(" /repos/autre "), Some("autre"));
+		// Sans dépôt à lui, un projet porte celui de la configuration globale.
+		assert_eq!(id("/repos/monorepo"), Some("herite"));
+		assert_eq!(id("/repos/inconnu"), None);
+	}
+
+	#[cfg(windows)]
+	#[test]
+	fn sous_windows_toutes_les_formes_d_un_chemin_designent_le_meme_projet() {
+		let mut cfg = base();
+		cfg.projects = vec![ProjectConfig {
+			main_repo: "D:/repos/autre".into(),
+			..Default::default()
+		}];
+		for repo in [r"D:\repos\autre", r"D:\repos\Autre\", r"\\?\D:\repos\autre"] {
+			assert!(cfg.project_of_repo(repo).is_some(), "{repo}");
+		}
 	}
 
 	/// `SandboxConfig` sérialise en camelCase, à la différence des autres

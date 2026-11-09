@@ -541,7 +541,7 @@ async fn run(app: &tauri::AppHandle, call: &Call) -> Result<Value> {
 				.unwrap_or_default();
 			// Les rôles qui jugent sont ceux du catalogue : ce sont eux qu'on
 			// remet en attente, puisqu'ils auront à rejuger le travail corrigé.
-			let verifiers: std::collections::HashSet<String> = crate::roles_list()
+			let verifiers: std::collections::HashSet<String> = crate::roles_for(&mission.cwd)
 				.into_iter()
 				.filter(|role| role.verifies)
 				.map(|role| role.id)
@@ -783,7 +783,7 @@ async fn run(app: &tauri::AppHandle, call: &Call) -> Result<Value> {
 			// déposé : la mission se fermait sur une parole, et personne ne s'en
 			// apercevait avant la production. On ne bloque pas — c'est au maître
 			// de juger — mais on le dit, et on nomme la tâche concernée.
-			let verifiers: std::collections::HashSet<String> = crate::roles_list()
+			let verifiers: std::collections::HashSet<String> = crate::roles_for(&mission.cwd)
 				.into_iter()
 				.filter(|role| role.verifies)
 				.map(|role| role.id)
