@@ -82,6 +82,10 @@ jobs:
       - name: Interface
         run: pnpm exec vite build
 
+      - name: Format Rust
+        working-directory: src-tauri
+        run: cargo fmt --check
+
       - name: Tests Rust
         working-directory: src-tauri
         run: cargo test --lib

@@ -1,0 +1,6 @@
+# Les tabulations et la largeur sont celles que le code suivait déjà : elles
+# réduisent le premier passage, et donc le bruit laissé dans `git blame`.
+hard_tabs = true
+max_width = 120
+# Le dépôt est en LF et une copie Windows en CRLF : chacun garde les siennes.
+newline_style = "Auto"
