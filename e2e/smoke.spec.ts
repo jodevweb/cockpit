@@ -108,7 +108,8 @@ test("les réglages disent quels rôles viennent du dépôt", async ({ page }) =
 	// `backend` tourne sans rien demander et le dépôt change sa consigne : il
 	// redemande l'accord jusqu'à ce qu'on valide le fichier.
 	const untrusted = page.getByTestId("repo-roles-untrusted");
-	await expect(untrusted).toContainText("backend ask for approval");
+	// Un seul rôle : le verbe est au singulier.
+	await expect(untrusted).toContainText("backend asks for approval");
 	await untrusted.getByRole("button", { name: "Validate this file" }).click();
 	await expect(page.getByTestId("repo-roles-trusted")).toBeVisible();
 });
