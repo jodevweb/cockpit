@@ -232,6 +232,15 @@ pub fn turn_failed(payload: &Value) -> bool {
 pub fn to_claude_shaped(payload: &Value) -> Option<Value> {
 	let kind = payload.get("type").and_then(|v| v.as_str())?;
 	match kind {
+		// Le fil, sous la forme où Claude Code annonce sa session : c'est par lui
+		// que l'écran reprend la conversation d'un agent rouvert au démarrage ou
+		// relancé pour changer de mode. Sans lui, un agent Codex repartait sur une
+		// conversation vide là où un agent Claude retrouvait la sienne.
+		"thread.started" => Some(json!({
+			"type": "system",
+			"subtype": "thread",
+			"session_id": thread_id(payload)?,
+		})),
 		"item.completed" => {
 			let item = payload.get("item")?;
 			match item.get("type").and_then(|v| v.as_str())? {
@@ -593,11 +602,18 @@ mod tests {
 	}
 
 	#[test]
+	fn le_fil_rejoint_l_ecran_comme_une_session() {
+		let translated = to_claude_shaped(&json!({"type": "thread.started", "thread_id": "x"})).unwrap();
+		assert_eq!(translated["type"], "system");
+		assert_eq!(translated["session_id"], "x");
+		assert!(to_claude_shaped(&json!({"type": "thread.started"})).is_none());
+	}
+
+	#[test]
 	fn ce_qui_n_a_pas_de_forme_verifiee_ne_se_traduit_pas() {
 		// `reasoning`, `web_search`, `plan_update` : aucun champ relevé sur le
 		// binaire. Un item inconnu à l'intérieur d'un type connu ne se traduit
 		// pas non plus.
-		assert!(to_claude_shaped(&json!({"type": "thread.started", "thread_id": "x"})).is_none());
 		assert!(to_claude_shaped(&json!({"type": "turn.started"})).is_none());
 		assert!(to_claude_shaped(&json!({"type": "item.completed", "item": {"type": "reasoning"}})).is_none());
 	}

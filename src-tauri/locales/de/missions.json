@@ -157,7 +157,6 @@
 		"protocolNoMission": "Das Protokoll `{{protocol}}` unterstützt die Missionswerkzeuge noch nicht: Diese Engine kann in einer Mission noch nicht verwendet werden, weder als Hauptagent noch als Ausführer.",
 		"claudeNotFoundHint": "Die `claude`-CLI ist nicht zu finden. Installiere sie oder prüfe, ob sie in ~/.local/bin, ~/.claude/local oder /opt/homebrew/bin liegt.",
 		"noBinary": "Die Engine „{{engine}}“ deklariert kein Binary, und Cockpit findet von sich aus nur `claude`.",
-		"codexNeedsMessage": "`codex-exec` braucht eine Nachricht zum Starten: Es kann nicht mit Schweigen beginnen.",
 		"geminiNeedsMessage": "`gemini-stream-json` braucht eine Nachricht zum Starten: Es kann nicht mit Schweigen beginnen.",
 		"geminiNoResume": "`gemini-stream-json` kann keine Unterhaltung fortsetzen: Keine Quelle dokumentiert, wie. Starte einen neuen Agenten.",
 		"bridgeUnavailable": {

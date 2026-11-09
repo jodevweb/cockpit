@@ -157,7 +157,6 @@
 		"protocolNoMission": "`{{protocol}}` 协议目前还不支持任务工具：该引擎暂时无法在任务中使用，无论是作为主智能体还是执行者。",
 		"claudeNotFoundHint": "找不到 `claude` CLI。请安装它，或检查它是否位于 ~/.local/bin、~/.claude/local 或 /opt/homebrew/bin。",
 		"noBinary": "引擎“{{engine}}”未声明任何可执行文件，而 Cockpit 只能自行找到 `claude`。",
-		"codexNeedsMessage": "`codex-exec` 需要一条消息才能启动：它无法在没有输入的情况下开启。",
 		"geminiNeedsMessage": "`gemini-stream-json` 需要一条消息才能启动：它无法在没有输入的情况下开启。",
 		"geminiNoResume": "`gemini-stream-json` 无法恢复对话：没有任何资料说明如何做到。请启动一个新的智能体。",
 		"bridgeUnavailable": {

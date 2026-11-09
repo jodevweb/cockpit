@@ -170,6 +170,13 @@ struct PerTurn {
 	/// suivant de reprendre la même conversation plutôt que d'en ouvrir une
 	/// autre. Absent tant que le premier tour n'a encore rien annoncé.
 	thread_id: Option<String>,
+	/// Un process est-il déjà parti pour cet agent ?
+	///
+	/// Faux pour un agent ouvert sans message — rouvert au démarrage, ou relancé
+	/// pour changer de mode ou de modèle. Codex ne démarre pas sur un silence :
+	/// on l'enregistre prêt, et c'est son premier message qui lance le tour.
+	/// Sans fil connu, ce tour en ouvre un ; avec, il le reprend.
+	launched: bool,
 	/// Les réglages du lancement : une reprise n'en hérite aucun, ni son mode, ni
 	/// ses outils, ni son modèle.
 	args: String,
@@ -190,6 +197,9 @@ pub struct AgentRegistry {
 	/// compter comme une livraison, et la mission proposait d'ouvrir une pull
 	/// request sur du vide.
 	completed: Mutex<std::collections::HashSet<String>>,
+	/// De quoi prévenir l'écran depuis `stop`, appelé sans lui. Posé au premier
+	/// lancement : un agent n'existe dans le registre qu'après en être passé par là.
+	app: OnceLock<AppHandle>,
 }
 
 pub type SharedAgents = Arc<AgentRegistry>;
@@ -1059,6 +1069,7 @@ async fn start_inner(
 	}
 
 	let session_id = format!("agent-{}", uuid_like());
+	let _ = agents.app.set(app.clone());
 	// Inscrite avant même le lancement : la première demande peut arriver
 	// avant que quoi que ce soit d'autre soit prêt.
 	if locked {
@@ -1144,10 +1155,6 @@ async fn start_inner(
 	// Le second terme : ce qu'un tour de Codex doit redonner à chaque reprise, voir `PerTurn`.
 	let (command, codex_args) = match dialect {
 		crate::protocol::Protocol::Codex => {
-			// Un message vide n'a rien à ouvrir — voir `codex.rs`.
-			if prompt.trim().is_empty() {
-				return Err(CockpitError::msg(crate::i18n::t("agent.codexNeedsMessage")));
-			}
 			let args = codex_turn_args(&request);
 			let command = match resume.as_deref().filter(|s| !s.trim().is_empty()) {
 				Some(thread) => crate::codex::resume_turn(&binary, thread, &args),
@@ -1161,6 +1168,50 @@ async fn start_inner(
 
 	let mut env_vars = agent_env(&session_id, &mode, mission.as_deref(), &scope, executor, &cwd, &config);
 	let env_removals = apply_engine_env(&engine, &mut env_vars);
+
+	// Codex ne s'ouvre pas sur un silence : un agent rouvert au démarrage, ou
+	// relancé pour changer de mode ou de modèle, échouait sur « needs a message
+	// to start », là où Claude attend simplement la suite. Il est donc enregistré
+	// tel quel, sans process, et `send` lancera son premier tour.
+	if dialect == crate::protocol::Protocol::Codex && prompt.trim().is_empty() {
+		let execution = crate::executions::open(crate::executions::Opening {
+			session_id: session_id.clone(),
+			protocol: protocol.clone(),
+			engine: engine.id.clone(),
+			engine_label: engine.label.clone(),
+			model: model_label,
+			mission: mission.clone().unwrap_or_default(),
+			origin,
+			cwd: cwd.clone(),
+			project: config.active_project.clone(),
+			sandboxed: config.sandbox.enabled,
+		});
+		let thread = resume.filter(|s| !s.trim().is_empty());
+		agents.sessions.lock().unwrap().insert(
+			session_id.clone(),
+			Running {
+				cwd,
+				execution,
+				stdin: None,
+				child: None,
+				relay: None,
+				protocol: dialect,
+				container: None,
+				claude_session_id: None,
+				turn_done: true,
+				turn_started_at: std::time::Instant::now(),
+				per_turn: Some(PerTurn {
+					binary,
+					thread_id: thread,
+					launched: false,
+					args: codex_args,
+					env: env_vars,
+					env_removals,
+				}),
+			},
+		);
+		return Ok(session_id);
+	}
 
 	// Le jeton de la forge, relevé une fois : dans un conteneur, c'est la seule
 	// façon pour l'agent de lire une pull request, d'en ouvrir une, ou de
@@ -1285,6 +1336,7 @@ async fn start_inner(
 	let per_turn = (!dialect.keeps_process()).then(|| PerTurn {
 		binary: binary.clone(),
 		thread_id: None,
+		launched: true,
 		args: codex_args.clone(),
 		env: env_vars.clone(),
 		env_removals: env_removals.clone(),
@@ -2061,9 +2113,25 @@ fn spawn_reader(
 			// donc toujours la fin de l'agent, comme pour le protocole par
 			// défaut — il suit la branche `else` ci-dessous sans cas particulier.
 			if !dialect.keeps_process() && finished_cleanly {
-				if let Some(running) = agents.sessions.lock().unwrap().get_mut(&session_id) {
-					running.child = None;
-					running.stdin = None;
+				let registered = match agents.sessions.lock().unwrap().get_mut(&session_id) {
+					Some(running) => {
+						running.child = None;
+						running.stdin = None;
+						true
+					}
+					None => false,
+				};
+				// Arrêté pendant que son process finissait : `stop` l'a retiré du
+				// registre sans annoncer sa fin, puisqu'un process vivait encore.
+				// C'est donc ici qu'elle se dit.
+				if !registered {
+					let _ = app.emit(
+						"agent://event",
+						AgentEvent {
+							session_id: session_id.clone(),
+							payload: json!({ "type": "cockpit", "subtype": "ended" }),
+						},
+					);
 				}
 			} else {
 				// Mort avant la première réponse (`finished_cleanly` ne s'est jamais
@@ -2197,11 +2265,15 @@ async fn respawn_turn(
 		)));
 	}
 
-	let thread = per_turn
-		.thread_id
-		.as_deref()
-		.ok_or_else(|| CockpitError::msg(crate::i18n::t("agent.noThreadYet")))?;
-	let command = crate::codex::resume_turn(&per_turn.binary, thread, &per_turn.args);
+	// Un agent enregistré sans process (voir `start_inner`) n'a encore rien
+	// lancé : sans fil connu, ce premier message en ouvre un. Un agent déjà
+	// parti sans fil annoncé, lui, attend encore sa première réponse — en
+	// ouvrir un second ferait deux conversations.
+	let command = match per_turn.thread_id.as_deref() {
+		Some(thread) => crate::codex::resume_turn(&per_turn.binary, thread, &per_turn.args),
+		None if !per_turn.launched => crate::codex::first_turn(&per_turn.binary, &per_turn.args),
+		None => return Err(CockpitError::msg(crate::i18n::t("agent.noThreadYet"))),
+	};
 
 	let sandbox_cfg = &config.sandbox;
 	let runtime = if sandbox_cfg.enabled {
@@ -2273,6 +2345,9 @@ async fn respawn_turn(
 		running.child = Some(child);
 		running.stdin = None;
 		running.container = container;
+		if let Some(per_turn) = running.per_turn.as_mut() {
+			per_turn.launched = true;
+		}
 		running.turn_done = false;
 		running.turn_started_at = std::time::Instant::now();
 		execution = running.execution.clone();
@@ -2465,6 +2540,21 @@ pub fn stop(agents: &SharedAgents, session_id: &str) -> Result<()> {
 	// rendre sa réponse — rien à tuer, il n'y a simplement plus de process.
 	if let Some(child) = running.child.as_mut() {
 		let _ = child.start_kill();
+	}
+	// D'habitude, c'est la lecture de sa sortie qui annonce la fin d'un agent
+	// tué. Entre deux tours, un agent Codex n'en a plus : rien ne prévenait
+	// l'écran, qui gardait les maîtres arrêtés par la mission « en attente »,
+	// six sur le même worktree au bout de quelques phases.
+	if running.child.is_none() && running.relay.is_none() {
+		if let Some(app) = agents.app.get() {
+			let _ = app.emit(
+				"agent://event",
+				AgentEvent {
+					session_id: session_id.to_string(),
+					payload: json!({ "type": "cockpit", "subtype": "ended" }),
+				},
+			);
+		}
 	}
 	// Détaché : le groupe entier, puis son dossier — voir `relay::kill`.
 	if let Some(relay) = &running.relay {
