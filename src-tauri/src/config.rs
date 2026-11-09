@@ -1318,7 +1318,7 @@ impl PermanenceConfig {
 		// Seul un préfixe de serveur se retire : `feat/main` reste une branche de
 		// travail, `origin/main` est bien `main`.
 		let cleaned = match bare.split_once('/') {
-			Some((head, tail)) if matches!(head, "origin" | "upstream") => tail,
+			Some(("origin" | "upstream", tail)) => tail,
 			_ => bare,
 		}
 		.to_lowercase();
@@ -1667,7 +1667,7 @@ fn default_roles_in(lang: &str) -> Vec<RoleConfig> {
 	let label = |key: &str| crate::i18n::t_in(lang, key);
 	let role = |id: &str, label: String, prompt: &str, scope: &[&str]| RoleConfig {
 		id: id.into(),
-		label: label.into(),
+		label,
 		prompt: prompt.into(),
 		model: String::new(),
 		depth: String::new(),

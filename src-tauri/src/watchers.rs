@@ -687,7 +687,7 @@ pub(crate) fn watch_missions(app: AppHandle) {
 			// secondes : elle demande de parcourir les journaux de toutes les
 			// sessions, et une mission ne dérape pas en six secondes.
 			tours += 1;
-			if tours % 10 == 0 {
+			if tours.is_multiple_of(10) {
 				pause_missions_hors_budget();
 			}
 			for mission in mission::list() {
@@ -942,8 +942,8 @@ pub(crate) fn raise_file_descriptor_limit() {
 		if libc::getrlimit(libc::RLIMIT_NOFILE, &mut limit) != 0 {
 			return;
 		}
-		let souhaite = (10_240u64).min(limit.rlim_max as u64);
-		if souhaite > limit.rlim_cur as u64 {
+		let souhaite = (10_240u64).min(limit.rlim_max);
+		if souhaite > limit.rlim_cur {
 			limit.rlim_cur = souhaite as libc::rlim_t;
 			let _ = libc::setrlimit(libc::RLIMIT_NOFILE, &limit);
 		}

@@ -228,9 +228,10 @@ impl Step {
 /// La **première** étape finale l'emporte, jamais la dernière : un agent coupé
 /// à la main dont le flux se ferme ensuite a été arrêté, il n'est pas « mort au
 /// lancement ». Les deux enregistrements existent, la lecture tranche.
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
+#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub enum Outcome {
+	#[default]
 	Running,
 	Answered,
 	Failed,
@@ -239,11 +240,6 @@ pub enum Outcome {
 	Orphaned,
 }
 
-impl Default for Outcome {
-	fn default() -> Self {
-		Outcome::Running
-	}
-}
 
 impl From<Step> for Outcome {
 	fn from(step: Step) -> Self {
@@ -364,6 +360,9 @@ pub struct Entry {
 	pub record: Record,
 }
 
+// Un enregistrement vit le temps d'écrire ou de relire une ligne du registre :
+// la place perdue par les petites variantes ne s'accumule nulle part.
+#[allow(clippy::large_enum_variant)]
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 #[serde(tag = "record", rename_all = "camelCase")]
 pub enum Record {
@@ -1740,7 +1739,7 @@ mod tests {
 	#[test]
 	fn l_entree_d_un_outil_est_plus_serree_que_le_reste() {
 		// Elle décrit un appel, elle ne le rejoue pas.
-		assert!(MAX_INPUT < MAX_TEXT);
+		const { assert!(MAX_INPUT < MAX_TEXT) };
 		let long = "b".repeat(10_000);
 		assert_eq!(clip_input(&long).chars().count(), MAX_INPUT + 1);
 		assert_eq!(clip_excerpt(&long).chars().count(), MAX_EXCERPT + 1);

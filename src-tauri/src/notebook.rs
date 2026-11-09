@@ -142,7 +142,7 @@ fn write_list<T: Serialize>(path: &Path, list: &[T]) -> Result<()> {
 pub fn lessons(project: &str) -> Vec<Lesson> {
 	let mut all: Vec<Lesson> = read_list(&lessons_path());
 	all.retain(|lesson| project.is_empty() || lesson.project == project);
-	all.sort_by(|a, b| b.at.cmp(&a.at));
+	all.sort_by_key(|a| std::cmp::Reverse(a.at));
 	all
 }
 
@@ -488,7 +488,7 @@ pub async fn collect(cwd: &str) -> Option<Handback> {
 pub fn handbacks(project: &str) -> Vec<Handback> {
 	let mut all: Vec<Handback> = read_list(&handbacks_path());
 	all.retain(|entry| project.is_empty() || entry.project == project);
-	all.sort_by(|a, b| b.at.cmp(&a.at));
+	all.sort_by_key(|a| std::cmp::Reverse(a.at));
 	all
 }
 

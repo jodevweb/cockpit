@@ -1009,7 +1009,7 @@ async fn create_pr_on(
 			.and_then(|v| v.get("message").and_then(|m| m.as_str()).map(String::from))
 			.unwrap_or(raw);
 		let error = i18n::tf("lib.github.prRefused", &[("status", &status), ("message", &message)]);
-		journal::record("github", &i18n::t("lib.github.prCreation"), &branch, false, &error);
+		journal::record("github", &i18n::t("lib.github.prCreation"), branch, false, &error);
 		return Err(CockpitError::msg(error));
 	}
 
@@ -1017,7 +1017,7 @@ async fn create_pr_on(
 		.ok()
 		.and_then(|v| v.get("html_url").and_then(|u| u.as_str()).map(String::from))
 		.unwrap_or_default();
-	journal::record("github", &i18n::t("lib.github.prCreation"), &branch, true, &url);
+	journal::record("github", &i18n::t("lib.github.prCreation"), branch, true, &url);
 	Ok(url)
 }
 
@@ -1644,6 +1644,7 @@ async fn pull_request_merge(number: i64, method: Option<String>) -> Result<()> {
 
 /// Démarre un agent — consigné : il va écrire dans le dépôt.
 #[tauri::command]
+#[allow(clippy::too_many_arguments)]
 async fn agent_start(
 	app: AppHandle,
 	agents: State<'_, agent::SharedAgents>,
@@ -2322,6 +2323,7 @@ fn sandbox_login() -> Result<SandboxLogin> {
 }
 
 #[tauri::command]
+#[allow(clippy::too_many_arguments)]
 fn terminal_open(
 	app: AppHandle,
 	terminals: State<'_, terminal::SharedTerminals>,
@@ -2740,9 +2742,9 @@ async fn open_external(url: String) -> Result<()> {
 }
 
 /// Cadre à restaurer quand on sort du plein écran de travail.
-static ZOOM_MEMORY: std::sync::OnceLock<
-	std::sync::Mutex<Option<(tauri::PhysicalPosition<i32>, tauri::PhysicalSize<u32>)>>,
-> = std::sync::OnceLock::new();
+static ZOOM_MEMORY: std::sync::OnceLock<std::sync::Mutex<Option<WindowFrame>>> = std::sync::OnceLock::new();
+
+type WindowFrame = (tauri::PhysicalPosition<i32>, tauri::PhysicalSize<u32>);
 
 /// Bascule entre le plein écran de travail et le cadre précédent.
 ///

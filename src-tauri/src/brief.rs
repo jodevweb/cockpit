@@ -857,7 +857,7 @@ fn attempts_section(cwd: &str) -> Option<BriefSection> {
 	if files.is_empty() {
 		return None;
 	}
-	files.sort_by(|a, b| b.0.cmp(&a.0));
+	files.sort_by_key(|a| std::cmp::Reverse(a.0));
 
 	let mut lines = Vec::new();
 	for (_, path) in files.iter().take(MAX_ATTEMPTS) {

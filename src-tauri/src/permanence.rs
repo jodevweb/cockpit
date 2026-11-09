@@ -2723,9 +2723,7 @@ async fn perform(
 			if body.is_empty() {
 				return Err(crate::i18n::t("permanence.acts.noText"));
 			}
-			if let Err(refus) = may_comment(config, number).await {
-				return Err(refus);
-			}
+			may_comment(config, number).await?;
 			match crate::integrations::github_comment(config, number, body).await {
 				Ok(url) => Ok((
 					crate::i18n::t("permanence.acts.commented"),
@@ -2809,17 +2807,15 @@ async fn may_comment(config: &Config, number: u64) -> std::result::Result<(), St
 
 	let me = crate::integrations::github_login(config).await.to_lowercase();
 
-	if comment.opens("i_commented") {
-		if !me.is_empty() {
-			let commenters = crate::integrations::github_commenters(config, number)
-				.await
-				.unwrap_or_default();
-			if commenters
-				.iter()
-				.any(|login| login.trim().to_lowercase() == me)
-			{
-				return Ok(());
-			}
+	if comment.opens("i_commented") && !me.is_empty() {
+		let commenters = crate::integrations::github_commenters(config, number)
+			.await
+			.unwrap_or_default();
+		if commenters
+			.iter()
+			.any(|login| login.trim().to_lowercase() == me)
+		{
+			return Ok(());
 		}
 	}
 	if comment.opens("i_allowed") && config.permanence.allowed_pr(number) {

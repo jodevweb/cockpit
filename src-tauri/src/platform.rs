@@ -342,7 +342,7 @@ pub fn system_language() -> String {
 			.map(|output| String::from_utf8_lossy(&output.stdout).to_string())
 			.unwrap_or_default();
 		if let Some(first) = listed
-			.split(|c: char| c == '"' || c == '\n' || c == ',' || c == '(' || c == ')')
+			.split(['"', '\n', ',', '(', ')'])
 			.map(str::trim)
 			.find(|item| !item.is_empty())
 		{
@@ -503,7 +503,7 @@ pub fn processes() -> Vec<ProcessEntry> {
 			let parent_ok = match created.get(&process.ppid) {
 				None => false,
 				// Parent plus jeune que l'enfant : son pid a été redonné.
-				Some(Some(parent_born)) => born.map_or(true, |born| *parent_born <= born),
+				Some(Some(parent_born)) => born.is_none_or(|born| *parent_born <= born),
 				// Parent qu'on ne peut pas ouvrir (système, autre compte) : on
 				// garde le lien, faute de mieux.
 				Some(None) => true,

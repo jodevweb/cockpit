@@ -187,7 +187,7 @@ pub async fn prepare(repo: &Path, case: &Case, dir: &Path) -> Result<()> {
 	// JavaScript échouent tous, et le contrôle d'un cas conclurait qu'il « sait
 	// échouer » sur une simple absence de `node_modules`.
 	if let Some(command) = install_command(dir) {
-		let outcome = crate::gates::run(&path, &[command.clone()], INSTALL_TIMEOUT).await;
+		let outcome = crate::gates::run(&path, std::slice::from_ref(&command), INSTALL_TIMEOUT).await;
 		if !outcome.passed {
 			discard(repo, dir).await;
 			return Err(crate::error::CockpitError::msg(crate::i18n::tf(

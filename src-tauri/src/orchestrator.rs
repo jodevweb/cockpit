@@ -1304,7 +1304,7 @@ async fn brings_own_commits(cwd: &std::path::Path, branch: &str) -> bool {
 		.await
 		.ok()
 		.and_then(|raw| raw.trim().parse::<u32>().ok())
-		.map_or(true, |count| count > 0)
+		.is_none_or(|count| count > 0)
 }
 
 /// Les fichiers qu'une branche change hors de son périmètre, depuis qu'elle a

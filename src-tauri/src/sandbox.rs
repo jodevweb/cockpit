@@ -492,7 +492,6 @@ fn provision_mcp_tokens(account_dir: &std::path::Path, tokens: &[(&str, &str, &s
 /// légitimement. Les identifiants (Claude, git, SSH) sont montés en lecture
 /// seule — un agent s'en sert pour s'authentifier, jamais pour les changer.
 #[allow(clippy::too_many_arguments)]
-#[allow(clippy::too_many_arguments)]
 pub fn build(
 	sandbox: &SandboxConfig,
 	runtime: &str,

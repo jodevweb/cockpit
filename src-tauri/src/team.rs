@@ -1404,7 +1404,7 @@ fn compute_flags(
 		}
 
 		if !review_stale.is_empty() {
-			review_stale.sort_by(|a, b| b.1.cmp(&a.1));
+			review_stale.sort_by_key(|a| std::cmp::Reverse(a.1));
 			let (oldest, oldest_age) = review_stale[0];
 			let numbers: Vec<String> = review_stale.iter().map(|(pr, _)| format!("#{}", pr.number)).collect();
 			flags.push(finish(FlagDraft {
@@ -1436,7 +1436,7 @@ fn compute_flags(
 		}
 
 		if !draft_stale.is_empty() {
-			draft_stale.sort_by(|a, b| b.1.cmp(&a.1));
+			draft_stale.sort_by_key(|a| std::cmp::Reverse(a.1));
 			let numbers: Vec<String> = draft_stale.iter().map(|(pr, _)| format!("#{}", pr.number)).collect();
 			flags.push(finish(FlagDraft {
 				severity: "orange",
@@ -1928,7 +1928,7 @@ pub async fn build_board(config: &Config, cycle_only: bool) -> Result<TeamBoard>
 				})
 				.collect()
 		};
-		review_inbox.sort_by(|a, b| b.age_days.cmp(&a.age_days));
+		review_inbox.sort_by_key(|a| std::cmp::Reverse(a.age_days));
 
 		let mut delta = Vec::new();
 		if !member.github.is_empty() {

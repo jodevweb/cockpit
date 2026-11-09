@@ -745,9 +745,9 @@ pub async fn listening_ports() -> Result<Vec<ListeningPort>> {
 	// demande directement au système (voir `windows_ports`).
 	#[cfg(windows)]
 	{
-		return tokio::task::spawn_blocking(windows_ports::listening)
+		tokio::task::spawn_blocking(windows_ports::listening)
 			.await
-			.map_err(|e| CockpitError::msg(e.to_string()));
+			.map_err(|e| CockpitError::msg(e.to_string()))
 	}
 	// Sous Linux, `lsof` est rarement installé d'office ; `ss` l'est toujours,
 	// et `/proc` dit le dossier de chaque processus sans rien lancer de plus.
@@ -760,7 +760,7 @@ pub async fn listening_ports() -> Result<Vec<ListeningPort>> {
 				.map(|path| path.to_string_lossy().to_string())
 				.unwrap_or_default();
 		}
-		return Ok(ports);
+		Ok(ports)
 	}
 	#[cfg(target_os = "macos")]
 	{

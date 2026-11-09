@@ -570,7 +570,7 @@ fi
 		let events = run(&command, "fix the failing test").await;
 		let started = events.iter().find(|e| thread_id(e).is_some()).unwrap();
 		assert_eq!(thread_id(started), Some("thread-xyz"));
-		assert!(events.iter().any(|e| turn_finished(e)));
+		assert!(events.iter().any(turn_finished));
 		assert!(
 			events
 				.iter()

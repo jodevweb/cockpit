@@ -720,6 +720,9 @@ async fn gatekeeper(request: axum::extract::Request, next: axum::middleware::Nex
 
 /// Vérifie l'hôte, le jeton, le quota — dans cet ordre, du moins cher au plus
 /// cher. Rend l'appareil reconnu.
+// Le refus est la réponse HTTP elle-même, rendue aussitôt : l'emballer ne servirait
+// qu'à le déballer dans chacune des routes.
+#[allow(clippy::result_large_err)]
 fn guard(inner: &Shared, headers: &HeaderMap) -> std::result::Result<Device, Response> {
 	let host = headers
 		.get("host")

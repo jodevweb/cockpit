@@ -143,7 +143,7 @@ pub fn scan_many(roots: Vec<(PathBuf, String)>, limit: usize) -> Result<Vec<DocE
 		.iter()
 		.flat_map(|(root, label)| scan_worktree(root, label))
 		.collect();
-	all.sort_by(|a, b| b.modified.cmp(&a.modified));
+	all.sort_by_key(|a| std::cmp::Reverse(a.modified));
 	all.truncate(limit);
 	Ok(all)
 }
