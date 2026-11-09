@@ -7,6 +7,8 @@ import {
 	useRef,
 	useState,
 	type ReactNode,
+	type Dispatch,
+	type SetStateAction,
 } from "react";
 import { isImagePath } from "@/components/LocalImage";
 import { t } from "@/i18n";
@@ -1489,6 +1491,9 @@ function previewRuns(): AgentRun[] {
 	];
 }
 
+type Cockpit = ReturnType<typeof useCockpit>;
+type Workspace = ReturnType<typeof useWorkspace>;
+
 export function AgentRunsProvider({ children }: { children: ReactNode }) {
 	const { notify, go } = useCockpit();
 	const workspace = useWorkspace();
@@ -1520,255 +1525,20 @@ export function AgentRunsProvider({ children }: { children: ReactNode }) {
 	// Un message peut précéder la réponse du démarrage : on le garde de côté
 	// plutôt que de le jeter, et on le rejoue dès que la session est connue.
 	const orphans = useRef(new Map<string, Array<Record<string, unknown>>>());
-	// Les remises de revue déjà rangées, par appel : un événement rejoué ne doit
-	// pas ajouter un tour de plus.
-	const recorded = useRef(new Set<string>());
 
 	const patch = useCallback((runId: string, update: (run: AgentRun) => AgentRun) => {
 		setRuns((current) => current.map((run) => (run.id === runId ? update(run) : run)));
 	}, []);
 
 	const applyEvent = useCallback(
-		(run: AgentRun, payload: Record<string, unknown>): AgentRun => {
-			const { turns: incoming, results, context, commands, equipment, parent, usage, settled } =
-				readEvent(payload);
-			let next = run;
-
-			// Ce qui vient d'un sous-agent va sous l'appel qui l'a lancé, et
-			// nulle part ailleurs : son fil se lit à part, se replie, et ne
-			// s'entremêle pas à celui du maître quand trois d'entre eux
-			// travaillent en même temps. Rien d'autre de ce message ne compte —
-			// ni son coût, déjà porté par le tour du maître, ni son activité.
-			if (parent) {
-				return {
-					...next,
-					turns: next.turns.map((turn) =>
-						turn.toolId === parent
-							? { ...turn, sub: appendSub(turn.sub ?? [], incoming, results) }
-							: turn,
-					),
-				};
-			}
-
-			const claudeId = payload.session_id;
-			if (typeof claudeId === "string" && !next.claudeSessionId) {
-				next = { ...next, claudeSessionId: claudeId };
-			}
-			if (commands && commands.length > 0) {
-				next = { ...next, commands };
-			}
-			// Les deux annonces se complètent sans se recouvrir : le démarrage
-			// apporte skills et sous-agents, la réponse d'état apporte les
-			// serveurs. Fusionner plutôt que remplacer, sinon la seconde efface
-			// ce que la première avait appris.
-			if (equipment) {
-				next = { ...next, equipment: { ...next.equipment, ...equipment } };
-			}
-			if (usage) {
-				// Une mesure est une réponse à une question, pas une parole de
-				// l'agent : elle ne compte ni comme non lue ni comme activité.
-				return { ...next, usage };
-			}
-			if (context) {
-				// Une fenêtre ne rétrécit pas en cours de conversation : après un
-				// résumé, le tour suivant repasserait sous les 200 000 jetons et
-				// ferait retomber l'échelle à la valeur supposée, alors qu'on a la
-				// preuve qu'elle est plus large.
-				const observed = Math.max(context.window ?? 0, next.contextWindow ?? 0);
-				next = {
-					...next,
-					// Le bilan de fin de tour ne recompte pas les jetons : il ne
-					// vient que confirmer le modèle et sa fenêtre.
-					contextTokens: context.tokens > 0 ? context.tokens : next.contextTokens,
-					contextWindow: observed > 0 ? observed : next.contextWindow,
-					activeModel: context.model ?? next.activeModel,
-				};
-			}
-			if (results.length > 0) {
-				next = { ...next, turns: attachResults(next.turns, results) };
-			}
-			if (incoming.length > 0) {
-				next = { ...next, turns: appendTurns(next, incoming) };
-			}
-
-			// Un appel d'outil signifie que ça avance : on nomme ce qu'il fait
-			// plutôt que d'afficher une attente muette.
-			const tool = incoming.find((turn) => turn.kind === "tool");
-			if (tool) next = { ...next, activity: tool.tool ?? null };
-
-			// La main ne revient qu'au bilan de fin de tour. Le code s'arrêtait
-			// aussi sur un simple message d'assistant — or un agent annonce
-			// presque toujours ce qu'il va faire (« je regarde d'où vient
-			// l'écart ») avant d'enchaîner des outils pendant des minutes. Le
-			// cockpit le croyait alors disponible : l'indicateur de travail
-			// s'éteignait, et le bouton « Arrêter » redevenait « Envoyer » au bout
-			// de trois secondes, sans plus aucun moyen d'interrompre ce qui
-			// tournait encore.
-			//
-			// Une demande d'autorisation ou une question laissent aussi le tour
-			// ouvert sans `result` : là non plus la main n'est pas revenue, et
-			// c'est justement là qu'on veut pouvoir couper.
-			//
-			// Et le bilan lui-même ne rend pas toujours la main : un agent qui a
-			// lancé des sous-agents en arrière-plan termine son tour en disant
-			// « j'attends leurs rapports », puis reprend seul quand ils arrivent.
-			// Le cockpit annonçait « Terminé — rien ne tourne » pendant que trois
-			// relecteurs lisaient le code. Tant qu'il en reste un, le tour est tenu
-			// pour ouvert.
-			if (settled && settled.length > 0) {
-				const ended = new Map(settled.map((entry) => [entry.toolId, entry.status]));
-				next = {
-					...next,
-					turns: next.turns.map((turn) =>
-						turn.background && turn.toolId && ended.has(turn.toolId)
-							? { ...turn, background: { endedAt: Date.now(), status: ended.get(turn.toolId) } }
-							: turn,
-					),
-				};
-			}
-			// Il reparle ou relance un outil sans qu'on lui ait rien envoyé : une
-			// notification l'a réveillé, il travaille de nouveau.
-			if (
-				next.running &&
-				!next.thinking &&
-				incoming.some((turn) => turn.kind === "assistant" || turn.kind === "tool")
-			) {
-				next = { ...next, thinking: true };
-			}
-			if (payload.type === "result") {
-				next =
-					next.thinking && backgroundPending(next.turns).length > 0
-						? { ...next, activity: null }
-						: { ...next, thinking: false, activity: null };
-			}
-			if ((payload as { subtype?: string }).subtype === "ended") {
-				// Le processus est parti : ses sous-agents avec lui, rendus ou non.
-				next = {
-					...next,
-					running: false,
-					thinking: false,
-					turns: next.turns.map((turn) =>
-						turn.background?.endedAt === null
-							? { ...turn, background: { endedAt: Date.now(), status: "stopped" } }
-							: turn,
-					),
-				};
-			}
-
-			// Le panneau montre autre chose : on compte ce qui mérite un coup d'œil.
-			if (!visible("agent", run.id) && !libreVisible(run.id)) {
-				const notable = incoming.filter(
-					(turn) => turn.kind === "assistant" || turn.kind === "error",
-				).length;
-				if (notable > 0) next = { ...next, unread: next.unread + notable };
-			}
-
-			return next;
-		},
+		(run: AgentRun, payload: Record<string, unknown>): AgentRun =>
+			reduceEvent(run, payload, visible("agent", run.id) || libreVisible(run.id)),
 		[visible],
 	);
 
-	/**
-	 * Demande au CLI de quoi est rempli le contexte d'un agent.
-	 *
-	 * Gratuit — ni appel au modèle, ni message dans la conversation — mais pas
-	 * pour autant à poser sans raison : au démarrage, à chaque fin de tour, et
-	 * de loin en loin pendant qu'il travaille.
-	 */
-	const probeContext = useCallback(
-		(runId: string) => {
-			if (!hasTauri()) return;
-			const run = runsRef.current.find((entry) => entry.id === runId);
-			if (!run?.sessionId || !run.running || run.noUsage) return;
-			void api.agents.probeContext(run.sessionId).catch((error) => {
-				// Seul le refus d'un moteur sans canal de contrôle est définitif ;
-				// un agent qui vient de s'arrêter n'a simplement plus rien à dire.
-				// Le message a changé de langue : l'ancien texte français et l'anglais.
-				if (/canal de contrôle|control channel/i.test(String(error))) {
-					patch(runId, (current) => ({ ...current, noUsage: true }));
-				}
-			});
-		},
-		[patch],
-	);
+	const probeContext = useContextProbe(runs, runsRef, patch);
 
-	const working = runs
-		.filter((run) => run.running && run.thinking && run.sessionId && !run.noUsage)
-		.map((run) => run.id)
-		.join(" ");
-	useEffect(() => {
-		if (!working) return;
-		const timer = setInterval(() => {
-			for (const id of working.split(" ")) probeContext(id);
-		}, 10_000);
-		return () => clearInterval(timer);
-	}, [working, probeContext]);
-
-	useEffect(() => {
-		const subscription = events.onAgentEvent((event) => {
-			const payload = event.payload as Record<string, unknown>;
-			const target = runsRef.current.find((run) => run.sessionId === event.sessionId);
-
-			if (!target) {
-				// Session inconnue : soit son démarrage n'a pas encore répondu,
-				// soit c'est le dernier soupir d'un agent qu'on a remplacé.
-				if ((payload as { subtype?: string }).subtype === "ended") {
-					orphans.current.delete(event.sessionId);
-					return;
-				}
-				const queue = orphans.current.get(event.sessionId) ?? [];
-				if (queue.length < 200) queue.push(payload);
-				orphans.current.set(event.sessionId, queue);
-				return;
-			}
-
-			// Un agent qui rend la main sans qu'on le regarde doit le dire : le
-			// cockpit n'est pas forcément au premier plan.
-			const wasBusy = target.thinking || target.running;
-			setRuns((current) =>
-				current.map((run) => (run.id === target.id ? applyEvent(run, payload) : run)),
-			);
-			// Une revue remise par son outil : on la range tout de suite, l'écran
-			// de la branche la montre point par point. Le contenu est l'entrée de
-			// l'appel, pas un texte à relire.
-			for (const turn of readEvent(payload).turns) {
-				if (turn.kind !== "tool" || turn.tool !== REVIEW_TOOL || !turn.toolId) continue;
-				if (recorded.current.has(turn.toolId)) continue;
-				recorded.current.add(turn.toolId);
-				void api.reviews
-					.record(target.cwd, turn.input ?? {})
-					.then((review) => {
-						const count = review.rounds[review.rounds.length - 1]?.findings.length ?? 0;
-						window.dispatchEvent(new CustomEvent(REVIEW_EVENT, { detail: review }));
-						notify(t("app:agents.review.delivered", { number: review.number, count }), {
-							label: t("app:agents.see"),
-							onClick: () => {
-								go("workspace");
-								showTab(target.cwd, { kind: "board", id: target.cwd });
-							},
-						});
-					})
-					.catch((error) => notify(t("app:agents.review.recordFailed", { error: String(error) })));
-			}
-			// Fin de tour ou session tout juste prête : le contexte vient de
-			// changer, ou on ne l'a encore jamais mesuré.
-			if (payload.type === "result" || (payload.type === "system" && payload.subtype === "init")) {
-				setTimeout(() => probeContext(target.id), 300);
-			}
-			if (!visible("agent", target.id) && !libreVisible(target.id) && wasBusy) {
-				const ended = (payload as { subtype?: string }).subtype === "ended";
-				const replied = readEvent(payload).turns.some((turn) => turn.kind === "assistant");
-				if (ended || replied) {
-					void api.system
-						.notify(target.label, ended ? t("app:agents.notify.ended") : t("app:agents.notify.replied"))
-						.catch(() => undefined);
-				}
-			}
-		});
-		return () => {
-			void subscription.then((off) => off());
-		};
-	}, [applyEvent, visible, probeContext, notify, go, showTab]);
+	useAgentEventStream({ runsRef, orphans, setRuns, applyEvent, probeContext, visible, notify, go, showTab });
 
 	/** Rattache une session backend à sa conversation et rejoue son retard. */
 	const attach = useCallback(
@@ -1809,30 +1579,6 @@ export function AgentRunsProvider({ children }: { children: ReactNode }) {
 				});
 		},
 		[attach, patch],
-	);
-
-	/**
-	 * Le contexte du dossier, joint à une consigne partie sans passer par le
-	 * champ de saisie.
-	 *
-	 * Ne rejette jamais : un contexte est un bonus, et rater un bonus n'a pas à
-	 * retenir un agent. Rend la consigne inchangée quand il n'y a rien à joindre.
-	 */
-	const withBrief = useCallback(
-		async (cwd: string, prompt: string): Promise<{ text: string; joined: string | null }> => {
-			try {
-				const brief = await api.brief.compose(cwd);
-				const retained = brief.sections.filter((section) => section.on);
-				if (retained.length === 0) return { text: prompt, joined: null };
-				return {
-					text: await api.brief.assemble(retained, prompt, cwd),
-					joined: retained.map((section) => section.label).join(" · "),
-				};
-			} catch {
-				return { text: prompt, joined: null };
-			}
-		},
-		[],
 	);
 
 	const open = useCallback(
@@ -1895,16 +1641,10 @@ export function AgentRunsProvider({ children }: { children: ReactNode }) {
 					free: libre ? true : undefined,
 					account: extra?.account,
 					depth: extra?.depth,
-					activeModel: null,
-					commands: [],
-					equipment: { servers: [], probed: false, skills: [], subagents: [], plugins: [] },
-					contextTokens: 0,
-					contextWindow: null,
+					...FRESH_RUN,
 					turns: prompt ? [{ kind: "user", text: prompt }] : [],
 					running: true,
 					thinking: Boolean(prompt),
-					activity: null,
-					unread: 0,
 				},
 			]);
 			if (!libre) showTab(cwd, { kind: "agent", id });
@@ -1957,103 +1697,10 @@ export function AgentRunsProvider({ children }: { children: ReactNode }) {
 			}
 			return id;
 		},
-		[defaultMode, defaultModel, go, launch, patch, showTab, withBrief],
+		[defaultMode, defaultModel, go, launch, patch, showTab],
 	);
 
-	// ── Adoption des agents lancés hors de l'interface ────────────────────
-	//
-	// Une mission démarre son maître et ses exécutants côté cockpit : ces agents
-	// existaient donc sans onglet, et « Suivre » menait à un panneau vide. On
-	// les découvre ici, avec leur conversation, pour qu'ils soient des onglets
-	// comme les autres — même worktree, même fil, mêmes gestes.
-	//
-	// C'est aussi par là que reviennent, au démarrage, les agents détachés qui
-	// ont continué pendant que le cockpit était fermé (`relay.rs`) : le backend
-	// les a déjà réinscrits sous leur identifiant d'origine, il ne reste qu'à
-	// leur rendre un onglet — et à le dire une fois, sans quoi on les prendrait
-	// pour des conversations qu'on vient de rouvrir.
-	useEffect(() => {
-		let stopped = false;
-		if (hasTauri()) {
-			void api.agents
-				.survivors()
-				.then((survivors) => {
-					if (stopped || survivors.length === 0) return;
-					const count = survivors.length;
-					const activity = startActivity(
-						t("app:agents.survivors.title", { count }),
-						t("app:agents.survivors.detail", { count }),
-					);
-					activity.done(t("app:agents.survivors.done", { count }), {
-						label: t("app:agents.see"),
-						run: () => go("workspace"),
-					},
-					);
-				})
-				.catch(() => undefined);
-		}
-		const adopt = async () => {
-			const statuses = await api.agents.list().catch(() => []);
-			for (const status of statuses) {
-				if (stopped) return;
-				if (runsRef.current.some((run) => run.sessionId === status.sessionId)) continue;
-
-				const events = await api.agents.timeline(status.sessionId).catch(() => []);
-				if (stopped) return;
-				// Un agent libre revenu de son relais : il reprend sa place dans son
-				// écran, avec ce qu'on avait choisi pour le lancer.
-				const libre = libreOf({
-					id: status.sessionId,
-					sessionId: status.sessionId,
-					claudeSessionId: status.claudeSessionId,
-				});
-				if (libre) patchLibre(libre.id, { runId: status.sessionId });
-				setRuns((current) => {
-					if (current.some((run) => run.sessionId === status.sessionId)) return current;
-					return [
-						...current,
-						{
-							id: status.sessionId,
-							sessionId: status.sessionId,
-							claudeSessionId: status.claudeSessionId,
-							cwd: status.cwd,
-							label: libre?.label ?? status.cwd.split("/").pop() ?? status.cwd,
-							// Un agent détaché a été lancé à la main, dans le mode choisi
-							// sur ce poste ; ceux d'une mission tournent sans rien demander.
-							mode: libre
-								? libre.mode
-								: status.detached
-									? defaultModeRef.current
-									: "bypassPermissions",
-							model: libre?.model ?? "",
-							free: libre ? true : undefined,
-							account: libre?.account,
-							depth: libre?.depth,
-							activeModel: null,
-							commands: [],
-							equipment: { servers: [], probed: false, skills: [], subagents: [], plugins: [] },
-							contextTokens: 0,
-							contextWindow: null,
-							turns: historyTurns(events),
-							running: status.running,
-							thinking: status.working,
-							activity: null,
-							unread: 0,
-						},
-					];
-				});
-			}
-		};
-
-		void adopt();
-		const timer = setInterval(() => void adopt(), 5000);
-		return () => {
-			stopped = true;
-			clearInterval(timer);
-		};
-		// Une seule boucle d'adoption pour toute la session : `go` ne change que l'écran.
-		// eslint-disable-next-line react-hooks/exhaustive-deps
-	}, []);
+	useAgentAdoption(runsRef, defaultModeRef, setRuns, go);
 
 	const send = useCallback(
 		(runId: string, text: string, joined?: SendExtras) => {
@@ -2144,6 +1791,40 @@ export function AgentRunsProvider({ children }: { children: ReactNode }) {
 		[go, patch, showTab],
 	);
 
+	/**
+	 * Relance le CLI d'une conversation en cours, sur la même session Claude.
+	 *
+	 * Le mode comme le modèle sont des drapeaux de lancement : en changer veut dire
+	 * relancer, ce qui conserve le fil et tout le contexte.
+	 */
+	const relaunchWith = useCallback(
+		(
+			run: AgentRun,
+			change: Partial<Pick<AgentRun, "mode" | "model" | "activeModel">>,
+			notice: (kept: boolean) => string,
+		) => {
+			if (run.sessionId) {
+				void api.agents.stop(run.sessionId).catch(() => undefined);
+				void api.agents.discardPermissions(run.sessionId).catch(() => undefined);
+			}
+			const resume = run.claudeSessionId ?? undefined;
+			patch(run.id, (current) => ({
+				...current,
+				...change,
+				sessionId: null,
+				activity: null,
+				thinking: false,
+				running: true,
+				turns: appendTurns(current, [{ kind: "system", text: notice(Boolean(resume)) }]),
+			}));
+			launch(run.id, run.cwd, "", change.mode ?? run.mode, change.model ?? run.model, resume, run.profile, {
+				account: run.account,
+				depth: run.depth,
+			});
+		},
+		[launch, patch],
+	);
+
 	const changeMode = useCallback(
 		(runId: string, mode: string) => {
 			const run = runsRef.current.find((entry) => entry.id === runId);
@@ -2156,45 +1837,18 @@ export function AgentRunsProvider({ children }: { children: ReactNode }) {
 				patch(runId, (current) => ({ ...current, mode }));
 				return;
 			}
-
-			// Le mode est figé au lancement du CLI : pour en changer, on relance
-			// sur la même session Claude, ce qui conserve tout le contexte.
-			if (run.sessionId) {
-				void api.agents.stop(run.sessionId).catch(() => undefined);
-				void api.agents.discardPermissions(run.sessionId).catch(() => undefined);
-			}
-			const resume = run.claudeSessionId ?? undefined;
-			patch(runId, (current) => ({
-				...current,
-				mode,
-				sessionId: null,
-				activity: null,
-				thinking: false,
-				running: true,
-				turns: appendTurns(current, [
-					{
-						kind: "system",
-						text: resume
-							? t("app:agents.turn.relaunchedModeKept", { mode: modeLabel(mode) })
-							: t("app:agents.turn.relaunchedModeFresh", { mode: modeLabel(mode) }),
-					},
-				]),
-			}));
-			launch(runId, run.cwd, "", mode, run.model, resume, run.profile, {
-				account: run.account,
-				depth: run.depth,
-			});
+			relaunchWith(run, { mode }, (kept) =>
+				kept
+					? t("app:agents.turn.relaunchedModeKept", { mode: modeLabel(mode) })
+					: t("app:agents.turn.relaunchedModeFresh", { mode: modeLabel(mode) }),
+			);
 		},
-		[launch, patch, setDefaultMode],
+		[patch, relaunchWith, setDefaultMode],
 	);
 
 	/**
-	 * Change le modèle d'une conversation en cours.
-	 *
-	 * Même mécanique que le mode d'autorisation : `--model` est un drapeau de
-	 * lancement, on relance donc le CLI sur la même session Claude. Le fil est
-	 * conservé — c'est ce qui permet de commencer en Sonnet et de passer en Opus
-	 * quand la tâche se corse, sans rien réexpliquer.
+	 * Change le modèle d'une conversation en cours : on peut commencer en Sonnet et
+	 * passer en Opus quand la tâche se corse, sans rien réexpliquer.
 	 */
 	const changeModel = useCallback(
 		(runId: string, model: string) => {
@@ -2206,37 +1860,518 @@ export function AgentRunsProvider({ children }: { children: ReactNode }) {
 				patch(runId, (current) => ({ ...current, model }));
 				return;
 			}
-
-			if (run.sessionId) {
-				void api.agents.stop(run.sessionId).catch(() => undefined);
-				void api.agents.discardPermissions(run.sessionId).catch(() => undefined);
-			}
-			const resume = run.claudeSessionId ?? undefined;
-			patch(runId, (current) => ({
-				...current,
-				model,
-				activeModel: null,
-				sessionId: null,
-				activity: null,
-				thinking: false,
-				running: true,
-				turns: appendTurns(current, [
-					{
-						kind: "system",
-						text: resume
-							? t("app:agents.turn.relaunchedModelKept", { model: modelLabel(model) })
-							: t("app:agents.turn.relaunchedModelFresh", { model: modelLabel(model) }),
-					},
-				]),
-			}));
-			launch(runId, run.cwd, "", run.mode, model, resume, run.profile, {
-				account: run.account,
-				depth: run.depth,
-			});
+			relaunchWith(run, { model, activeModel: null }, (kept) =>
+				kept
+					? t("app:agents.turn.relaunchedModelKept", { model: modelLabel(model) })
+					: t("app:agents.turn.relaunchedModelFresh", { model: modelLabel(model) }),
+			);
 		},
-		[launch, patch, setDefaultModel],
+		[patch, relaunchWith, setDefaultModel],
 	);
 
+	// Conversation au premier plan : seul point où l'état du panneau change ce
+	// que ce registre décide, faute de mieux (voir ci-dessous).
+	const frontmost = workspace.tab?.kind === "agent" ? workspace.tab.id : null;
+
+	const { decide, answer, pendingFor, pendingForSession } = useAgentPermissions({
+		runs,
+		runsRef,
+		frontmost,
+		autoApprove,
+		visible,
+		notify,
+	});
+
+	const actions = useMemo<AgentActions>(
+		() => ({
+			setDefaultMode,
+			setAutoApprove,
+			open,
+			send,
+			stop,
+			close,
+			show,
+			changeMode,
+			changeModel,
+			decide,
+			answer,
+		}),
+		[
+			setDefaultMode,
+			setAutoApprove,
+			open,
+			send,
+			stop,
+			close,
+			show,
+			changeMode,
+			changeModel,
+			decide,
+			answer,
+		],
+	);
+
+	const state = useMemo<AgentState>(
+		() => ({ runs, defaultMode, autoApprove, pendingFor, pendingForSession }),
+		[runs, defaultMode, autoApprove, pendingFor, pendingForSession],
+	);
+
+	const guard = useMemo<AgentGuard>(
+		() => ({ autoApprove, pendingFor, pendingForSession }),
+		[autoApprove, pendingFor, pendingForSession],
+	);
+
+	// Recalculée à chaque rendu — elle ne coûte que la longueur de la liste — et
+	// c'est elle qui empêche la table ci-dessous de changer d'identité à chaque
+	// message reçu.
+	const openSignature = runs.map((run) => `${run.id}\0${run.claudeSessionId ?? ""}`).join("\x01");
+	const openSessions = useMemo(() => {
+		const map = new Map<string, string>();
+		for (const run of runs) {
+			if (run.claudeSessionId) map.set(run.claudeSessionId, run.id);
+		}
+		return map;
+		// `runs` change à chaque phrase ; la signature, seulement quand une
+		// conversation s'ouvre, se ferme ou apprend sa session.
+		// eslint-disable-next-line react-hooks/exhaustive-deps
+	}, [openSignature]);
+
+	return (
+		<ActionsContext.Provider value={actions}>
+			<StateContext.Provider value={state}>
+				<GuardContext.Provider value={guard}>
+					<OpenSessionsContext.Provider value={openSessions}>
+						{children}
+					</OpenSessionsContext.Provider>
+				</GuardContext.Provider>
+			</StateContext.Provider>
+		</ActionsContext.Provider>
+	);
+}
+
+/** Ce qu'une conversation qui commence n'a pas encore appris. */
+const FRESH_RUN = {
+	activeModel: null,
+	commands: [],
+	equipment: { servers: [], probed: false, skills: [], subagents: [], plugins: [] },
+	contextTokens: 0,
+	contextWindow: null,
+	activity: null,
+	unread: 0,
+} satisfies Partial<AgentRun>;
+
+/**
+ * Un événement du CLI appliqué à sa conversation.
+ *
+ * `watched` : quelqu'un la regarde, donc rien n'y est à compter comme non lu.
+ */
+function reduceEvent(run: AgentRun, payload: Record<string, unknown>, watched: boolean): AgentRun {
+	const { turns: incoming, results, context, commands, equipment, parent, usage, settled } =
+		readEvent(payload);
+	let next = run;
+
+	// Ce qui vient d'un sous-agent va sous l'appel qui l'a lancé, et
+	// nulle part ailleurs : son fil se lit à part, se replie, et ne
+	// s'entremêle pas à celui du maître quand trois d'entre eux
+	// travaillent en même temps. Rien d'autre de ce message ne compte —
+	// ni son coût, déjà porté par le tour du maître, ni son activité.
+	if (parent) {
+		return {
+			...next,
+			turns: next.turns.map((turn) =>
+				turn.toolId === parent
+					? { ...turn, sub: appendSub(turn.sub ?? [], incoming, results) }
+					: turn,
+			),
+		};
+	}
+
+	const claudeId = payload.session_id;
+	if (typeof claudeId === "string" && !next.claudeSessionId) {
+		next = { ...next, claudeSessionId: claudeId };
+	}
+	if (commands && commands.length > 0) {
+		next = { ...next, commands };
+	}
+	// Les deux annonces se complètent sans se recouvrir : le démarrage
+	// apporte skills et sous-agents, la réponse d'état apporte les
+	// serveurs. Fusionner plutôt que remplacer, sinon la seconde efface
+	// ce que la première avait appris.
+	if (equipment) {
+		next = { ...next, equipment: { ...next.equipment, ...equipment } };
+	}
+	if (usage) {
+		// Une mesure est une réponse à une question, pas une parole de
+		// l'agent : elle ne compte ni comme non lue ni comme activité.
+		return { ...next, usage };
+	}
+	if (context) {
+		// Une fenêtre ne rétrécit pas en cours de conversation : après un
+		// résumé, le tour suivant repasserait sous les 200 000 jetons et
+		// ferait retomber l'échelle à la valeur supposée, alors qu'on a la
+		// preuve qu'elle est plus large.
+		const observed = Math.max(context.window ?? 0, next.contextWindow ?? 0);
+		next = {
+			...next,
+			// Le bilan de fin de tour ne recompte pas les jetons : il ne
+			// vient que confirmer le modèle et sa fenêtre.
+			contextTokens: context.tokens > 0 ? context.tokens : next.contextTokens,
+			contextWindow: observed > 0 ? observed : next.contextWindow,
+			activeModel: context.model ?? next.activeModel,
+		};
+	}
+	if (results.length > 0) {
+		next = { ...next, turns: attachResults(next.turns, results) };
+	}
+	if (incoming.length > 0) {
+		next = { ...next, turns: appendTurns(next, incoming) };
+	}
+
+	// Un appel d'outil signifie que ça avance : on nomme ce qu'il fait
+	// plutôt que d'afficher une attente muette.
+	const tool = incoming.find((turn) => turn.kind === "tool");
+	if (tool) next = { ...next, activity: tool.tool ?? null };
+
+	// La main ne revient qu'au bilan de fin de tour. Le code s'arrêtait
+	// aussi sur un simple message d'assistant — or un agent annonce
+	// presque toujours ce qu'il va faire (« je regarde d'où vient
+	// l'écart ») avant d'enchaîner des outils pendant des minutes. Le
+	// cockpit le croyait alors disponible : l'indicateur de travail
+	// s'éteignait, et le bouton « Arrêter » redevenait « Envoyer » au bout
+	// de trois secondes, sans plus aucun moyen d'interrompre ce qui
+	// tournait encore.
+	//
+	// Une demande d'autorisation ou une question laissent aussi le tour
+	// ouvert sans `result` : là non plus la main n'est pas revenue, et
+	// c'est justement là qu'on veut pouvoir couper.
+	//
+	// Et le bilan lui-même ne rend pas toujours la main : un agent qui a
+	// lancé des sous-agents en arrière-plan termine son tour en disant
+	// « j'attends leurs rapports », puis reprend seul quand ils arrivent.
+	// Le cockpit annonçait « Terminé — rien ne tourne » pendant que trois
+	// relecteurs lisaient le code. Tant qu'il en reste un, le tour est tenu
+	// pour ouvert.
+	if (settled && settled.length > 0) {
+		const ended = new Map(settled.map((entry) => [entry.toolId, entry.status]));
+		next = {
+			...next,
+			turns: next.turns.map((turn) =>
+				turn.background && turn.toolId && ended.has(turn.toolId)
+					? { ...turn, background: { endedAt: Date.now(), status: ended.get(turn.toolId) } }
+					: turn,
+			),
+		};
+	}
+	// Il reparle ou relance un outil sans qu'on lui ait rien envoyé : une
+	// notification l'a réveillé, il travaille de nouveau.
+	if (
+		next.running &&
+		!next.thinking &&
+		incoming.some((turn) => turn.kind === "assistant" || turn.kind === "tool")
+	) {
+		next = { ...next, thinking: true };
+	}
+	if (payload.type === "result") {
+		next =
+			next.thinking && backgroundPending(next.turns).length > 0
+				? { ...next, activity: null }
+				: { ...next, thinking: false, activity: null };
+	}
+	if ((payload as { subtype?: string }).subtype === "ended") {
+		// Le processus est parti : ses sous-agents avec lui, rendus ou non.
+		next = {
+			...next,
+			running: false,
+			thinking: false,
+			turns: next.turns.map((turn) =>
+				turn.background?.endedAt === null
+					? { ...turn, background: { endedAt: Date.now(), status: "stopped" } }
+					: turn,
+			),
+		};
+	}
+
+	// Le panneau montre autre chose : on compte ce qui mérite un coup d'œil.
+	if (!watched) {
+		const notable = incoming.filter(
+			(turn) => turn.kind === "assistant" || turn.kind === "error",
+		).length;
+		if (notable > 0) next = { ...next, unread: next.unread + notable };
+	}
+
+	return next;
+}
+
+/**
+ * Le contexte du dossier, joint à une consigne partie sans passer par le
+ * champ de saisie.
+ *
+ * Ne rejette jamais : un contexte est un bonus, et rater un bonus n'a pas à
+ * retenir un agent. Rend la consigne inchangée quand il n'y a rien à joindre.
+ */
+async function withBrief(cwd: string, prompt: string): Promise<{ text: string; joined: string | null }> {
+	try {
+		const brief = await api.brief.compose(cwd);
+		const retained = brief.sections.filter((section) => section.on);
+		if (retained.length === 0) return { text: prompt, joined: null };
+		return {
+			text: await api.brief.assemble(retained, prompt, cwd),
+			joined: retained.map((section) => section.label).join(" · "),
+		};
+	} catch {
+		return { text: prompt, joined: null };
+	}
+}
+
+/**
+ * Demande au CLI de quoi est rempli le contexte d'un agent.
+ *
+ * Gratuit — ni appel au modèle, ni message dans la conversation — mais pas
+ * pour autant à poser sans raison : au démarrage, à chaque fin de tour, et
+ * de loin en loin pendant qu'il travaille.
+ */
+function useContextProbe(
+	runs: AgentRun[],
+	runsRef: { current: AgentRun[] },
+	patch: (runId: string, update: (run: AgentRun) => AgentRun) => void,
+): (runId: string) => void {
+	const probeContext = useCallback(
+		(runId: string) => {
+			if (!hasTauri()) return;
+			const run = runsRef.current.find((entry) => entry.id === runId);
+			if (!run?.sessionId || !run.running || run.noUsage) return;
+			void api.agents.probeContext(run.sessionId).catch((error) => {
+				// Seul le refus d'un moteur sans canal de contrôle est définitif ;
+				// un agent qui vient de s'arrêter n'a simplement plus rien à dire.
+				// Le message a changé de langue : l'ancien texte français et l'anglais.
+				if (/canal de contrôle|control channel/i.test(String(error))) {
+					patch(runId, (current) => ({ ...current, noUsage: true }));
+				}
+			});
+		},
+		[patch, runsRef],
+	);
+
+	const working = runs
+		.filter((run) => run.running && run.thinking && run.sessionId && !run.noUsage)
+		.map((run) => run.id)
+		.join(" ");
+	useEffect(() => {
+		if (!working) return;
+		const timer = setInterval(() => {
+			for (const id of working.split(" ")) probeContext(id);
+		}, 10_000);
+		return () => clearInterval(timer);
+	}, [working, probeContext]);
+
+	return probeContext;
+}
+
+/** Le flux d'événements des agents : chacun rejoint sa conversation, et ce qu'il annonce part d'ici. */
+function useAgentEventStream({
+	runsRef,
+	orphans,
+	setRuns,
+	applyEvent,
+	probeContext,
+	visible,
+	notify,
+	go,
+	showTab,
+}: {
+	runsRef: { current: AgentRun[] };
+	orphans: { current: Map<string, Array<Record<string, unknown>>> };
+	setRuns: Dispatch<SetStateAction<AgentRun[]>>;
+	applyEvent: (run: AgentRun, payload: Record<string, unknown>) => AgentRun;
+	probeContext: (runId: string) => void;
+	visible: Workspace["visible"];
+	notify: Cockpit["notify"];
+	go: Cockpit["go"];
+	showTab: Workspace["show"];
+}) {
+	// Les remises de revue déjà rangées, par appel : un événement rejoué ne doit
+	// pas ajouter un tour de plus.
+	const recorded = useRef(new Set<string>());
+
+	useEffect(() => {
+		const subscription = events.onAgentEvent((event) => {
+			const payload = event.payload as Record<string, unknown>;
+			const target = runsRef.current.find((run) => run.sessionId === event.sessionId);
+
+			if (!target) {
+				// Session inconnue : soit son démarrage n'a pas encore répondu,
+				// soit c'est le dernier soupir d'un agent qu'on a remplacé.
+				if ((payload as { subtype?: string }).subtype === "ended") {
+					orphans.current.delete(event.sessionId);
+					return;
+				}
+				const queue = orphans.current.get(event.sessionId) ?? [];
+				if (queue.length < 200) queue.push(payload);
+				orphans.current.set(event.sessionId, queue);
+				return;
+			}
+
+			// Un agent qui rend la main sans qu'on le regarde doit le dire : le
+			// cockpit n'est pas forcément au premier plan.
+			const wasBusy = target.thinking || target.running;
+			setRuns((current) =>
+				current.map((run) => (run.id === target.id ? applyEvent(run, payload) : run)),
+			);
+			// Une revue remise par son outil : on la range tout de suite, l'écran
+			// de la branche la montre point par point. Le contenu est l'entrée de
+			// l'appel, pas un texte à relire.
+			for (const turn of readEvent(payload).turns) {
+				if (turn.kind !== "tool" || turn.tool !== REVIEW_TOOL || !turn.toolId) continue;
+				if (recorded.current.has(turn.toolId)) continue;
+				recorded.current.add(turn.toolId);
+				void api.reviews
+					.record(target.cwd, turn.input ?? {})
+					.then((review) => {
+						const count = review.rounds[review.rounds.length - 1]?.findings.length ?? 0;
+						window.dispatchEvent(new CustomEvent(REVIEW_EVENT, { detail: review }));
+						notify(t("app:agents.review.delivered", { number: review.number, count }), {
+							label: t("app:agents.see"),
+							onClick: () => {
+								go("workspace");
+								showTab(target.cwd, { kind: "board", id: target.cwd });
+							},
+						});
+					})
+					.catch((error) => notify(t("app:agents.review.recordFailed", { error: String(error) })));
+			}
+			// Fin de tour ou session tout juste prête : le contexte vient de
+			// changer, ou on ne l'a encore jamais mesuré.
+			if (payload.type === "result" || (payload.type === "system" && payload.subtype === "init")) {
+				setTimeout(() => probeContext(target.id), 300);
+			}
+			if (!visible("agent", target.id) && !libreVisible(target.id) && wasBusy) {
+				const ended = (payload as { subtype?: string }).subtype === "ended";
+				const replied = readEvent(payload).turns.some((turn) => turn.kind === "assistant");
+				if (ended || replied) {
+					void api.system
+						.notify(target.label, ended ? t("app:agents.notify.ended") : t("app:agents.notify.replied"))
+						.catch(() => undefined);
+				}
+			}
+		});
+		return () => {
+			void subscription.then((off) => off());
+		};
+	}, [runsRef, orphans, setRuns, applyEvent, visible, probeContext, notify, go, showTab]);
+}
+
+function useAgentAdoption(
+	runsRef: { current: AgentRun[] },
+	defaultModeRef: { current: string },
+	setRuns: Dispatch<SetStateAction<AgentRun[]>>,
+	go: Cockpit["go"],
+) {
+	// ── Adoption des agents lancés hors de l'interface ────────────────────
+	//
+	// Une mission démarre son maître et ses exécutants côté cockpit : ces agents
+	// existaient donc sans onglet, et « Suivre » menait à un panneau vide. On
+	// les découvre ici, avec leur conversation, pour qu'ils soient des onglets
+	// comme les autres — même worktree, même fil, mêmes gestes.
+	//
+	// C'est aussi par là que reviennent, au démarrage, les agents détachés qui
+	// ont continué pendant que le cockpit était fermé (`relay.rs`) : le backend
+	// les a déjà réinscrits sous leur identifiant d'origine, il ne reste qu'à
+	// leur rendre un onglet — et à le dire une fois, sans quoi on les prendrait
+	// pour des conversations qu'on vient de rouvrir.
+	useEffect(() => {
+		let stopped = false;
+		if (hasTauri()) {
+			void api.agents
+				.survivors()
+				.then((survivors) => {
+					if (stopped || survivors.length === 0) return;
+					const count = survivors.length;
+					const activity = startActivity(
+						t("app:agents.survivors.title", { count }),
+						t("app:agents.survivors.detail", { count }),
+					);
+					activity.done(t("app:agents.survivors.done", { count }), {
+						label: t("app:agents.see"),
+						run: () => go("workspace"),
+					},
+					);
+				})
+				.catch(() => undefined);
+		}
+		const adopt = async () => {
+			const statuses = await api.agents.list().catch(() => []);
+			for (const status of statuses) {
+				if (stopped) return;
+				if (runsRef.current.some((run) => run.sessionId === status.sessionId)) continue;
+
+				const events = await api.agents.timeline(status.sessionId).catch(() => []);
+				if (stopped) return;
+				// Un agent libre revenu de son relais : il reprend sa place dans son
+				// écran, avec ce qu'on avait choisi pour le lancer.
+				const libre = libreOf({
+					id: status.sessionId,
+					sessionId: status.sessionId,
+					claudeSessionId: status.claudeSessionId,
+				});
+				if (libre) patchLibre(libre.id, { runId: status.sessionId });
+				setRuns((current) => {
+					if (current.some((run) => run.sessionId === status.sessionId)) return current;
+					return [
+						...current,
+						{
+							id: status.sessionId,
+							sessionId: status.sessionId,
+							claudeSessionId: status.claudeSessionId,
+							cwd: status.cwd,
+							label: libre?.label ?? status.cwd.split("/").pop() ?? status.cwd,
+							// Un agent détaché a été lancé à la main, dans le mode choisi
+							// sur ce poste ; ceux d'une mission tournent sans rien demander.
+							mode: libre
+								? libre.mode
+								: status.detached
+									? defaultModeRef.current
+									: "bypassPermissions",
+							model: libre?.model ?? "",
+							free: libre ? true : undefined,
+							account: libre?.account,
+							depth: libre?.depth,
+							...FRESH_RUN,
+							turns: historyTurns(events),
+							running: status.running,
+							thinking: status.working,
+						},
+					];
+				});
+			}
+		};
+
+		void adopt();
+		const timer = setInterval(() => void adopt(), 5000);
+		return () => {
+			stopped = true;
+			clearInterval(timer);
+		};
+		// Une seule boucle d'adoption pour toute la session : `go` ne change que l'écran.
+		// eslint-disable-next-line react-hooks/exhaustive-deps
+	}, []);
+}
+
+/** Les demandes d'autorisation et les questions des agents, et ce qu'on y répond. */
+function useAgentPermissions({
+	runs,
+	runsRef,
+	frontmost,
+	autoApprove,
+	visible,
+	notify,
+}: {
+	runs: AgentRun[];
+	runsRef: { current: AgentRun[] };
+	frontmost: string | null;
+	autoApprove: boolean;
+	visible: Workspace["visible"];
+	notify: Cockpit["notify"];
+}) {
 	// Le pont MCP dépose les demandes sur disque ; on ne les relève que s'il y a
 	// un agent capable d'en produire.
 	const watching = runs.some((run) => run.running);
@@ -2314,11 +2449,7 @@ export function AgentRunsProvider({ children }: { children: ReactNode }) {
 		for (const id of announced.current) {
 			if (!live.has(id)) announced.current.delete(id);
 		}
-	}, [pending, visible]);
-
-	// Conversation au premier plan : seul point où l'état du panneau change ce
-	// que ce registre décide, faute de mieux (voir ci-dessous).
-	const frontmost = workspace.tab?.kind === "agent" ? workspace.tab.id : null;
+	}, [runsRef, pending, visible]);
 
 	const pendingFor = useCallback(
 		(runId: string) => {
@@ -2340,71 +2471,7 @@ export function AgentRunsProvider({ children }: { children: ReactNode }) {
 		[pending],
 	);
 
-	const actions = useMemo<AgentActions>(
-		() => ({
-			setDefaultMode,
-			setAutoApprove,
-			open,
-			send,
-			stop,
-			close,
-			show,
-			changeMode,
-			changeModel,
-			decide,
-			answer,
-		}),
-		[
-			setDefaultMode,
-			setAutoApprove,
-			open,
-			send,
-			stop,
-			close,
-			show,
-			changeMode,
-			changeModel,
-			decide,
-			answer,
-		],
-	);
-
-	const state = useMemo<AgentState>(
-		() => ({ runs, defaultMode, autoApprove, pendingFor, pendingForSession }),
-		[runs, defaultMode, autoApprove, pendingFor, pendingForSession],
-	);
-
-	const guard = useMemo<AgentGuard>(
-		() => ({ autoApprove, pendingFor, pendingForSession }),
-		[autoApprove, pendingFor, pendingForSession],
-	);
-
-	// Recalculée à chaque rendu — elle ne coûte que la longueur de la liste — et
-	// c'est elle qui empêche la table ci-dessous de changer d'identité à chaque
-	// message reçu.
-	const openSignature = runs.map((run) => `${run.id}\0${run.claudeSessionId ?? ""}`).join("\x01");
-	const openSessions = useMemo(() => {
-		const map = new Map<string, string>();
-		for (const run of runs) {
-			if (run.claudeSessionId) map.set(run.claudeSessionId, run.id);
-		}
-		return map;
-		// `runs` change à chaque phrase ; la signature, seulement quand une
-		// conversation s'ouvre, se ferme ou apprend sa session.
-		// eslint-disable-next-line react-hooks/exhaustive-deps
-	}, [openSignature]);
-
-	return (
-		<ActionsContext.Provider value={actions}>
-			<StateContext.Provider value={state}>
-				<GuardContext.Provider value={guard}>
-					<OpenSessionsContext.Provider value={openSessions}>
-						{children}
-					</OpenSessionsContext.Provider>
-				</GuardContext.Provider>
-			</StateContext.Provider>
-		</ActionsContext.Provider>
-	);
+	return { decide, answer, pendingFor, pendingForSession };
 }
 
 /**
