@@ -437,7 +437,17 @@ pub(crate) fn mission_pause(app: AppHandle, id: String) -> Result<mission::Missi
 /// ticket, propose un découpage — alors que son plan est approuvé et que ses
 /// exécutants travaillent depuis une heure. On lui dit donc où en est la
 /// mission, et surtout de constater avant d'agir.
-pub(crate) fn resume_brief(mission: &mission::Mission) -> String {
+/// `original` : ce qu'on avait confié au premier maître (voir `original_brief`).
+/// Le maître relancé repart d'une conversation neuve, et `status` ne dit ni le
+/// ticket ni le plan : sans eux, il reprenait une mission dont il ignorait l'objet.
+pub(crate) fn resume_brief(mission: &mission::Mission, original: Option<&str>) -> String {
+	let mut context = String::new();
+	if let Some(original) = original.map(str::trim).filter(|text| !text.is_empty()) {
+		context.push_str(&format!("The mission, as it was given at the start:\n\n{original}\n\n"));
+	}
+	if !mission.plan.trim().is_empty() {
+		context.push_str(&format!("Its plan:\n\n{}\n\n", mission.plan.trim()));
+	}
 	let taches = mission
 		.tasks
 		.iter()
@@ -460,17 +470,13 @@ pub(crate) fn resume_brief(mission: &mission::Mission) -> String {
 	format!(
 		"── Resuming ──\n\
 		 This mission was already under way: Cockpit restarted, not the mission. Its \
-		 state is `{:?}`{}.\n\n\
-		 {}\n\n\
+		 state is `{:?}`.\n\n\
+		 {}{}\n\n\
 		 Start with `status` to see the mission as it is now, and carry on from there. \
 		 Do not re-plan what is already broken down, and do not relaunch what is \
 		 running: Cockpit restarts the pending tasks by itself.",
 		mission.state,
-		if mission.plan.trim().is_empty() {
-			""
-		} else {
-			", its plan is set"
-		},
+		context,
 		if taches.is_empty() {
 			"No task has been created yet.".to_string()
 		} else {
@@ -487,7 +493,7 @@ pub(crate) async fn mission_resume(app: AppHandle, id: String) -> Result<mission
 	// qui recompose à la fin : on le remet debout tant qu'on y est.
 	let mission = mission::get(&id)?;
 	if mission.master_session.is_none() && mission.state != mission::MissionState::Done {
-		let brief = resume_brief(&mission);
+		let brief = resume_brief(&mission, original_brief(&mission).await.as_deref());
 		let _ = launch_master(app.clone(), id.clone(), Some(brief), executions::Origin::human()).await;
 	}
 	launch_ready_tasks(app, &id).await;
@@ -534,7 +540,7 @@ pub(crate) async fn relaunch_mission_masters(app: &AppHandle) -> usize {
 		) {
 			continue;
 		}
-		let brief = resume_brief(&mission);
+		let brief = resume_brief(&mission, original_brief(&mission).await.as_deref());
 		if launch_master(
 			app.clone(),
 			mission.id.clone(),
@@ -887,6 +893,7 @@ pub(crate) async fn mission_start_from_ticket(app: AppHandle, reference: String)
 	// Le maître lancé dans la foulée : une mission ouverte et laissée sans maître
 	// n'a rien fait avancer, et il faudrait revenir la démarrer à la main.
 	let brief = ticket_brief(&ticket);
+	let _ = mission::keep_brief(&mission.id, &brief);
 	let session = launch_master(app, mission.id.clone(), Some(brief), executions::Origin::human()).await?;
 	let message = if guided {
 		i18n::tf("lib.mission.openedGuided", &[("identifier", &identifier)])
@@ -911,6 +918,9 @@ pub(crate) async fn mission_master_launch(app: AppHandle, id: String, brief: Opt
 	// Les boucles de fond, elles, passent par `launch_master` avec leur propre
 	// acteur — sans quoi une mission relancée à trois heures du matin se
 	// signerait de la main de quelqu'un qui dormait.
+	if let Some(brief) = brief.as_deref() {
+		let _ = mission::keep_brief(&id, brief);
+	}
 	launch_master(app, id, brief, executions::Origin::human()).await
 }
 
@@ -938,7 +948,13 @@ pub(crate) async fn launch_master(
 	// explicite ; celui-ci ne comble que le trou, jamais ne les court-circuite.
 	let brief = match brief.filter(|b| !b.trim().is_empty()) {
 		Some(brief) => Some(brief),
-		None => fetch_ticket_brief(&mission).await,
+		None => {
+			let ticket = original_brief(&mission).await;
+			if let Some(ticket) = &ticket {
+				let _ = mission::keep_brief(&id, ticket);
+			}
+			ticket
+		}
 	};
 
 	// Sans Node, pas de pont MCP, donc pas d'outils de mission : le maître
@@ -1299,7 +1315,7 @@ pub(crate) async fn guide_master(app: &AppHandle, mission: &mission::Mission, me
 		// autre, sans quoi deux maîtres finiraient par tenir la même mission.
 		let _ = agent::stop(agents.inner(), session);
 	}
-	let ticket = fetch_ticket_brief(mission).await.unwrap_or_default();
+	let ticket = original_brief(mission).await.unwrap_or_default();
 	let brief = if ticket.is_empty() {
 		message.to_string()
 	} else {
@@ -1313,6 +1329,15 @@ pub(crate) async fn guide_master(app: &AppHandle, mission: &mission::Mission, me
 	)
 	.await
 	.map(|_| ())
+}
+
+/// Ce qu'on a confié au premier maître, tel qu'il l'a reçu ; à défaut, le ticket
+/// relu chez le fournisseur.
+pub(crate) async fn original_brief(mission: &mission::Mission) -> Option<String> {
+	if !mission.brief.trim().is_empty() {
+		return Some(mission.brief.clone());
+	}
+	fetch_ticket_brief(mission).await
 }
 
 /// Le ticket d'une mission, relu chez le fournisseur et mis en forme.
@@ -1542,6 +1567,29 @@ pub(crate) fn roles_for(repo: &str) -> Vec<config::RoleConfig> {
 		roles
 	};
 	crate::roles::with_repo(repo, local)
+}
+
+#[cfg(test)]
+mod resume_brief_tests {
+	use super::*;
+
+	#[test]
+	fn le_maitre_relance_retrouve_l_objet_et_le_plan() {
+		let mut mission = mission::blocking_tests::mission_test(Vec::new());
+		mission.plan = "Deux tâches : le calcul, puis l'écran.".into();
+		let brief = resume_brief(&mission, Some("Corriger l'arrondi du panier."));
+		assert!(brief.contains("Corriger l'arrondi du panier."), "{brief}");
+		assert!(brief.contains("Deux tâches : le calcul, puis l'écran."), "{brief}");
+		assert!(brief.contains("No task has been created yet."));
+	}
+
+	#[test]
+	fn sans_brief_ni_plan_la_reprise_reste_celle_d_avant() {
+		let mission = mission::blocking_tests::mission_test(Vec::new());
+		let brief = resume_brief(&mission, None);
+		assert!(!brief.contains("as it was given"));
+		assert!(!brief.contains("Its plan"));
+	}
 }
 
 #[cfg(test)]
