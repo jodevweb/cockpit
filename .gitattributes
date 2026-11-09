@@ -1,2 +1,6 @@
 # Écrits par ts-rs en LF : sans cela, un checkout Windows les verrait modifiés.
 src/lib/generated/** text eol=lf
+# Écrits sur le disque tels quels par `include_str!`, qui ne normalise rien, contrairement
+# à une chaîne Rust. Un checkout Windows y mettrait des CR, jusque dans la ligne #! d'un
+# script lu sous Linux dans un conteneur.
+src-tauri/src/scripts/** text eol=lf

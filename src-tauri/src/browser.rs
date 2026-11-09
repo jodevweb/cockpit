@@ -98,70 +98,7 @@ fn known() -> Vec<PathBuf> {
 /// se glisse devant lui pour ce seul instant : il laisse passer la poignée de
 /// main et la liste des outils sans rien lancer, et démarre le navigateur
 /// juste avant de transmettre le premier appel d'outil.
-const SHIM: &str = r#"#!/usr/bin/env node
-// Pont navigateur du cockpit — généré, ne pas éditer à la main.
-import { spawn } from "node:child_process";
-import { writeFileSync } from "node:fs";
-import { delimiter, dirname } from "node:path";
-
-const PORT = process.env.COCKPIT_BROWSER_PORT;
-const LAUNCH = JSON.parse(process.env.COCKPIT_BROWSER_LAUNCH ?? "[]");
-const SERVER = JSON.parse(process.env.COCKPIT_BROWSER_SERVER ?? "[]");
-const PID_FILE = process.env.COCKPIT_BROWSER_PID;
-const ENDPOINT = `http://127.0.0.1:${PORT}`;
-
-// `npx` est un script Node : lancé depuis le Finder, le cockpit n'a pas le
-// dossier de Node dans son PATH, et `env node` échouerait.
-// Le séparateur du système : `:` ici, `;` sous Windows.
-const env = { ...process.env, PATH: `${dirname(process.execPath)}${delimiter}${process.env.PATH ?? ""}` };
-
-const alive = async () => {
-  try {
-    return (await fetch(`${ENDPOINT}/json/version`)).ok;
-  } catch {
-    return false;
-  }
-};
-
-let ready = null;
-/** Le navigateur répond — quitte à le lancer. Une seule fois par agent. */
-const ensure = () =>
-  (ready ??= (async () => {
-    if (await alive()) return;
-    if (LAUNCH.length === 0) return;
-    const child = spawn(LAUNCH[0], LAUNCH.slice(1), { detached: true, stdio: "ignore", env, windowsHide: true });
-    child.unref();
-    if (PID_FILE && child.pid) writeFileSync(PID_FILE, String(child.pid));
-    for (let waited = 0; waited < 15000; waited += 150) {
-      if (await alive()) return;
-      await new Promise((resolve) => setTimeout(resolve, 150));
-    }
-  })());
-
-const server = spawn(SERVER[0], [...SERVER.slice(1), "--cdp-endpoint", ENDPOINT], {
-  stdio: ["pipe", "inherit", "inherit"],
-  env,
-  windowsHide: true,
-});
-server.on("exit", (code) => process.exit(code ?? 0));
-
-// Les messages passent dans l'ordre : un appel d'outil attend le navigateur,
-// et tout ce qui le suit attend derrière lui.
-let queue = Promise.resolve();
-let buffer = "";
-process.stdin.on("data", (chunk) => {
-  buffer += chunk;
-  const lines = buffer.split("\n");
-  buffer = lines.pop() ?? "";
-  for (const line of lines) {
-    queue = queue.then(async () => {
-      if (line.includes('"tools/call"')) await ensure();
-      server.stdin.write(`${line}\n`);
-    });
-  }
-});
-process.stdin.on("end", () => server.kill());
-"#;
+const SHIM: &str = include_str!("scripts/browser-bridge.mjs");
 
 fn state_dir() -> PathBuf {
 	config_dir().join("browsers")
@@ -374,40 +311,7 @@ pub async fn snapshot(cwd: &str) -> Option<(Vec<u8>, String)> {
 /// composant ». On lit donc l'élément lui-même : sa balise, son texte, un
 /// sélecteur court, et — quand la page est une application React en
 /// développement — le composant qui l'a rendu, voire son fichier.
-const INSPECT: &str = r##"(() => {
-  const el = document.elementFromPoint(__X__, __Y__);
-  if (!el) return null;
-  const box = el.getBoundingClientRect();
-  let component = null, source = null;
-  const key = Object.keys(el).find((name) => name.startsWith("__reactFiber$"));
-  for (let fiber = key ? el[key] : null; fiber && !(component && source); fiber = fiber.return) {
-    const type = fiber.type;
-    const name = typeof type === "function" ? (type.displayName || type.name)
-      : type && typeof type === "object" ? (type.displayName || (type.render && (type.render.displayName || type.render.name)) || (type.type && (type.type.displayName || type.type.name)))
-      : null;
-    if (!component && name && /^[A-Z]/.test(name)) component = name;
-    if (!source && fiber._debugSource) source = fiber._debugSource.fileName + ":" + fiber._debugSource.lineNumber;
-  }
-  const path = [];
-  for (let node = el; node && node.nodeType === 1 && path.length < 4; node = node.parentElement) {
-    let part = node.tagName.toLowerCase();
-    if (node.id) part += "#" + node.id;
-    else if (node.classList.length) part += "." + [...node.classList].slice(0, 2).join(".");
-    path.unshift(part);
-  }
-  return {
-    tag: el.tagName.toLowerCase(),
-    text: String(el.innerText || el.value || el.getAttribute("alt") || "").trim().replace(/\s+/g, " ").slice(0, 90),
-    testid: el.getAttribute("data-testid"),
-    role: el.getAttribute("role"),
-    label: el.getAttribute("aria-label"),
-    selector: path.join(" > "),
-    component,
-    source,
-    url: location.href,
-    rect: { x: box.x, y: box.y, width: box.width, height: box.height },
-  };
-})()"##;
+const INSPECT: &str = include_str!("scripts/browser-inspect.js");
 
 pub async fn inspect(cwd: &str, x: f64, y: f64) -> Result<serde_json::Value> {
 	let port = std::fs::read_to_string(port_path(cwd))
