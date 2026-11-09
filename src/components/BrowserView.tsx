@@ -110,34 +110,29 @@ function serversOf(ports: ListeningPort[] | null, cwd: string): ListeningPort[] 
 		.sort((a, b) => a.port - b.port);
 }
 
-export function BrowserView({
-	cwd,
-	active,
-	driving,
-	onStartServer,
-}: {
-	cwd: string;
-	/** L'onglet est celui qu'on regarde : masqué, il ne diffuse rien. */
-	active: boolean;
-	/** L'outil que l'agent emploie en ce moment dans la page, s'il y en a un. */
-	driving: string | null;
-	/** Lance le serveur de dev de l'équipe, si elle en a déclaré un. */
-	onStartServer?: () => void;
-}) {
-	const { t } = useTranslation("components3");
-	const { activeProject } = useCockpit();
-	// Le dossier du serveur qu'on a choisi d'ouvrir, par projet.
-	const [home, setHome] = usePersistentState<string | null>(`browser.home.${activeProject?.id ?? "defaut"}`, null);
-	const [status, setStatus] = useState<Status>("idle");
-	const [error, setError] = useState<string | null>(null);
-	// L'adresse de la page, et celle qu'on est en train d'écrire.
-	const [url, setUrl] = useState("");
-	const [typed, setTyped] = useState<string | null>(null);
-	const [title, setTitle] = useState("");
+/**
+ * Ce qui écoute dans ce workspace, interrogé plus souvent quand on attend un
+ * serveur qu'on vient de lancer.
+ */
+function useWorkspaceServers(cwd: string, active: boolean) {
 	// On attend qu'un serveur lancé se mette à écouter.
 	const [waiting, setWaiting] = useState(false);
-	// On montre la page à l'agent : les gestes ne partent plus dans la page.
-	const [annotating, setAnnotating] = useState(false);
+	const ports = useAsync(() => api.system.ports(), [], { pollMs: waiting ? 2000 : 10_000, enabled: active });
+	const servers = serversOf(ports.data, cwd);
+	return { ports, servers, waiting, setWaiting };
+}
+
+/**
+ * La liaison avec le navigateur du workspace : on le regarde, on dessine ses
+ * images, on lui envoie les gestes, et on cesse de le regarder quand l'onglet
+ * n'est plus à l'écran.
+ */
+function useBrowserSession(cwd: string, active: boolean, driving: string | null) {
+	const [status, setStatus] = useState<Status>("idle");
+	const [error, setError] = useState<string | null>(null);
+	// L'adresse de la page.
+	const [url, setUrl] = useState("");
+	const [title, setTitle] = useState("");
 	const canvas = useRef<HTMLCanvasElement>(null);
 	const stage = useRef<HTMLDivElement>(null);
 	const size = useRef({ width: 1280, height: 800 });
@@ -154,10 +149,6 @@ export function BrowserView({
 		},
 		[cwd],
 	);
-
-	const ports = useAsync(() => api.system.ports(), [], { pollMs: waiting ? 2000 : 10_000, enabled: active });
-	const servers = serversOf(ports.data, cwd);
-	const blank = url === "" || url === "about:blank";
 
 	const open = useCallback(async () => {
 		setStatus("opening");
@@ -306,6 +297,36 @@ export function BrowserView({
 		};
 	}, [active, status, cwd, open, driving]);
 
+	return { status, setStatus, error, url, setUrl, title, setTitle, canvas, stage, size, shown, act, open };
+}
+
+/**
+ * Aller de soi-même sur ce qui écoute dans le workspace, quitte à lancer
+ * d'abord le serveur de l'équipe.
+ */
+function useServerLead({
+	status,
+	blank,
+	servers,
+	act,
+	cwd,
+	home,
+	onStartServer,
+	portsInitial,
+	waiting,
+	setWaiting,
+}: {
+	status: Status;
+	blank: boolean;
+	servers: ListeningPort[];
+	act: (action: BrowserAction) => void;
+	cwd: string;
+	home: string | null;
+	onStartServer: (() => void) | undefined;
+	portsInitial: boolean;
+	waiting: boolean;
+	setWaiting: (waiting: boolean) => void;
+}) {
 	// Ouvert sur une page vide : on va de soi-même sur ce qui écoute ici. On ne
 	// le fait qu'une fois par ouverture — revenir à une page vide est un choix.
 	const led = useRef(false);
@@ -319,44 +340,57 @@ export function BrowserView({
 		setWaiting(false);
 		const first = homeOf(servers, cwd, home);
 		if (first) act({ kind: "navigate", url: `http://localhost:${first.port}` });
-	}, [status, blank, servers, act, cwd, home]);
+		// `setWaiting` est le setter d'un état : stable, il ne relance rien.
+	}, [status, blank, servers, act, cwd, home, setWaiting]);
 
 	// Rien n'écoute : on lance le serveur de l'équipe, et la page s'ouvrira
 	// d'elle-même dès qu'il répondra.
 	const started = useRef(false);
 	useEffect(() => {
 		if (status !== "live" || !blank || isPreview()) return;
-		if (started.current || !onStartServer || ports.initial || servers.length > 0) return;
+		if (started.current || !onStartServer || portsInitial || servers.length > 0) return;
 		started.current = true;
 		setWaiting(true);
 		onStartServer();
-	}, [status, blank, onStartServer, ports.initial, servers.length]);
+	}, [status, blank, onStartServer, portsInitial, servers.length, setWaiting]);
 	// Un serveur qui ne vient pas : on cesse de l'annoncer.
 	useEffect(() => {
 		if (!waiting) return;
 		const timer = window.setTimeout(() => setWaiting(false), SERVER_WAIT_MS);
 		return () => window.clearTimeout(timer);
-	}, [waiting]);
+	}, [waiting, setWaiting]);
 
-	const go = (target: string) => {
-		const address = toUrl(target);
-		if (!address) return;
-		setTyped(null);
-		led.current = true;
-		if (status === "live") act({ kind: "navigate", url: address });
-		else void open().then(() => act({ kind: "navigate", url: address }));
+	return { led, started };
+}
+
+/** Un point de l'écran, ramené au repère de la page. */
+function pointIn(
+	canvas: React.RefObject<HTMLCanvasElement | null>,
+	size: React.RefObject<{ width: number; height: number }>,
+	event: { clientX: number; clientY: number },
+) {
+	const box = canvas.current?.getBoundingClientRect();
+	if (!box || box.width === 0) return null;
+	return {
+		x: ((event.clientX - box.left) / box.width) * size.current.width,
+		y: ((event.clientY - box.top) / box.height) * size.current.height,
 	};
+}
 
-	/** Un point de l'écran, ramené au repère de la page. */
-	const pointOf = (event: { clientX: number; clientY: number }) => {
-		const box = canvas.current?.getBoundingClientRect();
-		if (!box || box.width === 0) return null;
-		return {
-			x: ((event.clientX - box.left) / box.width) * size.current.width,
-			y: ((event.clientY - box.top) / box.height) * size.current.height,
-		};
-	};
-
+/** Les gestes de la souris, de la molette et du clavier, relayés à la page. */
+function usePageInput({
+	status,
+	act,
+	canvas,
+	stage,
+	size,
+}: {
+	status: Status;
+	act: (action: BrowserAction) => void;
+	canvas: React.RefObject<HTMLCanvasElement | null>;
+	stage: React.RefObject<HTMLDivElement | null>;
+	size: React.RefObject<{ width: number; height: number }>;
+}) {
 	// La molette demande un écouteur non passif pour ne pas faire défiler l'app.
 	useEffect(() => {
 		const element = stage.current;
@@ -373,7 +407,7 @@ export function BrowserView({
 			pending = null;
 		};
 		const wheel = (event: WheelEvent) => {
-			const point = pointOf(event);
+			const point = pointIn(canvas, size, event);
 			if (!point) return;
 			event.preventDefault();
 			pending = {
@@ -388,7 +422,8 @@ export function BrowserView({
 			element.removeEventListener("wheel", wheel);
 			cancelAnimationFrame(frame);
 		};
-	}, [status, act]);
+		// `stage`, `canvas` et `size` sont des refs : stables, elles ne relancent rien.
+	}, [status, act, stage, canvas, size]);
 
 	const lastMove = useRef(0);
 	const mouse = (kind: "mousePressed" | "mouseReleased" | "mouseMoved") => (event: React.MouseEvent) => {
@@ -399,7 +434,7 @@ export function BrowserView({
 			if (event.timeStamp - lastMove.current < 16) return;
 			lastMove.current = event.timeStamp;
 		}
-		const point = pointOf(event);
+		const point = pointIn(canvas, size, event);
 		if (!point) return;
 		if (kind === "mousePressed") {
 			// Le clic ne doit pas reprendre le focus au champ de saisie caché.
@@ -465,94 +500,205 @@ export function BrowserView({
 		});
 	};
 
+	return { mouse, keys, composing, sendText, key };
+}
+
+/** La barre du navigateur : historique, adresse, serveurs du workspace, annotation, arrêt. */
+function BrowserToolbar({
+	cwd,
+	status,
+	live,
+	blank,
+	url,
+	title,
+	typed,
+	setTyped,
+	go,
+	servers,
+	setHome,
+	driving,
+	annotating,
+	setAnnotating,
+	act,
+	onStop,
+}: {
+	cwd: string;
+	status: Status;
+	live: boolean;
+	blank: boolean;
+	url: string;
+	title: string;
+	typed: string | null;
+	setTyped: (typed: string | null) => void;
+	go: (target: string) => void;
+	servers: ListeningPort[];
+	setHome: (home: string | null) => void;
+	driving: string | null;
+	annotating: boolean;
+	setAnnotating: React.Dispatch<React.SetStateAction<boolean>>;
+	act: (action: BrowserAction) => void;
+	onStop: () => void;
+}) {
+	const { t } = useTranslation("components3");
+	return (
+		<div className="flex items-center gap-1 border-b border-line-soft px-3 py-1.5">
+			<Button size="sm" icon={ArrowLeft} disabled={!live} onClick={() => act({ kind: "back" })} title={t("browserView.back")} />
+			<Button size="sm" icon={ArrowRight} disabled={!live} onClick={() => act({ kind: "forward" })} title={t("browserView.forward")} />
+			<Button size="sm" icon={RotateCw} disabled={!live} onClick={() => act({ kind: "reload" })} title={t("browserView.reload")} />
+			<form
+				className="flex min-w-0 flex-1 items-center gap-2 rounded-lg bg-raised px-2.5 py-1"
+				onSubmit={(event) => {
+					event.preventDefault();
+					go(typed ?? url);
+				}}
+			>
+				<Globe size={12} className="shrink-0 text-ink-faint" />
+				<input
+					value={typed ?? (blank ? "" : url)}
+					onChange={(event) => setTyped(event.target.value)}
+					onBlur={() => setTyped(null)}
+					placeholder={t("browserView.addressPlaceholder")}
+					spellCheck={false}
+					className="min-w-0 flex-1 bg-transparent font-mono text-[11.5px] text-ink outline-none placeholder:text-ink-faint"
+				/>
+				{title && typed === null ? (
+					<span className="max-w-56 shrink-0 truncate text-[11px] text-ink-faint">{title}</span>
+				) : null}
+			</form>
+			{/* Ce qui écoute dans ce workspace : on y va d'un clic, sans rien écrire. */}
+			{servers.slice(0, 5).map((server) => (
+				<button
+					key={server.port}
+					type="button"
+					onClick={() => {
+						// Choisir un serveur, c'est dire où l'on veut arriver la prochaine fois.
+						setHome(placeOf(server, cwd));
+						go(`localhost:${server.port}`);
+					}}
+					title={`${server.process} — ${server.cwd}`}
+					className={clsx(
+						"focus-ring shrink-0 rounded-full px-2 py-0.5 font-mono text-[11px]",
+						url.includes(`localhost:${server.port}`)
+							? "bg-accent-dim text-accent"
+							: "bg-raised text-ink-muted hover:bg-hover hover:text-ink",
+					)}
+				>
+					{nameOf(server, cwd)} :{server.port}
+				</button>
+			))}
+			{driving ? (
+				<span className="flex shrink-0 items-center gap-1.5 rounded-full bg-accent-dim px-2.5 py-1 text-[11px] font-medium text-accent">
+					<span className="animate-pulse-dot size-1.5 rounded-full bg-accent" />
+					<Bot size={12} />
+					{gestureLabel(driving)}
+				</span>
+			) : null}
+			<Button
+				size="sm"
+				icon={PenLine}
+				variant={annotating ? "solid" : undefined}
+				disabled={!live}
+				onClick={() => setAnnotating((value) => !value)}
+				title={t("browserView.annotateTitle")}
+			>
+				{t("browserView.annotate")}
+			</Button>
+			<Button
+				size="sm"
+				icon={ExternalLink}
+				disabled={!live || blank}
+				onClick={() => void api.system.openUrl(url)}
+				title={t("browserView.openExternal")}
+			/>
+			<Button size="sm" icon={Power} disabled={status === "idle"} onClick={onStop} title={t("browserView.stop")} />
+		</div>
+	);
+}
+
+export function BrowserView({
+	cwd,
+	active,
+	driving,
+	onStartServer,
+}: {
+	cwd: string;
+	/** L'onglet est celui qu'on regarde : masqué, il ne diffuse rien. */
+	active: boolean;
+	/** L'outil que l'agent emploie en ce moment dans la page, s'il y en a un. */
+	driving: string | null;
+	/** Lance le serveur de dev de l'équipe, si elle en a déclaré un. */
+	onStartServer?: () => void;
+}) {
+	const { t } = useTranslation("components3");
+	const { activeProject } = useCockpit();
+	// Le dossier du serveur qu'on a choisi d'ouvrir, par projet.
+	const [home, setHome] = usePersistentState<string | null>(`browser.home.${activeProject?.id ?? "defaut"}`, null);
+	// L'adresse qu'on est en train d'écrire.
+	const [typed, setTyped] = useState<string | null>(null);
+	// On montre la page à l'agent : les gestes ne partent plus dans la page.
+	const [annotating, setAnnotating] = useState(false);
+
+	// Les effets partent dans l'ordre des hooks : les ports d'abord, puis la
+	// liaison avec le navigateur, le serveur à ouvrir, et enfin les gestes.
+	const { ports, servers, waiting, setWaiting } = useWorkspaceServers(cwd, active);
+	const { status, setStatus, error, url, setUrl, title, setTitle, canvas, stage, size, shown, act, open } =
+		useBrowserSession(cwd, active, driving);
+	const blank = url === "" || url === "about:blank";
+	const { led, started } = useServerLead({
+		status,
+		blank,
+		servers,
+		act,
+		cwd,
+		home,
+		onStartServer,
+		portsInitial: ports.initial,
+		waiting,
+		setWaiting,
+	});
+
+	const go = (target: string) => {
+		const address = toUrl(target);
+		if (!address) return;
+		setTyped(null);
+		led.current = true;
+		if (status === "live") act({ kind: "navigate", url: address });
+		else void open().then(() => act({ kind: "navigate", url: address }));
+	};
+
+	const { mouse, keys, composing, sendText, key } = usePageInput({ status, act, canvas, stage, size });
+
+	const stop = () => {
+		void api.browser.stop(cwd).catch(() => undefined);
+		setStatus("idle");
+		setUrl("");
+		setTitle("");
+		shown.current = { url: "", title: "" };
+		started.current = false;
+	};
+
 	const live = status === "live";
 
 	return (
 		<div className="flex min-h-0 flex-1 flex-col">
-			<div className="flex items-center gap-1 border-b border-line-soft px-3 py-1.5">
-				<Button size="sm" icon={ArrowLeft} disabled={!live} onClick={() => act({ kind: "back" })} title={t("browserView.back")} />
-				<Button size="sm" icon={ArrowRight} disabled={!live} onClick={() => act({ kind: "forward" })} title={t("browserView.forward")} />
-				<Button size="sm" icon={RotateCw} disabled={!live} onClick={() => act({ kind: "reload" })} title={t("browserView.reload")} />
-				<form
-					className="flex min-w-0 flex-1 items-center gap-2 rounded-lg bg-raised px-2.5 py-1"
-					onSubmit={(event) => {
-						event.preventDefault();
-						go(typed ?? url);
-					}}
-				>
-					<Globe size={12} className="shrink-0 text-ink-faint" />
-					<input
-						value={typed ?? (blank ? "" : url)}
-						onChange={(event) => setTyped(event.target.value)}
-						onBlur={() => setTyped(null)}
-						placeholder={t("browserView.addressPlaceholder")}
-						spellCheck={false}
-						className="min-w-0 flex-1 bg-transparent font-mono text-[11.5px] text-ink outline-none placeholder:text-ink-faint"
-					/>
-					{title && typed === null ? (
-						<span className="max-w-56 shrink-0 truncate text-[11px] text-ink-faint">{title}</span>
-					) : null}
-				</form>
-				{/* Ce qui écoute dans ce workspace : on y va d'un clic, sans rien écrire. */}
-				{servers.slice(0, 5).map((server) => (
-					<button
-						key={server.port}
-						type="button"
-						onClick={() => {
-							// Choisir un serveur, c'est dire où l'on veut arriver la prochaine fois.
-							setHome(placeOf(server, cwd));
-							go(`localhost:${server.port}`);
-						}}
-						title={`${server.process} — ${server.cwd}`}
-						className={clsx(
-							"focus-ring shrink-0 rounded-full px-2 py-0.5 font-mono text-[11px]",
-							url.includes(`localhost:${server.port}`)
-								? "bg-accent-dim text-accent"
-								: "bg-raised text-ink-muted hover:bg-hover hover:text-ink",
-						)}
-					>
-						{nameOf(server, cwd)} :{server.port}
-					</button>
-				))}
-				{driving ? (
-					<span className="flex shrink-0 items-center gap-1.5 rounded-full bg-accent-dim px-2.5 py-1 text-[11px] font-medium text-accent">
-						<span className="animate-pulse-dot size-1.5 rounded-full bg-accent" />
-						<Bot size={12} />
-						{gestureLabel(driving)}
-					</span>
-				) : null}
-				<Button
-					size="sm"
-					icon={PenLine}
-					variant={annotating ? "solid" : undefined}
-					disabled={!live}
-					onClick={() => setAnnotating((value) => !value)}
-					title={t("browserView.annotateTitle")}
-				>
-					{t("browserView.annotate")}
-				</Button>
-				<Button
-					size="sm"
-					icon={ExternalLink}
-					disabled={!live || blank}
-					onClick={() => void api.system.openUrl(url)}
-					title={t("browserView.openExternal")}
-				/>
-				<Button
-					size="sm"
-					icon={Power}
-					disabled={status === "idle"}
-					onClick={() => {
-						void api.browser.stop(cwd).catch(() => undefined);
-						setStatus("idle");
-						setUrl("");
-						setTitle("");
-						shown.current = { url: "", title: "" };
-						started.current = false;
-					}}
-					title={t("browserView.stop")}
-				/>
-			</div>
+			<BrowserToolbar
+				cwd={cwd}
+				status={status}
+				live={live}
+				blank={blank}
+				url={url}
+				title={title}
+				typed={typed}
+				setTyped={setTyped}
+				go={go}
+				servers={servers}
+				setHome={setHome}
+				driving={driving}
+				annotating={annotating}
+				setAnnotating={setAnnotating}
+				act={act}
+				onStop={stop}
+			/>
 
 			<div
 				ref={stage}
