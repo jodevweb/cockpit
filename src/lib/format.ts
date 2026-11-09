@@ -49,28 +49,6 @@ export function fromIso(iso: string | null | undefined): string {
 	return fromSeconds((Date.now() - parsed) / 1000);
 }
 
-export function clockTime(iso: string | null | undefined): string {
-	if (!iso) return "";
-	const parsed = new Date(iso);
-	if (Number.isNaN(parsed.getTime())) return "";
-	return parsed.toLocaleTimeString(locale(), {
-		hour: "2-digit",
-		minute: "2-digit",
-	});
-}
-
-export function fullDate(iso: string | null | undefined): string {
-	if (!iso) return "—";
-	const parsed = new Date(iso);
-	if (Number.isNaN(parsed.getTime())) return "—";
-	return parsed.toLocaleString(locale(), {
-		day: "2-digit",
-		month: "short",
-		hour: "2-digit",
-		minute: "2-digit",
-	});
-}
-
 let compactCache: { locale: string; format: Intl.NumberFormat } | null = null;
 
 export function compactNumber(value: number): string {

@@ -38,20 +38,6 @@
 		"source": {
 			"tracker": "Gestore dei ticket"
 		},
-		"event": {
-			"merged": "PR unita",
-			"opened": "PR aperta",
-			"updated": "PR aggiornata",
-			"reviewed": "PR revisionata",
-			"done": "Ticket completato",
-			"started": "Ticket avviato",
-			"moved": "Ticket spostato",
-			"canceled": "Ticket annullato",
-			"agent": "Agenti",
-			"git": "Azione Git",
-			"resolved": "Errore risolto",
-			"assigned": "Errore assegnato"
-		},
 		"markdown": {
 			"silent": "Nessuna risposta questa volta: {{sources}}."
 		}
@@ -194,14 +180,6 @@
 			"memory": "Istruzioni del progetto",
 			"system": "Base della CLI",
 			"other": "Altro"
-		}
-	},
-	"illustrations": {
-		"source": {
-			"mesure": "misurato",
-			"depot": "trovato nel repository",
-			"capture": "catturato",
-			"agent": "dichiarato dall'agente"
 		}
 	},
 	"film": {

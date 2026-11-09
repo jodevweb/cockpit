@@ -38,11 +38,6 @@ use crate::mission::{self, MissionState, Task, TaskState};
 use serde::{Deserialize, Serialize};
 use serde_json::{json, Value};
 
-/// Au-delà, c'est qu'un plan a dérapé. Trois exécutants en parallèle sur un
-/// même ticket est déjà beaucoup ; six est le signe qu'on n'a pas découpé, on a
-/// éparpillé.
-const MAX_RUNNING: usize = 4;
-
 pub fn calls_dir() -> std::path::PathBuf {
 	config_dir().join("orchestrator")
 }
@@ -482,7 +477,7 @@ async fn run(app: &tauri::AppHandle, call: &Call) -> Result<Value> {
 				.iter()
 				.filter(|task| task.state == TaskState::Running)
 				.count();
-			if running >= MAX_RUNNING {
+			if running >= crate::watchers::MAX_RUNNING_TASKS {
 				return Err(CockpitError::msg(format!(
 					"{running} workers are already running: wait for one before launching another."
 				)));

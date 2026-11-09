@@ -7,9 +7,6 @@
 
 use super::*;
 
-/// Surveille `~/.claude/projects` et notifie l'UI dès qu'un agent écrit.
-/// Debounce volontaire : Claude Code écrit par rafales, on ne veut pas
-/// re-scanner à chaque ligne de JSONL.
 /// Au-delà, c'est qu'un plan a dérapé plutôt qu'il n'a découpé.
 pub(crate) const MAX_RUNNING_TASKS: usize = 4;
 
@@ -807,6 +804,9 @@ pub(crate) fn watch_scopes() {
 	});
 }
 
+/// Surveille `~/.claude/projects` et notifie l'UI dès qu'un agent écrit.
+/// Debounce volontaire : Claude Code écrit par rafales, on ne veut pas
+/// re-scanner à chaque ligne de JSONL.
 pub(crate) fn watch_sessions(app: AppHandle) {
 	use notify::{RecursiveMode, Watcher};
 

@@ -131,46 +131,6 @@ export const SOURCE_COLOR: Record<string, string> = {
 	sentry: "var(--color-warning)",
 };
 
-/** Ce qui est arrivé à un élément, dit en clair. */
-export const EVENT_LABEL: Record<string, string> = {
-	get merged() {
-		return t("lib:automations.event.merged");
-	},
-	get opened() {
-		return t("lib:automations.event.opened");
-	},
-	get updated() {
-		return t("lib:automations.event.updated");
-	},
-	get reviewed() {
-		return t("lib:automations.event.reviewed");
-	},
-	get done() {
-		return t("lib:automations.event.done");
-	},
-	get started() {
-		return t("lib:automations.event.started");
-	},
-	get moved() {
-		return t("lib:automations.event.moved");
-	},
-	get canceled() {
-		return t("lib:automations.event.canceled");
-	},
-	get agent() {
-		return t("lib:automations.event.agent");
-	},
-	get git() {
-		return t("lib:automations.event.git");
-	},
-	get resolved() {
-		return t("lib:automations.event.resolved");
-	},
-	get assigned() {
-		return t("lib:automations.event.assigned");
-	},
-};
-
 /**
  * Les prochains rendez-vous d'un réglage pas encore enregistré, avec la
  * période que chacun couvrira. Même règle que `automations::upcoming`.

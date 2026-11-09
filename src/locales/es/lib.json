@@ -38,20 +38,6 @@
 		"source": {
 			"tracker": "Gestor de tareas"
 		},
-		"event": {
-			"merged": "PR fusionada",
-			"opened": "PR abierta",
-			"updated": "PR actualizada",
-			"reviewed": "PR revisada",
-			"done": "Ticket terminado",
-			"started": "Ticket empezado",
-			"moved": "Ticket movido",
-			"canceled": "Ticket cancelado",
-			"agent": "Agentes",
-			"git": "Acción de Git",
-			"resolved": "Error resuelto",
-			"assigned": "Error asignado"
-		},
 		"markdown": {
 			"silent": "Sin respuesta esta vez: {{sources}}."
 		}
@@ -194,14 +180,6 @@
 			"memory": "Instrucciones del proyecto",
 			"system": "Base de la CLI",
 			"other": "Otros"
-		}
-	},
-	"illustrations": {
-		"source": {
-			"mesure": "medido",
-			"depot": "encontrado en el repositorio",
-			"capture": "capturado",
-			"agent": "declarado por el agente"
 		}
 	},
 	"film": {

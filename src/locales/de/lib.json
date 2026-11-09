@@ -38,20 +38,6 @@
 		"source": {
 			"tracker": "Aufgaben-Tracker"
 		},
-		"event": {
-			"merged": "PR gemergt",
-			"opened": "PR geöffnet",
-			"updated": "PR aktualisiert",
-			"reviewed": "PR reviewt",
-			"done": "Ticket erledigt",
-			"started": "Ticket begonnen",
-			"moved": "Ticket verschoben",
-			"canceled": "Ticket abgebrochen",
-			"agent": "Agenten",
-			"git": "Git-Aktion",
-			"resolved": "Fehler behoben",
-			"assigned": "Fehler zugewiesen"
-		},
 		"markdown": {
 			"silent": "Diesmal keine Antwort: {{sources}}."
 		}
@@ -194,14 +180,6 @@
 			"memory": "Projektanweisungen",
 			"system": "CLI-Grundlast",
 			"other": "Sonstiges"
-		}
-	},
-	"illustrations": {
-		"source": {
-			"mesure": "gemessen",
-			"depot": "im Repository gefunden",
-			"capture": "aufgenommen",
-			"agent": "vom Agenten angegeben"
 		}
 	},
 	"film": {
