@@ -197,6 +197,9 @@ pub struct AgentRegistry {
 	/// compter comme une livraison, et la mission proposait d'ouvrir une pull
 	/// request sur du vide.
 	completed: Mutex<std::collections::HashSet<String>>,
+	/// De quoi prévenir l'écran depuis `stop`, appelé sans lui. Posé au premier
+	/// lancement : un agent n'existe dans le registre qu'après en être passé par là.
+	app: OnceLock<AppHandle>,
 }
 
 pub type SharedAgents = Arc<AgentRegistry>;
@@ -1066,6 +1069,7 @@ async fn start_inner(
 	}
 
 	let session_id = format!("agent-{}", uuid_like());
+	let _ = agents.app.set(app.clone());
 	// Inscrite avant même le lancement : la première demande peut arriver
 	// avant que quoi que ce soit d'autre soit prêt.
 	if locked {
@@ -2109,9 +2113,25 @@ fn spawn_reader(
 			// donc toujours la fin de l'agent, comme pour le protocole par
 			// défaut — il suit la branche `else` ci-dessous sans cas particulier.
 			if !dialect.keeps_process() && finished_cleanly {
-				if let Some(running) = agents.sessions.lock().unwrap().get_mut(&session_id) {
-					running.child = None;
-					running.stdin = None;
+				let registered = match agents.sessions.lock().unwrap().get_mut(&session_id) {
+					Some(running) => {
+						running.child = None;
+						running.stdin = None;
+						true
+					}
+					None => false,
+				};
+				// Arrêté pendant que son process finissait : `stop` l'a retiré du
+				// registre sans annoncer sa fin, puisqu'un process vivait encore.
+				// C'est donc ici qu'elle se dit.
+				if !registered {
+					let _ = app.emit(
+						"agent://event",
+						AgentEvent {
+							session_id: session_id.clone(),
+							payload: json!({ "type": "cockpit", "subtype": "ended" }),
+						},
+					);
 				}
 			} else {
 				// Mort avant la première réponse (`finished_cleanly` ne s'est jamais
@@ -2520,6 +2540,21 @@ pub fn stop(agents: &SharedAgents, session_id: &str) -> Result<()> {
 	// rendre sa réponse — rien à tuer, il n'y a simplement plus de process.
 	if let Some(child) = running.child.as_mut() {
 		let _ = child.start_kill();
+	}
+	// D'habitude, c'est la lecture de sa sortie qui annonce la fin d'un agent
+	// tué. Entre deux tours, un agent Codex n'en a plus : rien ne prévenait
+	// l'écran, qui gardait les maîtres arrêtés par la mission « en attente »,
+	// six sur le même worktree au bout de quelques phases.
+	if running.child.is_none() && running.relay.is_none() {
+		if let Some(app) = agents.app.get() {
+			let _ = app.emit(
+				"agent://event",
+				AgentEvent {
+					session_id: session_id.to_string(),
+					payload: json!({ "type": "cockpit", "subtype": "ended" }),
+				},
+			);
+		}
 	}
 	// Détaché : le groupe entier, puis son dossier — voir `relay::kill`.
 	if let Some(relay) = &running.relay {
