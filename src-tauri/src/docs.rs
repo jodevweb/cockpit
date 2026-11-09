@@ -82,11 +82,7 @@ pub fn scan_worktree(root: &Path, worktree_label: &str) -> Vec<DocEntry> {
 			if !is_doc {
 				continue;
 			}
-			let relative = path
-				.strip_prefix(root)
-				.unwrap_or(path)
-				.to_string_lossy()
-				.to_string();
+			let relative = path.strip_prefix(root).unwrap_or(path).to_string_lossy().to_string();
 			entries.push(DocEntry {
 				path: path.to_string_lossy().to_string(),
 				relative,

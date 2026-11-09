@@ -161,10 +161,7 @@ mod tests {
 	fn command() -> CommandConfig {
 		CommandConfig {
 			base: "pnpm worktree:create".into(),
-			options: vec![
-				option("force", "--force", "boolean"),
-				option("from", "--from", "text"),
-			],
+			options: vec![option("force", "--force", "boolean"), option("from", "--from", "text")],
 			..blank("x")
 		}
 	}

@@ -90,7 +90,8 @@ pub(crate) use scope_rules;
 ///
 /// Il parle JSON-RPC sur son entrée/sortie standard — le strict nécessaire du
 /// protocole : `initialize`, `tools/list`, `tools/call`.
-const BRIDGE: &str = concat!(r#"#!/usr/bin/env node
+const BRIDGE: &str = concat!(
+	r#"#!/usr/bin/env node
 // Pont d'autorisation du cockpit — généré, ne pas éditer à la main.
 import { mkdirSync, writeFileSync, readFileSync, existsSync, unlinkSync } from "node:fs";
 import { join } from "node:path";
@@ -109,7 +110,9 @@ const SESSION = process.env.COCKPIT_AGENT_SESSION ?? null;
 // permission de chaque commande. On tranche ici plutôt que de déranger.
 const BYPASS = process.env.COCKPIT_PERMISSION_MODE === "bypassPermissions";
 
-"#, scope_rules!(), r#"// Les outils dont on sait lire la cible sans l'interpréter. `Bash` en est
+"#,
+	scope_rules!(),
+	r#"// Les outils dont on sait lire la cible sans l'interpréter. `Bash` en est
 // exclu : deviner ce qu'une ligne de commande touche serait une promesse qu'on
 // ne peut pas tenir.
 const ECRITURES = { Write: "file_path", Edit: "file_path", MultiEdit: "file_path", NotebookEdit: "notebook_path" };
@@ -432,7 +435,8 @@ process.stdin.on("data", async (chunk) => {
     }
   }
 });
-"#);
+"#
+);
 
 pub fn permissions_dir() -> PathBuf {
 	config_dir().join("permissions")
@@ -475,7 +479,11 @@ pub fn bridge_arguments(sandboxed: bool) -> Option<(String, String)> {
 	// ont la forme `/c/Users/…` (voir `sandbox::container_path`).
 	let seen = |path: &std::path::Path| {
 		let path = path.to_string_lossy().to_string();
-		if sandboxed { crate::sandbox::container_path(&path) } else { path }
+		if sandboxed {
+			crate::sandbox::container_path(&path)
+		} else {
+			path
+		}
 	};
 	let payload = serde_json::json!({
 		"mcpServers": {
@@ -487,10 +495,7 @@ pub fn bridge_arguments(sandboxed: bool) -> Option<(String, String)> {
 	});
 	std::fs::write(&config, serde_json::to_string_pretty(&payload).ok()?).ok()?;
 
-	Some((
-		seen(&config),
-		"mcp__cockpit__approve".to_string(),
-	))
+	Some((seen(&config), "mcp__cockpit__approve".to_string()))
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -515,12 +520,7 @@ pub fn pending() -> Vec<PermissionRequest> {
 
 	let mut requests: Vec<PermissionRequest> = entries
 		.flatten()
-		.filter(|entry| {
-			entry
-				.path()
-				.extension()
-				.is_some_and(|extension| extension == "request")
-		})
+		.filter(|entry| entry.path().extension().is_some_and(|extension| extension == "request"))
 		.filter_map(|entry| {
 			let raw = std::fs::read_to_string(entry.path()).ok()?;
 			serde_json::from_str(&raw).ok()

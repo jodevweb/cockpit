@@ -30,10 +30,7 @@ impl CockpitError {
 }
 
 impl Serialize for CockpitError {
-	fn serialize<S: serde::Serializer>(
-		&self,
-		serializer: S,
-	) -> std::result::Result<S::Ok, S::Error> {
+	fn serialize<S: serde::Serializer>(&self, serializer: S) -> std::result::Result<S::Ok, S::Error> {
 		serializer.serialize_str(&self.to_string())
 	}
 }

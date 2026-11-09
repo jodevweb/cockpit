@@ -88,11 +88,7 @@ fn walk(root: &Path, base: &Path, depth: usize, out: &mut Vec<QaFile>, limit: us
 		}
 
 		let metadata = std::fs::metadata(&path).ok();
-		let relative = path
-			.strip_prefix(base)
-			.unwrap_or(&path)
-			.to_string_lossy()
-			.to_string();
+		let relative = path.strip_prefix(base).unwrap_or(&path).to_string_lossy().to_string();
 		let group = PathBuf::from(&relative)
 			.parent()
 			.map(|parent| parent.to_string_lossy().to_string())
@@ -118,15 +114,10 @@ fn walk(root: &Path, base: &Path, depth: usize, out: &mut Vec<QaFile>, limit: us
 /// Une capture d'écran pèse quelques centaines de kilooctets : la table tient
 /// en trois lignes, une crate de plus ne se justifie pas.
 fn base64(bytes: &[u8]) -> String {
-	const ALPHABET: &[u8; 64] =
-		b"ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
+	const ALPHABET: &[u8; 64] = b"ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
 	let mut out = String::with_capacity(bytes.len().div_ceil(3) * 4);
 	for chunk in bytes.chunks(3) {
-		let b = [
-			chunk[0],
-			*chunk.get(1).unwrap_or(&0),
-			*chunk.get(2).unwrap_or(&0),
-		];
+		let b = [chunk[0], *chunk.get(1).unwrap_or(&0), *chunk.get(2).unwrap_or(&0)];
 		let n = ((b[0] as u32) << 16) | ((b[1] as u32) << 8) | b[2] as u32;
 		out.push(ALPHABET[(n >> 18 & 63) as usize] as char);
 		out.push(ALPHABET[(n >> 12 & 63) as usize] as char);
@@ -179,11 +170,7 @@ pub fn data_url(path: &Path, max_bytes: u64) -> Result<String, String> {
 		.extension()
 		.map(|e| e.to_string_lossy().to_lowercase())
 		.unwrap_or_default();
-	Ok(format!(
-		"data:{};base64,{}",
-		mime_of(&extension),
-		base64(&bytes)
-	))
+	Ok(format!("data:{};base64,{}", mime_of(&extension), base64(&bytes)))
 }
 
 /// Recopie les livrables de QA d'un worktree vers un autre, chemins conservés.

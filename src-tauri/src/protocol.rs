@@ -115,9 +115,7 @@ impl Protocol {
 	pub fn turn_over(&self, payload: &Value) -> bool {
 		match self {
 			Protocol::Codex => crate::codex::turn_finished(payload),
-			Protocol::Claude | Protocol::Gemini => {
-				payload.get("type").and_then(|v| v.as_str()) == Some("result")
-			}
+			Protocol::Claude | Protocol::Gemini => payload.get("type").and_then(|v| v.as_str()) == Some("result"),
 		}
 	}
 
@@ -130,9 +128,7 @@ impl Protocol {
 	pub fn turn_failed(&self, payload: &Value) -> bool {
 		match self {
 			Protocol::Codex => crate::codex::turn_failed(payload),
-			Protocol::Claude => {
-				payload.get("is_error").and_then(|v| v.as_bool()).unwrap_or(false)
-			}
+			Protocol::Claude => payload.get("is_error").and_then(|v| v.as_bool()).unwrap_or(false),
 			Protocol::Gemini => false,
 		}
 	}
@@ -207,11 +203,7 @@ impl Protocol {
 			// gonflerait une colonne au détriment de l'autre. Il compte comme
 			// entrée faute de mieux, et `reports_token_split` dit pourquoi.
 			Protocol::Gemini => Turn {
-				input_tokens: nombre(
-					payload
-						.get("stats")
-						.and_then(|stats| stats.get("total_tokens")),
-				),
+				input_tokens: nombre(payload.get("stats").and_then(|stats| stats.get("total_tokens"))),
 				..Default::default()
 			},
 			Protocol::Claude => {
@@ -239,10 +231,7 @@ mod tests {
 	fn les_trois_protocoles_se_reconnaissent() {
 		assert_eq!(Protocol::parse("claude-stream-json"), Some(Protocol::Claude));
 		assert_eq!(Protocol::parse("codex-exec"), Some(Protocol::Codex));
-		assert_eq!(
-			Protocol::parse("gemini-stream-json"),
-			Some(Protocol::Gemini)
-		);
+		assert_eq!(Protocol::parse("gemini-stream-json"), Some(Protocol::Gemini));
 	}
 
 	#[test]
@@ -329,10 +318,7 @@ mod tests {
 		assert_eq!(turn.input_tokens, 1000);
 		assert_eq!(turn.output_tokens, 200);
 		assert_eq!(turn.cache_tokens, 42);
-		assert_eq!(
-			turn.cost,
-			Some(crate::executions::Cost::Reported { usd: 0.42 })
-		);
+		assert_eq!(turn.cost, Some(crate::executions::Cost::Reported { usd: 0.42 }));
 	}
 
 	#[test]
@@ -385,9 +371,6 @@ mod tests {
 	#[test]
 	fn un_message_claude_traverse_sans_etre_traduit() {
 		let payload = serde_json::json!({ "type": "assistant" });
-		assert_eq!(
-			Protocol::Claude.to_claude_shaped(payload.clone()),
-			Some(payload)
-		);
+		assert_eq!(Protocol::Claude.to_claude_shaped(payload.clone()), Some(payload));
 	}
 }

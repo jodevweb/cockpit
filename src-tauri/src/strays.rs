@@ -42,10 +42,9 @@ pub struct Table {
 /// qui est exactement le périmètre voulu : le cockpit ne lance rien d'autre.
 #[cfg(target_os = "macos")]
 pub fn read() -> Table {
-	let output = crate::platform::quiet_std(
-		std::process::Command::new("ps").args(["-axwwE", "-o", "pid=,ppid=,rss=,command="]),
-	)
-	.output();
+	let output =
+		crate::platform::quiet_std(std::process::Command::new("ps").args(["-axwwE", "-o", "pid=,ppid=,rss=,command="]))
+			.output();
 	match output {
 		Ok(output) => parse(&String::from_utf8_lossy(&output.stdout)),
 		Err(_) => Table {
@@ -80,7 +79,8 @@ pub fn read() -> Table {
 		// Les noms de variables ne distinguent pas la casse sous Windows.
 		let session = environment.iter().find_map(|variable| {
 			let (name, value) = variable.split_once('=')?;
-			name.eq_ignore_ascii_case(MARKER.trim_end_matches('=')).then(|| value.trim().to_string())
+			name.eq_ignore_ascii_case(MARKER.trim_end_matches('='))
+				.then(|| value.trim().to_string())
 		});
 		if let Some(session) = session.filter(|session| !session.is_empty()) {
 			marked.push(Marked {

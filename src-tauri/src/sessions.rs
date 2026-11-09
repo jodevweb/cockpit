@@ -355,10 +355,7 @@ fn ingest(acc: &mut Accumulator, entry: &Value) {
 		}
 	}
 
-	let is_sidechain = entry
-		.get("isSidechain")
-		.and_then(|v| v.as_bool())
-		.unwrap_or(false);
+	let is_sidechain = entry.get("isSidechain").and_then(|v| v.as_bool()).unwrap_or(false);
 
 	match kind {
 		"user" => {
@@ -406,11 +403,7 @@ fn ingest(acc: &mut Accumulator, entry: &Value) {
 			if let Some(items) = entry.pointer("/message/content").and_then(|v| v.as_array()) {
 				for item in items {
 					if item.get("type").and_then(|v| v.as_str()) == Some("tool_use") {
-						let name = item
-							.get("name")
-							.and_then(|v| v.as_str())
-							.unwrap_or("tool")
-							.to_string();
+						let name = item.get("name").and_then(|v| v.as_str()).unwrap_or("tool").to_string();
 						acc.summary.tool_calls += 1;
 						if matches!(name.as_str(), "Task" | "Agent") {
 							acc.summary.subagents += 1;
@@ -473,12 +466,7 @@ fn finalize(mut acc: Accumulator) -> SessionSummary {
 	if let Ok(entries) = std::fs::read_dir(&subagent_dir) {
 		let count = entries
 			.flatten()
-			.filter(|e| {
-				e.path()
-					.extension()
-					.map(|ext| ext == "jsonl")
-					.unwrap_or(false)
-			})
+			.filter(|e| e.path().extension().map(|ext| ext == "jsonl").unwrap_or(false))
 			.count();
 		if count > 0 {
 			acc.summary.subagents = count;
@@ -541,9 +529,8 @@ struct CacheEntry {
 }
 
 fn cache() -> &'static std::sync::Mutex<std::collections::HashMap<PathBuf, CacheEntry>> {
-	static CACHE: std::sync::OnceLock<
-		std::sync::Mutex<std::collections::HashMap<PathBuf, CacheEntry>>,
-	> = std::sync::OnceLock::new();
+	static CACHE: std::sync::OnceLock<std::sync::Mutex<std::collections::HashMap<PathBuf, CacheEntry>>> =
+		std::sync::OnceLock::new();
 	CACHE.get_or_init(|| std::sync::Mutex::new(std::collections::HashMap::new()))
 }
 
@@ -656,15 +643,7 @@ pub fn scan_all(limit_per_project: usize) -> Result<Vec<ProjectSessions>> {
 		projects.push(ProjectSessions { key, cwd, sessions });
 	}
 
-	projects.sort_by_key(|p| {
-		std::cmp::Reverse(
-			p.sessions
-				.iter()
-				.map(|s| -s.idle_seconds)
-				.max()
-				.unwrap_or(i64::MIN),
-		)
-	});
+	projects.sort_by_key(|p| std::cmp::Reverse(p.sessions.iter().map(|s| -s.idle_seconds).max().unwrap_or(i64::MIN)));
 
 	Ok(projects)
 }
@@ -725,14 +704,8 @@ fn read_timeline_from(file: &Path, depuis: u64, max_events: usize) -> Result<Vec
 			continue;
 		};
 		let kind = entry.get("type").and_then(|v| v.as_str()).unwrap_or("");
-		let timestamp = entry
-			.get("timestamp")
-			.and_then(|v| v.as_str())
-			.map(|s| s.to_string());
-		let is_sidechain = entry
-			.get("isSidechain")
-			.and_then(|v| v.as_bool())
-			.unwrap_or(false);
+		let timestamp = entry.get("timestamp").and_then(|v| v.as_str()).map(|s| s.to_string());
+		let is_sidechain = entry.get("isSidechain").and_then(|v| v.as_bool()).unwrap_or(false);
 		let index = events.len();
 
 		match kind {
@@ -749,16 +722,11 @@ fn read_timeline_from(file: &Path, depuis: u64, max_events: usize) -> Result<Vec
 						.collect();
 					if !results.is_empty() {
 						for result in results {
-							let body = result
-								.get("content")
-								.map(as_text)
-								.unwrap_or_default();
-							let is_error = result.get("is_error").and_then(|v| v.as_bool())
-								== Some(true);
+							let body = result.get("content").map(as_text).unwrap_or_default();
+							let is_error = result.get("is_error").and_then(|v| v.as_bool()) == Some(true);
 							events.push(SessionEvent {
 								index: events.len(),
-								kind: if is_error { "tool-error" } else { "tool-result" }
-									.into(),
+								kind: if is_error { "tool-error" } else { "tool-result" }.into(),
 								timestamp: timestamp.clone(),
 								text: truncate(&body, 1600),
 								tool: None,
@@ -792,11 +760,8 @@ fn read_timeline_from(file: &Path, depuis: u64, max_events: usize) -> Result<Vec
 					.pointer("/message/model")
 					.and_then(|v| v.as_str())
 					.map(|s| s.to_string());
-				let tokens = entry
-					.pointer("/message/usage/output_tokens")
-					.and_then(|v| v.as_u64());
-				let Some(items) = entry.pointer("/message/content").and_then(|v| v.as_array())
-				else {
+				let tokens = entry.pointer("/message/usage/output_tokens").and_then(|v| v.as_u64());
+				let Some(items) = entry.pointer("/message/content").and_then(|v| v.as_array()) else {
 					continue;
 				};
 				for item in items {
@@ -819,10 +784,7 @@ fn read_timeline_from(file: &Path, depuis: u64, max_events: usize) -> Result<Vec
 							});
 						}
 						Some("thinking") => {
-							let text = item
-								.get("thinking")
-								.and_then(|v| v.as_str())
-								.unwrap_or("");
+							let text = item.get("thinking").and_then(|v| v.as_str()).unwrap_or("");
 							if text.trim().is_empty() {
 								continue;
 							}
@@ -839,11 +801,7 @@ fn read_timeline_from(file: &Path, depuis: u64, max_events: usize) -> Result<Vec
 							});
 						}
 						Some("tool_use") => {
-							let name = item
-								.get("name")
-								.and_then(|v| v.as_str())
-								.unwrap_or("tool")
-								.to_string();
+							let name = item.get("name").and_then(|v| v.as_str()).unwrap_or("tool").to_string();
 							let empty = Value::Object(Default::default());
 							let input = item.get("input").unwrap_or(&empty);
 							events.push(SessionEvent {
@@ -852,10 +810,7 @@ fn read_timeline_from(file: &Path, depuis: u64, max_events: usize) -> Result<Vec
 								timestamp: timestamp.clone(),
 								text: describe_tool(&name, input),
 								tool: Some(name),
-								detail: Some(truncate(
-									&serde_json::to_string_pretty(input).unwrap_or_default(),
-									4000,
-								)),
+								detail: Some(truncate(&serde_json::to_string_pretty(input).unwrap_or_default(), 4000)),
 								is_sidechain,
 								model: model.clone(),
 								tokens: None,
@@ -931,8 +886,7 @@ pub fn to_cockpit(payload: &Value) -> Vec<crate::executions::ExecEvent> {
 			}
 		}
 		"assistant" => {
-			let Some(items) = payload.pointer("/message/content").and_then(|v| v.as_array())
-			else {
+			let Some(items) = payload.pointer("/message/content").and_then(|v| v.as_array()) else {
 				return out;
 			};
 			for item in items {
@@ -954,24 +908,14 @@ pub fn to_cockpit(payload: &Value) -> Vec<crate::executions::ExecEvent> {
 						}
 					}
 					Some("tool_use") => {
-						let name = item
-							.get("name")
-							.and_then(|v| v.as_str())
-							.unwrap_or("tool")
-							.to_string();
+						let name = item.get("name").and_then(|v| v.as_str()).unwrap_or("tool").to_string();
 						let empty = Value::Object(Default::default());
 						let input = item.get("input").unwrap_or(&empty);
 						out.push(ExecEvent::Tool {
-							id: item
-								.get("id")
-								.and_then(|v| v.as_str())
-								.unwrap_or_default()
-								.to_string(),
+							id: item.get("id").and_then(|v| v.as_str()).unwrap_or_default().to_string(),
 							hint: describe_tool(&name, input),
 							name,
-							input: crate::executions::clip_input(
-								&serde_json::to_string(input).unwrap_or_default(),
-							),
+							input: crate::executions::clip_input(&serde_json::to_string(input).unwrap_or_default()),
 						});
 					}
 					_ => {}
@@ -981,9 +925,7 @@ pub fn to_cockpit(payload: &Value) -> Vec<crate::executions::ExecEvent> {
 		"result" => {
 			out.push(ExecEvent::TurnEnd {
 				ok: payload.get("is_error").and_then(|v| v.as_bool()) != Some(true),
-				text: crate::executions::clip_text(
-					payload.get("result").and_then(|v| v.as_str()).unwrap_or(""),
-				),
+				text: crate::executions::clip_text(payload.get("result").and_then(|v| v.as_str()).unwrap_or("")),
 			});
 		}
 		// `system` (l'initialisation) et `cockpit` (nos propres messages à
@@ -1026,12 +968,7 @@ pub fn read_subagents(session_file: &Path) -> Result<Vec<SubagentRun>> {
 		let Ok(meta) = serde_json::from_str::<Value>(&raw) else {
 			continue;
 		};
-		let get = |key: &str| {
-			meta.get(key)
-				.and_then(|v| v.as_str())
-				.unwrap_or_default()
-				.to_string()
-		};
+		let get = |key: &str| meta.get(key).and_then(|v| v.as_str()).unwrap_or_default().to_string();
 		let jsonl = path.to_string_lossy().replace(".meta.json", ".jsonl");
 		runs.push(SubagentRun {
 			id: path
@@ -1081,7 +1018,10 @@ mod tests {
 	fn le_dossier_des_conversations_s_encode_comme_le_cli() {
 		// Valeurs relevées en rejouant l'encodage du CLI (`replace(/[^a-zA-Z0-9]/g, "-")`).
 		assert_eq!(super::project_key("/Users/moi/Sites/api"), "-Users-moi-Sites-api");
-		assert_eq!(super::project_key("/Users/moi/mon projet_v2.1"), "-Users-moi-mon-projet-v2-1");
+		assert_eq!(
+			super::project_key("/Users/moi/mon projet_v2.1"),
+			"-Users-moi-mon-projet-v2-1"
+		);
 		assert_eq!(super::project_key(r"C:\Users\me\proj"), "C--Users-me-proj");
 		assert_eq!(super::project_key("C:/Users/me/proj"), "C--Users-me-proj");
 		// Un caractère hors du plan de base compte deux unités UTF-16.
@@ -1254,10 +1194,7 @@ mod tests {
 			serde_json::json!({ "type": "assistant" }),
 			serde_json::json!({}),
 		] {
-			assert!(
-				to_cockpit(&payload).is_empty(),
-				"rien ne devait sortir de {payload}"
-			);
+			assert!(to_cockpit(&payload).is_empty(), "rien ne devait sortir de {payload}");
 		}
 	}
 

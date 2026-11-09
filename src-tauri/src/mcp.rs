@@ -109,8 +109,7 @@ pub fn config_for(cwd: &str, sandboxed: bool) -> Option<PathBuf> {
 /// Un fichier par dossier de travail : deux agents lancés en même temps sur
 /// deux dépôts différents ne doivent pas se disputer le même.
 fn write_filtered(cwd: &str, servers: &[(String, serde_json::Value)]) -> Option<PathBuf> {
-	let map: serde_json::Map<String, serde_json::Value> =
-		servers.iter().cloned().collect();
+	let map: serde_json::Map<String, serde_json::Value> = servers.iter().cloned().collect();
 	let payload = serde_json::json!({ "mcpServers": map });
 	let path = crate::config::config_dir().join(format!("mcp-projet-{}.json", key_of(cwd)));
 	std::fs::create_dir_all(crate::config::config_dir()).ok()?;
@@ -185,7 +184,10 @@ pub fn approval(cwd: &str) -> Approval {
 	let servers = read_servers(&Path::new(cwd).join(FILE));
 	let recorded = approved_fingerprint(cwd);
 	let approved = !servers.is_empty() && fingerprint(&servers) == recorded;
-	Approval { approved, changed: !approved && !recorded.is_empty() }
+	Approval {
+		approved,
+		changed: !approved && !recorded.is_empty(),
+	}
 }
 
 /// Approuve le contenu **actuel** du `.mcp.json` de `cwd`, pour tout son dépôt.
@@ -198,7 +200,10 @@ pub fn approve(cwd: &str) -> crate::error::Result<Approval> {
 	let mut approvals = load_approvals();
 	approvals.insert(repo_identity(cwd), serde_json::Value::String(fingerprint(&servers)));
 	std::fs::create_dir_all(crate::config::config_dir())?;
-	std::fs::write(approvals_path(), serde_json::to_string_pretty(&approvals).map_err(anyhow::Error::from)?)?;
+	std::fs::write(
+		approvals_path(),
+		serde_json::to_string_pretty(&approvals).map_err(anyhow::Error::from)?,
+	)?;
 	Ok(approval(cwd))
 }
 
@@ -207,7 +212,10 @@ pub fn revoke(cwd: &str) -> crate::error::Result<Approval> {
 	let mut approvals = load_approvals();
 	approvals.remove(&repo_identity(cwd));
 	std::fs::create_dir_all(crate::config::config_dir())?;
-	std::fs::write(approvals_path(), serde_json::to_string_pretty(&approvals).map_err(anyhow::Error::from)?)?;
+	std::fs::write(
+		approvals_path(),
+		serde_json::to_string_pretty(&approvals).map_err(anyhow::Error::from)?,
+	)?;
 	Ok(approval(cwd))
 }
 
@@ -254,10 +262,7 @@ pub fn inspect(cwd: &str, sandboxed: bool) -> Vec<Server> {
 /// éprouvé — même patron que `mission::blocking_reason`.
 pub fn describe(name: &str, config: &serde_json::Value, sandboxed: bool) -> Server {
 	let url = config.get("url").and_then(|v| v.as_str()).unwrap_or_default();
-	let command = config
-		.get("command")
-		.and_then(|v| v.as_str())
-		.unwrap_or_default();
+	let command = config.get("command").and_then(|v| v.as_str()).unwrap_or_default();
 	let declared = config.get("type").and_then(|v| v.as_str()).unwrap_or("");
 
 	let kind = if !declared.is_empty() {
@@ -272,11 +277,7 @@ pub fn describe(name: &str, config: &serde_json::Value, sandboxed: bool) -> Serv
 		let args: Vec<String> = config
 			.get("args")
 			.and_then(|v| v.as_array())
-			.map(|args| {
-				args.iter()
-					.filter_map(|a| a.as_str().map(|s| s.to_string()))
-					.collect()
-			})
+			.map(|args| args.iter().filter_map(|a| a.as_str().map(|s| s.to_string())).collect())
 			.unwrap_or_default();
 		format!("{command} {}", args.join(" ")).trim().to_string()
 	} else {
@@ -294,10 +295,7 @@ pub fn describe(name: &str, config: &serde_json::Value, sandboxed: bool) -> Serv
 		crate::i18n::t("mcp.blockerLocal")
 	} else if !command.is_empty() && !IN_IMAGE.contains(&command) {
 		crate::i18n::tf("mcp.blockerNotInImage", &[("command", &command)])
-	} else if !url.is_empty()
-		&& config.get("headers").is_none()
-		&& !PROVISIONED.contains(&name)
-	{
+	} else if !url.is_empty() && config.get("headers").is_none() && !PROVISIONED.contains(&name) {
 		crate::i18n::t("mcp.blockerOauth")
 	} else {
 		String::new()
@@ -330,7 +328,9 @@ mod tests {
 	#[test]
 	fn l_empreinte_suit_le_contenu_pas_la_forme() {
 		let a = parse_servers(r#"{"mcpServers":{"a":{"command":"npx","args":["x"]},"b":{"url":"https://y"}}}"#);
-		let meme = parse_servers("{\n  \"mcpServers\": {\"b\":{\"url\":\"https://y\"},\n \"a\":{\"args\":[\"x\"],\"command\":\"npx\"}}}");
+		let meme = parse_servers(
+			"{\n  \"mcpServers\": {\"b\":{\"url\":\"https://y\"},\n \"a\":{\"args\":[\"x\"],\"command\":\"npx\"}}}",
+		);
 		let autre = parse_servers(r#"{"mcpServers":{"a":{"command":"sh","args":["-c","x"]},"b":{"url":"https://y"}}}"#);
 		assert_eq!(fingerprint(&a), fingerprint(&meme));
 		assert_ne!(fingerprint(&a), fingerprint(&autre));

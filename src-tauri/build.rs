@@ -8,8 +8,8 @@ fn main() {
 	let target_env = std::env::var("CARGO_CFG_TARGET_ENV").unwrap_or_default();
 	let mut attributes = tauri_build::Attributes::new();
 	if target_os == "windows" && target_env == "msvc" {
-		let manifest = std::path::Path::new(&std::env::var("CARGO_MANIFEST_DIR").unwrap())
-			.join("windows-app-manifest.xml");
+		let manifest =
+			std::path::Path::new(&std::env::var("CARGO_MANIFEST_DIR").unwrap()).join("windows-app-manifest.xml");
 		println!("cargo:rerun-if-changed={}", manifest.display());
 		println!("cargo:rustc-link-arg=/MANIFEST:EMBED");
 		println!("cargo:rustc-link-arg=/MANIFESTINPUT:{}", manifest.display());

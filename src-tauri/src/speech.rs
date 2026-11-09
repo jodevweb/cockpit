@@ -174,7 +174,13 @@ pub fn set_key(key: &str) -> Result<()> {
 fn set_key_mac(key: &str) -> Result<()> {
 	if key.is_empty() {
 		let _ = Command::new("/usr/bin/security")
-			.args(["delete-generic-password", "-a", KEYCHAIN_ACCOUNT, "-s", KEYCHAIN_SERVICE])
+			.args([
+				"delete-generic-password",
+				"-a",
+				KEYCHAIN_ACCOUNT,
+				"-s",
+				KEYCHAIN_SERVICE,
+			])
 			.output();
 		return Ok(());
 	}
@@ -220,7 +226,14 @@ fn key() -> Option<String> {
 #[cfg(not(windows))]
 fn key_mac() -> Option<String> {
 	let output = Command::new("/usr/bin/security")
-		.args(["find-generic-password", "-a", KEYCHAIN_ACCOUNT, "-s", KEYCHAIN_SERVICE, "-w"])
+		.args([
+			"find-generic-password",
+			"-a",
+			KEYCHAIN_ACCOUNT,
+			"-s",
+			KEYCHAIN_SERVICE,
+			"-w",
+		])
 		.output()
 		.ok()?;
 	let key = String::from_utf8_lossy(&output.stdout).trim().to_string();
@@ -272,7 +285,11 @@ fn cloud_voice(raw: &serde_json::Value) -> Option<CloudVoice> {
 		} else {
 			String::new()
 		},
-		if french { crate::i18n::t("speech.french") } else { String::new() },
+		if french {
+			crate::i18n::t("speech.french")
+		} else {
+			String::new()
+		},
 		raw.get("category").and_then(|v| v.as_str()).unwrap_or("").to_string(),
 	]
 	.iter()
@@ -280,7 +297,13 @@ fn cloud_voice(raw: &serde_json::Value) -> Option<CloudVoice> {
 	.cloned()
 	.collect::<Vec<_>>()
 	.join(" · ");
-	Some(CloudVoice { id, name, description, female, french })
+	Some(CloudVoice {
+		id,
+		name,
+		description,
+		female,
+		french,
+	})
 }
 
 pub async fn cloud_voices() -> Result<Vec<CloudVoice>> {
@@ -293,7 +316,10 @@ pub async fn cloud_voices() -> Result<Vec<CloudVoice>> {
 		.await
 		.map_err(|e| CockpitError::msg(crate::i18n::tf("speech.unreachable", &[("error", &e)])))?;
 	if !response.status().is_success() {
-		return Err(CockpitError::msg(crate::i18n::tf("speech.keyRefused", &[("status", &response.status())])));
+		return Err(CockpitError::msg(crate::i18n::tf(
+			"speech.keyRefused",
+			&[("status", &response.status())],
+		)));
 	}
 	let body: serde_json::Value = response
 		.json()
@@ -328,7 +354,10 @@ async fn say_cloud(text: &str, voice: Option<&str>, model: Option<&str>, rate: O
 	};
 	// L'identifiant devient un segment d'URL : rien qui puisse en sortir.
 	if !voice.chars().all(|c| c.is_ascii_alphanumeric() || c == '-' || c == '_') {
-		return Err(CockpitError::msg(crate::i18n::tf("speech.invalidVoice", &[("voice", &voice)])));
+		return Err(CockpitError::msg(crate::i18n::tf(
+			"speech.invalidVoice",
+			&[("voice", &voice)],
+		)));
 	}
 	let response = reqwest::Client::new()
 		.post(format!("{API}/text-to-speech/{voice}?output_format=mp3_44100_128"))
@@ -353,7 +382,10 @@ async fn say_cloud(text: &str, voice: Option<&str>, model: Option<&str>, rate: O
 		let body = response.text().await.unwrap_or_default();
 		return Err(CockpitError::msg(crate::i18n::tf(
 			"speech.refused",
-			&[("status", &status), ("body", &body.chars().take(200).collect::<String>())],
+			&[
+				("status", &status),
+				("body", &body.chars().take(200).collect::<String>()),
+			],
 		)));
 	}
 	let audio = response
@@ -362,7 +394,8 @@ async fn say_cloud(text: &str, voice: Option<&str>, model: Option<&str>, rate: O
 		.map_err(|e| CockpitError::msg(format!("ElevenLabs : {e}")))?;
 
 	let path = std::env::temp_dir().join(format!("cockpit-voix-{}.mp3", std::process::id()));
-	std::fs::write(&path, &audio).map_err(|e| CockpitError::msg(crate::i18n::tf("speech.audioFile", &[("error", &e)])))?;
+	std::fs::write(&path, &audio)
+		.map_err(|e| CockpitError::msg(crate::i18n::tf("speech.audioFile", &[("error", &e)])))?;
 	#[cfg(windows)]
 	let child = windows::play_mp3(&path)?;
 	#[cfg(not(windows))]
@@ -411,7 +444,10 @@ fn parse_sapi_voice(line: &str) -> Option<Voice> {
 	let name = name.trim();
 	let culture = culture.trim().replace('-', "_");
 	let valid = !name.is_empty() && culture.len() >= 5 && culture.as_bytes()[2] == b'_';
-	valid.then(|| Voice { name: name.to_string(), locale: culture })
+	valid.then(|| Voice {
+		name: name.to_string(),
+		locale: culture,
+	})
 }
 
 /// Le débit du Mac (mots par minute, 185 par défaut) ramené à l'échelle de
@@ -439,7 +475,14 @@ mod windows {
 		let utf16: Vec<u8> = script.encode_utf16().flat_map(|unit| unit.to_le_bytes()).collect();
 		let encoded = base64::engine::general_purpose::STANDARD.encode(utf16);
 		let mut command = Command::new("powershell.exe");
-		command.args(["-NoProfile", "-NonInteractive", "-ExecutionPolicy", "Bypass", "-EncodedCommand", &encoded]);
+		command.args([
+			"-NoProfile",
+			"-NonInteractive",
+			"-ExecutionPolicy",
+			"Bypass",
+			"-EncodedCommand",
+			&encoded,
+		]);
 		crate::platform::quiet_std(&mut command);
 		command
 	}

@@ -73,10 +73,7 @@ pub fn to_claude_shaped(payload: &Value) -> Option<Value> {
 		}
 		"tool_use" => {
 			let name = payload.get("tool_name").and_then(|v| v.as_str())?;
-			let id = payload
-				.get("tool_id")
-				.and_then(|v| v.as_str())
-				.unwrap_or("gemini-tool");
+			let id = payload.get("tool_id").and_then(|v| v.as_str()).unwrap_or("gemini-tool");
 			let input = payload.get("parameters").cloned().unwrap_or_else(|| json!({}));
 			Some(json!({
 				"type": "assistant",

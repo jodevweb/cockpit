@@ -147,8 +147,7 @@ fn save(config: &RemoteConfig) -> Result<()> {
 	}
 	let raw = serde_json::to_string_pretty(config)
 		.map_err(|e| CockpitError::msg(tf("mobile.errors.stateUnreadable", &[("error", &e)])))?;
-	std::fs::write(&path, raw)
-		.map_err(|e| CockpitError::msg(tf("mobile.errors.stateWrite", &[("error", &e)])))?;
+	std::fs::write(&path, raw).map_err(|e| CockpitError::msg(tf("mobile.errors.stateWrite", &[("error", &e)])))?;
 
 	#[cfg(unix)]
 	{
@@ -272,8 +271,8 @@ pub fn revoke(id: &str) -> Result<()> {
 /// d'appairage se tape, pour qu'une photo du QR ne suffise jamais.
 pub fn qr_svg(url: &str) -> Result<String> {
 	use qrcode::render::svg;
-	let code = qrcode::QrCode::new(url.as_bytes())
-		.map_err(|e| CockpitError::msg(tf("mobile.errors.qr", &[("error", &e)])))?;
+	let code =
+		qrcode::QrCode::new(url.as_bytes()).map_err(|e| CockpitError::msg(tf("mobile.errors.qr", &[("error", &e)])))?;
 	Ok(code
 		.render::<svg::Color>()
 		.min_dimensions(200, 200)
@@ -459,10 +458,7 @@ enum Action {
 	/// L'outil n'est pas exécuté pour autant — la réponse voyage dans le motif du
 	/// refus, comme sur le poste. Mais elle oriente la suite du travail : elle
 	/// demande donc la même signature que le reste.
-	AnswerQuestion {
-		id: String,
-		answers: Vec<QuestionAnswer>,
-	},
+	AnswerQuestion { id: String, answers: Vec<QuestionAnswer> },
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -517,8 +513,8 @@ pub async fn start(app: AppHandle) -> Result<()> {
 		None => ("localhost".to_string(), format!("http://localhost:{PORT}")),
 	};
 
-	let origin = Url::parse(&base_url)
-		.map_err(|e| CockpitError::msg(tf("mobile.errors.invalidOrigin", &[("error", &e)])))?;
+	let origin =
+		Url::parse(&base_url).map_err(|e| CockpitError::msg(tf("mobile.errors.invalidOrigin", &[("error", &e)])))?;
 	let webauthn = WebauthnBuilder::new(&host, &origin)
 		.and_then(|builder| builder.rp_name("Cockpit").build())
 		.map_err(|e| CockpitError::msg(tf("mobile.errors.webauthn", &[("error", &e)])))?;
@@ -639,8 +635,7 @@ fn watch_permissions() {
 		loop {
 			tokio::time::sleep(Duration::from_secs(2)).await;
 			let pending = crate::permissions::pending();
-			let live: std::collections::HashSet<String> =
-				pending.iter().map(|request| request.id.clone()).collect();
+			let live: std::collections::HashSet<String> = pending.iter().map(|request| request.id.clone()).collect();
 
 			for request in &pending {
 				if announced.contains(&request.id) {
@@ -649,8 +644,7 @@ fn watch_permissions() {
 				// Rédigés avant l'attente : les arguments de `tf` ne traversent pas un `await`.
 				let title = t("mobile.wake.agentWaiting");
 				let body = tf("mobile.wake.request", &[("tool", &request.tool)]);
-				let sent = wake(&title, &body, Some(&request.id))
-				.await;
+				let sent = wake(&title, &body, Some(&request.id)).await;
 				if sent {
 					announced.insert(request.id.clone());
 				}
@@ -800,11 +794,7 @@ struct PairBody {
 	name: String,
 }
 
-async fn pair(
-	State(inner): State<Shared>,
-	headers: HeaderMap,
-	Json(body): Json<PairBody>,
-) -> Response {
+async fn pair(State(inner): State<Shared>, headers: HeaderMap, Json(body): Json<PairBody>) -> Response {
 	let host = headers
 		.get("host")
 		.and_then(|value| value.to_str().ok())
@@ -1009,9 +999,7 @@ async fn inbox(State(inner): State<Shared>, headers: HeaderMap) -> Response {
 		let file = status.claude_session_id.as_deref().and_then(session_file);
 		let (last, working) = match file.as_deref() {
 			Some(file) => {
-				let events =
-					crate::sessions::read_timeline(std::path::Path::new(file), 400)
-						.unwrap_or_default();
+				let events = crate::sessions::read_timeline(std::path::Path::new(file), 400).unwrap_or_default();
 				let last = events
 					.iter()
 					.rev()
@@ -1132,8 +1120,7 @@ async fn transcript(
 		return Json(json!({ "events": [], "total": 0, "working": true })).into_response();
 	};
 
-	let events = crate::sessions::read_timeline(std::path::Path::new(&file), 2000)
-		.unwrap_or_default();
+	let events = crate::sessions::read_timeline(std::path::Path::new(&file), 2000).unwrap_or_default();
 	let total = events.len();
 	let from = if query.since > total { 0 } else { query.since };
 
@@ -1167,11 +1154,7 @@ fn agent_cwd(inner: &Shared, session: &str) -> Option<String> {
 
 /// Le constat : ce que `git diff` dit du travail de l'agent. Des noms de
 /// fichiers et des volumes, jamais leur contenu.
-async fn changes(
-	State(inner): State<Shared>,
-	headers: HeaderMap,
-	Path(session): Path<String>,
-) -> Response {
+async fn changes(State(inner): State<Shared>, headers: HeaderMap, Path(session): Path<String>) -> Response {
 	if let Err(response) = guard(&inner, &headers) {
 		return response;
 	}
@@ -1224,7 +1207,11 @@ async fn media(
 	};
 	let root = std::path::Path::new(&cwd);
 	let asked = std::path::Path::new(&query.path);
-	let target = if asked.is_absolute() { asked.to_path_buf() } else { root.join(asked) };
+	let target = if asked.is_absolute() {
+		asked.to_path_buf()
+	} else {
+		root.join(asked)
+	};
 	let (Ok(root), Ok(target)) = (root.canonicalize(), target.canonicalize()) else {
 		return refuse(StatusCode::NOT_FOUND, "imageNotFound");
 	};
@@ -1236,18 +1223,18 @@ async fn media(
 		_ => return refuse(StatusCode::NOT_FOUND, "imageTooLarge"),
 	}
 	match std::fs::read(&target) {
-		Ok(bytes) => ([("content-type", kind), ("cache-control", "private, max-age=300")], bytes).into_response(),
+		Ok(bytes) => (
+			[("content-type", kind), ("cache-control", "private, max-age=300")],
+			bytes,
+		)
+			.into_response(),
 		Err(_) => refuse(StatusCode::NOT_FOUND, "imageNotFound"),
 	}
 }
 
 /// La page du navigateur de l'agent, à l'instant. Rien n'est lancé pour le
 /// téléphone : sans navigateur déjà ouvert, il n'y a pas d'image.
-async fn screen(
-	State(inner): State<Shared>,
-	headers: HeaderMap,
-	Path(session): Path<String>,
-) -> Response {
+async fn screen(State(inner): State<Shared>, headers: HeaderMap, Path(session): Path<String>) -> Response {
 	if let Err(response) = guard(&inner, &headers) {
 		return response;
 	}
@@ -1275,11 +1262,7 @@ struct DenyBody {
 /// Refuser ne demande pas de signature : au pire, un agent attend. C'est
 /// l'action qu'on veut la plus rapide possible, y compris depuis la
 /// notification.
-async fn deny(
-	State(inner): State<Shared>,
-	headers: HeaderMap,
-	Json(body): Json<DenyBody>,
-) -> Response {
+async fn deny(State(inner): State<Shared>, headers: HeaderMap, Json(body): Json<DenyBody>) -> Response {
 	let device = match guard(&inner, &headers) {
 		Ok(device) => device,
 		Err(response) => return response,
@@ -1321,11 +1304,7 @@ struct ChallengeBody {
 }
 
 /// Ouvre un défi Face ID pour une action précise.
-async fn challenge(
-	State(inner): State<Shared>,
-	headers: HeaderMap,
-	Json(body): Json<ChallengeBody>,
-) -> Response {
+async fn challenge(State(inner): State<Shared>, headers: HeaderMap, Json(body): Json<ChallengeBody>) -> Response {
 	let device = match guard(&inner, &headers) {
 		Ok(device) => device,
 		Err(response) => return response,
@@ -1362,11 +1341,7 @@ struct ExecuteBody {
 }
 
 /// Vérifie la signature, puis exécute — et seulement ce que le défi disait.
-async fn execute(
-	State(inner): State<Shared>,
-	headers: HeaderMap,
-	Json(body): Json<ExecuteBody>,
-) -> Response {
+async fn execute(State(inner): State<Shared>, headers: HeaderMap, Json(body): Json<ExecuteBody>) -> Response {
 	let device = match guard(&inner, &headers) {
 		Ok(device) => device,
 		Err(response) => return response,
@@ -1390,20 +1365,24 @@ async fn execute(
 		.finish_passkey_authentication(&body.credential, &pending.state)
 		.is_err()
 	{
-		crate::journal::record("remote", &t("mobile.journal.signatureRejected"), &device.name, false, "");
+		crate::journal::record(
+			"remote",
+			&t("mobile.journal.signatureRejected"),
+			&device.name,
+			false,
+			"",
+		);
 		return refuse(StatusCode::FORBIDDEN, "invalidSignature");
 	}
 
 	match pending.action {
-		Action::AllowTool { id } => {
-			match crate::permissions::answer(&id, true, Some("Allowed from mobile.".into())) {
-				Ok(()) => {
-					crate::journal::record("remote", &t("mobile.journal.toolAllowed"), &id, true, &device.name);
-					Json(json!({ "ok": true })).into_response()
-				}
-				Err(error) => fail(StatusCode::BAD_REQUEST, &error.to_string()),
+		Action::AllowTool { id } => match crate::permissions::answer(&id, true, Some("Allowed from mobile.".into())) {
+			Ok(()) => {
+				crate::journal::record("remote", &t("mobile.journal.toolAllowed"), &id, true, &device.name);
+				Json(json!({ "ok": true })).into_response()
 			}
-		}
+			Err(error) => fail(StatusCode::BAD_REQUEST, &error.to_string()),
+		},
 		// Approuver un plan libère les exécutants : c'est une décision, elle
 		// passe donc par la même signature que les autres.
 		Action::ApprovePlan { id } => match crate::mission::approve(&id) {
@@ -1667,8 +1646,7 @@ mod tests {
 		let allow: Action = serde_json::from_str(r#"{"kind":"allowTool","id":"abc"}"#).unwrap();
 		assert!(matches!(allow, Action::AllowTool { id } if id == "abc"));
 
-		let message: Action =
-			serde_json::from_str(r#"{"kind":"message","sessionId":"s1","text":"salut"}"#).unwrap();
+		let message: Action = serde_json::from_str(r#"{"kind":"message","sessionId":"s1","text":"salut"}"#).unwrap();
 		match message {
 			Action::Message { session_id, text } => {
 				assert_eq!(session_id, "s1");
@@ -1677,10 +1655,9 @@ mod tests {
 			other => panic!("variante inattendue : {other:?}"),
 		}
 
-		let answer: Action = serde_json::from_str(
-			r#"{"kind":"answerQuestion","id":"q1","answers":[{"header":"Base","choice":"dev"}]}"#,
-		)
-		.unwrap();
+		let answer: Action =
+			serde_json::from_str(r#"{"kind":"answerQuestion","id":"q1","answers":[{"header":"Base","choice":"dev"}]}"#)
+				.unwrap();
 		match answer {
 			Action::AnswerQuestion { id, answers } => {
 				assert_eq!(id, "q1");
@@ -1701,7 +1678,10 @@ mod tests {
 		let end = start + page[start..].find("</script>").unwrap();
 		let json = &page[start + "window.I18N = ".len()..end].trim_end_matches(';');
 		let catalog: Value = serde_json::from_str(json).expect("catalogue illisible");
-		assert_eq!(catalog.pointer("/common/connecting").and_then(Value::as_str), Some("Connexion…"));
+		assert_eq!(
+			catalog.pointer("/common/connecting").and_then(Value::as_str),
+			Some("Connexion…")
+		);
 	}
 
 	/// Chaque clé lue en dur par la page existe en anglais : une clé oubliée
@@ -1712,11 +1692,16 @@ mod tests {
 		let catalog = crate::i18n::namespace_for("en", "mobile");
 		let has = |key: &str| {
 			let pointer = |k: &str| format!("/{}", k.replace('.', "/"));
-			catalog.pointer(&pointer(key)).is_some()
-				|| catalog.pointer(&pointer(&format!("{key}_other"))).is_some()
+			catalog.pointer(&pointer(key)).is_some() || catalog.pointer(&pointer(&format!("{key}_other"))).is_some()
 		};
 		let mut checked = 0;
-		for opener in ["t(\"", "th(\"", "data-i18n=\"", "data-i18n-placeholder=\"", "data-i18n-aria-label=\""] {
+		for opener in [
+			"t(\"",
+			"th(\"",
+			"data-i18n=\"",
+			"data-i18n-placeholder=\"",
+			"data-i18n-aria-label=\"",
+		] {
 			for (index, _) in page.match_indices(opener) {
 				// `t(` au milieu d'un mot (`set(`, `split(`…) n'est pas une traduction.
 				if index > 0 && page.as_bytes()[index - 1].is_ascii_alphanumeric() {

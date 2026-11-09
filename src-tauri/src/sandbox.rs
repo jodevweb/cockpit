@@ -54,9 +54,8 @@ fn which(binary: &str) -> Option<String> {
 		return None;
 	}
 	let file = crate::platform::exe(binary);
-	if std::env::var_os("PATH").is_some_and(|paths| {
-		std::env::split_paths(&paths).any(|dir| dir.join(&file).is_file())
-	}) {
+	if std::env::var_os("PATH").is_some_and(|paths| std::env::split_paths(&paths).any(|dir| dir.join(&file).is_file()))
+	{
 		return Some(binary.to_string());
 	}
 
@@ -97,7 +96,9 @@ fn which(binary: &str) -> Option<String> {
 			}
 		}
 
-		let home = home().map(|path| path.to_string_lossy().to_string()).unwrap_or_default();
+		let home = home()
+			.map(|path| path.to_string_lossy().to_string())
+			.unwrap_or_default();
 		[
 			format!("/opt/homebrew/bin/{binary}"),
 			format!("/usr/local/bin/{binary}"),
@@ -365,15 +366,11 @@ fn trust_worktree(account_dir: &std::path::Path, cwd: &str) {
 	let Some(root) = value.as_object_mut() else {
 		return;
 	};
-	let projects = root
-		.entry("projects")
-		.or_insert_with(|| serde_json::json!({}));
+	let projects = root.entry("projects").or_insert_with(|| serde_json::json!({}));
 	let Some(projects) = projects.as_object_mut() else {
 		return;
 	};
-	let entry = projects
-		.entry(cwd.to_string())
-		.or_insert_with(|| serde_json::json!({}));
+	let entry = projects.entry(cwd.to_string()).or_insert_with(|| serde_json::json!({}));
 	let Some(entry) = entry.as_object_mut() else {
 		return;
 	};
@@ -416,9 +413,7 @@ fn sync_mcp_servers(host_claude_json: &std::path::Path, account_dir: &std::path:
 	let Some(root) = value.as_object_mut() else {
 		return;
 	};
-	let servers = root
-		.entry("mcpServers")
-		.or_insert_with(|| serde_json::json!({}));
+	let servers = root.entry("mcpServers").or_insert_with(|| serde_json::json!({}));
 	let Some(servers) = servers.as_object_mut() else {
 		return;
 	};
@@ -442,10 +437,7 @@ fn sync_mcp_servers(host_claude_json: &std::path::Path, account_dir: &std::path:
 /// Vérifié bout en bout — un vrai jeton Linear, un vrai conteneur, les
 /// équipes réelles renvoyées — avant d'écrire cette fonction, pas après.
 fn provision_mcp_tokens(account_dir: &std::path::Path, tokens: &[(&str, &str, &str)]) {
-	let usable: Vec<_> = tokens
-		.iter()
-		.filter(|(_, _, token)| !token.trim().is_empty())
-		.collect();
+	let usable: Vec<_> = tokens.iter().filter(|(_, _, token)| !token.trim().is_empty()).collect();
 	if usable.is_empty() {
 		return;
 	}
@@ -459,9 +451,7 @@ fn provision_mcp_tokens(account_dir: &std::path::Path, tokens: &[(&str, &str, &s
 	let Some(root) = value.as_object_mut() else {
 		return;
 	};
-	let servers = root
-		.entry("mcpServers")
-		.or_insert_with(|| serde_json::json!({}));
+	let servers = root.entry("mcpServers").or_insert_with(|| serde_json::json!({}));
 	let Some(servers) = servers.as_object_mut() else {
 		return;
 	};
@@ -656,11 +646,7 @@ pub fn build(
 		&[
 			("linear", "https://mcp.linear.app/mcp", &jetons.linear.token),
 			("stripe", "https://mcp.stripe.com", &jetons.stripe.token),
-			(
-				"betterstack",
-				"https://mcp.betterstack.com",
-				&jetons.betterstack.token,
-			),
+			("betterstack", "https://mcp.betterstack.com", &jetons.betterstack.token),
 		],
 	);
 	cmd.arg("--volume").arg(volume(&account_dir, false));
@@ -740,8 +726,7 @@ fn bridge_files(root: &std::path::Path, cwd: &str) -> Vec<std::path::PathBuf> {
 /// avéré peu fiable. Une seule couche de terminal, le même geste qu'un
 /// `claude setup-token` tapé à la main.
 pub fn login_command() -> Result<String, String> {
-	let claude = crate::agent::claude_binary()
-		.ok_or_else(|| crate::i18n::t("sandbox.claudeNotFound"))?;
+	let claude = crate::agent::claude_binary().ok_or_else(|| crate::i18n::t("sandbox.claudeNotFound"))?;
 	let account_dir = sandbox_account_dir();
 	std::fs::create_dir_all(&account_dir).map_err(|error| error.to_string())?;
 
@@ -798,8 +783,7 @@ mod tests {
 		);
 
 		let saved: serde_json::Value =
-			serde_json::from_str(&std::fs::read_to_string(dir.join(".claude.json")).unwrap())
-				.unwrap();
+			serde_json::from_str(&std::fs::read_to_string(dir.join(".claude.json")).unwrap()).unwrap();
 		assert_eq!(
 			saved["mcpServers"]["linear"]["headers"]["Authorization"],
 			"Bearer lin_api_test"
@@ -838,22 +822,12 @@ mod tests {
 
 		let worktree = base.join("worktree");
 		git(
-			&[
-				"worktree",
-				"add",
-				"-q",
-				"-b",
-				"une-branche",
-				worktree.to_str().unwrap(),
-			],
+			&["worktree", "add", "-q", "-b", "une-branche", worktree.to_str().unwrap()],
 			&depot,
 		);
 
 		let retrouve = worktree_origin(worktree.to_str().unwrap()).unwrap();
-		assert_eq!(
-			retrouve.canonicalize().unwrap(),
-			depot.canonicalize().unwrap()
-		);
+		assert_eq!(retrouve.canonicalize().unwrap(), depot.canonicalize().unwrap());
 
 		let _ = std::fs::remove_dir_all(&base);
 	}
@@ -895,8 +869,7 @@ mod tests {
 		trust_worktree(&dir, "/repos/mission-1");
 
 		let saved: serde_json::Value =
-			serde_json::from_str(&std::fs::read_to_string(dir.join(".claude.json")).unwrap())
-				.unwrap();
+			serde_json::from_str(&std::fs::read_to_string(dir.join(".claude.json")).unwrap()).unwrap();
 		assert_eq!(saved["machineID"], "abc");
 		assert_eq!(saved["projects"]["/autre/chemin"]["hasTrustDialogAccepted"], true);
 		assert_eq!(saved["projects"]["/repos/mission-1"]["hasTrustDialogAccepted"], true);
@@ -975,7 +948,10 @@ mod tests {
 			);
 		} else {
 			assert_eq!(container_path("/Users/ana/wt"), "/Users/ana/wt");
-			assert_eq!(volume(std::path::Path::new("/Users/ana/.ssh"), true), "/Users/ana/.ssh:/Users/ana/.ssh:ro");
+			assert_eq!(
+				volume(std::path::Path::new("/Users/ana/.ssh"), true),
+				"/Users/ana/.ssh:/Users/ana/.ssh:ro"
+			);
 		}
 	}
 
@@ -1005,10 +981,7 @@ mod tests {
 		// d'identifiants qui rendrait une chaîne vide : il échouerait plus loin,
 		// et plus obscurément, qu'en n'ayant rien du tout.
 		let sandbox = SandboxConfig::default();
-		let cmd = format!(
-			"{:?}",
-			build(&sandbox, "docker", "s1", "/tmp/wt", &[], "echo hi", "")
-		);
+		let cmd = format!("{:?}", build(&sandbox, "docker", "s1", "/tmp/wt", &[], "echo hi", ""));
 		assert!(!cmd.contains("GH_TOKEN"));
 		assert!(!cmd.contains("credential.https://github.com.helper"));
 		assert!(cmd.contains("GIT_CONFIG_COUNT=1"));

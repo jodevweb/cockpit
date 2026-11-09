@@ -159,8 +159,7 @@ pub async fn scan(project: Option<&str>) -> Result<Scan> {
 
 	// Le plus récemment touché en premier : c'est l'ordre dans lequel on se
 	// demande « où ça en est ».
-	out.changes
-		.sort_by(|a, b| b.updated_at.cmp(&a.updated_at));
+	out.changes.sort_by(|a, b| b.updated_at.cmp(&a.updated_at));
 	Ok(out)
 }
 
@@ -322,10 +321,7 @@ async fn github_changes(project: &ProjectConfig, label: &str, config: &Config) -
 				author: string(node, "/author/login"),
 				base: string(node, "/baseRefName"),
 				url: string(node, "/url"),
-				draft: node
-					.pointer("/isDraft")
-					.and_then(|v| v.as_bool())
-					.unwrap_or(false),
+				draft: node.pointer("/isDraft").and_then(|v| v.as_bool()).unwrap_or(false),
 				head_sha: string(node, "/headRefOid"),
 				additions: usize_at(node, "/additions"),
 				deletions: usize_at(node, "/deletions"),
@@ -530,12 +526,7 @@ fn gitlab_labels(mr: &Value) -> Vec<Tag> {
 /// fusion. Elle contient pourtant du code, et souvent depuis plusieurs jours —
 /// c'est précisément le changement qu'on aimerait comprendre avant qu'il ne
 /// grossisse.
-async fn local_changes(
-	project: &ProjectConfig,
-	label: &str,
-	config: &Config,
-	covered: &[String],
-) -> SourceResult {
+async fn local_changes(project: &ProjectConfig, label: &str, config: &Config, covered: &[String]) -> SourceResult {
 	if !config.impact.local_branches() {
 		return Err(None);
 	}
@@ -556,10 +547,7 @@ async fn local_changes(
 	let candidates: Vec<crate::git::Branch> = branches
 		.into_iter()
 		.filter(|branch| {
-			branch.commits_ahead > 0
-				&& !branch.is_default
-				&& branch.name != base
-				&& !covered.contains(&branch.name)
+			branch.commits_ahead > 0 && !branch.is_default && branch.name != base && !covered.contains(&branch.name)
 		})
 		.take(MAX_LOCAL_BRANCHES)
 		.collect();

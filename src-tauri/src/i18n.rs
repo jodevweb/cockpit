@@ -233,7 +233,10 @@ mod tests {
 	#[test]
 	fn tous_les_catalogues_se_lisent() {
 		for (lang, raw) in raw_catalogs() {
-			assert!(serde_json::from_str::<Value>(raw).is_ok(), "catalogue illisible : {lang}");
+			assert!(
+				serde_json::from_str::<Value>(raw).is_ok(),
+				"catalogue illisible : {lang}"
+			);
 		}
 	}
 }

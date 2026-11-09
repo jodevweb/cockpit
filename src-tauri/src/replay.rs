@@ -76,7 +76,10 @@ pub fn is_test_file(path: &str) -> bool {
 	let lower = path.replace('\\', "/").to_lowercase();
 	let mut parts: Vec<&str> = lower.split('/').collect();
 	let name = parts.pop().unwrap_or_default();
-	if parts.iter().any(|dir| matches!(*dir, "test" | "tests" | "__tests__" | "spec" | "specs")) {
+	if parts
+		.iter()
+		.any(|dir| matches!(*dir, "test" | "tests" | "__tests__" | "spec" | "specs"))
+	{
 		return true;
 	}
 	name.contains(".test.")
@@ -94,7 +97,11 @@ fn parse_pr(subject: &str, body: &str) -> Option<(Option<u32>, String)> {
 	let subject = subject.trim();
 	if let Some(rest) = subject.strip_prefix("Merge pull request #") {
 		let number = rest.split_whitespace().next()?.parse().ok()?;
-		let title = body.lines().map(str::trim).find(|line| !line.is_empty()).unwrap_or(subject);
+		let title = body
+			.lines()
+			.map(str::trim)
+			.find(|line| !line.is_empty())
+			.unwrap_or(subject);
 		return Some((Some(number), title.to_string()));
 	}
 	let open = subject.rfind("(#")?;
@@ -107,7 +114,13 @@ fn parse_pr(subject: &str, body: &str) -> Option<(Option<u32>, String)> {
 pub async fn cases(repo: &Path, branch: &str, limit: usize) -> Result<Vec<Case>> {
 	let raw = crate::git::run_git(
 		repo,
-		&["log", "--first-parent", "-300", "--format=%H%x1f%P%x1f%s%x1f%b%x1e", branch],
+		&[
+			"log",
+			"--first-parent",
+			"-300",
+			"--format=%H%x1f%P%x1f%s%x1f%b%x1e",
+			branch,
+		],
 	)
 	.await?;
 	let mut found = Vec::new();
@@ -116,11 +129,16 @@ pub async fn cases(repo: &Path, branch: &str, limit: usize) -> Result<Vec<Case>>
 			break;
 		}
 		let fields: Vec<&str> = record.trim_start_matches('\n').split('\u{1f}').collect();
-		let [head, parents, subject, body] = fields[..] else { continue };
-		let Some(base) = parents.split_whitespace().next() else { continue };
-		let Some((number, title)) = parse_pr(subject, body) else { continue };
-		let Ok(changed) =
-			crate::git::run_git(repo, &["diff", "--name-status", "--no-renames", base, head]).await
+		let [head, parents, subject, body] = fields[..] else {
+			continue;
+		};
+		let Some(base) = parents.split_whitespace().next() else {
+			continue;
+		};
+		let Some((number, title)) = parse_pr(subject, body) else {
+			continue;
+		};
+		let Ok(changed) = crate::git::run_git(repo, &["diff", "--name-status", "--no-renames", base, head]).await
 		else {
 			continue;
 		};
@@ -128,7 +146,9 @@ pub async fn cases(repo: &Path, branch: &str, limit: usize) -> Result<Vec<Case>>
 		let mut sources = Vec::new();
 		for line in changed.lines() {
 			let mut columns = line.split('\t');
-			let (Some(status), Some(path)) = (columns.next(), columns.next()) else { continue };
+			let (Some(status), Some(path)) = (columns.next(), columns.next()) else {
+				continue;
+			};
 			if is_test_file(path) {
 				// Un test supprimé ne juge rien : seuls ceux qui existent après.
 				if status.starts_with('A') || status.starts_with('M') {
@@ -199,7 +219,9 @@ pub async fn prepare(repo: &Path, case: &Case, dir: &Path) -> Result<()> {
 	// Ce que l'installation a écrit (un verrou créé, mis à jour) n'est pas le
 	// travail de l'agent : on le fige dans un commit local, et c'est de lui que
 	// part la comparaison.
-	let status = crate::git::run_git(dir, &["status", "--porcelain"]).await.unwrap_or_default();
+	let status = crate::git::run_git(dir, &["status", "--porcelain"])
+		.await
+		.unwrap_or_default();
 	if !status.trim().is_empty() {
 		let _ = crate::git::run_git(dir, &["add", "--all"]).await;
 		let _ = crate::git::run_git(dir, &["commit", "--quiet", "--no-verify", "-m", "dependances"]).await;
@@ -276,7 +298,12 @@ async fn changed_files(dir: &Path) -> Result<Vec<String>> {
 	// de leur contenu.
 	crate::git::run_git(dir, &["add", "--all", "--intent-to-add"]).await?;
 	let raw = crate::git::run_git(dir, &["diff", "--name-only", "HEAD"]).await?;
-	Ok(raw.lines().map(str::trim).filter(|line| !line.is_empty()).map(String::from).collect())
+	Ok(raw
+		.lines()
+		.map(str::trim)
+		.filter(|line| !line.is_empty())
+		.map(String::from)
+		.collect())
 }
 
 /// Ce que le contrôle d'un cas a conclu.
@@ -300,20 +327,27 @@ pub enum Check {
 ///   pour un échec qui n'en est pas un.
 pub async fn check(repo: &Path, case: &Case, dir: &Path, commands: &[String], timeout: Duration) -> Result<Check> {
 	if commands.is_empty() {
-		return Ok(Check::Unusable { reason: crate::i18n::t("replay.noGates") });
+		return Ok(Check::Unusable {
+			reason: crate::i18n::t("replay.noGates"),
+		});
 	}
 	prepare(repo, case, dir).await?;
 	let path = dir.to_string_lossy().to_string();
 	let verdict = async {
 		apply_from_head(repo, dir, case, &case.tests).await?;
 		if crate::gates::run(&path, commands, timeout).await.passed {
-			return Ok::<Check, crate::error::CockpitError>(Check::Unusable { reason: crate::i18n::t("replay.passesBefore") });
+			return Ok::<Check, crate::error::CockpitError>(Check::Unusable {
+				reason: crate::i18n::t("replay.passesBefore"),
+			});
 		}
 		apply_from_head(repo, dir, case, &case.sources).await?;
 		let human = crate::gates::run(&path, commands, timeout).await;
 		if !human.passed {
 			return Ok(Check::Unusable {
-				reason: crate::i18n::tf("replay.humanFails", &[("command", &human.failed), ("output", &human.output)]),
+				reason: crate::i18n::tf(
+					"replay.humanFails",
+					&[("command", &human.failed), ("output", &human.output)],
+				),
 			});
 		}
 		Ok(Check::Usable)
@@ -335,20 +369,35 @@ pub async fn judge(repo: &Path, dir: &Path, case: &Case, commands: &[String], ti
 		.into_iter()
 		.filter(|path| !case.tests.contains(path))
 		.collect();
-	let shared_files = agent_files.iter().filter(|path| case.sources.contains(path)).cloned().collect();
+	let shared_files = agent_files
+		.iter()
+		.filter(|path| case.sources.contains(path))
+		.cloned()
+		.collect();
 	let verdict = if commands.is_empty() {
-		Verdict::NotJudgeable { reason: crate::i18n::t("replay.noGates") }
+		Verdict::NotJudgeable {
+			reason: crate::i18n::t("replay.noGates"),
+		}
 	} else if let Err(error) = apply_from_head(repo, dir, case, &case.tests).await {
-		Verdict::NotJudgeable { reason: crate::i18n::tf("replay.testsDontApply", &[("error", &error)]) }
+		Verdict::NotJudgeable {
+			reason: crate::i18n::tf("replay.testsDontApply", &[("error", &error)]),
+		}
 	} else {
 		let outcome = crate::gates::run(&dir.to_string_lossy(), commands, timeout).await;
 		if outcome.passed {
 			Verdict::Resolved
 		} else {
-			Verdict::Failed { command: outcome.failed, output: outcome.output }
+			Verdict::Failed {
+				command: outcome.failed,
+				output: outcome.output,
+			}
 		}
 	};
-	Judgement { verdict, agent_files, shared_files }
+	Judgement {
+		verdict,
+		agent_files,
+		shared_files,
+	}
 }
 
 // ── Les essais ───────────────────────────────────────────────────────────────
@@ -401,7 +450,11 @@ pub fn trial_prompt(case: &Case, setup: &Setup, commands: &[String]) -> String {
 	if !commands.is_empty() {
 		prompt.push_str(&format!(
 			"\nThe repository's checks are: {}. Make them pass.\n",
-			commands.iter().map(|command| format!("`{command}`")).collect::<Vec<_>>().join(", ")
+			commands
+				.iter()
+				.map(|command| format!("`{command}`"))
+				.collect::<Vec<_>>()
+				.join(", ")
 		));
 	}
 	prompt.push_str(
@@ -442,9 +495,12 @@ where
 	prepare(repo, case, dir).await?;
 	let worked = work(dir.to_string_lossy().to_string(), trial_prompt(case, setup, commands)).await;
 	let (judgement, error, cost_usd, duration_ms) = match worked {
-		Ok(worked) => {
-			(Some(judge(repo, dir, case, commands, timeout).await), None, worked.cost_usd, worked.duration_ms)
-		}
+		Ok(worked) => (
+			Some(judge(repo, dir, case, commands, timeout).await),
+			None,
+			worked.cost_usd,
+			worked.duration_ms,
+		),
 		Err(error) => (None, Some(error.to_string()), 0.0, 0),
 	};
 	discard(repo, dir).await;
@@ -484,7 +540,10 @@ pub async fn trial(repo: &Path, case: &Case, setup: &Setup, commands: &[String],
 			crate::executions::Origin::cockpit("rejeu"),
 		)
 		.await?;
-		Ok(Worked { cost_usd: shot.cost_usd, duration_ms: shot.duration_ms })
+		Ok(Worked {
+			cost_usd: shot.cost_usd,
+			duration_ms: shot.duration_ms,
+		})
 	})
 	.await?;
 	record(repo, &done)?;
@@ -493,7 +552,9 @@ pub async fn trial(repo: &Path, case: &Case, setup: &Setup, commands: &[String],
 
 /// Où vivent les essais d'un dépôt : sous la configuration, jamais dans le dépôt.
 fn trials_dir(repo: &Path) -> std::path::PathBuf {
-	crate::config::config_dir().join("rejeu").join(crate::mcp::key_of(&repo.to_string_lossy()))
+	crate::config::config_dir()
+		.join("rejeu")
+		.join(crate::mcp::key_of(&repo.to_string_lossy()))
 }
 
 /// Ajoute un essai au relevé du dépôt — en ajout seul, comme les exécutions.
@@ -501,7 +562,10 @@ pub fn record(repo: &Path, trial: &Trial) -> Result<()> {
 	use std::io::Write;
 	let dir = trials_dir(repo);
 	std::fs::create_dir_all(&dir)?;
-	let mut file = std::fs::OpenOptions::new().create(true).append(true).open(dir.join("essais.jsonl"))?;
+	let mut file = std::fs::OpenOptions::new()
+		.create(true)
+		.append(true)
+		.open(dir.join("essais.jsonl"))?;
 	let line = serde_json::to_string(trial).map_err(|e| crate::error::CockpitError::msg(e.to_string()))?;
 	writeln!(file, "{line}")?;
 	Ok(())
@@ -559,7 +623,11 @@ pub fn reserve(repo: &Path, total: usize) -> Result<()> {
 	if slot.is_some() {
 		return Err(crate::error::CockpitError::msg(crate::i18n::t("replay.alreadyRunning")));
 	}
-	*slot = Some(Progress { repo: repo.to_string_lossy().to_string(), done: 0, total });
+	*slot = Some(Progress {
+		repo: repo.to_string_lossy().to_string(),
+		done: 0,
+		total,
+	});
 	Ok(())
 }
 
@@ -673,7 +741,9 @@ fn remove_tree(dir: &Path) {
 /// Range ce qu'une campagne interrompue a laissé : des dossiers d'essai et de
 /// contrôle qu'aucun `discard` n'a refermés (app fermée en plein essai).
 fn sweep(repo: &Path) {
-	let Ok(entries) = std::fs::read_dir(trials_dir(repo)) else { return };
+	let Ok(entries) = std::fs::read_dir(trials_dir(repo)) else {
+		return;
+	};
 	for entry in entries.flatten() {
 		let name = entry.file_name().to_string_lossy().to_string();
 		if entry.path().is_dir() && (name.starts_with("essai-") || name.starts_with("controle-")) {
@@ -708,7 +778,10 @@ mod tests {
 	#[test]
 	fn le_numero_et_le_titre_d_une_pr_se_lisent() {
 		assert_eq!(
-			parse_pr("Merge pull request #12 from me/fix-total", "\nCart total uses quantities\n"),
+			parse_pr(
+				"Merge pull request #12 from me/fix-total",
+				"\nCart total uses quantities\n"
+			),
 			Some((Some(12), "Cart total uses quantities".into()))
 		);
 		assert_eq!(
@@ -727,8 +800,16 @@ mod tests {
 	}
 
 	fn git(dir: &Path, args: &[&str]) {
-		let sortie = std::process::Command::new("git").args(args).current_dir(dir).output().unwrap();
-		assert!(sortie.status.success(), "git {args:?} : {}", String::from_utf8_lossy(&sortie.stderr));
+		let sortie = std::process::Command::new("git")
+			.args(args)
+			.current_dir(dir)
+			.output()
+			.unwrap();
+		assert!(
+			sortie.status.success(),
+			"git {args:?} : {}",
+			String::from_utf8_lossy(&sortie.stderr)
+		);
 	}
 
 	/// Un dépôt avec une PR fusionnée : elle corrige `src/cart.txt` et ajoute
@@ -781,7 +862,10 @@ mod tests {
 		// Le code d'avant échoue aux tests de l'humain, la solution humaine les
 		// passe : le cas est utilisable.
 		let essai = repo.with_file_name(format!("{}-essai", repo.file_name().unwrap().to_string_lossy()));
-		assert_eq!(check(&repo, case, &essai, &commands, timeout).await.unwrap(), Check::Usable);
+		assert_eq!(
+			check(&repo, case, &essai, &commands, timeout).await.unwrap(),
+			Check::Usable
+		);
 		assert!(!essai.exists(), "le dossier de contrôle est rangé");
 
 		// Le dossier d'essai n'a aucune histoire après le commit d'avant : ni la
@@ -793,8 +877,15 @@ mod tests {
 			.status()
 			.unwrap();
 		assert!(!tete.success(), "la solution humaine est introuvable depuis l'essai");
-		let refs = std::process::Command::new("git").args(["for-each-ref"]).current_dir(&essai).output().unwrap();
-		assert!(String::from_utf8_lossy(&refs.stdout).trim().is_empty(), "aucune référence");
+		let refs = std::process::Command::new("git")
+			.args(["for-each-ref"])
+			.current_dir(&essai)
+			.output()
+			.unwrap();
+		assert!(
+			String::from_utf8_lossy(&refs.stdout).trim().is_empty(),
+			"aucune référence"
+		);
 		assert!(!essai.join("tests/total.test.sh").exists());
 		discard(&repo, &essai).await;
 		assert!(!essai.exists(), "le dossier d'essai est rangé");
@@ -835,7 +926,10 @@ mod tests {
 		let timeout = Duration::from_secs(60);
 		let essai = repo.with_file_name(format!("{}-c", repo.file_name().unwrap().to_string_lossy()));
 
-		let porte_nouvelle = vec!["bash tests/total.test.sh".to_string(), "bash scripts/absent.sh".to_string()];
+		let porte_nouvelle = vec![
+			"bash tests/total.test.sh".to_string(),
+			"bash scripts/absent.sh".to_string(),
+		];
 		let humain = check(&repo, &case, &essai, &porte_nouvelle, timeout).await.unwrap();
 		assert!(matches!(humain, Check::Unusable { .. }), "{humain:?}");
 
@@ -866,7 +960,11 @@ mod tests {
 	#[tokio::test]
 	async fn le_worktree_d_un_projet_js_recoit_ses_dependances() {
 		let repo = depot_avec_une_pr("js");
-		std::fs::write(repo.join("package.json"), r#"{"name":"essai","version":"1.0.0","private":true}"#).unwrap();
+		std::fs::write(
+			repo.join("package.json"),
+			r#"{"name":"essai","version":"1.0.0","private":true}"#,
+		)
+		.unwrap();
 		git(&repo, &["add", "."]);
 		git(&repo, &["commit", "--quiet", "-m", "Un package.json"]);
 		let case = Case {
@@ -879,7 +977,10 @@ mod tests {
 		};
 		let dir = repo.with_file_name(format!("{}-w", repo.file_name().unwrap().to_string_lossy()));
 		prepare(&repo, &case, &dir).await.unwrap();
-		assert!(dir.join("package-lock.json").exists(), "npm install a tourné dans le worktree");
+		assert!(
+			dir.join("package-lock.json").exists(),
+			"npm install a tourné dans le worktree"
+		);
 		discard(&repo, &dir).await;
 		let _ = std::fs::remove_dir_all(&repo);
 	}
@@ -908,7 +1009,10 @@ mod tests {
 			tests: vec!["tests/total.test.sh".into()],
 			sources: vec!["src/cart.txt".into()],
 		};
-		let setup = Setup { instructions: "Write the test first.".into(), ..Default::default() };
+		let setup = Setup {
+			instructions: "Write the test first.".into(),
+			..Default::default()
+		};
 		let prompt = trial_prompt(&case, &setup, &["npm test".to_string()]);
 		assert!(prompt.contains("Cart total uses quantities"));
 		assert!(prompt.contains("`npm test`"));
@@ -928,13 +1032,27 @@ mod tests {
 		let commands = vec!["bash tests/total.test.sh".to_string()];
 		let timeout = Duration::from_secs(60);
 		let dir = repo.with_file_name(format!("{}-w", repo.file_name().unwrap().to_string_lossy()));
-		let setup = Setup { label: "simulé".into(), ..Default::default() };
+		let setup = Setup {
+			label: "simulé".into(),
+			..Default::default()
+		};
 
-		let reussi = trial_with(&repo, &case, &setup, &commands, &dir, timeout, |cwd, prompt| async move {
-			assert!(prompt.contains("Cart total uses quantities"));
-			std::fs::write(Path::new(&cwd).join("src/cart.txt"), "total = sum(price * quantity)\n").unwrap();
-			Ok(Worked { cost_usd: 0.12, duration_ms: 900 })
-		})
+		let reussi = trial_with(
+			&repo,
+			&case,
+			&setup,
+			&commands,
+			&dir,
+			timeout,
+			|cwd, prompt| async move {
+				assert!(prompt.contains("Cart total uses quantities"));
+				std::fs::write(Path::new(&cwd).join("src/cart.txt"), "total = sum(price * quantity)\n").unwrap();
+				Ok(Worked {
+					cost_usd: 0.12,
+					duration_ms: 900,
+				})
+			},
+		)
 		.await
 		.unwrap();
 		assert_eq!(reussi.judgement.as_ref().map(|j| &j.verdict), Some(&Verdict::Resolved));

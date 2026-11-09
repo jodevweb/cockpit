@@ -43,7 +43,11 @@ pub fn first_turn(binary: &str, args: &str) -> String {
 /// Ligne de commande d'un tour suivant — un process de plus, jamais une
 /// écriture sur celui d'avant, qui n'existe déjà plus.
 pub fn resume_turn(binary: &str, thread_id: &str, args: &str) -> String {
-	format!("{} exec resume {} --json{args} -", shell_quote(binary), shell_quote(thread_id))
+	format!(
+		"{} exec resume {} --json{args} -",
+		shell_quote(binary),
+		shell_quote(thread_id)
+	)
 }
 
 /// Un réglage `-c clé=valeur`, dont la valeur est du TOML.
@@ -96,7 +100,13 @@ pub fn mcp_args(config: &Value) -> String {
 		// Le nom est un segment de chemin pointé : un point y créerait un niveau.
 		let name: String = name
 			.chars()
-			.map(|c| if c.is_ascii_alphanumeric() || c == '-' || c == '_' { c } else { '_' })
+			.map(|c| {
+				if c.is_ascii_alphanumeric() || c == '-' || c == '_' {
+					c
+				} else {
+					'_'
+				}
+			})
 			.collect();
 		let key = format!("mcp_servers.{name}");
 		if let Some(command) = server.get("command").and_then(|v| v.as_str()) {
@@ -104,7 +114,11 @@ pub fn mcp_args(config: &Value) -> String {
 			if let Some(args) = server.get("args").filter(|args| args.is_array()) {
 				out.push_str(&setting(&format!("{key}.args"), &args.to_string()));
 			}
-			if let Some(env) = server.get("env").and_then(|env| env.as_object()).filter(|env| !env.is_empty()) {
+			if let Some(env) = server
+				.get("env")
+				.and_then(|env| env.as_object())
+				.filter(|env| !env.is_empty())
+			{
 				let table = env
 					.iter()
 					.filter_map(|(name, value)| Some(format!("{}={}", toml_string(name), toml_string(value.as_str()?))))
@@ -112,13 +126,19 @@ pub fn mcp_args(config: &Value) -> String {
 					.join(",");
 				out.push_str(&setting(&format!("{key}.env"), &format!("{{{table}}}")));
 			}
-			out.push_str(&setting(&format!("{key}.env_vars"), &Value::from(SERVER_ENV.to_vec()).to_string()));
+			out.push_str(&setting(
+				&format!("{key}.env_vars"),
+				&Value::from(SERVER_ENV.to_vec()).to_string(),
+			));
 		} else if let Some(url) = server.get("url").and_then(|v| v.as_str()) {
 			out.push_str(&setting(&format!("{key}.url"), &toml_string(url)));
 		} else {
 			continue;
 		}
-		out.push_str(&setting(&format!("{key}.default_tools_approval_mode"), &toml_string("approve")));
+		out.push_str(&setting(
+			&format!("{key}.default_tools_approval_mode"),
+			&toml_string("approve"),
+		));
 		// Le pont de mission attend jusqu'à deux minutes qu'un worktree soit prêt :
 		// le délai par défaut couperait l'appel avant sa réponse.
 		out.push_str(&setting(&format!("{key}.tool_timeout_sec"), "300"));
@@ -138,7 +158,10 @@ pub fn hook_args(node: &str, script: &str) -> String {
 		"[{{matcher=\"^(Bash|apply_patch)$\",hooks=[{{type=\"command\",command={}}}]}}]",
 		toml_string(&command)
 	);
-	format!(" --dangerously-bypass-hook-trust{}", setting("hooks.PreToolUse", &hooks))
+	format!(
+		" --dangerously-bypass-hook-trust{}",
+		setting("hooks.PreToolUse", &hooks)
+	)
 }
 
 /// Les consignes permanentes, l'équivalent de `--append-system-prompt`.
@@ -267,7 +290,11 @@ fn tool_result(item: &Value, output: &str, failed: bool) -> Value {
 
 /// Le texte rendu par un outil MCP, ou la raison de son échec.
 fn mcp_output(item: &Value) -> String {
-	if let Some(error) = item.get("error").and_then(|e| e.get("message")).and_then(|m| m.as_str()) {
+	if let Some(error) = item
+		.get("error")
+		.and_then(|e| e.get("message"))
+		.and_then(|m| m.as_str())
+	{
 		return error.to_string();
 	}
 	item.get("result")
@@ -297,10 +324,7 @@ mod tests {
 	#[test]
 	fn les_autres_evenements_ne_donnent_pas_d_identifiant() {
 		assert_eq!(thread_id(&json!({"type": "turn.started"})), None);
-		assert_eq!(
-			thread_id(&json!({"type": "item.completed", "item": {}})),
-			None
-		);
+		assert_eq!(thread_id(&json!({"type": "item.completed", "item": {}})), None);
 	}
 
 	#[test]
@@ -321,7 +345,10 @@ mod tests {
 	fn un_evenement_intermediaire_n_est_pas_une_fin() {
 		let items = ["thread.started", "turn.started", "item.started", "item.completed"];
 		for kind in items {
-			assert!(!turn_finished(&json!({"type": kind})), "{kind} ne devrait pas finir un tour");
+			assert!(
+				!turn_finished(&json!({"type": kind})),
+				"{kind} ne devrait pas finir un tour"
+			);
 		}
 	}
 
@@ -352,12 +379,21 @@ mod tests {
 			"args": ["C:/l'outil.mjs"],
 			"env": { "CLE": "valeur" },
 		} } }));
-		assert!(args.contains(r#"-c 'mcp_servers.mission.command="C:/node.exe"'"#), "{args}");
+		assert!(
+			args.contains(r#"-c 'mcp_servers.mission.command="C:/node.exe"'"#),
+			"{args}"
+		);
 		// L'apostrophe du chemin ne sort pas de la citation shell.
-		assert!(args.contains(r#"mcp_servers.mission.args=["C:/l'\''outil.mjs"]"#), "{args}");
+		assert!(
+			args.contains(r#"mcp_servers.mission.args=["C:/l'\''outil.mjs"]"#),
+			"{args}"
+		);
 		assert!(args.contains(r#"mcp_servers.mission.env={"CLE"="valeur"}"#), "{args}");
 		assert!(args.contains("COCKPIT_MISSION_ID"), "{args}");
-		assert!(args.contains(r#"mcp_servers.mission.default_tools_approval_mode="approve""#), "{args}");
+		assert!(
+			args.contains(r#"mcp_servers.mission.default_tools_approval_mode="approve""#),
+			"{args}"
+		);
 		assert!(args.contains("mcp_servers.mission.tool_timeout_sec=300"), "{args}");
 	}
 
@@ -376,14 +412,20 @@ mod tests {
 	#[test]
 	fn le_hook_vise_les_commandes_et_les_modifications_de_fichiers() {
 		let args = hook_args("C:/node.exe", "C:/guard.mjs");
-		assert!(args.starts_with(" --dangerously-bypass-hook-trust -c 'hooks.PreToolUse=["), "{args}");
+		assert!(
+			args.starts_with(" --dangerously-bypass-hook-trust -c 'hooks.PreToolUse=["),
+			"{args}"
+		);
 		assert!(args.contains("^(Bash|apply_patch)$"), "{args}");
 		assert!(args.contains(r#"command="\"C:/node.exe\" \"C:/guard.mjs\"""#), "{args}");
 	}
 
 	#[test]
 	fn les_consignes_restent_une_seule_chaine_toml() {
-		assert_eq!(instructions_args("a\nl'\"b\""), r#" -c 'developer_instructions="a\nl'\''\"b\""'"#);
+		assert_eq!(
+			instructions_args("a\nl'\"b\""),
+			r#" -c 'developer_instructions="a\nl'\''\"b\""'"#
+		);
 	}
 
 	#[test]
@@ -495,10 +537,7 @@ mod tests {
 		// pas non plus.
 		assert!(to_claude_shaped(&json!({"type": "thread.started", "thread_id": "x"})).is_none());
 		assert!(to_claude_shaped(&json!({"type": "turn.started"})).is_none());
-		assert!(
-			to_claude_shaped(&json!({"type": "item.completed", "item": {"type": "reasoning"}}))
-				.is_none()
-		);
+		assert!(to_claude_shaped(&json!({"type": "item.completed", "item": {"type": "reasoning"}})).is_none());
 	}
 
 	/// La CI n'a pas le vrai binaire `codex` : ce test fait tourner un faux
@@ -571,12 +610,10 @@ fi
 		let started = events.iter().find(|e| thread_id(e).is_some()).unwrap();
 		assert_eq!(thread_id(started), Some("thread-xyz"));
 		assert!(events.iter().any(turn_finished));
-		assert!(
-			events
-				.iter()
-				.any(|e| e.get("item").and_then(|i| i.get("text")).and_then(|t| t.as_str())
-					== Some("got: fix the failing test"))
-		);
+		assert!(events
+			.iter()
+			.any(|e| e.get("item").and_then(|i| i.get("text")).and_then(|t| t.as_str())
+				== Some("got: fix the failing test")));
 
 		// Le tour suivant reprend le même fil — c'est la partie qu'une simple
 		// vérification de texte ne peut pas prouver : que la commande générée

@@ -71,7 +71,12 @@ pub fn assemble(seen: &Observed) -> Readiness {
 	};
 	let mut checks = Vec::new();
 	if seen.windows {
-		checks.push(Check { id: "shell".into(), required: true, ok: seen.shell, detail: String::new() });
+		checks.push(Check {
+			id: "shell".into(),
+			required: true,
+			ok: seen.shell,
+			detail: String::new(),
+		});
 	}
 	checks.push(check("git", true, &seen.git));
 	checks.push(check("claude", true, &seen.claude));
@@ -100,7 +105,13 @@ pub async fn observe() -> Readiness {
 			.await
 			.into_iter()
 			.find(|account| account.logged_in)
-			.map(|account| if account.email.is_empty() { account.label } else { account.email })
+			.map(|account| {
+				if account.email.is_empty() {
+					account.label
+				} else {
+					account.email
+				}
+			})
 	} else {
 		None
 	};

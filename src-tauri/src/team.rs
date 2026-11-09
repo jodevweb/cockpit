@@ -32,13 +32,7 @@ fn is_base_branch(workflow: &crate::config::WorkflowConfig, branch: &str) -> boo
 /// Jours de daily (lundi, mercredi, vendredi) : sert à calculer la fenêtre
 /// « depuis le dernier daily ».
 /// Repli : tous les jours ouvrés, quand la configuration ne dit rien.
-const DAILY_WEEKDAYS: [Weekday; 5] = [
-	Weekday::Mon,
-	Weekday::Tue,
-	Weekday::Wed,
-	Weekday::Thu,
-	Weekday::Fri,
-];
+const DAILY_WEEKDAYS: [Weekday; 5] = [Weekday::Mon, Weekday::Tue, Weekday::Wed, Weekday::Thu, Weekday::Fri];
 
 /// `1` = lundi, comme dans la configuration.
 fn meets_on(workflow: &crate::config::WorkflowConfig, day: Weekday) -> bool {
@@ -118,10 +112,7 @@ const FALLBACK_DONE: [&str; 3] = ["Done", "Merged", "Terminé"];
 
 /// Phase de travail d'un état : `active`, `review`, `done` ou `upcoming`.
 fn state_phase(workflow: &crate::config::WorkflowConfig, state: &str) -> &'static str {
-	if workflow.active_states.is_empty()
-		&& workflow.review_states.is_empty()
-		&& workflow.done_states.is_empty()
-	{
+	if workflow.active_states.is_empty() && workflow.review_states.is_empty() && workflow.done_states.is_empty() {
 		return if FALLBACK_ACTIVE.contains(&state) {
 			"active"
 		} else if FALLBACK_REVIEW.contains(&state) {
@@ -560,7 +551,11 @@ pub(crate) async fn fetch_current_cycle(token: &str, team_id: &str) -> Result<Op
 	Ok(Some(Cycle {
 		id: cycle.get("id").and_then(|v| v.as_str()).unwrap_or_default().to_string(),
 		number: cycle.get("number").and_then(|v| v.as_i64()).unwrap_or(0),
-		starts_at: cycle.get("startsAt").and_then(|v| v.as_str()).unwrap_or_default().into(),
+		starts_at: cycle
+			.get("startsAt")
+			.and_then(|v| v.as_str())
+			.unwrap_or_default()
+			.into(),
 		ends_at: cycle.get("endsAt").and_then(|v| v.as_str()).unwrap_or_default().into(),
 	}))
 }
@@ -809,12 +804,7 @@ fn labels_of(node: &Value) -> Vec<PrLabel> {
 
 /// PR ouvertes avec, en une seule requête, l'état CI et les reviewers demandés —
 /// ce que l'API REST ne sait pas faire sans un appel par PR.
-pub async fn fetch_open_prs(
-	token: &str,
-	owner: &str,
-	name: &str,
-	team_key: &str,
-) -> Result<Vec<PullRequest>> {
+pub async fn fetch_open_prs(token: &str, owner: &str, name: &str, team_key: &str) -> Result<Vec<PullRequest>> {
 	let mut prs = Vec::new();
 	let mut after: Option<String> = None;
 
@@ -904,12 +894,7 @@ pub async fn fetch_open_prs(
 	Ok(prs)
 }
 
-async fn fetch_merged_prs(
-	token: &str,
-	repo: &str,
-	since: NaiveDate,
-	team_key: &str,
-) -> Result<Vec<MergedPr>> {
+async fn fetch_merged_prs(token: &str, repo: &str, since: NaiveDate, team_key: &str) -> Result<Vec<MergedPr>> {
 	let body = github_graphql(
 		token,
 		"query MergedPrs($query: String!) {
@@ -958,7 +943,6 @@ async fn fetch_merged_prs(
 }
 
 // ───────────────────────────── Thèmes métier ─────────────────────────────
-
 
 /// Minuscules sans accents, entourées d'espaces pour que les mots-clés courts
 /// (` ci `, ` bo `) ne matchent pas au milieu d'un autre mot.
@@ -1301,13 +1285,7 @@ fn finish(draft: FlagDraft) -> Flag {
 	}
 }
 
-fn pr_flag(
-	severity: &'static str,
-	member: &str,
-	category: &'static str,
-	question: String,
-	pr: &PullRequest,
-) -> Flag {
+fn pr_flag(severity: &'static str, member: &str, category: &'static str, question: String, pr: &PullRequest) -> Flag {
 	finish(FlagDraft {
 		severity,
 		member: member.to_string(),
@@ -1340,10 +1318,7 @@ fn compute_flags(
 				question: if ids.len() == 1 {
 					tr("flags.blockedOne", &[("id", &ids[0])])
 				} else {
-					tr(
-						"flags.blockedMany",
-						&[("count", &ids.len()), ("ids", &sample(&ids, 3))],
-					)
+					tr("flags.blockedMany", &[("count", &ids.len()), ("ids", &sample(&ids, 3))])
 				},
 				ticket_id: Some(ctx.blocked[0].identifier.clone()),
 				ticket_url: Some(ctx.blocked[0].url.clone()),
@@ -1364,10 +1339,7 @@ fn compute_flags(
 					"red",
 					name,
 					"pr-stacked",
-					tr(
-						"flags.stacked",
-						&[("number", &pr.number), ("base", &pr.base_ref)],
-					),
+					tr("flags.stacked", &[("number", &pr.number), ("base", &pr.base_ref)]),
 					pr,
 				));
 			} else if pr.ci_state == "failing" {
@@ -1646,18 +1618,13 @@ fn build_pr_flow(
 		.collect();
 
 	// Une PR empilée est bloquée par celle dont la branche lui sert de base.
-	let head_to_number: HashMap<&str, i64> = open_prs
-		.iter()
-		.map(|pr| (pr.head_ref.as_str(), pr.number))
-		.collect();
+	let head_to_number: HashMap<&str, i64> = open_prs.iter().map(|pr| (pr.head_ref.as_str(), pr.number)).collect();
 
 	let item = |pr: &PullRequest| PrFlowItem {
 		number: pr.number,
 		url: pr.url.clone(),
 		title: pr.title.clone(),
-		author: member_name_of(members, &pr.author)
-			.unwrap_or(&pr.author)
-			.to_string(),
+		author: member_name_of(members, &pr.author).unwrap_or(&pr.author).to_string(),
 		ticket_id: pr.linear_ids.first().cloned(),
 		blocked_by: head_to_number.get(pr.base_ref.as_str()).copied(),
 		base: pr.base_ref.clone(),
@@ -1685,8 +1652,14 @@ fn build_pr_flow(
 			.filter(|pr| !is_base_branch(workflow, &pr.base_ref))
 			.map(|pr| item(pr))
 			.collect(),
-		ci_pending: team_prs.iter().filter(|pr| !pr.is_draft && pr.ci_state == "pending").count(),
-		ci_success: team_prs.iter().filter(|pr| !pr.is_draft && pr.ci_state == "success").count(),
+		ci_pending: team_prs
+			.iter()
+			.filter(|pr| !pr.is_draft && pr.ci_state == "pending")
+			.count(),
+		ci_success: team_prs
+			.iter()
+			.filter(|pr| !pr.is_draft && pr.ci_state == "success")
+			.count(),
 	}
 }
 
@@ -1742,14 +1715,10 @@ pub async fn build_board(config: &Config, cycle_only: bool) -> Result<TeamBoard>
 			} else {
 				match fetch_open_prs(&token, &owner, &name, &config.linear.team_key).await {
 					Ok(open) => {
-						let merged = fetch_merged_prs(
-							&token,
-							&config.github.repo,
-							since_daily,
-							&config.linear.team_key,
-						)
-							.await
-							.unwrap_or_default();
+						let merged =
+							fetch_merged_prs(&token, &config.github.repo, since_daily, &config.linear.team_key)
+								.await
+								.unwrap_or_default();
 						(open, merged, None)
 					}
 					Err(error) => (Vec::new(), Vec::new(), Some(error.to_string())),
@@ -1834,8 +1803,7 @@ pub async fn build_board(config: &Config, cycle_only: bool) -> Result<TeamBoard>
 		// déjà son signal, les alertes le disent ; cette liste-ci répond à « sur
 		// quoi es-tu en ce moment ».
 		let by_age = |a: &TicketCard, b: &TicketCard| a.age_days.cmp(&b.age_days);
-		let mut active_tickets: Vec<TicketCard> =
-			active.iter().chain(blocked.iter()).map(to_card).collect();
+		let mut active_tickets: Vec<TicketCard> = active.iter().chain(blocked.iter()).map(to_card).collect();
 		active_tickets.sort_by(by_age);
 		let mut review_tickets: Vec<TicketCard> = review.iter().map(to_card).collect();
 		review_tickets.sort_by(by_age);
@@ -1920,9 +1888,7 @@ pub async fn build_board(config: &Config, cycle_only: bool) -> Result<TeamBoard>
 					number: pr.number,
 					url: pr.url.clone(),
 					title: pr.title.clone(),
-					author: member_name_of(&members, &pr.author)
-						.unwrap_or(&pr.author)
-						.to_string(),
+					author: member_name_of(&members, &pr.author).unwrap_or(&pr.author).to_string(),
 					age_days: business_days_between(&pr.created_at, now),
 					labels: pr.labels.clone(),
 				})
@@ -1967,10 +1933,7 @@ pub async fn build_board(config: &Config, cycle_only: bool) -> Result<TeamBoard>
 					linked_issue_ids.insert(issue.identifier.clone());
 				}
 				for pr in prs {
-					if !member.github.is_empty()
-						&& !pr.author.is_empty()
-						&& !is_member_login(member, &pr.author)
-					{
+					if !member.github.is_empty() && !pr.author.is_empty() && !is_member_login(member, &pr.author) {
 						foreign_author_prs.push(((*pr).clone(), issue.identifier.clone()));
 					}
 				}
@@ -2054,11 +2017,7 @@ pub async fn build_board(config: &Config, cycle_only: bool) -> Result<TeamBoard>
 					.prs
 					.iter()
 					.filter(|pr| !pr.is_draft)
-					.filter(|pr| {
-						pr.ticket_id
-							.as_deref()
-							.is_none_or(|id| !active_ids.contains(id))
-					})
+					.filter(|pr| pr.ticket_id.as_deref().is_none_or(|id| !active_ids.contains(id)))
 					.map(|pr| pr.title.clone()),
 			)
 			.collect();
@@ -2142,7 +2101,11 @@ mod narrative_tests {
 			keywords: keywords.iter().map(|word| word.to_string()).collect(),
 		};
 		vec![
-			theme("Fidélité", "la fidélité", &["loyalty", "points", "reward", "recompense"]),
+			theme(
+				"Fidélité",
+				"la fidélité",
+				&["loyalty", "points", "reward", "recompense"],
+			),
 			theme(
 				"Facturation",
 				"la facturation",
@@ -2163,7 +2126,11 @@ mod narrative_tests {
 				"le retrait en magasin",
 				&["retrait en magasin", "click and collect", "magasin"],
 			),
-			theme("UI front", "l'interface front", &["affichage", "responsive", "composant"]),
+			theme(
+				"UI front",
+				"l'interface front",
+				&["affichage", "responsive", "composant"],
+			),
 		]
 	}
 
@@ -2171,8 +2138,7 @@ mod narrative_tests {
 	/// sinon le sujet « dominant » reflète le choix des mots, pas le travail.
 	#[test]
 	fn un_titre_ne_compte_que_pour_un_theme() {
-		let themes =
-			count_themes(&seeded(), &titles(&["Corriger l'affichage du panier"]));
+		let themes = count_themes(&seeded(), &titles(&["Corriger l'affichage du panier"]));
 		let total: usize = themes.iter().map(|t| t.count).sum();
 		assert_eq!(total, 1, "un seul titre ne peut peser que pour un");
 	}
@@ -2195,7 +2161,10 @@ mod narrative_tests {
 	/// Le mot-clé le plus spécifique l'emporte sur le plus générique.
 	#[test]
 	fn le_theme_le_plus_precis_gagne() {
-		let themes = count_themes(&seeded(), &titles(&["Retrait en magasin : livraison du colis par transporteur"]));
+		let themes = count_themes(
+			&seeded(),
+			&titles(&["Retrait en magasin : livraison du colis par transporteur"]),
+		);
 		assert_eq!(themes[0].label, "Retrait en magasin");
 	}
 
@@ -2203,10 +2172,22 @@ mod narrative_tests {
 	#[test]
 	fn pas_de_focus_sans_majorite() {
 		let current = vec![
-			ThemeCount { label: "Facturation Stripe".into(), count: 2 },
-			ThemeCount { label: "UI front".into(), count: 1 },
-			ThemeCount { label: "Tests & QA".into(), count: 1 },
-			ThemeCount { label: "CI & infra".into(), count: 1 },
+			ThemeCount {
+				label: "Facturation Stripe".into(),
+				count: 2,
+			},
+			ThemeCount {
+				label: "UI front".into(),
+				count: 1,
+			},
+			ThemeCount {
+				label: "Tests & QA".into(),
+				count: 1,
+			},
+			ThemeCount {
+				label: "CI & infra".into(),
+				count: 1,
+			},
 		];
 		let narrative = build_narrative(
 			&seeded(),
@@ -2237,8 +2218,14 @@ mod narrative_tests {
 	#[test]
 	fn focus_quand_le_sujet_domine() {
 		let current = vec![
-			ThemeCount { label: "Facturation".into(), count: 4 },
-			ThemeCount { label: "UI front".into(), count: 1 },
+			ThemeCount {
+				label: "Facturation".into(),
+				count: 4,
+			},
+			ThemeCount {
+				label: "UI front".into(),
+				count: 1,
+			},
 		];
 		let narrative = build_narrative(
 			&seeded(),
