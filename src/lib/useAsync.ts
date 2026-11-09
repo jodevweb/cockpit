@@ -100,7 +100,6 @@ export function useAsync<T>(
 				setInitial(false);
 			}
 		}
-		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, [enabled]);
 
 	useEffect(() => {
@@ -110,6 +109,7 @@ export function useAsync<T>(
 			setInitial(true);
 		}
 		void run();
+		// `deps` vient de l'appelant : la règle ne peut pas le vérifier d'ici.
 		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, [...deps, enabled, projectEpoch]);
 

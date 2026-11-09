@@ -11,6 +11,7 @@
 		"setup:mobile": "node scripts/plateforme.mjs setup-mobile",
 		"vite:dev": "vite",
 		"vite:build": "tsc --noEmit && vite build",
+		"lint": "eslint src e2e scripts",
 		"test:ui": "playwright test",
 		"tauri": "tauri",
 		"release": "node scripts/plateforme.mjs release"
@@ -41,14 +42,19 @@
 		"sonner": "^2.0.8"
 	},
 	"devDependencies": {
+		"@eslint/js": "^10.0.1",
 		"@playwright/test": "1.56.1",
 		"@tailwindcss/vite": "^4.0.0",
 		"@tauri-apps/cli": "^2.2.2",
 		"@types/react": "^19.0.2",
 		"@types/react-dom": "^19.0.2",
 		"@vitejs/plugin-react": "^4.3.4",
+		"eslint": "^10.14.0",
+		"eslint-plugin-react-hooks": "^7.1.1",
+		"globals": "^17.14.0",
 		"tailwindcss": "^4.0.0",
 		"typescript": "^5.7.2",
+		"typescript-eslint": "^8.72.1",
 		"vite": "^6.0.5"
 	}
 }

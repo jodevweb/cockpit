@@ -301,7 +301,7 @@ export function ImpactView() {
 			.catch(() => undefined);
 	}, []);
 
-	const changes = scan.data?.changes ?? [];
+	const changes = useMemo(() => scan.data?.changes ?? [], [scan.data?.changes]);
 
 	const [fixing, setFixing] = useState<string | null>(null);
 

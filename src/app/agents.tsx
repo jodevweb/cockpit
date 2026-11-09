@@ -2051,6 +2051,7 @@ export function AgentRunsProvider({ children }: { children: ReactNode }) {
 			stopped = true;
 			clearInterval(timer);
 		};
+		// Une seule boucle d'adoption pour toute la session : `go` ne change que l'écran.
 		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, []);
 
@@ -2381,7 +2382,7 @@ export function AgentRunsProvider({ children }: { children: ReactNode }) {
 	// Recalculée à chaque rendu — elle ne coûte que la longueur de la liste — et
 	// c'est elle qui empêche la table ci-dessous de changer d'identité à chaque
 	// message reçu.
-	const openSignature = runs.map((run) => `${run.id} ${run.claudeSessionId ?? ""}`).join("");
+	const openSignature = runs.map((run) => `${run.id}\0${run.claudeSessionId ?? ""}`).join("\x01");
 	const openSessions = useMemo(() => {
 		const map = new Map<string, string>();
 		for (const run of runs) {

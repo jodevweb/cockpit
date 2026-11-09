@@ -226,6 +226,8 @@ export function HibernateProvider({ children }: { children: ReactNode }) {
 		}
 		const timer = window.setTimeout(() => void go(), 2500);
 		return () => window.clearTimeout(timer);
+		// La reprise se décide sur le mode et sur l'arrivée des sessions : `restore` est
+		// refait à chaque rendu, et `resumed` l'empêche de repasser.
 		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, [resumeMode, sessions.length]);
 
@@ -312,6 +314,7 @@ export function HibernateProvider({ children }: { children: ReactNode }) {
 				.map((group) => capture(group.cwd))
 				.filter((entry): entry is SleepingGroup => entry !== null),
 		);
+		// La signature dit quand l'empreinte change : `capture` est refait à chaque rendu.
 		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, [signature]);
 
@@ -332,6 +335,7 @@ export function HibernateProvider({ children }: { children: ReactNode }) {
 				? current.filter((entry) => !alive.has(entry.cwd))
 				: current,
 		);
+		// Les dossiers ouverts sont le déclencheur : `resumeMode` ne fait que le retarder.
 		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, [liveCwds]);
 

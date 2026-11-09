@@ -265,6 +265,7 @@ function Hygiene() {
 		seen.current = settled;
 		hygiene.reload();
 		reloadWorktrees();
+		// Seule la fin d'un job déclenche la relecture : les `reload` n'ont rien à y ajouter.
 		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, [settled]);
 	const removable = (hygiene.data ?? []).filter((entry) => entry.removable);

@@ -297,6 +297,7 @@ export function MissionGraph({
 		// Chaque nœud sait dans quel sens partent ses liens.
 		for (const node of nodes) node.data.vertical = vertical;
 		return { nodes, edges };
+		// `labelOf` est refaite à chaque rendu et ne lit que `roles.data`.
 		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, [mission, activity, verifying, selected, roles.data, vertical, withTicket, t]);
 

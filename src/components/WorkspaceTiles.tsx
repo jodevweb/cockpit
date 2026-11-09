@@ -242,6 +242,7 @@ const SILENT_MS = 5 * 60_000;
 function useProgress(satellites: Satellites, runId: string) {
 	const run = satellites.group.runs.find((entry) => entry.id === runId) ?? null;
 	const turns = run?.turns;
+	// `run` change à chaque phrase ; ses tours sont remplacés, jamais modifiés : ils servent de clé.
 	// eslint-disable-next-line react-hooks/exhaustive-deps
 	const progress = useMemo(() => (run ? progressOf(run) : null), [turns]);
 	return { run, progress };

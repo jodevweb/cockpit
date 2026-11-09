@@ -80,7 +80,6 @@ import { openLightbox } from "@/components/Lightbox";
 import { backgroundPending, REVIEW_TOOL, useAgentActions, type Turn } from "@/app/agents";
 import { useReview, useReviewFlow } from "@/app/review";
 import { ReviewPanel } from "@/components/ReviewPanel";
-import { useCockpit } from "@/app/store";
 import {
 	commandOf,
 	episodes,
@@ -803,7 +802,6 @@ export function AgentMap({
 	const compactedAt = useMemo(() => lastCompaction(turns), [turns]);
 	// Une commande de test déclarée dans les réglages change le rangement :
 	// la carte se redessine, sans attendre le prochain geste de l'agent.
-	const tests = useCockpit().config?.workflow?.testCommands?.join("\n") ?? "";
 	const last = all.length - 1;
 	// Toute la session tient sur une carte : les épisodes passés s'y replient
 	// en une carte chacun, et se déplient sur place. Une nouvelle consigne ne
@@ -955,7 +953,7 @@ export function AgentMap({
 			}
 		});
 		return { nodes, edges, byId };
-	}, [all, open, live, activity, waiting, selected, tests, cwd, sizes, remarked, print]);
+	}, [all, open, live, activity, waiting, selected, cwd, sizes, remarked, print]);
 
 	const sized = useMemo(() => withSizes(nodes), [nodes, withSizes]);
 
@@ -1422,7 +1420,7 @@ function StateBar({
 	let tone: "live" | "yours" | "done" | "failed";
 	let label: string;
 	let what: string | null = null;
-	let since: number | null = null;
+	let since: number | null;
 	let total: number | null = null;
 
 	if (waiting) {

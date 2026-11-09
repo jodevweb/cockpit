@@ -100,10 +100,9 @@ export function DocsView() {
 			setSelectedPath(focus.docPath);
 			clearFocus();
 		}
-		// eslint-disable-next-line react-hooks/exhaustive-deps
-	}, [focus.docPath]);
+	}, [focus.docPath, clearFocus]);
 
-	const all = docs.data ?? [];
+	const all = useMemo(() => docs.data ?? [], [docs.data]);
 
 	const items = useMemo(() => {
 		const needle = query.trim().toLowerCase();

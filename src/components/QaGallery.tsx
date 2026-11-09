@@ -228,7 +228,6 @@ function Lightbox({
 							className="max-h-full max-w-full object-contain"
 						/>
 					) : file.kind === "video" ? (
-						// eslint-disable-next-line jsx-a11y/media-has-caption
 						<video
 							src={convertFileSrc(file.path)}
 							controls

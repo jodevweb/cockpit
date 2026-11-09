@@ -34,6 +34,7 @@ export function useStickToBottom<T extends HTMLElement>(deps: unknown[]) {
 		if (!node) return;
 		node.scrollTop = node.scrollHeight;
 		anchor.current = node.scrollTop;
+		// `deps` vient de l'appelant : la règle ne peut pas le vérifier d'ici.
 		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, [...deps, stuck]);
 

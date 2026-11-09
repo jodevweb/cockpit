@@ -393,8 +393,7 @@ export function WorktreesView() {
 			setSelectedPath(focus.worktreePath);
 			clearFocus();
 		}
-		// eslint-disable-next-line react-hooks/exhaustive-deps
-	}, [focus.worktreePath]);
+	}, [focus.worktreePath, clearFocus]);
 
 	const filtered = useMemo(() => {
 		const needle = query.trim().toLowerCase();

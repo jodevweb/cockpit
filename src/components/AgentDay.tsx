@@ -111,6 +111,7 @@ export function AgentDay() {
 		const step = to - from > 8 * 3600_000 ? 2 : 1;
 		for (let tick = first.getTime() + 3600_000; tick < to; tick += step * 3600_000) ticks.push(tick);
 		return { lanes, from, to, ticks };
+		// `now` change à chaque rendu : la frise se refait quand les données arrivent.
 		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, [runs.data]);
 

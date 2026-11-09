@@ -152,8 +152,10 @@ function World() {
 	const { t } = useTranslation("views");
 	const { projectList, activeProject, switchProject, missions, go, config } = useCockpit();
 	const { runs: all, pendingFor } = useAgentRuns();
-	// Un agent libre ne relève d'aucune île : il vit dans son propre écran.
+	// Un agent libre ne relève d'aucune île : il vit dans son propre écran. Relu à
+	// chaque changement du registre, que `isLibreRun` consulte sans le recevoir.
 	const registry = useLibres();
+	// eslint-disable-next-line react-hooks/exhaustive-deps
 	const runs = useMemo(() => all.filter((run) => !isLibreRun(run)), [all, registry]);
 	const groups = useWorkGroups();
 	const workspace = useWorkspace();

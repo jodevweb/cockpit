@@ -161,6 +161,7 @@ export function useWorkGroups(): WorkGroup[] {
 	// d'eux. Relu à chaque changement du registre, pour qu'un agent revenu de
 	// son relais n'y apparaisse pas le temps d'être reconnu.
 	const registry = useLibres();
+	// eslint-disable-next-line react-hooks/exhaustive-deps
 	const runs = useMemo(() => all.filter((run) => !isLibreRun(run)), [all, registry]);
 	const { tabs: terminals } = useTerminals();
 	const { worktrees, missions, config } = useCockpit();
@@ -501,6 +502,7 @@ function GroupRail({
 			window.removeEventListener("pointerup", drop);
 			window.removeEventListener("pointercancel", drop);
 		};
+		// La clé dit quand les lignes changent : `rows` et `move` sont refaits à chaque rendu.
 		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, [rows.map(rowKey).join("|")]);
 

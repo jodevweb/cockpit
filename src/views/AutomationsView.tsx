@@ -459,6 +459,7 @@ function Week({ entry }: { entry: AutomationOverview }) {
 		const day = new Date(now.getFullYear(), now.getMonth(), now.getDate());
 		day.setDate(day.getDate() - ((day.getDay() + 6) % 7));
 		return day;
+		// Le nom du jour sert de clé : `now` change à chaque rendu.
 		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, [now.toDateString()]);
 	const span = 7 * 86_400_000;

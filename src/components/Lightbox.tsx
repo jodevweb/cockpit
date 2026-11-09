@@ -52,8 +52,9 @@ export function Lightbox() {
 	const viewer = useFileViewer();
 	const count = open?.media.length ?? 0;
 
+	const isOpen = open !== null;
 	useEffect(() => {
-		if (!open) return;
+		if (!isOpen) return;
 		const step = (delta: number) => {
 			if (!current) return;
 			const total = current.media.length;
@@ -70,7 +71,7 @@ export function Lightbox() {
 		// En capture : Échap ferme l'image avant de fermer le panneau dessous.
 		window.addEventListener("keydown", key, true);
 		return () => window.removeEventListener("keydown", key, true);
-	}, [open !== null]);
+	}, [isOpen]);
 
 	const item = open ? open.media[open.index] : null;
 	const stage = item ? stageOf(item) : null;
