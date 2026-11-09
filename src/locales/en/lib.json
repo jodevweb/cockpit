@@ -38,20 +38,6 @@
 		"source": {
 			"tracker": "Task tracker"
 		},
-		"event": {
-			"merged": "PR merged",
-			"opened": "PR opened",
-			"updated": "PR updated",
-			"reviewed": "PR reviewed",
-			"done": "Ticket done",
-			"started": "Ticket started",
-			"moved": "Ticket moved",
-			"canceled": "Ticket canceled",
-			"agent": "Agents",
-			"git": "Git action",
-			"resolved": "Error resolved",
-			"assigned": "Error assigned"
-		},
 		"markdown": {
 			"silent": "No answer this time: {{sources}}."
 		}
@@ -194,14 +180,6 @@
 			"memory": "Project instructions",
 			"system": "CLI baseline",
 			"other": "Other"
-		}
-	},
-	"illustrations": {
-		"source": {
-			"mesure": "measured",
-			"depot": "found in the repository",
-			"capture": "captured",
-			"agent": "stated by the agent"
 		}
 	},
 	"film": {

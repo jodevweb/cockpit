@@ -997,7 +997,7 @@ pub struct PermanenceRule {
 	/// drapeau le rend à la mission, règle par règle — pour celles dont on veut
 	/// relire le plan sans remettre tout le dispositif en question.
 	pub needs_approval: bool,
-	/// Plafonds propres à cette règle, sur le modèle de `MAX_RUNNING`.
+	/// Plafonds propres à cette règle, sur le modèle de `MAX_RUNNING_TASKS`.
 	pub token_budget: u64,
 	pub per_hour: u64,
 }
@@ -1386,7 +1386,7 @@ fn parse_clock(raw: &str) -> Option<u32> {
 ///
 /// Les missions sont, de loin, ce qui consomme le plus dans le cockpit : la
 /// boucle lance les tâches prêtes toutes les six secondes, et rien ne bornait
-/// le total. Le parallélisme l'était (`MAX_RUNNING`), pas la dépense — et
+/// le total. Le parallélisme l'était (`MAX_RUNNING_TASKS`), pas la dépense — et
 /// quatre agents en série coûtent autant que quatre en parallèle.
 ///
 /// Deux plafonds, parce qu'ils répondent à deux peurs différentes : l'un
@@ -1416,7 +1416,7 @@ pub struct MissionsConfig {
 	/// nouvel agent ne démarre — mission, exécutant ou lancement manuel.
 	/// 0 = la valeur par défaut. 100 = pas de plafond.
 	///
-	/// Le parallélisme des exécutants était borné (`MAX_RUNNING`), pas ce
+	/// Le parallélisme des exécutants était borné (`MAX_RUNNING_TASKS`), pas ce
 	/// qu'ils pèsent une fois lancés : chaque agent tient plusieurs process
 	/// (`claude`, ses ponts MCP), et rien n'empêchait d'en cumuler assez pour
 	/// saturer la machine. Refuser au démarrage plutôt que d'empiler et

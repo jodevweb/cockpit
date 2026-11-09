@@ -38,20 +38,6 @@
 		"source": {
 			"tracker": "작업 트래커"
 		},
-		"event": {
-			"merged": "PR 병합됨",
-			"opened": "PR 열림",
-			"updated": "PR 업데이트됨",
-			"reviewed": "PR 리뷰됨",
-			"done": "티켓 완료",
-			"started": "티켓 시작",
-			"moved": "티켓 이동",
-			"canceled": "티켓 취소",
-			"agent": "에이전트",
-			"git": "Git 작업",
-			"resolved": "오류 해결됨",
-			"assigned": "오류 할당됨"
-		},
 		"markdown": {
 			"silent": "이번에는 응답 없음: {{sources}}."
 		}
@@ -190,14 +176,6 @@
 			"memory": "프로젝트 지침",
 			"system": "CLI 기본 구성",
 			"other": "기타"
-		}
-	},
-	"illustrations": {
-		"source": {
-			"mesure": "측정값",
-			"depot": "저장소에서 확인",
-			"capture": "캡처",
-			"agent": "에이전트 진술"
 		}
 	},
 	"film": {

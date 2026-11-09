@@ -38,20 +38,6 @@
 		"source": {
 			"tracker": "Suivi de tâches"
 		},
-		"event": {
-			"merged": "PR fusionnée",
-			"opened": "PR ouverte",
-			"updated": "PR mise à jour",
-			"reviewed": "PR relue",
-			"done": "Ticket terminé",
-			"started": "Ticket en cours",
-			"moved": "Ticket déplacé",
-			"canceled": "Ticket annulé",
-			"agent": "Agents",
-			"git": "Geste git",
-			"resolved": "Erreur résolue",
-			"assigned": "Erreur assignée"
-		},
 		"markdown": {
 			"silent": "Sans réponse cette fois : {{sources}}."
 		}
@@ -194,14 +180,6 @@
 			"memory": "Consignes du projet",
 			"system": "Socle du CLI",
 			"other": "Autre"
-		}
-	},
-	"illustrations": {
-		"source": {
-			"mesure": "mesuré",
-			"depot": "constaté dans le dépôt",
-			"capture": "capturé",
-			"agent": "dit par l'agent"
 		}
 	},
 	"film": {

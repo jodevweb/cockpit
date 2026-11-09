@@ -38,20 +38,6 @@
 		"source": {
 			"tracker": "任务跟踪工具"
 		},
-		"event": {
-			"merged": "PR 已合并",
-			"opened": "PR 已创建",
-			"updated": "PR 已更新",
-			"reviewed": "PR 已审查",
-			"done": "工单已完成",
-			"started": "工单已开始",
-			"moved": "工单已移动",
-			"canceled": "工单已取消",
-			"agent": "智能体",
-			"git": "Git 操作",
-			"resolved": "错误已解决",
-			"assigned": "错误已分配"
-		},
 		"markdown": {
 			"silent": "本次没有回应：{{sources}}。"
 		}
@@ -190,14 +176,6 @@
 			"memory": "项目指令",
 			"system": "CLI 基础内容",
 			"other": "其他"
-		}
-	},
-	"illustrations": {
-		"source": {
-			"mesure": "实测",
-			"depot": "来自仓库",
-			"capture": "截取",
-			"agent": "智能体所述"
 		}
 	},
 	"film": {

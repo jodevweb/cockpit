@@ -742,7 +742,7 @@ pub async fn launch_task_agent(
 
 		 {brief}
 
-		 The shared contracts — types, routes, schemas — are set on the integration 		 branch: follow them, and report what you are missing rather than inventing it.
+		 The shared contracts — types, routes, schemas — are set on the integration branch: follow them, and report what you are missing rather than inventing it.
 
 		 {directive}",
 		directive = i18n::reply_directive(),

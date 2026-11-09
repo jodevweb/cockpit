@@ -20,7 +20,7 @@ import { Button } from "@/components/ui";
 import { useFileViewer } from "@/lib/fileViewer";
 import { fromIso } from "@/lib/format";
 import { api } from "@/lib/ipc";
-import type { Review, ReviewFinding, ReviewRound } from "@/lib/types";
+import type { Review, ReviewFinding } from "@/lib/types";
 
 /**
  * Une revue de code, rangée pour qu'on la poste.
@@ -322,11 +322,6 @@ function FindingCard({
 			</div>
 		</article>
 	);
-}
-
-/** Le dernier tour d'une revue, pour les cartes qui n'en montrent qu'un résumé. */
-export function lastRound(review: Review | null | undefined): ReviewRound | null {
-	return review?.rounds[review.rounds.length - 1] ?? null;
 }
 
 export { VERDICT };

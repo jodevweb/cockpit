@@ -30,9 +30,6 @@ function detectMac(): boolean {
 /** macOS (et iPadOS, pour l'appli mobile) : ⌘, symboles, barre de titre superposée. */
 export const isMac = detectMac();
 
-/** Windows : l'Explorateur au lieu du Finder, `\` dans les chemins des agents. */
-export const isWindows = !isMac && typeof navigator !== "undefined" && /windows/i.test(navigator.userAgent ?? "");
-
 /** Le nom de la touche de commande, seul : « ⌘ » ou « Ctrl ». */
 export const modLabel = isMac ? "⌘" : "Ctrl";
 /** « ⌥ » ou « Alt ». */

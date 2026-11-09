@@ -783,9 +783,3 @@ export function TextInput({
 	);
 }
 
-export const severityTone: Record<string, Severity | "neutral"> = {
-	critical: "critical",
-	warning: "warning",
-	success: "success",
-	info: "info",
-};
