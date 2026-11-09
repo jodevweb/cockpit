@@ -403,7 +403,7 @@ pub(crate) async fn collect_finished_tasks(app: &AppHandle, id: &str) -> bool {
 		// `engine_session` vide toute la mission — une reprise repartait à froid,
 		// sans la conversation qui allait avec son checkpoint, et le verdict
 		// ci-dessous ne trouvait jamais de fil à lire.
-		let claude_session = agents.claude_session_of(session);
+		let claude_session = agents.engine_session_of(session);
 		if let Some(claude_session) = &claude_session {
 			let _ = mission::set_task_engine_session(id, &task.id, claude_session);
 		}

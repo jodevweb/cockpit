@@ -148,11 +148,8 @@ pub const DEFAULT_PROTOCOL: &str = "claude-stream-json";
 
 /// `codex exec` (OpenAI Codex CLI) : à l'opposé, un process relancé à chaque
 /// tour (`codex exec resume <fil>` pour les suivants), qui se termine de
-/// lui-même une fois la réponse rendue. Voir `codex.rs` — vérifié contre la
-/// documentation officielle, pas contre le binaire, absent du poste où ceci
-/// a été écrit. Ne peut pas encore être le moteur d'une mission (maître ou
-/// exécutant) : les outils de mission et le pont d'autorisation sont des
-/// mécanismes du protocole par défaut, pas du dialogue lui-même.
+/// lui-même une fois la réponse rendue. Voir `codex.rs`. Peut tenir une mission,
+/// sauf dans un conteneur : voir `Protocol::runs_missions`.
 pub const PROTOCOL_CODEX_EXEC: &str = "codex-exec";
 
 /// `gemini --output-format stream-json` (Google Gemini CLI) : répond une
