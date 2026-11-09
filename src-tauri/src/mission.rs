@@ -591,6 +591,11 @@ pub struct Mission {
 	pub ticket: String,
 	#[serde(default)]
 	pub ticket_url: String,
+	/// Ce qu'on a confié au premier maître : le ticket tel qu'il était lu, ou la
+	/// consigne écrite à la main. Un maître relancé au redémarrage repart d'une
+	/// conversation neuve ; sans elle, il ne savait plus ce qu'on attendait de lui.
+	#[serde(default)]
+	pub brief: String,
 	/// Branche d'intégration : les exécutants en partent, le maître y recompose.
 	#[serde(default)]
 	pub branch: String,
@@ -825,6 +830,7 @@ pub fn create(title: &str, ticket: &str, ticket_url: &str, cwd: &str, branch: &s
 		title: title.to_string(),
 		ticket: ticket.trim().to_string(),
 		ticket_url: ticket_url.trim().to_string(),
+		brief: String::new(),
 		branch: branch.trim().to_string(),
 		base: String::new(),
 		cwd: cwd.trim().to_string(),
@@ -1414,6 +1420,17 @@ pub fn claim_task(id: &str, task_id: &str) -> Result<bool> {
 	Ok(claimed)
 }
 
+/// Retient le brief du premier maître, s'il n'y en a pas déjà un : les maîtres
+/// suivants reçoivent une consigne d'étape, pas la commande d'origine.
+pub fn keep_brief(id: &str, brief: &str) -> Result<Mission> {
+	let brief = brief.trim().to_string();
+	update(id, |mission| {
+		if mission.brief.trim().is_empty() && !brief.is_empty() {
+			mission.brief = brief.clone();
+		}
+	})
+}
+
 /// Rattache la session du maître à la mission.
 pub fn attach_master(id: &str, session_id: &str) -> Result<Mission> {
 	let session = session_id.to_string();
@@ -1921,6 +1938,7 @@ mod tests {
 			title: "Mission".into(),
 			ticket: String::new(),
 			ticket_url: String::new(),
+			brief: String::new(),
 			branch: "integration".into(),
 			base: String::new(),
 			cwd: String::new(),
@@ -2443,6 +2461,7 @@ pub(crate) mod blocking_tests {
 			title: "Test".into(),
 			ticket: String::new(),
 			ticket_url: String::new(),
+			brief: String::new(),
 			branch: "integration".into(),
 			base: String::new(),
 			cwd: String::new(),
@@ -3032,6 +3051,7 @@ mod parcours_guide {
 			title: "Mission".into(),
 			ticket: String::new(),
 			ticket_url: String::new(),
+			brief: String::new(),
 			branch: "integration".into(),
 			base: String::new(),
 			cwd: String::new(),

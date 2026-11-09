@@ -9,6 +9,12 @@ export type Mission = { id: string, title: string,
  */
 ticket: string, ticketUrl: string, 
 /**
+ * Ce qu'on a confié au premier maître : le ticket tel qu'il était lu, ou la
+ * consigne écrite à la main. Un maître relancé au redémarrage repart d'une
+ * conversation neuve ; sans elle, il ne savait plus ce qu'on attendait de lui.
+ */
+brief: string, 
+/**
  * Branche d'intégration : les exécutants en partent, le maître y recompose.
  */
 branch: string, 

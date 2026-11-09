@@ -1308,6 +1308,7 @@ mod tests {
 			title: "Mission de test".into(),
 			ticket: String::new(),
 			ticket_url: String::new(),
+			brief: String::new(),
 			branch: branch.into(),
 			base: String::new(),
 			cwd: cwd.into(),
