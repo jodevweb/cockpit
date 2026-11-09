@@ -206,17 +206,19 @@ function Line({
 	);
 }
 
+type Go = ReturnType<typeof useCockpit>["go"];
+type Cockpit = ReturnType<typeof useCockpit>;
+type OverviewData = ReturnType<typeof useOverviewData>;
+
 /**
- * Ce qui attend une décision, avant tout le reste.
+ * Les flux de l'accueil et ce qu'on en tire.
  *
- * L'écran d'accueil ne récapitule pas l'état du monde : il répond à « par quoi
- * je commence ». Les agents qui posent une question passent en premier — ce sont
- * les seuls blocages dont on est soi-même la cause.
+ * Tout ce que l'écran compte ou trie se calcule ici, une fois : les tuiles et
+ * les blocs lisent les mêmes listes, et un chiffre ne peut pas dire autre chose
+ * que le bloc qui le détaille.
  */
-export function OverviewView() {
+function useOverviewData(worktrees: Cockpit["worktrees"], missions: Cockpit["missions"]) {
 	const { t } = useTranslation("views");
-	const { worktrees, worktreesLoading, go, notify, missions, missionsLoading } =
-		useCockpit();
 	const sessions = useAllSessions();
 
 	// Ces flux sont facultatifs : une clé absente ne doit pas casser l'accueil.
@@ -340,8 +342,500 @@ export function OverviewView() {
 		};
 	}, [board.data]);
 
+	return {
+		sessions,
+		board,
+		prs,
+		sentry,
+		usage,
+		docs,
+		waiting,
+		live,
+		ready,
+		broken,
+		stacked,
+		liveMissions,
+		dirty,
+		redFlags,
+		critical,
+		usageDays,
+		prSegments,
+		errorsByProject,
+		reviewLoad,
+		cycle,
+	};
+}
 
+/**
+ * Les compteurs du haut de l'écran.
+ *
+ * Ne s'affiche que ce qui a quelque chose à dire. Six compteurs dont
+ * quatre à zéro occupaient toute la largeur sans rien apprendre, et
+ * faisaient passer le seul chiffre qui comptait pour un détail parmi
+ * d'autres. Les worktrees restent toujours là : ils disent l'état du
+ * poste, pas un incident, et leur absence se lirait comme une panne.
+ */
+function OverviewTiles({
+	loading,
+	live,
+	waiting,
+	ready,
+	broken,
+	redFlags,
+	critical,
+	dirty,
+	worktreeCount,
+	go,
+}: {
+	loading: boolean;
+	live: number;
+	waiting: number;
+	ready: number;
+	broken: number;
+	redFlags: number;
+	critical: number;
+	dirty: number;
+	worktreeCount: number;
+	go: Go;
+}) {
+	const { t } = useTranslation("views");
+	return (
+		<div className="flex flex-wrap gap-2">
+			{loading
+				? [0, 1, 2, 3].map((index) => <TileSkeleton key={index} />)
+				: null}
+			{loading ? null : [
+				{
+					label: t("overview.tiles.liveAgents"),
+					value: live,
+					tone: live > 0 ? ("success" as const) : undefined,
+					hint: waiting > 0 ? t("overview.tiles.waiting", { count: waiting }) : undefined,
+					view: "agents" as const,
+					always: false,
+				},
+				{
+					label: t("overview.tiles.readyToMerge"),
+					value: ready,
+					tone: ready > 0 ? ("success" as const) : undefined,
+					hint: undefined,
+					view: "delivery" as const,
+					always: false,
+				},
+				{
+					label: t("overview.tiles.ciFailing"),
+					value: broken,
+					tone: broken > 0 ? ("critical" as const) : undefined,
+					hint: undefined,
+					view: "delivery" as const,
+					always: false,
+				},
+				{
+					label: t("overview.tiles.dailyBlockers"),
+					value: redFlags,
+					tone: redFlags > 0 ? ("critical" as const) : undefined,
+					hint: undefined,
+					view: "team" as const,
+					always: false,
+				},
+				{
+					label: t("overview.tiles.prodErrors"),
+					value: critical,
+					tone: critical > 0 ? ("warning" as const) : undefined,
+					hint: undefined,
+					view: "observability" as const,
+					always: false,
+				},
+				{
+					label: t("overview.tiles.activeWorktrees"),
+					value: dirty,
+					tone: undefined,
+					hint: t("overview.tiles.total", { count: worktreeCount }),
+					view: "worktrees" as const,
+					always: true,
+				},
+			]
+				.filter((tile) => tile.always || tile.value > 0)
+				.map((tile, index) => (
+					<div
+						key={tile.label}
+						className={clsx("rise w-[11rem]", index < 3 && `rise-${index + 1}`)}
+					>
+						<Tile
+							label={tile.label}
+							value={tile.value}
+							tone={tile.tone}
+							hint={tile.hint}
+							onClick={() => go(tile.view)}
+						/>
+					</div>
+				))}
+		</div>
+	);
+}
 
+/** La consommation de jetons des trois dernières semaines. */
+function UsagePanel({ usage, usageDays }: Pick<OverviewData, "usage" | "usageDays">) {
+	const { t } = useTranslation("views");
+	return (
+		<Panel
+			title={t("overview.usage.title")}
+			icon={Gauge2}
+			loading={usage.initial && usage.loading}
+			rows={4}
+		>
+			{usageDays.length > 1 ? (
+				<>
+					<Sparkline
+						values={usageDays.map((day) => day.value)}
+						labels={usageDays.map(
+							(day) => t("overview.usage.dayLabel", { day: day.key, tokens: compactNumber(day.value) }),
+						)}
+					/>
+					<p className="mt-1 text-[10px] text-ink-faint">
+						{t("overview.usage.summary", {
+							today: compactNumber(
+								(usage.data?.today.input ?? 0) +
+									(usage.data?.today.output ?? 0) +
+									(usage.data?.today.cacheWrite ?? 0),
+							),
+							week: compactNumber(
+								(usage.data?.last7Days.input ?? 0) +
+									(usage.data?.last7Days.output ?? 0) +
+									(usage.data?.last7Days.cacheWrite ?? 0),
+							),
+						})}
+					</p>
+				</>
+			) : (
+				<p className="px-1 py-2 text-[11px] text-ink-faint">
+					{t("overview.usage.none")}
+				</p>
+			)}
+		</Panel>
+	);
+}
+
+/** L'avancement du cycle, et qui porte les relectures en attente. */
+function CyclePanel({
+	cycle,
+	reviewLoad,
+	loading,
+}: Pick<OverviewData, "cycle" | "reviewLoad"> & { loading: boolean }) {
+	const { t } = useTranslation("views");
+	return (
+		<Panel title={t("overview.cycle.title")} icon={Rocket} loading={loading} rows={2}>
+			{cycle.total > 0 ? (
+				<>
+					<Gauge value={cycle.done} total={cycle.total} label={t("overview.cycle.ticketsDone")} />
+					{reviewLoad.length > 0 ? (
+						<div className="mt-2.5">
+							<div className="mb-1 text-[10px] tracking-[0.06em] text-ink-faint uppercase">
+								{t("overview.cycle.reviewLoad")}
+							</div>
+							<BarList rows={reviewLoad} />
+						</div>
+					) : null}
+				</>
+			) : (
+				<p className="px-1 py-2 text-[11px] text-ink-faint">{t("overview.cycle.none")}</p>
+			)}
+		</Panel>
+	);
+}
+
+/** Les missions vivantes, et où en sont leurs tâches. */
+function MissionsPanel({
+	missions,
+	loading,
+	go,
+}: {
+	missions: OverviewData["liveMissions"];
+	loading: boolean;
+	go: Go;
+}) {
+	const { t } = useTranslation("views");
+	return (
+		<Panel
+			title={t("overview.missions.title")}
+			icon={ListChecks}
+			count={missions.length}
+			loading={loading}
+		>
+			{missions.length === 0 ? (
+				<p className="px-1 py-2 text-[11px] text-ink-faint">
+					{t("overview.missions.none")}
+				</p>
+			) : (
+				<div className="flex flex-col gap-0.5">
+					{missions.slice(0, 6).map((mission) => {
+						const total = mission.tasks.length;
+						const finies = mission.tasks.filter((task) =>
+							["delivered", "integrated"].includes(task.state),
+						).length;
+						const actives = mission.tasks.filter(
+							(task) => task.state === "running",
+						).length;
+						return (
+							<Line
+								key={mission.id}
+								primary={mission.title}
+								secondary={
+									total > 0
+									? t("overview.missions.delivered", { done: finies, total })
+									: t("overview.missions.splitting")
+								}
+								trailing={actives > 0 ? t("overview.missions.running", { count: actives }) : undefined}
+								tone={
+									awaitsHuman(mission) ? "text-accent-soft" : undefined
+								}
+								onClick={() => go("missions", { missionId: mission.id })}
+							/>
+						);
+					})}
+				</div>
+			)}
+		</Panel>
+	);
+}
+
+/** Les erreurs critiques de production, réparties par projet. */
+function ProductionPanel({
+	critical,
+	errorsByProject,
+	loading,
+	open,
+}: Pick<OverviewData, "critical" | "errorsByProject"> & {
+	loading: boolean;
+	open: (url: string) => void;
+}) {
+	const { t } = useTranslation("views");
+	return (
+		<Panel
+			title={t("overview.production.title")}
+			icon={AlertTriangle}
+			count={critical.length}
+			loading={loading}
+		>
+			{critical.length === 0 ? (
+				<p className="px-1 py-2 text-[11px] text-ink-faint">
+					{t("overview.production.none")}
+				</p>
+			) : (
+				<div className="flex flex-col gap-0.5">
+					{errorsByProject.length > 1 ? (
+						<div className="mb-2">
+							<BarList rows={errorsByProject} />
+						</div>
+					) : null}
+					{critical.slice(0, 5).map((issue) => (
+						<Line
+							key={issue.id}
+							primary={issue.title}
+							secondary={
+								issue.meta.find((field) => field.label === "projet")?.value
+							}
+							trailing={fromIso(issue.timestamp)}
+							onClick={() => open(issue.url)}
+						/>
+					))}
+				</div>
+			)}
+		</Panel>
+	);
+}
+
+/** Les PR qui coincent : CI en échec, ou empilées sur une autre branche. */
+function PrFlowPanel({
+	prs,
+	ready,
+	broken,
+	stacked,
+	loading,
+	go,
+	open,
+}: Pick<OverviewData, "prs" | "ready" | "broken" | "stacked"> & {
+	loading: boolean;
+	go: Go;
+	open: (url: string) => void;
+}) {
+	const { t } = useTranslation("views");
+	return (
+		<Panel
+			title={t("overview.prFlow.title")}
+			icon={GitPullRequest}
+			count={prs.data?.length}
+			loading={loading}
+			rows={4}
+			action={
+				<Button size="sm" onClick={() => go("delivery")}>
+					{t("overview.prFlow.see")}
+				</Button>
+			}
+		>
+			<div className="flex flex-col gap-0.5">
+				{broken.slice(0, 4).map((pr) => (
+					<Line
+						key={pr.number}
+						primary={`#${pr.number} ${pr.title}`}
+						secondary={t("overview.prSegments.ciFailing")}
+						chips={prChips(pr.labels)}
+						tone="text-critical"
+						onClick={() => open(pr.url)}
+						action={
+							<PrActions number={pr.number} headRef={pr.headRef} ciFailing />
+						}
+					/>
+				))}
+				{stacked.slice(0, 3).map((pr) => (
+					<Line
+						key={pr.number}
+						primary={`#${pr.number} ${pr.title}`}
+						secondary={t("overview.prFlow.stackedOn", { base: pr.baseRef })}
+						chips={prChips(pr.labels)}
+						tone="text-warning"
+						onClick={() => open(pr.url)}
+					/>
+				))}
+				{broken.length === 0 && stacked.length === 0 ? (
+					<p className="px-1 py-2 text-[11px] text-ink-faint">
+						{ready.length > 0
+							? t("overview.prFlow.ready", { count: ready.length })
+							: t("overview.prFlow.noneFailing")}
+					</p>
+				) : null}
+			</div>
+		</Panel>
+	);
+}
+
+/** Les worktrees qui ont des changements en cours. */
+function FleetPanel({
+	dirty,
+	loading,
+	go,
+}: Pick<OverviewData, "dirty"> & { loading: boolean; go: Go }) {
+	const { t } = useTranslation("views");
+	return (
+		<Panel
+			title={t("overview.fleet.title")}
+			icon={Layers}
+			count={dirty.length}
+			loading={loading}
+		>
+			{dirty.length === 0 ? (
+				<p className="px-1 py-2 text-[11px] text-ink-faint">
+					{t("overview.fleet.allClean")}
+				</p>
+			) : (
+				<div className="flex flex-col gap-0.5">
+					{dirty.slice(0, 6).map((tree) => (
+						<Line
+							key={tree.path}
+							primary={tree.branch ?? tree.folderName}
+							secondary={t("overview.fleet.changes", {
+								count: tree.status.modified + tree.status.staged + tree.status.untracked,
+							})}
+							trailing={fromTimestamp(tree.lastActivity)}
+							onClick={() => go("worktrees", { worktreePath: tree.path })}
+						/>
+					))}
+				</div>
+			)}
+		</Panel>
+	);
+}
+
+/** Les signaux rouges du daily. */
+function DailyPanel({
+	redFlags,
+	loading,
+	go,
+	open,
+}: Pick<OverviewData, "redFlags"> & {
+	loading: boolean;
+	go: Go;
+	open: (url: string) => void;
+}) {
+	const { t } = useTranslation("views");
+	return (
+		<Panel
+			title={t("overview.daily.title")}
+			icon={Rocket}
+			count={redFlags.length}
+			loading={loading}
+			action={
+				<Button size="sm" onClick={() => go("team")}>
+					{t("overview.daily.button")}
+				</Button>
+			}
+		>
+			<div className="flex flex-col gap-0.5">
+				{redFlags.slice(0, 6).map((flag) => (
+					<Line
+						key={flag.key}
+						primary={flag.question}
+						secondary={flag.member}
+						tone="text-critical"
+						onClick={() =>
+							flag.prUrl || flag.ticketUrl
+								? open(flag.prUrl ?? flag.ticketUrl ?? "")
+								: go("team")
+						}
+					/>
+				))}
+			</div>
+		</Panel>
+	);
+}
+
+/** Les documents récemment modifiés dans les worktrees. */
+function DocsPanel({
+	docs,
+	loading,
+	go,
+}: Pick<OverviewData, "docs"> & { loading: boolean; go: Go }) {
+	const { t } = useTranslation("views");
+	return (
+		<Panel
+			title={t("overview.docs.title")}
+			icon={FileText}
+			count={docs.data?.length}
+			loading={loading}
+		>
+			{(docs.data ?? []).length === 0 ? (
+				<p className="px-1 py-2 text-[11px] text-ink-faint">
+					{t("overview.docs.none")}
+				</p>
+			) : (
+				<div className="flex flex-col gap-0.5">
+					{(docs.data ?? []).slice(0, 6).map((doc) => (
+						<Line
+							key={doc.path}
+							primary={doc.name}
+							secondary={doc.worktree}
+							trailing={fromTimestamp(doc.modified)}
+							onClick={() => go("docs", { docPath: doc.path })}
+						/>
+					))}
+				</div>
+			)}
+		</Panel>
+	);
+}
+
+/**
+ * Ce qui attend une décision, avant tout le reste.
+ *
+ * L'écran d'accueil ne récapitule pas l'état du monde : il répond à « par quoi
+ * je commence ». Les agents qui posent une question passent en premier — ce sont
+ * les seuls blocages dont on est soi-même la cause.
+ */
+export function OverviewView() {
+	const { t } = useTranslation("views");
+	const { worktrees, worktreesLoading, go, notify, missions, missionsLoading } =
+		useCockpit();
+	const data = useOverviewData(worktrees, missions);
+	const { sessions, board, prs, sentry, docs, waiting, broken, stacked, redFlags } = data;
 
 	const open = (url: string) => {
 		if (url) void api.system.openUrl(url).catch((error) => notify(String(error)));
@@ -419,118 +913,21 @@ export function OverviewView() {
 						</button>
 					) : null}
 
-					{/* Ne s'affiche que ce qui a quelque chose à dire. Six compteurs dont
-					    quatre à zéro occupaient toute la largeur sans rien apprendre, et
-					    faisaient passer le seul chiffre qui comptait pour un détail parmi
-					    d'autres. Les worktrees restent toujours là : ils disent l'état du
-					    poste, pas un incident, et leur absence se lirait comme une panne. */}
-					<div className="flex flex-wrap gap-2">
-						{tilesLoading
-							? [0, 1, 2, 3].map((index) => <TileSkeleton key={index} />)
-							: null}
-						{tilesLoading ? null : [
-							{
-								label: t("overview.tiles.liveAgents"),
-								value: live.length,
-								tone: live.length > 0 ? ("success" as const) : undefined,
-								hint: waiting.length > 0 ? t("overview.tiles.waiting", { count: waiting.length }) : undefined,
-								view: "agents" as const,
-								always: false,
-							},
-							{
-								label: t("overview.tiles.readyToMerge"),
-								value: ready.length,
-								tone: ready.length > 0 ? ("success" as const) : undefined,
-								hint: undefined,
-								view: "delivery" as const,
-								always: false,
-							},
-							{
-								label: t("overview.tiles.ciFailing"),
-								value: broken.length,
-								tone: broken.length > 0 ? ("critical" as const) : undefined,
-								hint: undefined,
-								view: "delivery" as const,
-								always: false,
-							},
-							{
-								label: t("overview.tiles.dailyBlockers"),
-								value: redFlags.length,
-								tone: redFlags.length > 0 ? ("critical" as const) : undefined,
-								hint: undefined,
-								view: "team" as const,
-								always: false,
-							},
-							{
-								label: t("overview.tiles.prodErrors"),
-								value: critical.length,
-								tone: critical.length > 0 ? ("warning" as const) : undefined,
-								hint: undefined,
-								view: "observability" as const,
-								always: false,
-							},
-							{
-								label: t("overview.tiles.activeWorktrees"),
-								value: dirty.length,
-								tone: undefined,
-								hint: t("overview.tiles.total", { count: worktrees.length }),
-								view: "worktrees" as const,
-								always: true,
-							},
-						]
-							.filter((tile) => tile.always || tile.value > 0)
-							.map((tile, index) => (
-								<div
-									key={tile.label}
-									className={clsx("rise w-[11rem]", index < 3 && `rise-${index + 1}`)}
-								>
-									<Tile
-										label={tile.label}
-										value={tile.value}
-										tone={tile.tone}
-										hint={tile.hint}
-										onClick={() => go(tile.view)}
-									/>
-								</div>
-							))}
-					</div>
+					<OverviewTiles
+						loading={tilesLoading}
+						live={data.live.length}
+						waiting={waiting.length}
+						ready={data.ready.length}
+						broken={broken.length}
+						redFlags={redFlags.length}
+						critical={data.critical.length}
+						dirty={data.dirty.length}
+						worktreeCount={worktrees.length}
+						go={go}
+					/>
 
 					<div className="columns-1 gap-3 lg:columns-2 xl:columns-3 [&>*]:mb-3 [&>*]:break-inside-avoid">
-						<Panel
-							title={t("overview.usage.title")}
-							icon={Gauge2}
-							loading={usage.initial && usage.loading}
-							rows={4}
-						>
-							{usageDays.length > 1 ? (
-								<>
-									<Sparkline
-										values={usageDays.map((day) => day.value)}
-										labels={usageDays.map(
-											(day) => t("overview.usage.dayLabel", { day: day.key, tokens: compactNumber(day.value) }),
-										)}
-									/>
-									<p className="mt-1 text-[10px] text-ink-faint">
-										{t("overview.usage.summary", {
-											today: compactNumber(
-												(usage.data?.today.input ?? 0) +
-													(usage.data?.today.output ?? 0) +
-													(usage.data?.today.cacheWrite ?? 0),
-											),
-											week: compactNumber(
-												(usage.data?.last7Days.input ?? 0) +
-													(usage.data?.last7Days.output ?? 0) +
-													(usage.data?.last7Days.cacheWrite ?? 0),
-											),
-										})}
-									</p>
-								</>
-							) : (
-								<p className="px-1 py-2 text-[11px] text-ink-faint">
-									{t("overview.usage.none")}
-								</p>
-							)}
-						</Panel>
+						<UsagePanel usage={data.usage} usageDays={data.usageDays} />
 
 						{(prs.data ?? []).length > 0 ? (
 							<Panel
@@ -540,27 +937,11 @@ export function OverviewView() {
 								loading={prsLoading}
 								rows={2}
 							>
-								<StackedBar segments={prSegments} />
+								<StackedBar segments={data.prSegments} />
 							</Panel>
 						) : null}
 
-						<Panel title={t("overview.cycle.title")} icon={Rocket} loading={boardLoading} rows={2}>
-							{cycle.total > 0 ? (
-								<>
-									<Gauge value={cycle.done} total={cycle.total} label={t("overview.cycle.ticketsDone")} />
-									{reviewLoad.length > 0 ? (
-										<div className="mt-2.5">
-											<div className="mb-1 text-[10px] tracking-[0.06em] text-ink-faint uppercase">
-												{t("overview.cycle.reviewLoad")}
-											</div>
-											<BarList rows={reviewLoad} />
-										</div>
-									) : null}
-								</>
-							) : (
-								<p className="px-1 py-2 text-[11px] text-ink-faint">{t("overview.cycle.none")}</p>
-							)}
-						</Panel>
+						<CyclePanel cycle={data.cycle} reviewLoad={data.reviewLoad} loading={boardLoading} />
 					</div>
 
 					<div className="columns-1 gap-3 lg:columns-2 [&>*]:mb-3 [&>*]:break-inside-avoid">
@@ -572,209 +953,39 @@ export function OverviewView() {
 						    À sa place, ce qu'aucun écran ne montrait : où en sont les
 						    missions. C'est pourtant le cœur de l'outil — du travail confié
 						    à des agents, qui avance pendant qu'on regarde ailleurs. */}
-						<Panel
-							title={t("overview.missions.title")}
-							icon={ListChecks}
-							count={liveMissions.length}
-							loading={missionsLoading}
-						>
-							{liveMissions.length === 0 ? (
-								<p className="px-1 py-2 text-[11px] text-ink-faint">
-									{t("overview.missions.none")}
-								</p>
-							) : (
-								<div className="flex flex-col gap-0.5">
-									{liveMissions.slice(0, 6).map((mission) => {
-										const total = mission.tasks.length;
-										const finies = mission.tasks.filter((task) =>
-											["delivered", "integrated"].includes(task.state),
-										).length;
-										const actives = mission.tasks.filter(
-											(task) => task.state === "running",
-										).length;
-										return (
-											<Line
-												key={mission.id}
-												primary={mission.title}
-												secondary={
-													total > 0
-													? t("overview.missions.delivered", { done: finies, total })
-													: t("overview.missions.splitting")
-												}
-												trailing={actives > 0 ? t("overview.missions.running", { count: actives }) : undefined}
-												tone={
-													awaitsHuman(mission) ? "text-accent-soft" : undefined
-												}
-												onClick={() => go("missions", { missionId: mission.id })}
-											/>
-										);
-									})}
-								</div>
-							)}
-						</Panel>
+						<MissionsPanel missions={data.liveMissions} loading={missionsLoading} go={go} />
 
-						<Panel
-							title={t("overview.production.title")}
-							icon={AlertTriangle}
-							count={critical.length}
+						<ProductionPanel
+							critical={data.critical}
+							errorsByProject={data.errorsByProject}
 							loading={sentryLoading}
-						>
-							{critical.length === 0 ? (
-								<p className="px-1 py-2 text-[11px] text-ink-faint">
-									{t("overview.production.none")}
-								</p>
-							) : (
-								<div className="flex flex-col gap-0.5">
-									{errorsByProject.length > 1 ? (
-										<div className="mb-2">
-											<BarList rows={errorsByProject} />
-										</div>
-									) : null}
-									{critical.slice(0, 5).map((issue) => (
-										<Line
-											key={issue.id}
-											primary={issue.title}
-											secondary={
-												issue.meta.find((field) => field.label === "projet")?.value
-											}
-											trailing={fromIso(issue.timestamp)}
-											onClick={() => open(issue.url)}
-										/>
-									))}
-								</div>
-							)}
-						</Panel>
+							open={open}
+						/>
 
 						{broken.length + stacked.length > 0 ? (
-						<Panel
-							title={t("overview.prFlow.title")}
-							icon={GitPullRequest}
-							count={prs.data?.length}
-							loading={prsLoading}
-							rows={4}
-							action={
-								<Button size="sm" onClick={() => go("delivery")}>
-									{t("overview.prFlow.see")}
-								</Button>
-							}
-						>
-							<div className="flex flex-col gap-0.5">
-								{broken.slice(0, 4).map((pr) => (
-									<Line
-										key={pr.number}
-										primary={`#${pr.number} ${pr.title}`}
-										secondary={t("overview.prSegments.ciFailing")}
-										chips={prChips(pr.labels)}
-										tone="text-critical"
-										onClick={() => open(pr.url)}
-										action={
-											<PrActions number={pr.number} headRef={pr.headRef} ciFailing />
-										}
-									/>
-								))}
-								{stacked.slice(0, 3).map((pr) => (
-									<Line
-										key={pr.number}
-										primary={`#${pr.number} ${pr.title}`}
-										secondary={t("overview.prFlow.stackedOn", { base: pr.baseRef })}
-										chips={prChips(pr.labels)}
-										tone="text-warning"
-										onClick={() => open(pr.url)}
-									/>
-								))}
-								{broken.length === 0 && stacked.length === 0 ? (
-									<p className="px-1 py-2 text-[11px] text-ink-faint">
-										{ready.length > 0
-											? t("overview.prFlow.ready", { count: ready.length })
-											: t("overview.prFlow.noneFailing")}
-									</p>
-								) : null}
-							</div>
-						</Panel>
+							<PrFlowPanel
+								prs={prs}
+								ready={data.ready}
+								broken={broken}
+								stacked={stacked}
+								loading={prsLoading}
+								go={go}
+								open={open}
+							/>
 						) : null}
 
-						<Panel
-							title={t("overview.fleet.title")}
-							icon={Layers}
-							count={dirty.length}
+						<FleetPanel
+							dirty={data.dirty}
 							loading={worktrees.length === 0 && worktreesLoading}
-						>
-							{dirty.length === 0 ? (
-								<p className="px-1 py-2 text-[11px] text-ink-faint">
-									{t("overview.fleet.allClean")}
-								</p>
-							) : (
-								<div className="flex flex-col gap-0.5">
-									{dirty.slice(0, 6).map((tree) => (
-										<Line
-											key={tree.path}
-											primary={tree.branch ?? tree.folderName}
-											secondary={t("overview.fleet.changes", {
-												count: tree.status.modified + tree.status.staged + tree.status.untracked,
-											})}
-											trailing={fromTimestamp(tree.lastActivity)}
-											onClick={() => go("worktrees", { worktreePath: tree.path })}
-										/>
-									))}
-								</div>
-							)}
-						</Panel>
+							go={go}
+						/>
 
 						{redFlags.length > 0 ? (
-							<Panel
-								title={t("overview.daily.title")}
-								icon={Rocket}
-								count={redFlags.length}
-								loading={boardLoading}
-								action={
-									<Button size="sm" onClick={() => go("team")}>
-										{t("overview.daily.button")}
-									</Button>
-								}
-							>
-								<div className="flex flex-col gap-0.5">
-									{redFlags.slice(0, 6).map((flag) => (
-										<Line
-											key={flag.key}
-											primary={flag.question}
-											secondary={flag.member}
-											tone="text-critical"
-											onClick={() =>
-												flag.prUrl || flag.ticketUrl
-													? open(flag.prUrl ?? flag.ticketUrl ?? "")
-													: go("team")
-											}
-										/>
-									))}
-								</div>
-							</Panel>
+							<DailyPanel redFlags={redFlags} loading={boardLoading} go={go} open={open} />
 						) : null}
 
 						{(docs.data ?? []).length > 0 ? (
-						<Panel
-							title={t("overview.docs.title")}
-							icon={FileText}
-							count={docs.data?.length}
-							loading={docsLoading}
-						>
-							{(docs.data ?? []).length === 0 ? (
-								<p className="px-1 py-2 text-[11px] text-ink-faint">
-									{t("overview.docs.none")}
-								</p>
-							) : (
-								<div className="flex flex-col gap-0.5">
-									{(docs.data ?? []).slice(0, 6).map((doc) => (
-										<Line
-											key={doc.path}
-											primary={doc.name}
-											secondary={doc.worktree}
-											trailing={fromTimestamp(doc.modified)}
-											onClick={() => go("docs", { docPath: doc.path })}
-										/>
-									))}
-								</div>
-							)}
-						</Panel>
+							<DocsPanel docs={docs} loading={docsLoading} go={go} />
 						) : null}
 					</div>
 
