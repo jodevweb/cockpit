@@ -38,7 +38,8 @@ async fn pr_base(branch: &str) -> Option<String> {
 	use std::collections::HashMap;
 	use std::sync::{Mutex, OnceLock};
 	use std::time::{Duration, Instant};
-	static CACHE: OnceLock<Mutex<HashMap<String, (Instant, Option<String>)>>> = OnceLock::new();
+	type Cached = (Instant, Option<String>);
+	static CACHE: OnceLock<Mutex<HashMap<String, Cached>>> = OnceLock::new();
 	let cache = CACHE.get_or_init(|| Mutex::new(HashMap::new()));
 	if let Some((at, base)) = cache.lock().ok()?.get(branch).cloned() {
 		if at.elapsed() < Duration::from_secs(600) {

@@ -827,11 +827,10 @@ mod tests {
 
 	#[test]
 	fn une_calibration_se_relit_dans_les_deux_sens() {
-		assert_eq!(
-			parse_calibration("Attrapé: oui\nNote: la route n'avait pas de validation.").0,
-			true
+		assert!(
+			parse_calibration("Attrapé: oui\nNote: la route n'avait pas de validation.").0
 		);
-		assert_eq!(parse_calibration("Attrapé: non\nNote: sans rapport.").0, false);
+		assert!(!parse_calibration("Attrapé: non\nNote: sans rapport.").0);
 	}
 
 	/// Le verdict qui compte : une propriété qui n'attrape rien sur de vraies

@@ -71,7 +71,7 @@ fn known() -> Vec<PathBuf> {
 fn known() -> Vec<PathBuf> {
 	let roots: Vec<PathBuf> = ["ProgramFiles", "ProgramFiles(x86)", "ProgramW6432", "LOCALAPPDATA"]
 		.iter()
-		.filter_map(|name| std::env::var_os(name))
+		.filter_map(std::env::var_os)
 		.map(PathBuf::from)
 		.collect();
 	let mut found = Vec::new();

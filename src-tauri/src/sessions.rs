@@ -460,7 +460,7 @@ fn finalize(mut acc: Accumulator) -> SessionSummary {
 		.into_iter()
 		.map(|(name, count)| ToolCount { name, count })
 		.collect();
-	tools.sort_by(|a, b| b.count.cmp(&a.count));
+	tools.sort_by_key(|a| std::cmp::Reverse(a.count));
 	tools.truncate(8);
 	acc.summary.top_tools = tools;
 
@@ -634,7 +634,7 @@ pub fn scan_all(limit_per_project: usize) -> Result<Vec<ProjectSessions>> {
 
 	let mut projects = Vec::new();
 	for (key, mut files) in par_projet {
-		files.sort_by(|a, b| b.1.cmp(&a.1));
+		files.sort_by_key(|a| std::cmp::Reverse(a.1));
 		files.truncate(limit_per_project);
 
 		let sessions: Vec<SessionSummary> = files

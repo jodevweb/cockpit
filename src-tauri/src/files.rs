@@ -142,17 +142,14 @@ pub fn write(path: String, content: String) -> Result<()> {
 	// Les droits d'origine survivent au remplacement : un fichier en 600 ne
 	// doit pas ressortir lisible par tout le monde.
 	// Un fichier neuf, lui, prend les droits ordinaires (644), comme avant.
-	match std::fs::metadata(&target) {
-		Ok(meta) => {
-			let _ = std::fs::set_permissions(&temporary, meta.permissions());
-		}
-		Err(_) => {
-			#[cfg(unix)]
-			{
-				use std::os::unix::fs::PermissionsExt;
-				let _ = std::fs::set_permissions(&temporary, std::fs::Permissions::from_mode(0o644));
-			}
-		}
+	let existing = std::fs::metadata(&target).ok();
+	if let Some(meta) = &existing {
+		let _ = std::fs::set_permissions(&temporary, meta.permissions());
+	}
+	#[cfg(unix)]
+	if existing.is_none() {
+		use std::os::unix::fs::PermissionsExt;
+		let _ = std::fs::set_permissions(&temporary, std::fs::Permissions::from_mode(0o644));
 	}
 
 	std::fs::rename(&temporary, &target).map_err(|e| {

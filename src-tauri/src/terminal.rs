@@ -150,6 +150,7 @@ fn login_shell() -> String {
 /// réglages pour ouvrir une connexion sur un compte qu'aucun projet n'utilise
 /// encore. Absent, on prend celui du projet ouvert, qui est ce qu'on attend
 /// d'un terminal lancé depuis un écran de travail.
+#[allow(clippy::too_many_arguments)]
 pub fn open(
 	app: AppHandle,
 	terminals: SharedTerminals,

@@ -82,6 +82,11 @@ jobs:
       - name: Interface
         run: pnpm exec vite build
 
+      # Après `vite build` : `generate_context!` lit `dist/` dès la compilation.
+      - name: Clippy
+        working-directory: src-tauri
+        run: cargo clippy --lib --tests -- -D warnings
+
       - name: Tests Rust
         working-directory: src-tauri
         run: cargo test --lib

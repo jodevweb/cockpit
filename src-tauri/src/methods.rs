@@ -809,8 +809,7 @@ mod tests {
 		let since = chrono::DateTime::parse_from_rfc3339("2026-11-10T00:00:00Z").unwrap().with_timezone(&chrono::Utc);
 		let now = since + chrono::Duration::days(5);
 		let exec = |day: i64, project: &str, outcome: Outcome, turns: u32, usd: f64| {
-			let mut tally = crate::executions::Tally::default();
-			tally.turns = turns;
+			let mut tally = crate::executions::Tally { turns, ..Default::default() };
 			tally.cost.reported_usd = usd;
 			Execution {
 				id: String::new(),

@@ -852,9 +852,7 @@ pub fn parse(rapport: &str) -> Analysis {
 				.iter()
 				.any(|point| point.severity == "critical")
 		});
-		analysis.summary.verdict = if grave {
-			"réserves".into()
-		} else if analysis.summary.risk_count > 0 {
+		analysis.summary.verdict = if grave || analysis.summary.risk_count > 0 {
 			"réserves".into()
 		} else {
 			"ok".into()

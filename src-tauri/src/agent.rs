@@ -565,6 +565,7 @@ pub async fn run_once(
 /// **par appel d'outil** plutôt que par du texte à relire : un verdict qu'on
 /// extrait d'une phrase dépend de la façon dont le modèle a tourné sa phrase, et
 /// finit toujours par se tromper le jour où il la tourne autrement.
+#[allow(clippy::too_many_arguments)]
 pub async fn run_once_with_tools(
 	cwd: &str,
 	prompt: &str,
@@ -808,6 +809,7 @@ fn user_message(text: &str) -> String {
 /// `permission_mode` décide de ce que l'agent peut faire sans demander. Sans
 /// TTY, une demande d'autorisation resterait sans réponse : on choisit donc
 /// explicitement à l'ouverture plutôt que de bloquer plus tard.
+#[allow(clippy::too_many_arguments)]
 pub async fn start(
 	app: AppHandle,
 	agents: SharedAgents,

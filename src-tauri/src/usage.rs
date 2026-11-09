@@ -240,11 +240,7 @@ pub fn session_spend(
 		total,
 		// Une part de zéro n'a pas de sens : sans fenêtre mesurée, on ne prétend
 		// pas savoir quelle place cette conversation y tient.
-		share: if window == 0 {
-			0
-		} else {
-			((total.min(window) * 100) / window) as u32
-		},
+		share: (total.min(window) * 100).checked_div(window).unwrap_or(0) as u32,
 		remaining: tightest.map(|limit| 100u32.saturating_sub(limit.percent)),
 		tightest: tightest.map(|limit| limit.label.clone()).unwrap_or_default(),
 		resets_at: tightest.map(|limit| limit.resets_at.clone()).unwrap_or_default(),

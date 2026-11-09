@@ -687,7 +687,7 @@ pub(crate) fn watch_missions(app: AppHandle) {
 			// secondes : elle demande de parcourir les journaux de toutes les
 			// sessions, et une mission ne dérape pas en six secondes.
 			tours += 1;
-			if tours % 10 == 0 {
+			if tours.is_multiple_of(10) {
 				pause_missions_hors_budget();
 			}
 			for mission in mission::list() {

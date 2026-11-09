@@ -60,11 +60,7 @@ fn side(delivered: u64, taken_back: u64) -> Side {
 	Side {
 		delivered,
 		taken_back,
-		rate: if delivered == 0 {
-			0
-		} else {
-			(taken_back * 100) / delivered
-		},
+		rate: (taken_back * 100).checked_div(delivered).unwrap_or(0),
 	}
 }
 
@@ -168,11 +164,7 @@ pub fn collect(project: &str) -> Metrics {
 	let handbacks = Handbacks {
 		delivered: tally.delivered,
 		taken_back: tally.taken_back,
-		rate: if tally.delivered == 0 {
-			0
-		} else {
-			(tally.taken_back * 100) / tally.delivered
-		},
+		rate: (tally.taken_back * 100).checked_div(tally.delivered).unwrap_or(0),
 		since: tally.since,
 		pending: crate::notebook::handbacks(project).len(),
 		comparable: briefed.delivered >= COMPARABLE_AT && plain.delivered >= COMPARABLE_AT,
@@ -271,7 +263,7 @@ pub fn collect(project: &str) -> Metrics {
 			}),
 		}
 	}
-	deeds.sort_by(|a, b| b.count.cmp(&a.count));
+	deeds.sort_by_key(|a| std::cmp::Reverse(a.count));
 
 	let mut metrics = Metrics {
 		window_days: WINDOW_DAYS,
