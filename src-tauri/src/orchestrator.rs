@@ -662,7 +662,8 @@ async fn run(app: &tauri::AppHandle, call: &Call) -> Result<Value> {
 				if task.state != TaskState::Delivered || branche.is_empty() {
 					continue;
 				}
-				let decision = mission::gate_decision(task.gate, !gate_commands.is_empty(), verifiers.contains(&task.role));
+				let decision =
+					mission::gate_decision(task.gate, !gate_commands.is_empty(), verifiers.contains(&task.role));
 				// Rendue avant que les portes existent, ou retrouvée au démarrage :
 				// elle passe les portes comme les autres.
 				let decision = if decision == mission::GateDecision::Start {
