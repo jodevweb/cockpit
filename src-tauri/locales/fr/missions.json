@@ -157,7 +157,6 @@
 		"protocolNoMission": "Le protocole `{{protocol}}` ne parle pas encore les outils de mission : ce moteur ne peut pas encore être utilisé dans une mission, maître ou exécutant.",
 		"claudeNotFoundHint": "Le CLI `claude` est introuvable. Installe-le, ou vérifie qu'il est bien dans ~/.local/bin, ~/.claude/local ou /opt/homebrew/bin.",
 		"noBinary": "Le moteur « {{engine}} » ne déclare pas de binaire, et le cockpit ne sait chercher que `claude` tout seul.",
-		"codexNeedsMessage": "`codex-exec` a besoin d'un message pour démarrer : il ne peut pas s'ouvrir sur un silence.",
 		"geminiNeedsMessage": "`gemini-stream-json` a besoin d'un message pour démarrer : il ne peut pas s'ouvrir sur un silence.",
 		"geminiNoResume": "`gemini-stream-json` ne sait pas reprendre une conversation : aucune source ne documente comment. Relance un agent neuf.",
 		"bridgeUnavailable": {

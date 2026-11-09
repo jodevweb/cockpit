@@ -157,7 +157,6 @@
 		"protocolNoMission": "`{{protocol}}` プロトコルはまだミッションツールに対応していません：このエンジンはリードとしても実行役としても、まだミッションで使えません。",
 		"claudeNotFoundHint": "`claude` CLI が見つかりません。インストールするか、~/.local/bin、~/.claude/local、/opt/homebrew/bin のいずれかにあるか確認してください。",
 		"noBinary": "エンジン「{{engine}}」はバイナリを宣言していません。Cockpit が自動で見つけられるのは `claude` のみです。",
-		"codexNeedsMessage": "`codex-exec` を開始するにはメッセージが必要です：空のままでは開始できません。",
 		"geminiNeedsMessage": "`gemini-stream-json` を開始するにはメッセージが必要です：空のままでは開始できません。",
 		"geminiNoResume": "`gemini-stream-json` は会話を再開できません：その方法を記した資料がありません。新しいエージェントを起動してください。",
 		"bridgeUnavailable": {

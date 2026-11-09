@@ -157,7 +157,6 @@
 		"protocolNoMission": "Il protocollo `{{protocol}}` non supporta ancora gli strumenti di missione: questo motore non può ancora essere usato in una missione, né come agente principale né come esecutore.",
 		"claudeNotFoundHint": "La CLI `claude` non si trova. Installala, o verifica che sia in ~/.local/bin, ~/.claude/local o /opt/homebrew/bin.",
 		"noBinary": "Il motore \"{{engine}}\" non dichiara alcun binario, e Cockpit sa trovare da solo solo `claude`.",
-		"codexNeedsMessage": "`codex-exec` ha bisogno di un messaggio per partire: non può aprirsi nel silenzio.",
 		"geminiNeedsMessage": "`gemini-stream-json` ha bisogno di un messaggio per partire: non può aprirsi nel silenzio.",
 		"geminiNoResume": "`gemini-stream-json` non può riprendere una conversazione: nessuna fonte documenta come farlo. Avvia un nuovo agente.",
 		"bridgeUnavailable": {

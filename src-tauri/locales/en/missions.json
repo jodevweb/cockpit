@@ -157,7 +157,6 @@
 		"protocolNoMission": "The `{{protocol}}` protocol does not support mission tools yet: this engine cannot be used in a mission yet, as lead or worker.",
 		"claudeNotFoundHint": "The `claude` CLI cannot be found. Install it, or check that it is in ~/.local/bin, ~/.claude/local or /opt/homebrew/bin.",
 		"noBinary": "The engine \"{{engine}}\" declares no binary, and Cockpit can only find `claude` on its own.",
-		"codexNeedsMessage": "`codex-exec` needs a message to start: it cannot open on silence.",
 		"geminiNeedsMessage": "`gemini-stream-json` needs a message to start: it cannot open on silence.",
 		"geminiNoResume": "`gemini-stream-json` cannot resume a conversation: no source documents how. Start a fresh agent.",
 		"bridgeUnavailable": {

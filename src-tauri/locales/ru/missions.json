@@ -157,7 +157,6 @@
 		"protocolNoMission": "Протокол `{{protocol}}` пока не поддерживает инструменты миссий: этот движок пока нельзя использовать в миссии ни как ведущего, ни как исполнителя.",
 		"claudeNotFoundHint": "CLI `claude` не найден. Установите его или проверьте, что он находится в ~/.local/bin, ~/.claude/local или /opt/homebrew/bin.",
 		"noBinary": "Движок «{{engine}}» не объявляет бинарный файл, а Cockpit умеет сам находить только `claude`.",
-		"codexNeedsMessage": "`codex-exec` нужно сообщение для старта: он не может начать с пустого.",
 		"geminiNeedsMessage": "`gemini-stream-json` нужно сообщение для старта: он не может начать с пустого.",
 		"geminiNoResume": "`gemini-stream-json` не умеет возобновлять диалог: ни один источник не описывает, как это сделать. Запустите нового агента.",
 		"bridgeUnavailable": {
