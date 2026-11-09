@@ -34,7 +34,7 @@
 
 use crate::config::config_dir;
 use crate::error::{CockpitError, Result};
-use crate::mission::{self, MissionState, Task, TaskState};
+use crate::mission::{self, Mission, MissionState, Task, TaskState};
 use serde::{Deserialize, Serialize};
 use serde_json::{json, Value};
 
@@ -387,654 +387,640 @@ pub async fn handle(app: &tauri::AppHandle, call: Call) {
 
 async fn run(app: &tauri::AppHandle, call: &Call) -> Result<Value> {
 	let mission = mission::get(&call.mission)?;
+	let input = &call.input;
 
 	match call.tool.as_str() {
-		"understand" | "approach" => {
-			let step = if call.tool == "understand" {
-				mission::Step::Understanding
-			} else {
-				mission::Step::Approach
-			};
-			let summary = call
-				.input
-				.get("summary")
-				.and_then(|value| value.as_str())
-				.unwrap_or_default();
-			let questions: Vec<String> = call
-				.input
-				.get("questions")
-				.and_then(|value| value.as_array())
-				.map(|items| {
-					items
-						.iter()
-						.filter_map(|item| item.as_str().map(str::to_string))
-						.collect()
-				})
-				.unwrap_or_default();
-			mission::submit_draft(&mission.id, step, summary, questions)?;
-			Ok(json!({
-				"state": step.awaiting(),
-				"message": format!(
-					"Your {} has been submitted. The user is reviewing it: stop here, their answer \
-					 will reach you as a message.",
-					step.protocol_label()
-				),
-			}))
-		}
-
-		"plan" => {
-			let summary = call
-				.input
-				.get("summary")
-				.and_then(|value| value.as_str())
-				.unwrap_or_default();
-			let tasks = read_tasks(&call.input, &mission.branch)?;
-			if tasks.is_empty() {
-				return Err(CockpitError::msg("A plan without tasks commits no one."));
-			}
-			let count = tasks.len();
-			mission::submit_plan(&mission.id, summary, tasks)?;
-			Ok(json!({
-				"state": "awaitingApproval",
-				"tasks": count,
-				"message": "Plan recorded. It is waiting for the user's approval: \
-							only call `spawn` once the mission has moved to `running`.",
-			}))
-		}
-
-		"status" => {
-			let mission = mission::get(&call.mission)?;
-			Ok(json!({
-				"state": mission.state,
-				"branch": mission.branch,
-				"progress": mission.progress(),
-				"tasks": mission.tasks.iter().map(|task| json!({
-					"id": task.id,
-					"role": task.role,
-					"title": task.title,
-					"state": task.state,
-					"branch": task.branch,
-					// Nommée à part quand elle diffère : c'est elle qui porte le
-					// travail, et c'est elle que l'intégration fusionnera.
-					"workingBranch": mission::working_branch(task),
-					"worktree": task.worktree,
-					"scope": task.scope,
-					// Ce que le cockpit a lu du rapport de cette vérification.
-					// Le maître le voit donc même s'il n'a pas relu le fil, et
-					// un « blocking » ici ferme la pull request tant qu'il tient.
-					"verdict": task.verdict,
-					// Les portes du dépôt sur son dernier rendu.
-					"gate": task.gate,
-					"note": task.note,
-				})).collect::<Vec<_>>(),
-			}))
-		}
-
-		"spawn" => {
-			if !mission.can_launch() {
-				return Err(CockpitError::msg(
-					"The breakdown does not have the user's approval yet. Nothing can start before that.",
-				));
-			}
-			let running = mission
-				.tasks
-				.iter()
-				.filter(|task| task.state == TaskState::Running)
-				.count();
-			if running >= crate::watchers::MAX_RUNNING_TASKS {
-				return Err(CockpitError::msg(format!(
-					"{running} workers are already running: wait for one before launching another."
-				)));
-			}
-
-			let task_id = call
-				.input
-				.get("taskId")
-				.and_then(|value| value.as_str())
-				.unwrap_or_default()
-				.to_string();
-			let task = mission
-				.tasks
-				.iter()
-				.find(|task| task.id == task_id)
-				.cloned()
-				.ok_or_else(|| CockpitError::msg("Unknown task."))?;
-			if task.state != TaskState::Planned {
-				return Err(CockpitError::msg(format!("This task is already {:?}.", task.state)));
-			}
-
-			// Branche et worktree d'abord : un exécutant sans terrain propre
-			// écrirait dans celui du maître, et l'isolation ne serait qu'un mot.
-			let worktree = prepare_worktree(&mission, &task).await?;
-			mission::set_task_worktree(&mission.id, &task.id, &worktree)?;
-
-			// Le maître, et lui seul : c'est `spawn` qui passe par ici.
-			let session =
-				crate::launch_task_agent(app.clone(), &mission.id, &task.id, crate::executions::MASTER).await?;
-			Ok(json!({
-				"sessionId": session,
-				"worktree": worktree,
-				"branch": task.branch,
-				"message": "Worker launched. Its file edits outside its scope will be refused, and its branch will not be merged if it changes anything else.",
-			}))
-		}
-
-		"rework" => {
-			let task_id = call
-				.input
-				.get("taskId")
-				.and_then(|value| value.as_str())
-				.unwrap_or_default();
-			let reason = call
-				.input
-				.get("reason")
-				.and_then(|value| value.as_str())
-				.unwrap_or_default();
-			// Les rôles qui jugent sont ceux du catalogue : ce sont eux qu'on
-			// remet en attente, puisqu'ils auront à rejuger le travail corrigé.
-			let verifiers: std::collections::HashSet<String> = crate::roles_for(&mission.cwd)
-				.into_iter()
-				.filter(|role| role.verifies)
-				.map(|role| role.id)
-				.collect();
-			// Les agents des tâches qu'on relance n'ont plus rien à faire : leur
-			// laisser la vie revenait à empiler un CLI par reprise, chacun avec
-			// son serveur MCP, jusqu'à saturer la machine.
-			let sessions: Vec<String> = mission
-				.tasks
-				.iter()
-				.filter(|task| task.id == task_id || verifiers.contains(&task.role))
-				.filter_map(|task| task.session_id.clone())
-				.collect();
-			let updated = mission::rework(&mission.id, task_id, reason, |role| verifiers.contains(role))?;
-			if let Some(agents) = {
-				use tauri::Manager;
-				app.try_state::<crate::agent::SharedAgents>()
-			} {
-				// La conversation de chaque exécutant est déjà notée à ce stade —
-				// `collect_finished_tasks` la capture dès la livraison, avant de
-				// couper l'agent (voir `AgentRegistry::claude_session_of`). Ici,
-				// l'agent est déjà mort : plus rien à en tirer, seulement à l'arrêter
-				// pour de bon si quelque chose l'avait laissé vivant.
-				for session in &sessions {
-					let _ = crate::agent::stop(agents.inner(), session);
-				}
-			}
-			let task = updated.tasks.iter().find(|task| task.id == task_id);
-			Ok(json!({
-				"state": "planned",
-				"attempts": task.map(|task| task.attempts).unwrap_or(0),
-				"remaining": mission::MAX_ATTEMPTS
-					.saturating_sub(task.map(|task| task.attempts).unwrap_or(0)),
-				"message": "Task sent back for rework. It restarts on its own, and the \
-							checks will judge again once it has delivered.",
-			}))
-		}
-		"collect" => {
-			let task_id = call
-				.input
-				.get("taskId")
-				.and_then(|value| value.as_str())
-				.unwrap_or_default();
-			let task = mission
-				.tasks
-				.iter()
-				.find(|task| task.id == task_id)
-				.ok_or_else(|| CockpitError::msg("Unknown task."))?;
-			if task.worktree.trim().is_empty() {
-				return Err(CockpitError::msg("This task has no worktree."));
-			}
-			let path = std::path::Path::new(&task.worktree);
-			let base = if task.base.is_empty() {
-				mission.branch.clone()
-			} else {
-				task.base.clone()
-			};
-			let commits = crate::git::run_git(path, &["log", "--oneline", &format!("{base}..HEAD")])
-				.await
-				.unwrap_or_default();
-			let files = crate::git::run_git(path, &["diff", "--stat", &format!("{base}...HEAD")])
-				.await
-				.unwrap_or_default();
-			// `HEAD` suit le worktree : un exécutant parti sur sa propre branche
-			// donne ici son vrai travail, et la branche nommée dit où il est.
-			Ok(json!({
-				"commits": commits,
-				"files": files,
-				"branch": mission::working_branch(task),
-				// Les portes du dépôt sur ce rendu : `none` quand il n'y en a pas.
-				"gate": task.gate,
-				"gateOutput": task.gate_output,
-			}))
-		}
-
-		"integrate" => {
-			// Jamais dans `mission.cwd` : c'est le dépôt principal, où vit la
-			// branche de travail de l'utilisateur. Un merge lancé là atterrit dans
-			// ce qui s'y trouvait sorti — et c'est ainsi qu'une mission a fusionné
-			// sa tâche dans le `dev` local de quelqu'un.
-			let worktree = integration_worktree(&mission).await?;
-			let cwd = std::path::Path::new(&worktree);
-
-			// Le dossier est peut-être le bon sans être sur la bonne branche :
-			// quelqu'un y a basculé ailleurs, ou une résolution de conflit a laissé
-			// une HEAD détachée. On ne fusionne pas à l'aveugle.
-			let head = crate::git::current_branch(cwd).await.unwrap_or_default();
-			if head.trim() != mission.branch.trim() {
-				return Err(CockpitError::msg(format!(
-					"`{worktree}` is not on `{}` but on `{}`. Put it back on the \
-					 integration branch before merging.",
-					mission.branch,
-					if head.trim().is_empty() {
-						"detached HEAD"
-					} else {
-						head.trim()
-					},
-				)));
-			}
-
-			let mut merged = Vec::new();
-			let mut conflicts = Vec::new();
-
-			// Les portes du dépôt (`gates.rs`) : une tâche n'est fusionnée que
-			// sur un code de sortie, pas sur ce qu'elle dit d'elle-même. Celles
-			// qu'un redémarrage a interrompues repartent ici.
-			let gate_commands = crate::gates::commands_for(&mission.cwd);
-			crate::gates::ensure(&mission);
-			// Les rôles du projet de la mission, comme au ramassage des tâches
-			// rendues (`collect_finished_tasks`) : les deux doivent s'accorder
-			// sur qui juge, sans quoi une recette passerait les portes ici.
-			let verifiers: std::collections::HashSet<String> = crate::roles_for(&mission.cwd)
-				.into_iter()
-				.filter(|role| role.verifies)
-				.map(|role| role.id)
-				.collect();
-			let mut gates_pending = Vec::new();
-			let mut gates_failed = Vec::new();
-			let mut scope_failed = Vec::new();
-
-			for task in &mission.tasks {
-				// La branche qui porte le travail, pas celle qu'on lui avait
-				// assignée : un exécutant qui s'est créé sa propre branche a bien
-				// livré, ailleurs. Fusionner la branche déclarée laissait son code
-				// dehors et refermait la mission dessus.
-				let branche = mission::working_branch(task).to_string();
-				if task.state != TaskState::Delivered || branche.is_empty() {
-					continue;
-				}
-				let decision =
-					mission::gate_decision(task.gate, !gate_commands.is_empty(), verifiers.contains(&task.role));
-				// Rendue avant que les portes existent, ou retrouvée au démarrage :
-				// elle passe les portes comme les autres.
-				let decision = if decision == mission::GateDecision::Start {
-					match crate::gates::start(&mission.id, &task.id) {
-						mission::Gate::Running => mission::GateDecision::Pending,
-						mission::Gate::Failed => mission::GateDecision::Refuse,
-						// Les portes ont disparu des réglages entre-temps.
-						_ => mission::GateDecision::Merge,
-					}
-				} else {
-					decision
-				};
-				match decision {
-					mission::GateDecision::Merge => {}
-					mission::GateDecision::Pending | mission::GateDecision::Start => {
-						gates_pending.push(json!({ "taskId": task.id, "task": task.title }));
-						continue;
-					}
-					mission::GateDecision::Refuse => {
-						// Relue : `start` vient peut-être d'en poser la raison.
-						let output = mission::get(&mission.id)
-							.ok()
-							.and_then(|fresh| fresh.tasks.into_iter().find(|t| t.id == task.id))
-							.map(|fresh| fresh.gate_output)
-							.unwrap_or_else(|| task.gate_output.clone());
-						gates_failed.push(json!({
-							"taskId": task.id,
-							"task": task.title,
-							"output": output,
-						}));
-						continue;
-					}
-				}
-				// Le pont d'autorisation ne voit que les outils d'édition : une
-				// écriture par `Bash` lui échappe. Le diff, lui, dit ce que la branche
-				// change, quel que soit le moyen. Sans objet pour une tâche qui juge :
-				// sa branche porte aussi les fusions de ses sœurs.
-				if !task.scope.is_empty() && !verifiers.contains(&task.role) {
-					let base = if task.base.trim().is_empty() {
-						&mission.branch
-					} else {
-						&task.base
-					};
-					// Un diff illisible ne vaut pas un diff propre : on ne fusionne pas.
-					let refus = match files_outside_scope(cwd, base, &branche, &task.scope).await {
-						Ok(files) if files.is_empty() => None,
-						Ok(files) => Some(json!({ "files": files })),
-						Err(error) => Some(json!({ "error": error.to_string() })),
-					};
-					if let Some(mut refus) = refus {
-						refus["taskId"] = json!(task.id);
-						refus["task"] = json!(task.title);
-						refus["scope"] = json!(task.scope);
-						scope_failed.push(refus);
-						continue;
-					}
-				}
-				// Une tâche qui vérifie sans rien commiter n'apporte que les
-				// fusions de ses sœurs, reçues avant son lancement
-				// (`sync_verifier_worktree`). La fusionner à son tour ramenait
-				// ces fusions dans la PR : six commits de fusion pour deux
-				// commits de travail. Elle est intégrée sans fusion.
-				if !brings_own_commits(cwd, &branche).await {
-					mission::set_task_state(&mission.id, &task.id, TaskState::Integrated, "")?;
-					merged.push(branche.clone());
-					continue;
-				}
-				match crate::git::run_git(cwd, &["merge", "--no-ff", "--no-edit", &branche]).await {
-					Ok(_) => {
-						mission::set_task_state(&mission.id, &task.id, TaskState::Integrated, "")?;
-						merged.push(branche.clone());
-					}
-					Err(error) => {
-						conflicts.push(json!({
-							"branch": branche,
-							"task": task.title,
-							"error": error.to_string(),
-						}));
-						// Un merge en conflit laisse le dossier en plein milieu d'une
-						// fusion. Continuer la boucle faisait échouer toutes les
-						// branches suivantes sur « you have unmerged files » — des
-						// erreurs qui n'avaient rien à voir avec elles et qui
-						// masquaient le seul conflit réel. On s'arrête au premier :
-						// il se résout ici, et `integrate` se rappelle ensuite.
-						break;
-					}
-				}
-			}
-
-			if conflicts.is_empty() && !merged.is_empty() {
-				mission::set_state(&mission.id, MissionState::Integrating, "")?;
-			}
-
-			// Les preuves de recette suivent, elles que les branches ne portent pas.
-			// Une tâche abandonnée peut avoir produit du code avant de renoncer —
-			// trois reprises épuisées ne veulent pas dire trois reprises vides. Son
-			// travail n'est intégré par personne, et la mission se refermait dessus
-			// sans un mot : la branche restait là, sans PR pour la porter et sans
-			// rien pour la nommer. On ne bloque pas — renoncer est une décision —
-			// mais on ne laisse plus partir en silence.
-			let mut abandonne = Vec::new();
-			for task in &mission.tasks {
-				if !matches!(task.state, TaskState::Failed) {
-					continue;
-				}
-				let branche = mission::working_branch(task);
-				if branche.is_empty() {
-					continue;
-				}
-				let restes =
-					crate::git::run_git(cwd, &["rev-list", "--count", &format!("{}..{branche}", mission.branch)])
-						.await
-						.ok()
-						.and_then(|raw| raw.trim().parse::<u32>().ok())
-						.unwrap_or(0);
-				if restes > 0 {
-					abandonne.push(json!({
-						"task": task.title,
-						"branch": branche,
-						"commits": restes,
-					}));
-				}
-			}
-
-			let evidence = gather_evidence(&mission, &worktree);
-
-			// Une recette sans trace n'est pas une recette. Le rôle qui vérifie
-			// pouvait rendre « c'est bon » sans avoir rien exécuté ni rien
-			// déposé : la mission se fermait sur une parole, et personne ne s'en
-			// apercevait avant la production. On ne bloque pas — c'est au maître
-			// de juger — mais on le dit, et on nomme la tâche concernée.
-			let verifiers: std::collections::HashSet<String> = crate::roles_for(&mission.cwd)
-				.into_iter()
-				.filter(|role| role.verifies)
-				.map(|role| role.id)
-				.collect();
-			let recettes_muettes: Vec<String> = mission
-				.tasks
-				.iter()
-				.filter(|task| verifiers.contains(&task.role))
-				.filter(|task| matches!(task.state, TaskState::Delivered | TaskState::Integrated))
-				.filter(|_| evidence.is_empty())
-				.map(|task| task.title.clone())
-				.collect();
-
-			let portes = {
-				let titres = |entries: &[serde_json::Value]| {
-					entries
-						.iter()
-						.filter_map(|entry| Some(format!("\"{}\"", entry.get("task")?.as_str()?)))
-						.collect::<Vec<_>>()
-						.join(", ")
-				};
-				let mut texte = String::new();
-				if !gates_failed.is_empty() {
-					texte.push_str(&format!(
-						" Not merged, the repository checks failed for {}: send them back \
-						 with `rework`, quoting the output given in `gatesFailed`.",
-						titres(&gates_failed)
-					));
-				}
-				if !scope_failed.is_empty() {
-					texte.push_str(&format!(
-						" Not merged, the branch changes files outside its scope for {}: send \
-						 them back with `rework`, quoting the files given in `scopeFailed`.",
-						titres(&scope_failed)
-					));
-				}
-				if !gates_pending.is_empty() {
-					texte.push_str(&format!(
-						" Not merged yet, the repository checks are still running for {}: \
-						 call `integrate` again once `status` shows them finished.",
-						titres(&gates_pending)
-					));
-				}
-				texte
-			};
-
-			Ok(json!({
-				"merged": merged,
-				"conflicts": conflicts,
-				"gatesFailed": gates_failed,
-				"gatesPending": gates_pending,
-				"scopeFailed": scope_failed,
-				"worktree": worktree,
-				"evidence": evidence,
-				"evidenceMissing": recettes_muettes,
-				"abandonedWithWork": abandonne,
-				"message": if conflicts.is_empty() {
-					let perdu = if abandonne.is_empty() {
-						String::new()
-					} else {
-						let liste = abandonne
-							.iter()
-							.filter_map(|entry| {
-								Some(format!(
-									"\"{}\" on `{}` ({} commit(s))",
-									entry.get("task")?.as_str()?,
-									entry.get("branch")?.as_str()?,
-									entry.get("commits")?.as_u64()?,
-								))
-							})
-							.collect::<Vec<_>>()
-							.join(", ");
-						format!(
-							" Warning: {liste} — these tasks were abandoned but \
-							 produced code that no integrated branch carries. Integrate it \
-							 if it is worth anything, or say explicitly that it is dropped \
-							 before opening the pull request."
-						)
-					};
-					let alerte = if recettes_muettes.is_empty() {
-						String::new()
-					} else {
-						format!(
-							" Warning: {} gave its verdict without leaving any \
-							 evidence of execution. Ask it for something to verify it with before \
-							 opening the pull request.",
-							recettes_muettes.join(", "),
-						)
-					};
-					format!(
-						"Branches merged into `{worktree}`. It is up to you to validate the whole \
-						 before the pull request.{portes}{alerte}{perdu}"
-					)
-				} else {
-					format!(
-						"Conflicts remain: resolve them in `{worktree}`, then call \
-						 `integrate` again."
-					)
-				},
-			}))
-		}
-
-		"report" => {
-			let summary = call
-				.input
-				.get("summary")
-				.and_then(|value| value.as_str())
-				.unwrap_or_default();
-			if summary.trim().is_empty() {
-				return Err(CockpitError::msg("An empty report helps no one."));
-			}
-			mission::set_summary(&mission.id, summary)?;
-			Ok(json!({ "message": "Report recorded." }))
-		}
-
-		"pr" => {
-			let title = call
-				.input
-				.get("title")
-				.and_then(|value| value.as_str())
-				.filter(|title| !title.trim().is_empty())
-				.map(String::from)
-				.unwrap_or_else(|| mission.title.clone());
-			let body = call
-				.input
-				.get("body")
-				.and_then(|value| value.as_str())
-				.unwrap_or_default()
-				.to_string();
-
-			// Rien n'est fusionné : on ouvre la pull request du travail recomposé,
-			// et c'est une relecture humaine qui décidera de la suite.
-			let pending: Vec<&str> = mission
-				.tasks
-				.iter()
-				.filter(|task| task.state == TaskState::Delivered)
-				.map(|task| task.title.as_str())
-				.collect();
-			if !pending.is_empty() {
-				return Err(CockpitError::msg(format!(
-					"These tasks are delivered but not integrated: {}. Call `integrate` first.",
-					pending.join(", ")
-				)));
-			}
-
-			let body = if body.trim().is_empty() && !mission.summary.trim().is_empty() {
-				mission.summary.clone()
-			} else {
-				body
-			};
-			// La base peut être déclarée par le maître : une mission qui prolonge
-			// un travail en cours s'empile dessus plutôt que de repartir de la
-			// branche par défaut, où sa PR montrerait aussi le travail du voisin.
-			let base = call
-				.input
-				.get("base")
-				.and_then(|value| value.as_str())
-				.map(str::trim)
-				.filter(|value| !value.is_empty())
-				.map(str::to_string);
-			if let Some(base) = &base {
-				mission::set_base(&mission.id, base)?;
-			}
-			let mission = mission::get(&mission.id)?;
-
-			// L'équipe a peut-être sa propre façon d'ouvrir une pull request : le bon
-			// gabarit, ses labels, l'envoi des captures de recette. Tout cela vit
-			// dans une commande du dépôt, que le cockpit ne saurait pas refaire — et
-			// qu'un autre projet n'a pas. Quand elle est déclarée, c'est le maître
-			// qui la joue, dans son worktree, et qui rend l'adresse obtenue.
-			let team_command = crate::mission_pr_command(&mission);
-			let url = call
-				.input
-				.get("url")
-				.and_then(|value| value.as_str())
-				.map(str::trim)
-				.filter(|value| !value.is_empty())
-				.map(str::to_string);
-
-			let url = match (url, team_command) {
-				// L'adresse est là : la pull request existe déjà, le cockpit n'a plus
-				// qu'à en tirer les conséquences.
-				(Some(url), _) => {
-					if !url.starts_with("http") {
-						return Err(CockpitError::msg("`url` expects the URL of the opened pull request."));
-					}
-					url
-				}
-				// Commande d'équipe déclarée : on rend la main au maître plutôt que
-				// d'ouvrir une pull request qui ignorerait sa méthode.
-				(None, Some(command)) => {
-					let worktree = integration_worktree(&mission).await?;
-					// Les preuves de recette sont réunies avant de rendre la main : la
-					// commande d'équipe les joint à la pull request, et elle les cherche
-					// là où elle s'exécute.
-					let evidence = gather_evidence(&mission, &worktree);
-					return Ok(json!({
-						"command": command,
-						"worktree": worktree,
-						"evidence": evidence,
-						"message": format!(
-							"This team opens its pull requests with `{command}`. Run it in \
-							 `{worktree}`, then call `pr` again with `url` — the URL it \
-							 produced. The mission will close at that point. The workers' QA \
-							 evidence has been gathered there ({} file(s) under \
-							 `.claude/work/`): git ignores it, it will not leave with the \
-							 branch.",
-							evidence.len()
-						),
-					}));
-				}
-				// Aucune méthode maison : le cockpit ouvre la pull request lui-même.
-				// Le `git push` part du worktree d'intégration, comme le merge : aucune
-				// commande de mission ne s'exécute dans le dépôt principal.
-				(None, None) => {
-					let from = integration_worktree(&mission).await?;
-					crate::open_mission_pr(
-						&from,
-						&mission.branch,
-						&crate::mission_base(&mission).await,
-						&title,
-						&body,
-					)
-					.await?
-				}
-			};
-
-			mission::finish(&mission.id, &url)?;
-			crate::delivery::publish_on_close(&mission.id);
-			let removed = mission::cleanup(&mission.id).await.unwrap_or_default();
-			Ok(json!({
-				"url": url,
-				"cleaned": removed,
-				"message": "Mission closed, worktrees of the integrated tasks cleaned up.",
-			}))
-		}
-
+		"understand" => submit_draft(&mission, mission::Step::Understanding, input),
+		"approach" => submit_draft(&mission, mission::Step::Approach, input),
+		"plan" => submit_plan(&mission, input),
+		"status" => Ok(status(&mission)),
+		"spawn" => spawn_task(app, &mission, input).await,
+		"rework" => rework_task(app, &mission, input),
+		"collect" => collect_task(&mission, input).await,
+		"integrate" => integrate(&mission).await,
+		"report" => report(&mission, input),
+		"pr" => open_pr(&mission, input).await,
 		other => Err(CockpitError::msg(format!("Unknown tool: {other}"))),
 	}
+}
+
+/// Le texte d'un champ de l'appel, vide s'il manque.
+fn input_text<'a>(input: &'a Value, key: &str) -> &'a str {
+	input.get(key).and_then(Value::as_str).unwrap_or_default()
+}
+
+/// Le texte d'un champ de l'appel, débarrassé de ses blancs, s'il dit quelque chose.
+fn input_filled(input: &Value, key: &str) -> Option<String> {
+	Some(input_text(input, key).trim())
+		.filter(|value| !value.is_empty())
+		.map(str::to_string)
+}
+
+/// Les rôles qui jugent, ceux du projet de la mission : le ramassage des tâches rendues
+/// (`collect_finished_tasks`), `rework` et `integrate` doivent s'accorder sur qui juge,
+/// sans quoi une recette passerait les portes ici.
+fn verifier_roles(mission: &Mission) -> std::collections::HashSet<String> {
+	crate::roles_for(&mission.cwd)
+		.into_iter()
+		.filter(|role| role.verifies)
+		.map(|role| role.id)
+		.collect()
+}
+
+fn submit_draft(mission: &Mission, step: mission::Step, input: &Value) -> Result<Value> {
+	let questions: Vec<String> = input
+		.get("questions")
+		.and_then(|value| value.as_array())
+		.map(|items| {
+			items
+				.iter()
+				.filter_map(|item| item.as_str().map(str::to_string))
+				.collect()
+		})
+		.unwrap_or_default();
+	mission::submit_draft(&mission.id, step, input_text(input, "summary"), questions)?;
+	Ok(json!({
+		"state": step.awaiting(),
+		"message": format!(
+			"Your {} has been submitted. The user is reviewing it: stop here, their answer \
+			 will reach you as a message.",
+			step.protocol_label()
+		),
+	}))
+}
+
+fn submit_plan(mission: &Mission, input: &Value) -> Result<Value> {
+	let tasks = read_tasks(input, &mission.branch)?;
+	if tasks.is_empty() {
+		return Err(CockpitError::msg("A plan without tasks commits no one."));
+	}
+	let count = tasks.len();
+	mission::submit_plan(&mission.id, input_text(input, "summary"), tasks)?;
+	Ok(json!({
+		"state": "awaitingApproval",
+		"tasks": count,
+		"message": "Plan recorded. It is waiting for the user's approval: \
+					only call `spawn` once the mission has moved to `running`.",
+	}))
+}
+
+fn status(mission: &Mission) -> Value {
+	json!({
+		"state": mission.state,
+		"branch": mission.branch,
+		"progress": mission.progress(),
+		"tasks": mission.tasks.iter().map(|task| json!({
+			"id": task.id,
+			"role": task.role,
+			"title": task.title,
+			"state": task.state,
+			"branch": task.branch,
+			// Nommée à part quand elle diffère : c'est elle qui porte le
+			// travail, et c'est elle que l'intégration fusionnera.
+			"workingBranch": mission::working_branch(task),
+			"worktree": task.worktree,
+			"scope": task.scope,
+			// Ce que le cockpit a lu du rapport de cette vérification.
+			// Le maître le voit donc même s'il n'a pas relu le fil, et
+			// un « blocking » ici ferme la pull request tant qu'il tient.
+			"verdict": task.verdict,
+			// Les portes du dépôt sur son dernier rendu.
+			"gate": task.gate,
+			"note": task.note,
+		})).collect::<Vec<_>>(),
+	})
+}
+
+async fn spawn_task(app: &tauri::AppHandle, mission: &Mission, input: &Value) -> Result<Value> {
+	if !mission.can_launch() {
+		return Err(CockpitError::msg(
+			"The breakdown does not have the user's approval yet. Nothing can start before that.",
+		));
+	}
+	let running = mission
+		.tasks
+		.iter()
+		.filter(|task| task.state == TaskState::Running)
+		.count();
+	if running >= crate::watchers::MAX_RUNNING_TASKS {
+		return Err(CockpitError::msg(format!(
+			"{running} workers are already running: wait for one before launching another."
+		)));
+	}
+
+	let task_id = input_text(input, "taskId");
+	let task = mission
+		.tasks
+		.iter()
+		.find(|task| task.id == task_id)
+		.ok_or_else(|| CockpitError::msg("Unknown task."))?;
+	if task.state != TaskState::Planned {
+		return Err(CockpitError::msg(format!("This task is already {:?}.", task.state)));
+	}
+
+	// Branche et worktree d'abord : un exécutant sans terrain propre
+	// écrirait dans celui du maître, et l'isolation ne serait qu'un mot.
+	let worktree = prepare_worktree(mission, task).await?;
+	mission::set_task_worktree(&mission.id, &task.id, &worktree)?;
+
+	// Le maître, et lui seul : c'est `spawn` qui passe par ici.
+	let session = crate::launch_task_agent(app.clone(), &mission.id, &task.id, crate::executions::MASTER).await?;
+	Ok(json!({
+		"sessionId": session,
+		"worktree": worktree,
+		"branch": task.branch,
+		"message": "Worker launched. Its file edits outside its scope will be refused, and its branch will not be merged if it changes anything else.",
+	}))
+}
+
+fn rework_task(app: &tauri::AppHandle, mission: &Mission, input: &Value) -> Result<Value> {
+	let task_id = input_text(input, "taskId");
+	let reason = input_text(input, "reason");
+	// Les rôles qui jugent sont ceux du catalogue : ce sont eux qu'on
+	// remet en attente, puisqu'ils auront à rejuger le travail corrigé.
+	let verifiers = verifier_roles(mission);
+	// Les agents des tâches qu'on relance n'ont plus rien à faire : leur
+	// laisser la vie revenait à empiler un CLI par reprise, chacun avec
+	// son serveur MCP, jusqu'à saturer la machine.
+	let sessions: Vec<String> = mission
+		.tasks
+		.iter()
+		.filter(|task| task.id == task_id || verifiers.contains(&task.role))
+		.filter_map(|task| task.session_id.clone())
+		.collect();
+	let updated = mission::rework(&mission.id, task_id, reason, |role| verifiers.contains(role))?;
+	if let Some(agents) = {
+		use tauri::Manager;
+		app.try_state::<crate::agent::SharedAgents>()
+	} {
+		// La conversation de chaque exécutant est déjà notée à ce stade —
+		// `collect_finished_tasks` la capture dès la livraison, avant de
+		// couper l'agent (voir `AgentRegistry::claude_session_of`). Ici,
+		// l'agent est déjà mort : plus rien à en tirer, seulement à l'arrêter
+		// pour de bon si quelque chose l'avait laissé vivant.
+		for session in &sessions {
+			let _ = crate::agent::stop(agents.inner(), session);
+		}
+	}
+	let task = updated.tasks.iter().find(|task| task.id == task_id);
+	Ok(json!({
+		"state": "planned",
+		"attempts": task.map(|task| task.attempts).unwrap_or(0),
+		"remaining": mission::MAX_ATTEMPTS
+			.saturating_sub(task.map(|task| task.attempts).unwrap_or(0)),
+		"message": "Task sent back for rework. It restarts on its own, and the \
+					checks will judge again once it has delivered.",
+	}))
+}
+
+async fn collect_task(mission: &Mission, input: &Value) -> Result<Value> {
+	let task_id = input_text(input, "taskId");
+	let task = mission
+		.tasks
+		.iter()
+		.find(|task| task.id == task_id)
+		.ok_or_else(|| CockpitError::msg("Unknown task."))?;
+	if task.worktree.trim().is_empty() {
+		return Err(CockpitError::msg("This task has no worktree."));
+	}
+	let path = std::path::Path::new(&task.worktree);
+	let base = if task.base.is_empty() {
+		mission.branch.clone()
+	} else {
+		task.base.clone()
+	};
+	let commits = crate::git::run_git(path, &["log", "--oneline", &format!("{base}..HEAD")])
+		.await
+		.unwrap_or_default();
+	let files = crate::git::run_git(path, &["diff", "--stat", &format!("{base}...HEAD")])
+		.await
+		.unwrap_or_default();
+	// `HEAD` suit le worktree : un exécutant parti sur sa propre branche
+	// donne ici son vrai travail, et la branche nommée dit où il est.
+	Ok(json!({
+		"commits": commits,
+		"files": files,
+		"branch": mission::working_branch(task),
+		// Les portes du dépôt sur ce rendu : `none` quand il n'y en a pas.
+		"gate": task.gate,
+		"gateOutput": task.gate_output,
+	}))
+}
+
+async fn integrate(mission: &Mission) -> Result<Value> {
+	// Jamais dans `mission.cwd` : c'est le dépôt principal, où vit la
+	// branche de travail de l'utilisateur. Un merge lancé là atterrit dans
+	// ce qui s'y trouvait sorti — et c'est ainsi qu'une mission a fusionné
+	// sa tâche dans le `dev` local de quelqu'un.
+	let worktree = integration_worktree(mission).await?;
+	let cwd = std::path::Path::new(&worktree);
+
+	// Le dossier est peut-être le bon sans être sur la bonne branche :
+	// quelqu'un y a basculé ailleurs, ou une résolution de conflit a laissé
+	// une HEAD détachée. On ne fusionne pas à l'aveugle.
+	let head = crate::git::current_branch(cwd).await.unwrap_or_default();
+	if head.trim() != mission.branch.trim() {
+		return Err(CockpitError::msg(format!(
+			"`{worktree}` is not on `{}` but on `{}`. Put it back on the \
+			 integration branch before merging.",
+			mission.branch,
+			if head.trim().is_empty() {
+				"detached HEAD"
+			} else {
+				head.trim()
+			},
+		)));
+	}
+
+	let verifiers = verifier_roles(mission);
+	let merges = merge_delivered_tasks(mission, cwd, &verifiers).await?;
+
+	if merges.conflicts.is_empty() && !merges.merged.is_empty() {
+		mission::set_state(&mission.id, MissionState::Integrating, "")?;
+	}
+
+	let abandoned = abandoned_with_work(mission, cwd).await;
+
+	// Les preuves de recette suivent, elles que les branches ne portent pas.
+	let evidence = gather_evidence(mission, &worktree);
+
+	// Une recette sans trace n'est pas une recette. Le rôle qui vérifie
+	// pouvait rendre « c'est bon » sans avoir rien exécuté ni rien
+	// déposé : la mission se fermait sur une parole, et personne ne s'en
+	// apercevait avant la production. On ne bloque pas — c'est au maître
+	// de juger — mais on le dit, et on nomme la tâche concernée.
+	let unproven: Vec<String> = mission
+		.tasks
+		.iter()
+		.filter(|task| verifiers.contains(&task.role))
+		.filter(|task| matches!(task.state, TaskState::Delivered | TaskState::Integrated))
+		.filter(|_| evidence.is_empty())
+		.map(|task| task.title.clone())
+		.collect();
+
+	let message = integrate_message(&worktree, &merges, &abandoned, &unproven);
+	Ok(json!({
+		"merged": merges.merged,
+		"conflicts": merges.conflicts,
+		"gatesFailed": merges.gates_failed,
+		"gatesPending": merges.gates_pending,
+		"scopeFailed": merges.scope_failed,
+		"worktree": worktree,
+		"evidence": evidence,
+		"evidenceMissing": unproven,
+		"abandonedWithWork": abandoned,
+		"message": message,
+	}))
+}
+
+/// Ce qu'un passage d'`integrate` a fait de chaque tâche rendue.
+#[derive(Default)]
+struct Merges {
+	merged: Vec<String>,
+	conflicts: Vec<Value>,
+	gates_pending: Vec<Value>,
+	gates_failed: Vec<Value>,
+	scope_failed: Vec<Value>,
+}
+
+async fn merge_delivered_tasks(
+	mission: &Mission,
+	cwd: &std::path::Path,
+	verifiers: &std::collections::HashSet<String>,
+) -> Result<Merges> {
+	let mut merges = Merges::default();
+
+	// Les portes du dépôt (`gates.rs`) : une tâche n'est fusionnée que
+	// sur un code de sortie, pas sur ce qu'elle dit d'elle-même. Celles
+	// qu'un redémarrage a interrompues repartent ici.
+	let gate_commands = crate::gates::commands_for(&mission.cwd);
+	crate::gates::ensure(mission);
+
+	for task in &mission.tasks {
+		// La branche qui porte le travail, pas celle qu'on lui avait
+		// assignée : un exécutant qui s'est créé sa propre branche a bien
+		// livré, ailleurs. Fusionner la branche déclarée laissait son code
+		// dehors et refermait la mission dessus.
+		let branche = mission::working_branch(task).to_string();
+		if task.state != TaskState::Delivered || branche.is_empty() {
+			continue;
+		}
+		let decision = mission::gate_decision(task.gate, !gate_commands.is_empty(), verifiers.contains(&task.role));
+		// Rendue avant que les portes existent, ou retrouvée au démarrage :
+		// elle passe les portes comme les autres.
+		let decision = if decision == mission::GateDecision::Start {
+			match crate::gates::start(&mission.id, &task.id) {
+				mission::Gate::Running => mission::GateDecision::Pending,
+				mission::Gate::Failed => mission::GateDecision::Refuse,
+				// Les portes ont disparu des réglages entre-temps.
+				_ => mission::GateDecision::Merge,
+			}
+		} else {
+			decision
+		};
+		match decision {
+			mission::GateDecision::Merge => {}
+			mission::GateDecision::Pending | mission::GateDecision::Start => {
+				merges
+					.gates_pending
+					.push(json!({ "taskId": task.id, "task": task.title }));
+				continue;
+			}
+			mission::GateDecision::Refuse => {
+				// Relue : `start` vient peut-être d'en poser la raison.
+				let output = mission::get(&mission.id)
+					.ok()
+					.and_then(|fresh| fresh.tasks.into_iter().find(|t| t.id == task.id))
+					.map(|fresh| fresh.gate_output)
+					.unwrap_or_else(|| task.gate_output.clone());
+				merges.gates_failed.push(json!({
+					"taskId": task.id,
+					"task": task.title,
+					"output": output,
+				}));
+				continue;
+			}
+		}
+		// Sans objet pour une tâche qui juge : sa branche porte aussi les
+		// fusions de ses sœurs.
+		if !task.scope.is_empty() && !verifiers.contains(&task.role) {
+			if let Some(refus) = scope_refusal(mission, task, cwd, &branche).await {
+				merges.scope_failed.push(refus);
+				continue;
+			}
+		}
+		// Une tâche qui vérifie sans rien commiter n'apporte que les
+		// fusions de ses sœurs, reçues avant son lancement
+		// (`sync_verifier_worktree`). La fusionner à son tour ramenait
+		// ces fusions dans la PR : six commits de fusion pour deux
+		// commits de travail. Elle est intégrée sans fusion.
+		if !brings_own_commits(cwd, &branche).await {
+			mission::set_task_state(&mission.id, &task.id, TaskState::Integrated, "")?;
+			merges.merged.push(branche);
+			continue;
+		}
+		match crate::git::run_git(cwd, &["merge", "--no-ff", "--no-edit", &branche]).await {
+			Ok(_) => {
+				mission::set_task_state(&mission.id, &task.id, TaskState::Integrated, "")?;
+				merges.merged.push(branche);
+			}
+			Err(error) => {
+				merges.conflicts.push(json!({
+					"branch": branche,
+					"task": task.title,
+					"error": error.to_string(),
+				}));
+				// Un merge en conflit laisse le dossier en plein milieu d'une
+				// fusion. Continuer la boucle faisait échouer toutes les
+				// branches suivantes sur « you have unmerged files » — des
+				// erreurs qui n'avaient rien à voir avec elles et qui
+				// masquaient le seul conflit réel. On s'arrête au premier :
+				// il se résout ici, et `integrate` se rappelle ensuite.
+				break;
+			}
+		}
+	}
+	Ok(merges)
+}
+
+/// Le refus d'une branche qui sort de son périmètre.
+///
+/// Le pont d'autorisation ne voit que les outils d'édition : une écriture par `Bash`
+/// lui échappe. Le diff, lui, dit ce que la branche change, quel que soit le moyen.
+async fn scope_refusal(mission: &Mission, task: &Task, cwd: &std::path::Path, branche: &str) -> Option<Value> {
+	let base = if task.base.trim().is_empty() {
+		&mission.branch
+	} else {
+		&task.base
+	};
+	// Un diff illisible ne vaut pas un diff propre : on ne fusionne pas.
+	let mut refus = match files_outside_scope(cwd, base, branche, &task.scope).await {
+		Ok(files) if files.is_empty() => return None,
+		Ok(files) => json!({ "files": files }),
+		Err(error) => json!({ "error": error.to_string() }),
+	};
+	refus["taskId"] = json!(task.id);
+	refus["task"] = json!(task.title);
+	refus["scope"] = json!(task.scope);
+	Some(refus)
+}
+
+/// Les tâches abandonnées dont la branche porte encore du code.
+///
+/// Une tâche abandonnée peut avoir produit du code avant de renoncer — trois reprises
+/// épuisées ne veulent pas dire trois reprises vides. Son travail n'est intégré par
+/// personne, et la mission se refermait dessus sans un mot : la branche restait là, sans
+/// PR pour la porter et sans rien pour la nommer. On ne bloque pas — renoncer est une
+/// décision — mais on ne laisse plus partir en silence.
+async fn abandoned_with_work(mission: &Mission, cwd: &std::path::Path) -> Vec<Value> {
+	let mut abandoned = Vec::new();
+	for task in &mission.tasks {
+		if !matches!(task.state, TaskState::Failed) {
+			continue;
+		}
+		let branche = mission::working_branch(task);
+		if branche.is_empty() {
+			continue;
+		}
+		let restes = crate::git::run_git(cwd, &["rev-list", "--count", &format!("{}..{branche}", mission.branch)])
+			.await
+			.ok()
+			.and_then(|raw| raw.trim().parse::<u32>().ok())
+			.unwrap_or(0);
+		if restes > 0 {
+			abandoned.push(json!({
+				"task": task.title,
+				"branch": branche,
+				"commits": restes,
+			}));
+		}
+	}
+	abandoned
+}
+
+fn integrate_message(worktree: &str, merges: &Merges, abandoned: &[Value], unproven: &[String]) -> String {
+	if !merges.conflicts.is_empty() {
+		return format!(
+			"Conflicts remain: resolve them in `{worktree}`, then call \
+			 `integrate` again."
+		);
+	}
+	let portes = gates_message(merges);
+	let perdu = if abandoned.is_empty() {
+		String::new()
+	} else {
+		let liste = abandoned
+			.iter()
+			.filter_map(|entry| {
+				Some(format!(
+					"\"{}\" on `{}` ({} commit(s))",
+					entry.get("task")?.as_str()?,
+					entry.get("branch")?.as_str()?,
+					entry.get("commits")?.as_u64()?,
+				))
+			})
+			.collect::<Vec<_>>()
+			.join(", ");
+		format!(
+			" Warning: {liste} — these tasks were abandoned but \
+			 produced code that no integrated branch carries. Integrate it \
+			 if it is worth anything, or say explicitly that it is dropped \
+			 before opening the pull request."
+		)
+	};
+	let alerte = if unproven.is_empty() {
+		String::new()
+	} else {
+		format!(
+			" Warning: {} gave its verdict without leaving any \
+			 evidence of execution. Ask it for something to verify it with before \
+			 opening the pull request.",
+			unproven.join(", "),
+		)
+	};
+	format!(
+		"Branches merged into `{worktree}`. It is up to you to validate the whole \
+		 before the pull request.{portes}{alerte}{perdu}"
+	)
+}
+
+fn gates_message(merges: &Merges) -> String {
+	let titres = |entries: &[Value]| {
+		entries
+			.iter()
+			.filter_map(|entry| Some(format!("\"{}\"", entry.get("task")?.as_str()?)))
+			.collect::<Vec<_>>()
+			.join(", ")
+	};
+	let mut texte = String::new();
+	if !merges.gates_failed.is_empty() {
+		texte.push_str(&format!(
+			" Not merged, the repository checks failed for {}: send them back \
+			 with `rework`, quoting the output given in `gatesFailed`.",
+			titres(&merges.gates_failed)
+		));
+	}
+	if !merges.scope_failed.is_empty() {
+		texte.push_str(&format!(
+			" Not merged, the branch changes files outside its scope for {}: send \
+			 them back with `rework`, quoting the files given in `scopeFailed`.",
+			titres(&merges.scope_failed)
+		));
+	}
+	if !merges.gates_pending.is_empty() {
+		texte.push_str(&format!(
+			" Not merged yet, the repository checks are still running for {}: \
+			 call `integrate` again once `status` shows them finished.",
+			titres(&merges.gates_pending)
+		));
+	}
+	texte
+}
+
+fn report(mission: &Mission, input: &Value) -> Result<Value> {
+	let summary = input_text(input, "summary");
+	if summary.trim().is_empty() {
+		return Err(CockpitError::msg("An empty report helps no one."));
+	}
+	mission::set_summary(&mission.id, summary)?;
+	Ok(json!({ "message": "Report recorded." }))
+}
+
+async fn open_pr(mission: &Mission, input: &Value) -> Result<Value> {
+	// Rien n'est fusionné : on ouvre la pull request du travail recomposé,
+	// et c'est une relecture humaine qui décidera de la suite.
+	let pending: Vec<&str> = mission
+		.tasks
+		.iter()
+		.filter(|task| task.state == TaskState::Delivered)
+		.map(|task| task.title.as_str())
+		.collect();
+	if !pending.is_empty() {
+		return Err(CockpitError::msg(format!(
+			"These tasks are delivered but not integrated: {}. Call `integrate` first.",
+			pending.join(", ")
+		)));
+	}
+
+	// La base peut être déclarée par le maître : une mission qui prolonge
+	// un travail en cours s'empile dessus plutôt que de repartir de la
+	// branche par défaut, où sa PR montrerait aussi le travail du voisin.
+	if let Some(base) = input_filled(input, "base") {
+		mission::set_base(&mission.id, &base)?;
+	}
+	let mission = mission::get(&mission.id)?;
+
+	// L'équipe a peut-être sa propre façon d'ouvrir une pull request : le bon
+	// gabarit, ses labels, l'envoi des captures de recette. Tout cela vit
+	// dans une commande du dépôt, que le cockpit ne saurait pas refaire — et
+	// qu'un autre projet n'a pas. Quand elle est déclarée, c'est le maître
+	// qui la joue, dans son worktree, et qui rend l'adresse obtenue.
+	let url = match (input_filled(input, "url"), crate::mission_pr_command(&mission)) {
+		// L'adresse est là : la pull request existe déjà, le cockpit n'a plus
+		// qu'à en tirer les conséquences.
+		(Some(url), _) => {
+			if !url.starts_with("http") {
+				return Err(CockpitError::msg("`url` expects the URL of the opened pull request."));
+			}
+			url
+		}
+		// Commande d'équipe déclarée : on rend la main au maître plutôt que
+		// d'ouvrir une pull request qui ignorerait sa méthode.
+		(None, Some(command)) => return team_pr_handoff(&mission, &command).await,
+		// Aucune méthode maison : le cockpit ouvre la pull request lui-même.
+		// Le `git push` part du worktree d'intégration, comme le merge : aucune
+		// commande de mission ne s'exécute dans le dépôt principal.
+		(None, None) => {
+			let title = match input_text(input, "title") {
+				title if title.trim().is_empty() => mission.title.as_str(),
+				title => title,
+			};
+			let body = match input_text(input, "body") {
+				body if body.trim().is_empty() && !mission.summary.trim().is_empty() => mission.summary.as_str(),
+				body => body,
+			};
+			let from = integration_worktree(&mission).await?;
+			crate::open_mission_pr(
+				&from,
+				&mission.branch,
+				&crate::mission_base(&mission).await,
+				title,
+				body,
+			)
+			.await?
+		}
+	};
+
+	mission::finish(&mission.id, &url)?;
+	crate::delivery::publish_on_close(&mission.id);
+	let removed = mission::cleanup(&mission.id).await.unwrap_or_default();
+	Ok(json!({
+		"url": url,
+		"cleaned": removed,
+		"message": "Mission closed, worktrees of the integrated tasks cleaned up.",
+	}))
+}
+
+async fn team_pr_handoff(mission: &Mission, command: &str) -> Result<Value> {
+	let worktree = integration_worktree(mission).await?;
+	// Les preuves de recette sont réunies avant de rendre la main : la
+	// commande d'équipe les joint à la pull request, et elle les cherche
+	// là où elle s'exécute.
+	let evidence = gather_evidence(mission, &worktree);
+	let count = evidence.len();
+	Ok(json!({
+		"command": command,
+		"worktree": worktree,
+		"evidence": evidence,
+		"message": format!(
+			"This team opens its pull requests with `{command}`. Run it in \
+			 `{worktree}`, then call `pr` again with `url` — the URL it \
+			 produced. The mission will close at that point. The workers' QA \
+			 evidence has been gathered there ({count} file(s) under \
+			 `.claude/work/`): git ignores it, it will not leave with the \
+			 branch.",
+		),
+	}))
 }
 
 /// Lit les tâches d'un plan, en complétant ce que le maître a laissé implicite.
