@@ -849,6 +849,40 @@ pub async fn start_with_mission(
 	.await
 }
 
+/// La place d'un agent dans une mission. Elle décide de ce qu'il reçoit au
+/// lancement : les outils de mission d'un côté, le garde-fou git de l'autre.
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+enum MissionSeat {
+	/// Hors mission.
+	None,
+	/// Lancé pour la mission elle-même : il découpe, lance et intègre.
+	Master,
+	/// Lancé pour une de ses tâches.
+	Executor,
+}
+
+impl MissionSeat {
+	fn of(mission: Option<&str>, task: &str) -> Self {
+		match mission {
+			None => MissionSeat::None,
+			Some(_) if task.trim().is_empty() => MissionSeat::Master,
+			Some(_) => MissionSeat::Executor,
+		}
+	}
+}
+
+/// La configuration sous laquelle lancer un agent.
+///
+/// Une mission tourne en fond pour le projet de son dépôt. La lire depuis le
+/// projet à l'écran donnait à ses agents le compte et les moteurs du voisin dès
+/// qu'on changeait d'onglet, alors que leur rôle venait bien du bon projet.
+fn launch_config(mission: Option<&str>) -> crate::config::Config {
+	mission
+		.and_then(|id| crate::mission::get(id).ok())
+		.map(|mission| crate::config::Config::for_repo(&mission.cwd))
+		.unwrap_or_else(crate::config::Config::active)
+}
+
 /// Un agent lancé depuis l'écran, avec un profil : `review` le met en lecture
 /// seule (voir `review.rs`).
 #[allow(clippy::too_many_arguments)]
@@ -907,7 +941,8 @@ async fn start_inner(
 	let reviewing = profile.as_deref() == Some("review");
 	// Un exécutant de mission : lancé pour une tâche. Le maître, lui, n'en a
 	// pas — il intègre, et pousse donc sur la branche d'intégration.
-	let executor = mission.is_some() && !origin.task.trim().is_empty();
+	let seat = MissionSeat::of(mission.as_deref(), &origin.task);
+	let executor = seat == MissionSeat::Executor;
 	// La lecture seule se règle par projet (Réglages → Flux de travail) : un
 	// agent de revue sans elle garde son outil de remise, rien d'autre.
 	let locked = reviewing && crate::config::Config::active().workflow.review_read_only;
@@ -936,7 +971,7 @@ async fn start_inner(
 	// Le moteur dit quel programme fait tourner cet agent. Sans moteur nommé, ou
 	// s'il en désigne un qui n'existe plus, on retombe sur celui d'origine :
 	// une ligne de configuration effacée ne doit pas empêcher un agent de partir.
-	let mut config = crate::config::Config::active();
+	let mut config = launch_config(mission.as_deref());
 	if let Some(account) = account.as_deref().map(str::trim).filter(|id| !id.is_empty()) {
 		config.account = account.to_string();
 	}
@@ -1190,7 +1225,7 @@ async fn start_inner(
 		}
 		// Les outils de mission ne sont donnés qu'au maître : un exécutant qui
 		// pourrait en lancer d'autres n'aurait plus de périmètre du tout.
-		if mission.is_some() {
+		if seat == MissionSeat::Master {
 			if let Some(config) = crate::orchestrator::bridge_config(config.sandbox.enabled) {
 				command.push_str(&format!(" --mcp-config {}", shell_quote(&config)));
 			}
@@ -2430,6 +2465,20 @@ mod write_tests {
 			.expect("l'écriture a paniqué hors du runtime");
 		assert!(ecrit);
 		let _ = tauri::async_runtime::block_on(async { child.kill().await });
+	}
+}
+
+#[cfg(test)]
+mod seat_tests {
+	use super::MissionSeat;
+
+	#[test]
+	fn la_place_dans_la_mission_se_lit_sur_la_mission_et_la_tache() {
+		assert_eq!(MissionSeat::of(None, ""), MissionSeat::None);
+		// Une tâche sans mission n'existe pas : rien à recevoir de ce côté.
+		assert_eq!(MissionSeat::of(None, "t1"), MissionSeat::None);
+		assert_eq!(MissionSeat::of(Some("m1"), "  "), MissionSeat::Master);
+		assert_eq!(MissionSeat::of(Some("m1"), "t1"), MissionSeat::Executor);
 	}
 }
 

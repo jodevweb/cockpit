@@ -969,7 +969,7 @@ pub(crate) async fn launch_master(
 	// Les rôles qui jugent sont annoncés comme tels : le maître planifiait des
 	// recettes en parallèle de l'implémentation, faute de savoir que le cockpit
 	// les retiendrait de toute façon.
-	let roles = roles_list()
+	let roles = roles_for(&mission.cwd)
 		.into_iter()
 		// Le maître ne se confie pas de tâche à lui-même : sa clé n'a rien à
 		// faire dans la liste qu'il utilise pour découper.
