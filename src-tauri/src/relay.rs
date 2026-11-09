@@ -165,12 +165,17 @@ fn quote(value: &str) -> String {
 /// programme Windows natif. On tue donc d'abord `tail` par son pid — en bash,
 /// `$!` désigne la substitution de processus, que `exec` a remplacée par
 /// `tail`. Le CLI, lui, a déjà rendu la main à ce stade.
+///
+/// Reste l'arrêt depuis le cockpit (`kill`) : `taskkill /T` suit l'arbre Windows,
+/// où un enfant MSYS n'apparaît pas, et chaque relais arrêté laissait un `tail -f`
+/// sur un fichier effacé. `--pid` le fait partir avec le shell, quoi qui l'emporte.
 fn script(dir: &Path, command: &str) -> String {
 	let at = |name: &str| quote(&crate::platform::display_path(&dir.join(name)));
 	let stop_tail = if cfg!(windows) { "kill -TERM $! 2>/dev/null\n" } else { "" };
+	let with_shell = if cfg!(windows) { "--pid=$$ " } else { "" };
 	format!(
 		"( {command}
-) < <(exec tail -n +1 -f {input}) > {output} 2> {error}\n\
+) < <(exec tail {with_shell}-n +1 -f {input}) > {output} 2> {error}\n\
 		 code=$?\n\
 		 printf '%s\\n' \"$code\" > {exit_tmp} && mv {exit_tmp} {exit}\n\
 		 {stop_tail}\
@@ -635,7 +640,27 @@ mod tests {
 		}
 		assert!(!alive(handle.pgid), "le groupe est mort");
 		assert!(!handle.dir.exists(), "le dossier est effacé");
+		#[cfg(windows)]
+		tail_finit_par_partir(&base);
 		let _ = std::fs::remove_dir_all(base);
+	}
+
+	/// `taskkill /T` ne voit pas les enfants MSYS d'un shell : c'est `tail` qui
+	/// doit partir de lui-même. `ps` est celui de MSYS, seul à lister ses arguments.
+	#[cfg(windows)]
+	fn tail_finit_par_partir(base: &std::path::Path) {
+		let nom = base.file_name().unwrap().to_string_lossy().to_string();
+		let reste = || {
+			let sortie = crate::platform::shell("ps -ef").output().expect("ps");
+			String::from_utf8_lossy(&sortie.stdout).contains(&nom)
+		};
+		for _ in 0..50 {
+			if !reste() {
+				return;
+			}
+			std::thread::sleep(Duration::from_millis(100));
+		}
+		panic!("un `tail -f` survit au relais {nom}");
 	}
 
 	#[tokio::test]
