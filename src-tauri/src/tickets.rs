@@ -125,6 +125,8 @@ pub struct TeamRef {
 }
 
 /// Ce qu'un suivi de tâches doit savoir faire.
+// `async_trait` met un `#[must_use]` sur ce qu'il génère, une `Future` qui en a déjà un.
+#[allow(clippy::double_must_use)]
 #[async_trait]
 pub trait Provider: Send + Sync {
     /// Nom affiché — c'est lui qui titre l'onglet, à la place de « Linear ».

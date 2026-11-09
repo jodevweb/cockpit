@@ -760,7 +760,7 @@ pub async fn listening_ports() -> Result<Vec<ListeningPort>> {
 				.map(|path| path.to_string_lossy().to_string())
 				.unwrap_or_default();
 		}
-		return Ok(ports);
+		Ok(ports)
 	}
 	#[cfg(target_os = "macos")]
 	{

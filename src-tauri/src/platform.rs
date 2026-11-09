@@ -342,7 +342,7 @@ pub fn system_language() -> String {
 			.map(|output| String::from_utf8_lossy(&output.stdout).to_string())
 			.unwrap_or_default();
 		if let Some(first) = listed
-			.split(|c: char| c == '"' || c == '\n' || c == ',' || c == '(' || c == ')')
+			.split(['"', '\n', ',', '(', ')'])
 			.map(str::trim)
 			.find(|item| !item.is_empty())
 		{

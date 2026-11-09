@@ -942,8 +942,8 @@ pub(crate) fn raise_file_descriptor_limit() {
 		if libc::getrlimit(libc::RLIMIT_NOFILE, &mut limit) != 0 {
 			return;
 		}
-		let souhaite = (10_240u64).min(limit.rlim_max as u64);
-		if souhaite > limit.rlim_cur as u64 {
+		let souhaite = (10_240u64).min(limit.rlim_max);
+		if souhaite > limit.rlim_cur {
 			limit.rlim_cur = souhaite as libc::rlim_t;
 			let _ = libc::setrlimit(libc::RLIMIT_NOFILE, &limit);
 		}
