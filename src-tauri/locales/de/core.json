@@ -421,6 +421,7 @@
 			"quotaFloor": "Unter {{floor}} % verbleibendem Kontingent startet keine neue Aufgabe.",
 			"launchSuspended": "Start ausgesetzt",
 			"tooManyWorkers": "{{count}} Ausführer laufen bereits auf dem Rechner",
+			"invalidRepoRoles": "{{file}} ist ungültig: {{error}}",
 			"taskWithoutId": "Aufgabe ohne Kennung: Plane die Mission neu.",
 			"taskBlocked": "Aufgabe blockiert",
 			"worktreeFailed": "Worktree nicht möglich: {{error}}",

@@ -421,6 +421,7 @@
 			"quotaFloor": "Abaixo de {{floor}}% de cota restante, nenhuma nova tarefa começa.",
 			"launchSuspended": "Lançamento suspenso",
 			"tooManyWorkers": "{{count}} executores já rodando na máquina",
+			"invalidRepoRoles": "{{file}} é inválido: {{error}}",
 			"taskWithoutId": "Tarefa sem identificador: replaneje a missão.",
 			"taskBlocked": "Tarefa bloqueada",
 			"worktreeFailed": "Worktree impossível: {{error}}",

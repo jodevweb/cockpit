@@ -58,6 +58,8 @@ These are the checks the CI runs on every PR (macOS, Windows, Linux, and Playwri
 - `Config::active()`: the active project's view, where project settings override the global ones.
 - `Config::for_repo(path)`: the view of the project that owns a repository. Background work (missions, workers) must use this, not `active()`.
 
+Mission roles come from `mission_commands::roles_for(repo)`, not `config.roles`: it adds the repository's `.cockpit/roles.toml` (`roles.rs`), which can never set permissions or the engine.
+
 **Frontend.** `src/app/` holds the shell and global state as React providers, nested in `App.tsx`:
 - `store.tsx` (`useCockpit`): config, worktrees, missions, navigation;
 - `agents.tsx` (`useAgentRuns`): the live agent runs and their turns;

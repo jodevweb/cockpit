@@ -264,6 +264,10 @@ token = ""
 # équipe branche sa méthode sans la recopier ici. Ce qui suit y est remplacé au
 # lancement : {ticket} {ticketUrl} {branch} {mission} {task} {brief}.
 #
+# Un dépôt peut aussi versionner ses rôles dans `.cockpit/roles.toml`, avec les mêmes
+# champs sauf `permissionMode` et `engine`, qui restent sur le poste. Ils se posent
+# par-dessus ceux déclarés ici, à `id` égal.
+#
 # [[roles]]
 # id = "master"                                  # clé réservée : pilote la mission
 # label = "Agent maître"
