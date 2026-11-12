@@ -477,7 +477,8 @@ async fn merge_delivered_tasks(
 		// les autres. Ses deux commits partaient sinon dans l'intégration sans
 		// que rien ne les ait joués (bac à sable, mission « total du panier »).
 		let own = brings_own_commits(cwd, &branche).await;
-		let judges_only = verifiers.contains(&task.role) && !own;
+		let judges_only =
+			verifiers.contains(&task.role) && !authored_commits(mission, task, |role| verifiers.contains(role)).await;
 		let decision = mission::gate_decision(task.gate, !gate_commands.is_empty(), judges_only);
 		// Rendue avant que les portes existent, ou retrouvée au démarrage :
 		// elle passe les portes comme les autres.
@@ -1039,6 +1040,63 @@ async fn brings_own_commits(cwd: &std::path::Path, branch: &str) -> bool {
 		.is_none_or(|count| count > 0)
 }
 
+/// La tâche a-t-elle écrit des commits à elle, hors fusions ?
+///
+/// Ni ceux de l'intégration, ni ceux des lots : une vérification reçoit le
+/// travail des lots avant de démarrer (`sync_verifier_worktree`), et tant
+/// qu'ils ne sont pas intégrés, ces commits sont aussi sur sa branche. Les
+/// branches des autres vérifications ne sont pas retranchées : elles portent
+/// elles aussi le travail des lots, et l'exclure ferait croire qu'un lot n'a
+/// rien écrit. Les
+/// compter faisait passer les portes à une relecture qui n'avait rien écrit,
+/// sur le code d'une autre (bac à sable, mission « code promo »).
+///
+/// Dans le doute — git qui échoue — on répond oui : les portes tournent alors
+/// pour rien, ce qui vaut mieux qu'un code intégré sans qu'elles l'aient joué.
+pub(crate) async fn authored_commits(
+	mission: &Mission,
+	task: &mission::Task,
+	is_verifier: impl Fn(&str) -> bool,
+) -> bool {
+	let repo = std::path::Path::new(&mission.cwd);
+	let branch = mission::working_branch(task).to_string();
+	if branch.is_empty() {
+		return false;
+	}
+	let mut args = vec![
+		"rev-list".to_string(),
+		"--count".into(),
+		"--no-merges".into(),
+		branch.clone(),
+		format!("^{}", mission.branch),
+	];
+	for sister in mission
+		.tasks
+		.iter()
+		.filter(|other| other.id != task.id && !is_verifier(&other.role))
+	{
+		let other = mission::working_branch(sister);
+		if other.is_empty() || other == branch {
+			continue;
+		}
+		// Une sœur dont la branche n'existe plus (rangée, jamais créée) ferait
+		// échouer toute la commande : on ne l'exclut que si elle est là.
+		let reference = format!("refs/heads/{other}");
+		if crate::git::run_git(repo, &["show-ref", "--verify", "--quiet", &reference])
+			.await
+			.is_ok()
+		{
+			args.push(format!("^{other}"));
+		}
+	}
+	let args: Vec<&str> = args.iter().map(String::as_str).collect();
+	crate::git::run_git(repo, &args)
+		.await
+		.ok()
+		.and_then(|raw| raw.trim().parse::<u32>().ok())
+		.is_none_or(|count| count > 0)
+}
+
 /// Les fichiers qu'une branche change hors de son périmètre, depuis qu'elle a
 /// quitté `base`.
 ///
@@ -1427,6 +1485,10 @@ mod tests {
 				tache_de_test("review", "feat/w-review", TaskState::Running),
 			],
 		);
+		let mut mission = mission;
+		mission.tasks[2].role = "qa".into();
+		mission.tasks[3].role = "review".into();
+		let verifie = |role: &str| role == "qa" || role == "review";
 		for (tache, dossier) in [(&mission.tasks[2], &qa), (&mission.tasks[3], &review)] {
 			let rapport = sync_verifier_worktree(&mission, tache, &dossier.to_string_lossy())
 				.await
@@ -1437,6 +1499,20 @@ mod tests {
 
 		// Avant l'intégration des lots, la vérification les porte : elle apporte.
 		assert!(brings_own_commits(&depot, "feat/w-qa").await);
+		// Mais elle ne les a pas écrits : rien à faire juger aux portes chez la
+		// qa, qui n'a rien commité ; la relecture, si, pour sa note.
+		assert!(
+			!authored_commits(&mission, &mission.tasks[2], verifie).await,
+			"qa n'a rien écrit"
+		);
+		assert!(
+			authored_commits(&mission, &mission.tasks[3], verifie).await,
+			"review a écrit sa note"
+		);
+		assert!(
+			authored_commits(&mission, &mission.tasks[0], verifie).await,
+			"le lot backend a écrit le sien"
+		);
 
 		for lot in ["feat/w-backend", "feat/w-frontend"] {
 			let sortie = std::process::Command::new("git")
