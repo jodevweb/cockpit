@@ -215,6 +215,25 @@
 			"missionsOngoing": "{{missions}} 進行中（{{mod}}{{shift}}M）",
 			"missionsWaiting_other": "{{missions}} 進行中、{{count}} 件があなたの承認待ち（{{mod}}{{shift}}M）",
 			"scripts_other": "スクリプト {{count}} 件実行中"
+		},
+		"blurb": {
+			"map": "すべてのプロジェクトとエージェントを一目で",
+			"today": "待っていること、今日動いたこと",
+			"decisions": "あなたの回答を待つ質問",
+			"recap": "一日を画像でふり返る",
+			"permanence": "不在の間に動くもの",
+			"missions": "チケットからプルリクエストへ",
+			"workspace": "開いているエージェントとターミナル",
+			"libres": "ミッション外で起動したエージェント",
+			"agents": "すべてのセッション（実行中と過去）",
+			"methods": "プロジェクトが採用できるプラグイン",
+			"replay": "過去の PR でエージェント構成を検証",
+			"docs": "プロジェクトのドキュメント",
+			"impact": "マージ前に変更の影響範囲を確認",
+			"worktrees": "エージェントごとの独立したブランチ",
+			"git": "ブランチ、コミット、差分",
+			"scripts": "プロジェクトのコマンドと出力",
+			"infra": "このマシンで動いているサーバー"
 		}
 	},
 	"agents": {

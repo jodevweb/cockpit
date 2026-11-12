@@ -1276,8 +1276,35 @@
 			"add": "Добавить",
 			"reopen": "Открыть снова",
 			"complete": "Завершить",
-			"delete": "Удалить"
-		}
+			"delete": "Удалить",
+			"empty": "Нет заметок",
+			"emptyHint": "Запишите то, что не хотите забыть, — Enter добавит."
+		},
+		"stats": {
+			"waiting": "Ждёт вас",
+			"waitingNone": "Ничего не заблокировано",
+			"working": "Агенты за работой",
+			"resting_one": "{{count}} открыт, простаивает",
+			"resting_few": "{{count}} открыты, простаивают",
+			"resting_many": "{{count}} открыто, простаивают",
+			"resting_other": "{{count}} открыто, простаивают",
+			"missions": "Миссии в работе",
+			"missionsWaiting_one": "{{count}} ждёт вашего одобрения",
+			"missionsWaiting_few": "{{count}} ждут вашего одобрения",
+			"missionsWaiting_many": "{{count}} ждут вашего одобрения",
+			"missionsWaiting_other": "{{count}} ждут вашего одобрения",
+			"pullRequests": "PR готовы к слиянию",
+			"toReview_one": "{{count}} на ревью",
+			"toReview_few": "{{count}} на ревью",
+			"toReview_many": "{{count}} на ревью",
+			"toReview_other": "{{count}} на ревью",
+			"cleanup": "Worktree на уборку",
+			"trees_one": "всего {{count}} worktree",
+			"trees_few": "всего {{count}} worktree",
+			"trees_many": "всего {{count}} worktree",
+			"trees_other": "всего {{count}} worktree"
+		},
+		"activityNone": "Cockpit пока ничего не сделал от вашего имени."
 	},
 	"worktrees": {
 		"row": {

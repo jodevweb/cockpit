@@ -198,12 +198,14 @@
 		"summary": {
 			"none": "최근 몇 시간 동안 실행된 에이전트가 없습니다.",
 			"busy_other": "지금 {{busy}}개 작업 중 · 오늘 아침부터 {{count}}개",
-			"idle_other": "최근 몇 시간 동안 에이전트 {{count}}개, 작업 중인 것 없음"
+			"idle_other": "최근 몇 시간 동안 에이전트 {{count}}개, 작업 중인 것 없음",
+			"resting_other": "{{count}}개 열림, 대기 중"
 		},
 		"legend": {
 			"working": "작업 중",
 			"done": "완료",
-			"failed": "실패"
+			"failed": "실패",
+			"resting": "대기 중"
 		},
 		"now": "지금",
 		"turns_other": "{{count}}턴",
@@ -380,7 +382,18 @@
 			"recent": "최근",
 			"resting": "휴면"
 		},
-		"empty": "Worktree가 없습니다."
+		"empty": "Worktree가 없습니다.",
+		"agent": "에이전트",
+		"stats": {
+			"trees": "Worktree",
+			"agents": "작업 중인 에이전트",
+			"dirty": "커밋 안 된 변경",
+			"ahead": "푸시할 커밋"
+		},
+		"invite": {
+			"title": "새 worktree",
+			"body": "자체 폴더의 격리된 브랜치: 에이전트가 main을 건드리지 않고 그곳에서 작업합니다."
+		}
 	},
 	"impactReport": {
 		"ago": {

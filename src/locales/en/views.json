@@ -1132,8 +1132,27 @@
 			"add": "Add",
 			"reopen": "Reopen",
 			"complete": "Complete",
-			"delete": "Delete"
-		}
+			"delete": "Delete",
+			"empty": "No notes",
+			"emptyHint": "Jot down what you don't want to forget — Enter adds it."
+		},
+		"stats": {
+			"waiting": "Waiting for you",
+			"waitingNone": "Nothing is blocked",
+			"working": "Agents working",
+			"resting_one": "{{count}} open, idle",
+			"resting_other": "{{count}} open, idle",
+			"missions": "Missions in progress",
+			"missionsWaiting_one": "{{count}} awaits your go-ahead",
+			"missionsWaiting_other": "{{count}} await your go-ahead",
+			"pullRequests": "PRs ready to merge",
+			"toReview_one": "{{count}} to review",
+			"toReview_other": "{{count}} to review",
+			"cleanup": "Worktrees to clean up",
+			"trees_one": "{{count}} worktree in all",
+			"trees_other": "{{count}} worktrees in all"
+		},
+		"activityNone": "The cockpit hasn't done anything on your behalf yet."
 	},
 	"worktrees": {
 		"row": {

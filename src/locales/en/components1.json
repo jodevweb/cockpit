@@ -204,12 +204,15 @@
 			"busy_one": "{{busy}} working right now · {{count}} since this morning",
 			"busy_other": "{{busy}} working right now · {{count}} since this morning",
 			"idle_one": "{{count}} agent in the last few hours, none working",
-			"idle_other": "{{count}} agents in the last few hours, none working"
+			"idle_other": "{{count}} agents in the last few hours, none working",
+			"resting_one": "{{count}} open, idle",
+			"resting_other": "{{count}} open, idle"
 		},
 		"legend": {
 			"working": "working",
 			"done": "done",
-			"failed": "failed"
+			"failed": "failed",
+			"resting": "idle"
 		},
 		"now": "now",
 		"turns_one": "{{count}} turn",
@@ -397,7 +400,18 @@
 			"recent": "Recent",
 			"resting": "Resting"
 		},
-		"empty": "No worktrees."
+		"empty": "No worktrees.",
+		"agent": "Agent",
+		"stats": {
+			"trees": "Worktrees",
+			"agents": "Agents on them",
+			"dirty": "Uncommitted changes",
+			"ahead": "Commits to push"
+		},
+		"invite": {
+			"title": "New worktree",
+			"body": "An isolated branch in its own folder: an agent works there without touching main."
+		}
 	},
 	"impactReport": {
 		"ago": {

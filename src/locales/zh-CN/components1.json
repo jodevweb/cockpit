@@ -198,12 +198,14 @@
 		"summary": {
 			"none": "过去几小时内没有智能体运行。",
 			"busy_other": "{{busy}} 个正在工作 · 今天早上以来共 {{count}} 个",
-			"idle_other": "过去几小时内有 {{count}} 个智能体，目前都未在工作"
+			"idle_other": "过去几小时内有 {{count}} 个智能体，目前都未在工作",
+			"resting_other": "{{count}} 个已打开，空闲"
 		},
 		"legend": {
 			"working": "工作中",
 			"done": "已完成",
-			"failed": "失败"
+			"failed": "失败",
+			"resting": "空闲"
 		},
 		"now": "现在",
 		"turns_other": "{{count}} 个回合",
@@ -380,7 +382,18 @@
 			"recent": "最近",
 			"resting": "闲置"
 		},
-		"empty": "没有 worktree。"
+		"empty": "没有 worktree。",
+		"agent": "智能体",
+		"stats": {
+			"trees": "Worktree",
+			"agents": "其上的智能体",
+			"dirty": "未提交的改动",
+			"ahead": "待推送的提交"
+		},
+		"invite": {
+			"title": "新建 worktree",
+			"body": "独立文件夹中的隔离分支：智能体在那里工作，不会碰到 main。"
+		}
 	},
 	"impactReport": {
 		"ago": {

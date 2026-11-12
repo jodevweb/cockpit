@@ -4,6 +4,7 @@ import { motion } from "motion/react";
 import { useMemo, useState } from "react";
 import { useCockpit } from "@/app/store";
 import { useWorkspace } from "@/app/workspace";
+import { useAgentRuns } from "@/app/agents";
 import { duration } from "@/lib/format";
 import { api } from "@/lib/ipc";
 import type { Execution } from "@/lib/types";
@@ -34,12 +35,19 @@ interface Lane {
 	sessionId: string;
 	runs: Execution[];
 	live: boolean;
+	/**
+	 * Vivant ne veut pas dire au travail : un agent qui a rendu son tour reste
+	 * ouvert, conversation intacte, en attendant la suite. Sa barre courait
+	 * pourtant jusqu'à « maintenant » dans la couleur du travail, et la frise
+	 * annonçait sept agents au travail sur un poste où rien ne bougeait.
+	 */
+	resting: boolean;
 }
 
-function tone(run: Execution): string {
+function tone(run: Execution, resting: boolean): string {
 	switch (run.outcome) {
 		case "running":
-			return "bg-accent";
+			return resting ? "bg-accent/20 ring-1 ring-inset ring-accent/45" : "bg-accent";
 		case "answered":
 			return "bg-success/75";
 		case "failed":
@@ -50,10 +58,19 @@ function tone(run: Execution): string {
 	}
 }
 
-function labelOf(run: Execution): { label: string; sub: string } {
+/**
+ * Le nom d'une ligne. Les worktrees s'appellent `<dépôt>-<branche>` : tronqué
+ * dans une colonne de 150 pixels, il ne restait que le nom du dépôt, identique
+ * sur toutes les lignes. On garde la branche devant et on passe le dépôt dessous.
+ */
+function labelOf(run: Execution, repo: string): { label: string; sub: string } {
 	const folder = basename(run.cwd);
+	const prefix = repo ? `${repo}-` : "";
+	const branch = prefix && folder.startsWith(prefix) ? folder.slice(prefix.length) : "";
+	const place = branch || folder;
 	const role = run.origin.role && run.origin.role !== "me" ? run.origin.role : "";
-	if (role) return { label: role, sub: folder };
+	if (role) return { label: role, sub: place };
+	if (branch) return { label: branch, sub: repo };
 	return { label: folder, sub: run.origin.actor === "permanence" ? translate("components1:agentDay.permanence") : run.model };
 }
 
@@ -63,8 +80,10 @@ function cost(run: Execution): number {
 
 export function AgentDay() {
 	const { t } = useTranslation("components1");
-	const { go } = useCockpit();
+	const { go, config } = useCockpit();
 	const { show } = useWorkspace();
+	const { runs: open, pendingFor } = useAgentRuns();
+	const repo = basename(config?.mainRepo ?? "");
 	const runs = useAsync(() => api.executions.recent(12), [], { pollMs: 30_000 });
 	const [hover, setHover] = useState<{ run: Execution; lane: Lane } | null>(null);
 	const now = Date.now();
@@ -81,18 +100,28 @@ export function AgentDay() {
 			} else {
 				byAgent.set(key, {
 					key,
-					...labelOf(run),
+					...labelOf(run, repo),
 					cwd: run.cwd,
 					sessionId: run.sessionId,
 					runs: [run],
 					live: run.outcome === "running",
+					resting: false,
 				});
 			}
 		}
-		// Les agents qui travaillent d'abord, puis les plus récents.
+		// Ce que dit le registre des agents ouverts : sans réponse de sa part — un
+		// agent qu'on ne retrouve pas — on garde ce que dit le relevé.
+		for (const lane of byAgent.values()) {
+			if (!lane.live) continue;
+			const run = open.find((candidate) => candidate.running && candidate.sessionId === lane.sessionId);
+			lane.resting = run !== undefined && !run.thinking && pendingFor(run.id).length === 0;
+		}
+		const rank = (lane: Lane) => (lane.live ? (lane.resting ? 1 : 0) : 2);
+		// Les agents qui travaillent d'abord, puis ceux qui attendent, puis les
+		// plus récents.
 		const lanes = [...byAgent.values()]
 			.sort((a, b) => {
-				if (a.live !== b.live) return a.live ? -1 : 1;
+				if (rank(a) !== rank(b)) return rank(a) - rank(b);
 				const lastA = a.runs.at(-1)?.startedAt ?? "";
 				const lastB = b.runs.at(-1)?.startedAt ?? "";
 				return lastB.localeCompare(lastA);
@@ -113,7 +142,7 @@ export function AgentDay() {
 		return { lanes, from, to, ticks };
 		// `now` change à chaque rendu : la frise se refait quand les données arrivent.
 		// eslint-disable-next-line react-hooks/exhaustive-deps
-	}, [runs.data]);
+	}, [runs.data, open, repo]);
 
 	const x = (time: number) => `${(((time - from) / (to - from)) * 100).toFixed(3)}%`;
 	const span = (run: Execution) => {
@@ -124,7 +153,8 @@ export function AgentDay() {
 		return { left: x(start), width: `${width.toFixed(3)}%` };
 	};
 
-	const busy = lanes.filter((lane) => lane.live).length;
+	const busy = lanes.filter((lane) => lane.live && !lane.resting).length;
+	const resting = lanes.filter((lane) => lane.live && lane.resting).length;
 
 	return (
 		<section className="panel flex flex-col gap-3 p-4">
@@ -140,12 +170,17 @@ export function AgentDay() {
 							: busy > 0
 								? t("agentDay.summary.busy", { busy, count: lanes.length })
 								: t("agentDay.summary.idle", { count: lanes.length })}
+						{resting > 0 ? ` · ${t("agentDay.summary.resting", { count: resting })}` : ""}
 					</p>
 				</div>
 				<div className="flex items-center gap-3 text-[10.5px] text-ink-muted">
 					<span className="flex items-center gap-1.5">
 						<span className="size-2 rounded-full bg-accent" />
 						{t("agentDay.legend.working")}
+					</span>
+					<span className="flex items-center gap-1.5">
+						<span className="size-2 rounded-full bg-accent/20 ring-1 ring-accent/45" />
+						{t("agentDay.legend.resting")}
 					</span>
 					<span className="flex items-center gap-1.5">
 						<span className="size-2 rounded-full bg-success/75" />
@@ -159,7 +194,7 @@ export function AgentDay() {
 			</div>
 
 			{lanes.length > 0 ? (
-				<div className="relative grid grid-cols-[150px_minmax(0,1fr)] gap-x-3 gap-y-1.5">
+				<div className="relative grid grid-cols-[190px_minmax(0,1fr)] gap-x-3 gap-y-1.5">
 					{/* L'échelle des heures, alignée sur la piste. */}
 					<span />
 					<div className="relative h-4">
@@ -267,7 +302,14 @@ function LaneRow({
 				title={lane.live ? t("agentDay.openConversation") : undefined}
 			>
 				<span className="flex items-center gap-1.5 truncate text-[12px] font-medium text-ink">
-					{lane.live ? <span className="animate-pulse-dot size-1.5 shrink-0 rounded-full bg-accent" /> : null}
+					{lane.live ? (
+						<span
+							className={clsx(
+								"size-1.5 shrink-0 rounded-full",
+								lane.resting ? "bg-accent/40" : "animate-pulse-dot bg-accent",
+							)}
+						/>
+					) : null}
 					<span className="truncate">{lane.label}</span>
 				</span>
 				<span className="truncate font-mono text-[9.5px] text-ink-faint">{lane.sub}</span>
@@ -295,16 +337,16 @@ function LaneRow({
 							onClick={onOpen}
 							className={clsx(
 								"absolute top-1 bottom-1 origin-left rounded-[5px] transition-[filter,box-shadow]",
-								tone(run),
+								tone(run, lane.resting),
 								hovered === run.id && "brightness-110 ring-2 ring-ink/20",
-								live && "shadow-[0_0_0_3px_var(--color-accent-dim)]",
+								live && !lane.resting && "shadow-[0_0_0_3px_var(--color-accent-dim)]",
 							)}
 							style={place}
 							aria-label={`${lane.label}, ${run.outcome}`}
 						/>
 					);
 				})}
-				{lane.live ? (
+				{lane.live && !lane.resting ? (
 					<span
 						className="animate-pulse-dot absolute top-1/2 size-2 -translate-x-1/2 -translate-y-1/2 rounded-full bg-accent"
 						style={{ left: x(now) }}

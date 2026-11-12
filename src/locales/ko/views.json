@@ -1060,8 +1060,23 @@
 			"add": "추가",
 			"reopen": "다시 열기",
 			"complete": "완료",
-			"delete": "삭제"
-		}
+			"delete": "삭제",
+			"empty": "메모 없음",
+			"emptyHint": "잊고 싶지 않은 것을 적어 두세요 — Enter로 추가합니다."
+		},
+		"stats": {
+			"waiting": "나를 기다리는 것",
+			"waitingNone": "막힌 것이 없습니다",
+			"working": "작업 중인 에이전트",
+			"resting_other": "{{count}}개 열림, 대기 중",
+			"missions": "진행 중인 미션",
+			"missionsWaiting_other": "{{count}}개가 승인 대기",
+			"pullRequests": "병합 준비된 PR",
+			"toReview_other": "리뷰할 것 {{count}}개",
+			"cleanup": "정리할 worktree",
+			"trees_other": "worktree 총 {{count}}개"
+		},
+		"activityNone": "Cockpit이 아직 당신을 대신해 한 일이 없습니다."
 	},
 	"worktrees": {
 		"row": {

@@ -215,6 +215,25 @@
 			"missionsOngoing": "{{missions}} 진행 중 ({{mod}}{{shift}}M)",
 			"missionsWaiting_other": "{{missions}} 진행 중, {{count}}개 승인 대기 ({{mod}}{{shift}}M)",
 			"scripts_other": "스크립트 {{count}}개 실행 중"
+		},
+		"blurb": {
+			"map": "모든 프로젝트와 에이전트를 한눈에",
+			"today": "기다리는 것, 오늘 실행된 것",
+			"decisions": "답변을 기다리는 질문",
+			"recap": "하루를 이미지로 다시 보기",
+			"permanence": "자리를 비운 동안 돌아가는 것",
+			"missions": "티켓에서 풀 리퀘스트까지",
+			"workspace": "열려 있는 에이전트와 터미널",
+			"libres": "미션 밖에서 실행한 에이전트",
+			"agents": "모든 세션, 진행 중과 지난 것",
+			"methods": "프로젝트가 도입할 수 있는 플러그인",
+			"replay": "지난 PR로 에이전트 구성 검증",
+			"docs": "프로젝트 문서",
+			"impact": "병합 전에 변경이 미치는 범위",
+			"worktrees": "에이전트마다 하나씩, 격리된 브랜치",
+			"git": "브랜치, 커밋, 차이",
+			"scripts": "프로젝트 명령과 출력",
+			"infra": "이 컴퓨터에서 실행 중인 서버"
 		}
 	},
 	"agents": {

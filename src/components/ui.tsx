@@ -628,6 +628,73 @@ export function Metric({
 	);
 }
 
+/**
+ * Un chiffre d'en-tête, avec son icône et ce qu'il veut dire.
+ *
+ * Les écrans d'accueil s'ouvraient sur un texte centré dans un grand vide —
+ * « Rien ne t'attend » — ou sur une carte seule perdue à gauche : on ne savait
+ * pas, d'un coup d'œil, si le poste tournait à plein ou dormait. Une rangée de
+ * tuiles le dit avant toute liste. Un zéro reste affiché, en sourdine : c'est
+ * une réponse aussi, et une tuile qui disparaît fait bouger les autres.
+ */
+export function StatTile({
+	icon: Icon,
+	label,
+	value,
+	hint,
+	tone = "neutral",
+	onClick,
+}: {
+	icon: React.ComponentType<{ size?: number; className?: string }>;
+	label: string;
+	value: string | number;
+	hint?: string;
+	tone?: Severity | "neutral" | "accent";
+	onClick?: () => void;
+}) {
+	const quiet = value === 0 || value === "0";
+	const tones = {
+		critical: "bg-critical/10 text-critical",
+		warning: "bg-warning/12 text-warning",
+		success: "bg-success/12 text-success",
+		info: "bg-info/10 text-info",
+		accent: "bg-accent-dim text-accent",
+		neutral: "bg-raised text-ink-muted",
+	};
+	return (
+		<button
+			type="button"
+			onClick={onClick}
+			disabled={!onClick}
+			className={clsx(
+				"panel focus-ring flex min-w-0 items-center gap-3 px-3.5 py-3 text-left transition-[border-color,background-color,transform] duration-150",
+				onClick && "hover:-translate-y-px hover:border-line hover:bg-raised/60",
+			)}
+		>
+			<span
+				className={clsx(
+					"grid size-9 shrink-0 place-items-center rounded-xl transition-colors",
+					quiet ? tones.neutral : tones[tone],
+				)}
+			>
+				<Icon size={16} />
+			</span>
+			<span className="flex min-w-0 flex-1 flex-col">
+				<span
+					className={clsx(
+						"font-mono text-[20px] leading-tight font-semibold tracking-tight tabular-nums",
+						quiet ? "text-ink-faint" : "text-ink",
+					)}
+				>
+					{value}
+				</span>
+				<span className="truncate text-[11.5px] text-ink-muted">{label}</span>
+				{hint ? <span className="truncate text-[10px] text-ink-faint">{hint}</span> : null}
+			</span>
+		</button>
+	);
+}
+
 /** Ligne de liste sélectionnable — la brique de toutes les colonnes maîtres. */
 export function Row({
 	selected,

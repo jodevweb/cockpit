@@ -1132,8 +1132,27 @@
 			"add": "Aggiungi",
 			"reopen": "Riapri",
 			"complete": "Completa",
-			"delete": "Elimina"
-		}
+			"delete": "Elimina",
+			"empty": "Nessuna nota",
+			"emptyHint": "Annota ciò che non vuoi dimenticare — Invio la aggiunge."
+		},
+		"stats": {
+			"waiting": "Ti aspetta",
+			"waitingNone": "Niente è bloccato",
+			"working": "Agenti al lavoro",
+			"resting_one": "{{count}} aperto, inattivo",
+			"resting_other": "{{count}} aperti, inattivi",
+			"missions": "Missioni in corso",
+			"missionsWaiting_one": "{{count}} attende il tuo via libera",
+			"missionsWaiting_other": "{{count}} attendono il tuo via libera",
+			"pullRequests": "PR pronte al merge",
+			"toReview_one": "{{count}} da rivedere",
+			"toReview_other": "{{count}} da rivedere",
+			"cleanup": "Worktree da sistemare",
+			"trees_one": "{{count}} worktree in tutto",
+			"trees_other": "{{count}} worktree in tutto"
+		},
+		"activityNone": "Il cockpit non ha ancora fatto nulla a tuo nome."
 	},
 	"worktrees": {
 		"row": {

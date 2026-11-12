@@ -204,12 +204,15 @@
 			"busy_one": "{{busy}} trabajando ahora mismo · {{count}} desde esta mañana",
 			"busy_other": "{{busy}} trabajando ahora mismo · {{count}} desde esta mañana",
 			"idle_one": "{{count}} agente en las últimas horas, ninguno trabajando",
-			"idle_other": "{{count}} agentes en las últimas horas, ninguno trabajando"
+			"idle_other": "{{count}} agentes en las últimas horas, ninguno trabajando",
+			"resting_one": "{{count}} abierto, inactivo",
+			"resting_other": "{{count}} abiertos, inactivos"
 		},
 		"legend": {
 			"working": "trabajando",
 			"done": "terminado",
-			"failed": "fallido"
+			"failed": "fallido",
+			"resting": "inactivo"
 		},
 		"now": "ahora",
 		"turns_one": "{{count}} turno",
@@ -397,7 +400,18 @@
 			"recent": "Recientes",
 			"resting": "En reposo"
 		},
-		"empty": "No hay worktrees."
+		"empty": "No hay worktrees.",
+		"agent": "Agente",
+		"stats": {
+			"trees": "Worktrees",
+			"agents": "Agentes en ellos",
+			"dirty": "Cambios sin commit",
+			"ahead": "Commits por subir"
+		},
+		"invite": {
+			"title": "Nuevo worktree",
+			"body": "Una rama aislada en su propia carpeta: un agente trabaja ahí sin tocar main."
+		}
 	},
 	"impactReport": {
 		"ago": {

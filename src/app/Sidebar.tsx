@@ -740,6 +740,105 @@ function Atelier({ onClose }: { onClose: () => void }) {
 		onClose();
 	};
 
+	// Un service absent : l'entrée revient d'elle-même dès que la clé est
+	// renseignée.
+	const visible = (entry: Entry) => {
+		const needs = NEEDS[entry.id];
+		if (needs && !hasConnector(needs)) return false;
+		return entry.id !== "permanence" || config?.permanence?.enabled === true;
+	};
+
+	// Ce qui suit le nom : l'état vivant d'abord, le raccourci sinon.
+	const tail = (entry: Entry) => {
+		if (entry.id === "workspace") return <WorkspaceTail />;
+		const badge = badgeFor(entry.id);
+		if (badge !== null) {
+			return (
+				<span className="flex items-center gap-1 font-mono text-[10px] text-accent-soft">
+					{entry.id === "agents" ? <Dot tone="success" pulse /> : null}
+					{badge}
+				</span>
+			);
+		}
+		if (entry.shortcut) {
+			return (
+				<span className="font-mono text-[10px] text-ink-faint/60">{formatShortcut(`⌘${entry.shortcut}`)}</span>
+			);
+		}
+		return null;
+	};
+
+	const renderGroup = (id: string, tiles = false) => {
+		const group = GROUPS.find((candidate) => candidate.id === id);
+		const entries = group?.entries.filter(visible) ?? [];
+		if (entries.length === 0) return null;
+		return (
+			<div className="flex flex-col gap-0.5">
+				<span className="px-2.5 pb-1 text-[10px] font-semibold tracking-[0.09em] text-ink-faint/70 uppercase">
+					{t(`sidebar.groups.${id}`)}
+				</span>
+				<div className={tiles ? "grid grid-cols-4 gap-1.5 px-0.5" : "flex flex-col gap-0.5"}>
+					{entries.map((entry) => {
+						const active = view === entry.id;
+						return tiles ? (
+							// Les outils en tuiles : on les reconnaît à leur icône, et une
+							// rangée de quatre tient là où il fallait quatre lignes.
+							<button
+								key={entry.id}
+								type="button"
+								data-screen={entry.id}
+								onClick={() => open(entry.id)}
+								title={t(`sidebar.blurb.${entry.id}`)}
+								className={clsx(
+									"focus-ring flex flex-col items-start gap-1.5 rounded-xl border p-2.5 text-left transition-colors duration-150",
+									active
+										? "border-accent/40 bg-surface shadow-card"
+										: "border-line-soft hover:border-line hover:bg-surface",
+								)}
+							>
+								<span className="flex w-full items-center justify-between">
+									<entry.icon size={15} className={active ? "text-accent" : "text-ink-muted"} />
+									{tail(entry)}
+								</span>
+								<span className="text-[12px] font-medium text-ink">{viewLabel(entry.id)}</span>
+							</button>
+						) : (
+							<button
+								key={entry.id}
+								type="button"
+								data-screen={entry.id}
+								onClick={() => open(entry.id)}
+								className={clsx(
+									"focus-ring group relative flex items-center gap-2.5 rounded-lg px-2 py-1.5 text-[12.5px] transition-colors duration-150",
+									active ? "bg-surface font-medium text-ink shadow-card" : "text-ink-muted hover:bg-surface hover:text-ink",
+								)}
+							>
+								<span
+									className={clsx(
+										"grid size-7 shrink-0 place-items-center rounded-lg transition-colors",
+										active ? "bg-accent-dim text-accent" : "bg-raised text-ink-faint group-hover:text-ink-muted",
+									)}
+								>
+									<entry.icon size={14} />
+								</span>
+								{/* Une ligne pour dire à quoi sert l'écran : « Rejeu » ou
+								    « Méthodes » ne se devinent pas, et le menu était le seul
+								    endroit où l'on pouvait l'apprendre avant de cliquer. */}
+								<span className="flex min-w-0 flex-1 flex-col text-left">
+									<span className="truncate">{viewLabel(entry.id)}</span>
+									<span className="truncate text-[10.5px] font-normal text-ink-faint">
+										{t(`sidebar.blurb.${entry.id}`)}
+									</span>
+								</span>
+								{tail(entry)}
+							</button>
+						);
+					})}
+				</div>
+			</div>
+		);
+	};
+
 	return (
 		<>
 			<motion.button
@@ -756,7 +855,7 @@ function Atelier({ onClose }: { onClose: () => void }) {
 				animate={{ opacity: 1, y: 0 }}
 				exit={{ opacity: 0, y: -6 }}
 				transition={{ duration: 0.18, ease: [0.25, 1, 0.5, 1] }}
-				className="fixed top-12 right-2 z-50 flex max-h-[calc(100vh-4rem)] w-[560px] flex-col overflow-hidden rounded-[var(--radius-panel)] bg-base shadow-[var(--shadow-pop)]"
+				className="fixed top-12 right-2 z-50 flex max-h-[calc(100vh-4rem)] w-[640px] max-w-[calc(100vw-1rem)] flex-col overflow-hidden rounded-[var(--radius-panel)] bg-base shadow-[var(--shadow-pop)]"
 			>
 				<div className="flex items-center gap-2 px-3 pt-3">
 					<span className="text-[13px] font-semibold text-ink">{t("sidebar.atelier.name")}</span>
@@ -765,51 +864,19 @@ function Atelier({ onClose }: { onClose: () => void }) {
 				<div className="pt-2">
 					<ProjectSwitcher />
 				</div>
-				<div className="grid min-h-0 grid-cols-2 gap-x-2 gap-y-4 overflow-y-auto px-2 pb-3">
-					{GROUPS.map((group) => (
-						<div key={group.id} className="flex flex-col gap-0.5">
-							<span className="px-2.5 pb-1 text-[10px] font-semibold tracking-[0.09em] text-ink-faint/70 uppercase">
-								{t(`sidebar.groups.${group.id}`)}
-							</span>
-							{group.entries
-								// Un service absent : l'entrée revient d'elle-même dès que la
-								// clé est renseignée.
-								.filter((entry) => {
-									const needs = NEEDS[entry.id];
-									return !needs || hasConnector(needs);
-								})
-								.filter((entry) => entry.id !== "permanence" || config?.permanence?.enabled === true)
-								.map((entry) => {
-									const active = view === entry.id;
-									const badge = badgeFor(entry.id);
-									return (
-										<button
-											key={entry.id}
-											type="button"
-											data-screen={entry.id}
-											onClick={() => open(entry.id)}
-											className={clsx(
-												"focus-ring group relative flex h-8 items-center gap-2.5 rounded-lg px-2.5 text-[12.5px] transition-colors duration-150",
-												active ? "bg-surface font-medium text-ink shadow-card" : "text-ink-muted hover:bg-surface hover:text-ink",
-											)}
-										>
-											<entry.icon size={14} className={active ? "text-accent" : "text-ink-faint"} />
-											<span className="flex-1 text-left">{viewLabel(entry.id)}</span>
-											{entry.id === "workspace" ? (
-												<WorkspaceTail />
-											) : badge !== null ? (
-												<span className="flex items-center gap-1 font-mono text-[10px] text-accent-soft">
-													{entry.id === "agents" ? <Dot tone="success" pulse /> : null}
-													{badge}
-												</span>
-											) : entry.shortcut ? (
-												<span className="font-mono text-[10px] text-ink-faint/60">{formatShortcut(`⌘${entry.shortcut}`)}</span>
-											) : null}
-										</button>
-									);
-								})}
+				{/* Deux colonnes qui finissent ensemble, puis l'outillage en tuiles.
+				    Rangés groupe après groupe dans une grille à deux places, « Livrer »
+				    et son unique écran laissaient sous « Piloter » un trou de quatre
+				    lignes, et « Outillage » se retrouvait seul en bas à droite. */}
+				<div className="flex min-h-0 flex-col gap-4 overflow-y-auto px-2 pb-3">
+					<div className="grid grid-cols-2 gap-x-2">
+						<div className="flex flex-col gap-4">
+							{renderGroup("pilot")}
+							{renderGroup("deliver")}
 						</div>
-					))}
+						{renderGroup("produce")}
+					</div>
+					{renderGroup("tooling", true)}
 				</div>
 				<div className="hairline-b" />
 				<button

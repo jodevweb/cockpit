@@ -1132,8 +1132,27 @@
 			"add": "Hinzufügen",
 			"reopen": "Wieder öffnen",
 			"complete": "Erledigen",
-			"delete": "Löschen"
-		}
+			"delete": "Löschen",
+			"empty": "Keine Notizen",
+			"emptyHint": "Notiere, was du nicht vergessen willst — Enter fügt es hinzu."
+		},
+		"stats": {
+			"waiting": "Wartet auf dich",
+			"waitingNone": "Nichts ist blockiert",
+			"working": "Agenten bei der Arbeit",
+			"resting_one": "{{count}} offen, untätig",
+			"resting_other": "{{count}} offen, untätig",
+			"missions": "Laufende Missionen",
+			"missionsWaiting_one": "{{count}} wartet auf deine Freigabe",
+			"missionsWaiting_other": "{{count}} warten auf deine Freigabe",
+			"pullRequests": "PRs bereit zum Mergen",
+			"toReview_one": "{{count}} zu prüfen",
+			"toReview_other": "{{count}} zu prüfen",
+			"cleanup": "Aufzuräumende Worktrees",
+			"trees_one": "{{count}} Worktree insgesamt",
+			"trees_other": "{{count}} Worktrees insgesamt"
+		},
+		"activityNone": "Das Cockpit hat noch nichts in deinem Namen getan."
 	},
 	"worktrees": {
 		"row": {

@@ -1060,8 +1060,23 @@
 			"add": "添加",
 			"reopen": "重新打开",
 			"complete": "完成",
-			"delete": "删除"
-		}
+			"delete": "删除",
+			"empty": "没有笔记",
+			"emptyHint": "记下不想忘记的事 — 按 Enter 添加。"
+		},
+		"stats": {
+			"waiting": "等你处理",
+			"waitingNone": "没有阻塞",
+			"working": "工作中的智能体",
+			"resting_other": "{{count}} 个已打开，空闲",
+			"missions": "进行中的任务",
+			"missionsWaiting_other": "{{count}} 个等你批准",
+			"pullRequests": "可合并的 PR",
+			"toReview_other": "{{count}} 个待审阅",
+			"cleanup": "待清理的 worktree",
+			"trees_other": "共 {{count}} 个 worktree"
+		},
+		"activityNone": "Cockpit 还没有代你做过任何事。"
 	},
 	"worktrees": {
 		"row": {

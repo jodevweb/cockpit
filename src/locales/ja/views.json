@@ -1060,8 +1060,23 @@
 			"add": "追加",
 			"reopen": "再開",
 			"complete": "完了",
-			"delete": "削除"
-		}
+			"delete": "削除",
+			"empty": "メモはありません",
+			"emptyHint": "忘れたくないことを書き留めましょう — Enter で追加。"
+		},
+		"stats": {
+			"waiting": "あなた待ち",
+			"waitingNone": "ブロックはありません",
+			"working": "作業中のエージェント",
+			"resting_other": "{{count}} 件が待機中",
+			"missions": "進行中のミッション",
+			"missionsWaiting_other": "{{count}} 件が承認待ち",
+			"pullRequests": "マージ可能な PR",
+			"toReview_other": "レビュー待ち {{count}} 件",
+			"cleanup": "片付ける worktree",
+			"trees_other": "worktree は全部で {{count}} 件"
+		},
+		"activityNone": "Cockpit はまだあなたの代わりに何もしていません。"
 	},
 	"worktrees": {
 		"row": {
