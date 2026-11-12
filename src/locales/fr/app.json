@@ -27,7 +27,7 @@
 			"git": "Git",
 			"scripts": "Scripts",
 			"docs": "Documents",
-			"infra": "Serveurs & conteneurs · ce qui tourne sur le poste",
+			"infra": "Serveurs · ce qui tourne sur le poste",
 			"settings": "Réglages",
 			"replay": "Rejeu · juger une configuration d'agents sur les PR passées",
 			"methods": "Méthodes · les plugins qu'un projet peut adopter, lus avant de les installer"
@@ -175,7 +175,7 @@
 			"worktrees": "Worktrees",
 			"git": "Git",
 			"scripts": "Scripts",
-			"infra": "Serveurs & conteneurs",
+			"infra": "Serveurs",
 			"settings": "Réglages",
 			"replay": "Rejeu",
 			"methods": "Méthodes"

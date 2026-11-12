@@ -159,7 +159,6 @@
 		"packageJsonMissing": "package.json не найден в этом репозитории.",
 		"packageJsonUnreadable": "Не удаётся прочитать package.json: {{error}}",
 		"generalGroup": "общее",
-		"dockerDown": "Docker не отвечает — демон запущен?",
 		"unknownProcess": "Неизвестный процесс."
 	},
 	"notebook": {
@@ -275,8 +274,7 @@
 	"lib": {
 		"connectorMissing": {
 			"claude": "CLI `claude` на этой машине",
-			"node": "Node — от него зависят мосты разрешений и инструментов миссий",
-			"docker": "Docker на этой машине"
+			"node": "Node — от него зависят мосты разрешений и инструментов миссий"
 		},
 		"config": {
 			"serialize": "Сериализация конфигурации: {{error}}",

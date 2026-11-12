@@ -1550,7 +1550,6 @@ const REPONSES: Record<string, unknown> = {
 		{ id: "linear", label: "Linear", kind: "tickets", configured: true, missing: "" },
 		{ id: "claude", label: "CLI Claude Code", kind: "agents", configured: true, missing: "" },
 		{ id: "node", label: "Node", kind: "orchestration", configured: true, missing: "" },
-		{ id: "docker", label: "Docker", kind: "containers", configured: true, missing: "" },
 	],
 	worktrees_list: [0, 1, 2, 3, 4].map((index) => ({
 		path:
@@ -2877,32 +2876,6 @@ const REPONSES: Record<string, unknown> = {
 		{ port: 4300, process: "node", pid: 22118, cwd: "", memoryMb: 1420 },
 		{ port: 5432, process: "postgres", pid: 1204, cwd: "/", memoryMb: 180 },
 		{ port: 6379, process: "redis-server", pid: 1288, cwd: "/", memoryMb: 40 },
-	],
-	docker_containers: [
-		{
-			id: "c1a2b3",
-			name: "northwind-postgres",
-			image: "postgres:16",
-			state: "running",
-			status: "Up 3 hours",
-			ports: "5432->5432",
-		},
-		{
-			id: "d4e5f6",
-			name: "northwind-redis",
-			image: "redis:7",
-			state: "running",
-			status: "Up 3 hours",
-			ports: "6379->6379",
-		},
-		{
-			id: "a7b8c9",
-			name: "northwind-mailhog",
-			image: "mailhog/mailhog",
-			state: "exited",
-			status: "Exited (0) 2 days ago",
-			ports: "",
-		},
 	],
 };
 

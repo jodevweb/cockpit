@@ -329,16 +329,11 @@
 		}
 	},
 	"infra": {
-		"title": "服务器与容器",
-		"subtitle": "本机上正在运行的内容：开发服务器和容器。",
+		"title": "服务器",
+		"subtitle": "本机上正在监听的开发服务器，以及各自来自哪个 worktree。",
 		"portFreed": "端口 {{port}} 已释放。",
-		"runningContainers": "运行中的容器",
-		"stoppedContainers": "已停止的容器",
 		"devPorts": "开发端口",
 		"worktrees": "Worktree",
-		"noContainers": "没有容器",
-		"viewLogs": "查看日志",
-		"logs": "日志",
 		"listening": "正在监听的服务器",
 		"noServers": "没有运行中的开发服务器",
 		"unknownFolder": "未知文件夹",

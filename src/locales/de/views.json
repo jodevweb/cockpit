@@ -350,16 +350,11 @@
 		}
 	},
 	"infra": {
-		"title": "Server & Container",
-		"subtitle": "Was auf diesem Rechner läuft: Entwicklungsserver und Container.",
+		"title": "Server",
+		"subtitle": "Die Entwicklungsserver, die auf diesem Rechner lauschen, und der Worktree, aus dem jeder stammt.",
 		"portFreed": "Port {{port}} freigegeben.",
-		"runningContainers": "Laufende Container",
-		"stoppedContainers": "Gestoppte Container",
 		"devPorts": "Dev-Ports",
 		"worktrees": "Worktrees",
-		"noContainers": "Keine Container",
-		"viewLogs": "Logs ansehen",
-		"logs": "Logs",
 		"listening": "Lauschende Server",
 		"noServers": "Kein Entwicklungsserver läuft",
 		"unknownFolder": "unbekannter Ordner",

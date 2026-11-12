@@ -329,16 +329,11 @@
 		}
 	},
 	"infra": {
-		"title": "サーバーとコンテナ",
-		"subtitle": "このマシンで動いているもの：開発サーバーとコンテナ。",
+		"title": "サーバー",
+		"subtitle": "このマシンで待ち受けている開発サーバーと、それぞれの起動元の worktree。",
 		"portFreed": "ポート {{port}} を解放しました。",
-		"runningContainers": "実行中のコンテナ",
-		"stoppedContainers": "停止中のコンテナ",
 		"devPorts": "開発ポート",
 		"worktrees": "Worktree",
-		"noContainers": "コンテナはありません",
-		"viewLogs": "ログを表示",
-		"logs": "ログ",
 		"listening": "待ち受け中のサーバー",
 		"noServers": "実行中の開発サーバーはありません",
 		"unknownFolder": "不明なフォルダ",

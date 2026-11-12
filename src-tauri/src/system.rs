@@ -1,6 +1,9 @@
-//! Ponts avec le poste de travail : éditeur, terminal, Finder, ports, Docker.
+//! Ponts avec le poste de travail : éditeur, terminal, Finder, ports.
 
 use crate::error::{CockpitError, Result};
+// Sous Windows, tout passe par les API du système : `capture` (un shell) n'y
+// sert plus depuis le retrait de la liste des conteneurs Docker.
+#[cfg(not(windows))]
 use crate::runner::capture;
 use serde::Serialize;
 use serde_json::Value;
@@ -626,94 +629,6 @@ pub fn package_scripts(repo: &Path) -> Result<Vec<PackageScript>> {
 // que dans le dépôt (le dossier personnel et les plugins en fournissent aussi),
 // leurs sous-dossiers comptent dans leur nom, et leur en-tête déclare parfois
 // les arguments attendus. La version qui vivait ici n'en voyait rien.
-
-#[derive(Debug, Clone, Serialize)]
-#[serde(rename_all = "camelCase")]
-pub struct Container {
-	pub id: String,
-	pub name: String,
-	pub image: String,
-	pub state: String,
-	pub status: String,
-	pub ports: String,
-}
-
-/// Docker est-il installé sur ce poste ?
-///
-/// La présence du binaire, pas l'état du daemon : le second se voit en une
-/// seconde à l'écran — « Docker ne répond pas » — là où le premier décide si
-/// l'écran a lieu d'être. Mémoïsé : on n'installe pas Docker en cours de session,
-/// et cette question se pose à chaque rendu du menu.
-pub fn has_docker() -> bool {
-	static FOUND: std::sync::OnceLock<bool> = std::sync::OnceLock::new();
-	*FOUND.get_or_init(|| {
-		#[cfg(windows)]
-		{
-			let mut command = std::process::Command::new("where");
-			command.arg("docker");
-			if let Ok(output) = crate::platform::quiet_std(&mut command).output() {
-				if output.status.success()
-					&& String::from_utf8_lossy(&output.stdout)
-						.lines()
-						.any(|line| std::path::Path::new(line.trim()).is_file())
-				{
-					return true;
-				}
-			}
-			// Docker Desktop pose son CLI ici ; le PATH d'une app lancée avant
-			// son installation ne le voit pas encore.
-			["ProgramFiles", "ProgramW6432"]
-				.iter()
-				.filter_map(|name| std::env::var(name).ok())
-				.any(|base| {
-					std::path::Path::new(&base)
-						.join("Docker")
-						.join("Docker")
-						.join("resources")
-						.join("bin")
-						.join("docker.exe")
-						.is_file()
-				})
-		}
-		#[cfg(not(windows))]
-		{
-			if let Ok(output) = crate::platform::shell("command -v docker").output() {
-				let path = String::from_utf8_lossy(&output.stdout).trim().to_string();
-				if !path.is_empty() && std::path::Path::new(&path).exists() {
-					return true;
-				}
-			}
-			["/opt/homebrew/bin/docker", "/usr/local/bin/docker", "/usr/bin/docker"]
-				.iter()
-				.any(|path| std::path::Path::new(path).exists())
-		}
-	})
-}
-
-pub async fn docker_containers() -> Result<Vec<Container>> {
-	let raw = capture("/", "docker ps -a --format '{{json .}}'")
-		.await
-		.map_err(|_| CockpitError::msg(crate::i18n::t("system.dockerDown")))?;
-
-	let mut containers = Vec::new();
-	for line in raw.lines().filter(|l| !l.trim().is_empty()) {
-		let Ok(value) = serde_json::from_str::<Value>(line) else {
-			continue;
-		};
-		let get = |key: &str| value.get(key).and_then(|v| v.as_str()).unwrap_or_default().to_string();
-		containers.push(Container {
-			id: get("ID"),
-			name: get("Names"),
-			image: get("Image"),
-			state: get("State"),
-			status: get("Status"),
-			ports: get("Ports"),
-		});
-	}
-
-	containers.sort_by(|a, b| a.name.cmp(&b.name));
-	Ok(containers)
-}
 
 #[derive(Debug, Clone, Serialize)]
 #[serde(rename_all = "camelCase")]

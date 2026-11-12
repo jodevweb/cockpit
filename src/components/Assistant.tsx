@@ -60,7 +60,7 @@ const VIEWS: Array<{ id: ViewId; label: string }> = [
 	{ id: "impact", label: "Impact" },
 	{ id: "docs", label: "Documents" },
 	{ id: "scripts", label: "Scripts" },
-	{ id: "infra", label: "Servers and containers" },
+	{ id: "infra", label: "Development servers" },
 	{ id: "permanence", label: "Permanence" },
 	{ id: "settings", label: "Settings" },
 ];

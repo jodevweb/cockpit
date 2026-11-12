@@ -27,7 +27,7 @@
 			"git": "Git",
 			"scripts": "Scripts",
 			"docs": "Documents",
-			"infra": "Servers & containers · what's running on this machine",
+			"infra": "Servers · what's running on this machine",
 			"settings": "Settings",
 			"replay": "Replay · judge an agent setup on past PRs",
 			"methods": "Methods · plugins this project can adopt, read before installing"
@@ -175,7 +175,7 @@
 			"worktrees": "Worktrees",
 			"git": "Git",
 			"scripts": "Scripts",
-			"infra": "Servers & containers",
+			"infra": "Servers",
 			"settings": "Settings",
 			"replay": "Replay",
 			"methods": "Methods"

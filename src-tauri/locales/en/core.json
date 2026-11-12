@@ -159,7 +159,6 @@
 		"packageJsonMissing": "package.json not found in this repository.",
 		"packageJsonUnreadable": "Unreadable package.json: {{error}}",
 		"generalGroup": "general",
-		"dockerDown": "Docker is not responding — is the daemon running?",
 		"unknownProcess": "Unknown process."
 	},
 	"notebook": {
@@ -275,8 +274,7 @@
 	"lib": {
 		"connectorMissing": {
 			"claude": "the `claude` CLI on this machine",
-			"node": "Node — the mission permission and tool bridges depend on it",
-			"docker": "Docker on this machine"
+			"node": "Node — the mission permission and tool bridges depend on it"
 		},
 		"config": {
 			"serialize": "Serializing config: {{error}}",
