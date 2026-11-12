@@ -190,6 +190,7 @@
 	},
 	"git": {
 		"commandFailed": "git {{args}} falhou: {{error}}",
+		"mergeBaseDirty": "`{{base}}` tem alterações sem commit em {{path}}: faça commit ou guarde-as antes de mesclar.",
 		"detachedHead": "HEAD destacado: nenhuma branch para publicar a partir desta pasta.",
 		"commitMessageRequired": "Um commit precisa de uma mensagem.",
 		"noWorktree": "O git não informa nenhum worktree.",
@@ -447,7 +448,10 @@
 			"integrationNotResumed": "Integração não retomada",
 			"outOfScopeRefused": "Escrita fora do escopo recusada",
 			"revivalsExhausted": "Missão em pausa: a integração está andando em círculos",
-			"revivalsExhaustedDetail": "O agente principal foi reiniciado {{count}} vezes sem que nada avançasse (tarefas, verificações, pull request). Veja o que o bloqueia — uma pull request que não abre, um conflito — e retome a missão."
+			"revivalsExhaustedDetail": "O agente principal foi reiniciado {{count}} vezes sem que nada avançasse (tarefas, verificações, pull request). Veja o que o bloqueia — uma pull request que não abre, um conflito — e retome a missão.",
+			"noRemote": "Missão pausada: sem remoto para abrir o pull request",
+			"noRemoteDetail": "Todas as tarefas estão integradas, mas o repositório não tem remoto: nenhum pull request pode ser aberto. Conclua a missão localmente pelo seu cartão.",
+			"localMergeMessage": "Missão «{{title}}»"
 		},
 		"quoted": "“{{text}}”",
 		"tailscaleDown": "O Tailscale não está respondendo.",

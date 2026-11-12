@@ -3383,6 +3383,7 @@ pub fn run() {
 			mission_from_ticket,
 			mission_start_from_ticket,
 			mission_start_from_brief,
+			mission_finish_local,
 			mission_activity,
 			agent_timeline,
 			mission_remove,
