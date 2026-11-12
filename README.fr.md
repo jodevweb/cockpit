@@ -64,6 +64,27 @@ livrent sans tout relire**.
 6. **Une pull request**, avec son dossier de livraison — ou, pour un dépôt sans
    remote, une fusion en local.
 
+<table>
+  <tr>
+    <td width="50%"><img alt="Décrire une mission : un titre et des détails, sans suivi de tâches" src="docs/images/mission-demande.webp"></td>
+    <td width="50%"><img alt="L'historique d'une étape guidée : les questions du maître et tes réponses" src="docs/images/historique-reponses.webp"></td>
+  </tr>
+  <tr>
+    <td align="center"><sub>1. Un ticket, écrit directement dans Cockpit</sub></td>
+    <td align="center"><sub>2. Ses questions et tes réponses, gardées</sub></td>
+  </tr>
+  <tr>
+    <td width="50%"><img alt="Le graphe de la mission : une tâche renvoyée après l'échec de ses vérifications, puis intégrée" src="docs/images/mission-boucle.webp"></td>
+    <td width="50%"><img alt="L'historique d'une vérification en échec : sa sortie et le diff à cet instant" src="docs/images/historique-porte.webp"></td>
+  </tr>
+  <tr>
+    <td align="center"><sub>4. Les vérifications échouent, la tâche repart : la boucle</sub></td>
+    <td align="center"><sub>5. La sortie de la vérification et le diff à cet instant</sub></td>
+  </tr>
+</table>
+
+<sub>Ces quatre-là viennent des données d'aperçu de l'application, interface en anglais.</sub>
+
 <p align="center">
   <img alt="Un ticket GitHub devient une mission : tu valides ce que le maître a compris, son approche, son découpage, et tu reçois une pull request avec son dossier de livraison" src="docs/images/demo.gif" width="800">
 </p>
