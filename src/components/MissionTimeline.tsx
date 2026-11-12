@@ -1,9 +1,10 @@
 import clsx from "clsx";
-import { Copy, History, X } from "lucide-react";
+import { Copy, FileDiff, History, X } from "lucide-react";
 import { useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useCockpit } from "@/app/store";
-import { Button, Modal, Spinner } from "@/components/ui";
+import { DiffView } from "@/components/LogView";
+import { Button, ErrorNote, Modal, Spinner } from "@/components/ui";
 import { locale } from "@/i18n";
 import { fromIso } from "@/lib/format";
 import { api } from "@/lib/ipc";
@@ -443,6 +444,12 @@ function Detail({
 
 			<Body change={change} />
 
+			{change.kind === "gate" && change.commit ? (
+				// Une clé par événement : passer d'une porte à l'autre referme le
+				// diff, qui parlait d'un autre commit.
+				<CommitDiff key={entry.index} missionId={mission.id} task={change.task} commit={change.commit} />
+			) : null}
+
 			{tasks.size > 0 ? (
 				<div className="flex flex-col gap-1.5">
 					<p className="text-[11px] font-semibold text-ink-muted">{t("missionTimeline.branches")}</p>
@@ -577,4 +584,105 @@ function Body({ change }: { change: MissionChange }) {
 		default:
 			return null;
 	}
+}
+
+/**
+ * Ce que la tâche avait changé quand la porte l'a jugée : depuis sa base,
+ * jusqu'au commit noté, dans le dépôt de la mission.
+ *
+ * Replié par défaut : le diff se lit pour comprendre un échec, pas à chaque
+ * événement qu'on survole. Il ne se charge qu'une fois ouvert.
+ */
+function CommitDiff({ missionId, task, commit }: { missionId: string; task: string; commit: string }) {
+	const { t } = useTranslation("components2");
+	const [open, setOpen] = useState(false);
+	const [file, setFile] = useState<string | null>(null);
+	const diff = useAsync(
+		() => (open ? api.missions.commitDiff(missionId, task, commit) : Promise.resolve(null)),
+		[open, missionId, task, commit],
+		{ enabled: open },
+	);
+	const fileDiff = useAsync(
+		() => (file ? api.missions.commitFileDiff(missionId, task, commit, file) : Promise.resolve("")),
+		[missionId, task, commit, file],
+		{ enabled: Boolean(file) },
+	);
+
+	if (!open) {
+		return (
+			<div>
+				<Button variant="outline" size="sm" icon={FileDiff} onClick={() => setOpen(true)}>
+					{t("missionTimeline.diff.show")}
+				</Button>
+			</div>
+		);
+	}
+
+	const files = diff.data?.files ?? [];
+	return (
+		<div className="flex flex-col gap-2">
+			<div className="flex items-center justify-between gap-3">
+				<p className="text-[11px] font-semibold text-ink-muted">
+					{t("missionTimeline.diff.files")}
+					{diff.data ? (
+						<span className="ml-2 font-mono font-normal">
+							<span className="text-success">+{diff.data.additions}</span>{" "}
+							<span className="text-critical">−{diff.data.deletions}</span>
+						</span>
+					) : null}
+				</p>
+				<Button size="sm" onClick={() => setOpen(false)}>
+					{t("missionTimeline.diff.hide")}
+				</Button>
+			</div>
+			{diff.loading && !diff.data ? (
+				<p className="flex items-center gap-2 text-[12px] text-ink-faint">
+					<Spinner /> {t("missionTimeline.diff.loading")}
+				</p>
+			) : diff.error ? (
+				<ErrorNote error={diff.error} onRetry={diff.reload} />
+			) : files.length === 0 ? (
+				<p className="text-[12px] text-ink-muted">{t("missionTimeline.diff.none")}</p>
+			) : (
+				<>
+					<ul className="flex flex-col divide-y divide-line-soft rounded-xl border border-line-soft">
+						{files.map((change) => (
+							<li key={change.path}>
+								<button
+									type="button"
+									aria-pressed={file === change.path}
+									onClick={() => setFile((current) => (current === change.path ? null : change.path))}
+									className={clsx(
+										"focus-ring flex w-full items-center gap-3 px-3 py-2 text-left",
+										file === change.path ? "bg-accent-dim" : "hover:bg-hover",
+									)}
+								>
+									<span className="min-w-0 flex-1 truncate font-mono text-[11px] text-ink">{change.path}</span>
+									<span className="shrink-0 font-mono text-[11px]">
+										<span className="text-success">+{change.added}</span>{" "}
+										<span className="text-critical">−{change.removed}</span>
+									</span>
+								</button>
+							</li>
+						))}
+					</ul>
+					{file ? (
+						fileDiff.loading && !fileDiff.data ? (
+							<p className="flex items-center gap-2 text-[12px] text-ink-faint">
+								<Spinner /> {t("missionTimeline.diff.loading")}
+							</p>
+						) : fileDiff.error ? (
+							<ErrorNote error={fileDiff.error} />
+						) : (
+							<div className="overflow-hidden rounded-xl border border-line-soft">
+								<DiffView diff={fileDiff.data ?? ""} />
+							</div>
+						)
+					) : (
+						<p className="text-[12px] text-ink-muted">{t("missionTimeline.diff.pick")}</p>
+					)}
+				</>
+			)}
+		</div>
+	);
 }

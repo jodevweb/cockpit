@@ -3377,6 +3377,8 @@ pub fn run() {
 			mission_overruns,
 			mission_get,
 			mission_events,
+			mission_commit_diff,
+			mission_commit_file_diff,
 			mission_create,
 			mission_from_ticket,
 			mission_start_from_ticket,

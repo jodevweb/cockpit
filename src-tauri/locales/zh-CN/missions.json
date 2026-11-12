@@ -61,7 +61,8 @@
 			"launchFailed": "无法启动检查：{{error}}",
 			"noWorktree": "无法运行检查：任务的 worktree 已不存在（{{path}}）。",
 			"noRuntime": "已开启代理隔离，但未找到 Docker 或 OrbStack：检查不会改为在本机上运行。"
-		}
+		},
+		"badCommit": "“{{commit}}”不是提交标识符。"
 	},
 	"panel": {
 		"lens": {

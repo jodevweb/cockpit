@@ -61,7 +61,8 @@
 			"launchFailed": "Could not start the check: {{error}}",
 			"noWorktree": "The checks could not run: the task's worktree no longer exists ({{path}}).",
 			"noRuntime": "Agent isolation is on but neither Docker nor OrbStack was found: the checks are not run on the host in their place."
-		}
+		},
+		"badCommit": "\"{{commit}}\" is not a commit identifier."
 	},
 	"panel": {
 		"lens": {

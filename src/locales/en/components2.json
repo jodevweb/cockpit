@@ -937,6 +937,14 @@
 			"checks": "repository checks",
 			"waitingForYou": "waiting for you",
 			"role": "{{role}}"
+		},
+		"diff": {
+			"show": "See the diff at that moment",
+			"hide": "Hide the diff",
+			"files": "Files changed since the task's base",
+			"loading": "reading the diff…",
+			"none": "No change since the task's base.",
+			"pick": "Pick a file to see its diff."
 		}
 	},
 	"viewBoundary": {
