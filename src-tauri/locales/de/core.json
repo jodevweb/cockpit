@@ -221,24 +221,17 @@
 			"github": "das Repository (`github.repo`) und ein Token oder eine `gh`-Sitzung",
 			"linear": "ein Linear-Token",
 			"gitlab": "ein GitLab-Token (Scope `api`) und den Projektpfad",
-			"sentry": "ein Sentry-Token",
-			"betterstack": "ein Better-Stack-Token",
 			"trigger": "einen geheimen Trigger.dev-Schlüssel",
 			"railway": "ein Railway-Token",
 			"stripe": "einen Stripe-Schlüssel"
 		},
 		"secretHint": {
 			"github": "Klassisches `repo`-Token — oder leer lassen, dann nutzt Cockpit `gh auth token`.",
-			"sentry": "User-Auth-Token mit den Scopes `project:read`, `event:read`, `event:write`.",
 			"linear": "Persönlicher API-Schlüssel (Settings → API → Personal API keys).",
 			"gitlab": "Persönliches Token mit Scope `api` — `read_api` reicht zum Lesen, nicht zum Ändern des Status eines Issues.",
 			"trigger": "Der geheime Schlüssel einer Umgebung — `tr_dev_…`, `tr_prod_…`, `tr_staging_…` je nach Umgebung (Projekt → API keys), nicht das `tr_pat_…` Personal Access Token der CLI.",
 			"railway": "Konto- oder Workspace-Token (Account Settings → Tokens) — ein projektgebundenes Token erfordert zusätzlich die Projektkennung.",
-			"betterstack": "Uptime-API-Token (Monitore und Vorfälle).",
-			"betterstackTelemetry": "„Global API token“ (Better Stack → API tokens → Global API tokens). Ein Team-Token kann Dashboards auflisten, aber keinen Datenzugriff öffnen: Die Werte blieben leer.",
-			"betterstackClickhouseHost": "Optional: nur ausfüllen, wenn das KPI-Token den Zugriff nicht selbst öffnen kann. Better Stack → Integrations → SQL API (z. B. eu-nbg-2-connect.betterstackdata.com).",
-			"betterstackClickhouseUsername": "Benutzername der SQL API, neben dem Host.",
-			"betterstackClickhousePassword": "Passwort der SQL API — Better Stack zeigt es nach dem Anlegen nie wieder an.",
+			"betterstack": "API-Token, den Cockpit dem MCP-Server von Better Stack im Container eines isolierten Agenten übergibt.",
 			"stripe": "Eingeschränkter Nur-Lese-Schlüssel `rk_…` (Developers → API keys → Restricted keys): Ein veröffentlichbarer `pk_…`-Schlüssel wird von der Server-API abgelehnt.",
 			"sandboxOauthToken": "Führe `claude setup-token` unter Einstellungen → Isolierung aus und füge das angezeigte Token ein — einmalig, es hält ein Jahr. Nie das des Hosts: Ein Container kann den macOS-Schlüsselbund nicht lesen."
 		},
@@ -258,19 +251,8 @@
 	},
 	"integrations": {
 		"githubRepoMissing": "`github.repo` ist nicht konfiguriert.",
-		"telemetryTokenMissing": "Telemetry-Token fehlt.",
 		"unreadableResponse": "Unlesbare Antwort: {{error}}",
 		"unreadableResponseBody": "Unlesbare Antwort ({{error}}): {{body}}",
-		"sentryNoOrg": "Dieses Sentry-Token gibt Zugriff auf keine Organisation.",
-		"sentrySeveralOrgs": "Mehrere Sentry-Organisationen sind zugänglich ({{orgs}}) — wähle eine unter Einstellungen → Sentry-Organisation.",
-		"linearNotCreated": "Linear hat das Issue nicht angelegt.",
-		"sentryInvalidIssue": "Ungültige Sentry-Issue-Kennung: {{id}}",
-		"kpiTokenMissing": "KPI-Dashboards liegen auf telemetry.betterstack.com, das das Uptime-Token nicht abdeckt. Füge das Token „Better Stack · KPI“ in den Einstellungen hinzu.",
-		"telemetryTeamToken": "Dieses Telemetry-Token ist ein Team-Token: Es listet Dashboards, kann aber keinen Datenzugriff öffnen. Du brauchst ein „Global API token“ (Better Stack → API tokens → Global API tokens) mit Schreibzugriff.",
-		"telemetryReadOnly": "Dieses globale Token ist schreibgeschützt: Das Öffnen des Datenzugriffs zählt als Schreiben. Zwei Möglichkeiten — das Token ohne das Häkchen „read-only“ neu anlegen, oder vorhandene SQL-API-Zugangsdaten (Better Stack → Integrations → SQL API) in die drei ClickHouse-Felder der Einstellungen einfügen.",
-		"betterstackConnection": "Better-Stack-Verbindung {{status}} — {{body}}",
-		"betterstackNoCredentials": "Better Stack hat ohne brauchbare Zugangsdaten geantwortet.",
-		"chartNoQuery": "Dieses Diagramm stellt keine Abfrage bereit.",
 		"issueNotFound": "Issue {{id}} nicht gefunden.",
 		"linearUpdateRefused": "Linear hat die Änderung abgelehnt.",
 		"priority": {
@@ -448,11 +430,7 @@
 			"revivalsExhaustedDetail": "Der Leitagent wurde {{count}}-mal neu gestartet, ohne dass sich etwas bewegt hat (Aufgaben, Prüfungen, Pull Request). Sieh nach, was ihn blockiert – ein Pull Request, der sich nicht öffnen lässt, ein Konflikt – und setze die Mission dann fort."
 		},
 		"quoted": "„{{text}}“",
-		"tailscaleDown": "Tailscale antwortet nicht.",
-		"sentryIssue": {
-			"description": "Von Sentry gemeldeter Fehler.\n\n**Projekt**: {{project}}\n**Herkunft**: {{culprit}}\n**Auswirkung**: {{events}} Vorkommen, {{users}} Nutzer\n\n[In Sentry öffnen]({{permalink}})\n\n_Issue aus Cockpit angelegt._",
-			"note": "Linear-Issue {{identifier}} — {{url}}"
-		}
+		"tailscaleDown": "Tailscale antwortet nicht."
 	},
 	"delivery": {
 		"title": "Lieferakte — Cockpit",

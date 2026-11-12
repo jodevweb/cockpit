@@ -456,8 +456,6 @@
 		"more": {
 			"tickets_one": "{{count}} ticket más",
 			"tickets_other": "{{count}} tickets más",
-			"errors_one": "{{count}} error más",
-			"errors_other": "{{count}} errores más",
 			"prs_one": "{{count}} PR más",
 			"prs_other": "{{count}} PR más"
 		},
@@ -469,8 +467,6 @@
 		"summary": {
 			"tickets_one": "{{count}} ticket",
 			"tickets_other": "{{count}} tickets",
-			"errorsToTriage_one": "{{count}} error por clasificar",
-			"errorsToTriage_other": "{{count}} errores por clasificar",
 			"agents_one": "{{count}} agente",
 			"agents_other": "{{count}} agentes",
 			"collisions_one": "{{count}} colisión",
@@ -482,10 +478,7 @@
 			"prs_one": "{{count}} PR",
 			"prs_other": "{{count}} PR",
 			"redCi_one": "{{count}} CI en rojo",
-			"redCi_other": "{{count}} CI en rojo",
-			"down_one": "{{count}} caído",
-			"down_other": "{{count}} caídos",
-			"online": "en línea"
+			"redCi_other": "{{count}} CI en rojo"
 		},
 		"waiting": "Te espera",
 		"waitingDismiss": "Descartar — vuelve si cambia",
@@ -502,23 +495,18 @@
 			"calm": "tranquilo",
 			"openProject": "Abrir este proyecto →",
 			"thingsWaiting_one": "{{count}} cosa te espera",
-			"thingsWaiting_other": "{{count}} cosas te esperan",
-			"prodErrors_one": "{{count}} error en producción",
-			"prodErrors_other": "{{count}} errores en producción"
+			"thingsWaiting_other": "{{count}} cosas te esperan"
 		},
 		"region": {
 			"frame": "Encuadrar esta región",
 			"empty": {
-				"arrive": "Ningún ticket para ti, ningún error por clasificar.",
+				"arrive": "Ningún ticket para ti.",
 				"encours": "Nada en marcha. Lanza un agente o una misión desde un ticket.",
-				"livrer": "Ninguna PR abierta.",
-				"prod": "Conecta la monitorización (Better Stack) en Ajustes para ver aquí la producción."
+				"livrer": "Ninguna PR abierta."
 			}
 		},
 		"card": {
-			"sentry": "Sentry · por clasificar",
-			"deploy": "Despliegue",
-			"monitor": "Monitorización"
+			"deploy": "Despliegue"
 		},
 		"ticket": {
 			"inMission": "en una misión"
@@ -772,22 +760,6 @@
 			"failed": "comprobaciones fallidas"
 		}
 	},
-	"observability": {
-		"title": "Observabilidad",
-		"subtitle": "Sentry y Better Stack",
-		"ticket": "Ticket",
-		"ticketTitle": "Crear el ticket de Linear y anotarlo en Sentry",
-		"ticketCreated": "Ticket de Linear creado.",
-		"resolve": "Resolver",
-		"resolved": "Incidencia resuelta.",
-		"ignore": "Ignorar",
-		"ignored": "Incidencia ignorada.",
-		"regressions": "Regresiones",
-		"incidents": "Incidentes",
-		"monitors": "Monitores",
-		"errorsAndIncidents": "Errores e incidentes",
-		"emptyHint": "Revisa el token y la organización en Ajustes si esperabas resultados."
-	},
 	"permanence": {
 		"title": "Permanence",
 		"resume": "Reanudar",
@@ -1018,9 +990,6 @@
 			"add": "Añadir",
 			"name": "Nombre"
 		},
-		"sentry": {
-			"unavailable": "Lista no disponible ({{error}}): introduce los slugs a mano."
-		},
 		"trigger": {
 			"saved": "Entorno «{{name}}» guardado.",
 			"removeTitle": "¿Quitar el entorno «{{name}}»?",
@@ -1058,7 +1027,7 @@
 			"thisProject": "este proyecto",
 			"globalTitle": "Los ajustes de abajo son los valores por defecto, heredados por todos los proyectos",
 			"projectHintIsolated": "Aquí solo ves lo que declara este proyecto. Un campo vacío no está configurado para él: en cuanto hay varios proyectos, ninguno toma prestado el repositorio o el equipo de otro. Solo los tokens de acceso siguen compartidos.",
-			"projectHint": "Un campo vacío hereda los valores por defecto. Rellénalo para dar a este proyecto el suyo propio: otra cuenta de GitHub, otra clave de Sentry.",
+			"projectHint": "Un campo vacío hereda los valores por defecto. Rellénalo para dar a este proyecto el suyo propio: otra cuenta de GitHub, otra clave de Linear.",
 			"globalHintIsolated": "Estos valores sirven de respaldo para los tokens de acceso. Los repositorios y los equipos se declaran proyecto por proyecto.",
 			"globalHint": "Estos valores se aplican allí donde un proyecto no dice nada. Cambia al proyecto para darle sus propios ajustes.",
 			"project": "Proyecto",
@@ -1109,9 +1078,6 @@
 		},
 		"services": {
 			"githubRepo": "Repositorio de GitHub",
-			"sentryOrg": "Organización de Sentry",
-			"sentryProjects": "Proyectos de Sentry",
-			"sentryProjectsHint": "Ninguno marcado = toda la organización.",
 			"ticketKey": "Clave de ticket",
 			"ticketKeyHint": "Prefijo de Linear, p. ej. ABC — sirve para reconocer los números de ticket en ramas y títulos",
 			"linearTeamId": "Equipo de Linear",
@@ -1132,7 +1098,7 @@
 			"missing": "falta",
 			"keepPlaceholder": "•••••••• — déjalo vacío para conservarlo",
 			"pastePlaceholder": "Pega el token",
-			"storage": "Los tokens se escriben en {{path}} con permisos 600 y nunca vuelven a la interfaz. Cada valor también puede proporcionarse mediante una variable de entorno (COCKPIT_SENTRY_TOKEN, COCKPIT_LINEAR_TOKEN…), que entonces tiene prioridad sobre el archivo."
+			"storage": "Los tokens se escriben en {{path}} con permisos 600 y nunca vuelven a la interfaz. Cada valor también puede proporcionarse mediante una variable de entorno (COCKPIT_GITHUB_TOKEN, COCKPIT_LINEAR_TOKEN…), que entonces tiene prioridad sobre el archivo."
 		},
 		"theme": {
 			"dark": "Oscuro",

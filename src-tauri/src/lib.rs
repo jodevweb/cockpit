@@ -91,7 +91,7 @@ fn connectors_list() -> Vec<config::Connector> {
 
 	// Les outils du poste comptent autant que les clés d'API : un écran qui
 	// dépend de Docker ou du CLI `claude` est aussi vide sans eux qu'un écran
-	// Sentry sans jeton. Les déclarer ici permet à l'interface de masquer ce qui
+	// GitHub sans jeton. Les déclarer ici permet à l'interface de masquer ce qui
 	// ne peut pas répondre, au lieu de laisser cliquer vers une erreur.
 	//
 	// C'est aussi ce qui manquait pour voir qu'un poste n'avait pas Node : le
@@ -2693,77 +2693,6 @@ async fn stop_process(pid: u32) -> Result<()> {
 
 // ──────────────────────────── Intégrations SaaS ────────────────────────────
 
-#[tauri::command]
-async fn feed_sentry(query: Option<String>) -> Result<Vec<integrations::FeedItem>> {
-	integrations::sentry_issues(&cfg(), &query.unwrap_or_else(|| "is:unresolved".into())).await
-}
-
-#[tauri::command]
-async fn sentry_projects() -> Result<Vec<integrations::SentryProject>> {
-	integrations::sentry_projects(&cfg()).await
-}
-
-/// Crée le ticket Linear correspondant à une issue Sentry, et laisse une note
-/// sur l'issue pour ne pas le recréer au prochain triage.
-#[tauri::command]
-async fn sentry_to_linear(
-	issue_id: String,
-	title: String,
-	permalink: String,
-	project: String,
-	culprit: String,
-	users: String,
-	events: String,
-) -> Result<String> {
-	let config = cfg();
-	let team_id = config.linear.team_id.clone();
-
-	let description = i18n::tf(
-		"lib.sentryIssue.description",
-		&[
-			("project", &project),
-			("culprit", &culprit),
-			("events", &events),
-			("users", &users),
-			("permalink", &permalink),
-		],
-	);
-
-	let (identifier, url) = integrations::linear_create_issue(&config, &team_id, &title, &description).await?;
-
-	// La note est un confort, pas une condition : si elle échoue, le ticket
-	// existe quand même et on ne veut pas faire croire à un échec.
-	let note = i18n::tf("lib.sentryIssue.note", &[("identifier", &identifier), ("url", &url)]);
-	let _ = integrations::sentry_add_comment(&config, &issue_id, &note).await;
-
-	Ok(url)
-}
-
-#[tauri::command]
-async fn sentry_set_status(issue_id: String, status: String) -> Result<()> {
-	integrations::sentry_update_issue(&cfg(), &issue_id, &status).await
-}
-
-#[tauri::command]
-async fn betterstack_dashboards() -> Result<Vec<integrations::KpiDashboard>> {
-	integrations::betterstack_dashboards(&cfg()).await
-}
-
-#[tauri::command]
-async fn betterstack_kpi_values(dashboard_id: String, hours: Option<i64>) -> Result<Vec<integrations::KpiValue>> {
-	integrations::betterstack_kpi_values(&cfg(), &dashboard_id, hours.unwrap_or(24)).await
-}
-
-#[tauri::command]
-async fn feed_betterstack_monitors() -> Result<Vec<integrations::FeedItem>> {
-	integrations::betterstack_monitors(&cfg()).await
-}
-
-#[tauri::command]
-async fn feed_betterstack_incidents() -> Result<Vec<integrations::FeedItem>> {
-	integrations::betterstack_incidents(&cfg()).await
-}
-
 /// Ce que sait faire le suivi de tâches configuré, et comment il s'appelle.
 ///
 /// L'interface s'y règle : sans priorité chez le fournisseur, le sélecteur de
@@ -3224,14 +3153,6 @@ pub fn run() {
 			docker_containers,
 			listening_ports,
 			stop_process,
-			feed_sentry,
-			sentry_projects,
-			sentry_set_status,
-			sentry_to_linear,
-			betterstack_dashboards,
-			betterstack_kpi_values,
-			feed_betterstack_monitors,
-			feed_betterstack_incidents,
 			feed_linear,
 			ticket_provider,
 			linear_issue,

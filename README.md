@@ -269,11 +269,10 @@ the file:
 | Service      | Variable                    | Expected token                                         |
 | ------------ | --------------------------- | ------------------------------------------------------ |
 | GitHub       | `COCKPIT_GITHUB_TOKEN`      | optional — automatic fallback to `gh auth token`        |
-| Sentry       | `COCKPIT_SENTRY_TOKEN`      | user auth token (`project:read`, `event:write`)         |
 | Linear       | `COCKPIT_LINEAR_TOKEN`      | personal API key                                        |
 | Trigger.dev  | `COCKPIT_TRIGGER_TOKEN`     | environment secret key (`tr_prod_…`, `tr_staging_…`)    |
 | Railway      | `COCKPIT_RAILWAY_TOKEN`     | account or project token                                |
-| Better Stack | `COCKPIT_BETTERSTACK_TOKEN` | Uptime API token                                        |
+| Better Stack | `COCKPIT_BETTERSTACK_TOKEN` | API token, for the MCP server of isolated agents        |
 | Stripe       | `COCKPIT_STRIPE_TOKEN`      | read-only restricted key                                |
 
 ## Screens
@@ -283,13 +282,13 @@ The top bar holds the screens you use all day; the others are in the
 
 | Screen            | What it shows                                                                                                                    |
 | ----------------- | -------------------------------------------------------------------------------------------------------------------------------- |
-| **Map**           | Each project as four columns — incoming, in progress, ship, in production — with its tickets, missions, workspaces and pull requests, and the "Waiting on you" bar above (a cross sets an item aside until it changes). |
+| **Map**           | Each project as three columns — incoming, in progress, ship — with its tickets, missions, workspaces and pull requests, and the "Waiting on you" bar above (a cross sets an item aside until it changes). |
 | **Workspaces**    | A worktree, its agents and its terminals, side by side (see "The work panel").                                                    |
 | **Free agents**   | Agents launched outside any project, in a folder of your choice.                                                                  |
 | **Decisions**     | Everything waiting for your answer: permissions, questions, plans to approve.                                                     |
 | **Recap**         | What happened over the past hour, three hours or day, told visually.                                                              |
 | **Missions**      | One ticket, one plan, several workers: you confirm what the lead agent understood, its approach, its breakdown; each worker gets its own branch and worktree; repository checks gate every delivery; the pull request carries a delivery dossier. |
-| *Workshop*        | **Today**, **Permanence** (an agent on call, within hours and budgets you set), **AI agents** (every Claude Code session, its timeline, its tools), **Documents**, **Flow** (tickets, PRs, CI, deployments), **Impact** (what each change in flight implies), **Observability** (Sentry, Better Stack), **Worktrees**, **Git**, **Scripts**, **Servers & containers**, **Settings**. |
+| *Workshop*        | **Today**, **Permanence** (an agent on call, within hours and budgets you set), **AI agents** (every Claude Code session, its timeline, its tools), **Documents**, **Flow** (tickets, PRs, CI, deployments), **Impact** (what each change in flight implies), **Worktrees**, **Git**, **Scripts**, **Servers & containers**, **Settings**. |
 
 ## Shortcuts
 
@@ -411,7 +410,7 @@ src-tauri/src/
   docs.rs          discovery of markdown deliverables
   runner.rs        command execution, line-by-line streaming, process groups
   system.rs        editor, terminal, Finder/Explorer, Docker, ports
-  integrations.rs  Sentry, Better Stack, Linear, GitHub, Trigger, Railway, Stripe
+  integrations.rs  Linear, GitHub, Trigger, Railway, Stripe
   monitor.rs       census of in-flight changes, across all forges
   impact.rs        factual file of a change, reading by an agent, report review
   lib.rs           IPC commands + file system watching

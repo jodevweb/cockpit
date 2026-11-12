@@ -453,21 +453,6 @@
 		},
 		"save": "保存"
 	},
-	"kpiBoard": {
-		"noSection": "无分区",
-		"filter": "筛选指标…",
-		"dashboards_other": "{{count}} 个仪表板",
-		"indicators_other": "{{count}} 个指标",
-		"empty": {
-			"message": "没有仪表板",
-			"hint": "KPI 仪表板来自 Better Stack Telemetry。"
-		},
-		"hide": "隐藏",
-		"show": "显示数值",
-		"hours_other": "{{count}} 小时",
-		"days_other": "{{count}} 天",
-		"openExternal": "在 Better Stack 中打开"
-	},
 	"libreLauncher": {
 		"places": {
 			"ici": {

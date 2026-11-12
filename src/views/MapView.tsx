@@ -17,7 +17,6 @@ import {
 import "@xyflow/react/dist/style.css";
 import clsx from "clsx";
 import {
-	AlertTriangle,
 	ArrowUpRight,
 	Bot,
 	ChevronRight,
@@ -27,7 +26,6 @@ import {
 	Map as MapIcon,
 	ScanSearch,
 	Rocket,
-	Siren,
 	Ticket,
 	X,
 } from "lucide-react";
@@ -96,12 +94,10 @@ interface CardData extends Record<string, unknown> {
 
 type CardPayload =
 	| { kind: "ticket"; item: FeedItem; taken: boolean }
-	| { kind: "sentry"; item: FeedItem }
 	| { kind: "mission"; mission: Mission }
 	| { kind: "chantier"; group: WorkGroup }
 	| { kind: "pr"; pr: PullRequest; mine: boolean; review: Review | null }
 	| { kind: "deploy"; item: FeedItem }
-	| { kind: "monitor"; item: FeedItem }
 	| { kind: "more"; label: string; view: Parameters<ReturnType<typeof useCockpit>["go"]>[0] };
 
 /** Ce qu'une île repliée résume : ce qu'on sait sans ouvrir son projet. */
@@ -166,13 +162,7 @@ function World() {
 	const tickets = useAsync(() => api.feeds.linear(true).catch(() => []), [activeProject?.id], {
 		pollMs: 180_000,
 	});
-	const sentry = useAsync(() => api.feeds.sentry("is:unresolved").catch(() => []), [activeProject?.id], {
-		pollMs: 300_000,
-	});
 	const deploys = useAsync(() => api.feeds.railway().catch(() => []), [activeProject?.id], {
-		pollMs: 300_000,
-	});
-	const monitors = useAsync(() => api.feeds.betterstackMonitors().catch(() => []), [activeProject?.id], {
 		pollMs: 300_000,
 	});
 	const everywhere = useAsync(() => api.missions.everywhere().catch(() => []), [], { pollMs: 30_000 });
@@ -205,7 +195,7 @@ function World() {
 				.filter(Boolean),
 		);
 
-		// Arrive : les tickets qui te sont confiés, puis les erreurs à trier.
+		// Arrive : les tickets qui te sont confiés.
 		const open = (tickets.data ?? []).filter((item) => !doneStates.has(item.status));
 		for (const item of open.slice(0, 5)) {
 			const branch = item.meta.find((field) => field.label === "branche")?.value ?? "";
@@ -215,11 +205,6 @@ function World() {
 			});
 		}
 		if (open.length > 5) card("more:tickets", "more", "arrive", { kind: "more", label: t("map.more.tickets", { count: open.length - 5 }), view: "today" }, { tickets: [], branches: [] });
-		const issues = sentry.data ?? [];
-		for (const item of issues.slice(0, 2)) {
-			card(`sentry:${item.id}`, "sentry", "arrive", { kind: "sentry", item }, { tickets: [], branches: [] });
-		}
-		if (issues.length > 2) card("more:sentry", "more", "arrive", { kind: "more", label: t("map.more.errors", { count: issues.length - 2 }), view: "observability" }, { tickets: [], branches: [] });
 
 		// En cours : les missions, puis les chantiers — ceux qu'on pilote à la main
 		// comme ceux qu'une mission a ouverts.
@@ -262,14 +247,8 @@ function World() {
 		for (const item of (deploys.data ?? []).slice(0, 2)) {
 			card(`deploy:${item.id}`, "deploy", "livrer", { kind: "deploy", item }, { tickets: [], branches: [] });
 		}
-
-		// En prod : ce qui surveille, les pannes en premier.
-		const watch = [...(monitors.data ?? [])].sort((a, b) => severityRank(a.severity) - severityRank(b.severity));
-		for (const item of watch.slice(0, 5)) {
-			card(`monitor:${item.id}`, "monitor", "prod", { kind: "monitor", item }, { tickets: [], branches: [] });
-		}
 		return out;
-	}, [tickets.data, sentry.data, missions, groups, prs.data, deploys.data, monitors.data, doneStates, activeProject?.linearTeamKey, reviews, t]);
+	}, [tickets.data, missions, groups, prs.data, deploys.data, doneStates, activeProject?.linearTeamKey, reviews, t]);
 
 	// ── Les îles ────────────────────────────────────────────────────────
 	const pulses = useMemo(() => {
@@ -347,7 +326,6 @@ function World() {
 								agents: runs.filter((run) => run.running && groups.some((group) => group.cwd === run.cwd)).length,
 								waiting: blockers.length,
 								prs: (prs.data ?? []).length,
-								errors: (sentry.data ?? []).length,
 							}
 						: null,
 				},
@@ -376,7 +354,7 @@ function World() {
 			});
 		}
 		return out;
-	}, [placed, projectList, pulses, runs, groups, blockers.length, prs.data, sentry.data, cards]);
+	}, [placed, projectList, pulses, runs, groups, blockers.length, prs.data, cards]);
 
 	const { onNodesChange, withSizes } = useNodeSizes<Node>();
 	const sized = useMemo(() => withSizes(nodes), [nodes, withSizes]);
@@ -411,7 +389,7 @@ function World() {
 	return (
 		<ActionsContext.Provider value={actions}>
 			<div className="relative flex min-h-0 flex-1 flex-col bg-base">
-				<LoadingBar active={[prs, tickets, sentry, everywhere].some((source) => source.initial && source.loading)} />
+				<LoadingBar active={[prs, tickets, everywhere].some((source) => source.initial && source.loading)} />
 				<Waiting items={blockers} />
 				<ReadinessCard />
 				<div className="mission-graph relative min-h-0 flex-1">
@@ -527,10 +505,6 @@ function World() {
 	);
 }
 
-function severityRank(severity: string): number {
-	return severity === "critical" ? 0 : severity === "warning" ? 1 : 2;
-}
-
 /** Ce qu'une région dit d'elle-même vue de loin : un chiffre, et ce qui presse. */
 function regionSummary(region: RegionId, cards: Array<WorldCard<CardData>>): { big: string; alert: string | null } {
 	const mine = cards.filter((card) => card.region === region && card.kind !== "more");
@@ -539,7 +513,7 @@ function regionSummary(region: RegionId, cards: Array<WorldCard<CardData>>): { b
 		case "arrive":
 			return {
 				big: translate("views:map.summary.tickets", { count: count("ticket") }),
-				alert: count("sentry") > 0 ? translate("views:map.summary.errorsToTriage", { count: count("sentry") }) : null,
+				alert: null,
 			};
 		case "encours": {
 			const agents = mine
@@ -562,18 +536,6 @@ function regionSummary(region: RegionId, cards: Array<WorldCard<CardData>>): { b
 			return {
 				big: translate("views:map.summary.prs", { count: count("pr") }),
 				alert: red > 0 ? translate("views:map.summary.redCi", { count: red }) : null,
-			};
-		}
-		case "prod": {
-			const down = mine.filter((card) => card.data.payload.kind === "monitor" && card.data.payload.item.severity === "critical").length;
-			return {
-				big:
-					down > 0
-						? translate("views:map.summary.down", { count: down })
-						: count("monitor") > 0
-							? translate("views:map.summary.online")
-							: "—",
-				alert: null,
 			};
 		}
 	}
@@ -677,7 +639,7 @@ interface IslandData extends Record<string, unknown> {
 	projectId: string;
 	color: string;
 	pulse: IslandPulse | null;
-	counts: { agents: number; waiting: number; prs: number; errors: number } | null;
+	counts: { agents: number; waiting: number; prs: number } | null;
 }
 
 function IslandNode({ data }: NodeProps<Node<IslandData>>) {
@@ -752,11 +714,6 @@ function IslandNode({ data }: NodeProps<Node<IslandData>>) {
 						{t("map.island.thingsWaiting", { count: data.counts.waiting })}
 					</span>
 				) : null}
-				{data.counts && data.counts.errors > 0 ? (
-					<span className="text-[80px] font-semibold text-critical">
-						{t("map.island.prodErrors", { count: data.counts.errors })}
-					</span>
-				) : null}
 			</div>
 		</div>
 	);
@@ -825,12 +782,10 @@ function CardNode({ data }: NodeProps<Node<CardData>>) {
 		>
 			<Handle type="target" position={Position.Left} className="!size-1.5 !border-0 !bg-line" />
 			{payload.kind === "ticket" ? <TicketCard item={payload.item} taken={payload.taken} /> : null}
-			{payload.kind === "sentry" ? <FeedCard item={payload.item} icon={Siren} eyebrow={t("map.card.sentry")} tone="critical" /> : null}
 			{payload.kind === "mission" ? <MissionCard mission={payload.mission} /> : null}
 			{payload.kind === "chantier" ? <ChantierCard group={payload.group} /> : null}
 			{payload.kind === "pr" ? <PrCard pr={payload.pr} mine={payload.mine} review={payload.review} /> : null}
 			{payload.kind === "deploy" ? <FeedCard item={payload.item} icon={Rocket} eyebrow={t("map.card.deploy")} /> : null}
-			{payload.kind === "monitor" ? <FeedCard item={payload.item} icon={AlertTriangle} eyebrow={t("map.card.monitor")} /> : null}
 			{payload.kind === "more" ? <MoreCard label={payload.label} view={payload.view} /> : null}
 			<Handle type="source" position={Position.Right} className="!size-1.5 !border-0 !bg-line" />
 		</div>
@@ -889,14 +844,12 @@ function FeedCard({
 	item,
 	icon: Icon,
 	eyebrow,
-	tone,
 }: {
 	item: FeedItem;
 	icon: React.ComponentType<{ size?: number; className?: string }>;
 	eyebrow: string;
-	tone?: "critical";
 }) {
-	const severe = tone === "critical" || item.severity === "critical";
+	const severe = item.severity === "critical";
 	return (
 		<button
 			type="button"

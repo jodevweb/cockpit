@@ -46,15 +46,6 @@ pub struct GithubConfig {
 
 #[derive(Debug, Clone, Serialize, Deserialize, Default)]
 #[serde(default)]
-pub struct SentryConfig {
-	pub org: String,
-	/// Slugs de projets à surveiller ; vide = tous les projets de l'org.
-	pub projects: Vec<String>,
-	pub token: String,
-}
-
-#[derive(Debug, Clone, Serialize, Deserialize, Default)]
-#[serde(default)]
 pub struct LinearConfig {
 	pub token: String,
 	/// Clé d'équipe (ex. `NW`) pour filtrer le backlog.
@@ -475,21 +466,14 @@ pub struct RailwayConfig {
 #[derive(Debug, Clone, Serialize, Deserialize, Default)]
 #[serde(default)]
 pub struct BetterstackConfig {
-	/// Token « Uptime API » (monitors + incidents).
-	pub token: String,
-	/// Token Telemetry, distinct du précédent : les dashboards et leurs
-	/// graphiques KPI vivent sur telemetry.betterstack.com, que le token Uptime
-	/// ne couvre pas.
+	/// Jeton d'API Better Stack, que le cockpit pose pour le serveur MCP de
+	/// Better Stack dans le conteneur d'un agent isolé (voir
+	/// `sandbox::provision_mcp_tokens`).
 	///
-	/// Le prendre **global** plutôt que par équipe : lui seul sait ouvrir un
-	/// accès aux données, et c'est alors la seule clé à renseigner.
-	pub telemetry_token: String,
-	/// Connexion ClickHouse, à ne renseigner que pour réutiliser des
-	/// identifiants existants : sans eux, le cockpit en demande lui-même à
-	/// Better Stack et les garde en cache.
-	pub clickhouse_host: String,
-	pub clickhouse_username: String,
-	pub clickhouse_password: String,
+	/// L'écran Observabilité qui le lisait aussi est parti ; le jeton reste, parce
+	/// que sans lui un agent isolé perd cet outil. Les anciens champs
+	/// (`telemetry_token`, `clickhouse_*`) sont ignorés à la lecture.
+	pub token: String,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize, Default)]
@@ -1522,7 +1506,7 @@ impl Default for WorkflowConfig {
 pub struct Connector {
 	pub id: String,
 	pub label: String,
-	/// `repository` | `tickets` | `ci` | `monitoring` | `deploy` | `payments`
+	/// `repository` | `tickets` | `ci` | `deploy` | `payments`
 	pub kind: String,
 	/// Vrai quand ce service a de quoi répondre.
 	pub configured: bool,
@@ -1721,7 +1705,6 @@ pub struct ProjectConfig {
 	pub projects_root: String,
 	pub editor: String,
 	pub github: GithubConfig,
-	pub sentry: SentryConfig,
 	pub linear: LinearConfig,
 	pub gitlab: GitlabConfig,
 	pub trigger: TriggerConfig,
@@ -1774,14 +1757,6 @@ fn inherit(project: &str, global: &str) -> String {
 	}
 }
 
-fn inherit_list(project: &[String], global: &[String]) -> Vec<String> {
-	if project.is_empty() {
-		global.to_vec()
-	} else {
-		project.to_vec()
-	}
-}
-
 impl ProjectConfig {
 	/// Applique les réglages du projet par-dessus les valeurs globales.
 	///
@@ -1805,7 +1780,6 @@ impl ProjectConfig {
 		// compte actif — qui n'y a pas accès, et l'erreur rendue désigne le nom
 		// du dépôt au lieu de l'identité qui manque.
 		base.github.user = inherit(&self.github.user, &base.github.user);
-		base.sentry.token = inherit(&self.sentry.token, &base.sentry.token);
 		base.linear.token = inherit(&self.linear.token, &base.linear.token);
 		base.trigger.token = inherit(&self.trigger.token, &base.trigger.token);
 		base.trigger.api_url = inherit(&self.trigger.api_url, &base.trigger.api_url);
@@ -1826,16 +1800,12 @@ impl ProjectConfig {
 		// voisin : il n'est simplement pas encore configuré, et le dit.
 		if cloisonne {
 			base.github.repo = self.github.repo.trim().to_string();
-			base.sentry.org = self.sentry.org.trim().to_string();
-			base.sentry.projects = self.sentry.projects.clone();
 			base.linear.team_key = self.linear.team_key.trim().to_string();
 			base.linear.team_id = self.linear.team_id.trim().to_string();
 			base.trigger.project_ref = self.trigger.project_ref.trim().to_string();
 			base.gitlab.project = self.gitlab.project.trim().to_string();
 		} else {
 			base.github.repo = inherit(&self.github.repo, &base.github.repo);
-			base.sentry.org = inherit(&self.sentry.org, &base.sentry.org);
-			base.sentry.projects = inherit_list(&self.sentry.projects, &base.sentry.projects);
 			base.linear.team_key = inherit(&self.linear.team_key, &base.linear.team_key);
 			base.linear.team_id = inherit(&self.linear.team_id, &base.linear.team_id);
 			base.trigger.project_ref = inherit(&self.trigger.project_ref, &base.trigger.project_ref);
@@ -1957,18 +1927,6 @@ impl ProjectConfig {
 		};
 
 		base.betterstack.token = inherit(&self.betterstack.token, &base.betterstack.token);
-		base.betterstack.telemetry_token =
-			inherit(&self.betterstack.telemetry_token, &base.betterstack.telemetry_token);
-		base.betterstack.clickhouse_host =
-			inherit(&self.betterstack.clickhouse_host, &base.betterstack.clickhouse_host);
-		base.betterstack.clickhouse_username = inherit(
-			&self.betterstack.clickhouse_username,
-			&base.betterstack.clickhouse_username,
-		);
-		base.betterstack.clickhouse_password = inherit(
-			&self.betterstack.clickhouse_password,
-			&base.betterstack.clickhouse_password,
-		);
 
 		base.stripe.token = inherit(&self.stripe.token, &base.stripe.token);
 
@@ -2009,8 +1967,6 @@ impl ProjectConfig {
 		mark("account", &self.account);
 		mark("github_repo", &self.github.repo);
 		mark("github", &self.github.token);
-		mark("sentry_org", &self.sentry.org);
-		mark("sentry", &self.sentry.token);
 		mark("linear", &self.linear.token);
 		mark("linear_team_key", &self.linear.team_key);
 		mark("linear_team_id", &self.linear.team_id);
@@ -2019,15 +1975,8 @@ impl ProjectConfig {
 		mark("railway", &self.railway.token);
 		mark("railway_project_id", &self.railway.project_id);
 		mark("betterstack", &self.betterstack.token);
-		mark("betterstack_telemetry", &self.betterstack.telemetry_token);
-		mark("betterstack_clickhouse_host", &self.betterstack.clickhouse_host);
-		mark("betterstack_clickhouse_username", &self.betterstack.clickhouse_username);
-		mark("betterstack_clickhouse_password", &self.betterstack.clickhouse_password);
 		mark("stripe", &self.stripe.token);
 		mark("impact_brief", &self.impact.brief);
-		if !self.sentry.projects.is_empty() {
-			keys.push("sentry_projects".into());
-		}
 		if !self.trigger.environments.is_empty() {
 			keys.push("trigger_environments".into());
 		}
@@ -2058,7 +2007,6 @@ pub struct Config {
 	pub active_project: String,
 	pub general: GeneralConfig,
 	pub github: GithubConfig,
-	pub sentry: SentryConfig,
 	pub linear: LinearConfig,
 	pub gitlab: GitlabConfig,
 	pub trigger: TriggerConfig,
@@ -2276,20 +2224,6 @@ impl Config {
 				&crate::i18n::t("config.connectorMissing.gitlab"),
 			),
 			entry(
-				"sentry",
-				"Sentry",
-				"monitoring",
-				!self.sentry.token.trim().is_empty(),
-				&crate::i18n::t("config.connectorMissing.sentry"),
-			),
-			entry(
-				"betterstack",
-				"Better Stack",
-				"monitoring",
-				!self.betterstack.token.trim().is_empty(),
-				&crate::i18n::t("config.connectorMissing.betterstack"),
-			),
-			entry(
 				"trigger",
 				"Trigger.dev",
 				"ci",
@@ -2387,13 +2321,10 @@ impl Config {
 		}
 
 		cfg.github.token = env_override(&cfg.github.token, "COCKPIT_GITHUB_TOKEN");
-		cfg.sentry.token = env_override(&cfg.sentry.token, "COCKPIT_SENTRY_TOKEN");
 		cfg.linear.token = env_override(&cfg.linear.token, "COCKPIT_LINEAR_TOKEN");
 		cfg.trigger.token = env_override(&cfg.trigger.token, "COCKPIT_TRIGGER_TOKEN");
 		cfg.railway.token = env_override(&cfg.railway.token, "COCKPIT_RAILWAY_TOKEN");
 		cfg.betterstack.token = env_override(&cfg.betterstack.token, "COCKPIT_BETTERSTACK_TOKEN");
-		cfg.betterstack.telemetry_token =
-			env_override(&cfg.betterstack.telemetry_token, "COCKPIT_BETTERSTACK_TELEMETRY_TOKEN");
 		cfg.stripe.token = env_override(&cfg.stripe.token, "COCKPIT_STRIPE_TOKEN");
 
 		if cfg.trigger.api_url.trim().is_empty() {
@@ -2557,8 +2488,6 @@ pub struct ConfigView {
 	pub main_repo: String,
 	pub editor: String,
 	pub github_repo: String,
-	pub sentry_org: String,
-	pub sentry_projects: Vec<String>,
 	pub linear_team_key: String,
 	pub linear_team_id: String,
 	pub trigger_project_ref: String,
@@ -2606,7 +2535,6 @@ pub struct ProjectView {
 	pub main_repo: String,
 	pub github_repo: String,
 	pub linear_team_key: String,
-	pub sentry_projects: Vec<String>,
 	pub railway_project_id: String,
 	pub trigger_project_ref: String,
 	/// Le compte sous lequel il travaille, héritage appliqué. Deux projets côte
@@ -2634,8 +2562,6 @@ pub struct ProjectDeclared {
 	pub main_repo: String,
 	pub editor: String,
 	pub github_repo: String,
-	pub sentry_org: String,
-	pub sentry_projects: Vec<String>,
 	pub linear_team_key: String,
 	pub linear_team_id: String,
 	pub trigger_project_ref: String,
@@ -2689,8 +2615,6 @@ impl Config {
 					main_repo: brut.general.main_repo.clone(),
 					editor: brut.general.editor.clone(),
 					github_repo: brut.github.repo.clone(),
-					sentry_org: brut.sentry.org.clone(),
-					sentry_projects: brut.sentry.projects.clone(),
 					linear_team_key: brut.linear.team_key.clone(),
 					linear_team_id: brut.linear.team_id.clone(),
 					trigger_project_ref: brut.trigger.project_ref.clone(),
@@ -2716,7 +2640,6 @@ impl Config {
 						main_repo: resolved.general.main_repo.clone(),
 						github_repo: resolved.github.repo.clone(),
 						linear_team_key: resolved.linear.team_key.clone(),
-						sentry_projects: resolved.sentry.projects.clone(),
 						railway_project_id: resolved.railway.project_id.clone(),
 						trigger_project_ref: resolved.trigger.project_ref.clone(),
 						overrides: project.overrides(),
@@ -2725,8 +2648,6 @@ impl Config {
 							main_repo: project.main_repo.clone(),
 							editor: project.editor.clone(),
 							github_repo: project.github.repo.clone(),
-							sentry_org: project.sentry.org.clone(),
-							sentry_projects: project.sentry.projects.clone(),
 							linear_team_key: project.linear.team_key.clone(),
 							linear_team_id: project.linear.team_id.clone(),
 							trigger_project_ref: project.trigger.project_ref.clone(),
@@ -2750,8 +2671,6 @@ impl Config {
 			main_repo: self.general.main_repo.clone(),
 			editor: self.general.editor.clone(),
 			github_repo: self.github.repo.clone(),
-			sentry_org: self.sentry.org.clone(),
-			sentry_projects: self.sentry.projects.clone(),
 			linear_team_key: self.linear.team_key.clone(),
 			linear_team_id: self.linear.team_id.clone(),
 			trigger_project_ref: self.trigger.project_ref.clone(),
@@ -2786,12 +2705,6 @@ impl Config {
 					&crate::i18n::t("config.secretHint.github"),
 				),
 				secret(
-					"sentry",
-					"Sentry",
-					&self.sentry.token,
-					&crate::i18n::t("config.secretHint.sentry"),
-				),
-				secret(
 					"linear",
 					"Linear",
 					&self.linear.token,
@@ -2820,30 +2733,6 @@ impl Config {
 					"Better Stack",
 					&self.betterstack.token,
 					&crate::i18n::t("config.secretHint.betterstack"),
-				),
-				secret(
-					"betterstack_telemetry",
-					"Better Stack · KPI",
-					&self.betterstack.telemetry_token,
-					&crate::i18n::t("config.secretHint.betterstackTelemetry"),
-				),
-				secret(
-					"betterstack_clickhouse_host",
-					"Better Stack · SQL host",
-					&self.betterstack.clickhouse_host,
-					&crate::i18n::t("config.secretHint.betterstackClickhouseHost"),
-				),
-				secret(
-					"betterstack_clickhouse_username",
-					"Better Stack · SQL user",
-					&self.betterstack.clickhouse_username,
-					&crate::i18n::t("config.secretHint.betterstackClickhouseUsername"),
-				),
-				secret(
-					"betterstack_clickhouse_password",
-					"Better Stack · SQL password",
-					&self.betterstack.clickhouse_password,
-					&crate::i18n::t("config.secretHint.betterstackClickhousePassword"),
 				),
 				secret(
 					"stripe",
@@ -3091,12 +2980,18 @@ mod tests {
 		assert_eq!(config.linear.team_id, "eq-global");
 		assert_eq!(config.projects.len(), 1);
 		assert_eq!(config.projects[0].linear.team_id, "eq-perso");
+		// Le jeton Better Stack sert encore au serveur MCP des agents isolés :
+		// il survit, quand ses voisins Telemetry et ClickHouse sont ignorés.
+		assert_eq!(config.betterstack.token, "bs");
+		assert_eq!(config.projects[0].betterstack.token, "bs-perso");
 
 		// Et la section ne se réécrit pas : elle disparaît à la sauvegarde.
 		let rewritten = toml::to_string(&config).unwrap();
 		assert!(!rewritten.contains("[team]"), "{rewritten}");
 		assert!(!rewritten.contains("linear_team_id"), "{rewritten}");
 		assert!(rewritten.contains("team_id = \"eq-global\""), "{rewritten}");
+		assert!(!rewritten.contains("[sentry]"), "{rewritten}");
+		assert!(!rewritten.contains("telemetry_token"), "{rewritten}");
 	}
 
 	/// Un identifiant déjà déclaré sous `[linear]` prime sur l'ancien.

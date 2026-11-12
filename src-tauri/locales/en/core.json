@@ -221,24 +221,17 @@
 			"github": "the repository (`github.repo`), and a token or a `gh` session",
 			"linear": "a Linear token",
 			"gitlab": "a GitLab token (`api` scope) and the project path",
-			"sentry": "a Sentry token",
-			"betterstack": "a Better Stack token",
 			"trigger": "a Trigger.dev secret key",
 			"railway": "a Railway token",
 			"stripe": "a Stripe key"
 		},
 		"secretHint": {
 			"github": "Classic `repo` token — or leave empty, Cockpit will use `gh auth token`.",
-			"sentry": "User auth token with the `project:read`, `event:read`, `event:write` scopes.",
 			"linear": "Personal API key (Settings → API → Personal API keys).",
 			"gitlab": "Personal token with `api` scope — `read_api` is enough to read, not to change an issue's state.",
 			"trigger": "An environment's secret key — `tr_dev_…`, `tr_prod_…`, `tr_staging_…` depending on the environment (project → API keys), not the CLI's `tr_pat_…` Personal Access Token.",
 			"railway": "Account or workspace token (Account Settings → Tokens) — a project-scoped token requires entering the project identifier alongside.",
-			"betterstack": "Uptime API token (monitors and incidents).",
-			"betterstackTelemetry": "“Global API token” (Better Stack → API tokens → Global API tokens). A team token can list dashboards but cannot open access to the data: the values would stay empty.",
-			"betterstackClickhouseHost": "Optional: fill in only if the KPI token cannot open access by itself. Better Stack → Integrations → SQL API (e.g. eu-nbg-2-connect.betterstackdata.com).",
-			"betterstackClickhouseUsername": "SQL API username, next to the host.",
-			"betterstackClickhousePassword": "SQL API password — Better Stack never shows it again after creation.",
+			"betterstack": "API token Cockpit hands to the Better Stack MCP server inside an isolated agent's container.",
 			"stripe": "Read-only restricted key `rk_…` (Developers → API keys → Restricted keys): a publishable `pk_…` key is rejected by the server API.",
 			"sandboxOauthToken": "Run `claude setup-token` from Settings → Isolation and paste the token shown — once, it lasts a year. Never the host's: a container cannot read the macOS keychain."
 		},
@@ -258,19 +251,8 @@
 	},
 	"integrations": {
 		"githubRepoMissing": "`github.repo` is not configured.",
-		"telemetryTokenMissing": "Telemetry token missing.",
 		"unreadableResponse": "Unreadable response: {{error}}",
 		"unreadableResponseBody": "Unreadable response ({{error}}): {{body}}",
-		"sentryNoOrg": "This Sentry token gives access to no organization.",
-		"sentrySeveralOrgs": "Several Sentry organizations are accessible ({{orgs}}) — pick one in Settings → Sentry organization.",
-		"linearNotCreated": "Linear did not create the issue.",
-		"sentryInvalidIssue": "Invalid Sentry issue identifier: {{id}}",
-		"kpiTokenMissing": "KPI dashboards live on telemetry.betterstack.com, which the Uptime token does not cover. Add the “Better Stack · KPI” token in Settings.",
-		"telemetryTeamToken": "This Telemetry token is a team token: it lists dashboards but cannot open access to the data. You need a “Global API token” (Better Stack → API tokens → Global API tokens), with write access.",
-		"telemetryReadOnly": "This global token is read-only: opening data access counts as a write. Two options — recreate the token without the “read-only” box, or paste existing SQL API credentials (Better Stack → Integrations → SQL API) into the three ClickHouse fields in Settings.",
-		"betterstackConnection": "Better Stack connection {{status}} — {{body}}",
-		"betterstackNoCredentials": "Better Stack answered without usable connection credentials.",
-		"chartNoQuery": "This chart exposes no query.",
 		"issueNotFound": "Issue {{id}} not found.",
 		"linearUpdateRefused": "Linear refused the change.",
 		"priority": {
@@ -448,11 +430,7 @@
 			"revivalsExhaustedDetail": "The lead agent was relaunched {{count}} times without anything moving (tasks, checks, pull request). Look at what blocks it — a pull request that cannot open, a conflict — then resume the mission."
 		},
 		"quoted": "“{{text}}”",
-		"tailscaleDown": "Tailscale is not responding.",
-		"sentryIssue": {
-			"description": "Error reported by Sentry.\n\n**Project**: {{project}}\n**Origin**: {{culprit}}\n**Impact**: {{events}} occurrence(s), {{users}} user(s)\n\n[Open in Sentry]({{permalink}})\n\n_Issue created from Cockpit._",
-			"note": "Linear issue {{identifier}} — {{url}}"
-		}
+		"tailscaleDown": "Tailscale is not responding."
 	},
 	"delivery": {
 		"title": "Delivery dossier — Cockpit",

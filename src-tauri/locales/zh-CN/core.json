@@ -221,24 +221,17 @@
 			"github": "仓库（`github.repo`），以及令牌或 `gh` 会话",
 			"linear": "Linear 令牌",
 			"gitlab": "GitLab 令牌（`api` 权限范围）以及项目路径",
-			"sentry": "Sentry 令牌",
-			"betterstack": "Better Stack 令牌",
 			"trigger": "Trigger.dev 密钥",
 			"railway": "Railway 令牌",
 			"stripe": "Stripe 密钥"
 		},
 		"secretHint": {
 			"github": "经典 `repo` 令牌 — 或留空，Cockpit 将使用 `gh auth token`。",
-			"sentry": "具有 `project:read`、`event:read`、`event:write` 权限范围的用户认证令牌。",
 			"linear": "个人 API 密钥（Settings → API → Personal API keys）。",
 			"gitlab": "具有 `api` 权限范围的个人令牌 — `read_api` 足以读取，但不能更改工单状态。",
 			"trigger": "某个环境的密钥 — 根据环境为 `tr_dev_…`、`tr_prod_…`、`tr_staging_…`（项目 → API keys），而不是 CLI 使用的 `tr_pat_…` 个人访问令牌。",
 			"railway": "账户或工作区令牌（Account Settings → Tokens）— 项目范围的令牌需要同时填写项目标识符。",
-			"betterstack": "Uptime API 令牌（监控和事件）。",
-			"betterstackTelemetry": "“Global API token”（Better Stack → API tokens → Global API tokens）。团队令牌可以列出仪表板，但无法开通数据访问：数值将保持为空。",
-			"betterstackClickhouseHost": "可选：仅当 KPI 令牌无法自行开通访问时才填写。Better Stack → Integrations → SQL API（例如 eu-nbg-2-connect.betterstackdata.com）。",
-			"betterstackClickhouseUsername": "SQL API 用户名，位于主机旁边。",
-			"betterstackClickhousePassword": "SQL API 密码 — 创建后 Better Stack 不会再次显示。",
+			"betterstack": "Cockpit 在隔离代理的容器中交给 Better Stack MCP 服务器的 API 令牌。",
 			"stripe": "只读受限密钥 `rk_…`（Developers → API keys → Restricted keys）：服务器 API 会拒绝可发布的 `pk_…` 密钥。",
 			"sandboxOauthToken": "在“设置 → 隔离”中运行 `claude setup-token`，并粘贴显示的令牌 — 只需一次，有效期一年。切勿使用主机的令牌：容器无法读取 macOS 钥匙串。"
 		},
@@ -258,19 +251,8 @@
 	},
 	"integrations": {
 		"githubRepoMissing": "未配置 `github.repo`。",
-		"telemetryTokenMissing": "缺少 Telemetry 令牌。",
 		"unreadableResponse": "无法读取的响应：{{error}}",
 		"unreadableResponseBody": "无法读取的响应（{{error}}）：{{body}}",
-		"sentryNoOrg": "此 Sentry 令牌无法访问任何组织。",
-		"sentrySeveralOrgs": "可访问多个 Sentry 组织（{{orgs}}）— 请在“设置 → Sentry 组织”中选择一个。",
-		"linearNotCreated": "Linear 未创建该工单。",
-		"sentryInvalidIssue": "无效的 Sentry 问题标识符：{{id}}",
-		"kpiTokenMissing": "KPI 仪表板位于 telemetry.betterstack.com，Uptime 令牌无法覆盖。请在设置中添加“Better Stack · KPI”令牌。",
-		"telemetryTeamToken": "此 Telemetry 令牌是团队令牌：它可以列出仪表板，但无法开通数据访问。你需要一个具有写入权限的“Global API token”（Better Stack → API tokens → Global API tokens）。",
-		"telemetryReadOnly": "此全局令牌为只读：开通数据访问属于写入操作。有两种选择 — 重新创建令牌并取消勾选“read-only”，或将现有的 SQL API 凭据（Better Stack → Integrations → SQL API）粘贴到设置中的三个 ClickHouse 字段。",
-		"betterstackConnection": "Better Stack 连接 {{status}} — {{body}}",
-		"betterstackNoCredentials": "Better Stack 的回应中没有可用的连接凭据。",
-		"chartNoQuery": "此图表未提供任何查询。",
 		"issueNotFound": "找不到工单 {{id}}。",
 		"linearUpdateRefused": "Linear 拒绝了该更改。",
 		"priority": {
@@ -448,11 +430,7 @@
 			"revivalsExhaustedDetail": "主控已重新启动 {{count}} 次，但没有任何进展（任务、检查、拉取请求）。请查看阻碍它的原因——无法创建的拉取请求、冲突——然后继续任务。"
 		},
 		"quoted": "“{{text}}”",
-		"tailscaleDown": "Tailscale 没有响应。",
-		"sentryIssue": {
-			"description": "Sentry 报告的错误。\n\n**项目**：{{project}}\n**来源**：{{culprit}}\n**影响**：{{events}} 次出现，{{users}} 个用户\n\n[在 Sentry 中打开]({{permalink}})\n\n_工单由 Cockpit 创建。_",
-			"note": "Linear 工单 {{identifier}} — {{url}}"
-		}
+		"tailscaleDown": "Tailscale 没有响应。"
 	},
 	"delivery": {
 		"title": "交付档案 — Cockpit",

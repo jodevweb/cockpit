@@ -1,7 +1,6 @@
 import clsx from "clsx";
 import { AnimatePresence, motion } from "motion/react";
 import {
-	Activity,
 	Check,
 	ChevronRight,
 	ChevronsUpDown,
@@ -66,7 +65,6 @@ interface Entry {
  * et qu'elle réapparaisse d'elle-même dès la clé renseignée.
  */
 const NEEDS: Partial<Record<ViewId, string>> = {
-	observability: "monitoring",
 	// Sans suivi de tâches ni dépôt GitHub, l'écran des flux n'a ni tickets ni
 	// pull requests à montrer : il ne reste que ses onglets vides.
 	delivery: "tickets",
@@ -129,7 +127,6 @@ const GROUPS: Array<{ id: string; entries: Entry[] }> = [
 		entries: [
 			{ id: "delivery", icon: Rocket, shortcut: "6" },
 			{ id: "impact", icon: ScanEye, shortcut: "⇧I" },
-			{ id: "observability", icon: Activity, shortcut: "7" },
 		],
 	},
 	{

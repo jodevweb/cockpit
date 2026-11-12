@@ -430,7 +430,6 @@
 	"map": {
 		"more": {
 			"tickets_other": "티켓 {{count}}개 더",
-			"errors_other": "오류 {{count}}개 더",
 			"prs_other": "PR {{count}}개 더"
 		},
 		"defaultProject": "프로젝트",
@@ -440,15 +439,12 @@
 		"backToMap": "지도로 돌아가기",
 		"summary": {
 			"tickets_other": "티켓 {{count}}개",
-			"errorsToTriage_other": "분류할 오류 {{count}}개",
 			"agents_other": "에이전트 {{count}}개",
 			"collisions_other": "충돌 {{count}}개",
 			"missions_other": "미션 {{count}}개",
 			"chantiers_other": "작업장 {{count}}개",
 			"prs_other": "PR {{count}}개",
-			"redCi_other": "CI 실패 {{count}}개",
-			"down_other": "{{count}}개 다운",
-			"online": "온라인"
+			"redCi_other": "CI 실패 {{count}}개"
 		},
 		"waiting": "나를 기다리는 것",
 		"waitingDismiss": "숨기기 — 변경되면 다시 표시",
@@ -460,22 +456,18 @@
 			"awaiting_other": "{{count}}개 나를 기다리는 중",
 			"calm": "조용함",
 			"openProject": "이 프로젝트 열기 →",
-			"thingsWaiting_other": "나를 기다리는 것 {{count}}개",
-			"prodErrors_other": "프로덕션 오류 {{count}}개"
+			"thingsWaiting_other": "나를 기다리는 것 {{count}}개"
 		},
 		"region": {
 			"frame": "이 영역에 맞추기",
 			"empty": {
-				"arrive": "나에게 온 티켓도, 분류할 오류도 없습니다.",
+				"arrive": "나에게 온 티켓이 없습니다.",
 				"encours": "실행 중인 것이 없습니다. 티켓에서 에이전트나 미션을 시작하세요.",
-				"livrer": "열린 PR이 없습니다.",
-				"prod": "여기서 프로덕션을 보려면 설정에서 모니터링(Better Stack)을 연결하세요."
+				"livrer": "열린 PR이 없습니다."
 			}
 		},
 		"card": {
-			"sentry": "Sentry · 분류 필요",
-			"deploy": "배포",
-			"monitor": "모니터링"
+			"deploy": "배포"
 		},
 		"ticket": {
 			"inMission": "미션 진행 중"
@@ -713,22 +705,6 @@
 			"failed": "검사 실패"
 		}
 	},
-	"observability": {
-		"title": "관측성",
-		"subtitle": "Sentry와 Better Stack",
-		"ticket": "티켓",
-		"ticketTitle": "Linear 티켓을 만들고 Sentry에 기록",
-		"ticketCreated": "Linear 티켓을 만들었습니다.",
-		"resolve": "해결",
-		"resolved": "이슈를 해결했습니다.",
-		"ignore": "무시",
-		"ignored": "이슈를 무시했습니다.",
-		"regressions": "회귀",
-		"incidents": "인시던트",
-		"monitors": "모니터",
-		"errorsAndIncidents": "오류 및 인시던트",
-		"emptyHint": "결과가 있어야 한다면 설정에서 토큰과 조직을 확인하세요."
-	},
 	"permanence": {
 		"title": "Permanence",
 		"resume": "재개",
@@ -942,9 +918,6 @@
 			"add": "추가",
 			"name": "이름"
 		},
-		"sentry": {
-			"unavailable": "목록을 사용할 수 없음 ({{error}}) — 슬러그를 직접 입력하세요."
-		},
 		"trigger": {
 			"saved": "환경 “{{name}}”을(를) 저장했습니다.",
 			"removeTitle": "환경 “{{name}}”을(를) 삭제할까요?",
@@ -982,7 +955,7 @@
 			"thisProject": "이 프로젝트",
 			"globalTitle": "아래 설정은 모든 프로젝트가 상속하는 기본값입니다",
 			"projectHintIsolated": "여기에는 이 프로젝트가 선언한 것만 보입니다. 빈 필드는 이 프로젝트에 설정되지 않은 것입니다: 프로젝트가 여럿이면 어느 것도 다른 프로젝트의 저장소나 팀을 빌리지 않습니다. 액세스 토큰만 공유됩니다.",
-			"projectHint": "비워 둔 필드는 기본값을 상속합니다. 이 프로젝트만의 값을 주려면 입력하세요 — 다른 GitHub 계정, 다른 Sentry 키.",
+			"projectHint": "비워 둔 필드는 기본값을 상속합니다. 이 프로젝트만의 값을 주려면 입력하세요 — 다른 GitHub 계정, 다른 Linear 키.",
 			"globalHintIsolated": "이 값은 액세스 토큰의 대체값입니다. 저장소와 팀은 프로젝트별로 선언합니다.",
 			"globalHint": "이 값은 프로젝트가 따로 지정하지 않은 모든 곳에 적용됩니다. 프로젝트별 설정을 하려면 해당 프로젝트로 전환하세요.",
 			"project": "프로젝트",
@@ -1033,9 +1006,6 @@
 		},
 		"services": {
 			"githubRepo": "GitHub 저장소",
-			"sentryOrg": "Sentry 조직",
-			"sentryProjects": "Sentry 프로젝트",
-			"sentryProjectsHint": "선택하지 않으면 = 조직 전체.",
 			"ticketKey": "티켓 키",
 			"ticketKeyHint": "Linear 접두사(예: ABC) — 브랜치와 제목에서 티켓 번호를 알아보는 데 쓰입니다",
 			"linearTeamId": "Linear 팀",
@@ -1056,7 +1026,7 @@
 			"missing": "없음",
 			"keepPlaceholder": "•••••••• — 유지하려면 비워 두세요",
 			"pastePlaceholder": "토큰 붙여 넣기",
-			"storage": "토큰은 권한 600으로 {{path}}에 기록되며, 인터페이스로 다시 내려오지 않습니다. 각 값은 환경 변수(COCKPIT_SENTRY_TOKEN, COCKPIT_LINEAR_TOKEN…)로도 지정할 수 있으며, 그 경우 파일보다 우선합니다."
+			"storage": "토큰은 권한 600으로 {{path}}에 기록되며, 인터페이스로 다시 내려오지 않습니다. 각 값은 환경 변수(COCKPIT_GITHUB_TOKEN, COCKPIT_LINEAR_TOKEN…)로도 지정할 수 있으며, 그 경우 파일보다 우선합니다."
 		},
 		"theme": {
 			"dark": "다크",

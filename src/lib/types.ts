@@ -706,31 +706,6 @@ export interface BriefConfig {
 	off: string[];
 }
 
-export interface KpiChart {
-	id: string;
-	name: string;
-	kind: string;
-	section: string;
-}
-
-export interface KpiValue {
-	chartId: string;
-	name: string;
-	kind: string;
-	columns: string[];
-	rows: string[][];
-	error: string | null;
-}
-
-export interface KpiDashboard {
-	id: string;
-	name: string;
-	group: string;
-	url: string;
-	updatedAt: string;
-	charts: KpiChart[];
-}
-
 export interface PermissionRequest {
 	id: string;
 	/** Agent à l'origine de la demande — absent des demandes antérieures. */
@@ -846,11 +821,6 @@ export interface LinearOptions {
 	labels: NamedRef[];
 }
 
-export interface SentryProject {
-	slug: string;
-	name: string;
-}
-
 export interface TriggerEnvironmentView {
 	name: string;
 	projectRef: string;
@@ -907,7 +877,6 @@ export interface ProjectView {
 	mainRepo: string;
 	githubRepo: string;
 	linearTeamKey: string;
-	sentryProjects: string[];
 	railwayProjectId: string;
 	triggerProjectRef: string;
 	/** Le compte sous lequel il fait travailler ses agents, héritage appliqué. */
@@ -940,8 +909,6 @@ export interface DeclaredSettings {
 	mainRepo: string;
 	editor: string;
 	githubRepo: string;
-	sentryOrg: string;
-	sentryProjects: string[];
 	linearTeamKey: string;
 	/** Identifiant (UUID) de l'équipe Linear, pour les options d'édition d'un ticket. */
 	linearTeamId: string;
@@ -965,8 +932,6 @@ export interface ConfigView {
 	mainRepo: string;
 	editor: string;
 	githubRepo: string;
-	sentryOrg: string;
-	sentryProjects: string[];
 	linearTeamKey: string;
 	/** Identifiant (UUID) de l'équipe Linear, pour les options d'édition d'un ticket. */
 	linearTeamId: string;
@@ -1638,7 +1603,7 @@ export interface Role {
 export interface Connector {
 	id: string;
 	label: string;
-	/** `repository` | `tickets` | `ci` | `monitoring` | `deploy` | `payments` */
+	/** `repository` | `tickets` | `ci` | `deploy` | `payments` */
 	kind: string;
 	configured: boolean;
 	/** Ce qui manque, dit en clair. */

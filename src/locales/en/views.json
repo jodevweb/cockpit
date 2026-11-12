@@ -456,8 +456,6 @@
 		"more": {
 			"tickets_one": "{{count}} more ticket",
 			"tickets_other": "{{count}} more tickets",
-			"errors_one": "{{count}} more error",
-			"errors_other": "{{count}} more errors",
 			"prs_one": "{{count}} more PR",
 			"prs_other": "{{count}} more PRs"
 		},
@@ -469,8 +467,6 @@
 		"summary": {
 			"tickets_one": "{{count}} ticket",
 			"tickets_other": "{{count}} tickets",
-			"errorsToTriage_one": "{{count}} error to triage",
-			"errorsToTriage_other": "{{count}} errors to triage",
 			"agents_one": "{{count}} agent",
 			"agents_other": "{{count}} agents",
 			"collisions_one": "{{count}} collision",
@@ -482,10 +478,7 @@
 			"prs_one": "{{count}} PR",
 			"prs_other": "{{count}} PRs",
 			"redCi_one": "{{count}} failing CI",
-			"redCi_other": "{{count}} failing CIs",
-			"down_one": "{{count}} down",
-			"down_other": "{{count}} down",
-			"online": "online"
+			"redCi_other": "{{count}} failing CIs"
 		},
 		"waiting": "Waiting on you",
 		"waitingDismiss": "Dismiss — it comes back if it changes",
@@ -502,23 +495,18 @@
 			"calm": "quiet",
 			"openProject": "Open this project →",
 			"thingsWaiting_one": "{{count}} thing waiting on you",
-			"thingsWaiting_other": "{{count}} things waiting on you",
-			"prodErrors_one": "{{count}} error in prod",
-			"prodErrors_other": "{{count}} errors in prod"
+			"thingsWaiting_other": "{{count}} things waiting on you"
 		},
 		"region": {
 			"frame": "Frame this region",
 			"empty": {
-				"arrive": "No tickets for you, no errors to triage.",
+				"arrive": "No tickets for you.",
 				"encours": "Nothing is running. Start an agent or a mission from a ticket.",
-				"livrer": "No open PRs.",
-				"prod": "Connect monitoring (Better Stack) in Settings to see prod here."
+				"livrer": "No open PRs."
 			}
 		},
 		"card": {
-			"sentry": "Sentry · to triage",
-			"deploy": "Deployment",
-			"monitor": "Monitoring"
+			"deploy": "Deployment"
 		},
 		"ticket": {
 			"inMission": "in a mission"
@@ -772,22 +760,6 @@
 			"failed": "checks fail"
 		}
 	},
-	"observability": {
-		"title": "Observability",
-		"subtitle": "Sentry and Better Stack",
-		"ticket": "Ticket",
-		"ticketTitle": "Create the Linear ticket and note it in Sentry",
-		"ticketCreated": "Linear ticket created.",
-		"resolve": "Resolve",
-		"resolved": "Issue resolved.",
-		"ignore": "Ignore",
-		"ignored": "Issue ignored.",
-		"regressions": "Regressions",
-		"incidents": "Incidents",
-		"monitors": "Monitors",
-		"errorsAndIncidents": "Errors & incidents",
-		"emptyHint": "Check the token and organization in Settings if you expected results."
-	},
 	"permanence": {
 		"title": "Permanence",
 		"resume": "Resume",
@@ -1018,9 +990,6 @@
 			"add": "Add",
 			"name": "Name"
 		},
-		"sentry": {
-			"unavailable": "List unavailable ({{error}}) — enter the slugs by hand."
-		},
 		"trigger": {
 			"saved": "Environment “{{name}}” saved.",
 			"removeTitle": "Remove the “{{name}}” environment?",
@@ -1058,7 +1027,7 @@
 			"thisProject": "this project",
 			"globalTitle": "The settings below are the defaults, inherited by every project",
 			"projectHintIsolated": "You only see what this project declares here. An empty field is not configured for it: as soon as there are several projects, none borrows another's repository or team. Only access tokens stay shared.",
-			"projectHint": "A field left empty inherits the defaults. Fill it in to give this project its own — another GitHub account, another Sentry key.",
+			"projectHint": "A field left empty inherits the defaults. Fill it in to give this project its own — another GitHub account, another Linear key.",
 			"globalHintIsolated": "These values are the fallback for access tokens. Repositories and teams are declared project by project.",
 			"globalHint": "These values apply wherever a project says nothing. Switch to the project to give it its own settings.",
 			"project": "Project",
@@ -1109,9 +1078,6 @@
 		},
 		"services": {
 			"githubRepo": "GitHub repository",
-			"sentryOrg": "Sentry organization",
-			"sentryProjects": "Sentry projects",
-			"sentryProjectsHint": "None checked = the whole organization.",
 			"ticketKey": "Ticket key",
 			"ticketKeyHint": "Linear prefix, e.g. ABC — used to recognize ticket numbers in branches and titles",
 			"linearTeamId": "Linear team",
@@ -1132,7 +1098,7 @@
 			"missing": "missing",
 			"keepPlaceholder": "•••••••• — leave empty to keep",
 			"pastePlaceholder": "Paste the token",
-			"storage": "Tokens are written to {{path}} with 600 permissions and never come back down to the interface. Each value can also be provided through an environment variable (COCKPIT_SENTRY_TOKEN, COCKPIT_LINEAR_TOKEN…), which then takes precedence over the file."
+			"storage": "Tokens are written to {{path}} with 600 permissions and never come back down to the interface. Each value can also be provided through an environment variable (COCKPIT_GITHUB_TOKEN, COCKPIT_LINEAR_TOKEN…), which then takes precedence over the file."
 		},
 		"theme": {
 			"dark": "Dark",

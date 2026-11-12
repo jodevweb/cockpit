@@ -430,7 +430,6 @@
 	"map": {
 		"more": {
 			"tickets_other": "ほかにチケット {{count}} 件",
-			"errors_other": "ほかにエラー {{count}} 件",
 			"prs_other": "ほかに PR {{count}} 件"
 		},
 		"defaultProject": "プロジェクト",
@@ -440,15 +439,12 @@
 		"backToMap": "マップに戻る",
 		"summary": {
 			"tickets_other": "チケット {{count}} 件",
-			"errorsToTriage_other": "仕分け待ちのエラー {{count}} 件",
 			"agents_other": "エージェント {{count}} 件",
 			"collisions_other": "衝突 {{count}} 件",
 			"missions_other": "ミッション {{count}} 件",
 			"chantiers_other": "作業場 {{count}} 件",
 			"prs_other": "PR {{count}} 件",
-			"redCi_other": "CI 失敗 {{count}} 件",
-			"down_other": "{{count}} 件ダウン",
-			"online": "オンライン"
+			"redCi_other": "CI 失敗 {{count}} 件"
 		},
 		"waiting": "あなた待ち",
 		"waitingDismiss": "非表示にする — 変化があれば再表示",
@@ -460,22 +456,18 @@
 			"awaiting_other": "{{count}} 件があなた待ち",
 			"calm": "平穏",
 			"openProject": "このプロジェクトを開く →",
-			"thingsWaiting_other": "{{count}} 件があなたを待っています",
-			"prodErrors_other": "本番エラー {{count}} 件"
+			"thingsWaiting_other": "{{count}} 件があなたを待っています"
 		},
 		"region": {
 			"frame": "この領域を表示",
 			"empty": {
-				"arrive": "あなた宛てのチケットも、仕分け待ちのエラーもありません。",
+				"arrive": "あなた宛てのチケットはありません。",
 				"encours": "実行中のものはありません。チケットからエージェントかミッションを開始してください。",
-				"livrer": "オープン中の PR はありません。",
-				"prod": "本番をここに表示するには、設定でモニタリング（Better Stack）を接続してください。"
+				"livrer": "オープン中の PR はありません。"
 			}
 		},
 		"card": {
-			"sentry": "Sentry · 仕分け待ち",
-			"deploy": "デプロイ",
-			"monitor": "モニタリング"
+			"deploy": "デプロイ"
 		},
 		"ticket": {
 			"inMission": "ミッション中"
@@ -713,22 +705,6 @@
 			"failed": "チェック失敗"
 		}
 	},
-	"observability": {
-		"title": "可観測性",
-		"subtitle": "Sentry と Better Stack",
-		"ticket": "チケット",
-		"ticketTitle": "Linear チケットを作成し、Sentry に記録",
-		"ticketCreated": "Linear チケットを作成しました。",
-		"resolve": "解決",
-		"resolved": "課題を解決しました。",
-		"ignore": "無視",
-		"ignored": "課題を無視しました。",
-		"regressions": "リグレッション",
-		"incidents": "インシデント",
-		"monitors": "モニター",
-		"errorsAndIncidents": "エラーとインシデント",
-		"emptyHint": "結果を期待していた場合は、設定でトークンと組織を確認してください。"
-	},
 	"permanence": {
 		"title": "Permanence",
 		"resume": "再開",
@@ -942,9 +918,6 @@
 			"add": "追加",
 			"name": "名前"
 		},
-		"sentry": {
-			"unavailable": "一覧を取得できません（{{error}}）— スラッグを手動で入力してください。"
-		},
 		"trigger": {
 			"saved": "環境「{{name}}」を保存しました。",
 			"removeTitle": "環境「{{name}}」を削除しますか？",
@@ -982,7 +955,7 @@
 			"thisProject": "このプロジェクト",
 			"globalTitle": "以下の設定はデフォルトで、すべてのプロジェクトに継承されます",
 			"projectHintIsolated": "ここに表示されるのは、このプロジェクトが宣言しているものだけです。空のフィールドはこのプロジェクトでは未設定です：プロジェクトが複数ある場合、他のプロジェクトのリポジトリやチームを借りることはありません。共有されるのはアクセストークンだけです。",
-			"projectHint": "空のフィールドはデフォルトを継承します。入力すると、このプロジェクト独自の設定になります — 別の GitHub アカウント、別の Sentry キーなど。",
+			"projectHint": "空のフィールドはデフォルトを継承します。入力すると、このプロジェクト独自の設定になります — 別の GitHub アカウント、別の Linear キーなど。",
 			"globalHintIsolated": "これらの値はアクセストークンのフォールバックです。リポジトリとチームはプロジェクトごとに宣言します。",
 			"globalHint": "これらの値は、プロジェクトが何も指定していない箇所に適用されます。プロジェクト独自の設定をするには、そのプロジェクトに切り替えてください。",
 			"project": "プロジェクト",
@@ -1033,9 +1006,6 @@
 		},
 		"services": {
 			"githubRepo": "GitHub リポジトリ",
-			"sentryOrg": "Sentry 組織",
-			"sentryProjects": "Sentry プロジェクト",
-			"sentryProjectsHint": "チェックなし = 組織全体。",
 			"ticketKey": "チケットのキー",
 			"ticketKeyHint": "Linear の接頭辞（例：ABC）— ブランチやタイトル内のチケット番号を認識するために使います",
 			"linearTeamId": "Linear チーム",
@@ -1056,7 +1026,7 @@
 			"missing": "未設定",
 			"keepPlaceholder": "•••••••• — 空欄のままで保持",
 			"pastePlaceholder": "トークンを貼り付け",
-			"storage": "トークンは権限 600 で {{path}} に書き込まれ、インターフェースに戻ってくることはありません。各値は環境変数（COCKPIT_SENTRY_TOKEN、COCKPIT_LINEAR_TOKEN…）でも指定でき、その場合はファイルより優先されます。"
+			"storage": "トークンは権限 600 で {{path}} に書き込まれ、インターフェースに戻ってくることはありません。各値は環境変数（COCKPIT_GITHUB_TOKEN、COCKPIT_LINEAR_TOKEN…）でも指定でき、その場合はファイルより優先されます。"
 		},
 		"theme": {
 			"dark": "ダーク",

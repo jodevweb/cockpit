@@ -11,8 +11,7 @@
 		"notify": {
 			"waitingReply": "Ждёт вашего ответа — {{title}}",
 			"ciFailed": "CI падает · #{{number}}",
-			"readyToMerge": "Готово к слиянию · #{{number}}",
-			"prodError": "Ошибка в продакшене · {{project}}"
+			"readyToMerge": "Готово к слиянию · #{{number}}"
 		}
 	},
 	"commandPalette": {
@@ -28,7 +27,6 @@
 			"git": "Git",
 			"scripts": "Скрипты",
 			"docs": "Документы",
-			"observability": "Наблюдаемость",
 			"delivery": "Поток · Linear, PR, CI, деплои",
 			"infra": "Серверы и контейнеры · что запущено на этой машине",
 			"settings": "Настройки",
@@ -184,7 +182,6 @@
 			"docs": "Документы",
 			"delivery": "Поток",
 			"impact": "Влияние",
-			"observability": "Наблюдаемость",
 			"worktrees": "Worktrees",
 			"git": "Git",
 			"scripts": "Скрипты",

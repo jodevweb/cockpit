@@ -11,8 +11,7 @@
 		"notify": {
 			"waitingReply": "等待你的回复 — {{title}}",
 			"ciFailed": "CI 失败 · #{{number}}",
-			"readyToMerge": "可以合并 · #{{number}}",
-			"prodError": "生产环境错误 · {{project}}"
+			"readyToMerge": "可以合并 · #{{number}}"
 		}
 	},
 	"commandPalette": {
@@ -28,7 +27,6 @@
 			"git": "Git",
 			"scripts": "脚本",
 			"docs": "文档",
-			"observability": "可观测性",
 			"delivery": "流程 · Linear、PR、CI、部署",
 			"infra": "服务器与容器 · 本机正在运行的内容",
 			"settings": "设置",
@@ -172,7 +170,6 @@
 			"docs": "文档",
 			"delivery": "流程",
 			"impact": "影响",
-			"observability": "可观测性",
 			"worktrees": "Worktree",
 			"git": "Git",
 			"scripts": "脚本",

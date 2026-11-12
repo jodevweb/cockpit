@@ -11,8 +11,7 @@
 		"notify": {
 			"waitingReply": "In attesa della tua risposta — {{title}}",
 			"ciFailed": "CI in errore · #{{number}}",
-			"readyToMerge": "Pronta per il merge · #{{number}}",
-			"prodError": "Errore in produzione · {{project}}"
+			"readyToMerge": "Pronta per il merge · #{{number}}"
 		}
 	},
 	"commandPalette": {
@@ -28,7 +27,6 @@
 			"git": "Git",
 			"scripts": "Script",
 			"docs": "Documenti",
-			"observability": "Osservabilità",
 			"delivery": "Flusso · Linear, PR, CI, deploy",
 			"infra": "Server e container · cosa gira su questa macchina",
 			"settings": "Impostazioni",
@@ -176,7 +174,6 @@
 			"docs": "Documenti",
 			"delivery": "Flusso",
 			"impact": "Impatto",
-			"observability": "Osservabilità",
 			"worktrees": "Worktree",
 			"git": "Git",
 			"scripts": "Script",

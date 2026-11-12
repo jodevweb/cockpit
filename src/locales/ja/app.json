@@ -11,8 +11,7 @@
 		"notify": {
 			"waitingReply": "あなたの返答待ち — {{title}}",
 			"ciFailed": "CI 失敗 · #{{number}}",
-			"readyToMerge": "マージ可能 · #{{number}}",
-			"prodError": "本番エラー · {{project}}"
+			"readyToMerge": "マージ可能 · #{{number}}"
 		}
 	},
 	"commandPalette": {
@@ -28,7 +27,6 @@
 			"git": "Git",
 			"scripts": "スクリプト",
 			"docs": "ドキュメント",
-			"observability": "可観測性",
 			"delivery": "フロー · Linear、PR、CI、デプロイ",
 			"infra": "サーバーとコンテナ · このマシンで動いているもの",
 			"settings": "設定",
@@ -172,7 +170,6 @@
 			"docs": "ドキュメント",
 			"delivery": "フロー",
 			"impact": "インパクト",
-			"observability": "可観測性",
 			"worktrees": "Worktree",
 			"git": "Git",
 			"scripts": "スクリプト",

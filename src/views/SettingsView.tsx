@@ -19,7 +19,6 @@ import {
 	ErrorNote,
 	Field,
 	Section,
-	Spinner,
 	TextInput,
 	ViewHeader,
 } from "@/components/ui";
@@ -81,87 +80,17 @@ type SettingsTab = (typeof TABS)[number]["id"];
 /** Clé de service → chemin du champ dans le TOML (snake_case côté Rust). */
 const SECRET_PATHS: Record<string, [string, string]> = {
 	github: ["github", "token"],
-	sentry: ["sentry", "token"],
 	linear: ["linear", "token"],
 	gitlab: ["gitlab", "token"],
 	trigger: ["trigger", "token"],
 	railway: ["railway", "token"],
 	betterstack: ["betterstack", "token"],
-	betterstack_telemetry: ["betterstack", "telemetry_token"],
-	betterstack_clickhouse_host: ["betterstack", "clickhouse_host"],
-	betterstack_clickhouse_username: ["betterstack", "clickhouse_username"],
-	betterstack_clickhouse_password: ["betterstack", "clickhouse_password"],
 	stripe: ["stripe", "token"],
 	// `SandboxConfig` sérialise en camelCase (`memoryMb`…), à la différence
 	// des autres structs de secrets ci-dessus : le champ suit sa convention,
 	// pas celle du reste de cette table.
 	sandbox_oauth_token: ["sandbox", "oauthToken"],
 };
-
-/**
- * Cases à cocher alimentées par l'organisation Sentry : plusieurs projets se
- * suivent en même temps, encore faut-il savoir lesquels existent — un champ
- * texte laissait deviner les slugs.
- */
-function SentryProjectPicker({
-	selected,
-	onChange,
-}: {
-	/** Slugs séparés par des virgules, tels que stockés dans le brouillon. */
-	selected: string;
-	onChange: (value: string) => void;
-}) {
-	const { t } = useTranslation("views");
-	const projects = useAsync(() => api.feeds.sentryProjects(), []);
-	const chosen = selected
-		.split(",")
-		.map((slug) => slug.trim())
-		.filter(Boolean);
-
-	const toggle = (slug: string) => {
-		const next = chosen.includes(slug)
-			? chosen.filter((value) => value !== slug)
-			: [...chosen, slug];
-		onChange(next.join(", "));
-	};
-
-	if (projects.error) {
-		// Sans token valide on garde la saisie manuelle plutôt que de bloquer.
-		return (
-			<>
-				<TextInput value={selected} onChange={onChange} mono />
-				<p className="mt-1 text-[10px] text-ink-faint">
-					{t("settings.sentry.unavailable", { error: projects.error })}
-				</p>
-			</>
-		);
-	}
-
-	return (
-		<div className="flex flex-wrap gap-1">
-			{projects.loading && !projects.data ? <Spinner /> : null}
-			{(projects.data ?? []).map((project) => {
-				const active = chosen.includes(project.slug);
-				return (
-					<button
-						key={project.slug}
-						type="button"
-						onClick={() => toggle(project.slug)}
-						className={clsx(
-							"focus-ring rounded-lg border px-2 py-1 font-mono text-[10px] transition-colors",
-							active
-								? "border-accent-soft/40 bg-accent-soft/12 text-ink"
-								: "border-line-soft bg-surface text-ink-faint hover:text-ink-muted",
-						)}
-					>
-						{active ? "✓ " : ""}
-						{project.slug}
-					</button>
-				);
-			})}
-		</div>
-	);
-}
 
 /**
  * Liste des environnements Trigger.dev — un par secret key, puisqu'une clé ne
@@ -271,8 +200,8 @@ function TriggerEnvironments() {
  *
  * Chaque champ laissé vide hérite des réglages globaux plus bas : déclarer un
  * side project ne demande donc que son dépôt. C'est ce qui permet au cockpit de
- * servir autant un monorepo d'entreprise qu'un dépôt personnel sans Linear ni
- * Sentry derrière.
+ * servir autant un monorepo d'entreprise qu'un dépôt personnel sans Linear
+ * derrière.
  */
 function Projects() {
 	const { t } = useTranslation("views");
@@ -429,8 +358,6 @@ type SettingsDraft = {
 	mainRepo: string;
 	editor: string;
 	githubRepo: string;
-	sentryOrg: string;
-	sentryProjects: string;
 	linearTeamKey: string;
 	linearTeamId: string;
 	triggerProjectRef: string;
@@ -494,8 +421,6 @@ function useSettingsForm(scope: SettingsScope) {
 		mainRepo: "",
 		editor: "zed",
 		githubRepo: "",
-		sentryOrg: "",
-		sentryProjects: "",
 		linearTeamKey: "",
 		linearTeamId: "",
 		triggerProjectRef: "",
@@ -525,8 +450,6 @@ function useSettingsForm(scope: SettingsScope) {
 			mainRepo: declared.mainRepo,
 			editor: declared.editor,
 			githubRepo: declared.githubRepo,
-			sentryOrg: declared.sentryOrg,
-			sentryProjects: declared.sentryProjects.join(", "),
 			linearTeamKey: declared.linearTeamKey,
 			linearTeamId: declared.linearTeamId,
 			triggerProjectRef: declared.triggerProjectRef,
@@ -545,13 +468,6 @@ function useSettingsForm(scope: SettingsScope) {
 				editor: draft.editor,
 			},
 			github: { repo: draft.githubRepo },
-			sentry: {
-				org: draft.sentryOrg,
-				projects: draft.sentryProjects
-					.split(",")
-					.map((value) => value.trim())
-					.filter(Boolean),
-			},
 			linear: { team_key: draft.linearTeamKey, team_id: draft.linearTeamId },
 			gitlab: { project: draft.gitlabProject, host: draft.gitlabHost },
 			trigger: { project_ref: draft.triggerProjectRef },
@@ -1051,26 +967,6 @@ function ServiceIdentifiers({ draft, setDraft }: { draft: SettingsDraft; setDraf
 						mono
 					/>
 				</Field>
-				<Field label={t("settings.services.sentryOrg")}>
-					<TextInput
-						value={draft.sentryOrg}
-						onChange={(value) =>
-							setDraft((current) => ({ ...current, sentryOrg: value }))
-						}
-						mono
-					/>
-				</Field>
-				<Field
-					label={t("settings.services.sentryProjects")}
-					hint={t("settings.services.sentryProjectsHint")}
-				>
-					<SentryProjectPicker
-						selected={draft.sentryProjects}
-						onChange={(value) =>
-							setDraft((current) => ({ ...current, sentryProjects: value }))
-						}
-					/>
-				</Field>
 				{/* La clé sert à lire un numéro de ticket (ABC-3044) ; l'UUID, à
 				    demander à Linear les états, membres et labels de l'équipe.
 				    Deux réglages distincts, côte à côte pour qu'on ne prenne pas
@@ -1229,7 +1125,6 @@ function ServiceLinks() {
 		<Section title={t("settings.sections.links")}>
 			<div className="panel flex flex-col gap-2 p-3.5 text-[11px] text-ink-muted">
 				{[
-					["Sentry", "https://sentry.io/settings/account/api/auth-tokens/"],
 					["Linear", "https://linear.app/settings/api"],
 					["GitLab", "https://gitlab.com/-/user_settings/personal_access_tokens"],
 					["Trigger.dev", "https://cloud.trigger.dev"],

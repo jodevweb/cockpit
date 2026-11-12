@@ -40,7 +40,7 @@ export interface FeedSource {
 
 /**
  * Liste + détail pour n'importe quelle source distante. Le même composant sert
- * à Sentry, Linear, GitHub, Trigger et Railway : c'est ce qui donne au cockpit
+ * à Linear, GitHub, Trigger et Railway : c'est ce qui donne au cockpit
  * une lecture homogène quel que soit le SaaS derrière.
  */
 type SortId = "recent" | "oldest" | "severity" | "status" | "title";
@@ -66,8 +66,8 @@ interface Facet {
 /**
  * Dimensions de filtrage déduites des données affichées.
  *
- * Chaque source a ses propres champs (`environnement` chez Trigger, `projet`
- * chez Sentry, `auteur` sur les PR) : les découvrir dans les éléments évite
+ * Chaque source a ses propres champs (`environnement` chez Trigger, `auteur`
+ * sur les PR) : les découvrir dans les éléments évite
  * d'écrire une barre de filtres par service. On écarte ce qui ne discrimine
  * rien — une valeur unique — et ce qui est presque unique par élément, comme un
  * identifiant.

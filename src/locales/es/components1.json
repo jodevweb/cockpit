@@ -474,25 +474,6 @@
 		},
 		"save": "Guardar"
 	},
-	"kpiBoard": {
-		"noSection": "Sin sección",
-		"filter": "Filtrar indicadores…",
-		"dashboards_one": "{{count}} panel",
-		"dashboards_other": "{{count}} paneles",
-		"indicators_one": "{{count}} indicador",
-		"indicators_other": "{{count}} indicadores",
-		"empty": {
-			"message": "No hay paneles",
-			"hint": "Los paneles de KPI vienen de Better Stack Telemetry."
-		},
-		"hide": "ocultar",
-		"show": "mostrar valores",
-		"hours_one": "{{count}} h",
-		"hours_other": "{{count}} h",
-		"days_one": "{{count}} d",
-		"days_other": "{{count}} d",
-		"openExternal": "Abrir en Better Stack"
-	},
 	"libreLauncher": {
 		"places": {
 			"ici": {

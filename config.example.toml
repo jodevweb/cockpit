@@ -4,7 +4,7 @@
 # référence et permet de garder la config sous la main (ou dans un gestionnaire
 # de secrets). Chaque jeton peut aussi venir d'une variable d'environnement,
 # qui prime alors sur la valeur écrite ici :
-#   COCKPIT_GITHUB_TOKEN, COCKPIT_SENTRY_TOKEN, COCKPIT_LINEAR_TOKEN,
+#   COCKPIT_GITHUB_TOKEN, COCKPIT_LINEAR_TOKEN,
 #   COCKPIT_TRIGGER_TOKEN, COCKPIT_RAILWAY_TOKEN, COCKPIT_BETTERSTACK_TOKEN,
 #   COCKPIT_STRIPE_TOKEN
 
@@ -16,14 +16,6 @@ editor = "zed" # zed · cursor · code
 [github]
 repo = "acme/monorepo"
 # Vide = le cockpit utilise la session `gh` déjà authentifiée sur le poste.
-token = ""
-
-[sentry]
-# Vide = déduit du token quand il ne donne accès qu'à une organisation.
-org = ""
-# Slugs de projets à surveiller ; liste vide = toute l'organisation.
-# L'écran Réglages propose la liste en cases à cocher.
-projects = ["acme-api", "acme-web"]
 token = ""
 
 [linear]
@@ -76,19 +68,9 @@ project_id = ""
 token = ""
 
 [betterstack]
-# Token API Uptime (monitors + incidents).
+# Jeton d'API remis au serveur MCP de Better Stack dans le conteneur d'un agent
+# isolé. Vide = l'agent isolé n'a pas cet outil.
 token = ""
-# Token Telemetry pour les KPI. Prendre un « Global API token » (Better Stack →
-# API tokens → Global API tokens) : un token d'équipe liste les dashboards mais
-# ne peut pas ouvrir l'accès aux données, et les valeurs restent vides.
-# Le cockpit demande alors lui-même une connexion ClickHouse en lecture et la
-# garde dans ~/.config/cockpit/betterstack-connection.json.
-telemetry_token = ""
-# Facultatif : identifiants SQL API déjà créés à la main, si on préfère ne pas
-# donner de token global au cockpit.
-# clickhouse_host = ""
-# clickhouse_username = ""
-# clickhouse_password = ""
 
 [stripe]
 # Clé restreinte en lecture seule `rk_…` (Développeurs → Clés API → Clés

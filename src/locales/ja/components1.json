@@ -453,21 +453,6 @@
 		},
 		"save": "保存"
 	},
-	"kpiBoard": {
-		"noSection": "セクションなし",
-		"filter": "指標を絞り込む…",
-		"dashboards_other": "ダッシュボード {{count}} 件",
-		"indicators_other": "指標 {{count}} 件",
-		"empty": {
-			"message": "ダッシュボードはありません",
-			"hint": "KPI ダッシュボードは Better Stack Telemetry から取得します。"
-		},
-		"hide": "隠す",
-		"show": "値を表示",
-		"hours_other": "{{count}} 時間",
-		"days_other": "{{count}} 日",
-		"openExternal": "Better Stack で開く"
-	},
 	"libreLauncher": {
 		"places": {
 			"ici": {

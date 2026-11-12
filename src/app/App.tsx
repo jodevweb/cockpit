@@ -15,7 +15,6 @@ import { ImpactView } from "@/views/ImpactView";
 import { DocsView } from "@/views/DocsView";
 import { GitView } from "@/views/GitView";
 import { InfraView } from "@/views/InfraView";
-import { ObservabilityView } from "@/views/ObservabilityView";
 import { ScriptsView } from "@/views/ScriptsView";
 import { SettingsView } from "@/views/SettingsView";
 import { MissionsView } from "@/views/MissionsView";
@@ -46,7 +45,6 @@ const SHORTCUTS: Record<string, ViewId> = {
 	"4": "agents",
 	"5": "docs",
 	"6": "delivery",
-	"7": "observability",
 	"8": "worktrees",
 	"9": "git",
 	"0": "scripts",
@@ -210,7 +208,6 @@ function Shell() {
 					{view === "git" ? <GitView /> : null}
 					{view === "scripts" ? <ScriptsView /> : null}
 					{view === "docs" ? <DocsView /> : null}
-					{view === "observability" ? <ObservabilityView /> : null}
 					{view === "delivery" ? <DeliveryView /> : null}
 					{view === "impact" ? <ImpactView /> : null}
 					{view === "infra" ? <InfraView /> : null}

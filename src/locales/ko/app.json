@@ -11,8 +11,7 @@
 		"notify": {
 			"waitingReply": "답변을 기다리는 중 — {{title}}",
 			"ciFailed": "CI 실패 · #{{number}}",
-			"readyToMerge": "병합 준비 완료 · #{{number}}",
-			"prodError": "프로덕션 오류 · {{project}}"
+			"readyToMerge": "병합 준비 완료 · #{{number}}"
 		}
 	},
 	"commandPalette": {
@@ -28,7 +27,6 @@
 			"git": "Git",
 			"scripts": "스크립트",
 			"docs": "문서",
-			"observability": "관측성",
 			"delivery": "흐름 · Linear, PR, CI, 배포",
 			"infra": "서버 및 컨테이너 · 이 머신에서 실행 중인 것",
 			"settings": "설정",
@@ -172,7 +170,6 @@
 			"docs": "문서",
 			"delivery": "흐름",
 			"impact": "영향",
-			"observability": "관측성",
 			"worktrees": "Worktree",
 			"git": "Git",
 			"scripts": "스크립트",

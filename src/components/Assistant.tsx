@@ -59,7 +59,6 @@ const VIEWS: Array<{ id: ViewId; label: string }> = [
 	{ id: "git", label: "Git, branches" },
 	{ id: "delivery", label: "Flow: Linear, PRs, CI, deployments" },
 	{ id: "impact", label: "Impact" },
-	{ id: "observability", label: "Observability" },
 	{ id: "docs", label: "Documents" },
 	{ id: "scripts", label: "Scripts" },
 	{ id: "infra", label: "Servers and containers" },

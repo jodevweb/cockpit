@@ -520,33 +520,6 @@
 		},
 		"save": "Сохранить"
 	},
-	"kpiBoard": {
-		"noSection": "Без раздела",
-		"filter": "Фильтр показателей…",
-		"dashboards_one": "{{count}} дашборд",
-		"dashboards_few": "{{count}} дашборда",
-		"dashboards_many": "{{count}} дашбордов",
-		"dashboards_other": "{{count}} дашборда",
-		"indicators_one": "{{count}} показатель",
-		"indicators_few": "{{count}} показателя",
-		"indicators_many": "{{count}} показателей",
-		"indicators_other": "{{count}} показателя",
-		"empty": {
-			"message": "Нет дашбордов",
-			"hint": "Дашборды KPI берутся из Better Stack Telemetry."
-		},
-		"hide": "скрыть",
-		"show": "показать значения",
-		"hours_one": "{{count}} ч",
-		"hours_few": "{{count}} ч",
-		"hours_many": "{{count}} ч",
-		"hours_other": "{{count}} ч",
-		"days_one": "{{count}} дн.",
-		"days_few": "{{count}} дн.",
-		"days_many": "{{count}} дн.",
-		"days_other": "{{count}} дн.",
-		"openExternal": "Открыть в Better Stack"
-	},
 	"libreLauncher": {
 		"places": {
 			"ici": {

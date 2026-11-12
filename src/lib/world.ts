@@ -10,7 +10,7 @@
 
 import { t } from "@/i18n";
 
-export type RegionId = "arrive" | "encours" | "livrer" | "prod";
+export type RegionId = "arrive" | "encours" | "livrer";
 
 /** Libellé et indication se traduisent à la lecture, jamais au chargement du module. */
 function region(id: RegionId, columns: number): { id: RegionId; label: string; hint: string; columns: number } {
@@ -30,17 +30,14 @@ export const REGIONS: Array<{ id: RegionId; label: string; hint: string; columns
 	region("arrive", 1),
 	region("encours", 2),
 	region("livrer", 1),
-	region("prod", 1),
 ];
 
 export type CardKind =
 	| "ticket"
-	| "sentry"
 	| "mission"
 	| "chantier"
 	| "pr"
 	| "deploy"
-	| "monitor"
 	| "more";
 
 /**
@@ -52,12 +49,10 @@ export type CardKind =
  */
 export const CARD_HEIGHT: Record<CardKind, number> = {
 	ticket: 116,
-	sentry: 100,
 	mission: 150,
 	chantier: 168,
 	pr: 122,
 	deploy: 84,
-	monitor: 84,
 	more: 52,
 };
 
@@ -210,7 +205,7 @@ export interface Link {
 	target: string;
 }
 
-const ORDER: Record<RegionId, number> = { arrive: 0, encours: 1, livrer: 2, prod: 3 };
+const ORDER: Record<RegionId, number> = { arrive: 0, encours: 1, livrer: 2 };
 
 /**
  * Les fils entre cartes, toujours dans le sens du travail.

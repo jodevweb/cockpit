@@ -221,24 +221,17 @@
 			"github": "репозиторий (`github.repo`) и токен или сессия `gh`",
 			"linear": "токен Linear",
 			"gitlab": "токен GitLab (область `api`) и путь к проекту",
-			"sentry": "токен Sentry",
-			"betterstack": "токен Better Stack",
 			"trigger": "секретный ключ Trigger.dev",
 			"railway": "токен Railway",
 			"stripe": "ключ Stripe"
 		},
 		"secretHint": {
 			"github": "Классический токен `repo` — или оставьте пустым, Cockpit использует `gh auth token`.",
-			"sentry": "User auth token с областями `project:read`, `event:read`, `event:write`.",
 			"linear": "Личный API-ключ (Settings → API → Personal API keys).",
 			"gitlab": "Личный токен с областью `api` — `read_api` достаточно для чтения, но не для изменения состояния задачи.",
 			"trigger": "Секретный ключ окружения — `tr_dev_…`, `tr_prod_…`, `tr_staging_…` в зависимости от окружения (проект → API keys), а не Personal Access Token `tr_pat_…` от CLI.",
 			"railway": "Токен аккаунта или рабочего пространства (Account Settings → Tokens) — для токена уровня проекта нужно также указать идентификатор проекта.",
-			"betterstack": "API-токен Uptime (мониторы и инциденты).",
-			"betterstackTelemetry": "«Global API token» (Better Stack → API tokens → Global API tokens). Токен команды может перечислять дашборды, но не может открыть доступ к данным: значения останутся пустыми.",
-			"betterstackClickhouseHost": "Необязательно: заполняйте, только если токен KPI не может сам открыть доступ. Better Stack → Integrations → SQL API (например, eu-nbg-2-connect.betterstackdata.com).",
-			"betterstackClickhouseUsername": "Имя пользователя SQL API, рядом с хостом.",
-			"betterstackClickhousePassword": "Пароль SQL API — Better Stack больше не показывает его после создания.",
+			"betterstack": "API-токен, который Cockpit передаёт MCP-серверу Better Stack в контейнере изолированного агента.",
 			"stripe": "Ограниченный ключ только для чтения `rk_…` (Developers → API keys → Restricted keys): публикуемый ключ `pk_…` серверный API отклоняет.",
 			"sandboxOauthToken": "Выполните `claude setup-token` из Настройки → Изоляция и вставьте показанный токен — один раз, он действует год. Никогда не используйте токен хоста: контейнер не может читать связку ключей macOS."
 		},
@@ -258,19 +251,8 @@
 	},
 	"integrations": {
 		"githubRepoMissing": "`github.repo` не настроен.",
-		"telemetryTokenMissing": "Нет токена телеметрии.",
 		"unreadableResponse": "Не удаётся прочитать ответ: {{error}}",
 		"unreadableResponseBody": "Не удаётся прочитать ответ ({{error}}): {{body}}",
-		"sentryNoOrg": "Этот токен Sentry не даёт доступа ни к одной организации.",
-		"sentrySeveralOrgs": "Доступно несколько организаций Sentry ({{orgs}}) — выберите одну в Настройки → Организация Sentry.",
-		"linearNotCreated": "Linear не создал задачу.",
-		"sentryInvalidIssue": "Недопустимый идентификатор задачи Sentry: {{id}}",
-		"kpiTokenMissing": "Дашборды KPI находятся на telemetry.betterstack.com, который токен Uptime не покрывает. Добавьте токен «Better Stack · KPI» в настройках.",
-		"telemetryTeamToken": "Этот токен Telemetry — токен команды: он перечисляет дашборды, но не может открыть доступ к данным. Нужен «Global API token» (Better Stack → API tokens → Global API tokens) с правом записи.",
-		"telemetryReadOnly": "Этот глобальный токен только для чтения: открытие доступа к данным считается записью. Два варианта — пересоздайте токен без флажка «read-only» или вставьте существующие учётные данные SQL API (Better Stack → Integrations → SQL API) в три поля ClickHouse в настройках.",
-		"betterstackConnection": "Подключение Better Stack {{status}} — {{body}}",
-		"betterstackNoCredentials": "Better Stack ответил без пригодных учётных данных для подключения.",
-		"chartNoQuery": "Этот график не предоставляет запроса.",
 		"issueNotFound": "Задача {{id}} не найдена.",
 		"linearUpdateRefused": "Linear отклонил изменение.",
 		"priority": {
@@ -448,11 +430,7 @@
 			"revivalsExhaustedDetail": "Ведущий агент перезапускался {{count}} раз(а), но ничего не сдвинулось (задачи, проверки, pull request). Посмотрите, что его блокирует — pull request, который не открывается, конфликт, — и затем возобновите миссию."
 		},
 		"quoted": "«{{text}}»",
-		"tailscaleDown": "Tailscale не отвечает.",
-		"sentryIssue": {
-			"description": "Ошибка, о которой сообщил Sentry.\n\n**Проект**: {{project}}\n**Источник**: {{culprit}}\n**Влияние**: вхождений — {{events}}, пользователей — {{users}}\n\n[Открыть в Sentry]({{permalink}})\n\n_Задача создана из Cockpit._",
-			"note": "Задача Linear {{identifier}} — {{url}}"
-		}
+		"tailscaleDown": "Tailscale не отвечает."
 	},
 	"delivery": {
 		"title": "Отчёт о поставке — Cockpit",

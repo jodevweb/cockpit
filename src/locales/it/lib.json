@@ -18,10 +18,6 @@
 			"livrer": {
 				"label": "Consegnare",
 				"hint": "rivedere e fare il merge"
-			},
-			"prod": {
-				"label": "In produzione",
-				"hint": "cosa cambia"
 			}
 		}
 	},
