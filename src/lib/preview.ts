@@ -1774,6 +1774,16 @@ const REPONSES: Record<string, unknown> = {
 			// d'une recette renvoyée et celle d'une porte rouge.
 			guided: true,
 			plan: "Three tasks: back end, front end, QA.",
+			understanding: [],
+			approach: [],
+			split: [
+				{
+					text: "Three tasks: back end, front end, QA.\nThe API rounds each line first; the cart reads its total from there.",
+					questions: ["Should QA wait for both the API and the cart, or start on the API alone?"],
+					submittedAt: ago(226),
+					review: { approved: true, feedback: "Keep the QA last.", answers: ["Wait for both."], at: ago(220) },
+				},
+			],
 			prUrl: "",
 			summary: "",
 			note: "",
@@ -2540,7 +2550,7 @@ const REPONSES: Record<string, unknown> = {
 		return [
 			{ at: ago(240), change: { kind: "opened", guided: true } },
 			{ at: ago(226), change: { kind: "state", from: "planning", to: "awaitingApproval", note: "" } },
-			{ at: ago(226), change: { kind: "draft", step: "split", version: 1, questions: 0 } },
+			{ at: ago(226), change: { kind: "draft", step: "split", version: 1, questions: 1 } },
 			{ at: ago(226), change: { kind: "taskAdded", task: "t1", title: "Per-line rounding in the API", role: "backend" } },
 			{ at: ago(226), change: { kind: "taskAdded", task: "t2", title: "Cart totals", role: "frontend" } },
 			{ at: ago(226), change: { kind: "taskAdded", task: "t3", title: "Functional QA", role: "qa" } },
