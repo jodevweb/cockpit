@@ -62,6 +62,27 @@ of it**.
 6. **A pull request**, with its delivery dossier — or, for a repository with
    no remote, a local merge.
 
+<table>
+  <tr>
+    <td width="50%"><img alt="Describe a mission: a title and details, no tracker needed" src="docs/images/mission-demande.webp"></td>
+    <td width="50%"><img alt="The history of a guided step: the lead agent's questions and your answers" src="docs/images/historique-reponses.webp"></td>
+  </tr>
+  <tr>
+    <td align="center"><sub>1. A ticket, written right in Cockpit</sub></td>
+    <td align="center"><sub>2. Its questions and your answers, kept</sub></td>
+  </tr>
+  <tr>
+    <td width="50%"><img alt="The mission graph: a task sent back after its checks failed, then integrated" src="docs/images/mission-boucle.webp"></td>
+    <td width="50%"><img alt="The history of a failed check: its output and the diff at that moment" src="docs/images/historique-porte.webp"></td>
+  </tr>
+  <tr>
+    <td align="center"><sub>4. Checks fail, the task goes back: the loop</sub></td>
+    <td align="center"><sub>5. The check's output and the diff at that moment</sub></td>
+  </tr>
+</table>
+
+<sub>These four come from the app's preview data.</sub>
+
 <p align="center">
   <img alt="A GitHub issue becomes a mission: you confirm what the lead agent understood, its approach, its breakdown, and get a pull request with its delivery dossier" src="docs/images/demo.gif" width="800">
 </p>
