@@ -238,6 +238,26 @@ pub(crate) async fn implementation_state(
 ///
 /// `session` est l'agent du cockpit, `engine` sa conversation chez le moteur —
 /// la seconde ne sert plus qu'aux exécutions antérieures à ce relevé.
+/// Les commits d'une branche hors fusions, depuis la branche d'intégration.
+///
+/// Dans le doute — git qui échoue — on compte un : les portes tournent alors
+/// pour rien, ce qui vaut mieux qu'un code intégré sans qu'elles l'aient joué.
+async fn own_commits(repo: &str, integration: &str, branch: &str) -> u32 {
+	git::run_git(
+		std::path::Path::new(repo),
+		&[
+			"rev-list",
+			"--count",
+			"--no-merges",
+			&format!("{integration}..{branch}"),
+		],
+	)
+	.await
+	.ok()
+	.and_then(|raw| raw.trim().parse::<u32>().ok())
+	.unwrap_or(1)
+}
+
 pub(crate) fn verdict_of(session: &str, engine: Option<&str>) -> Option<mission::Verdict> {
 	let releve = executions::for_session(session)
 		.into_iter()
@@ -386,8 +406,16 @@ pub(crate) async fn collect_finished_tasks(app: &AppHandle, id: &str) -> bool {
 			},
 		);
 		// Un rendu qui porte du code passe les portes du dépôt avant d'être
-		// intégrable. Une vérification ne commite rien : rien à juger chez elle.
-		if !verifiers.contains(&task.role) && (commits > 0 || !derive.is_empty()) {
+		// intégrable. Une vérification aussi, dès qu'elle commite : une recette
+		// qui ajoute ses tests apporte du code. Seuls ses commits à elle
+		// comptent, pas les fusions de ses sœurs reçues avant son lancement
+		// (`sync_verifier_worktree`), qui ne lui donnent rien à faire juger.
+		let brings_code = if verifiers.contains(&task.role) {
+			own_commits(&mission.cwd, &mission.branch, &task.branch).await > 0
+		} else {
+			commits > 0 || !derive.is_empty()
+		};
+		if brings_code {
 			let _ = gates::start(id, &task.id);
 		}
 		// Capturé maintenant, tant que l'agent est encore vivant : une fois

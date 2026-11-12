@@ -472,7 +472,13 @@ async fn merge_delivered_tasks(
 		if task.state != TaskState::Delivered || branche.is_empty() {
 			continue;
 		}
-		let decision = mission::gate_decision(task.gate, !gate_commands.is_empty(), verifiers.contains(&task.role));
+		// Une tâche qui vérifie échappe aux portes seulement si elle n'apporte
+		// rien : une recette qui ajoute ses propres tests commite du code comme
+		// les autres. Ses deux commits partaient sinon dans l'intégration sans
+		// que rien ne les ait joués (bac à sable, mission « total du panier »).
+		let own = brings_own_commits(cwd, &branche).await;
+		let judges_only = verifiers.contains(&task.role) && !own;
+		let decision = mission::gate_decision(task.gate, !gate_commands.is_empty(), judges_only);
 		// Rendue avant que les portes existent, ou retrouvée au démarrage :
 		// elle passe les portes comme les autres.
 		let decision = if decision == mission::GateDecision::Start {
@@ -521,7 +527,7 @@ async fn merge_delivered_tasks(
 		// (`sync_verifier_worktree`). La fusionner à son tour ramenait
 		// ces fusions dans la PR : six commits de fusion pour deux
 		// commits de travail. Elle est intégrée sans fusion.
-		if !brings_own_commits(cwd, &branche).await {
+		if !own {
 			mission::set_task_state(&mission.id, &task.id, TaskState::Integrated, "")?;
 			merges.merged.push(branche);
 			continue;
