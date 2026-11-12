@@ -109,6 +109,14 @@ test.describe("missions", () => {
 		await expect(dialog.getByText("Attempt 1 of 3")).toBeVisible();
 		await expect(dialog.getByText("Re-run QA once the per-line rounding is delivered.")).toBeVisible();
 		await expect(dialog.getByText("4d81b7e2c09a")).toHaveCount(0);
+
+		// Une étape guidée : ce que le maître proposait, ce qu'il demandait, et
+		// ce qu'on lui a répondu.
+		await events.getByRole("button", { name: /Breakdown approved/ }).click();
+		await expect(dialog.getByText("Your answers")).toBeVisible();
+		await expect(dialog.getByText("Should QA wait for both the API and the cart")).toBeVisible();
+		await expect(dialog.getByText("Wait for both.")).toBeVisible();
+		await expect(dialog.getByText("Keep the QA last.")).toBeVisible();
 		expect(errors).toEqual([]);
 	});
 

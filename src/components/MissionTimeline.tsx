@@ -8,7 +8,7 @@ import { Button, ErrorNote, Modal, Spinner } from "@/components/ui";
 import { locale } from "@/i18n";
 import { fromIso } from "@/lib/format";
 import { api } from "@/lib/ipc";
-import type { Mission, MissionChange, MissionEvent, TaskState } from "@/lib/types";
+import type { Mission, MissionChange, MissionDraft, MissionEvent, TaskState } from "@/lib/types";
 import { useAsync } from "@/lib/useAsync";
 
 /**
@@ -442,7 +442,7 @@ function Detail({
 				</p>
 			</div>
 
-			<Body change={change} />
+			<Body change={change} mission={mission} />
 
 			{change.kind === "gate" && change.commit ? (
 				// Une clé par événement : passer d'une porte à l'autre referme le
@@ -486,8 +486,52 @@ function Detail({
 	);
 }
 
+/**
+ * La version d'une étape guidée, telle que la mission la garde.
+ *
+ * L'événement ne retient que le numéro de version et le nombre de questions :
+ * le texte, les questions et les réponses vivent déjà dans la mission, une
+ * entrée par version, et rien ne les efface. Les recopier dans le journal en
+ * aurait fait deux sources qui pouvaient diverger.
+ */
+function draftOf(mission: Mission, step: string, version: number): MissionDraft | undefined {
+	const drafts =
+		step === "understanding" ? mission.understanding : step === "approach" ? mission.approach : mission.split;
+	// Une fiche écrite avant les étapes guidées n'a pas ces listes.
+	return (drafts ?? [])[version - 1];
+}
+
+/** Les questions d'une version, avec les réponses quand on les montre. */
+function Questions({ draft, answers }: { draft: MissionDraft; answers?: string[] }) {
+	const { t } = useTranslation("components2");
+	if (draft.questions.length === 0) return null;
+	return (
+		<div className="flex flex-col gap-1.5">
+			<p className="text-[11px] font-semibold text-ink-muted">
+				{answers ? t("missionTimeline.answers") : t("missionTimeline.questionsList")}
+			</p>
+			<ol className="flex flex-col gap-2" aria-label={t("missionTimeline.questionsList")}>
+				{draft.questions.map((question, index) => (
+					<li key={index} className="rounded-xl border border-line-soft px-3 py-2">
+						<p className="text-selectable text-[12.5px] leading-relaxed whitespace-pre-wrap text-ink">
+							{question}
+						</p>
+						{answers ? (
+							<p className="text-selectable mt-1.5 border-l-2 border-accent pl-2 text-[12.5px] leading-relaxed whitespace-pre-wrap text-ink">
+								{answers[index]?.trim() || (
+									<span className="text-ink-faint">{t("missionTimeline.noAnswer")}</span>
+								)}
+							</p>
+						) : null}
+					</li>
+				))}
+			</ol>
+		</div>
+	);
+}
+
 /** Le corps de l'événement : ce qu'il disait à ce moment-là, tel quel. */
-function Body({ change }: { change: MissionChange }) {
+function Body({ change, mission }: { change: MissionChange; mission: Mission }) {
 	const { t } = useTranslation("components2");
 	const { notify } = useCockpit();
 	const text = (label: string, value: string) =>
@@ -511,14 +555,36 @@ function Body({ change }: { change: MissionChange }) {
 					{text(t("missionTimeline.note"), change.note)}
 				</>
 			);
-		case "draft":
+		case "draft": {
+			// Ce que le maître a soumis, et ce qu'il demandait : c'est ce qu'on
+			// relit pour comprendre pourquoi la suite a pris tel chemin.
+			const draft = draftOf(mission, change.step, change.version);
 			return (
-				<p className="text-[13px] text-ink">
-					{t("missionTimeline.questions", { count: change.questions })}
-				</p>
+				<>
+					<p className="text-[13px] text-ink">
+						{t("missionTimeline.questions", { count: change.questions })}
+					</p>
+					{draft?.text.trim() ? (
+						<div className="flex flex-col gap-1">
+							<p className="text-[11px] font-semibold text-ink-muted">{t("missionTimeline.proposal")}</p>
+							<p className="text-selectable max-h-72 overflow-y-auto rounded-xl bg-surface/60 p-3 text-[12.5px] leading-relaxed whitespace-pre-wrap text-ink">
+								{draft.text}
+							</p>
+						</div>
+					) : null}
+					{draft ? <Questions draft={draft} /> : null}
+				</>
 			);
-		case "review":
-			return text(t("missionTimeline.feedback"), change.feedback);
+		}
+		case "review": {
+			const draft = draftOf(mission, change.step, change.version);
+			return (
+				<>
+					{draft ? <Questions draft={draft} answers={draft.review?.answers ?? []} /> : null}
+					{text(t("missionTimeline.feedback"), change.feedback)}
+				</>
+			);
+		}
 		case "taskAdded":
 			return <p className="text-[13px] text-ink">{t("missionTimeline.role", { role: change.role })}</p>;
 		case "task":
