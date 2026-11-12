@@ -639,7 +639,12 @@
 			"reproaches_other": "返工 · {{count}}",
 			"fullBrief": "它的完整指令",
 			"follow": "跟进它的对话",
-			"noAgent": "此子任务尚无智能体。"
+			"noAgent": "此子任务尚无智能体。",
+			"history": "在历史中查看其循环"
+		},
+		"loop": {
+			"attempts": "↺ {{attempts}}/{{max}}",
+			"checksFail": "检查未通过"
 		}
 	},
 	"actions": {

@@ -93,7 +93,7 @@ test.describe("missions", () => {
 		const dialog = page.getByRole("dialog", { name: /^History · Fix cart total/ });
 		await expect(dialog).toBeVisible();
 		// Rien de choisi : on suit le dernier événement.
-		await expect(dialog.getByText("Event 16 of 16")).toBeVisible();
+		await expect(dialog.getByText("Event 17 of 17")).toBeVisible();
 
 		const events = dialog.getByRole("list", { name: "Events" });
 		await events.getByRole("button", { name: /Checks fail · Per-line rounding/ }).click();
@@ -105,6 +105,26 @@ test.describe("missions", () => {
 		await expect(dialog.getByText("Attempt 1 of 3")).toBeVisible();
 		await expect(dialog.getByText("Re-run QA once the per-line rounding is delivered.")).toBeVisible();
 		await expect(dialog.getByText("4d81b7e2c09a")).toHaveCount(0);
+		expect(errors).toEqual([]);
+	});
+
+	test("le graphe montre la boucle de correction et mène à son historique", async ({ page }) => {
+		const errors = watchErrors(page);
+		await page
+			.getByRole("heading", { name: "Fix cart total rounding on multi-currency orders" })
+			.locator("xpath=ancestor::div[contains(@class,'items-start')][1]")
+			.getByRole("button", { name: "Journey" })
+			.click();
+		const graph = page.locator(".mission-graph");
+		// La recette renvoyée une fois, et la porte rouge de l'API.
+		await expect(graph.getByText("↺ 1/3")).toBeVisible();
+		await expect(graph.getByText("checks fail", { exact: true })).toBeVisible();
+
+		await graph.getByText("Functional QA").click();
+		await page.getByRole("button", { name: "See its loop in the history" }).click();
+		const dialog = page.getByRole("dialog", { name: /^History · Fix cart total/ });
+		// Ouvert sur la reprise de cette tâche, pas sur le dernier événement.
+		await expect(dialog.getByText("Attempt 1 of 3")).toBeVisible();
 		expect(errors).toEqual([]);
 	});
 

@@ -1,11 +1,15 @@
 import {
 	Background,
 	BackgroundVariant,
+	BaseEdge,
 	Controls,
+	EdgeLabelRenderer,
+	MarkerType,
 	Handle,
 	Position,
 	ReactFlow,
 	type Edge,
+	type EdgeProps,
 	type Node,
 	type NodeProps,
 	useReactFlow,
@@ -28,6 +32,7 @@ import { AnimatePresence, motion } from "motion/react";
 import { useEffect, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { Markdown } from "@/components/Markdown";
+import { MissionTimelineButton } from "@/components/MissionTimeline";
 import { Badge, Button } from "@/components/ui";
 import { useCockpit } from "@/app/store";
 import { useWorkspace } from "@/app/workspace";
@@ -294,6 +299,12 @@ export function MissionGraph({
 			}
 		}
 
+		// La boucle de correction, sur la tâche qui la parcourt.
+		for (const task of mission.tasks) {
+			const loop = loopOf(task, phases.get(task.id), t);
+			if (loop) edges.push(loop);
+		}
+
 		// Chaque nœud sait dans quel sens partent ses liens.
 		for (const node of nodes) node.data.vertical = vertical;
 		return { nodes, edges };
@@ -321,6 +332,7 @@ export function MissionGraph({
 				onNodesChange={onNodesChange}
 				edges={edges}
 				nodeTypes={NODE_TYPES}
+				edgeTypes={EDGE_TYPES}
 				fitView
 				fitViewOptions={{ padding: 0.12, maxZoom: 1 }}
 				minZoom={0.35}
@@ -342,6 +354,12 @@ export function MissionGraph({
 			</ReactFlow>
 
 			<Legend />
+
+			{/* De ce que la mission est à ce qui lui est arrivé : la boucle se
+			    voit ici, son déroulé se lit dans l'historique. */}
+			<div className="absolute top-3 right-3 rounded-full bg-surface/90 shadow-card backdrop-blur">
+				<MissionTimelineButton mission={mission} />
+			</div>
 
 			<AnimatePresence>
 				{picked ? (
@@ -386,6 +404,96 @@ function Refit() {
 	}, [ready, width, height, fitView]);
 	return null;
 }
+
+/** Les reprises au-delà desquelles une tâche rend la main : `mission::MAX_ATTEMPTS`. */
+const MAX_ATTEMPTS = 3;
+
+interface LoopData extends Record<string, unknown> {
+	label: string;
+	tone: string;
+}
+
+/**
+ * La boucle d'une tâche renvoyée en correction, ou dont les portes viennent
+ * d'échouer.
+ *
+ * La reprise ne se lisait qu'à un compteur dans un coin du nœud, et une porte
+ * rouge qu'à une ligne de détail : rien ne disait que la tâche allait repartir
+ * d'elle-même, ni combien de tours il lui restait avant de rendre la main.
+ * Une flèche qui revient sur la tâche le montre sans qu'on ait à lire.
+ *
+ * Rien pour une tâche qui n'a jamais été renvoyée et dont les portes ne
+ * retiennent rien : la boucle n'existe que lorsqu'elle a servi, ou va servir.
+ */
+function loopOf(
+	task: MissionTask,
+	phase: Phase | undefined,
+	t: ReturnType<typeof useTranslation>["t"],
+): Edge<LoopData> | null {
+	const checksFail = task.gate === "failed";
+	if (task.attempts === 0 && !checksFail) return null;
+	const exhausted = task.attempts >= MAX_ATTEMPTS;
+	const tone =
+		checksFail || exhausted
+			? "var(--color-critical)"
+			: phase === "live"
+				? "var(--color-accent)"
+				: "var(--color-warning)";
+	const parts = [
+		task.attempts > 0 ? t("missionGraph.loop.attempts", { attempts: task.attempts, max: MAX_ATTEMPTS }) : "",
+		checksFail ? t("missionGraph.loop.checksFail") : "",
+	].filter(Boolean);
+	return {
+		id: `${task.id}->loop`,
+		source: task.id,
+		target: task.id,
+		type: "loop",
+		animated: phase === "live",
+		data: { label: parts.join(" · "), tone },
+		style: { stroke: tone, strokeWidth: 1.8 },
+		markerEnd: { type: MarkerType.ArrowClosed, color: tone, width: 16, height: 16 },
+	};
+}
+
+/**
+ * Une arche qui part de la sortie du nœud et revient à son entrée.
+ *
+ * De gauche à droite, elle passe au-dessus ; de haut en bas, sur le côté, dans
+ * l'espace laissé entre deux couloirs (`LANE` − `NODE_W`). Le libellé se pose
+ * au sommet de l'arche, là où la courbe de Bézier atteint son extrême.
+ */
+function LoopEdge({ id, sourceX, sourceY, targetX, targetY, sourcePosition, markerEnd, style, data }: EdgeProps<Edge<LoopData>>) {
+	const vertical = sourcePosition === Position.Bottom;
+	const reach = vertical ? 140 : 96;
+	const path = vertical
+		? `M ${sourceX} ${sourceY} C ${sourceX + reach} ${sourceY + 56}, ${targetX + reach} ${targetY - 56}, ${targetX} ${targetY}`
+		: `M ${sourceX} ${sourceY} C ${sourceX + 56} ${sourceY - reach}, ${targetX - 56} ${targetY - reach}, ${targetX} ${targetY}`;
+	// Sommet d'une Bézier cubique symétrique : les points de contrôle y pèsent
+	// 3/4, les extrémités 1/4.
+	const labelX = vertical ? sourceX + (reach * 3) / 4 : (sourceX + targetX) / 2;
+	const labelY = vertical ? (sourceY + targetY) / 2 : sourceY - (reach * 3) / 4;
+	return (
+		<>
+			<BaseEdge id={id} path={path} markerEnd={markerEnd} style={style} />
+			{data?.label ? (
+				<EdgeLabelRenderer>
+					<div
+						className="nodrag nopan pointer-events-none absolute rounded-full border bg-surface px-1.5 py-px font-mono text-[9.5px] font-semibold whitespace-nowrap"
+						style={{
+							transform: `translate(-50%, -50%) translate(${labelX}px, ${labelY}px)`,
+							color: data.tone,
+							borderColor: `color-mix(in srgb, ${data.tone} 40%, transparent)`,
+						}}
+					>
+						{data.label}
+					</div>
+				</EdgeLabelRenderer>
+			) : null}
+		</>
+	);
+}
+
+const EDGE_TYPES = { loop: LoopEdge };
 
 function edge(source: string, target: string, from?: Phase, to?: Phase): Edge {
 	const flowing = from === "done" && (to === "live" || to === "yours");
@@ -597,6 +705,14 @@ function TaskDetail({
 						<Markdown source={task.brief} />
 					</div>
 				</details>
+			) : null}
+
+			{task.attempts > 0 || task.gate === "failed" ? (
+				<MissionTimelineButton
+					mission={mission}
+					focusTask={task.id}
+					label={t("missionGraph.detail.history")}
+				/>
 			) : null}
 
 			<div className="mt-auto flex gap-2">

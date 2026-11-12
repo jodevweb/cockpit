@@ -1770,6 +1770,9 @@ const REPONSES: Record<string, unknown> = {
 			cwd: "/Users/demo/code/storefront",
 			masterSession: "agent-1",
 			state: "running",
+			// Guidée : son parcours s'ouvre sur le graphe en direct, avec la boucle
+			// d'une recette renvoyée et celle d'une porte rouge.
+			guided: true,
 			plan: "Three tasks: back end, front end, QA.",
 			prUrl: "",
 			summary: "",
@@ -2521,12 +2524,16 @@ const REPONSES: Record<string, unknown> = {
 			"   expected 10.01 to be 10",
 		].join("\n");
 		return [
-			{ at: ago(240), change: { kind: "opened", guided: false } },
+			{ at: ago(240), change: { kind: "opened", guided: true } },
 			{ at: ago(226), change: { kind: "state", from: "planning", to: "awaitingApproval", note: "" } },
-			{ at: ago(226), change: { kind: "plan", tasks: 3 } },
+			{ at: ago(226), change: { kind: "draft", step: "split", version: 1, questions: 0 } },
 			{ at: ago(226), change: { kind: "taskAdded", task: "t1", title: "Per-line rounding in the API", role: "backend" } },
 			{ at: ago(226), change: { kind: "taskAdded", task: "t2", title: "Cart totals", role: "frontend" } },
 			{ at: ago(226), change: { kind: "taskAdded", task: "t3", title: "Functional QA", role: "qa" } },
+			{
+				at: ago(180),
+				change: { kind: "review", step: "split", version: 1, approved: true, feedback: "Keep the QA last." },
+			},
 			{ at: ago(180), change: { kind: "state", from: "awaitingApproval", to: "running", note: "" } },
 			{ at: ago(150), change: { kind: "task", task: "t1", from: "planned", to: "running", note: "" } },
 			{ at: ago(120), change: { kind: "task", task: "t3", from: "planned", to: "running", note: "" } },
