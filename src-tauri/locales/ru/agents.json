@@ -123,81 +123,10 @@
 			"broken": "нарушено: {{count}}"
 		}
 	},
-	"team": {
-		"priority": {
-			"urgent": "Срочно",
-			"high": "Высокий",
-			"medium": "Средний",
-			"low": "Низкий"
-		},
+	"pulls": {
 		"errors": {
 			"unknown": "ошибка",
-			"linear": "Linear: {{message}}",
-			"github": "GitHub: {{message}}",
-			"noMembers": "Участники не заявлены: добавьте команду в Настройки → Команда. Каждому нужен идентификатор в трекере задач, чтобы к нему можно было привязать его тикеты, и логин GitHub для его pull requests.",
-			"githubRepoMissing": "Укажите `github.repo` (например, acme/monorepo) в настройках."
-		},
-		"narrative": {
-			"theirTopics": "свои темы",
-			"and": "{{list}} и {{last}}",
-			"activeTickets_one": "{{count}} активный тикет",
-			"activeTickets_few": "{{count}} активных тикета",
-			"activeTickets_many": "{{count}} активных тикетов",
-			"activeTickets_other": "{{count}} активного тикета",
-			"reviewTickets_one": "{{count}} тикет на ревью",
-			"reviewTickets_few": "{{count}} тикета на ревью",
-			"reviewTickets_many": "{{count}} тикетов на ревью",
-			"reviewTickets_other": "{{count}} тикета на ревью",
-			"openPrs_one": "{{count}} открытый PR",
-			"openPrs_few": "{{count}} открытых PR",
-			"openPrs_many": "{{count}} открытых PR",
-			"openPrs_other": "{{count}} открытого PR",
-			"newOpenPrs_one": "{{count}} новый открытый PR",
-			"newOpenPrs_few": "{{count}} новых открытых PR",
-			"newOpenPrs_many": "{{count}} новых открытых PR",
-			"newOpenPrs_other": "{{count}} нового открытого PR",
-			"prs_one": "{{count}} PR",
-			"prs_few": "{{count}} PR",
-			"prs_many": "{{count}} PR",
-			"prs_other": "{{count}} PR",
-			"blockingPoints_one": "{{count}} блокирующая проблема",
-			"blockingPoints_few": "{{count}} блокирующие проблемы",
-			"blockingPoints_many": "{{count}} блокирующих проблем",
-			"blockingPoints_other": "{{count}} блокирующей проблемы",
-			"nothingActiveDev": "У {{name}} сейчас нет ничего активного и ни одного открытого PR.",
-			"nothingActive": "У {{name}} здесь нет отслеживаемых активных тем.",
-			"variedTopics": "{{name}} продвигается по разным темам{{load}}.",
-			"alsoOn": ", а также {{themes}}",
-			"mostlyOn": "{{name}} в основном занимается {{theme}}{{tail}}{{load}}.",
-			"workingOn": "{{name}} работает над {{themes}}{{load}}.",
-			"nothingMerged": "С прошлого дейли ничего не слито.",
-			"openedNothingMerged": "{{opened}} с прошлого дейли, пока ничего не слито.",
-			"shippedOn": " по {{themes}}",
-			"andOpened": ", и {{opened}}",
-			"shipped": "Поставлено {{prs}}{{themes}} с прошлого дейли{{opened}}.",
-			"toChallenge": "обсудить: {{count}}",
-			"toReview": "{{prs}} на ревью для других",
-			"nothingStuck": "С их стороны ничего не застряло.",
-			"toWatch": "Под наблюдением: {{items}}."
-		},
-		"days": "{{count}} дн.",
-		"flags": {
-			"blockedOne": "{{id}} помечен как Blocked — что его разблокирует?",
-			"blockedMany": "{{count}} тикетов помечены как Blocked ({{ids}}) — что их разблокирует?",
-			"stacked": "PR #{{number}} основан на `{{base}}` (не dev) — сначала слить базу?",
-			"ciFailing": "PR #{{number}} падает в CI — исправить до ревью/слияния.",
-			"approved": "PR #{{number}} одобрен, но не слит — что мешает слиянию?",
-			"changesRequested": "PR #{{number}}: запрошены правки — автору нужно их внести.",
-			"reviewStaleOne": "PR #{{number}} ждёт ревью уже {{age}} дн. — найти время на ревью?",
-			"reviewStaleMany": "{{count}} PR ждут ревью более {{days}} дн. ({{numbers}}, самый старый — {{age}} дн.) — запланировать ревью?",
-			"draftStale": "PR в черновике более {{days}} дн.: {{count}} ({{numbers}}) — ещё актуально?",
-			"inProgressNoPrOne": "{{id}} в In Progress без PR более {{days}} дн. — как продвигается?",
-			"inProgressNoPrMany": "{{count}} тикетов в In Progress без PR более {{days}} дн. ({{ids}}) — как продвигаются?",
-			"reviewStale": "Тикетов на ревью более {{days}} дн.: {{count}} ({{ids}}) — кого ждём?",
-			"wip": "{{count}} тикетов в In Progress параллельно — расставить приоритеты / сфокусироваться?",
-			"assigneeMismatch": "{{issue}} назначен на {{name}}, но код пишет @{{author}} (PR #{{number}}) — переназначить?",
-			"idleNothing": "нет открытых PR и активных тикетов — над чем вы работаете?",
-			"idleStale": "нет открытых PR, а у активных тикетов нет недавней активности — свободны? заблокированы?"
+			"github": "GitHub: {{message}}"
 		}
 	},
 	"permanence": {

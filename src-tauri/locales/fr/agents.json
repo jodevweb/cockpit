@@ -113,69 +113,10 @@
 			"broken": "{{count}} enfreinte(s)"
 		}
 	},
-	"team": {
-		"priority": {
-			"urgent": "Urgent",
-			"high": "Haute",
-			"medium": "Moyenne",
-			"low": "Basse"
-		},
+	"pulls": {
 		"errors": {
 			"unknown": "erreur",
-			"linear": "Linear : {{message}}",
-			"github": "GitHub : {{message}}",
-			"noMembers": "Aucun membre déclaré : ajoute l'équipe dans Réglages → Équipe. Chacun a besoin de son identifiant dans le suivi de tâches pour qu'on lui rattache ses tickets, et de son login GitHub pour ses pull requests.",
-			"githubRepoMissing": "Renseigne `github.repo` (ex. acme/monorepo) dans Réglages."
-		},
-		"narrative": {
-			"theirTopics": "ses sujets",
-			"and": "{{list}} et {{last}}",
-			"activeTickets_one": "{{count}} ticket actif",
-			"activeTickets_other": "{{count}} tickets actifs",
-			"reviewTickets_one": "{{count}} ticket en review",
-			"reviewTickets_other": "{{count}} tickets en review",
-			"openPrs_one": "{{count}} PR ouverte",
-			"openPrs_other": "{{count}} PR ouvertes",
-			"newOpenPrs_one": "{{count}} nouvelle PR ouverte",
-			"newOpenPrs_other": "{{count}} nouvelles PR ouvertes",
-			"prs_one": "{{count}} PR",
-			"prs_other": "{{count}} PR",
-			"blockingPoints_one": "{{count}} point bloquant",
-			"blockingPoints_other": "{{count}} points bloquants",
-			"nothingActiveDev": "{{name}} n'a rien d'actif ni de PR ouverte en ce moment.",
-			"nothingActive": "{{name}} n'a pas de sujet actif suivi ici.",
-			"variedTopics": "{{name}} avance sur des sujets variés{{load}}.",
-			"alsoOn": ", avec aussi {{themes}}",
-			"mostlyOn": "{{name}} est surtout sur {{theme}}{{tail}}{{load}}.",
-			"workingOn": "{{name}} travaille sur {{themes}}{{load}}.",
-			"nothingMerged": "Rien de mergé depuis le dernier daily.",
-			"openedNothingMerged": "{{opened}} depuis le dernier daily, rien de mergé encore.",
-			"shippedOn": " sur {{themes}}",
-			"andOpened": ", et {{opened}}",
-			"shipped": "A livré {{prs}}{{themes}} depuis le dernier daily{{opened}}.",
-			"toChallenge": "{{count}} à challenger",
-			"toReview": "{{prs}} à reviewer pour les autres",
-			"nothingStuck": "Rien qui coince de son côté.",
-			"toWatch": "À surveiller : {{items}}."
-		},
-		"days": "{{count}}j",
-		"flags": {
-			"blockedOne": "{{id}} marqué Blocked — qu'est-ce qui débloque ?",
-			"blockedMany": "{{count}} tickets marqués Blocked ({{ids}}) — qu'est-ce qui débloque ?",
-			"stacked": "PR #{{number}} basée sur `{{base}}` (pas dev) — merger la base d'abord ?",
-			"ciFailing": "PR #{{number}} en échec CI — à corriger avant review/merge.",
-			"approved": "PR #{{number}} approuvée mais non mergée — qu'est-ce qui bloque le merge ?",
-			"changesRequested": "PR #{{number}} : changements demandés — à traiter côté auteur.",
-			"reviewStaleOne": "PR #{{number}} en attente de review depuis {{age}}j — créneau de review ?",
-			"reviewStaleMany": "{{count}} PR en attente de review depuis >{{days}}j ({{numbers}}, plus ancienne {{age}}j) — review à planifier ?",
-			"draftStale": "{{count}} PR en draft depuis >{{days}}j ({{numbers}}) — encore d'actualité ?",
-			"inProgressNoPrOne": "{{id}} est In Progress sans PR depuis >{{days}}j — où ça en est ?",
-			"inProgressNoPrMany": "{{count}} tickets In Progress sans PR depuis >{{days}}j ({{ids}}) — où ça en est ?",
-			"reviewStale": "{{count}} ticket(s) en review depuis >{{days}}j ({{ids}}) — en attente de qui ?",
-			"wip": "{{count}} tickets In Progress en parallèle — à prioriser / recentrer ?",
-			"assigneeMismatch": "{{issue}} assigné à {{name}} mais codé par @{{author}} (PR #{{number}}) — réassigner ?",
-			"idleNothing": "aucune PR ouverte ni ticket actif — sur quoi es-tu ?",
-			"idleStale": "aucune PR ouverte et tickets actifs sans activité récente — dispo ? bloqué ?"
+			"github": "GitHub : {{message}}"
 		}
 	},
 	"permanence": {

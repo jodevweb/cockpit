@@ -61,7 +61,6 @@ import type {
 	Metrics,
 	Lesson,
 	PermissionRequest,
-	ProjectHealth,
 	ProjectInput,
 	Prompt,
 	Mission,
@@ -89,7 +88,6 @@ import type {
 	TerminalExit,
 	TerminalInfo,
 	Commit,
-	TeamBoard,
 	UsageLimits,
 	UsageReport,
 	UsageSpend,
@@ -153,8 +151,6 @@ export const api = {
 		updateProject: (patch: Record<string, unknown>, project?: string) =>
 			call<ConfigView>("project_update", { patch, project }),
 		removeProject: (id: string) => call<ConfigView>("project_remove", { id }),
-		/** Santé de tous les projets, chacun avec ses propres réglages. */
-		health: () => call<ProjectHealth[]>("projects_health"),
 		// Les jetons ne redescendant pas dans le webview, un environnement se
 		// modifie par une commande dédiée : un token vide conserve l'existant.
 		saveTriggerEnv: (name: string, token?: string, projectRef?: string) =>
@@ -269,10 +265,6 @@ export const api = {
 			call<WorktreeCommand>("worktree_command", { action, branch, path }),
 		mergePullRequest: (number: number, method = "squash") =>
 			call<void>("pull_request_merge", { number, method }),
-	},
-
-	team: {
-		board: (cycleOnly = true) => call<TeamBoard>("team_board", { cycleOnly }),
 	},
 
 	agents: {

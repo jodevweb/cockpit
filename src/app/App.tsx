@@ -16,10 +16,8 @@ import { DocsView } from "@/views/DocsView";
 import { GitView } from "@/views/GitView";
 import { InfraView } from "@/views/InfraView";
 import { ObservabilityView } from "@/views/ObservabilityView";
-import { OverviewView } from "@/views/OverviewView";
 import { ScriptsView } from "@/views/ScriptsView";
 import { SettingsView } from "@/views/SettingsView";
-import { TeamView } from "@/views/TeamView";
 import { MissionsView } from "@/views/MissionsView";
 import { PermanenceView } from "@/views/PermanenceView";
 import { WorktreesView } from "@/views/WorktreesView";
@@ -45,8 +43,6 @@ import { WorkspaceProvider, useWorkspace } from "./workspace";
 /** Les chiffres suivent l'ordre de l'atelier — voir `GROUPS` dans `Sidebar.tsx`. */
 const SHORTCUTS: Record<string, ViewId> = {
 	"1": "today",
-	"2": "overview",
-	"3": "team",
 	"4": "agents",
 	"5": "docs",
 	"6": "delivery",
@@ -204,8 +200,6 @@ function Shell() {
 					{view === "today" ? <TodayView /> : null}
 					{view === "decisions" ? <DecisionsView /> : null}
 					{view === "recap" ? <RecapView /> : null}
-					{view === "overview" ? <OverviewView /> : null}
-					{view === "team" ? <TeamView /> : null}
 					{view === "agents" ? <AgentsView /> : null}
 					{view === "methods" ? <MethodsView /> : null}
 					{view === "replay" ? <ReplayView /> : null}

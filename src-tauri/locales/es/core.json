@@ -59,7 +59,7 @@
 	},
 	"tickets": {
 		"noTracker": "No hay gestor de tickets configurado: introduce un token de Linear, un proyecto de GitLab o un repositorio de GitHub.",
-		"linearTeamMissing": "Falta el identificador del equipo de Linear: introdúcelo en Ajustes → Equipo y flujo. Es el UUID visible en la URL de los ajustes del equipo, no la clave que prefija los tickets."
+		"linearTeamMissing": "Falta el identificador del equipo de Linear: introdúcelo en Ajustes → Servicios. Es el UUID visible en la URL de los ajustes del equipo, no la clave que prefija los tickets."
 	},
 	"relay": {
 		"settingUnreadable": "Ajuste ilegible: {{error}}",
@@ -352,7 +352,6 @@
 			"prFromBase": "`{{branch}}` es la rama base: crea una rama dedicada antes de abrir una PR.",
 			"prRefused": "PR rechazada ({{status}}): {{message}}",
 			"prCreation": "Creación de la PR",
-			"repoOwnerFormat": "`github.repo` debe tener la forma propietario/repo.",
 			"mergeRefused": "Merge rechazado ({{status}}): {{message}}",
 			"prMerge": "Fusión de la PR",
 			"prTitleRequired": "Una pull request necesita un título."

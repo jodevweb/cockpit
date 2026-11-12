@@ -38,8 +38,6 @@ export type ViewId =
 	// La journée en images : ce que chaque agent a fait, à regarder plutôt
 	// qu'à lire.
 	| "recap"
-	| "overview"
-	| "team"
 	| "agents"
 	// Les plugins (skills, hooks, serveurs MCP) qu'un projet peut adopter, lus
 	// avant d'être installés.
@@ -167,7 +165,7 @@ const HANDBACK_SILENCE = 20;
 
 export function CockpitProvider({ children }: { children: ReactNode }) {
 	// L'écran d'accueil est celui qui dit par quoi commencer.
-	// L'écran d'entrée, ou celui que l'aperçu demande. `?view=overview` ouvre
+	// L'écran d'entrée, ou celui que l'aperçu demande. `?view=missions` ouvre
 	// directement une vue quand l'app tourne dans un navigateur : sans cela, on ne
 	// peut en capturer aucune autre que la première, et l'aperçu ne sert qu'à
 	// moitié.

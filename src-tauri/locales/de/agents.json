@@ -113,69 +113,10 @@
 			"broken": "{{count}} verletzt"
 		}
 	},
-	"team": {
-		"priority": {
-			"urgent": "Dringend",
-			"high": "Hoch",
-			"medium": "Mittel",
-			"low": "Niedrig"
-		},
+	"pulls": {
 		"errors": {
 			"unknown": "Fehler",
-			"linear": "Linear: {{message}}",
-			"github": "GitHub: {{message}}",
-			"noMembers": "Keine Mitglieder deklariert: Füge das Team unter Einstellungen → Team hinzu. Jede Person braucht ihre Kennung im Aufgaben-Tracker, damit ihr die Tickets zugeordnet werden, und ihren GitHub-Login für ihre Pull Requests.",
-			"githubRepoMissing": "Trage `github.repo` (z. B. acme/monorepo) in den Einstellungen ein."
-		},
-		"narrative": {
-			"theirTopics": "ihre Themen",
-			"and": "{{list}} und {{last}}",
-			"activeTickets_one": "{{count}} aktives Ticket",
-			"activeTickets_other": "{{count}} aktive Tickets",
-			"reviewTickets_one": "{{count}} Ticket im Review",
-			"reviewTickets_other": "{{count}} Tickets im Review",
-			"openPrs_one": "{{count}} offener PR",
-			"openPrs_other": "{{count}} offene PRs",
-			"newOpenPrs_one": "{{count}} neuer PR geöffnet",
-			"newOpenPrs_other": "{{count}} neue PRs geöffnet",
-			"prs_one": "{{count}} PR",
-			"prs_other": "{{count}} PRs",
-			"blockingPoints_one": "{{count}} blockierender Punkt",
-			"blockingPoints_other": "{{count}} blockierende Punkte",
-			"nothingActiveDev": "{{name}} hat gerade nichts Aktives und keinen offenen PR.",
-			"nothingActive": "{{name}} hat hier kein aktives Thema erfasst.",
-			"variedTopics": "{{name}} kommt bei verschiedenen Themen voran{{load}}.",
-			"alsoOn": ", und außerdem {{themes}}",
-			"mostlyOn": "{{name}} arbeitet vor allem an {{theme}}{{tail}}{{load}}.",
-			"workingOn": "{{name}} arbeitet an {{themes}}{{load}}.",
-			"nothingMerged": "Seit dem letzten Daily nichts gemergt.",
-			"openedNothingMerged": "{{opened}} seit dem letzten Daily, noch nichts gemergt.",
-			"shippedOn": " zu {{themes}}",
-			"andOpened": ", und {{opened}}",
-			"shipped": "{{prs}}{{themes}} seit dem letzten Daily ausgeliefert{{opened}}.",
-			"toChallenge": "{{count}} zu hinterfragen",
-			"toReview": "{{prs}} für andere zu reviewen",
-			"nothingStuck": "Bei ihnen hängt nichts.",
-			"toWatch": "Im Blick behalten: {{items}}."
-		},
-		"days": "{{count}} T.",
-		"flags": {
-			"blockedOne": "{{id}} als Blocked markiert — was würde es freigeben?",
-			"blockedMany": "{{count}} Tickets als Blocked markiert ({{ids}}) — was würde sie freigeben?",
-			"stacked": "PR #{{number}} basiert auf `{{base}}` (nicht dev) — zuerst die Basis mergen?",
-			"ciFailing": "PR #{{number}} scheitert in der CI — vor Review/Merge beheben.",
-			"approved": "PR #{{number}} freigegeben, aber nicht gemergt — was blockiert den Merge?",
-			"changesRequested": "PR #{{number}}: Änderungen angefordert — Sache des Autors.",
-			"reviewStaleOne": "PR #{{number}} wartet seit {{age}} T. auf ein Review — einen Review-Slot finden?",
-			"reviewStaleMany": "{{count}} PRs warten seit >{{days}} T. auf ein Review ({{numbers}}, ältester {{age}} T.) — ein Review einplanen?",
-			"draftStale": "{{count}} PR(s) seit >{{days}} T. im Entwurf ({{numbers}}) — noch relevant?",
-			"inProgressNoPrOne": "{{id}} ist seit >{{days}} T. In Progress ohne PR — wie ist der Stand?",
-			"inProgressNoPrMany": "{{count}} Tickets seit >{{days}} T. In Progress ohne PR ({{ids}}) — wie ist der Stand?",
-			"reviewStale": "{{count}} Ticket(s) seit >{{days}} T. im Review ({{ids}}) — wartet auf wen?",
-			"wip": "{{count}} Tickets parallel In Progress — priorisieren / fokussieren?",
-			"assigneeMismatch": "{{issue}} ist {{name}} zugewiesen, aber von @{{author}} programmiert (PR #{{number}}) — neu zuweisen?",
-			"idleNothing": "kein offener PR und kein aktives Ticket — woran arbeitest du?",
-			"idleStale": "kein offener PR und aktive Tickets ohne jüngste Aktivität — verfügbar? blockiert?"
+			"github": "GitHub: {{message}}"
 		}
 	},
 	"permanence": {

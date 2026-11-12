@@ -59,6 +59,12 @@ pub struct LinearConfig {
 	pub token: String,
 	/// Clé d'équipe (ex. `NW`) pour filtrer le backlog.
 	pub team_key: String,
+	/// Identifiant (UUID) de l'équipe Linear : ses états, ses membres et ses
+	/// labels proposés à l'édition d'un ticket.
+	///
+	/// Il vivait dans la section `[team]`, partie avec l'écran Équipe ; il est
+	/// repris de là au chargement (voir `LegacyTeam`).
+	pub team_id: String,
 }
 
 /// Un moteur d'agent : le programme qui fait tourner un agent, et ce qu'il sait.
@@ -492,47 +498,35 @@ pub struct StripeConfig {
 	pub token: String,
 }
 
-/// Un membre de l'équipe, tel qu'il faut le reconnaître dans chaque outil :
-/// Linear l'identifie par un UUID, GitHub par un ou plusieurs logins, Sentry
-/// par l'email de son compte.
-// Comme les rôles : l'interface lit du camelCase, les fichiers déjà écrits en
-// snake_case restent lus grâce aux alias.
-#[derive(Debug, Clone, Serialize, Deserialize, Default)]
-#[serde(default, rename_all = "camelCase")]
-pub struct TeamMemberConfig {
-	pub name: String,
-	/// `dev` ou `product` : seuls les devs sont attendus sur des PR.
-	pub role: String,
-	#[serde(alias = "role_label")]
-	pub role_label: String,
-	#[serde(alias = "linear_id")]
-	pub linear_id: String,
-	pub github: String,
-	/// Anciens comptes ou comptes secondaires, pour éviter les faux « réassigner ».
-	#[serde(alias = "github_aliases")]
-	pub github_aliases: Vec<String>,
-	#[serde(alias = "sentry_emails")]
-	pub sentry_emails: Vec<String>,
-	#[serde(alias = "sentry_names")]
-	pub sentry_names: Vec<String>,
+/// L'ancienne section `[team]`, telle que les fichiers déjà écrits la portent.
+///
+/// L'écran Équipe et le daily sont partis, et avec eux les membres. Seul
+/// l'identifiant d'équipe Linear servait encore — aux options d'édition d'un
+/// ticket — : on le relit ici pour le reporter sous `[linear]`, et la section
+/// disparaît du fichier à la sauvegarde suivante. Le reste (`members`…) est
+/// ignoré, sans faire échouer la lecture.
+#[derive(Debug, Clone, Deserialize, Default)]
+#[serde(default)]
+pub struct LegacyTeam {
+	#[serde(alias = "linearTeamId")]
+	linear_team_id: String,
 }
 
-#[derive(Debug, Clone, Serialize, Deserialize, Default)]
-#[serde(default, rename_all = "camelCase")]
-pub struct TeamConfig {
-	/// Équipe Linear dont on lit le cycle actif.
-	#[serde(alias = "linear_team_id")]
-	pub linear_team_id: String,
-	/// Vide = personne : les écrans qui en dépendent le disent, plutôt que de
-	/// montrer l'équipe de quelqu'un d'autre.
-	pub members: Vec<TeamMemberConfig>,
+impl LegacyTeam {
+	/// Reporte l'identifiant sous `[linear]` quand celui-ci n'en déclare pas.
+	fn adopt_into(&mut self, linear: &mut LinearConfig) {
+		let legacy = std::mem::take(&mut self.linear_team_id);
+		if linear.team_id.trim().is_empty() && !legacy.trim().is_empty() {
+			linear.team_id = legacy.trim().to_string();
+		}
+	}
 }
 
 /// Ce qui décrit la façon de travailler d'une équipe, plutôt que ses outils.
 ///
-/// Ces valeurs étaient gravées dans `team.rs` : des états de suivi précis, des
-/// branches, ses jours de daily, ses sujets métier. Le cockpit ne servait donc
-/// qu'à une seule équipe. Elles descendent ici, avec des valeurs par défaut
+/// Ces valeurs étaient gravées dans le code : des états de suivi précis, des
+/// branches, des commandes de worktree. Le cockpit ne servait donc qu'à une
+/// seule équipe. Elles descendent ici, avec des valeurs par défaut
 /// génériques — une équipe qui nomme ses colonnes autrement n'a qu'à le dire.
 // L'interface lit du camelCase, comme pour les rôles : ces champs sortaient en
 // snake_case, si bien que l'écran des réglages les trouvait vides et
@@ -545,24 +539,10 @@ pub struct WorkflowConfig {
 	/// signale une PR empilée.
 	#[serde(alias = "base_branches")]
 	pub base_branches: Vec<String>,
-	/// États du suivi de tâches, par phase. Ce qui n'y figure pas est « à venir ».
-	#[serde(alias = "active_states")]
-	pub active_states: Vec<String>,
-	#[serde(alias = "review_states")]
-	pub review_states: Vec<String>,
+	/// États du suivi de tâches qui valent « terminé » : la carte et l'écran
+	/// Aujourd'hui rangent ces tickets dans ce qui est livré.
 	#[serde(alias = "done_states")]
 	pub done_states: Vec<String>,
-	/// L'état qui signale un ticket bloqué, quand l'équipe en a un.
-	#[serde(alias = "blocked_state")]
-	pub blocked_state: String,
-	/// Jours où l'équipe se réunit : le daily raconte ce qui s'est passé depuis
-	/// le précédent. `1` = lundi.
-	#[serde(alias = "daily_weekdays")]
-	pub daily_weekdays: Vec<u8>,
-	/// Sujets métier reconnus dans les titres, pour raconter « il est sur la
-	/// facturation » plutôt qu'aligner des identifiants. Vide = pas de thème,
-	/// la narration se rabat sur les titres eux-mêmes.
-	pub themes: Vec<ThemeConfig>,
 	/// Commande d'équipe qui ouvre une pull request — `/pull-request-creation`,
 	/// typiquement.
 	///
@@ -1502,17 +1482,6 @@ impl SandboxConfig {
 	}
 }
 
-#[derive(Debug, Clone, Serialize, Deserialize, Default)]
-#[serde(default)]
-pub struct ThemeConfig {
-	/// Nom court, tel qu'il s'affiche.
-	pub label: String,
-	/// Formulation avec article, pour les phrases : « la livraison ».
-	pub phrase: String,
-	/// Mots-clés cherchés dans les titres, en minuscules et sans accents.
-	pub keywords: Vec<String>,
-}
-
 /// Tout vide par défaut : une liste absente se distingue ainsi d'une liste
 /// choisie, et chaque usage applique son propre repli générique. Sans cette
 /// distinction, impossible de savoir s'il faut semer les réglages d'une
@@ -1521,12 +1490,7 @@ impl Default for WorkflowConfig {
 	fn default() -> Self {
 		Self {
 			base_branches: Vec::new(),
-			active_states: Vec::new(),
-			review_states: Vec::new(),
 			done_states: Vec::new(),
-			blocked_state: "Blocked".into(),
-			daily_weekdays: Vec::new(),
-			themes: Vec::new(),
 			pr_command: String::new(),
 			worktree_command: String::new(),
 			worktree_remove_command: String::new(),
@@ -1750,8 +1714,6 @@ pub struct ProjectConfig {
 	pub name: String,
 	/// Teinte du projet dans l'interface ; vide = couleur d'accent.
 	pub color: String,
-	/// Projet sans équipe : le daily et la revue collective n'ont pas lieu d'être.
-	pub solo: bool,
 
 	// Réglages propres au projet. Mêmes noms que les sections globales, pour
 	// qu'un même patch s'applique indifféremment à l'un ou à l'autre.
@@ -1766,7 +1728,9 @@ pub struct ProjectConfig {
 	pub railway: RailwayConfig,
 	pub betterstack: BetterstackConfig,
 	pub stripe: StripeConfig,
-	pub team: TeamConfig,
+	/// Lue pour reprendre l'identifiant d'équipe Linear, jamais réécrite.
+	#[serde(skip_serializing)]
+	pub team: LegacyTeam,
 	pub workflow: WorkflowConfig,
 	/// Rôles des agents de mission, propres à ce projet.
 	///
@@ -1865,6 +1829,7 @@ impl ProjectConfig {
 			base.sentry.org = self.sentry.org.trim().to_string();
 			base.sentry.projects = self.sentry.projects.clone();
 			base.linear.team_key = self.linear.team_key.trim().to_string();
+			base.linear.team_id = self.linear.team_id.trim().to_string();
 			base.trigger.project_ref = self.trigger.project_ref.trim().to_string();
 			base.gitlab.project = self.gitlab.project.trim().to_string();
 		} else {
@@ -1872,6 +1837,7 @@ impl ProjectConfig {
 			base.sentry.org = inherit(&self.sentry.org, &base.sentry.org);
 			base.sentry.projects = inherit_list(&self.sentry.projects, &base.sentry.projects);
 			base.linear.team_key = inherit(&self.linear.team_key, &base.linear.team_key);
+			base.linear.team_id = inherit(&self.linear.team_id, &base.linear.team_id);
 			base.trigger.project_ref = inherit(&self.trigger.project_ref, &base.trigger.project_ref);
 			base.gitlab.project = inherit(&self.gitlab.project, &base.gitlab.project);
 		}
@@ -1945,23 +1911,8 @@ impl ProjectConfig {
 		if !self.workflow.base_branches.is_empty() {
 			base.workflow.base_branches = self.workflow.base_branches.clone();
 		}
-		if !self.workflow.active_states.is_empty() {
-			base.workflow.active_states = self.workflow.active_states.clone();
-		}
-		if !self.workflow.review_states.is_empty() {
-			base.workflow.review_states = self.workflow.review_states.clone();
-		}
 		if !self.workflow.done_states.is_empty() {
 			base.workflow.done_states = self.workflow.done_states.clone();
-		}
-		if !self.workflow.blocked_state.trim().is_empty() {
-			base.workflow.blocked_state = self.workflow.blocked_state.clone();
-		}
-		if !self.workflow.daily_weekdays.is_empty() {
-			base.workflow.daily_weekdays = self.workflow.daily_weekdays.clone();
-		}
-		if !self.workflow.themes.is_empty() {
-			base.workflow.themes = self.workflow.themes.clone();
 		}
 		// La commande d'ouverture de PR appartient au dépôt : celle d'un produit
 		// n'existe pas chez le voisin, et l'y hériter ferait jouer au maître une
@@ -2021,10 +1972,9 @@ impl ProjectConfig {
 
 		base.stripe.token = inherit(&self.stripe.token, &base.stripe.token);
 
-		// L'équipe et les rôles suivent le projet comme tout le reste : les
-		// membres d'un produit n'ont rien à faire dans le daily d'un autre, et un
-		// outil interne ne se découpe pas comme une application. Sans second
-		// projet, le global continue de tenir lieu de configuration.
+		// Les rôles suivent le projet comme tout le reste : un outil interne ne
+		// se découpe pas comme une application. Sans second projet, le global
+		// continue de tenir lieu de configuration.
 		if !self.roles.is_empty() || cloisonne {
 			base.roles = self.roles.clone();
 		}
@@ -2040,21 +1990,6 @@ impl ProjectConfig {
 		// aurait déconnecté d'un coup tous les projets d'une installation qui
 		// marchait.
 		base.account = inherit(&self.account, &base.account);
-		if cloisonne {
-			base.team.linear_team_id = self.team.linear_team_id.trim().to_string();
-			base.team.members = self.team.members.clone();
-		} else {
-			base.team.linear_team_id = inherit(&self.team.linear_team_id, &base.team.linear_team_id);
-			if !self.team.members.is_empty() {
-				base.team.members = self.team.members.clone();
-			}
-		}
-		// Sans équipe, pas de daily : mieux vaut un écran absent qu'un écran
-		// peuplé des membres d'un autre projet.
-		if self.solo {
-			base.team.members.clear();
-			base.team.linear_team_id = String::new();
-		}
 	}
 
 	/// Clés que ce projet définit en propre — le reste est hérité.
@@ -2078,6 +2013,7 @@ impl ProjectConfig {
 		mark("sentry", &self.sentry.token);
 		mark("linear", &self.linear.token);
 		mark("linear_team_key", &self.linear.team_key);
+		mark("linear_team_id", &self.linear.team_id);
 		mark("trigger", &self.trigger.token);
 		mark("trigger_project_ref", &self.trigger.project_ref);
 		mark("railway", &self.railway.token);
@@ -2129,7 +2065,9 @@ pub struct Config {
 	pub railway: RailwayConfig,
 	pub betterstack: BetterstackConfig,
 	pub stripe: StripeConfig,
-	pub team: TeamConfig,
+	/// Lue pour reprendre l'identifiant d'équipe Linear, jamais réécrite.
+	#[serde(skip_serializing)]
+	pub team: LegacyTeam,
 	pub workflow: WorkflowConfig,
 	pub impact: ImpactConfig,
 	/// Ce qui doit rester vrai — déclaré par projet, jamais fourni par défaut.
@@ -2157,7 +2095,7 @@ pub struct Config {
 
 /// Donne au projet historique ce que le global déclarait pour lui.
 ///
-/// Avant les projets, l'équipe et les rôles se réglaient une fois pour toutes
+/// Avant les projets, l'équipe Linear et les rôles se réglaient une fois pour toutes
 /// au niveau global. Les cloisonner les aurait retirés du projet qui s'en
 /// servait — celui qui travaille sur le dépôt du global — sans que personne
 /// n'ait rien demandé. On les lui recopie donc, une fois, et le fichier garde
@@ -2172,7 +2110,7 @@ pub fn migrate_project_ownership() -> bool {
 
 	let repo = config.general.main_repo.trim_end_matches('/').to_string();
 	let global_roles = config.roles.clone();
-	let global_team = config.team.clone();
+	let global_team_id = config.linear.team_id.clone();
 	let global_workflow = config.workflow.clone();
 
 	let Some(project) = config
@@ -2188,11 +2126,11 @@ pub fn migrate_project_ownership() -> bool {
 		project.roles = global_roles;
 		change = true;
 	}
-	if project.team.members.is_empty() && !global_team.members.is_empty() {
-		project.team = global_team;
+	if project.linear.team_id.trim().is_empty() && !global_team_id.trim().is_empty() {
+		project.linear.team_id = global_team_id;
 		change = true;
 	}
-	if project.workflow.active_states.is_empty() && !global_workflow.active_states.is_empty() {
+	if project.workflow.done_states.is_empty() && !global_workflow.done_states.is_empty() {
 		project.workflow = global_workflow;
 		change = true;
 	}
@@ -2408,6 +2346,15 @@ impl Config {
 		}
 	}
 
+	/// Reprend l'identifiant d'équipe Linear des anciennes sections `[team]`,
+	/// globale et par projet. Voir `LegacyTeam`.
+	fn adopt_legacy_team(&mut self) {
+		self.team.adopt_into(&mut self.linear);
+		for project in &mut self.projects {
+			project.team.adopt_into(&mut project.linear);
+		}
+	}
+
 	pub fn load() -> Self {
 		let raw = std::fs::read_to_string(config_path()).ok();
 		// Un fichier déjà présent vient d'une version qui gardait ces réglages
@@ -2428,6 +2375,7 @@ impl Config {
 		// branches et les sujets d'une équipe qui ne les avait jamais écrits
 		// nulle part — ils étaient dans le binaire.
 		cfg.seed_workflow(existing_install);
+		cfg.adopt_legacy_team();
 		if cfg.roles.is_empty() {
 			// Pas `i18n::lang()` : elle relit la config qu'on est en train de charger.
 			let lang = if cfg!(test) {
@@ -2612,6 +2560,7 @@ pub struct ConfigView {
 	pub sentry_org: String,
 	pub sentry_projects: Vec<String>,
 	pub linear_team_key: String,
+	pub linear_team_id: String,
 	pub trigger_project_ref: String,
 	/// Environnements Trigger.dev configurés — un onglet chacun dans Delivery.
 	pub trigger_environments: Vec<TriggerEnvironmentView>,
@@ -2642,9 +2591,6 @@ pub struct ConfigView {
 	pub accounts: Vec<AccountConfig>,
 	/// Celui sous lequel le projet actif travaille, héritage appliqué.
 	pub account: String,
-	/// L'équipe du projet : qui la compose, et sous quels comptes on la reconnaît
-	/// dans chaque outil. Sans elle, ni daily ni tableau d'équipe.
-	pub team: TeamConfig,
 }
 
 /// Un projet vu par l'interface.
@@ -2663,7 +2609,6 @@ pub struct ProjectView {
 	pub sentry_projects: Vec<String>,
 	pub railway_project_id: String,
 	pub trigger_project_ref: String,
-	pub solo: bool,
 	/// Le compte sous lequel il travaille, héritage appliqué. Deux projets côte
 	/// à côte dans la liste doivent pouvoir se distinguer d'un coup d'œil quand
 	/// ils ne sont pas la même personne.
@@ -2679,7 +2624,6 @@ pub struct ProjectView {
 	pub declared: ProjectDeclared,
 	pub has_github: bool,
 	pub has_linear: bool,
-	pub has_team: bool,
 }
 
 /// Les réglages qu'un projet déclare lui-même, tels qu'ils sont écrits.
@@ -2693,6 +2637,7 @@ pub struct ProjectDeclared {
 	pub sentry_org: String,
 	pub sentry_projects: Vec<String>,
 	pub linear_team_key: String,
+	pub linear_team_id: String,
 	pub trigger_project_ref: String,
 	pub railway_project_id: String,
 	/// Ce que fait ce produit, tel que ce projet le déclare.
@@ -2747,6 +2692,7 @@ impl Config {
 					sentry_org: brut.sentry.org.clone(),
 					sentry_projects: brut.sentry.projects.clone(),
 					linear_team_key: brut.linear.team_key.clone(),
+					linear_team_id: brut.linear.team_id.clone(),
 					trigger_project_ref: brut.trigger.project_ref.clone(),
 					railway_project_id: brut.railway.project_id.clone(),
 					impact_brief: brut.impact.brief.clone(),
@@ -2773,7 +2719,6 @@ impl Config {
 						sentry_projects: resolved.sentry.projects.clone(),
 						railway_project_id: resolved.railway.project_id.clone(),
 						trigger_project_ref: resolved.trigger.project_ref.clone(),
-						solo: project.solo,
 						overrides: project.overrides(),
 						declared: ProjectDeclared {
 							projects_root: project.projects_root.clone(),
@@ -2783,6 +2728,7 @@ impl Config {
 							sentry_org: project.sentry.org.clone(),
 							sentry_projects: project.sentry.projects.clone(),
 							linear_team_key: project.linear.team_key.clone(),
+							linear_team_id: project.linear.team_id.clone(),
 							trigger_project_ref: project.trigger.project_ref.clone(),
 							railway_project_id: project.railway.project_id.clone(),
 							impact_brief: project.impact.brief.clone(),
@@ -2796,7 +2742,6 @@ impl Config {
 						has_github: !resolved.github.repo.trim().is_empty(),
 						has_linear: !resolved.linear.token.trim().is_empty()
 							&& !resolved.linear.team_key.trim().is_empty(),
-						has_team: !project.solo,
 					}
 				})
 				.collect(),
@@ -2808,6 +2753,7 @@ impl Config {
 			sentry_org: self.sentry.org.clone(),
 			sentry_projects: self.sentry.projects.clone(),
 			linear_team_key: self.linear.team_key.clone(),
+			linear_team_id: self.linear.team_id.clone(),
 			trigger_project_ref: self.trigger.project_ref.clone(),
 			trigger_environments: self.trigger.views(),
 			railway_project_id: self.railway.project_id.clone(),
@@ -2825,9 +2771,6 @@ impl Config {
 			} else {
 				self.roles.clone()
 			},
-			// L'équipe résolue, projet actif compris : c'est celle que les écrans
-			// affichent, et donc celle qu'on doit pouvoir corriger.
-			team: self.team.clone(),
 			engines: if self.engines.is_empty() {
 				default_engines()
 			} else {
@@ -2931,7 +2874,6 @@ mod tests {
 		cfg.github.token = "gh-entreprise".into();
 		cfg.linear.token = "lin-entreprise".into();
 		cfg.linear.team_key = "NW".into();
-		cfg.team.members = vec![TeamMemberConfig::default()];
 		cfg
 	}
 
@@ -3053,44 +2995,124 @@ mod tests {
 	#[test]
 	fn le_flux_de_travail_sort_en_camel_case() {
 		let raw = serde_json::to_value(WorkflowConfig::default()).unwrap();
-		for key in [
-			"activeStates",
-			"reviewStates",
-			"doneStates",
-			"blockedState",
-			"baseBranches",
-			"dailyWeekdays",
-			"prCommand",
-		] {
+		for key in ["doneStates", "baseBranches", "prCommand"] {
 			assert!(raw.get(key).is_some(), "{key} manque dans la vue");
 		}
 
-		let ancien: WorkflowConfig =
-			serde_json::from_str(r#"{"active_states":["In Progress"],"pr_command":"/pr"}"#).unwrap();
-		assert_eq!(ancien.active_states, vec!["In Progress"]);
+		let ancien: WorkflowConfig = serde_json::from_str(r#"{"done_states":["Done"],"pr_command":"/pr"}"#).unwrap();
+		assert_eq!(ancien.done_states, vec!["Done"]);
 		assert_eq!(ancien.pr_command, "/pr");
 	}
 
-	/// L'équipe aussi : elle ne s'éditait qu'à la main dans le fichier, et son
-	/// écran ne servirait à rien s'il lisait des champs absents.
+	/// Une config écrite avant le retrait des écrans d'équipe, d'observabilité
+	/// et de livraison se lit encore, sections disparues comprises.
+	///
+	/// `load` retombe sur une configuration vide quand le fichier ne se lit
+	/// pas : une section inconnue qui ferait échouer la lecture effacerait
+	/// d'un coup tous les réglages d'une installation existante.
 	#[test]
-	fn l_equipe_sort_en_camel_case() {
-		let raw = serde_json::to_value(TeamConfig::default()).unwrap();
-		assert!(raw.get("linearTeamId").is_some());
+	fn une_config_aux_sections_retirees_se_lit_encore() {
+		let raw = r#"
+			[general]
+			main_repo = "/repos/monorepo"
 
-		let membre = serde_json::to_value(TeamMemberConfig::default()).unwrap();
-		for key in ["roleLabel", "linearId", "githubAliases", "sentryEmails", "sentryNames"] {
-			assert!(membre.get(key).is_some(), "{key} manque dans la vue");
-		}
+			[linear]
+			token = "lin-entreprise"
+			team_key = "NW"
 
-		// Les fichiers déjà écrits restent lus, membres compris.
-		let ancien: TeamConfig = serde_json::from_str(
-			r#"{"linear_team_id":"eq-1","members":[{"name":"Alice","linear_id":"m-1","github_aliases":["ancien"]}]}"#,
+			[team]
+			linear_team_id = "eq-global"
+			[[team.members]]
+			name = "Alice"
+			linear_id = "m-1"
+			github = "alice"
+			sentry_emails = ["alice@example.com"]
+
+			[workflow]
+			active_states = ["In Progress"]
+			review_states = ["In Review"]
+			done_states = ["Done"]
+			blocked_state = "Blocked"
+			daily_weekdays = [1, 3, 5]
+			[[workflow.themes]]
+			label = "Facturation"
+			phrase = "la facturation"
+			keywords = ["facture"]
+
+			[sentry]
+			token = "sntrys_x"
+			org = "acme"
+			projects = ["web"]
+
+			[trigger]
+			token = "tr_prod_x"
+			project_ref = "proj_x"
+			[[trigger.environments]]
+			name = "Production"
+			token = "tr_prod_x"
+			project_ref = "proj_x"
+
+			[railway]
+			token = "rw"
+			project_id = "p-1"
+
+			[betterstack]
+			token = "bs"
+			telemetry_token = "bt"
+			clickhouse_host = "eu.clickhouse"
+
+			[stripe]
+			token = "rk_live_x"
+
+			[[projects]]
+			id = "perso"
+			main_repo = "/repos/perso"
+			solo = true
+			[projects.team]
+			linear_team_id = "eq-perso"
+			[projects.sentry]
+			org = "moi"
+			[projects.trigger]
+			project_ref = "proj_perso"
+			[projects.railway]
+			project_id = "p-2"
+			[projects.betterstack]
+			token = "bs-perso"
+			[projects.stripe]
+			token = "rk_perso"
+		"#;
+		let mut config: Config = toml::from_str(raw).expect("une ancienne config se lit encore");
+		config.adopt_legacy_team();
+
+		assert_eq!(config.general.main_repo, "/repos/monorepo");
+		assert_eq!(config.linear.team_key, "NW");
+		assert_eq!(config.workflow.done_states, vec!["Done"]);
+		// L'identifiant d'équipe Linear survit au départ de `[team]`.
+		assert_eq!(config.linear.team_id, "eq-global");
+		assert_eq!(config.projects.len(), 1);
+		assert_eq!(config.projects[0].linear.team_id, "eq-perso");
+
+		// Et la section ne se réécrit pas : elle disparaît à la sauvegarde.
+		let rewritten = toml::to_string(&config).unwrap();
+		assert!(!rewritten.contains("[team]"), "{rewritten}");
+		assert!(!rewritten.contains("linear_team_id"), "{rewritten}");
+		assert!(rewritten.contains("team_id = \"eq-global\""), "{rewritten}");
+	}
+
+	/// Un identifiant déjà déclaré sous `[linear]` prime sur l'ancien.
+	#[test]
+	fn l_identifiant_linear_declare_prime_sur_l_ancien() {
+		let mut config: Config = toml::from_str(
+			r#"
+			[linear]
+			team_id = "eq-neuf"
+			[team]
+			linear_team_id = "eq-ancien"
+			"#,
 		)
 		.unwrap();
-		assert_eq!(ancien.linear_team_id, "eq-1");
-		assert_eq!(ancien.members[0].linear_id, "m-1");
-		assert_eq!(ancien.members[0].github_aliases, vec!["ancien"]);
+		config.adopt_legacy_team();
+		assert_eq!(config.linear.team_id, "eq-neuf");
 	}
 
 	/// Une config d'avant le multi-projets doit continuer de fonctionner telle
@@ -3189,21 +3211,6 @@ mod tests {
 		assert_eq!(cfg.linear.token, "lin-entreprise");
 		assert_eq!(cfg.linear.team_key, "NW");
 		assert_eq!(cfg.general.editor, "zed");
-	}
-
-	/// Un projet solo n'a pas d'équipe : le daily ne doit pas afficher celle
-	/// d'un autre projet.
-	#[test]
-	fn projet_solo_efface_lequipe() {
-		let mut cfg = base();
-		let perso = ProjectConfig {
-			id: "perso".into(),
-			main_repo: "/repos/perso".into(),
-			solo: true,
-			..Default::default()
-		};
-		perso.merge_into(&mut cfg, false);
-		assert!(cfg.team.members.is_empty());
 	}
 
 	/// Les environnements Trigger d'un projet remplacent ceux du global : les
@@ -3401,36 +3408,32 @@ mod workflow_tests {
 	fn defauts_vides() {
 		let workflow = WorkflowConfig::default();
 		assert!(workflow.base_branches.is_empty());
-		assert!(workflow.active_states.is_empty());
-		assert!(workflow.themes.is_empty(), "aucun thème métier par défaut");
-		assert!(workflow.daily_weekdays.is_empty());
+		assert!(workflow.done_states.is_empty());
 	}
 
-	/// Une installation neuve ne reçoit ni les colonnes ni les sujets d'une
+	/// Une installation neuve ne reçoit ni les colonnes ni les commandes d'une
 	/// autre équipe.
 	#[test]
 	fn installation_neuve_reste_vierge() {
 		let mut config = Config::default();
 		config.seed_workflow(false);
-		assert!(config.workflow.themes.is_empty());
-		assert!(config.workflow.active_states.is_empty());
+		assert!(config.workflow.done_states.is_empty());
+		assert!(config.workflow.worktree_command.is_empty());
 	}
 
 	/// L'exécutable ne porte rien de l'équipe qui l'a écrit.
 	///
 	/// C'est l'invariant de la marque blanche, et il se vérifie ici plutôt qu'à
 	/// la relecture : aucune configuration, quelle qu'elle soit, ne doit voir
-	/// apparaître des membres, des sujets métier ou un identifiant d'équipe
-	/// qu'elle n'a pas déclarés.
+	/// apparaître des colonnes ou un identifiant d'équipe qu'elle n'a pas
+	/// déclarés.
 	#[test]
 	fn rien_de_specifique_ne_survit_dans_le_binaire() {
 		let mut config = Config::default();
 		config.seed_workflow(true);
 
-		assert!(config.team.members.is_empty(), "aucun membre par défaut");
-		assert!(config.team.linear_team_id.is_empty(), "aucune équipe par défaut");
-		assert!(config.workflow.themes.is_empty(), "aucun sujet métier");
-		assert!(config.workflow.active_states.is_empty(), "aucune colonne imposée");
+		assert!(config.linear.team_id.is_empty(), "aucune équipe par défaut");
+		assert!(config.workflow.done_states.is_empty(), "aucune colonne imposée");
 
 		// Seules les branches de base, universelles, sont complétées.
 		assert!(config.workflow.base_branches.contains(&"main".to_string()));
@@ -3541,17 +3544,15 @@ mod migration_tests {
 
 	/// Cloisonner ne doit rien retirer à qui n'a rien demandé.
 	///
-	/// L'équipe et les rôles se réglaient au niveau global avant que les projets
-	/// n'existent. Le projet qui travaille sur le dépôt du global s'en servait :
-	/// les lui retirer viderait son daily et son catalogue de rôles.
+	/// L'équipe Linear et les rôles se réglaient au niveau global avant que les
+	/// projets n'existent. Le projet qui travaille sur le dépôt du global s'en
+	/// servait : les lui retirer viderait ses options de ticket et son
+	/// catalogue de rôles.
 	#[test]
 	fn le_projet_historique_garde_son_equipe() {
 		let mut global = Config::default();
 		global.general.main_repo = "/repos/monorepo".into();
-		global.team.members = vec![TeamMemberConfig {
-			name: "Alice".into(),
-			..Default::default()
-		}];
+		global.linear.team_id = "eq-1".into();
 
 		let historique = ProjectConfig {
 			id: "principal".into(),
@@ -3561,18 +3562,18 @@ mod migration_tests {
 
 		// Ce que la migration recopie, avant tout cloisonnement.
 		let mut projet = historique.clone();
-		if projet.team.members.is_empty() && !global.team.members.is_empty() {
-			projet.team = global.team.clone();
+		if projet.linear.team_id.is_empty() && !global.linear.team_id.is_empty() {
+			projet.linear.team_id = global.linear.team_id.clone();
 		}
 
 		let mut resolu = global.clone();
 		projet.merge_into(&mut resolu, true);
-		assert_eq!(resolu.team.members.len(), 1, "l'équipe suit le projet");
+		assert_eq!(resolu.linear.team_id, "eq-1", "l'équipe suit le projet");
 
 		// Sans migration, le cloisonnement l'aurait bien vidée.
 		let mut sans = global.clone();
 		historique.merge_into(&mut sans, true);
-		assert!(sans.team.members.is_empty(), "d'où la nécessité de migrer");
+		assert!(sans.linear.team_id.is_empty(), "d'où la nécessité de migrer");
 	}
 }
 

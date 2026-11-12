@@ -729,79 +729,6 @@
 		"errorsAndIncidents": "エラーとインシデント",
 		"emptyHint": "結果を期待していた場合は、設定でトークンと組織を確認してください。"
 	},
-	"overview": {
-		"prSegments": {
-			"ready": "準備完了",
-			"ciFailing": "CI ✗",
-			"stacked": "スタック",
-			"inReview": "レビュー中",
-			"drafts": "ドラフト"
-		},
-		"title": "概要",
-		"subtitle": "プロダクト、エージェント、ミッションの状態",
-		"refreshing": "更新中…",
-		"sourcesLoading_other": "{{count}} 件のソースを読み込み中…",
-		"waitingBanner_other": "{{count}} 件のエージェントがあなたの返答を待っています",
-		"tiles": {
-			"liveAgents": "アクティブなエージェント",
-			"waiting": "{{count}} 件待機中",
-			"readyToMerge": "マージ可能",
-			"ciFailing": "CI 失敗",
-			"dailyBlockers": "デイリーのブロッカー",
-			"prodErrors": "本番エラー",
-			"activeWorktrees": "アクティブな worktree",
-			"total": "合計 {{count}}"
-		},
-		"usage": {
-			"title": "Claude の使用量",
-			"dayLabel": "{{day}}：{{tokens}} トークン",
-			"summary": "今日 {{today}} · 7 日間で {{week}} · 直近 21 日",
-			"none": "まだ計測値はありません。"
-		},
-		"prState": "PR の状態",
-		"cycle": {
-			"title": "現在のサイクル",
-			"ticketsDone": "完了したチケット",
-			"reviewLoad": "レビュー待ちの PR",
-			"none": "アクティブなサイクルはありません。"
-		},
-		"missions": {
-			"title": "ミッション",
-			"none": "進行中のミッションはありません。ミッションはチケットをタスクに分割し、エージェントに割り当てます。",
-			"delivered": "{{done}}/{{total}} 納品済み",
-			"splitting": "分割中",
-			"running": "{{count}} 件実行中"
-		},
-		"production": {
-			"title": "本番",
-			"none": "14 日間、重大なエラーはありません。"
-		},
-		"prFlow": {
-			"title": "PR の流れ",
-			"see": "表示",
-			"stackedOn": "{{base}} にスタック",
-			"ready_other": "{{count}} 件の PR がマージ可能、壊れているものはありません。",
-			"noneFailing": "失敗している PR はありません。"
-		},
-		"fleet": {
-			"title": "worktree 一覧",
-			"allClean": "すべてのツリーはクリーンです。",
-			"changes_other": "{{count}} 件の変更"
-		},
-		"daily": {
-			"title": "デイリーのブロッカー",
-			"button": "デイリー"
-		},
-		"docs": {
-			"title": "最新の成果物",
-			"none": "最近のドキュメントはありません。"
-		},
-		"githubError": "GitHub：{{error}}",
-		"empty": {
-			"message": "表示するものはありません",
-			"hint": "設定で `general.main_repo` を確認してください。"
-		}
-	},
 	"permanence": {
 		"title": "Permanence",
 		"resume": "再開",
@@ -1035,7 +962,6 @@
 			"removeTitle": "プロジェクト「{{name}}」を削除しますか？",
 			"removeMessage": "変更されるのは Cockpit の設定だけです — リポジトリには触れません。",
 			"activate": "このプロジェクトを有効化",
-			"soloBadge": "ソロ",
 			"new": "新規",
 			"namePlaceholder": "サイドプロジェクト",
 			"folder": "フォルダ",
@@ -1043,8 +969,6 @@
 			"folderPlaceholder": "~/Sites/my-project",
 			"githubHint": "空欄 = リポジトリにあればそこから推測。",
 			"githubPlaceholder": "me/my-project",
-			"solo": "ソロ",
-			"soloTitle": "チームのないプロジェクト：デイリーを非表示にします",
 			"prepareFirst": "まず環境を準備してください — 下のブロックで行えます"
 		},
 		"saved": "設定を保存しました。",
@@ -1068,7 +992,6 @@
 			"projects": "プロジェクト",
 			"services": "接続されたサービス",
 			"workflow": "ワークフロー",
-			"team": "チーム",
 			"accounts": "アカウント",
 			"engines": "エージェントのエンジン",
 			"mcp": "リポジトリのツール（MCP）",
@@ -1114,7 +1037,9 @@
 			"sentryProjects": "Sentry プロジェクト",
 			"sentryProjectsHint": "チェックなし = 組織全体。",
 			"ticketKey": "チケットのキー",
-			"ticketKeyHint": "Linear の接頭辞、例：ABC — デイリーのチームは下で設定します",
+			"ticketKeyHint": "Linear の接頭辞（例：ABC）— ブランチやタイトル内のチケット番号を認識するために使います",
+			"linearTeamId": "Linear チーム",
+			"linearTeamIdHint": "Linear チームの UUID（チーム設定の URL に表示されます）。チケットの編集時に、そのステータス、メンバー、ラベルが候補になります。",
 			"gitlabProject": "GitLab プロジェクト",
 			"gitlabProjectHint": "グループを含むパス、例：group/product",
 			"gitlabProjectPlaceholder": "group/product",
@@ -1168,73 +1093,6 @@
 			"showHelp": "実行中のワークスペースは、画面の外でも右下に固定表示されます：他の場所を見ているときの唯一の手がかりです。",
 			"hideHelp": "他の画面の上には何も表示されません。実行中のものはワークスペース画面で確認でき、通知も引き続き届きます。"
 		}
-	},
-	"team": {
-		"title": "デイリー",
-		"loading": "読み込み中…",
-		"subtitle": "{{since}} のデイリー以降",
-		"subtitleCycle": "サイクル {{number}} · {{since}} のデイリー以降",
-		"present": "デイリーを全画面で進行",
-		"currentCycle": "現在のサイクル",
-		"all": "すべて",
-		"githubError": "GitHub 側：{{error}} — Linear のチケットは引き続き表示されます。",
-		"wholeTeam": "チーム全体",
-		"draft": "ドラフト",
-		"ageDays_other": "{{count}}日",
-		"decision": {
-			"approved": "承認済み",
-			"changesRequested": "修正依頼",
-			"reviewRequired": "レビュー待ち"
-		},
-		"chip": {
-			"wip": "WIP",
-			"review": "レビュー",
-			"prs": "PR",
-			"toReview": "レビュー待ち",
-			"merged": "マージ済み",
-			"blocking": "ブロッキング",
-			"toChallenge": "要確認",
-			"inReview": "レビュー中",
-			"readyToMerge": "マージ可能"
-		},
-		"member": {
-			"cycle": "サイクル {{done}}/{{total}}",
-			"more_other": "+ほか {{count}} 件",
-			"openPrs": "オープン中の PR",
-			"reviewInbox": "他メンバーのレビュー待ち",
-			"reviewFrom": "{{author}} · {{age}}",
-			"shipped": "前回のデイリー以降に出荷",
-			"next": "次"
-		},
-		"noTracker": {
-			"subtitle": "タスクトラッカーが接続されていません",
-			"service": "タスクトラッカー",
-			"token": "トークン"
-		},
-		"noTeam": {
-			"subtitle": "チームが宣言されていません",
-			"title": "デイリーには、チームに誰がいるかの情報が必要です",
-			"missingId": "チーム ID がありません：Linear チームの UUID で、チーム設定の URL に表示されます — チケットの接頭辞のキーではありません。",
-			"noMembers": "メンバーが宣言されていません：各メンバーには、チケットを紐づけるための Linear ID と、プルリクエスト用の GitHub ログインが必要です。",
-			"open": "設定 → チーム を開く"
-		},
-		"flags": {
-			"title": "デイリーで取り上げること",
-			"urgentOnly": "ブロッキングのみ",
-			"empty": "報告することはありません",
-			"emptyHint": "この範囲に未解決の問題はありません。"
-		},
-		"flow": {
-			"title": "PR の流れ",
-			"ready": "マージ可能（{{count}}）",
-			"ciFailing": "CI 失敗（{{count}}）",
-			"stacked": "スタックされた PR（{{count}}）",
-			"blockedBy": "#{{number}} によりブロック"
-		},
-		"focus": "チームの注力",
-		"product": "プロダクト · Linear での追跡",
-		"noMember": "メンバーなし",
-		"noMemberHint": "設定ファイルの `[team]` を入力してください。"
 	},
 	"today": {
 		"title": "今日",

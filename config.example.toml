@@ -28,6 +28,10 @@ token = ""
 
 [linear]
 team_key = "NW"
+# UUID de l'équipe, lisible dans l'URL de ses réglages : ses états, ses
+# membres et ses labels sont proposés à l'édition d'un ticket. Il se trouvait
+# autrefois sous `[team]` ; le cockpit l'y reprend et le réécrit ici.
+team_id = ""
 token = ""
 
 # GitLab, hébergé chez eux ou sur votre instance. Le suivi de tâches se déduit de
@@ -90,21 +94,6 @@ telemetry_token = ""
 # Clé restreinte en lecture seule `rk_…` (Développeurs → Clés API → Clés
 # restreintes). Une clé publiable `pk_…` est rejetée par l'API serveur.
 token = ""
-
-# Équipe du daily. Aucune équipe par défaut : tant que ce bloc est vide, les
-# écrans qui en dépendent le disent plutôt que d'afficher celle de quelqu'un
-# d'autre. Un exécutable distribué ne porte ni nom, ni adresse, ni identifiant
-# de l'équipe qui l'a compilé.
-# [team]
-# linear_team_id = "00000000-0000-0000-0000-000000000000"
-# [[team.members]]
-# name = "Alice"
-# role = "dev"             # dev · product
-# role_label = "Dev"
-# linear_id = "11111111-1111-1111-1111-111111111111"
-# github = "alex-dev"
-# github_aliases = []
-# sentry_emails = ["prenom@exemple.com"]
 
 # Lecture des changements en vol — l'écran Impact.
 #

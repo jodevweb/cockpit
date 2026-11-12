@@ -59,7 +59,7 @@
 	},
 	"tickets": {
 		"noTracker": "Aucun suivi de tâches configuré : renseigne un jeton Linear, un projet GitLab, ou un dépôt GitHub.",
-		"linearTeamMissing": "L'identifiant de l'équipe Linear manque : renseigne-le dans Réglages → Équipe. C'est l'UUID lisible dans l'URL de ses réglages, pas la clé qui préfixe les tickets."
+		"linearTeamMissing": "L'identifiant de l'équipe Linear manque : renseigne-le dans Réglages → Services. C'est l'UUID lisible dans l'URL de ses réglages, pas la clé qui préfixe les tickets."
 	},
 	"relay": {
 		"settingUnreadable": "Réglage illisible : {{error}}",
@@ -352,7 +352,6 @@
 			"prFromBase": "`{{branch}}` est la branche de base : crée une branche dédiée avant d'ouvrir une PR.",
 			"prRefused": "PR refusée ({{status}}) : {{message}}",
 			"prCreation": "Création de PR",
-			"repoOwnerFormat": "`github.repo` doit être de la forme owner/repo.",
 			"mergeRefused": "Merge refusé ({{status}}) : {{message}}",
 			"prMerge": "Merge de PR",
 			"prTitleRequired": "Une pull request a besoin d'un titre."

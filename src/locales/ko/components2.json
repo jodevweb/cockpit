@@ -931,10 +931,6 @@
 		"loadImageFrom": "<host>{{host}}</host>에서 이미지 불러오기",
 		"enlarge": "크게 보기"
 	},
-	"charts": {
-		"trend_other": "{{count}}개 지점의 추세",
-		"segment": "{{label}}: {{value}}"
-	},
 	"narration": {
 		"waitingForYou": "답변을 기다리고 있습니다.",
 		"stopped": "중지되었습니다.",

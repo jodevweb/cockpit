@@ -729,79 +729,6 @@
 		"errorsAndIncidents": "오류 및 인시던트",
 		"emptyHint": "결과가 있어야 한다면 설정에서 토큰과 조직을 확인하세요."
 	},
-	"overview": {
-		"prSegments": {
-			"ready": "준비됨",
-			"ciFailing": "CI ✗",
-			"stacked": "스택됨",
-			"inReview": "리뷰 중",
-			"drafts": "초안"
-		},
-		"title": "개요",
-		"subtitle": "제품, 에이전트 현황, 미션의 상태",
-		"refreshing": "새로 고치는 중…",
-		"sourcesLoading_other": "소스 {{count}}개 불러오는 중…",
-		"waitingBanner_other": "에이전트 {{count}}개가 답변을 기다리고 있습니다",
-		"tiles": {
-			"liveAgents": "활성 에이전트",
-			"waiting": "{{count}}개 대기 중",
-			"readyToMerge": "병합 준비 완료",
-			"ciFailing": "CI 실패",
-			"dailyBlockers": "데일리 차단 요소",
-			"prodErrors": "프로덕션 오류",
-			"activeWorktrees": "활성 worktree",
-			"total": "총 {{count}}개"
-		},
-		"usage": {
-			"title": "Claude 사용량",
-			"dayLabel": "{{day}}: 토큰 {{tokens}}개",
-			"summary": "오늘 {{today}} · 7일간 {{week}} · 최근 21일",
-			"none": "아직 측정값이 없습니다."
-		},
-		"prState": "PR 상태",
-		"cycle": {
-			"title": "현재 사이클",
-			"ticketsDone": "완료된 티켓",
-			"reviewLoad": "리뷰할 PR",
-			"none": "활성 사이클이 없습니다."
-		},
-		"missions": {
-			"title": "미션",
-			"none": "진행 중인 미션이 없습니다. 미션은 티켓을 작업으로 나눠 에이전트에게 맡깁니다.",
-			"delivered": "{{done}}/{{total}} 전달됨",
-			"splitting": "작업 분할 중",
-			"running": "{{count}}개 실행 중"
-		},
-		"production": {
-			"title": "프로덕션",
-			"none": "14일간 치명적인 오류가 없습니다."
-		},
-		"prFlow": {
-			"title": "PR 흐름",
-			"see": "보기",
-			"stackedOn": "{{base}} 위에 스택됨",
-			"ready_other": "병합 준비된 PR {{count}}개, 깨진 것 없음.",
-			"noneFailing": "실패한 PR이 없습니다."
-		},
-		"fleet": {
-			"title": "에이전트 현황",
-			"allClean": "모든 트리가 깨끗합니다.",
-			"changes_other": "변경 {{count}}개"
-		},
-		"daily": {
-			"title": "데일리 차단 요소",
-			"button": "데일리"
-		},
-		"docs": {
-			"title": "최근 결과물",
-			"none": "최근 문서가 없습니다."
-		},
-		"githubError": "GitHub: {{error}}",
-		"empty": {
-			"message": "표시할 항목 없음",
-			"hint": "설정에서 `general.main_repo`를 확인하세요."
-		}
-	},
 	"permanence": {
 		"title": "Permanence",
 		"resume": "재개",
@@ -1035,7 +962,6 @@
 			"removeTitle": "프로젝트 “{{name}}”을(를) 삭제할까요?",
 			"removeMessage": "Cockpit 설정만 바뀌며, 저장소는 건드리지 않습니다.",
 			"activate": "이 프로젝트 활성화",
-			"soloBadge": "solo",
 			"new": "새로 만들기",
 			"namePlaceholder": "사이드 프로젝트",
 			"folder": "폴더",
@@ -1043,8 +969,6 @@
 			"folderPlaceholder": "~/Sites/my-project",
 			"githubHint": "비워 두면 = 저장소가 있으면 거기서 추론.",
 			"githubPlaceholder": "me/my-project",
-			"solo": "Solo",
-			"soloTitle": "팀 없는 프로젝트: 데일리를 숨깁니다",
 			"prepareFirst": "먼저 기반을 준비하세요 — 아래 블록이 처리합니다"
 		},
 		"saved": "설정을 저장했습니다.",
@@ -1068,7 +992,6 @@
 			"projects": "프로젝트",
 			"services": "연결된 서비스",
 			"workflow": "워크플로",
-			"team": "팀",
 			"accounts": "계정",
 			"engines": "에이전트 엔진",
 			"mcp": "저장소 도구 (MCP)",
@@ -1114,7 +1037,9 @@
 			"sentryProjects": "Sentry 프로젝트",
 			"sentryProjectsHint": "선택하지 않으면 = 조직 전체.",
 			"ticketKey": "티켓 키",
-			"ticketKeyHint": "Linear 접두사, 예: ABC — 데일리의 팀은 아래에서 설정합니다",
+			"ticketKeyHint": "Linear 접두사(예: ABC) — 브랜치와 제목에서 티켓 번호를 알아보는 데 쓰입니다",
+			"linearTeamId": "Linear 팀",
+			"linearTeamIdHint": "Linear 팀의 UUID로, 팀 설정 URL에서 확인할 수 있습니다. 티켓을 편집할 때 이 팀의 상태, 멤버, 라벨이 제안됩니다.",
 			"gitlabProject": "GitLab 프로젝트",
 			"gitlabProjectHint": "그룹을 포함한 경로, 예: group/product",
 			"gitlabProjectPlaceholder": "group/product",
@@ -1168,73 +1093,6 @@
 			"showHelp": "실행 중인 워크스페이스는 해당 화면 밖에서도 오른쪽 아래에 고정되어 있습니다: 다른 곳을 볼 때 유일한 흔적입니다.",
 			"hideHelp": "다른 화면 위에 아무것도 표시되지 않습니다. 실행 중인 것은 워크스페이스 화면에서 계속 볼 수 있고, 알림도 계속 옵니다."
 		}
-	},
-	"team": {
-		"title": "데일리",
-		"loading": "불러오는 중…",
-		"subtitle": "{{since}} 데일리 이후",
-		"subtitleCycle": "사이클 {{number}} · {{since}} 데일리 이후",
-		"present": "전체 화면으로 데일리 진행",
-		"currentCycle": "현재 사이클",
-		"all": "전체",
-		"githubError": "GitHub 쪽: {{error}} — Linear 티켓은 계속 표시됩니다.",
-		"wholeTeam": "팀 전체",
-		"draft": "초안",
-		"ageDays_other": "{{count}}일",
-		"decision": {
-			"approved": "승인됨",
-			"changesRequested": "변경 요청됨",
-			"reviewRequired": "리뷰 필요"
-		},
-		"chip": {
-			"wip": "WIP",
-			"review": "리뷰",
-			"prs": "PR",
-			"toReview": "리뷰할 것",
-			"merged": "병합됨",
-			"blocking": "차단",
-			"toChallenge": "점검 필요",
-			"inReview": "리뷰 중",
-			"readyToMerge": "병합 준비 완료"
-		},
-		"member": {
-			"cycle": "사이클 {{done}}/{{total}}",
-			"more_other": "+{{count}}개 더",
-			"openPrs": "열린 PR",
-			"reviewInbox": "다른 사람을 위해 리뷰할 것",
-			"reviewFrom": "{{author}} · {{age}}",
-			"shipped": "지난 데일리 이후 배포됨",
-			"next": "다음"
-		},
-		"noTracker": {
-			"subtitle": "작업 트래커가 연결되지 않음",
-			"service": "작업 트래커",
-			"token": "토큰"
-		},
-		"noTeam": {
-			"subtitle": "팀이 선언되지 않음",
-			"title": "데일리에는 팀원이 누구인지 알아야 합니다",
-			"missingId": "팀 ID가 없습니다: 티켓 앞에 붙는 키가 아니라, 설정 URL에 보이는 Linear 팀의 UUID입니다.",
-			"noMembers": "선언된 멤버가 없습니다: 티켓을 연결하려면 각자의 Linear ID가, 풀 리퀘스트를 연결하려면 GitHub 로그인이 필요합니다.",
-			"open": "설정 → 팀 열기"
-		},
-		"flags": {
-			"title": "데일리에서 다룰 것",
-			"urgentOnly": "차단 사항만",
-			"empty": "보고할 것 없음",
-			"emptyHint": "이 범위에 열린 질문이 없습니다."
-		},
-		"flow": {
-			"title": "PR 흐름",
-			"ready": "병합 준비 완료 ({{count}})",
-			"ciFailing": "CI 실패 ({{count}})",
-			"stacked": "스택된 PR ({{count}})",
-			"blockedBy": "#{{number}}에 막힘"
-		},
-		"focus": "팀 중점",
-		"product": "제품 · Linear 추적",
-		"noMember": "멤버 없음",
-		"noMemberHint": "설정 파일에서 `[team]`을 입력하세요."
 	},
 	"today": {
 		"title": "오늘",

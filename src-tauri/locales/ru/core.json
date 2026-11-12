@@ -59,7 +59,7 @@
 	},
 	"tickets": {
 		"noTracker": "Трекер задач не настроен: укажите токен Linear, проект GitLab или репозиторий GitHub.",
-		"linearTeamMissing": "Не указан идентификатор команды Linear: введите его в Настройки → Команда. Это UUID, видимый в URL настроек команды, а не ключ-префикс задач."
+		"linearTeamMissing": "Не указан идентификатор команды Linear: введите его в Настройки → Сервисы. Это UUID, видимый в URL настроек команды, а не ключ-префикс задач."
 	},
 	"relay": {
 		"settingUnreadable": "Не удаётся прочитать настройку: {{error}}",
@@ -352,7 +352,6 @@
 			"prFromBase": "`{{branch}}` — базовая ветка: создайте отдельную ветку, прежде чем открывать PR.",
 			"prRefused": "PR отклонён ({{status}}): {{message}}",
 			"prCreation": "Создание PR",
-			"repoOwnerFormat": "`github.repo` должен иметь вид owner/repo.",
 			"mergeRefused": "Слияние отклонено ({{status}}): {{message}}",
 			"prMerge": "Слияние PR",
 			"prTitleRequired": "У pull request должно быть название."

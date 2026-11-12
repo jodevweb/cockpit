@@ -289,7 +289,7 @@ The top bar holds the screens you use all day; the others are in the
 | **Decisions**     | Everything waiting for your answer: permissions, questions, plans to approve.                                                     |
 | **Recap**         | What happened over the past hour, three hours or day, told visually.                                                              |
 | **Missions**      | One ticket, one plan, several workers: you confirm what the lead agent understood, its approach, its breakdown; each worker gets its own branch and worktree; repository checks gate every delivery; the pull request carries a delivery dossier. |
-| *Workshop*        | **Today**, **Permanence** (an agent on call, within hours and budgets you set), **Overview**, **Daily**, **AI agents** (every Claude Code session, its timeline, its tools), **Documents**, **Flow** (tickets, PRs, CI, deployments), **Impact** (what each change in flight implies), **Observability** (Sentry, Better Stack), **Worktrees**, **Git**, **Scripts**, **Servers & containers**, **Settings**. |
+| *Workshop*        | **Today**, **Permanence** (an agent on call, within hours and budgets you set), **AI agents** (every Claude Code session, its timeline, its tools), **Documents**, **Flow** (tickets, PRs, CI, deployments), **Impact** (what each change in flight implies), **Observability** (Sentry, Better Stack), **Worktrees**, **Git**, **Scripts**, **Servers & containers**, **Settings**. |
 
 ## Shortcuts
 

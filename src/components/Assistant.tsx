@@ -52,8 +52,6 @@ function useShortcut(): ShortcutStatus | null {
 const VIEWS: Array<{ id: ViewId; label: string }> = [
 	{ id: "map", label: "Map — every project and the work in progress" },
 	{ id: "today", label: "Today" },
-	{ id: "overview", label: "Overview" },
-	{ id: "team", label: "Team daily" },
 	{ id: "missions", label: "Missions" },
 	{ id: "workspace", label: "Workspaces, open agents and terminals" },
 	{ id: "agents", label: "AI agents, session history" },

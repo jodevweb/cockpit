@@ -23,7 +23,6 @@ import {
 	Settings,
 	Sun,
 	Terminal,
-	Users,
 	Inbox,
 	Clapperboard,
 	ChevronDown,
@@ -67,7 +66,6 @@ interface Entry {
  * et qu'elle réapparaisse d'elle-même dès la clé renseignée.
  */
 const NEEDS: Partial<Record<ViewId, string>> = {
-	team: "tickets",
 	observability: "monitoring",
 	// Sans suivi de tâches ni dépôt GitHub, l'écran des flux n'a ni tickets ni
 	// pull requests à montrer : il ne reste que ses onglets vides.
@@ -109,8 +107,6 @@ const GROUPS: Array<{ id: string; entries: Entry[] }> = [
 			// Juste après « Aujourd'hui » : c'est un poste de pilotage, pas une
 			// chose qu'on produit.
 			{ id: "permanence", icon: Radar, shortcut: "⇧P" },
-			{ id: "overview", icon: LayoutGrid, shortcut: "2" },
-			{ id: "team", icon: Users, shortcut: "3" },
 		],
 	},
 	{
@@ -707,7 +703,7 @@ function TopTab({
  * permanence, rangé dans un tiroir qu'on ouvre quand on en a besoin.
  */
 function Atelier({ onClose }: { onClose: () => void }) {
-	const { view, go, jobs, worktrees, activeProject, hasConnector, config } = useCockpit();
+	const { view, go, jobs, worktrees, hasConnector, config } = useCockpit();
 	const { t } = useTranslation("app");
 	const sessions = useAllSessions();
 
@@ -770,8 +766,6 @@ function Atelier({ onClose }: { onClose: () => void }) {
 								{t(`sidebar.groups.${group.id}`)}
 							</span>
 							{group.entries
-								// Un projet sans équipe n'a pas de daily à tenir.
-								.filter((entry) => entry.id !== "team" || activeProject?.hasTeam !== false)
 								// Un service absent : l'entrée revient d'elle-même dès que la
 								// clé est renseignée.
 								.filter((entry) => {

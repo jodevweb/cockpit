@@ -272,7 +272,7 @@ async fn github_changes(project: &ProjectConfig, label: &str, config: &Config) -
 		.await
 		.map_err(|error| Some(error.to_string().into()))?;
 
-	let body = crate::team::github_graphql(
+	let body = crate::pulls::github_graphql(
 		&token,
 		"query Changes($owner: String!, $name: String!) {
 			repository(owner: $owner, name: $name) {

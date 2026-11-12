@@ -5,7 +5,7 @@ import { Trans, useTranslation } from "react-i18next";
 import { Badge, Button, Field, Spinner, TextInput } from "@/components/ui";
 import { api } from "@/lib/ipc";
 import { useAsync } from "@/lib/useAsync";
-import type { Engine, RepoRoles, Role, TeamMember } from "@/lib/types";
+import type { Engine, RepoRoles, Role } from "@/lib/types";
 import { useCockpit } from "@/app/store";
 import { useTerminals } from "@/app/terminals";
 import { isMac, platformContext } from "@/lib/platform";
@@ -89,12 +89,8 @@ export function WorkflowSettings() {
 	const { config, reloadConfig, notify } = useCockpit();
 	const { t } = useTranslation("components3");
 	const [draft, setDraft] = useState({
-		activeStates: "",
-		reviewStates: "",
 		doneStates: "",
-		blockedState: "",
 		baseBranches: "",
-		dailyWeekdays: "",
 		prCommand: "",
 		worktreeCommand: "",
 		worktreeRemoveCommand: "",
@@ -114,12 +110,8 @@ export function WorkflowSettings() {
 		if (!config?.workflow) return;
 		const workflow = config.workflow;
 		setDraft({
-			activeStates: toText(workflow.activeStates),
-			reviewStates: toText(workflow.reviewStates),
 			doneStates: toText(workflow.doneStates),
-			blockedState: workflow.blockedState ?? "",
 			baseBranches: toText(workflow.baseBranches),
-			dailyWeekdays: (workflow.dailyWeekdays ?? []).join(", "),
 			prCommand: workflow.prCommand ?? "",
 			worktreeCommand: workflow.worktreeCommand ?? "",
 			worktreeRemoveCommand: workflow.worktreeRemoveCommand ?? "",
@@ -144,14 +136,8 @@ export function WorkflowSettings() {
 			// projet sérialisé, et deux graphies du même champ s'y contrediraient.
 			await api.config.updateProject({
 				workflow: {
-					activeStates: fromText(draft.activeStates),
-					reviewStates: fromText(draft.reviewStates),
 					doneStates: fromText(draft.doneStates),
-					blockedState: draft.blockedState.trim(),
 					baseBranches: fromText(draft.baseBranches),
-					dailyWeekdays: fromText(draft.dailyWeekdays)
-						.map((day) => Number(day))
-						.filter((day) => day >= 1 && day <= 7),
 					prCommand: draft.prCommand.trim(),
 					worktreeCommand: draft.worktreeCommand.trim(),
 					worktreeRemoveCommand: draft.worktreeRemoveCommand.trim(),
@@ -175,8 +161,6 @@ export function WorkflowSettings() {
 		}
 	};
 
-	const themes = config?.workflow?.themes?.length ?? 0;
-
 	// Une substitution mal écrite ne se voit nulle part : `(folder)` part tel
 	// quel dans la ligne de commande, `zsh` refuse de l'interpréter, la commande
 	// sort en erreur, et l'écran qui l'a lancée n'en disait rien. Repéré sur une
@@ -197,42 +181,12 @@ export function WorkflowSettings() {
 				{t("workflowSettings.workflow.intro")}
 			</p>
 
-			<div className="grid grid-cols-3 gap-2">
-				<Field
-					label={t("workflowSettings.workflow.active.label")}
-					hint={t("workflowSettings.workflow.active.hint")}
-				>
-					<TextInput
-						value={draft.activeStates}
-						onChange={(activeStates) => setDraft({ ...draft, activeStates })}
-						placeholder="In Progress"
-					/>
-				</Field>
-				<Field
-					label={t("workflowSettings.workflow.review.label")}
-					hint={t("workflowSettings.workflow.review.hint")}
-				>
-					<TextInput
-						value={draft.reviewStates}
-						onChange={(reviewStates) => setDraft({ ...draft, reviewStates })}
-						placeholder="In Review"
-					/>
-				</Field>
+			<div className="grid grid-cols-2 gap-2">
 				<Field label={t("workflowSettings.workflow.done.label")}>
 					<TextInput
 						value={draft.doneStates}
 						onChange={(doneStates) => setDraft({ ...draft, doneStates })}
 						placeholder="Done"
-					/>
-				</Field>
-				<Field
-					label={t("workflowSettings.workflow.blocked.label")}
-					hint={t("workflowSettings.workflow.blocked.hint")}
-				>
-					<TextInput
-						value={draft.blockedState}
-						onChange={(blockedState) => setDraft({ ...draft, blockedState })}
-						placeholder="Blocked"
 					/>
 				</Field>
 				<Field
@@ -243,17 +197,6 @@ export function WorkflowSettings() {
 						value={draft.baseBranches}
 						onChange={(baseBranches) => setDraft({ ...draft, baseBranches })}
 						placeholder="main, develop"
-						mono
-					/>
-				</Field>
-				<Field
-					label={t("workflowSettings.workflow.dailyWeekdays.label")}
-					hint={t("workflowSettings.workflow.dailyWeekdays.hint")}
-				>
-					<TextInput
-						value={draft.dailyWeekdays}
-						onChange={(dailyWeekdays) => setDraft({ ...draft, dailyWeekdays })}
-						placeholder="1, 3, 5"
 						mono
 					/>
 				</Field>
@@ -461,12 +404,7 @@ export function WorkflowSettings() {
 				</span>
 			</label>
 
-			<div className="flex items-center gap-2">
-				<span className="min-w-0 flex-1 text-[10px] text-ink-faint">
-					{themes > 0
-						? t("workflowSettings.workflow.themes", { count: themes })
-						: t("workflowSettings.workflow.noThemes")}
-				</span>
+			<div className="flex items-center justify-end gap-2">
 				<Button variant="solid" icon={Check} disabled={saving} onClick={() => void save()}>
 					{saving ? t("workflowSettings.saving") : t("workflowSettings.save")}
 				</Button>
@@ -813,250 +751,6 @@ export function RolesSettings() {
 					onClick={() => void save(roles)}
 				>
 					{saving ? t("workflowSettings.saving") : t("workflowSettings.roles.save")}
-				</Button>
-			</div>
-		</div>
-	);
-}
-
-/**
- * L'équipe du projet : qui la compose, et sous quels comptes on la reconnaît.
- *
- * Ces correspondances ne se devinent pas — Linear identifie par un UUID, GitHub
- * par un login, Sentry par l'email du compte — et rien ne fonctionne sans elles :
- * un ticket réassigné, une PR en attente ou une erreur de prod ne se rattachent
- * à personne. Elles ne s'éditaient qu'à la main dans le fichier de
- * configuration, ce qui revenait à réserver le daily et le tableau d'équipe à
- * qui accepte d'ouvrir un TOML.
- *
- * L'UUID Linear est le seul champ vraiment ingrat : il se lit dans l'URL du
- * profil, et l'écran le dit plutôt que de laisser chercher.
- */
-export function TeamSettings() {
-	const { config, reloadConfig, notify, activeProject } = useCockpit();
-	const { t } = useTranslation("components3");
-	const [members, setMembers] = useState<TeamMember[]>([]);
-	const [linearTeamId, setLinearTeamId] = useState("");
-	const [saving, setSaving] = useState(false);
-
-	useEffect(() => {
-		if (!config?.team) return;
-		setMembers(config.team.members ?? []);
-		setLinearTeamId(config.team.linearTeamId ?? "");
-	}, [config?.team]);
-
-	const save = async (next: TeamMember[], team = linearTeamId) => {
-		setSaving(true);
-		try {
-			// L'équipe suit le projet : les membres d'un produit n'ont rien à faire
-			// dans le daily d'un autre.
-			await api.config.updateProject({
-				team: {
-					linearTeamId: team.trim(),
-					members: next.map((member) => ({
-						name: member.name.trim(),
-						role: member.role.trim() || "dev",
-						roleLabel: member.roleLabel.trim(),
-						linearId: member.linearId.trim(),
-						github: member.github.trim(),
-						githubAliases: member.githubAliases,
-						sentryEmails: member.sentryEmails,
-						sentryNames: member.sentryNames,
-					})),
-				},
-			});
-			reloadConfig();
-			notify(t("workflowSettings.team.saved"));
-		} catch (error) {
-			notify(String(error));
-		} finally {
-			setSaving(false);
-		}
-	};
-
-	const update = (index: number, patch: Partial<TeamMember>) => {
-		setMembers((current) =>
-			current.map((member, position) =>
-				position === index ? { ...member, ...patch } : member,
-			),
-		);
-	};
-
-	return (
-		<div className="flex flex-col gap-2">
-			<p className="text-[11px] leading-relaxed text-ink-faint">
-				{t("workflowSettings.team.intro")}
-			</p>
-
-			{/* Un projet déclaré solo n'a pas d'équipe, par choix : ses membres sont
-			    écartés à la lecture. Le dire ici, sinon on saisit cinq personnes qui
-			    disparaissent au rechargement sans que rien ne l'explique. */}
-			{activeProject?.solo ? (
-				<p className="rounded-lg border border-warning/30 bg-warning/[0.06] px-2.5 py-2 text-[11px] leading-relaxed text-ink-muted">
-					<Trans
-						t={t}
-						i18nKey="workflowSettings.team.soloWarning"
-						components={{ strong: <strong /> }}
-					/>
-				</p>
-			) : null}
-
-			<Field
-				label={t("workflowSettings.team.linearTeam.label")}
-				hint={t("workflowSettings.team.linearTeam.hint")}
-			>
-				<TextInput
-					value={linearTeamId}
-					onChange={setLinearTeamId}
-					placeholder="11111111-1111-1111-1111-111111111111"
-					mono
-				/>
-			</Field>
-
-			{members.length === 0 ? (
-				<p className="rounded-lg border border-line-soft bg-surface/40 px-2.5 py-2 text-[11px] text-ink-faint">
-					{t("workflowSettings.team.empty")}
-				</p>
-			) : null}
-
-			{members.map((member, index) => (
-				<div
-					key={index}
-					className="flex flex-col gap-2 rounded-xl border border-line-soft bg-surface/40 p-2.5"
-				>
-					<div className="grid grid-cols-4 gap-2">
-						<Field label={t("workflowSettings.team.name")}>
-							<TextInput
-								value={member.name}
-								onChange={(name) => update(index, { name })}
-								placeholder="Alice Martin"
-							/>
-						</Field>
-						{/* `dev` ou `product` : ce n'est pas décoratif — seuls les devs
-						    sont attendus sur des pull requests, et le daily le sait. */}
-						<Field
-							label={t("workflowSettings.team.role.label")}
-							hint={t("workflowSettings.team.role.hint")}
-						>
-							<TextInput
-								value={member.role}
-								onChange={(role) => update(index, { role })}
-								placeholder="dev"
-								mono
-							/>
-						</Field>
-						<Field
-							label={t("workflowSettings.team.roleLabel.label")}
-							hint={t("workflowSettings.team.roleLabel.hint")}
-						>
-							<TextInput
-								value={member.roleLabel}
-								onChange={(roleLabel) => update(index, { roleLabel })}
-								placeholder={t("workflowSettings.team.roleLabel.placeholder")}
-							/>
-						</Field>
-						<Field label="GitHub" hint={t("workflowSettings.team.github.hint")}>
-							<TextInput
-								value={member.github}
-								onChange={(github) => update(index, { github })}
-								placeholder="alice-dev"
-								mono
-							/>
-						</Field>
-					</div>
-					<div className="grid grid-cols-2 gap-2">
-						<Field
-							label={t("workflowSettings.team.linearId.label")}
-							hint={t("workflowSettings.team.linearId.hint")}
-						>
-							<TextInput
-								value={member.linearId}
-								onChange={(linearId) => update(index, { linearId })}
-								placeholder="22222222-2222-2222-2222-222222222222"
-								mono
-							/>
-						</Field>
-						{/* Un compte renommé ou un second login : sans eux, ses anciennes
-						    PR passent pour celles de quelqu'un d'autre. */}
-						<Field
-							label={t("workflowSettings.team.githubAliases.label")}
-							hint={t("workflowSettings.team.githubAliases.hint")}
-						>
-							<TextInput
-								value={toText(member.githubAliases)}
-								onChange={(value) => update(index, { githubAliases: fromText(value) })}
-								mono
-							/>
-						</Field>
-						<Field
-							label={t("workflowSettings.team.sentryEmails.label")}
-							hint={t("workflowSettings.team.sentryEmails.hint")}
-						>
-							<TextInput
-								value={toText(member.sentryEmails)}
-								onChange={(value) => update(index, { sentryEmails: fromText(value) })}
-								placeholder="alice@example.com"
-								mono
-							/>
-						</Field>
-						<Field
-							label={t("workflowSettings.team.sentryNames.label")}
-							hint={t("workflowSettings.team.sentryNames.hint")}
-						>
-							<TextInput
-								value={toText(member.sentryNames)}
-								onChange={(value) => update(index, { sentryNames: fromText(value) })}
-								placeholder="Alice Martin"
-							/>
-						</Field>
-					</div>
-					<div className="flex justify-end">
-						<Button
-							size="sm"
-							icon={Trash2}
-							variant="danger"
-							onClick={() => {
-								const next = members.filter((_, position) => position !== index);
-								setMembers(next);
-								void save(next);
-							}}
-						>
-							{t("workflowSettings.remove")}
-						</Button>
-					</div>
-				</div>
-			))}
-
-			<div className="flex items-center gap-2">
-				<Button
-					size="sm"
-					icon={Plus}
-					onClick={() =>
-						setMembers([
-							...members,
-							{
-								name: "",
-								role: "dev",
-								roleLabel: "",
-								linearId: "",
-								github: "",
-								githubAliases: [],
-								sentryEmails: [],
-								sentryNames: [],
-							},
-						])
-					}
-				>
-					{t("workflowSettings.team.add")}
-				</Button>
-				<div className="flex-1" />
-				<Button
-					variant="solid"
-					icon={Check}
-					disabled={saving}
-					onClick={() => void save(members)}
-				>
-					{saving ? t("workflowSettings.saving") : t("workflowSettings.team.save")}
 				</Button>
 			</div>
 		</div>

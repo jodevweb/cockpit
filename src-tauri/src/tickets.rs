@@ -8,7 +8,7 @@
 //! titre, un état, un assigné, des étiquettes — et ce qu'ils n'ont pas :
 //!
 //! - **Linear** a des états riches (`In Review`), une priorité, une
-//!   estimation, des cycles.
+//!   estimation.
 //! - **GitHub Issues** n'a que `open` et `closed`, ni priorité ni estimation.
 //! - **Jira** a des états configurables et une priorité, mais nommée autrement.
 //!
@@ -16,13 +16,6 @@
 //! n'y en a pas, chaque fournisseur dit ce qu'il sait faire, et l'interface
 //! n'affiche que ce qui existe. Un champ vide ment moins qu'un champ inventé,
 //! mais un champ absent ne ment pas du tout.
-//!
-//! Le daily en fait partie désormais, et la question qu'il posait — « qu'est-ce
-//! qu'un cycle chez un fournisseur qui n'en a pas ? » — se répond par une
-//! capacité de plus : il n'en a pas, on ne rapporte donc rien à un sprint, et le
-//! tableau raconte ce qui est ouvert et assigné. Reste une convention : là où le
-//! titulaire d'un ticket n'est pas un UUID mais un login, c'est celui déclaré
-//! pour GitHub qui sert — un compte nommé autrement s'ajoute à ses alias.
 
 use crate::config::Config;
 use crate::error::{CockpitError, Result};
@@ -43,11 +36,6 @@ pub struct Capabilities {
 	pub estimate: bool,
 	/// Un nom de branche suggéré par le suivi.
 	pub branch_name: bool,
-	/// Des itérations — cycles, sprints — auxquelles rapporter l'avancement.
-	///
-	/// Sans elles, le daily raconte ce qui est en cours sans le comparer à un
-	/// engagement de sprint, et n'a pas d'identifiant d'équipe à réclamer.
-	pub cycles: bool,
 }
 
 /// Une tâche, telle que les écrans la manipulent.
@@ -81,49 +69,6 @@ pub struct Options {
 	pub labels: Vec<NamedRef>,
 }
 
-/// Une itération du suivi : un cycle Linear, un jalon ailleurs.
-#[derive(Debug, Clone, Serialize)]
-#[serde(rename_all = "camelCase")]
-pub struct TrackerCycle {
-	/// Identifiant interne, transmis tel quel au fournisseur pour filtrer.
-	pub id: String,
-	pub number: i64,
-	pub starts_at: String,
-	pub ends_at: String,
-}
-
-/// Un ticket tel que le daily le manipule.
-///
-/// Distinct de `TicketDetail`, qui sert la fiche d'un ticket qu'on ouvre : ici on
-/// en lit cent d'un coup pour les répartir entre les membres, et le détail —
-/// commentaires, libellés, options — coûterait autant d'appels que de tickets.
-#[derive(Debug, Clone)]
-pub struct TeamIssue {
-	pub identifier: String,
-	pub title: String,
-	pub description: String,
-	pub url: String,
-	pub state_name: String,
-	pub priority: i64,
-	pub updated_at: String,
-	/// Ce que le suivi rend comme titulaire : un UUID chez Linear, un login
-	/// ailleurs. C'est au daily de le rapprocher d'un membre.
-	pub assignee_id: String,
-	pub in_current_cycle: bool,
-}
-
-/// De quoi reconnaître un membre dans un suivi, quel qu'il soit.
-///
-/// Chaque service a sa façon de nommer les gens : Linear par un UUID, GitLab et
-/// GitHub par un login. Plutôt qu'un champ de configuration par service — autant
-/// d'occasions d'en oublier un — on donne au fournisseur ce que l'équipe déclare,
-/// et il retient ce qu'il sait utiliser.
-#[derive(Debug, Clone)]
-pub struct TeamRef {
-	pub tracker_id: String,
-	pub logins: Vec<String>,
-}
-
 /// Ce qu'un suivi de tâches doit savoir faire.
 // `async_trait` met un `#[must_use]` sur ce qu'il génère, une `Future` qui en a déjà un.
 #[allow(clippy::double_must_use)]
@@ -144,24 +89,6 @@ pub trait Provider: Send + Sync {
 	/// Applique un changement. Le patch porte les noms de champs du modèle
 	/// commun ; à chaque fournisseur de les traduire.
 	async fn update(&self, id: &str, patch: serde_json::Value) -> Result<()>;
-
-	/// L'itération en cours, quand le suivi en a une.
-	///
-	/// `None` n'est pas un échec : la plupart des suivis n'ont pas de cycle, et le
-	/// daily raconte alors ce qui est en cours sans le rapporter à un sprint.
-	async fn cycle(&self) -> Result<Option<TrackerCycle>> {
-		Ok(None)
-	}
-
-	/// Les tickets de ces personnes : le cycle en cours, plus ce qui est démarré
-	/// ou bloqué en dehors — un ticket bloqué depuis deux sprints doit rester
-	/// visible.
-	///
-	/// Sans implémentation, le daily n'a rien à montrer : c'est le fournisseur qui
-	/// sait interroger son service, pas le tableau.
-	async fn team_issues(&self, _members: &[TeamRef], _cycle_id: &str) -> Result<Vec<TeamIssue>> {
-		Ok(Vec::new())
-	}
 }
 
 /// Le fournisseur du projet actif.
@@ -201,7 +128,6 @@ impl Provider for Linear {
 		Capabilities {
 			priority: true,
 			rich_states: true,
-			cycles: true,
 			estimate: true,
 			branch_name: true,
 		}
@@ -231,7 +157,11 @@ impl Provider for Linear {
 	}
 
 	async fn options(&self) -> Result<Options> {
-		let options = crate::integrations::linear_options(&self.config, &crate::team::default_linear_team_id()).await?;
+		let team = self.config.linear.team_id.trim();
+		if team.is_empty() {
+			return Err(CockpitError::msg(crate::i18n::t("tickets.linearTeamMissing")));
+		}
+		let options = crate::integrations::linear_options(&self.config, team).await?;
 		Ok(Options {
 			states: options.states,
 			members: options.members,
@@ -241,34 +171,6 @@ impl Provider for Linear {
 
 	async fn update(&self, id: &str, patch: serde_json::Value) -> Result<()> {
 		crate::integrations::linear_update_issue(&self.config, id, patch).await
-	}
-
-	async fn cycle(&self) -> Result<Option<TrackerCycle>> {
-		let team = self.config.team.linear_team_id.trim();
-		if team.is_empty() {
-			return Err(CockpitError::msg(crate::i18n::t("tickets.linearTeamMissing")));
-		}
-		crate::team::fetch_current_cycle(&self.config.linear.token, team).await
-	}
-
-	/// Chez Linear, une personne est un UUID : ses logins n'y servent à rien, et
-	/// un membre sans identifiant déclaré ne peut se voir attribuer aucun ticket.
-	async fn team_issues(&self, members: &[TeamRef], cycle_id: &str) -> Result<Vec<TeamIssue>> {
-		let ids: Vec<String> = members
-			.iter()
-			.map(|member| member.tracker_id.trim().to_string())
-			.filter(|id| !id.is_empty())
-			.collect();
-		if ids.is_empty() {
-			return Ok(Vec::new());
-		}
-		crate::team::fetch_team_issues(
-			&self.config.linear.token,
-			cycle_id,
-			&ids,
-			&self.config.workflow.blocked_state,
-		)
-		.await
 	}
 }
 
@@ -298,7 +200,6 @@ impl Provider for GithubIssues {
 			rich_states: false,
 			estimate: false,
 			branch_name: false,
-			cycles: false,
 		}
 	}
 
@@ -316,15 +217,6 @@ impl Provider for GithubIssues {
 
 	async fn update(&self, id: &str, patch: serde_json::Value) -> Result<()> {
 		crate::integrations::github_issue_update(&self.config, &issue_number(id), patch).await
-	}
-
-	/// Les issues ouvertes assignées à l'équipe, reconnues par leurs logins.
-	async fn team_issues(&self, members: &[TeamRef], _cycle_id: &str) -> Result<Vec<TeamIssue>> {
-		let logins: Vec<String> = members.iter().flat_map(|member| member.logins.clone()).collect();
-		if logins.is_empty() {
-			return Ok(Vec::new());
-		}
-		crate::integrations::github_team_issues(&self.config, &logins).await
 	}
 }
 
@@ -353,7 +245,6 @@ impl Provider for Gitlab {
 			rich_states: false,
 			estimate: false,
 			branch_name: false,
-			cycles: false,
 		}
 	}
 
@@ -371,21 +262,6 @@ impl Provider for Gitlab {
 
 	async fn update(&self, id: &str, patch: serde_json::Value) -> Result<()> {
 		crate::integrations::gitlab_issue_update(&self.config, &issue_number(id), patch).await
-	}
-
-	/// Les tickets ouverts assignés à l'équipe.
-	///
-	/// Pas de cycle chez GitLab — donc rien qui distingue « dans le sprint » de
-	/// « en cours » : tout ce qui est ouvert et assigné compte comme actif. Les
-	/// personnes se reconnaissent à leur login, celui déclaré pour GitHub et ses
-	/// variantes ; un compte GitLab nommé autrement s'ajoute dans « autres
-	/// logins » plutôt que dans un champ de plus à oublier de remplir.
-	async fn team_issues(&self, members: &[TeamRef], _cycle_id: &str) -> Result<Vec<TeamIssue>> {
-		let logins: Vec<String> = members.iter().flat_map(|member| member.logins.clone()).collect();
-		if logins.is_empty() {
-			return Ok(Vec::new());
-		}
-		crate::integrations::gitlab_team_issues(&self.config, &logins).await
 	}
 }
 
@@ -425,22 +301,6 @@ mod tests {
 	fn le_numero_se_lit_dans_les_deux_ecritures() {
 		assert_eq!(issue_number("#317"), "317");
 		assert_eq!(issue_number(" 317 "), "317");
-	}
-
-	/// Un ticket se rattache à son titulaire quelle que soit la forme que le
-	/// suivi lui donne : un UUID chez Linear, un login ailleurs. Sans les deux
-	/// voies, le daily d'une équipe sur GitLab restait vide sans rien dire.
-	#[test]
-	fn le_daily_reconnait_un_membre_par_son_identifiant_ou_son_login() {
-		let mut config = Config::default();
-		config.gitlab.token = "glpat-x".into();
-		config.gitlab.project = "groupe/produit".into();
-		// GitLab n'a pas de cycle : rien à rapporter à un sprint, et aucun
-		// identifiant d'équipe à réclamer.
-		assert!(!provider(&config).unwrap().capabilities().cycles);
-
-		config.linear.token = "lin_api_x".into();
-		assert!(provider(&config).unwrap().capabilities().cycles);
 	}
 
 	/// Ce qui n'existe pas ne doit pas être annoncé comme disponible.

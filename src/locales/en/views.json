@@ -788,83 +788,6 @@
 		"errorsAndIncidents": "Errors & incidents",
 		"emptyHint": "Check the token and organization in Settings if you expected results."
 	},
-	"overview": {
-		"prSegments": {
-			"ready": "ready",
-			"ciFailing": "CI ✗",
-			"stacked": "stacked",
-			"inReview": "in review",
-			"drafts": "drafts"
-		},
-		"title": "Overview",
-		"subtitle": "The state of the product, the fleet and the missions",
-		"refreshing": "refreshing…",
-		"sourcesLoading_one": "{{count}} source loading…",
-		"sourcesLoading_other": "{{count}} sources loading…",
-		"waitingBanner_one": "{{count}} agent is waiting for your reply",
-		"waitingBanner_other": "{{count}} agents are waiting for your reply",
-		"tiles": {
-			"liveAgents": "Active agents",
-			"waiting": "{{count}} waiting",
-			"readyToMerge": "Ready to merge",
-			"ciFailing": "Failing CI",
-			"dailyBlockers": "Daily blockers",
-			"prodErrors": "Prod errors",
-			"activeWorktrees": "Active worktrees",
-			"total": "{{count}} in total"
-		},
-		"usage": {
-			"title": "Claude usage",
-			"dayLabel": "{{day}}: {{tokens}} tokens",
-			"summary": "{{today}} today · {{week}} over 7 days · last 21 days",
-			"none": "No measurements yet."
-		},
-		"prState": "PR status",
-		"cycle": {
-			"title": "Current cycle",
-			"ticketsDone": "tickets done",
-			"reviewLoad": "PRs to review",
-			"none": "No active cycle."
-		},
-		"missions": {
-			"title": "Missions",
-			"none": "No missions in progress. A mission breaks a ticket down into tasks handed to agents.",
-			"delivered": "{{done}}/{{total}} delivered",
-			"splitting": "being broken down",
-			"running": "{{count}} running"
-		},
-		"production": {
-			"title": "Production",
-			"none": "No critical errors in 14 days."
-		},
-		"prFlow": {
-			"title": "PR flow",
-			"see": "View",
-			"stackedOn": "stacked on {{base}}",
-			"ready_one": "{{count}} PR ready to merge, nothing broken.",
-			"ready_other": "{{count}} PRs ready to merge, nothing broken.",
-			"noneFailing": "No failing PRs."
-		},
-		"fleet": {
-			"title": "Fleet",
-			"allClean": "All trees are clean.",
-			"changes_one": "{{count}} change",
-			"changes_other": "{{count}} changes"
-		},
-		"daily": {
-			"title": "Daily blockers",
-			"button": "Daily"
-		},
-		"docs": {
-			"title": "Latest deliverables",
-			"none": "No recent documents."
-		},
-		"githubError": "GitHub: {{error}}",
-		"empty": {
-			"message": "Nothing to show",
-			"hint": "Check `general.main_repo` in Settings."
-		}
-	},
 	"permanence": {
 		"title": "Permanence",
 		"resume": "Resume",
@@ -1115,7 +1038,6 @@
 			"removeTitle": "Remove the “{{name}}” project?",
 			"removeMessage": "Only the cockpit configuration changes — the repository is left untouched.",
 			"activate": "Activate this project",
-			"soloBadge": "solo",
 			"new": "New",
 			"namePlaceholder": "Side project",
 			"folder": "Folder",
@@ -1123,8 +1045,6 @@
 			"folderPlaceholder": "~/Sites/my-project",
 			"githubHint": "Empty = inferred from the repository, if it has one.",
 			"githubPlaceholder": "me/my-project",
-			"solo": "Solo",
-			"soloTitle": "Project without a team: hides the daily",
 			"prepareFirst": "Prepare the ground first — the block below takes care of it"
 		},
 		"saved": "Configuration saved.",
@@ -1148,7 +1068,6 @@
 			"projects": "Projects",
 			"services": "Connected services",
 			"workflow": "Workflow",
-			"team": "Team",
 			"accounts": "Accounts",
 			"engines": "Agent engines",
 			"mcp": "Repository tools (MCP)",
@@ -1194,7 +1113,9 @@
 			"sentryProjects": "Sentry projects",
 			"sentryProjectsHint": "None checked = the whole organization.",
 			"ticketKey": "Ticket key",
-			"ticketKeyHint": "Linear prefix, e.g. ABC — the daily's team is set further down",
+			"ticketKeyHint": "Linear prefix, e.g. ABC — used to recognize ticket numbers in branches and titles",
+			"linearTeamId": "Linear team",
+			"linearTeamIdHint": "UUID of the Linear team, visible in the URL of its settings: its states, members and labels are offered when you edit a ticket.",
 			"gitlabProject": "GitLab project",
 			"gitlabProjectHint": "path with its group, e.g. group/product",
 			"gitlabProjectPlaceholder": "group/product",
@@ -1248,75 +1169,6 @@
 			"showHelp": "Running workspaces stay pinned in the bottom right, outside their screen: it's their only trace when you're looking elsewhere.",
 			"hideHelp": "Nothing shows on top of the other screens. What's running stays visible in the Workspaces screen, and notifications keep alerting you."
 		}
-	},
-	"team": {
-		"title": "Daily",
-		"loading": "Loading…",
-		"subtitle": "since the daily of {{since}}",
-		"subtitleCycle": "Cycle {{number}} · since the daily of {{since}}",
-		"present": "Run the daily full screen",
-		"currentCycle": "Current cycle",
-		"all": "All",
-		"githubError": "On the GitHub side: {{error}} — Linear tickets are still shown.",
-		"wholeTeam": "Whole team",
-		"draft": "draft",
-		"ageDays_one": "{{count}}d",
-		"ageDays_other": "{{count}}d",
-		"decision": {
-			"approved": "approved",
-			"changesRequested": "changes requested",
-			"reviewRequired": "to review"
-		},
-		"chip": {
-			"wip": "WIP",
-			"review": "review",
-			"prs": "PR",
-			"toReview": "to review",
-			"merged": "merged",
-			"blocking": "blocking",
-			"toChallenge": "to challenge",
-			"inReview": "in review",
-			"readyToMerge": "ready to merge"
-		},
-		"member": {
-			"cycle": "cycle {{done}}/{{total}}",
-			"more_one": "+{{count}} more",
-			"more_other": "+{{count}} more",
-			"openPrs": "Their open PRs",
-			"reviewInbox": "To review for others",
-			"reviewFrom": "by {{author}} · {{age}}",
-			"shipped": "Shipped since the last daily",
-			"next": "Up next"
-		},
-		"noTracker": {
-			"subtitle": "Task tracker not connected",
-			"service": "The task tracker",
-			"token": "a token"
-		},
-		"noTeam": {
-			"subtitle": "Team not declared",
-			"title": "The daily needs to know who is on the team",
-			"missingId": "The team ID is missing: it's the UUID of the Linear team, visible in the URL of its settings — not the key that prefixes tickets.",
-			"noMembers": "No member is declared: each one needs their Linear ID so their tickets can be attached to them, and their GitHub login for their pull requests.",
-			"open": "Open Settings → Team"
-		},
-		"flags": {
-			"title": "To address at the daily",
-			"urgentOnly": "Blocking only",
-			"empty": "Nothing to report",
-			"emptyHint": "No open question in this scope."
-		},
-		"flow": {
-			"title": "PR flow",
-			"ready": "Ready to merge ({{count}})",
-			"ciFailing": "CI failing ({{count}})",
-			"stacked": "Stacked PRs ({{count}})",
-			"blockedBy": "blocked by #{{number}}"
-		},
-		"focus": "Team focus",
-		"product": "Product · Linear tracking",
-		"noMember": "No members",
-		"noMemberHint": "Fill in `[team]` in the configuration."
 	},
 	"today": {
 		"title": "Today",
