@@ -456,6 +456,28 @@ export function Sidebar({ onOpenPalette }: { onOpenPalette: () => void }) {
 	// Le détail de la consommation, ouvert depuis le témoin.
 	const [usage, setUsage] = useState(false);
 	const live = useLiveTabs();
+	const liveTab = (tab: LiveTab) => (
+		<TopTab
+			key={tab.entry.id}
+			active={view === tab.entry.id}
+			onClick={() => go(tab.entry.id)}
+			icon={tab.entry.icon}
+			title={tab.title}
+			label={viewLabel(tab.entry.id)}
+		>
+			{tab.count > 0 ? (
+				<span
+					className={clsx(
+						"flex items-center gap-1 font-mono text-[10px]",
+						tab.waiting ? "text-warning" : "text-accent-soft",
+					)}
+				>
+					<Dot tone={tab.waiting ? "warning" : "success"} pulse={tab.waiting} />
+					{tab.count}
+				</span>
+			) : null}
+		</TopTab>
+	);
 	const current =
 		view === "map" || view === "workspace" || view === "libres" || view === "decisions" || view === "recap" || live.some((tab) => tab.entry.id === view) ? null : entryOf(view);
 
@@ -477,6 +499,7 @@ export function Sidebar({ onOpenPalette }: { onOpenPalette: () => void }) {
 				    icônes, puis le groupe défile — pour que la droite reste entière. */}
 				<div className="flex min-w-0 items-center gap-1 overflow-x-auto [scrollbar-width:none]">
 				<TopTab active={view === "map"} onClick={() => go("map")} icon={MapIcon} title={t("sidebar.top.mapTitle")} label={t("sidebar.views.map")} />
+				{live.filter((tab) => tab.pinned).map(liveTab)}
 				<TopTab
 					active={view === "workspace"}
 					onClick={() => go("workspace")}
@@ -513,26 +536,7 @@ export function Sidebar({ onOpenPalette }: { onOpenPalette: () => void }) {
 				>
 					<RecapTail />
 				</TopTab>
-				{live.map((tab) => (
-					<TopTab
-						key={tab.entry.id}
-						active={view === tab.entry.id}
-						onClick={() => go(tab.entry.id)}
-						icon={tab.entry.icon}
-						title={tab.title}
-						label={viewLabel(tab.entry.id)}
-					>
-						<span
-							className={clsx(
-								"flex items-center gap-1 font-mono text-[10px]",
-								tab.waiting ? "text-warning" : "text-accent-soft",
-							)}
-						>
-							<Dot tone={tab.waiting ? "warning" : "success"} pulse={tab.waiting} />
-							{tab.count}
-						</span>
-					</TopTab>
-				))}
+				{live.filter((tab) => !tab.pinned).map(liveTab)}
 				{current ? (
 					<>
 						<ChevronRight size={12} className="shrink-0 text-ink-faint" />
@@ -595,23 +599,34 @@ export function Sidebar({ onOpenPalette }: { onOpenPalette: () => void }) {
  *
  * Une mission suspendue ne tourne pas ; une mission qui attend un accord, si —
  * c'est même elle qu'il faut voir, d'où la teinte d'alerte.
+ *
+ * Les missions, elles, restent épinglées juste après la carte, même sans rien
+ * en cours : c'est le cœur de l'outil. Sans mission lancée, l'onglet
+ * disparaissait, et pour en démarrer une il fallait aller la chercher dans
+ * l'atelier — on l'a vu en préparant la vidéo de démo. Seul le compteur
+ * dépend de ce qui tourne.
  */
-function useLiveTabs(): Array<{ entry: Entry; count: number; waiting: boolean; title: string }> {
-	const { missions, jobs } = useCockpit();
-	const tabs: Array<{ entry: Entry; count: number; waiting: boolean; title: string }> = [];
+type LiveTab = { entry: Entry; count: number; waiting: boolean; title: string; pinned: boolean };
+function useLiveTabs(): LiveTab[] {
+	const { missions, jobs, hasConnector } = useCockpit();
+	const tabs: LiveTab[] = [];
 
 	const ongoing = missions.filter(
 		(mission) => mission.state !== "done" && mission.state !== "failed" && !mission.paused,
 	);
 	const entryMissions = entryOf("missions");
-	if (ongoing.length > 0 && entryMissions) {
+	// Même règle que l'atelier : sans CLI d'agent, l'écran ne mène à rien.
+	if (entryMissions && hasConnector("agents")) {
 		const waiting = ongoing.filter((mission) => mission.state.startsWith("awaiting")).length;
 		tabs.push({
 			entry: entryMissions,
 			count: ongoing.length,
 			waiting: waiting > 0,
+			pinned: true,
 			title:
-				waiting > 0
+				ongoing.length === 0
+					? viewLabel("missions")
+					: waiting > 0
 					? translate("app:sidebar.live.missionsWaiting", {
 							missions: translate("app:sidebar.live.missions", { count: ongoing.length }),
 							count: waiting,
@@ -629,6 +644,7 @@ function useLiveTabs(): Array<{ entry: Entry; count: number; waiting: boolean; t
 			entry: entryScripts,
 			count: running,
 			waiting: false,
+			pinned: false,
 			title: translate("app:sidebar.live.scripts", { count: running }),
 		});
 	}
