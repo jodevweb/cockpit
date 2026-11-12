@@ -59,6 +59,74 @@ pub(crate) fn mission_events(id: String) -> Vec<crate::mission_events::MissionEv
 	crate::mission_events::list(&id)
 }
 
+/// Ce qu'une tâche avait changé au commit qu'une porte a jugé, depuis sa base.
+///
+/// Dans le dépôt de la mission, pas dans celui du projet actif : `git_branch_diff`
+/// lit le second, et une mission ouverte sur un autre dépôt y aurait comparé un
+/// commit inconnu — au mieux une erreur, au pire le diff d'un homonyme.
+#[tauri::command]
+pub(crate) async fn mission_commit_diff(id: String, task: String, commit: String) -> Result<git::BranchDiff> {
+	let (repo, base) = commit_context(&id, &task, &commit)?;
+	git::branch_diff(&repo, &commit, &base).await
+}
+
+/// Le diff d'un fichier, au même instant que [`mission_commit_diff`].
+#[tauri::command]
+pub(crate) async fn mission_commit_file_diff(id: String, task: String, commit: String, file: String) -> Result<String> {
+	let (repo, base) = commit_context(&id, &task, &commit)?;
+	git::branch_file_diff(&repo, &commit, &base, &file).await
+}
+
+/// Le dépôt de la mission et la base de la tâche : celle qu'elle a déclarée
+/// (une sœur dont elle dépend), sinon la branche d'intégration.
+fn commit_context(id: &str, task: &str, commit: &str) -> Result<(std::path::PathBuf, String)> {
+	if !is_commit(commit) {
+		return Err(CockpitError::msg(i18n::tf("mission.badCommit", &[("commit", &commit)])));
+	}
+	let mission = mission::get(id)?;
+	let base = mission
+		.tasks
+		.iter()
+		.find(|candidate| candidate.id == task)
+		.map(|candidate| candidate.base.trim().to_string())
+		.filter(|base| !base.is_empty())
+		.unwrap_or_else(|| mission.branch.trim().to_string());
+	if base.is_empty() {
+		return Err(CockpitError::msg(i18n::t("orchestrator.noIntegrationBranch")));
+	}
+	Ok((std::path::PathBuf::from(mission.cwd), base))
+}
+
+/// Un identifiant de commit tel que les portes le notent : de l'hexadécimal, rien
+/// d'autre. Il vient de l'historique, donc d'un fichier sur le disque ; on ne le
+/// passe à git qu'une fois sûr qu'il ne peut pas être lu comme une option ou une
+/// plage (`HEAD~3`, `a..b`).
+fn is_commit(raw: &str) -> bool {
+	(7..=64).contains(&raw.len()) && raw.chars().all(|c| c.is_ascii_hexdigit())
+}
+
+#[cfg(test)]
+mod commit_tests {
+	use super::is_commit;
+
+	#[test]
+	fn seul_un_identifiant_hexadecimal_passe() {
+		assert!(is_commit("4d81b7e"));
+		assert!(is_commit("4d81b7e2c09a51f3e6b8d0c7a2f19e5b3c6d8a01"));
+		for refuse in [
+			"",
+			"4d81b7",
+			"HEAD",
+			"--output=x",
+			"a1b2c3d..e4f5a6b",
+			"4d81b7e~1",
+			"4d81b7é",
+		] {
+			assert!(!is_commit(refuse), "{refuse}");
+		}
+	}
+}
+
 #[tauri::command]
 pub(crate) fn mission_create(
 	title: String,

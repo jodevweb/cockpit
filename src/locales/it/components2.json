@@ -937,6 +937,14 @@
 			"checks": "controlli del repository",
 			"waitingForYou": "ti aspetta",
 			"role": "{{role}}"
+		},
+		"diff": {
+			"show": "Vedi il diff in quel momento",
+			"hide": "Nascondi il diff",
+			"files": "File modificati dalla base dell'attività",
+			"loading": "lettura del diff…",
+			"none": "Nessuna modifica dalla base dell'attività.",
+			"pick": "Scegli un file per vederne il diff."
 		}
 	},
 	"viewBoundary": {

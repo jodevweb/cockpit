@@ -99,6 +99,10 @@ test.describe("missions", () => {
 		await events.getByRole("button", { name: /Checks fail · Per-line rounding/ }).click();
 		await expect(dialog.getByText("expected 10.01 to be 10")).toBeVisible();
 		await expect(dialog.getByText("4d81b7e2c09a")).toBeVisible();
+		// Ce que la tâche avait changé à cet instant, fichier par fichier.
+		await dialog.getByRole("button", { name: "See the diff at that moment" }).click();
+		await dialog.getByRole("button", { name: /apps\/api\/cart\/total\.ts/ }).click();
+		await expect(dialog.getByText("Each line is rounded on its own", { exact: false })).toBeVisible();
 
 		// Une reprise : son motif, et l'état des branches à cet instant-là.
 		await events.getByRole("button", { name: /Functional QA sent back/ }).click();

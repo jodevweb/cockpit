@@ -885,6 +885,14 @@
 			"checks": "仓库检查",
 			"waitingForYou": "等待你",
 			"role": "{{role}}"
+		},
+		"diff": {
+			"show": "查看当时的差异",
+			"hide": "隐藏差异",
+			"files": "自任务基准以来更改的文件",
+			"loading": "正在读取差异…",
+			"none": "自任务基准以来没有更改。",
+			"pick": "选择一个文件以查看其差异。"
 		}
 	},
 	"viewBoundary": {

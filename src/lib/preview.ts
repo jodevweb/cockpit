@@ -2576,6 +2576,35 @@ const REPONSES: Record<string, unknown> = {
 			{ at: ago(35), change: { kind: "task", task: "t2", from: "planned", to: "running", note: "" } },
 		];
 	},
+	// Ce que l'API avait changé quand sa porte a échoué : le test de l'arrondi
+	// par ligne, et le calcul qu'il juge.
+	mission_commit_diff: ({ commit }: Record<string, unknown>) => ({
+		branch: commit,
+		base: "fix-cart-rounding-nw-3044",
+		mergeBase: "3e1a9c0b7d2f4e6a8c0b1d3f5a7c9e1b3d5f7a90",
+		files: [
+			{ path: "apps/api/cart/total.ts", added: 18, removed: 6, state: "modified" },
+			{ path: "apps/api/cart/total.test.ts", added: 31, removed: 0, state: "added" },
+		],
+		commits: [],
+		additions: 49,
+		deletions: 6,
+	}),
+	mission_commit_file_diff: ({ file }: Record<string, unknown>) =>
+		[
+			`diff --git a/${file} b/${file}`,
+			`--- a/${file}`,
+			`+++ b/${file}`,
+			"@@ -12,9 +12,15 @@ export function cartTotal(lines: CartLine[], currency: Currency) {",
+			"-  const raw = lines.reduce((sum, line) => sum + line.price * line.quantity, 0);",
+			"-  return round(raw, currency.decimals);",
+			"+  // Each line is rounded on its own, as the invoice shows it.",
+			"+  return lines.reduce(",
+			"+    (sum, line) => sum + round(line.price * line.quantity, currency.decimals),",
+			"+    0,",
+			"+  );",
+			" }",
+		].join("\n"),
 	// Un poste d'exemple déjà prêt : la carte « prêt à démarrer » ne s'affiche
 	// pas sur les captures du README.
 	readiness_check: {

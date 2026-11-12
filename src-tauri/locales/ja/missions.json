@@ -61,7 +61,8 @@
 			"launchFailed": "チェックを開始できませんでした: {{error}}",
 			"noWorktree": "チェックを実行できません: タスクの worktree が存在しません ({{path}})。",
 			"noRuntime": "エージェントの隔離が有効ですが、Docker も OrbStack も見つかりません。代わりにこのマシンでチェックを実行することはしません。"
-		}
+		},
+		"badCommit": "「{{commit}}」はコミット ID ではありません。"
 	},
 	"panel": {
 		"lens": {
