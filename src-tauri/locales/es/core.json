@@ -397,6 +397,7 @@
 		"automationNotFound": "Automatización no encontrada.",
 		"mission": {
 			"ticketReferenceRequired": "Pega la URL o el identificador de un ticket.",
+			"titleRequired": "Dale un título a la misión.",
 			"unknownTask": "Tarea desconocida.",
 			"fullReviewRequested": "Revisión completa solicitada.",
 			"workerStopped": "Ejecutor detenido: la tarea se reanudará cuando se reanude la misión.",

@@ -3382,6 +3382,7 @@ pub fn run() {
 			mission_create,
 			mission_from_ticket,
 			mission_start_from_ticket,
+			mission_start_from_brief,
 			mission_activity,
 			agent_timeline,
 			mission_remove,

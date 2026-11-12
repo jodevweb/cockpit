@@ -693,6 +693,18 @@
 			"submit": "Abrir",
 			"hint": "O título e a branch de integração vêm do ticket: nada mais a preencher."
 		},
+		"request": {
+			"title": "Descrever uma missão",
+			"titlePlaceholder": "O que precisa ser feito, em uma linha",
+			"briefLabel": "Detalhes",
+			"briefPlaceholder": "O contexto, o que se espera, o que não deve ser mexido… O líder lê isto como seu ticket.",
+			"hint": "Para o que não tem ticket: o líder lê este texto como leria um.",
+			"hintNoTracker": "Não precisa de gerenciador de tarefas: o líder lê este texto como seu ticket. Linear, GitLab ou GitHub se conectam nas Configurações.",
+			"connect": "Conectar um gerenciador",
+			"submit": "Iniciar",
+			"confirmMessage": "O agente líder começa na hora e lê seu pedido. Nada mais começa antes do seu acordo.",
+			"firstStep": "Registro o pedido e inicio o agente líder…"
+		},
 		"remove": {
 			"confirmTitle": "Excluir tudo de “{{title}}”?",
 			"confirmMessage_one": "Os agentes são parados, depois {{count}} worktree, as branches da missão — incluindo a de integração — e as conversas dos executores são excluídos. O trabalho sem push será perdido.",
@@ -700,15 +712,6 @@
 			"confirmLabel": "Excluir tudo",
 			"done_one": "Missão excluída — {{count}} item removido.",
 			"done_other": "Missão excluída — {{count}} itens removidos."
-		},
-		"intro": {
-			"title": "O que uma missão faz",
-			"how": "Você entrega um ticket. Um agente principal o lê, propõe uma divisão em tarefas e espera a sua aprovação — nada começa antes disso. Com o plano aprovado, cada tarefa ganha o próprio executor, branch e worktree; no final o agente principal junta o trabalho deles e abre o pull request.",
-			"why": "Essa é a diferença em relação a um agente que você inicia à mão: aqui o cockpit acompanha o ticket, o plano, as branches e o que foi entregue — e encontra tudo intacto mesmo se reiniciar no meio do caminho.",
-			"missingTitle": "O que falta aqui",
-			"missing": "Um gerenciador de tarefas, para ler o ticket de origem: {{missing}}. Os papéis de executor já têm valores padrão — você pode ajustá-los depois em “Papéis dos agentes”.",
-			"missingDefault": "um token do Linear, do GitLab ou do GitHub",
-			"openSettings": "Abrir Configurações"
 		},
 		"empty": {
 			"title": "Nenhuma missão em andamento",

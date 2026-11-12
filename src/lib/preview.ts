@@ -2502,6 +2502,20 @@ const REPONSES: Record<string, unknown> = {
 	// La fiche demandée, pas toujours la même : c'est ce que relit le parcours.
 	mission_get: ({ id }: Record<string, unknown>) =>
 		(REPONSES.missions_list as Array<{ id: string }>).find((mission) => mission.id === id),
+	// Une demande écrite dans Cockpit, sans suivi de tâches : la mission rendue
+	// n'est pas guidée, pour que l'aperçu reste sur la liste et y affiche le message.
+	mission_start_from_brief: ({ title }: Record<string, unknown>) => ({
+		mission: {
+			...(REPONSES.missions_list as Array<Record<string, unknown>>)[0],
+			id: "m-brief",
+			title,
+			ticket: "",
+			guided: false,
+		},
+		started: true,
+		session: "agent-9",
+		message: `Mission opened on ${String(title)}, the lead is analysing the issue.`,
+	}),
 	mission_activity: {
 		master: {
 			sessionId: "agent-4",
