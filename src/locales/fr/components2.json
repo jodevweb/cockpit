@@ -687,7 +687,8 @@
 			"reproaches_other": "Reprises · {{count}}",
 			"fullBrief": "Sa consigne complète",
 			"follow": "Suivre sa conversation",
-			"noAgent": "Pas encore d'agent sur cette tâche."
+			"noAgent": "Pas encore d'agent sur cette tâche.",
+			"history": "Voir sa boucle dans l'historique"
 		}
 	},
 	"actions": {

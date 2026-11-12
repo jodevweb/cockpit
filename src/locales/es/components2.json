@@ -687,7 +687,8 @@
 			"reproaches_other": "Rehacer · {{count}}",
 			"fullBrief": "Sus instrucciones completas",
 			"follow": "Seguir su conversación",
-			"noAgent": "Aún no hay agente en esta tarea."
+			"noAgent": "Aún no hay agente en esta tarea.",
+			"history": "Ver su bucle en el historial"
 		}
 	},
 	"actions": {

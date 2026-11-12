@@ -125,14 +125,27 @@ function fullDate(iso: string): string {
 	return date.toLocaleString(locale(), { dateStyle: "medium", timeStyle: "short" });
 }
 
-/** Le bouton qui ouvre l'historique, là où l'on regarde déjà la mission. */
-export function MissionTimelineButton({ mission }: { mission: Mission }) {
+/**
+ * Le bouton qui ouvre l'historique, là où l'on regarde déjà la mission.
+ *
+ * `focusTask` l'ouvre sur la dernière reprise ou la dernière porte rouge de
+ * cette tâche : depuis son nœud, c'est cette boucle-là qu'on vient lire.
+ */
+export function MissionTimelineButton({
+	mission,
+	focusTask,
+	label,
+}: {
+	mission: Mission;
+	focusTask?: string;
+	label?: string;
+}) {
 	const { t } = useTranslation("components2");
 	const [open, setOpen] = useState(false);
 	return (
 		<>
 			<Button size="sm" icon={History} title={t("missionTimeline.open")} onClick={() => setOpen(true)}>
-				{t("missionTimeline.button")}
+				{label ?? t("missionTimeline.button")}
 			</Button>
 			{open ? (
 				<Modal onClose={() => setOpen(false)} align="center">
@@ -148,7 +161,7 @@ export function MissionTimelineButton({ mission }: { mission: Mission }) {
 							</h2>
 							<Button icon={X} title={t("missionTimeline.close")} onClick={() => setOpen(false)} />
 						</header>
-						<MissionTimeline mission={mission} />
+						<MissionTimeline mission={mission} focusTask={focusTask} />
 					</div>
 				</Modal>
 			) : null}
@@ -156,7 +169,18 @@ export function MissionTimelineButton({ mission }: { mission: Mission }) {
 	);
 }
 
-export function MissionTimeline({ mission }: { mission: Mission }) {
+/** La dernière reprise ou porte rouge d'une tâche, -1 s'il n'y en a pas. */
+function lastLoop(entries: Entry[], task: string): number {
+	let found = -1;
+	entries.forEach((entry, index) => {
+		const change = entry.event.change;
+		if (change.kind === "rework" && change.task === task) found = index;
+		if (change.kind === "gate" && change.task === task && change.gate === "failed") found = index;
+	});
+	return found;
+}
+
+export function MissionTimeline({ mission, focusTask }: { mission: Mission; focusTask?: string }) {
 	const { t } = useTranslation("components2");
 	const closed = mission.state === "done" || mission.state === "failed";
 	const events = useAsync(() => api.missions.events(mission.id), [mission.id], {
@@ -164,9 +188,12 @@ export function MissionTimeline({ mission }: { mission: Mission }) {
 	});
 	const all = useMemo(() => events.data ?? [], [events.data]);
 	const entries = useMemo(() => visible(all), [all]);
-	// Rien de choisi : on suit le dernier événement, comme une mission qui avance.
+	const focused = useMemo(() => (focusTask ? lastLoop(entries, focusTask) : -1), [entries, focusTask]);
+	// Rien de choisi : on suit le dernier événement, comme une mission qui
+	// avance — ou la boucle de la tâche dont on vient.
 	const [picked, setPicked] = useState<number | null>(null);
-	const selected = picked !== null && picked < entries.length ? picked : entries.length - 1;
+	const selected =
+		picked !== null && picked < entries.length ? picked : focused >= 0 ? focused : entries.length - 1;
 
 	if (events.loading && !events.data) {
 		return (

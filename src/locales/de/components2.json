@@ -687,7 +687,8 @@
 			"reproaches_other": "Nacharbeit · {{count}}",
 			"fullBrief": "Seine vollständigen Anweisungen",
 			"follow": "Seiner Unterhaltung folgen",
-			"noAgent": "Noch kein Agent an dieser Aufgabe."
+			"noAgent": "Noch kein Agent an dieser Aufgabe.",
+			"history": "Die Schleife im Verlauf ansehen"
 		}
 	},
 	"actions": {

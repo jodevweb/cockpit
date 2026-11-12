@@ -639,7 +639,8 @@
 			"reproaches_other": "差し戻し · {{count}}",
 			"fullBrief": "指示の全文",
 			"follow": "会話を追う",
-			"noAgent": "このタスクにはまだエージェントがいません。"
+			"noAgent": "このタスクにはまだエージェントがいません。",
+			"history": "履歴でループを見る"
 		}
 	},
 	"actions": {

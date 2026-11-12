@@ -687,7 +687,8 @@
 			"reproaches_other": "Rework · {{count}}",
 			"fullBrief": "Its full instructions",
 			"follow": "Follow its conversation",
-			"noAgent": "No agent on this task yet."
+			"noAgent": "No agent on this task yet.",
+			"history": "See its loop in the history"
 		}
 	},
 	"actions": {

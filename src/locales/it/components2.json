@@ -687,7 +687,8 @@
 			"reproaches_other": "Rilavorazioni · {{count}}",
 			"fullBrief": "Le sue istruzioni complete",
 			"follow": "Segui la sua conversazione",
-			"noAgent": "Ancora nessun agente su questa attività."
+			"noAgent": "Ancora nessun agente su questa attività.",
+			"history": "Vedi il suo ciclo nella cronologia"
 		}
 	},
 	"actions": {

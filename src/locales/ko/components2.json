@@ -639,7 +639,8 @@
 			"reproaches_other": "재작업 · {{count}}",
 			"fullBrief": "전체 지시",
 			"follow": "대화 따라가기",
-			"noAgent": "이 작업에는 아직 에이전트가 없습니다."
+			"noAgent": "이 작업에는 아직 에이전트가 없습니다.",
+			"history": "기록에서 반복 과정 보기"
 		}
 	},
 	"actions": {

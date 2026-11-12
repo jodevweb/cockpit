@@ -687,7 +687,8 @@
 			"reproaches_other": "Retrabalhos · {{count}}",
 			"fullBrief": "As instruções completas",
 			"follow": "Acompanhar a conversa",
-			"noAgent": "Nenhum agente nesta tarefa ainda."
+			"noAgent": "Nenhum agente nesta tarefa ainda.",
+			"history": "Ver o ciclo no histórico"
 		}
 	},
 	"actions": {
