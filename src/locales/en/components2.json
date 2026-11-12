@@ -689,10 +689,6 @@
 			"follow": "Follow its conversation",
 			"noAgent": "No agent on this task yet.",
 			"history": "See its loop in the history"
-		},
-		"loop": {
-			"attempts": "↺ {{attempts}}/{{max}}",
-			"checksFail": "checks fail"
 		}
 	},
 	"actions": {

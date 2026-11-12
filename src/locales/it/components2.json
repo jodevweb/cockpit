@@ -689,10 +689,6 @@
 			"follow": "Segui la sua conversazione",
 			"noAgent": "Ancora nessun agente su questa attività.",
 			"history": "Vedi il suo ciclo nella cronologia"
-		},
-		"loop": {
-			"attempts": "↺ {{attempts}}/{{max}}",
-			"checksFail": "controlli falliti"
 		}
 	},
 	"actions": {

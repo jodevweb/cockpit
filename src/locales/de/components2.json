@@ -689,10 +689,6 @@
 			"follow": "Seiner Unterhaltung folgen",
 			"noAgent": "Noch kein Agent an dieser Aufgabe.",
 			"history": "Die Schleife im Verlauf ansehen"
-		},
-		"loop": {
-			"attempts": "↺ {{attempts}}/{{max}}",
-			"checksFail": "Prüfungen fehlgeschlagen"
 		}
 	},
 	"actions": {

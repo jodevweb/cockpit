@@ -3,7 +3,6 @@ import {
 	BackgroundVariant,
 	BaseEdge,
 	Controls,
-	EdgeLabelRenderer,
 	MarkerType,
 	Handle,
 	Position,
@@ -12,6 +11,7 @@ import {
 	type EdgeProps,
 	type Node,
 	type NodeProps,
+	useInternalNode,
 	useReactFlow,
 	useStore,
 } from "@xyflow/react";
@@ -162,7 +162,9 @@ export function MissionGraph({
 		}
 		const deepest = Math.max(0, ...columns.keys());
 		const tallest = Math.max(1, ...[...columns.values()].map((column) => column.length));
-		const spread = vertical ? LANE : ROW;
+		// Une boucle sur le côté d'un nœud a besoin de place : on l'écarte de ses voisins.
+		const looping = mission.tasks.some((task) => task.attempts > 0 || task.gate === "failed");
+		const spread = (vertical ? LANE : ROW) + (looping ? LOOP_ROOM : 0);
 		const centre = ((tallest - 1) * spread) / 2;
 		// `rank` : le niveau (ticket, maître, tâches, PR) ; `offset` : la place
 		// dans ce niveau. L'orientation ne change que l'axe qui porte chacun.
@@ -301,7 +303,7 @@ export function MissionGraph({
 
 		// La boucle de correction, sur la tâche qui la parcourt.
 		for (const task of mission.tasks) {
-			const loop = loopOf(task, phases.get(task.id), t);
+			const loop = loopOf(task, phases.get(task.id));
 			if (loop) edges.push(loop);
 		}
 
@@ -408,8 +410,14 @@ function Refit() {
 /** Les reprises au-delà desquelles une tâche rend la main : `mission::MAX_ATTEMPTS`. */
 const MAX_ATTEMPTS = 3;
 
+/**
+ * La place gardée entre deux couloirs (ou deux rangées) quand une boucle s'y
+ * dessine. Sans elle, l'écart entre deux nœuds voisins (`LANE` − `NODE_W`)
+ * laissait vingt pixels, et la boucle d'une tâche venait toucher sa voisine.
+ */
+const LOOP_ROOM = 32;
+
 interface LoopData extends Record<string, unknown> {
-	label: string;
 	tone: string;
 }
 
@@ -419,78 +427,63 @@ interface LoopData extends Record<string, unknown> {
  *
  * La reprise ne se lisait qu'à un compteur dans un coin du nœud, et une porte
  * rouge qu'à une ligne de détail : rien ne disait que la tâche allait repartir
- * d'elle-même, ni combien de tours il lui restait avant de rendre la main.
- * Une flèche qui revient sur la tâche le montre sans qu'on ait à lire.
+ * d'elle-même. Une flèche qui revient sur la tâche le montre sans qu'on ait à
+ * lire ; le compteur (`↺ 1/3`) et la raison restent dans le nœud, là où rien
+ * ne peut passer dessus.
  *
  * Rien pour une tâche qui n'a jamais été renvoyée et dont les portes ne
  * retiennent rien : la boucle n'existe que lorsqu'elle a servi, ou va servir.
  */
-function loopOf(
-	task: MissionTask,
-	phase: Phase | undefined,
-	t: ReturnType<typeof useTranslation>["t"],
-): Edge<LoopData> | null {
+function loopOf(task: MissionTask, phase: Phase | undefined): Edge<LoopData> | null {
 	const checksFail = task.gate === "failed";
 	if (task.attempts === 0 && !checksFail) return null;
-	const exhausted = task.attempts >= MAX_ATTEMPTS;
 	const tone =
-		checksFail || exhausted
+		checksFail || task.attempts >= MAX_ATTEMPTS
 			? "var(--color-critical)"
 			: phase === "live"
 				? "var(--color-accent)"
 				: "var(--color-warning)";
-	const parts = [
-		task.attempts > 0 ? t("missionGraph.loop.attempts", { attempts: task.attempts, max: MAX_ATTEMPTS }) : "",
-		checksFail ? t("missionGraph.loop.checksFail") : "",
-	].filter(Boolean);
 	return {
 		id: `${task.id}->loop`,
 		source: task.id,
 		target: task.id,
 		type: "loop",
 		animated: phase === "live",
-		data: { label: parts.join(" · "), tone },
+		data: { tone },
 		style: { stroke: tone, strokeWidth: 1.8 },
-		markerEnd: { type: MarkerType.ArrowClosed, color: tone, width: 16, height: 16 },
+		markerEnd: { type: MarkerType.ArrowClosed, color: tone, width: 12, height: 12 },
 	};
 }
 
 /**
- * Une arche qui part de la sortie du nœud et revient à son entrée.
+ * Une petite boucle sur le côté libre du nœud.
  *
- * De gauche à droite, elle passe au-dessus ; de haut en bas, sur le côté, dans
- * l'espace laissé entre deux couloirs (`LANE` − `NODE_W`). Le libellé se pose
- * au sommet de l'arche, là où la courbe de Bézier atteint son extrême.
+ * Libre, c'est-à-dire sans poignée : à droite quand le graphe descend (les
+ * liens entrent en haut et sortent en bas), au-dessus quand il va de gauche à
+ * droite. Une arche qui allait de la sortie à l'entrée faisait le tour du nœud
+ * et se mêlait aux liens qui y arrivaient. Elle se dessine d'après la boîte
+ * mesurée du nœud, pas d'après ses poignées.
  */
-function LoopEdge({ id, sourceX, sourceY, targetX, targetY, sourcePosition, markerEnd, style, data }: EdgeProps<Edge<LoopData>>) {
-	const vertical = sourcePosition === Position.Bottom;
-	const reach = vertical ? 140 : 96;
-	const path = vertical
-		? `M ${sourceX} ${sourceY} C ${sourceX + reach} ${sourceY + 56}, ${targetX + reach} ${targetY - 56}, ${targetX} ${targetY}`
-		: `M ${sourceX} ${sourceY} C ${sourceX + 56} ${sourceY - reach}, ${targetX - 56} ${targetY - reach}, ${targetX} ${targetY}`;
-	// Sommet d'une Bézier cubique symétrique : les points de contrôle y pèsent
-	// 3/4, les extrémités 1/4.
-	const labelX = vertical ? sourceX + (reach * 3) / 4 : (sourceX + targetX) / 2;
-	const labelY = vertical ? (sourceY + targetY) / 2 : sourceY - (reach * 3) / 4;
-	return (
-		<>
-			<BaseEdge id={id} path={path} markerEnd={markerEnd} style={style} />
-			{data?.label ? (
-				<EdgeLabelRenderer>
-					<div
-						className="nodrag nopan pointer-events-none absolute rounded-full border bg-surface px-1.5 py-px font-mono text-[9.5px] font-semibold whitespace-nowrap"
-						style={{
-							transform: `translate(-50%, -50%) translate(${labelX}px, ${labelY}px)`,
-							color: data.tone,
-							borderColor: `color-mix(in srgb, ${data.tone} 40%, transparent)`,
-						}}
-					>
-						{data.label}
-					</div>
-				</EdgeLabelRenderer>
-			) : null}
-		</>
-	);
+function LoopEdge({ id, source, sourcePosition, markerEnd, style }: EdgeProps<Edge<LoopData>>) {
+	const node = useInternalNode(source);
+	if (!node) return null;
+	const { x, y } = node.internals.positionAbsolute;
+	const width = node.measured.width ?? NODE_W;
+	const height = node.measured.height ?? 0;
+	// L'écart entre le départ et l'arrivée, et jusqu'où la boucle s'éloigne :
+	// au plus fort, une Bézier symétrique atteint les 3/4 de ses contrôles.
+	const spread = 14;
+	const bulge = 30;
+	let path: string;
+	if (sourcePosition === Position.Bottom) {
+		const edge = x + width;
+		const middle = y + height / 2;
+		path = `M ${edge} ${middle + spread} C ${edge + bulge} ${middle + spread}, ${edge + bulge} ${middle - spread}, ${edge + 2} ${middle - spread}`;
+	} else {
+		const middle = x + width / 2;
+		path = `M ${middle - spread} ${y} C ${middle - spread} ${y - bulge}, ${middle + spread} ${y - bulge}, ${middle + spread} ${y - 2}`;
+	}
+	return <BaseEdge id={id} path={path} markerEnd={markerEnd} style={style} />;
 }
 
 const EDGE_TYPES = { loop: LoopEdge };
@@ -567,7 +560,7 @@ function CockpitNode({ data }: NodeProps<Node<GraphData>>) {
 						title={t("missionGraph.sentBack")}
 					>
 						<RotateCcw size={9} />
-						{data.attempts}
+						{data.attempts}/{MAX_ATTEMPTS}
 					</span>
 				) : null}
 				<span

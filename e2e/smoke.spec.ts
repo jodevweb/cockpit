@@ -116,9 +116,10 @@ test.describe("missions", () => {
 			.getByRole("button", { name: "Journey" })
 			.click();
 		const graph = page.locator(".mission-graph");
-		// La recette renvoyée une fois, et la porte rouge de l'API.
-		await expect(graph.getByText("↺ 1/3")).toBeVisible();
-		await expect(graph.getByText("checks fail", { exact: true })).toBeVisible();
+		// Deux boucles : la recette renvoyée une fois, et la porte rouge de l'API.
+		// Le compteur vit dans le nœud, où rien ne peut passer dessus.
+		await expect(graph.locator(".react-flow__edge-loop")).toHaveCount(2);
+		await expect(graph.getByText("1/3", { exact: true })).toBeVisible();
 
 		await graph.getByText("Functional QA").click();
 		await page.getByRole("button", { name: "See its loop in the history" }).click();

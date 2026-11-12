@@ -641,10 +641,6 @@
 			"follow": "会話を追う",
 			"noAgent": "このタスクにはまだエージェントがいません。",
 			"history": "履歴でループを見る"
-		},
-		"loop": {
-			"attempts": "↺ {{attempts}}/{{max}}",
-			"checksFail": "チェック失敗"
 		}
 	},
 	"actions": {

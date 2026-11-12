@@ -689,10 +689,6 @@
 			"follow": "Suivre sa conversation",
 			"noAgent": "Pas encore d'agent sur cette tâche.",
 			"history": "Voir sa boucle dans l'historique"
-		},
-		"loop": {
-			"attempts": "↺ {{attempts}}/{{max}}",
-			"checksFail": "vérifications en échec"
 		}
 	},
 	"actions": {

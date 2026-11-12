@@ -689,10 +689,6 @@
 			"follow": "Acompanhar a conversa",
 			"noAgent": "Nenhum agente nesta tarefa ainda.",
 			"history": "Ver o ciclo no histórico"
-		},
-		"loop": {
-			"attempts": "↺ {{attempts}}/{{max}}",
-			"checksFail": "verificações falharam"
 		}
 	},
 	"actions": {
