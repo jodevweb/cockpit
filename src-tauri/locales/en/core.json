@@ -190,6 +190,7 @@
 	},
 	"git": {
 		"commandFailed": "git {{args}} failed: {{error}}",
+		"mergeBaseDirty": "`{{base}}` has uncommitted changes in {{path}}: commit or stash them before merging.",
 		"detachedHead": "Detached HEAD: no branch to publish from this folder.",
 		"commitMessageRequired": "A commit needs a message.",
 		"noWorktree": "git reports no worktree.",
@@ -447,7 +448,10 @@
 			"integrationNotResumed": "Integration not resumed",
 			"outOfScopeRefused": "Out-of-scope write refused",
 			"revivalsExhausted": "Mission paused: the integration is going round in circles",
-			"revivalsExhaustedDetail": "The lead agent was relaunched {{count}} times without anything moving (tasks, checks, pull request). Look at what blocks it — a pull request that cannot open, a conflict — then resume the mission."
+			"revivalsExhaustedDetail": "The lead agent was relaunched {{count}} times without anything moving (tasks, checks, pull request). Look at what blocks it — a pull request that cannot open, a conflict — then resume the mission.",
+			"noRemote": "Mission paused: no remote to open the pull request",
+			"noRemoteDetail": "Every task is integrated, but the repository has no remote: no pull request can open. Finish the mission locally from its card.",
+			"localMergeMessage": "Mission « {{title}} »"
 		},
 		"quoted": "“{{text}}”",
 		"tailscaleDown": "Tailscale is not responding.",

@@ -897,6 +897,20 @@ function MissionIntegration({
 	run: RunAction;
 }) {
 	const { t } = useTranslation("views");
+	const { confirm } = useConfirm();
+	const blocked = refus.length > 0 || indécises.length > 0;
+	// Sans remote, la pull request ne peut pas s'ouvrir : la mission restait en
+	// intégration, toutes ses tâches dedans, sans autre issue. Elle se termine
+	// aussi sur ce poste, avec les mêmes refus que la pull request.
+	const finishLocal = async () => {
+		const ok = await confirm({
+			title: t("missions.card.finishLocalConfirmTitle", { branch: mission.branch }),
+			message: t("missions.card.finishLocalConfirmMessage"),
+			confirmLabel: t("missions.card.finishLocalConfirmLabel"),
+		});
+		if (!ok) return;
+		await run("local", () => api.missions.finishLocal(mission.id), t("missions.card.finishedLocal"));
+	};
 	// Ce que la pull request emportera, avant de la demander. Le bouton
 	// refuse déjà de partir s'il reste du travail dehors, mais rien ne
 	// le disait : on cliquait sans savoir si la recomposition avait eu
@@ -990,6 +1004,15 @@ function MissionIntegration({
 				}
 			>
 				{busy === "pr" ? t("missions.card.opening") : t("missions.card.openPr")}
+			</Button>
+			<Button
+				icon={GitMerge}
+				loading={busy === "local"}
+				disabled={blocked}
+				title={t("missions.card.finishLocalTitle")}
+				onClick={() => void finishLocal()}
+			>
+				{t("missions.card.finishLocal")}
 			</Button>
 		</>
 	);

@@ -1574,10 +1574,11 @@ pub(crate) fn mission_exposure(id: String) -> Result<mission::Exposure> {
 	))
 }
 
-#[tauri::command]
-pub(crate) async fn mission_pr(id: String, title: Option<String>, body: Option<String>) -> Result<mission::Mission> {
-	let mission = mission::get(&id)?;
-
+/// Ce qui interdit de clore une mission, pull request ou pas : une
+/// vérification qui refuse ou n'a pas conclu, du travail resté hors de
+/// l'intégration. Partagé par la pull request et la fin en local, pour qu'aucun
+/// des deux chemins ne laisse passer ce que l'autre refuse.
+fn ensure_closable(mission: &mission::Mission) -> Result<()> {
 	// Ouvrir la pull request clôt la mission et range ses worktrees : ce qui
 	// n'est pas dans la branche d'intégration à cet instant se retrouve sur une
 	// branche que plus rien ne nomme. On refuse plutôt que de perdre le travail
@@ -1598,7 +1599,7 @@ pub(crate) async fn mission_pr(id: String, title: Option<String>, body: Option<S
 	// à redire » — la confusion que l'oracle de la Permanence a nommée comme son
 	// pire mode de défaillance. Le refus se lève sans rien perdre : la
 	// vérification reformule, ou la tâche s'assume abandonnée.
-	let indecises = mission::unclear_verdicts(&mission, &verifiers);
+	let indecises = mission::unclear_verdicts(mission, &verifiers);
 	if !indecises.is_empty() {
 		let liste = indecises
 			.iter()
@@ -1611,7 +1612,7 @@ pub(crate) async fn mission_pr(id: String, title: Option<String>, body: Option<S
 		)));
 	}
 
-	let refus = mission::blocking_verdicts(&mission, &verifiers);
+	let refus = mission::blocking_verdicts(mission, &verifiers);
 	if !refus.is_empty() {
 		let liste = refus
 			.iter()
@@ -1624,7 +1625,7 @@ pub(crate) async fn mission_pr(id: String, title: Option<String>, body: Option<S
 		)));
 	}
 
-	let dehors = mission::unintegrated(&mission);
+	let dehors = mission::unintegrated(mission);
 	if !dehors.is_empty() {
 		let liste = dehors
 			.iter()
@@ -1642,6 +1643,34 @@ pub(crate) async fn mission_pr(id: String, title: Option<String>, body: Option<S
 			&[("count", &dehors.len()), ("branch", &mission.branch), ("tasks", &liste)],
 		)));
 	}
+	Ok(())
+}
+
+/// Clôt une mission sans pull request : sa branche d'intégration est fusionnée
+/// dans sa base, sur ce poste.
+///
+/// Sur un dépôt sans remote — un projet local, le bac à sable des tests — la
+/// pull request ne peut pas s'ouvrir : le maître échouait, était relancé trois
+/// fois, puis la mission se mettait en pause sans issue, toutes ses tâches
+/// pourtant intégrées. C'est la même clôture, avec les mêmes refus, la fusion
+/// en plus.
+#[tauri::command]
+pub(crate) async fn mission_finish_local(id: String) -> Result<mission::Mission> {
+	let mission = mission::get(&id)?;
+	ensure_closable(&mission)?;
+	let base = mission_base(&mission).await;
+	let message = i18n::tf("lib.mission.localMergeMessage", &[("title", &mission.title)]);
+	git::merge_into(std::path::Path::new(&mission.cwd), &base, &mission.branch, &message).await?;
+	let closed = mission::finish(&id, "")?;
+	let _ = mission::cleanup(&id).await;
+	Ok(closed)
+}
+
+#[tauri::command]
+pub(crate) async fn mission_pr(id: String, title: Option<String>, body: Option<String>) -> Result<mission::Mission> {
+	let mission = mission::get(&id)?;
+
+	ensure_closable(&mission)?;
 
 	let url = open_mission_pr(
 		&mission.cwd,

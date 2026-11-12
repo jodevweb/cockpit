@@ -171,6 +171,14 @@ test.describe("missions", () => {
 		expect(errors).toEqual([]);
 	});
 
+	test("une mission en intégration peut se terminer en local, aux mêmes refus que la PR", async ({ page }) => {
+		// Seule « Shard the e2e test suite » est en intégration dans l'aperçu.
+		const card = page;
+		// La recette refuse : ni la pull request ni la fin en local ne passent.
+		await expect(card.getByRole("button", { name: "Finish locally" })).toBeDisabled();
+		await expect(card.getByRole("button", { name: "Open the PR" })).toBeDisabled();
+	});
+
 	test("l'approbation d'un plan nomme les exécutants sans filet", async ({ page }) => {
 		await expect(page.getByText("No container for backend, frontend, qa.")).toBeVisible();
 		await expect(page.getByText(/Agents → Agent isolation/)).toBeVisible();

@@ -190,6 +190,7 @@
 	},
 	"git": {
 		"commandFailed": "git {{args}} 失败：{{error}}",
+		"mergeBaseDirty": "`{{base}}` 在 {{path}} 有未提交的修改：合并前请先提交或暂存。",
 		"detachedHead": "分离的 HEAD：此文件夹中没有可发布的分支。",
 		"commitMessageRequired": "提交需要一条消息。",
 		"noWorktree": "git 未报告任何 worktree。",
@@ -447,7 +448,10 @@
 			"integrationNotResumed": "集成未恢复",
 			"outOfScopeRefused": "超出范围的写入被拒绝",
 			"revivalsExhausted": "任务已暂停：集成在原地打转",
-			"revivalsExhaustedDetail": "主控已重新启动 {{count}} 次，但没有任何进展（任务、检查、拉取请求）。请查看阻碍它的原因——无法创建的拉取请求、冲突——然后继续任务。"
+			"revivalsExhaustedDetail": "主控已重新启动 {{count}} 次，但没有任何进展（任务、检查、拉取请求）。请查看阻碍它的原因——无法创建的拉取请求、冲突——然后继续任务。",
+			"noRemote": "任务已暂停：没有可开拉取请求的远程",
+			"noRemoteDetail": "所有任务均已集成，但仓库没有远程，无法打开拉取请求。请在任务卡片上选择在本地完成。",
+			"localMergeMessage": "任务「{{title}}」"
 		},
 		"quoted": "“{{text}}”",
 		"tailscaleDown": "Tailscale 没有响应。",
