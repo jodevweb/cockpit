@@ -621,7 +621,7 @@
 		"memory": "{{mb}} MB",
 		"open": "Abrir {{url}}",
 		"stop": "Detener este servidor",
-		"footer": "Solo se listan los servidores iniciados desde este worktree. Los demás — y los contenedores Docker — siguen en «Servidores y contenedores»."
+		"footer": "Solo se listan los servidores iniciados desde este worktree. Los demás siguen en «Servidores»."
 	},
 	"producedFiles": {
 		"count_one": "{{count}} archivo tocado",

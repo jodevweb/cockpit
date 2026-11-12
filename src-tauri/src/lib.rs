@@ -90,8 +90,8 @@ fn connectors_list() -> Vec<config::Connector> {
 	let mut list = cfg().connectors();
 
 	// Les outils du poste comptent autant que les clés d'API : un écran qui
-	// dépend de Docker ou du CLI `claude` est aussi vide sans eux qu'un écran
-	// GitHub sans jeton. Les déclarer ici permet à l'interface de masquer ce qui
+	// dépend du CLI `claude` est aussi vide sans lui qu'un écran GitHub sans
+	// jeton. Les déclarer ici permet à l'interface de masquer ce qui
 	// ne peut pas répondre, au lieu de laisser cliquer vers une erreur.
 	//
 	// C'est aussi ce qui manquait pour voir qu'un poste n'avait pas Node : le
@@ -118,13 +118,6 @@ fn connectors_list() -> Vec<config::Connector> {
 		"orchestration",
 		agent::node_binary().is_some(),
 		&i18n::t("lib.connectorMissing.node"),
-	));
-	list.push(local(
-		"docker",
-		"Docker",
-		"containers",
-		system::has_docker(),
-		&i18n::t("lib.connectorMissing.docker"),
 	));
 	list
 }
@@ -2574,11 +2567,6 @@ async fn remote_wake(title: String, body: String) {
 }
 
 #[tauri::command]
-async fn docker_containers() -> Result<Vec<system::Container>> {
-	system::docker_containers().await
-}
-
-#[tauri::command]
 async fn listening_ports() -> Result<Vec<system::ListeningPort>> {
 	system::listening_ports().await
 }
@@ -3021,7 +3009,6 @@ pub fn run() {
 			remote_test,
 			remote_revoke,
 			remote_wake,
-			docker_containers,
 			listening_ports,
 			stop_process,
 			feed_linear,

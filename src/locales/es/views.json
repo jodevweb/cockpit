@@ -350,16 +350,11 @@
 		}
 	},
 	"infra": {
-		"title": "Servidores y contenedores",
-		"subtitle": "Lo que se ejecuta en esta máquina: servidores de desarrollo y contenedores.",
+		"title": "Servidores",
+		"subtitle": "Los servidores de desarrollo que escuchan en esta máquina, y el worktree del que viene cada uno.",
 		"portFreed": "Puerto {{port}} liberado.",
-		"runningContainers": "Contenedores en marcha",
-		"stoppedContainers": "Contenedores detenidos",
 		"devPorts": "Puertos de desarrollo",
 		"worktrees": "Worktrees",
-		"noContainers": "Ningún contenedor",
-		"viewLogs": "Ver los logs",
-		"logs": "Logs",
 		"listening": "Servidores a la escucha",
 		"noServers": "Ningún servidor de desarrollo en marcha",
 		"unknownFolder": "carpeta desconocida",

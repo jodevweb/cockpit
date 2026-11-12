@@ -159,7 +159,6 @@
 		"packageJsonMissing": "在此仓库中找不到 package.json。",
 		"packageJsonUnreadable": "无法读取的 package.json：{{error}}",
 		"generalGroup": "通用",
-		"dockerDown": "Docker 没有响应 — 守护进程是否在运行？",
 		"unknownProcess": "未知进程。"
 	},
 	"notebook": {
@@ -275,8 +274,7 @@
 	"lib": {
 		"connectorMissing": {
 			"claude": "本机上的 `claude` CLI",
-			"node": "Node — 任务的权限桥接和工具桥接都依赖它",
-			"docker": "本机上的 Docker"
+			"node": "Node — 任务的权限桥接和工具桥接都依赖它"
 		},
 		"config": {
 			"serialize": "序列化配置：{{error}}",

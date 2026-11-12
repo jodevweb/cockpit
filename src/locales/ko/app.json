@@ -27,7 +27,7 @@
 			"git": "Git",
 			"scripts": "스크립트",
 			"docs": "문서",
-			"infra": "서버 및 컨테이너 · 이 머신에서 실행 중인 것",
+			"infra": "서버 · 이 머신에서 실행 중인 것",
 			"settings": "설정",
 			"replay": "리플레이 · 지난 PR로 에이전트 구성 평가",
 			"methods": "메서드 · 이 프로젝트가 도입할 수 있는 플러그인을 설치 전에 확인"
@@ -171,7 +171,7 @@
 			"worktrees": "Worktree",
 			"git": "Git",
 			"scripts": "스크립트",
-			"infra": "서버 및 컨테이너",
+			"infra": "서버",
 			"settings": "설정",
 			"replay": "리플레이",
 			"methods": "메서드"

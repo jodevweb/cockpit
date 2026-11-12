@@ -122,7 +122,7 @@ installed on the machine.
 | `git`                  | Worktrees, Git screen, diffs, commits                       | nothing works                                   |
 | `claude`               | AI Agents screen, launching and resuming missions           | no more agents, the rest still works            |
 | authenticated `gh`     | Fallback when no GitHub token is configured                 | `COCKPIT_GITHUB_TOKEN` must be provided         |
-| `docker` or `orb`      | Local Infra screen, ntfy server for mobile access, agent isolation | the container list stays empty, isolation refuses to start when enabled |
+| `docker` or `orb`      | ntfy server for mobile access, agent isolation             | isolation refuses to start when enabled         |
 | `zed`, `cursor`, `code`| Opening a file in the editor                                | editor links do nothing                         |
 | Tailscale              | `pnpm setup:mobile` only                                    | no mobile access                                |
 
@@ -286,7 +286,7 @@ The top bar holds the screens you use all day; the others are in the
 | **Decisions**     | Everything waiting for your answer: permissions, questions, plans to approve.                                                     |
 | **Recap**         | What happened over the past hour, three hours or day, told visually.                                                              |
 | **Missions**      | One ticket, one plan, several workers: you confirm what the lead agent understood, its approach, its breakdown; each worker gets its own branch and worktree; repository checks gate every delivery; the pull request carries a delivery dossier. |
-| *Workshop*        | **Today**, **Permanence** (an agent on call, within hours and budgets you set), **AI agents** (every Claude Code session, its timeline, its tools), **Documents**, **Impact** (what each change in flight implies), **Worktrees**, **Git**, **Scripts**, **Servers & containers**, **Settings**. |
+| *Workshop*        | **Today**, **Permanence** (an agent on call, within hours and budgets you set), **AI agents** (every Claude Code session, its timeline, its tools), **Documents**, **Impact** (what each change in flight implies), **Worktrees**, **Git**, **Scripts**, **Servers** (development servers listening, and the worktree each one came from), **Settings**. |
 
 ## Shortcuts
 
@@ -328,7 +328,7 @@ repository's `.git` are watched by `notify`, and every write triggers a refresh
 Since worktree metadata lives under `.git/worktrees/`, a single watch covers
 them all.
 
-What comes from the network is polled: every few seconds for Docker and ports,
+What comes from the network is polled: every few seconds for ports,
 every two to three minutes for SaaS — enough to stay accurate, little enough
 not to eat into API quotas.
 
@@ -407,7 +407,7 @@ src-tauri/src/
   executions.rs    what each agent did: identity, turns, costs, timeline
   docs.rs          discovery of markdown deliverables
   runner.rs        command execution, line-by-line streaming, process groups
-  system.rs        editor, terminal, Finder/Explorer, Docker, ports
+  system.rs        editor, terminal, Finder/Explorer, ports
   integrations.rs  Linear, GitHub, GitLab
   monitor.rs       census of in-flight changes, across all forges
   impact.rs        factual file of a change, reading by an agent, report review

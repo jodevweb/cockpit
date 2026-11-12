@@ -350,16 +350,11 @@
 		}
 	},
 	"infra": {
-		"title": "Serveurs & conteneurs",
-		"subtitle": "Ce qui tourne sur le poste : serveurs de développement et conteneurs.",
+		"title": "Serveurs",
+		"subtitle": "Les serveurs de développement en écoute sur le poste, et le worktree d'où vient chacun.",
 		"portFreed": "Port {{port}} libéré.",
-		"runningContainers": "Conteneurs actifs",
-		"stoppedContainers": "Conteneurs arrêtés",
 		"devPorts": "Ports dev",
 		"worktrees": "Worktrees",
-		"noContainers": "Aucun conteneur",
-		"viewLogs": "Voir les logs",
-		"logs": "Logs",
 		"listening": "Serveurs en écoute",
 		"noServers": "Aucun serveur de développement actif",
 		"unknownFolder": "dossier inconnu",

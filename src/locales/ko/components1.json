@@ -597,7 +597,7 @@
 		"memory": "{{mb}} MB",
 		"open": "{{url}} 열기",
 		"stop": "이 서버 중지",
-		"footer": "이 worktree에서 시작한 서버만 표시됩니다. 나머지와 Docker 컨테이너는 “서버 및 컨테이너”에 있습니다."
+		"footer": "이 worktree에서 시작한 서버만 표시됩니다. 나머지는 “서버”에 있습니다."
 	},
 	"producedFiles": {
 		"count_other": "수정된 파일 {{count}}개",

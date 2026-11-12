@@ -350,16 +350,11 @@
 		}
 	},
 	"infra": {
-		"title": "Server e container",
-		"subtitle": "Cosa gira su questa macchina: server di sviluppo e container.",
+		"title": "Server",
+		"subtitle": "I server di sviluppo in ascolto su questa macchina, e il worktree da cui proviene ciascuno.",
 		"portFreed": "Porta {{port}} liberata.",
-		"runningContainers": "Container attivi",
-		"stoppedContainers": "Container fermi",
 		"devPorts": "Porte di sviluppo",
 		"worktrees": "Worktree",
-		"noContainers": "Nessun container",
-		"viewLogs": "Vedi i log",
-		"logs": "Log",
 		"listening": "Server in ascolto",
 		"noServers": "Nessun server di sviluppo attivo",
 		"unknownFolder": "cartella sconosciuta",

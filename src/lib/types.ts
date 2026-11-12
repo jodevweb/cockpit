@@ -491,15 +491,6 @@ export interface Tag {
 	tone: Severity | "neutral";
 }
 
-export interface Container {
-	id: string;
-	name: string;
-	image: string;
-	state: string;
-	status: string;
-	ports: string;
-}
-
 /**
  * Un élément de la page, lu sous un point : ce qu'on désigne à un agent quand
  * on lui montre l'écran (`browser_inspect`).

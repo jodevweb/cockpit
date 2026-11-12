@@ -159,7 +159,6 @@
 		"packageJsonMissing": "このリポジトリに package.json が見つかりません。",
 		"packageJsonUnreadable": "package.json を読み取れません：{{error}}",
 		"generalGroup": "一般",
-		"dockerDown": "Docker が応答しません — デーモンは起動していますか？",
 		"unknownProcess": "不明なプロセス。"
 	},
 	"notebook": {
@@ -275,8 +274,7 @@
 	"lib": {
 		"connectorMissing": {
 			"claude": "このマシン上の `claude` CLI",
-			"node": "Node — ミッションの権限ブリッジとツールブリッジが依存しています",
-			"docker": "このマシン上の Docker"
+			"node": "Node — ミッションの権限ブリッジとツールブリッジが依存しています"
 		},
 		"config": {
 			"serialize": "設定のシリアライズ：{{error}}",

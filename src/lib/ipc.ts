@@ -25,7 +25,6 @@ import type {
 	ReviewPrepared,
 	Territory,
 	Connector,
-	Container,
 	DocEntry,
 	FeedItem,
 	FileChange,
@@ -815,7 +814,6 @@ export const api = {
 		notify: (title: string, body: string) => call<void>("notify_desktop", { title, body }),
 		/** Plein écran de travail, ou retour au cadre précédent. */
 		zoomToggle: () => call<void>("window_zoom_toggle"),
-		containers: () => call<Container[]>("docker_containers"),
 		ports: () => call<ListeningPort[]>("listening_ports"),
 		/** Arrête ce qui occupe un port — SIGTERM, puis SIGKILL s'il s'accroche. */
 		stopProcess: (pid: number) => call<void>("stop_process", { pid }),

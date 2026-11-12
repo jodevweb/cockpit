@@ -621,7 +621,7 @@
 		"memory": "{{mb}} MB",
 		"open": "Apri {{url}}",
 		"stop": "Ferma questo server",
-		"footer": "Sono elencati solo i server avviati da questo worktree. Gli altri — e i container Docker — restano in “Server e container”."
+		"footer": "Sono elencati solo i server avviati da questo worktree. Gli altri restano in “Server”."
 	},
 	"producedFiles": {
 		"count_one": "{{count}} file toccato",

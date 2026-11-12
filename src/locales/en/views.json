@@ -350,16 +350,11 @@
 		}
 	},
 	"infra": {
-		"title": "Servers & containers",
-		"subtitle": "What's running on this machine: development servers and containers.",
+		"title": "Servers",
+		"subtitle": "Development servers listening on this machine, and the worktree each one came from.",
 		"portFreed": "Port {{port}} freed.",
-		"runningContainers": "Running containers",
-		"stoppedContainers": "Stopped containers",
 		"devPorts": "Dev ports",
 		"worktrees": "Worktrees",
-		"noContainers": "No containers",
-		"viewLogs": "View logs",
-		"logs": "Logs",
 		"listening": "Listening servers",
 		"noServers": "No development server running",
 		"unknownFolder": "unknown folder",

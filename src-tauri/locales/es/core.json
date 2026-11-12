@@ -159,7 +159,6 @@
 		"packageJsonMissing": "No se encuentra package.json en este repositorio.",
 		"packageJsonUnreadable": "package.json ilegible: {{error}}",
 		"generalGroup": "general",
-		"dockerDown": "Docker no responde: ¿está en marcha el daemon?",
 		"unknownProcess": "Proceso desconocido."
 	},
 	"notebook": {
@@ -275,8 +274,7 @@
 	"lib": {
 		"connectorMissing": {
 			"claude": "la CLI `claude` en esta máquina",
-			"node": "Node: los puentes de permisos y herramientas de las misiones dependen de él",
-			"docker": "Docker en esta máquina"
+			"node": "Node: los puentes de permisos y herramientas de las misiones dependen de él"
 		},
 		"config": {
 			"serialize": "Serializando la configuración: {{error}}",

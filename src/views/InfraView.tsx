@@ -1,10 +1,9 @@
 import clsx from "clsx";
-import { Boxes, RefreshCw, Square } from "lucide-react";
+import { RefreshCw, Square } from "lucide-react";
 import { useMemo } from "react";
 import {
 	Badge,
 	Button,
-	Dot,
 	Empty,
 	ErrorNote,
 	Metric,
@@ -21,10 +20,7 @@ import { useTranslation } from "react-i18next";
 export function InfraView() {
 	const { notify, worktrees } = useCockpit();
 	const { t } = useTranslation("views");
-	const containers = useAsync(() => api.system.containers(), [], { pollMs: 15_000 });
 	const ports = useAsync(() => api.system.ports(), [], { pollMs: 15_000 });
-
-	const running = (containers.data ?? []).filter((item) => item.state === "running");
 
 	const stop = async (pid: number, port: number) => {
 		try {
@@ -51,73 +47,19 @@ export function InfraView() {
 				subtitle={t("infra.subtitle")}
 				actions={
 					<>
-						{containers.loading || ports.loading ? <Spinner /> : null}
-						<Button
-							size="sm"
-							icon={RefreshCw}
-							onClick={() => {
-								containers.reload();
-								ports.reload();
-							}}
-						/>
+						{ports.loading ? <Spinner /> : null}
+						<Button size="sm" icon={RefreshCw} onClick={() => ports.reload()} />
 					</>
 				}
 			/>
 
 			<div className="min-h-0 flex-1 overflow-y-auto p-4">
-				<div className="grid grid-cols-4 gap-2.5">
-					<Metric label={t("infra.runningContainers")} value={running.length} tone="info" />
-					<Metric
-						label={t("infra.stoppedContainers")}
-						value={(containers.data ?? []).length - running.length}
-					/>
+				<div className="grid grid-cols-2 gap-2.5">
 					<Metric label={t("infra.devPorts")} value={devPorts.length} />
 					<Metric label={t("infra.worktrees")} value={worktrees.length} />
 				</div>
 
-				<div className="mt-5 grid grid-cols-2 gap-5">
-					<Section title="Docker" count={containers.data?.length}>
-						{containers.error ? (
-							<ErrorNote error={containers.error} onRetry={containers.reload} />
-						) : null}
-						{(containers.data ?? []).length === 0 && !containers.error ? (
-							<Empty icon={Boxes} message={t("infra.noContainers")} />
-						) : null}
-						<div className="flex flex-col gap-1">
-							{containers.data?.map((container) => (
-								<div
-									key={container.id}
-									className="panel flex items-center gap-2.5 px-3 py-2"
-								>
-									<Dot
-										tone={container.state === "running" ? "success" : "neutral"}
-										pulse={container.state === "running"}
-									/>
-									<div className="min-w-0 flex-1">
-										<div className="truncate text-[12.5px] text-ink">{container.name}</div>
-										<div className="truncate font-mono text-[10px] text-ink-faint">
-											{container.image}
-										</div>
-									</div>
-									<div className="max-w-40 shrink-0 truncate text-right font-mono text-[10px] text-ink-faint">
-										{container.ports || container.status}
-									</div>
-									<Button
-										size="sm"
-										title={t("infra.viewLogs")}
-										onClick={() => {
-											void api.system
-												.openTerminal("/", `docker logs -f --tail 200 ${container.name}`)
-												.catch((error) => notify(String(error)));
-										}}
-									>
-										{t("infra.logs")}
-									</Button>
-								</div>
-							))}
-						</div>
-					</Section>
-
+				<div className="mt-5">
 					{/* Un serveur de développement se lance dans un worktree et s'y
 					    oublie : trois semaines plus tard, le port 3000 est pris par un
 					    sujet livré depuis longtemps, et il fallait chercher le pid à la

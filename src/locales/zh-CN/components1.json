@@ -597,7 +597,7 @@
 		"memory": "{{mb}} MB",
 		"open": "打开 {{url}}",
 		"stop": "停止此服务器",
-		"footer": "仅列出从此 worktree 启动的服务器。其他服务器以及 Docker 容器请查看“服务器与容器”。"
+		"footer": "仅列出从此 worktree 启动的服务器。其他服务器请查看“服务器”。"
 	},
 	"producedFiles": {
 		"count_other": "涉及 {{count}} 个文件",
