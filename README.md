@@ -84,7 +84,7 @@ of it**.
 <sub>These four come from the app's preview data.</sub>
 
 <p align="center">
-  <img alt="A GitHub issue becomes a mission: you confirm what the lead agent understood, its approach, its breakdown, and get a pull request with its delivery dossier" src="docs/images/demo.gif" width="800">
+  <img alt="A ticket written in Cockpit becomes a mission: you answer the lead agent and approve its plan, a check fails and the task goes back, the history replays it, and a pull request comes out with its delivery dossier" src="docs/images/demo.gif" width="800">
 </p>
 
 <table>
