@@ -16,6 +16,7 @@ import {
 	Map as MapIcon,
 	Network,
 	PanelsTopLeft,
+	Search,
 	ListChecks,
 	Radar,
 	Rocket,
@@ -240,7 +241,7 @@ function ProjectSwitcher() {
  * compteur de la colonne qui se lit dans l'état des agents, lequel change à
  * chaque phrase reçue. Isolé ici, il ne fait rendre à nouveau que lui-même.
  */
-function WorkspaceTail({ shortcut }: { shortcut: string }) {
+function WorkspaceTail() {
 	const groups = useWorkGroups();
 	const { pendingFor } = useAgentRuns();
 
@@ -256,13 +257,10 @@ function WorkspaceTail({ shortcut }: { shortcut: string }) {
 			group.terminals.filter((terminal) => terminal.running).length,
 		0,
 	);
-	if (count === 0) {
-		return (
-			<span className="font-mono text-[10px] text-ink-faint/0 group-hover:text-ink-faint/60">
-				{formatShortcut(`⌘${shortcut}`)}
-			</span>
-		);
-	}
+	// Rien qui tourne, rien à montrer. Le raccourci s'affichait ici au survol,
+	// mais en texte transparent le reste du temps : il réservait sa largeur, et
+	// l'onglet en paraissait deux fois trop grand. Il est dans l'infobulle.
+	if (count === 0) return null;
 
 	// Un agent qui attend une autorisation expire au bout de cinq minutes : c'est
 	// le seul état que la colonne doit signaler sans qu'on ouvre l'écran.
@@ -519,32 +517,35 @@ export function Sidebar({ onOpenPalette }: { onOpenPalette: () => void }) {
 			<header
 				data-tauri-drag-region={dragRegion}
 				className={clsx(
-					"hairline-b relative z-30 flex h-11 shrink-0 items-center gap-1 bg-base pr-2",
+					"hairline-b @container relative z-30 flex h-11 shrink-0 items-center gap-1 bg-base pr-2",
 					// Les pastilles de fenêtre de macOS occupent le coin. Ailleurs, la
 					// barre de titre est native, au-dessus : rien à réserver.
 					hasTauri() && isMac ? "pl-[84px]" : "pl-3",
 				)}
 			>
-				<Logo size={20} className="mr-1.5 shadow-sm shadow-black/30" />
-				<TopTab active={view === "map"} onClick={() => go("map")} icon={MapIcon} title={t("sidebar.top.mapTitle")}>
-					{t("sidebar.views.map")}
-				</TopTab>
+				<Logo size={20} className="mr-1.5 shrink-0 shadow-sm shadow-black/30" />
+				{/* Fenêtrée, la barre débordait à droite : tout y était `shrink-0`, et
+				    l'Atelier, la consommation et la mémoire sortaient de l'écran. Les
+				    onglets cèdent la place les premiers — leurs noms se replient en
+				    icônes, puis le groupe défile — pour que la droite reste entière. */}
+				<div className="flex min-w-0 items-center gap-1 overflow-x-auto [scrollbar-width:none]">
+				<TopTab active={view === "map"} onClick={() => go("map")} icon={MapIcon} title={t("sidebar.top.mapTitle")} label={t("sidebar.views.map")} />
 				<TopTab
 					active={view === "workspace"}
 					onClick={() => go("workspace")}
 					icon={PanelsTopLeft}
 					title={t("sidebar.top.workspaceTitle")}
+					label={t("sidebar.views.workspace")}
 				>
-					{t("sidebar.views.workspace")}
-					<WorkspaceTail shortcut="⇧A" />
+					<WorkspaceTail />
 				</TopTab>
 				<TopTab
 					active={view === "libres"}
 					onClick={() => go("libres")}
 					icon={SquareTerminal}
 					title={t("sidebar.top.libresTitle")}
+					label={t("sidebar.views.libres")}
 				>
-					{t("sidebar.views.libres")}
 					<LibresTail />
 				</TopTab>
 				<TopTab
@@ -552,8 +553,8 @@ export function Sidebar({ onOpenPalette }: { onOpenPalette: () => void }) {
 					onClick={() => go("decisions")}
 					icon={Inbox}
 					title={t("sidebar.top.decisionsTitle")}
+					label={t("sidebar.views.decisions")}
 				>
-					{t("sidebar.views.decisions")}
 					<DecisionsTail />
 				</TopTab>
 				<TopTab
@@ -561,8 +562,8 @@ export function Sidebar({ onOpenPalette }: { onOpenPalette: () => void }) {
 					onClick={() => go("recap")}
 					icon={Clapperboard}
 					title={t("sidebar.top.recapTitle")}
+					label={t("sidebar.top.recap")}
 				>
-					{t("sidebar.top.recap")}
 					<RecapTail />
 				</TopTab>
 				<TopTab
@@ -570,8 +571,8 @@ export function Sidebar({ onOpenPalette }: { onOpenPalette: () => void }) {
 					onClick={() => go("automations")}
 					icon={AlarmClock}
 					title={t("sidebar.top.automationsTitle")}
+					label={t("sidebar.views.automations")}
 				>
-					{t("sidebar.views.automations")}
 					<AutomationsTail />
 				</TopTab>
 				{live.map((tab) => (
@@ -581,8 +582,8 @@ export function Sidebar({ onOpenPalette }: { onOpenPalette: () => void }) {
 						onClick={() => go(tab.entry.id)}
 						icon={tab.entry.icon}
 						title={tab.title}
+						label={viewLabel(tab.entry.id)}
 					>
-						{viewLabel(tab.entry.id)}
 						<span
 							className={clsx(
 								"flex items-center gap-1 font-mono text-[10px]",
@@ -597,35 +598,44 @@ export function Sidebar({ onOpenPalette }: { onOpenPalette: () => void }) {
 				{current ? (
 					<>
 						<ChevronRight size={12} className="shrink-0 text-ink-faint" />
-						<TopTab active onClick={() => undefined} icon={current.icon}>
-							{viewLabel(current.id)}
-						</TopTab>
+						<TopTab active onClick={() => undefined} icon={current.icon} label={viewLabel(current.id)} keepLabel />
 					</>
 				) : null}
+				</div>
 
 				<span data-tauri-drag-region={dragRegion} className="h-full min-w-4 flex-1" />
 
 				<button
 					type="button"
 					onClick={onOpenPalette}
-					className="focus-ring flex h-7 w-56 min-w-[132px] shrink items-center justify-between gap-2 rounded-lg border border-line-soft bg-surface px-2.5 text-[11px] text-ink-faint transition-colors duration-150 hover:border-line hover:text-ink-muted"
+					aria-label={t("sidebar.search")}
+					title={`${t("sidebar.search")} (${formatShortcut("⌘K")})`}
+					className="focus-ring flex h-7 w-8 shrink-0 items-center justify-center gap-2 rounded-lg border border-line-soft bg-surface text-[11px] text-ink-faint transition-colors duration-150 hover:border-line hover:text-ink-muted @min-[1400px]:w-56 @min-[1400px]:min-w-[132px] @min-[1400px]:shrink @min-[1400px]:justify-between @min-[1400px]:px-2.5"
 				>
-					<span className="truncate whitespace-nowrap">{t("sidebar.search")}</span>
-					<KeyHint>{formatShortcut("⌘K")}</KeyHint>
+					<Search size={13} className="shrink-0 @min-[1400px]:hidden" />
+					<span className="hidden truncate whitespace-nowrap @min-[1400px]:inline">{t("sidebar.search")}</span>
+					<span className="hidden @min-[1400px]:inline-flex">
+						<KeyHint>{formatShortcut("⌘K")}</KeyHint>
+					</span>
 				</button>
 				{/* Ce qu'on dépense et ce que la machine encaisse : à voir sans rien
 				    ouvrir, un quota qui s'épuise coûte plus cher qu'un écran de plus. */}
 				<LaunchButton />
-				<div className="w-36 shrink-0">
+				<div className="shrink-0 @min-[1400px]:w-36">
 					<SpendTicker onOpen={() => setUsage(true)} />
 				</div>
-				<div className="w-40 shrink-0">
+				<div className="shrink-0 @min-[1400px]:w-40">
 					<ResourcesTicker onOpen={() => setResources(true)} />
 				</div>
 				<ActivityChip />
-				<TopTab active={atelier} onClick={() => setAtelier((open) => !open)} icon={LayoutGrid} title={t("sidebar.atelier.title")}>
-					{t("sidebar.atelier.name")}
-				</TopTab>
+				<TopTab
+					active={atelier}
+					onClick={() => setAtelier((open) => !open)}
+					icon={LayoutGrid}
+					title={t("sidebar.atelier.title")}
+					label={t("sidebar.atelier.name")}
+					keepLabel
+				/>
 			</header>
 
 			<AnimatePresence>
@@ -708,25 +718,33 @@ function TopTab({
 	onClick,
 	icon: Icon,
 	title,
+	label,
+	keepLabel,
 	children,
 }: {
 	active: boolean;
 	onClick: () => void;
 	icon: React.ComponentType<{ size?: number; className?: string }>;
 	title?: string;
-	children: React.ReactNode;
+	label: string;
+	/** Le nom reste affiché même quand la barre manque de place. */
+	keepLabel?: boolean;
+	/** Ce qui suit le nom — un compteur, un raccourci — et reste toujours visible. */
+	children?: React.ReactNode;
 }) {
 	return (
 		<button
 			type="button"
 			onClick={onClick}
-			title={title}
+			title={title ?? label}
 			className={clsx(
 				"focus-ring group relative flex h-7 shrink-0 items-center gap-1.5 rounded-lg px-2.5 text-[12.5px] transition-colors duration-150",
 				active ? "bg-surface font-medium text-ink shadow-card" : "text-ink-muted hover:bg-surface hover:text-ink",
 			)}
 		>
-			<Icon size={14} className={active ? "text-accent" : "text-ink-faint"} />
+			<Icon size={14} className={clsx("shrink-0", active ? "text-accent" : "text-ink-faint")} />
+			{/* Replié, le nom reste lu par les lecteurs d'écran et dans l'infobulle. */}
+			<span className={clsx("whitespace-nowrap", !keepLabel && "sr-only @min-[1780px]:not-sr-only")}>{label}</span>
 			{children}
 		</button>
 	);
@@ -826,7 +844,7 @@ function Atelier({ onClose }: { onClose: () => void }) {
 											<entry.icon size={14} className={active ? "text-accent" : "text-ink-faint"} />
 											<span className="flex-1 text-left">{viewLabel(entry.id)}</span>
 											{entry.id === "workspace" ? (
-												<WorkspaceTail shortcut={entry.shortcut} />
+												<WorkspaceTail />
 											) : badge !== null ? (
 												<span className="flex items-center gap-1 font-mono text-[10px] text-accent-soft">
 													{entry.id === "agents" ? <Dot tone="success" pulse /> : null}
