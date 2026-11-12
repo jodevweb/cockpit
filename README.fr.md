@@ -127,7 +127,7 @@ est déjà installé sur le poste.
 | `git`                  | Worktrees, écran Git, diffs, commits                       | rien ne fonctionne                              |
 | `claude`               | Écran Agents IA, lancement et reprise des missions         | plus d'agents, le reste tient                   |
 | `gh` authentifié       | Repli quand aucun jeton GitHub n'est configuré             | il faut fournir `COCKPIT_GITHUB_TOKEN`          |
-| `docker` ou `orb`      | Écran Infra locale, serveur ntfy de l'accès mobile, isolation des agents | la liste des conteneurs reste vide, l'isolation refuse de démarrer si activée |
+| `docker` ou `orb`      | Serveur ntfy de l'accès mobile, isolation des agents       | l'isolation refuse de démarrer si activée       |
 | `zed`, `cursor`, `code`| Ouverture d'un fichier dans l'éditeur                      | les liens vers l'éditeur ne font rien           |
 | Tailscale              | `pnpm setup:mobile` uniquement                             | pas d'accès mobile                              |
 
@@ -277,12 +277,9 @@ fichier :
 | Service      | Variable                    | Jeton attendu                                          |
 | ------------ | --------------------------- | ------------------------------------------------------ |
 | GitHub       | `COCKPIT_GITHUB_TOKEN`      | facultatif — repli automatique sur `gh auth token`     |
-| Sentry       | `COCKPIT_SENTRY_TOKEN`      | auth token utilisateur (`project:read`, `event:write`) |
 | Linear       | `COCKPIT_LINEAR_TOKEN`      | clé API personnelle                                     |
-| Trigger.dev  | `COCKPIT_TRIGGER_TOKEN`     | secret key d'environnement (`tr_prod_…`, `tr_staging_…`) |
-| Railway      | `COCKPIT_RAILWAY_TOKEN`     | token de compte ou de projet                            |
-| Better Stack | `COCKPIT_BETTERSTACK_TOKEN` | token API Uptime                                        |
-| Stripe       | `COCKPIT_STRIPE_TOKEN`      | clé restreinte en lecture seule                         |
+| Better Stack | `COCKPIT_BETTERSTACK_TOKEN` | jeton d'API, pour le serveur MCP des agents isolés      |
+| Stripe       | `COCKPIT_STRIPE_TOKEN`      | clé restreinte, pour le serveur MCP des agents isolés   |
 
 ## Les écrans
 
@@ -291,13 +288,13 @@ tiroir **Atelier**, à droite de la barre.
 
 | Écran             | Ce qu'il montre                                                                                                                  |
 | ----------------- | -------------------------------------------------------------------------------------------------------------------------------- |
-| **Carte**         | Chaque projet en quatre colonnes — arrive, en cours, livrer, en prod — avec ses tickets, missions, workspaces et pull requests, et le bandeau « Ce qui t'attend » au-dessus (une croix écarte un élément jusqu'à ce qu'il change). |
+| **Carte**         | Chaque projet en trois colonnes — arrive, en cours, livrer — avec ses tickets, missions, workspaces et pull requests, et le bandeau « Ce qui t'attend » au-dessus (une croix écarte un élément jusqu'à ce qu'il change). |
 | **Workspaces**    | Un worktree, ses agents et ses terminaux, côte à côte (voir « Le panneau de travail »).                                           |
 | **Agents libres** | Les agents lancés hors projet, dans le dossier de ton choix.                                                                     |
 | **Décisions**     | Tout ce qui attend ta réponse : autorisations, questions, plans à approuver.                                                     |
 | **Récap en images** | Ce qui s'est passé dans l'heure, les trois heures ou la journée, raconté en images.                                            |
 | **Missions**      | Un ticket, un plan, plusieurs exécutants : tu valides ce que le maître a compris, son approche, son découpage ; chaque exécutant a sa branche et son worktree ; les vérifications du dépôt filtrent chaque livraison ; la pull request porte un dossier de livraison. |
-| *Atelier*         | **Aujourd'hui**, **Permanence** (un agent de garde, dans les horaires et budgets que tu fixes), **Agents IA** (chaque session Claude Code, sa timeline, ses outils), **Documents**, **Flux** (tickets, PR, CI, déploiements), **Impact** (ce qu'implique chaque changement en cours), **Observabilité** (Sentry, Better Stack), **Worktrees**, **Git**, **Scripts**, **Serveurs & conteneurs**, **Réglages**. |
+| *Atelier*         | **Aujourd'hui**, **Permanence** (un agent de garde, dans les horaires et budgets que tu fixes), **Agents IA** (chaque session Claude Code, sa timeline, ses outils), **Documents**, **Impact** (ce qu'implique chaque changement en cours), **Worktrees**, **Git**, **Scripts**, **Serveurs** (les serveurs de développement en écoute, et le worktree d'où vient chacun), **Réglages**. |
 
 ## Raccourcis
 
@@ -340,7 +337,7 @@ pousse un rafraîchissement (avec palier, pour absorber les rafales et ignorer
 les écritures que provoquent nos propres lectures). Comme les métadonnées des
 worktrees vivent sous `.git/worktrees/`, une seule surveillance les couvre tous.
 
-Ce qui vient du réseau est sondé à intervalle : quelques secondes pour Docker et
+Ce qui vient du réseau est sondé à intervalle : quelques secondes pour
 les ports, deux à trois minutes pour les SaaS — assez pour rester juste, assez
 peu pour ne pas entamer les quotas d'API.
 
@@ -423,8 +420,8 @@ src-tauri/src/
   executions.rs    ce que chaque agent a fait : identité, tours, coûts, timeline
   docs.rs          découverte des livrables markdown
   runner.rs        exécution de commandes, streaming ligne à ligne, groupes de processus
-  system.rs        éditeur, terminal, Finder/Explorateur, Docker, ports
-  integrations.rs  Sentry, Better Stack, Linear, GitHub, Trigger, Railway, Stripe
+  system.rs        éditeur, terminal, Finder/Explorateur, ports
+  integrations.rs  Linear, GitHub, GitLab
   monitor.rs       recensement des changements en vol, toutes forges confondues
   impact.rs        dossier factuel d'un changement, lecture par agent, relecture du rapport
   lib.rs           commandes IPC + surveillance du système de fichiers
@@ -432,7 +429,7 @@ src-tauri/src/
 src/
   app/             shell, menu, palette ⌘K, état global
   views/           un fichier par écran
-  components/      système de composants, markdown, logs ANSI, diff, flux SaaS
+  components/      système de composants, markdown, logs ANSI, diff
   lib/             types miroir, IPC typée, formatage, catalogue de commandes
 ```
 

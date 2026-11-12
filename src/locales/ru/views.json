@@ -169,16 +169,6 @@
 			"send": "Ответить"
 		}
 	},
-	"delivery": {
-		"title": "Потоки",
-		"tickets": "Тикеты",
-		"openWorktree": "Открыть worktree",
-		"localTracking": "отслеживается локально",
-		"yes": "да",
-		"no": "нет",
-		"noLocalWorktree": "Для этой ветки нет локального worktree.",
-		"emptyHint": "Недостающие токены отмечены в настройках."
-	},
 	"docs": {
 		"title": "Документы",
 		"subtitle": "Результаты агентов: планы, ревью, QA, вики — по всем worktrees.",
@@ -402,16 +392,11 @@
 		}
 	},
 	"infra": {
-		"title": "Серверы и контейнеры",
-		"subtitle": "Что запущено на этой машине: серверы разработки и контейнеры.",
+		"title": "Серверы",
+		"subtitle": "Серверы разработки, слушающие порты на этой машине, и worktree, из которого запущен каждый.",
 		"portFreed": "Порт {{port}} освобождён.",
-		"runningContainers": "Запущенные контейнеры",
-		"stoppedContainers": "Остановленные контейнеры",
 		"devPorts": "Порты разработки",
 		"worktrees": "Worktrees",
-		"noContainers": "Нет контейнеров",
-		"viewLogs": "Посмотреть журналы",
-		"logs": "Журналы",
 		"listening": "Слушающие серверы",
 		"noServers": "Нет запущенных серверов разработки",
 		"unknownFolder": "неизвестная папка",
@@ -508,10 +493,6 @@
 			"tickets_few": "ещё {{count}} тикета",
 			"tickets_many": "ещё {{count}} тикетов",
 			"tickets_other": "ещё {{count}} тикета",
-			"errors_one": "ещё {{count}} ошибка",
-			"errors_few": "ещё {{count}} ошибки",
-			"errors_many": "ещё {{count}} ошибок",
-			"errors_other": "ещё {{count}} ошибки",
 			"prs_one": "ещё {{count}} PR",
 			"prs_few": "ещё {{count}} PR",
 			"prs_many": "ещё {{count}} PR",
@@ -527,10 +508,6 @@
 			"tickets_few": "{{count}} тикета",
 			"tickets_many": "{{count}} тикетов",
 			"tickets_other": "{{count}} тикета",
-			"errorsToTriage_one": "{{count}} ошибка к разбору",
-			"errorsToTriage_few": "{{count}} ошибки к разбору",
-			"errorsToTriage_many": "{{count}} ошибок к разбору",
-			"errorsToTriage_other": "{{count}} ошибки к разбору",
 			"agents_one": "{{count}} агент",
 			"agents_few": "{{count}} агента",
 			"agents_many": "{{count}} агентов",
@@ -554,12 +531,7 @@
 			"redCi_one": "{{count}} падающий CI",
 			"redCi_few": "{{count}} падающих CI",
 			"redCi_many": "{{count}} падающих CI",
-			"redCi_other": "{{count}} падающего CI",
-			"down_one": "{{count}} недоступен",
-			"down_few": "{{count}} недоступно",
-			"down_many": "{{count}} недоступно",
-			"down_other": "{{count}} недоступно",
-			"online": "в сети"
+			"redCi_other": "{{count}} падающего CI"
 		},
 		"waiting": "Ждут вас",
 		"waitingDismiss": "Скрыть — вернётся, если что-то изменится",
@@ -586,25 +558,15 @@
 			"thingsWaiting_one": "{{count}} дело ждёт вас",
 			"thingsWaiting_few": "{{count}} дела ждут вас",
 			"thingsWaiting_many": "{{count}} дел ждут вас",
-			"thingsWaiting_other": "{{count}} дела ждут вас",
-			"prodErrors_one": "{{count}} ошибка в продакшене",
-			"prodErrors_few": "{{count}} ошибки в продакшене",
-			"prodErrors_many": "{{count}} ошибок в продакшене",
-			"prodErrors_other": "{{count}} ошибки в продакшене"
+			"thingsWaiting_other": "{{count}} дела ждут вас"
 		},
 		"region": {
 			"frame": "Показать эту область",
 			"empty": {
-				"arrive": "Нет тикетов для вас, нет ошибок к разбору.",
+				"arrive": "Нет тикетов для вас.",
 				"encours": "Ничего не запущено. Запустите агента или миссию из тикета.",
-				"livrer": "Нет открытых PR.",
-				"prod": "Подключите мониторинг (Better Stack) в настройках, чтобы видеть здесь продакшен."
+				"livrer": "Нет открытых PR."
 			}
-		},
-		"card": {
-			"sentry": "Sentry · к разбору",
-			"deploy": "Деплой",
-			"monitor": "Мониторинг"
 		},
 		"ticket": {
 			"inMission": "в миссии"
@@ -896,22 +858,6 @@
 			"failed": "проверки не пройдены"
 		}
 	},
-	"observability": {
-		"title": "Наблюдаемость",
-		"subtitle": "Sentry и Better Stack",
-		"ticket": "Тикет",
-		"ticketTitle": "Создать тикет Linear и отметить его в Sentry",
-		"ticketCreated": "Тикет Linear создан.",
-		"resolve": "Решить",
-		"resolved": "Проблема решена.",
-		"ignore": "Игнорировать",
-		"ignored": "Проблема проигнорирована.",
-		"regressions": "Регрессии",
-		"incidents": "Инциденты",
-		"monitors": "Мониторы",
-		"errorsAndIncidents": "Ошибки и инциденты",
-		"emptyHint": "Проверьте токен и организацию в настройках, если ожидали результаты."
-	},
 	"permanence": {
 		"title": "Permanence",
 		"resume": "Возобновить",
@@ -1176,21 +1122,6 @@
 			"add": "Добавить",
 			"name": "Название"
 		},
-		"sentry": {
-			"unavailable": "Список недоступен ({{error}}) — введите slug вручную."
-		},
-		"trigger": {
-			"saved": "Окружение «{{name}}» сохранено.",
-			"removeTitle": "Удалить окружение «{{name}}»?",
-			"removed": "Окружение «{{name}}» удалено.",
-			"defaultProject": "проект по умолчанию",
-			"mainKey": "основной ключ",
-			"namePlaceholder": "Production",
-			"secretKey": "Секретный ключ",
-			"project": "Проект",
-			"projectHint": "Пусто = тот, что выше.",
-			"help": "Секретный ключ работает только для одного проекта и одного окружения: добавьте по записи на каждое окружение, за которым нужно следить (Production, Staging, Test…). Каждое становится вкладкой в «Поставке»."
-		},
 		"projects": {
 			"added": "Проект «{{name}}» добавлен.",
 			"removeTitle": "Удалить проект «{{name}}»?",
@@ -1216,7 +1147,7 @@
 			"thisProject": "этот проект",
 			"globalTitle": "Настройки ниже — значения по умолчанию, наследуемые каждым проектом",
 			"projectHintIsolated": "Здесь видно только то, что объявляет этот проект. Пустое поле для него не настроено: когда проектов несколько, ни один не берёт чужой репозиторий или команду. Общими остаются только токены доступа.",
-			"projectHint": "Пустое поле наследует значения по умолчанию. Заполните его, чтобы дать проекту собственное значение — другой аккаунт GitHub, другой ключ Sentry.",
+			"projectHint": "Пустое поле наследует значения по умолчанию. Заполните его, чтобы дать проекту собственное значение — другой аккаунт GitHub, другой ключ Linear.",
 			"globalHintIsolated": "Эти значения — запасной вариант для токенов доступа. Репозитории и команды объявляются для каждого проекта отдельно.",
 			"globalHint": "Эти значения применяются везде, где проект ничего не указывает. Переключитесь на проект, чтобы задать ему собственные настройки.",
 			"project": "Проект",
@@ -1248,7 +1179,6 @@
 			"dock": "Напоминание о рабочих пространствах",
 			"workstation": "Рабочее место",
 			"identifiers": "Идентификаторы проекта",
-			"triggerEnvironments": "Окружения Trigger.dev",
 			"secrets": "Токены доступа",
 			"links": "Полезные ссылки"
 		},
@@ -1267,9 +1197,6 @@
 		},
 		"services": {
 			"githubRepo": "Репозиторий GitHub",
-			"sentryOrg": "Организация Sentry",
-			"sentryProjects": "Проекты Sentry",
-			"sentryProjectsHint": "Ни один не отмечен = вся организация.",
 			"ticketKey": "Ключ тикетов",
 			"ticketKeyHint": "Префикс Linear, например ABC, — по нему распознаются номера тикетов в ветках и заголовках",
 			"linearTeamId": "Команда Linear",
@@ -1279,9 +1206,7 @@
 			"gitlabProjectPlaceholder": "group/product",
 			"gitlabHost": "Инстанс GitLab",
 			"gitlabHostHint": "пусто = gitlab.com; иначе корень вашего",
-			"gitlabHostPlaceholder": "https://gitlab.example.com",
-			"triggerProject": "Проект Trigger.dev",
-			"railwayProject": "Проект Railway"
+			"gitlabHostPlaceholder": "https://gitlab.example.com"
 		},
 		"secrets": {
 			"override": "свой для проекта",
@@ -1290,7 +1215,7 @@
 			"missing": "отсутствует",
 			"keepPlaceholder": "•••••••• — оставьте пустым, чтобы сохранить",
 			"pastePlaceholder": "Вставьте токен",
-			"storage": "Токены записываются в {{path}} с правами 600 и никогда не возвращаются в интерфейс. Каждое значение можно также передать через переменную окружения (COCKPIT_SENTRY_TOKEN, COCKPIT_LINEAR_TOKEN…), которая тогда имеет приоритет над файлом."
+			"storage": "Токены записываются в {{path}} с правами 600 и никогда не возвращаются в интерфейс. Каждое значение можно также передать через переменную окружения (COCKPIT_GITHUB_TOKEN, COCKPIT_LINEAR_TOKEN…), которая тогда имеет приоритет над файлом."
 		},
 		"theme": {
 			"dark": "Тёмная",

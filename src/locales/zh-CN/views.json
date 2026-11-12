@@ -145,16 +145,6 @@
 			"send": "回复"
 		}
 	},
-	"delivery": {
-		"title": "信息流",
-		"tickets": "工单",
-		"openWorktree": "打开 worktree",
-		"localTracking": "本地跟踪",
-		"yes": "是",
-		"no": "否",
-		"noLocalWorktree": "此分支没有本地 worktree。",
-		"emptyHint": "缺少的令牌会在设置中标出。"
-	},
 	"docs": {
 		"title": "文档",
 		"subtitle": "智能体的交付物：计划、代码审查、QA、wiki — 来自所有 worktree。",
@@ -339,16 +329,11 @@
 		}
 	},
 	"infra": {
-		"title": "服务器与容器",
-		"subtitle": "本机上正在运行的内容：开发服务器和容器。",
+		"title": "服务器",
+		"subtitle": "本机上正在监听的开发服务器，以及各自来自哪个 worktree。",
 		"portFreed": "端口 {{port}} 已释放。",
-		"runningContainers": "运行中的容器",
-		"stoppedContainers": "已停止的容器",
 		"devPorts": "开发端口",
 		"worktrees": "Worktree",
-		"noContainers": "没有容器",
-		"viewLogs": "查看日志",
-		"logs": "日志",
 		"listening": "正在监听的服务器",
 		"noServers": "没有运行中的开发服务器",
 		"unknownFolder": "未知文件夹",
@@ -430,7 +415,6 @@
 	"map": {
 		"more": {
 			"tickets_other": "还有 {{count}} 个工单",
-			"errors_other": "还有 {{count}} 个错误",
 			"prs_other": "还有 {{count}} 个 PR"
 		},
 		"defaultProject": "项目",
@@ -440,15 +424,12 @@
 		"backToMap": "返回地图",
 		"summary": {
 			"tickets_other": "{{count}} 个工单",
-			"errorsToTriage_other": "{{count}} 个错误待分诊",
 			"agents_other": "{{count}} 个智能体",
 			"collisions_other": "{{count}} 处冲突",
 			"missions_other": "{{count}} 个任务",
 			"chantiers_other": "{{count}} 个工地",
 			"prs_other": "{{count}} 个 PR",
-			"redCi_other": "{{count}} 个 CI 失败",
-			"down_other": "{{count}} 个宕机",
-			"online": "在线"
+			"redCi_other": "{{count}} 个 CI 失败"
 		},
 		"waiting": "等待你处理",
 		"waitingDismiss": "忽略 — 有变化时会重新出现",
@@ -460,22 +441,15 @@
 			"awaiting_other": "{{count}} 个等待你处理",
 			"calm": "平静",
 			"openProject": "打开此项目 →",
-			"thingsWaiting_other": "{{count}} 项等待你处理",
-			"prodErrors_other": "生产环境中有 {{count}} 个错误"
+			"thingsWaiting_other": "{{count}} 项等待你处理"
 		},
 		"region": {
 			"frame": "聚焦此区域",
 			"empty": {
-				"arrive": "没有给你的工单，也没有待分诊的错误。",
+				"arrive": "没有给你的工单。",
 				"encours": "没有正在运行的内容。从工单启动一个智能体或任务。",
-				"livrer": "没有打开的 PR。",
-				"prod": "在设置中连接监控（Better Stack），即可在此查看生产环境。"
+				"livrer": "没有打开的 PR。"
 			}
-		},
-		"card": {
-			"sentry": "Sentry · 待分诊",
-			"deploy": "部署",
-			"monitor": "监控"
 		},
 		"ticket": {
 			"inMission": "在任务中"
@@ -719,22 +693,6 @@
 			"failed": "检查未通过"
 		}
 	},
-	"observability": {
-		"title": "可观测性",
-		"subtitle": "Sentry 和 Better Stack",
-		"ticket": "工单",
-		"ticketTitle": "创建 Linear 工单并在 Sentry 中备注",
-		"ticketCreated": "Linear 工单已创建。",
-		"resolve": "解决",
-		"resolved": "问题已解决。",
-		"ignore": "忽略",
-		"ignored": "问题已忽略。",
-		"regressions": "回归",
-		"incidents": "事件",
-		"monitors": "监控",
-		"errorsAndIncidents": "错误与事件",
-		"emptyHint": "如果你预期会有结果，请在设置中检查令牌和组织。"
-	},
 	"permanence": {
 		"title": "Permanence",
 		"resume": "恢复",
@@ -948,21 +906,6 @@
 			"add": "添加",
 			"name": "名称"
 		},
-		"sentry": {
-			"unavailable": "列表不可用（{{error}}）— 请手动输入 slug。"
-		},
-		"trigger": {
-			"saved": "环境“{{name}}”已保存。",
-			"removeTitle": "移除环境“{{name}}”？",
-			"removed": "环境“{{name}}”已移除。",
-			"defaultProject": "默认项目",
-			"mainKey": "主密钥",
-			"namePlaceholder": "Production",
-			"secretKey": "密钥",
-			"project": "项目",
-			"projectHint": "留空 = 上方的项目。",
-			"help": "一个密钥只适用于一个项目和一个环境：请为每个要跟踪的环境添加一项（Production、Staging、Test…）。每一项都会成为“交付”中的一个标签页。"
-		},
 		"projects": {
 			"added": "项目“{{name}}”已添加。",
 			"removeTitle": "移除项目“{{name}}”？",
@@ -988,7 +931,7 @@
 			"thisProject": "此项目",
 			"globalTitle": "以下设置为默认值，由每个项目继承",
 			"projectHintIsolated": "这里只显示此项目声明的内容。空字段表示未为其配置：一旦有多个项目，任何项目都不会借用其他项目的仓库或团队。只有访问令牌是共享的。",
-			"projectHint": "留空的字段会继承默认值。填写后即为此项目单独设置 — 其他 GitHub 账户、其他 Sentry 密钥。",
+			"projectHint": "留空的字段会继承默认值。填写后即为此项目单独设置 — 其他 GitHub 账户、其他 Linear 密钥。",
 			"globalHintIsolated": "这些值是访问令牌的后备值。仓库和团队需逐个项目声明。",
 			"globalHint": "这些值适用于项目未作说明的地方。切换到项目即可为其单独设置。",
 			"project": "项目",
@@ -1020,7 +963,6 @@
 			"dock": "工作区提示",
 			"workstation": "工作站",
 			"identifiers": "项目标识符",
-			"triggerEnvironments": "Trigger.dev 环境",
 			"secrets": "访问令牌",
 			"links": "实用链接"
 		},
@@ -1039,9 +981,6 @@
 		},
 		"services": {
 			"githubRepo": "GitHub 仓库",
-			"sentryOrg": "Sentry 组织",
-			"sentryProjects": "Sentry 项目",
-			"sentryProjectsHint": "不勾选 = 整个组织。",
 			"ticketKey": "工单键",
 			"ticketKeyHint": "Linear 前缀，例如 ABC — 用于识别分支和标题中的工单编号",
 			"linearTeamId": "Linear 团队",
@@ -1051,9 +990,7 @@
 			"gitlabProjectPlaceholder": "group/product",
 			"gitlabHost": "GitLab 实例",
 			"gitlabHostHint": "留空 = gitlab.com；否则填写你的实例根地址",
-			"gitlabHostPlaceholder": "https://gitlab.example.com",
-			"triggerProject": "Trigger.dev 项目",
-			"railwayProject": "Railway 项目"
+			"gitlabHostPlaceholder": "https://gitlab.example.com"
 		},
 		"secrets": {
 			"override": "项目专用",
@@ -1062,7 +999,7 @@
 			"missing": "缺失",
 			"keepPlaceholder": "•••••••• — 留空以保留",
 			"pastePlaceholder": "粘贴令牌",
-			"storage": "令牌以 600 权限写入 {{path}}，且绝不会回传到界面。每个值也可以通过环境变量提供（COCKPIT_SENTRY_TOKEN、COCKPIT_LINEAR_TOKEN…），此时环境变量优先于文件。"
+			"storage": "令牌以 600 权限写入 {{path}}，且绝不会回传到界面。每个值也可以通过环境变量提供（COCKPIT_GITHUB_TOKEN、COCKPIT_LINEAR_TOKEN…），此时环境变量优先于文件。"
 		},
 		"theme": {
 			"dark": "深色",

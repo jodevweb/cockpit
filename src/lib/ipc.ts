@@ -25,7 +25,6 @@ import type {
 	ReviewPrepared,
 	Territory,
 	Connector,
-	Container,
 	DocEntry,
 	FeedItem,
 	FileChange,
@@ -54,8 +53,6 @@ import type {
 	SessionSpend,
 	ResourceReport,
 	SlashCommand,
-	KpiDashboard,
-	KpiValue,
 	LinearIssueDetail,
 	LinearOptions,
 	Metrics,
@@ -80,7 +77,6 @@ import type {
 	Role,
 	TaskState,
 	QaFile,
-	SentryProject,
 	TicketProviderInfo,
 	SubagentRun,
 	Task,
@@ -151,11 +147,6 @@ export const api = {
 		updateProject: (patch: Record<string, unknown>, project?: string) =>
 			call<ConfigView>("project_update", { patch, project }),
 		removeProject: (id: string) => call<ConfigView>("project_remove", { id }),
-		// Les jetons ne redescendant pas dans le webview, un environnement se
-		// modifie par une commande dédiée : un token vide conserve l'existant.
-		saveTriggerEnv: (name: string, token?: string, projectRef?: string) =>
-			call<ConfigView>("trigger_env_save", { name, token, projectRef }),
-		removeTriggerEnv: (name: string) => call<ConfigView>("trigger_env_remove", { name }),
 		/** Ce qui est branché sur ce projet, et ce qui manque. */
 		connectors: () => call<Connector[]>("connectors_list"),
 	},
@@ -263,8 +254,6 @@ export const api = {
 		 */
 		worktreeCommand: (action: "create" | "remove", branch: string, path?: string) =>
 			call<WorktreeCommand>("worktree_command", { action, branch, path }),
-		mergePullRequest: (number: number, method = "squash") =>
-			call<void>("pull_request_merge", { number, method }),
 	},
 
 	agents: {
@@ -827,7 +816,6 @@ export const api = {
 		notify: (title: string, body: string) => call<void>("notify_desktop", { title, body }),
 		/** Plein écran de travail, ou retour au cadre précédent. */
 		zoomToggle: () => call<void>("window_zoom_toggle"),
-		containers: () => call<Container[]>("docker_containers"),
 		ports: () => call<ListeningPort[]>("listening_ports"),
 		/** Arrête ce qui occupe un port — SIGTERM, puis SIGKILL s'il s'accroche. */
 		stopProcess: (pid: number) => call<void>("stop_process", { pid }),
@@ -866,25 +854,6 @@ export const api = {
 	feeds: {
 		/** Force le prochain appel à repartir du service (bouton rafraîchir). */
 		invalidate: () => call<void>("feeds_invalidate"),
-		sentry: (query?: string) => call<FeedItem[]>("feed_sentry", { query }),
-		sentryProjects: () => call<SentryProject[]>("sentry_projects"),
-		sentrySetStatus: (issueId: string, status: string) =>
-			call<void>("sentry_set_status", { issueId, status }),
-		/** Crée le ticket Linear d'une issue Sentry et renvoie son URL. */
-		sentryToLinear: (fields: {
-			issueId: string;
-			title: string;
-			permalink: string;
-			project: string;
-			culprit: string;
-			users: string;
-			events: string;
-		}) => call<string>("sentry_to_linear", fields),
-		betterstackDashboards: () => call<KpiDashboard[]>("betterstack_dashboards"),
-		betterstackKpiValues: (dashboardId: string, hours = 24) =>
-			call<KpiValue[]>("betterstack_kpi_values", { dashboardId, hours }),
-		betterstackMonitors: () => call<FeedItem[]>("feed_betterstack_monitors"),
-		betterstackIncidents: () => call<FeedItem[]>("feed_betterstack_incidents"),
 		/** Ce que le suivi de tâches sait faire, et comment il s'appelle. */
 		ticketProvider: () => call<TicketProviderInfo>("ticket_provider"),
 		linear: (onlyMine = false) => call<FeedItem[]>("feed_linear", { onlyMine }),
@@ -892,11 +861,6 @@ export const api = {
 		linearOptions: () => call<LinearOptions>("linear_options"),
 		linearUpdate: (id: string, patch: Record<string, unknown>) =>
 			call<void>("linear_update", { id, patch }),
-		githubPulls: () => call<FeedItem[]>("feed_github_pulls"),
-		githubRuns: () => call<FeedItem[]>("feed_github_runs"),
-		trigger: (environment?: string) => call<FeedItem[]>("feed_trigger", { environment }),
-		railway: () => call<FeedItem[]>("feed_railway"),
-		stripe: () => call<FeedItem[]>("feed_stripe"),
 	},
 };
 

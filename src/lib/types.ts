@@ -491,15 +491,6 @@ export interface Tag {
 	tone: Severity | "neutral";
 }
 
-export interface Container {
-	id: string;
-	name: string;
-	image: string;
-	state: string;
-	status: string;
-	ports: string;
-}
-
 /**
  * Un élément de la page, lu sous un point : ce qu'on désigne à un agent quand
  * on lui montre l'écran (`browser_inspect`).
@@ -706,31 +697,6 @@ export interface BriefConfig {
 	off: string[];
 }
 
-export interface KpiChart {
-	id: string;
-	name: string;
-	kind: string;
-	section: string;
-}
-
-export interface KpiValue {
-	chartId: string;
-	name: string;
-	kind: string;
-	columns: string[];
-	rows: string[][];
-	error: string | null;
-}
-
-export interface KpiDashboard {
-	id: string;
-	name: string;
-	group: string;
-	url: string;
-	updatedAt: string;
-	charts: KpiChart[];
-}
-
 export interface PermissionRequest {
 	id: string;
 	/** Agent à l'origine de la demande — absent des demandes antérieures. */
@@ -846,18 +812,6 @@ export interface LinearOptions {
 	labels: NamedRef[];
 }
 
-export interface SentryProject {
-	slug: string;
-	name: string;
-}
-
-export interface TriggerEnvironmentView {
-	name: string;
-	projectRef: string;
-	/** Issu du champ « Trigger.dev » des jetons, pas de la liste d'environnements. */
-	fromDefaultKey: boolean;
-}
-
 /**
  * Un projet piloté par le cockpit.
  *
@@ -907,9 +861,6 @@ export interface ProjectView {
 	mainRepo: string;
 	githubRepo: string;
 	linearTeamKey: string;
-	sentryProjects: string[];
-	railwayProjectId: string;
-	triggerProjectRef: string;
 	/** Le compte sous lequel il fait travailler ses agents, héritage appliqué. */
 	account: string;
 	/** Clés que ce projet définit lui-même ; les autres sont héritées. */
@@ -940,13 +891,9 @@ export interface DeclaredSettings {
 	mainRepo: string;
 	editor: string;
 	githubRepo: string;
-	sentryOrg: string;
-	sentryProjects: string[];
 	linearTeamKey: string;
 	/** Identifiant (UUID) de l'équipe Linear, pour les options d'édition d'un ticket. */
 	linearTeamId: string;
-	triggerProjectRef: string;
-	railwayProjectId: string;
 	/** Ce que fait ce produit, tel que cette portée le déclare. */
 	impactBrief: string;
 	/** Chemin du projet GitLab (`groupe/projet`) et instance qui le sert. */
@@ -965,14 +912,9 @@ export interface ConfigView {
 	mainRepo: string;
 	editor: string;
 	githubRepo: string;
-	sentryOrg: string;
-	sentryProjects: string[];
 	linearTeamKey: string;
 	/** Identifiant (UUID) de l'équipe Linear, pour les options d'édition d'un ticket. */
 	linearTeamId: string;
-	triggerProjectRef: string;
-	triggerEnvironments: TriggerEnvironmentView[];
-	railwayProjectId: string;
 	configPath: string;
 	secrets: SecretStatus[];
 	/** Colonnes, branches et commandes : la façon de travailler de l'équipe. */
@@ -1638,7 +1580,7 @@ export interface Role {
 export interface Connector {
 	id: string;
 	label: string;
-	/** `repository` | `tickets` | `ci` | `monitoring` | `deploy` | `payments` */
+	/** `repository` | `tickets` | `ci` | `deploy` | `payments` */
 	kind: string;
 	configured: boolean;
 	/** Ce qui manque, dit en clair. */

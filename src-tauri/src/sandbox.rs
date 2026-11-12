@@ -636,10 +636,10 @@ pub fn build(
 	// Linear et Stripe ; un jeton vide (`provision_mcp_tokens` le filtre) ne
 	// fait rien de plus que ne pas déclarer le serveur.
 	//
-	// Sentry en est volontairement absent : son jeton `sentry.token` (auth
-	// token REST) s'est vu opposer un 401 par `mcp.sentry.dev` — vérifié avec
-	// un vrai jeton, pas un jeton vide. Ce serveur exige un type de jeton que
-	// Cockpit ne détient pas encore ; un agent isolé s'en passe pour l'instant.
+	// Sentry en est volontairement absent : un jeton d'API REST s'est vu
+	// opposer un 401 par `mcp.sentry.dev` — vérifié avec un vrai jeton, pas un
+	// jeton vide. Ce serveur exige un type de jeton que Cockpit ne détient pas ;
+	// un agent isolé s'en passe.
 	let jetons = crate::config::Config::active();
 	provision_mcp_tokens(
 		&account_dir,

@@ -11,8 +11,7 @@
 		"notify": {
 			"waitingReply": "En attente de ta réponse — {{title}}",
 			"ciFailed": "CI en échec · #{{number}}",
-			"readyToMerge": "Prête à merger · #{{number}}",
-			"prodError": "Erreur prod · {{project}}"
+			"readyToMerge": "Prête à merger · #{{number}}"
 		}
 	},
 	"commandPalette": {
@@ -28,9 +27,7 @@
 			"git": "Git",
 			"scripts": "Scripts",
 			"docs": "Documents",
-			"observability": "Observabilité",
-			"delivery": "Flux · Linear, PR, CI, déploiements",
-			"infra": "Serveurs & conteneurs · ce qui tourne sur le poste",
+			"infra": "Serveurs · ce qui tourne sur le poste",
 			"settings": "Réglages",
 			"replay": "Rejeu · juger une configuration d'agents sur les PR passées",
 			"methods": "Méthodes · les plugins qu'un projet peut adopter, lus avant de les installer"
@@ -174,13 +171,11 @@
 			"libres": "Agents libres",
 			"agents": "Agents IA",
 			"docs": "Documents",
-			"delivery": "Flux",
 			"impact": "Impact",
-			"observability": "Observabilité",
 			"worktrees": "Worktrees",
 			"git": "Git",
 			"scripts": "Scripts",
-			"infra": "Serveurs & conteneurs",
+			"infra": "Serveurs",
 			"settings": "Réglages",
 			"replay": "Rejeu",
 			"methods": "Méthodes"

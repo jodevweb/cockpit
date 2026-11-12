@@ -46,15 +46,6 @@ pub struct GithubConfig {
 
 #[derive(Debug, Clone, Serialize, Deserialize, Default)]
 #[serde(default)]
-pub struct SentryConfig {
-	pub org: String,
-	/// Slugs de projets à surveiller ; vide = tous les projets de l'org.
-	pub projects: Vec<String>,
-	pub token: String,
-}
-
-#[derive(Debug, Clone, Serialize, Deserialize, Default)]
-#[serde(default)]
 pub struct LinearConfig {
 	pub token: String,
 	/// Clé d'équipe (ex. `NW`) pour filtrer le backlog.
@@ -374,124 +365,24 @@ impl Default for GitlabConfig {
 	}
 }
 
-/// Une secret key Trigger.dev vaut pour un seul environnement : suivre
-/// Production et Staging demande donc autant de clés que d'environnements.
-#[derive(Debug, Clone, Serialize, Deserialize, Default)]
-#[serde(default)]
-pub struct TriggerEnvironment {
-	pub name: String,
-	pub token: String,
-	/// Projet auquel la clé appartient ; vide = `trigger.project_ref`.
-	pub project_ref: String,
-}
-
-#[derive(Debug, Clone, Serialize, Deserialize, Default)]
-#[serde(default)]
-pub struct TriggerConfig {
-	/// Environnement par défaut, conservé pour les configurations à une seule clé.
-	pub token: String,
-	pub project_ref: String,
-	#[serde(default)]
-	pub api_url: String,
-	pub environments: Vec<TriggerEnvironment>,
-}
-
-/// Nom d'environnement déduit d'une secret key `tr_<environnement>_<suite>`.
-///
-/// Trigger.dev nomme le préfixe d'après l'environnement, y compris pour ceux
-/// qu'on crée soi-même (`tr_staging_…`) : on lit donc le segment plutôt que de
-/// tenir une liste fermée qui vieillirait mal.
-fn environment_name_of(token: &str) -> String {
-	let segment = token
-		.strip_prefix("tr_")
-		.and_then(|rest| rest.split('_').next())
-		.filter(|segment| !segment.is_empty());
-
-	match segment {
-		Some("prod") => "Production".into(),
-		Some("dev") => "Development".into(),
-		Some(name) => {
-			// `staging` → `Staging`.
-			let mut chars = name.chars();
-			match chars.next() {
-				Some(first) => first.to_uppercase().collect::<String>() + chars.as_str(),
-				None => crate::i18n::t("config.defaultEnvironment"),
-			}
-		}
-		None => crate::i18n::t("config.defaultEnvironment"),
-	}
-}
-
-impl TriggerConfig {
-	/// Environnements interrogeables, clé par défaut incluse.
-	pub fn resolved(&self) -> Vec<TriggerEnvironment> {
-		let mut all: Vec<TriggerEnvironment> = Vec::new();
-		if !self.token.trim().is_empty() {
-			all.push(TriggerEnvironment {
-				name: environment_name_of(&self.token),
-				token: self.token.clone(),
-				project_ref: self.project_ref.clone(),
-			});
-		}
-		all.extend(
-			self.environments
-				.iter()
-				.filter(|env| !env.token.trim().is_empty() && !env.name.trim().is_empty())
-				.map(|env| TriggerEnvironment {
-					name: env.name.clone(),
-					token: env.token.clone(),
-					project_ref: if env.project_ref.trim().is_empty() {
-						self.project_ref.clone()
-					} else {
-						env.project_ref.clone()
-					},
-				}),
-		);
-		all
-	}
-
-	/// Les mêmes environnements, expurgés de leurs jetons, pour l'interface.
-	pub fn views(&self) -> Vec<TriggerEnvironmentView> {
-		let default_count = usize::from(!self.token.trim().is_empty());
-		self.resolved()
-			.into_iter()
-			.enumerate()
-			.map(|(index, env)| TriggerEnvironmentView {
-				name: env.name,
-				project_ref: env.project_ref,
-				from_default_key: index < default_count,
-			})
-			.collect()
-	}
-}
-
-#[derive(Debug, Clone, Serialize, Deserialize, Default)]
-#[serde(default)]
-pub struct RailwayConfig {
-	pub token: String,
-	pub project_id: String,
-}
-
 #[derive(Debug, Clone, Serialize, Deserialize, Default)]
 #[serde(default)]
 pub struct BetterstackConfig {
-	/// Token « Uptime API » (monitors + incidents).
-	pub token: String,
-	/// Token Telemetry, distinct du précédent : les dashboards et leurs
-	/// graphiques KPI vivent sur telemetry.betterstack.com, que le token Uptime
-	/// ne couvre pas.
+	/// Jeton d'API Better Stack, que le cockpit pose pour le serveur MCP de
+	/// Better Stack dans le conteneur d'un agent isolé (voir
+	/// `sandbox::provision_mcp_tokens`).
 	///
-	/// Le prendre **global** plutôt que par équipe : lui seul sait ouvrir un
-	/// accès aux données, et c'est alors la seule clé à renseigner.
-	pub telemetry_token: String,
-	/// Connexion ClickHouse, à ne renseigner que pour réutiliser des
-	/// identifiants existants : sans eux, le cockpit en demande lui-même à
-	/// Better Stack et les garde en cache.
-	pub clickhouse_host: String,
-	pub clickhouse_username: String,
-	pub clickhouse_password: String,
+	/// L'écran Observabilité qui le lisait aussi est parti ; le jeton reste, parce
+	/// que sans lui un agent isolé perd cet outil. Les anciens champs
+	/// (`telemetry_token`, `clickhouse_*`) sont ignorés à la lecture.
+	pub token: String,
 }
 
+/// Clé Stripe, que le cockpit pose pour le serveur MCP de Stripe dans le
+/// conteneur d'un agent isolé (voir `sandbox::provision_mcp_tokens`).
+///
+/// Le flux d'événements de l'écran Delivery qui la lisait aussi est parti ; la
+/// clé reste, parce que sans elle un agent isolé perd cet outil.
 #[derive(Debug, Clone, Serialize, Deserialize, Default)]
 #[serde(default)]
 pub struct StripeConfig {
@@ -1522,7 +1413,7 @@ impl Default for WorkflowConfig {
 pub struct Connector {
 	pub id: String,
 	pub label: String,
-	/// `repository` | `tickets` | `ci` | `monitoring` | `deploy` | `payments`
+	/// `repository` | `tickets` | `ci` | `deploy` | `payments`
 	pub kind: String,
 	/// Vrai quand ce service a de quoi répondre.
 	pub configured: bool,
@@ -1721,11 +1612,8 @@ pub struct ProjectConfig {
 	pub projects_root: String,
 	pub editor: String,
 	pub github: GithubConfig,
-	pub sentry: SentryConfig,
 	pub linear: LinearConfig,
 	pub gitlab: GitlabConfig,
-	pub trigger: TriggerConfig,
-	pub railway: RailwayConfig,
 	pub betterstack: BetterstackConfig,
 	pub stripe: StripeConfig,
 	/// Lue pour reprendre l'identifiant d'équipe Linear, jamais réécrite.
@@ -1774,14 +1662,6 @@ fn inherit(project: &str, global: &str) -> String {
 	}
 }
 
-fn inherit_list(project: &[String], global: &[String]) -> Vec<String> {
-	if project.is_empty() {
-		global.to_vec()
-	} else {
-		project.to_vec()
-	}
-}
-
 impl ProjectConfig {
 	/// Applique les réglages du projet par-dessus les valeurs globales.
 	///
@@ -1805,10 +1685,7 @@ impl ProjectConfig {
 		// compte actif — qui n'y a pas accès, et l'erreur rendue désigne le nom
 		// du dépôt au lieu de l'identité qui manque.
 		base.github.user = inherit(&self.github.user, &base.github.user);
-		base.sentry.token = inherit(&self.sentry.token, &base.sentry.token);
 		base.linear.token = inherit(&self.linear.token, &base.linear.token);
-		base.trigger.token = inherit(&self.trigger.token, &base.trigger.token);
-		base.trigger.api_url = inherit(&self.trigger.api_url, &base.trigger.api_url);
 		// GitLab suit la même règle que les autres accès : le jeton et l'instance
 		// s'héritent — une entreprise n'a qu'un GitLab — là où le projet visé est
 		// forcément propre au projet.
@@ -1826,28 +1703,15 @@ impl ProjectConfig {
 		// voisin : il n'est simplement pas encore configuré, et le dit.
 		if cloisonne {
 			base.github.repo = self.github.repo.trim().to_string();
-			base.sentry.org = self.sentry.org.trim().to_string();
-			base.sentry.projects = self.sentry.projects.clone();
 			base.linear.team_key = self.linear.team_key.trim().to_string();
 			base.linear.team_id = self.linear.team_id.trim().to_string();
-			base.trigger.project_ref = self.trigger.project_ref.trim().to_string();
 			base.gitlab.project = self.gitlab.project.trim().to_string();
 		} else {
 			base.github.repo = inherit(&self.github.repo, &base.github.repo);
-			base.sentry.org = inherit(&self.sentry.org, &base.sentry.org);
-			base.sentry.projects = inherit_list(&self.sentry.projects, &base.sentry.projects);
 			base.linear.team_key = inherit(&self.linear.team_key, &base.linear.team_key);
 			base.linear.team_id = inherit(&self.linear.team_id, &base.linear.team_id);
-			base.trigger.project_ref = inherit(&self.trigger.project_ref, &base.trigger.project_ref);
 			base.gitlab.project = inherit(&self.gitlab.project, &base.gitlab.project);
 		}
-		// Les environnements ne se fusionnent pas un à un : une liste propre au
-		// projet remplace celle du global, sans quoi on interrogerait les
-		// déploiements d'un autre produit.
-		if !self.trigger.environments.is_empty() {
-			base.trigger.environments = self.trigger.environments.clone();
-		}
-
 		// Le brief ne s'hérite jamais : décrire un produit avec les mots d'un
 		// autre est pire que ne rien décrire du tout — l'analyse parlerait
 		// d'utilisateurs qui n'existent pas. Le reste, qui ne dit que le moteur
@@ -1949,26 +1813,7 @@ impl ProjectConfig {
 			base.workflow.browser_server = self.workflow.browser_server.clone();
 		}
 
-		base.railway.token = inherit(&self.railway.token, &base.railway.token);
-		base.railway.project_id = if cloisonne {
-			self.railway.project_id.trim().to_string()
-		} else {
-			inherit(&self.railway.project_id, &base.railway.project_id)
-		};
-
 		base.betterstack.token = inherit(&self.betterstack.token, &base.betterstack.token);
-		base.betterstack.telemetry_token =
-			inherit(&self.betterstack.telemetry_token, &base.betterstack.telemetry_token);
-		base.betterstack.clickhouse_host =
-			inherit(&self.betterstack.clickhouse_host, &base.betterstack.clickhouse_host);
-		base.betterstack.clickhouse_username = inherit(
-			&self.betterstack.clickhouse_username,
-			&base.betterstack.clickhouse_username,
-		);
-		base.betterstack.clickhouse_password = inherit(
-			&self.betterstack.clickhouse_password,
-			&base.betterstack.clickhouse_password,
-		);
 
 		base.stripe.token = inherit(&self.stripe.token, &base.stripe.token);
 
@@ -2009,28 +1854,12 @@ impl ProjectConfig {
 		mark("account", &self.account);
 		mark("github_repo", &self.github.repo);
 		mark("github", &self.github.token);
-		mark("sentry_org", &self.sentry.org);
-		mark("sentry", &self.sentry.token);
 		mark("linear", &self.linear.token);
 		mark("linear_team_key", &self.linear.team_key);
 		mark("linear_team_id", &self.linear.team_id);
-		mark("trigger", &self.trigger.token);
-		mark("trigger_project_ref", &self.trigger.project_ref);
-		mark("railway", &self.railway.token);
-		mark("railway_project_id", &self.railway.project_id);
 		mark("betterstack", &self.betterstack.token);
-		mark("betterstack_telemetry", &self.betterstack.telemetry_token);
-		mark("betterstack_clickhouse_host", &self.betterstack.clickhouse_host);
-		mark("betterstack_clickhouse_username", &self.betterstack.clickhouse_username);
-		mark("betterstack_clickhouse_password", &self.betterstack.clickhouse_password);
 		mark("stripe", &self.stripe.token);
 		mark("impact_brief", &self.impact.brief);
-		if !self.sentry.projects.is_empty() {
-			keys.push("sentry_projects".into());
-		}
-		if !self.trigger.environments.is_empty() {
-			keys.push("trigger_environments".into());
-		}
 		keys
 	}
 }
@@ -2058,11 +1887,8 @@ pub struct Config {
 	pub active_project: String,
 	pub general: GeneralConfig,
 	pub github: GithubConfig,
-	pub sentry: SentryConfig,
 	pub linear: LinearConfig,
 	pub gitlab: GitlabConfig,
-	pub trigger: TriggerConfig,
-	pub railway: RailwayConfig,
 	pub betterstack: BetterstackConfig,
 	pub stripe: StripeConfig,
 	/// Lue pour reprendre l'identifiant d'équipe Linear, jamais réécrite.
@@ -2275,41 +2101,6 @@ impl Config {
 				!self.gitlab.token.trim().is_empty() && !self.gitlab.project.trim().is_empty(),
 				&crate::i18n::t("config.connectorMissing.gitlab"),
 			),
-			entry(
-				"sentry",
-				"Sentry",
-				"monitoring",
-				!self.sentry.token.trim().is_empty(),
-				&crate::i18n::t("config.connectorMissing.sentry"),
-			),
-			entry(
-				"betterstack",
-				"Better Stack",
-				"monitoring",
-				!self.betterstack.token.trim().is_empty(),
-				&crate::i18n::t("config.connectorMissing.betterstack"),
-			),
-			entry(
-				"trigger",
-				"Trigger.dev",
-				"ci",
-				!self.trigger.token.trim().is_empty() || !self.trigger.environments.is_empty(),
-				&crate::i18n::t("config.connectorMissing.trigger"),
-			),
-			entry(
-				"railway",
-				"Railway",
-				"deploy",
-				!self.railway.token.trim().is_empty(),
-				&crate::i18n::t("config.connectorMissing.railway"),
-			),
-			entry(
-				"stripe",
-				"Stripe",
-				"payments",
-				!self.stripe.token.trim().is_empty(),
-				&crate::i18n::t("config.connectorMissing.stripe"),
-			),
 		]
 	}
 
@@ -2387,18 +2178,9 @@ impl Config {
 		}
 
 		cfg.github.token = env_override(&cfg.github.token, "COCKPIT_GITHUB_TOKEN");
-		cfg.sentry.token = env_override(&cfg.sentry.token, "COCKPIT_SENTRY_TOKEN");
 		cfg.linear.token = env_override(&cfg.linear.token, "COCKPIT_LINEAR_TOKEN");
-		cfg.trigger.token = env_override(&cfg.trigger.token, "COCKPIT_TRIGGER_TOKEN");
-		cfg.railway.token = env_override(&cfg.railway.token, "COCKPIT_RAILWAY_TOKEN");
 		cfg.betterstack.token = env_override(&cfg.betterstack.token, "COCKPIT_BETTERSTACK_TOKEN");
-		cfg.betterstack.telemetry_token =
-			env_override(&cfg.betterstack.telemetry_token, "COCKPIT_BETTERSTACK_TELEMETRY_TOKEN");
 		cfg.stripe.token = env_override(&cfg.stripe.token, "COCKPIT_STRIPE_TOKEN");
-
-		if cfg.trigger.api_url.trim().is_empty() {
-			cfg.trigger.api_url = "https://api.trigger.dev".into();
-		}
 
 		cfg.ensure_projects();
 		cfg
@@ -2557,14 +2339,8 @@ pub struct ConfigView {
 	pub main_repo: String,
 	pub editor: String,
 	pub github_repo: String,
-	pub sentry_org: String,
-	pub sentry_projects: Vec<String>,
 	pub linear_team_key: String,
 	pub linear_team_id: String,
-	pub trigger_project_ref: String,
-	/// Environnements Trigger.dev configurés — un onglet chacun dans Delivery.
-	pub trigger_environments: Vec<TriggerEnvironmentView>,
-	pub railway_project_id: String,
 	pub config_path: String,
 	pub secrets: Vec<SecretStatus>,
 	/// Colonnes, branches et sujets : ce qui décrit la façon de travailler.
@@ -2606,9 +2382,6 @@ pub struct ProjectView {
 	pub main_repo: String,
 	pub github_repo: String,
 	pub linear_team_key: String,
-	pub sentry_projects: Vec<String>,
-	pub railway_project_id: String,
-	pub trigger_project_ref: String,
 	/// Le compte sous lequel il travaille, héritage appliqué. Deux projets côte
 	/// à côte dans la liste doivent pouvoir se distinguer d'un coup d'œil quand
 	/// ils ne sont pas la même personne.
@@ -2634,12 +2407,8 @@ pub struct ProjectDeclared {
 	pub main_repo: String,
 	pub editor: String,
 	pub github_repo: String,
-	pub sentry_org: String,
-	pub sentry_projects: Vec<String>,
 	pub linear_team_key: String,
 	pub linear_team_id: String,
-	pub trigger_project_ref: String,
-	pub railway_project_id: String,
 	/// Ce que fait ce produit, tel que ce projet le déclare.
 	pub impact_brief: String,
 	/// Chemin du projet GitLab, et l'instance qui le sert.
@@ -2647,18 +2416,6 @@ pub struct ProjectDeclared {
 	pub gitlab_host: String,
 	/// Le compte sous lequel ce projet fait travailler ses agents.
 	pub account: String,
-}
-
-/// Un environnement vu par l'interface : jamais son jeton, seulement le fait
-/// qu'il en ait un.
-#[derive(Debug, Clone, Serialize)]
-#[serde(rename_all = "camelCase")]
-pub struct TriggerEnvironmentView {
-	pub name: String,
-	pub project_ref: String,
-	/// Vrai quand l'entrée vient de `trigger.token` et non de la liste : elle
-	/// se modifie par le champ « Trigger.dev » des jetons, pas par la liste.
-	pub from_default_key: bool,
 }
 
 #[derive(Debug, Clone, Serialize)]
@@ -2689,12 +2446,8 @@ impl Config {
 					main_repo: brut.general.main_repo.clone(),
 					editor: brut.general.editor.clone(),
 					github_repo: brut.github.repo.clone(),
-					sentry_org: brut.sentry.org.clone(),
-					sentry_projects: brut.sentry.projects.clone(),
 					linear_team_key: brut.linear.team_key.clone(),
 					linear_team_id: brut.linear.team_id.clone(),
-					trigger_project_ref: brut.trigger.project_ref.clone(),
-					railway_project_id: brut.railway.project_id.clone(),
 					impact_brief: brut.impact.brief.clone(),
 					gitlab_project: brut.gitlab.project.clone(),
 					gitlab_host: brut.gitlab.host.clone(),
@@ -2716,21 +2469,14 @@ impl Config {
 						main_repo: resolved.general.main_repo.clone(),
 						github_repo: resolved.github.repo.clone(),
 						linear_team_key: resolved.linear.team_key.clone(),
-						sentry_projects: resolved.sentry.projects.clone(),
-						railway_project_id: resolved.railway.project_id.clone(),
-						trigger_project_ref: resolved.trigger.project_ref.clone(),
 						overrides: project.overrides(),
 						declared: ProjectDeclared {
 							projects_root: project.projects_root.clone(),
 							main_repo: project.main_repo.clone(),
 							editor: project.editor.clone(),
 							github_repo: project.github.repo.clone(),
-							sentry_org: project.sentry.org.clone(),
-							sentry_projects: project.sentry.projects.clone(),
 							linear_team_key: project.linear.team_key.clone(),
 							linear_team_id: project.linear.team_id.clone(),
-							trigger_project_ref: project.trigger.project_ref.clone(),
-							railway_project_id: project.railway.project_id.clone(),
 							impact_brief: project.impact.brief.clone(),
 							gitlab_project: project.gitlab.project.clone(),
 							gitlab_host: project.gitlab.host.clone(),
@@ -2750,13 +2496,8 @@ impl Config {
 			main_repo: self.general.main_repo.clone(),
 			editor: self.general.editor.clone(),
 			github_repo: self.github.repo.clone(),
-			sentry_org: self.sentry.org.clone(),
-			sentry_projects: self.sentry.projects.clone(),
 			linear_team_key: self.linear.team_key.clone(),
 			linear_team_id: self.linear.team_id.clone(),
-			trigger_project_ref: self.trigger.project_ref.clone(),
-			trigger_environments: self.trigger.views(),
-			railway_project_id: self.railway.project_id.clone(),
 			config_path: config_path().to_string_lossy().to_string(),
 			workflow: self.workflow.clone(),
 			impact: self.impact.clone(),
@@ -2786,12 +2527,6 @@ impl Config {
 					&crate::i18n::t("config.secretHint.github"),
 				),
 				secret(
-					"sentry",
-					"Sentry",
-					&self.sentry.token,
-					&crate::i18n::t("config.secretHint.sentry"),
-				),
-				secret(
 					"linear",
 					"Linear",
 					&self.linear.token,
@@ -2804,46 +2539,10 @@ impl Config {
 					&crate::i18n::t("config.secretHint.gitlab"),
 				),
 				secret(
-					"trigger",
-					"Trigger.dev",
-					&self.trigger.token,
-					&crate::i18n::t("config.secretHint.trigger"),
-				),
-				secret(
-					"railway",
-					"Railway",
-					&self.railway.token,
-					&crate::i18n::t("config.secretHint.railway"),
-				),
-				secret(
 					"betterstack",
 					"Better Stack",
 					&self.betterstack.token,
 					&crate::i18n::t("config.secretHint.betterstack"),
-				),
-				secret(
-					"betterstack_telemetry",
-					"Better Stack · KPI",
-					&self.betterstack.telemetry_token,
-					&crate::i18n::t("config.secretHint.betterstackTelemetry"),
-				),
-				secret(
-					"betterstack_clickhouse_host",
-					"Better Stack · SQL host",
-					&self.betterstack.clickhouse_host,
-					&crate::i18n::t("config.secretHint.betterstackClickhouseHost"),
-				),
-				secret(
-					"betterstack_clickhouse_username",
-					"Better Stack · SQL user",
-					&self.betterstack.clickhouse_username,
-					&crate::i18n::t("config.secretHint.betterstackClickhouseUsername"),
-				),
-				secret(
-					"betterstack_clickhouse_password",
-					"Better Stack · SQL password",
-					&self.betterstack.clickhouse_password,
-					&crate::i18n::t("config.secretHint.betterstackClickhousePassword"),
 				),
 				secret(
 					"stripe",
@@ -3091,12 +2790,23 @@ mod tests {
 		assert_eq!(config.linear.team_id, "eq-global");
 		assert_eq!(config.projects.len(), 1);
 		assert_eq!(config.projects[0].linear.team_id, "eq-perso");
+		// Le jeton Better Stack sert encore au serveur MCP des agents isolés :
+		// il survit, quand ses voisins Telemetry et ClickHouse sont ignorés.
+		assert_eq!(config.betterstack.token, "bs");
+		assert_eq!(config.projects[0].betterstack.token, "bs-perso");
+		// Idem pour la clé Stripe, quand Trigger et Railway disparaissent.
+		assert_eq!(config.stripe.token, "rk_live_x");
+		assert_eq!(config.projects[0].stripe.token, "rk_perso");
 
 		// Et la section ne se réécrit pas : elle disparaît à la sauvegarde.
 		let rewritten = toml::to_string(&config).unwrap();
 		assert!(!rewritten.contains("[team]"), "{rewritten}");
 		assert!(!rewritten.contains("linear_team_id"), "{rewritten}");
 		assert!(rewritten.contains("team_id = \"eq-global\""), "{rewritten}");
+		assert!(!rewritten.contains("[sentry]"), "{rewritten}");
+		assert!(!rewritten.contains("telemetry_token"), "{rewritten}");
+		assert!(!rewritten.contains("[trigger]"), "{rewritten}");
+		assert!(!rewritten.contains("[railway]"), "{rewritten}");
 	}
 
 	/// Un identifiant déjà déclaré sous `[linear]` prime sur l'ancien.
@@ -3211,33 +2921,6 @@ mod tests {
 		assert_eq!(cfg.linear.token, "lin-entreprise");
 		assert_eq!(cfg.linear.team_key, "NW");
 		assert_eq!(cfg.general.editor, "zed");
-	}
-
-	/// Les environnements Trigger d'un projet remplacent ceux du global : les
-	/// mélanger interrogerait les déploiements d'un autre produit.
-	#[test]
-	fn environnements_trigger_remplacent_au_lieu_de_sadditionner() {
-		let mut cfg = base();
-		cfg.trigger.environments = vec![TriggerEnvironment {
-			name: "Production".into(),
-			token: "tr_prod_exemple".into(),
-			project_ref: "proj_exemple".into(),
-		}];
-		let perso = ProjectConfig {
-			id: "perso".into(),
-			trigger: TriggerConfig {
-				environments: vec![TriggerEnvironment {
-					name: "Production".into(),
-					token: "tr_prod_perso".into(),
-					project_ref: "proj_perso".into(),
-				}],
-				..Default::default()
-			},
-			..Default::default()
-		};
-		perso.merge_into(&mut cfg, false);
-		assert_eq!(cfg.trigger.environments.len(), 1);
-		assert_eq!(cfg.trigger.environments[0].token, "tr_prod_perso");
 	}
 
 	/// L'écran Réglages doit pouvoir distinguer « propre au projet » de « hérité ».

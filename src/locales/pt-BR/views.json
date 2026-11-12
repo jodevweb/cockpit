@@ -153,16 +153,6 @@
 			"send": "Responder"
 		}
 	},
-	"delivery": {
-		"title": "Feeds",
-		"tickets": "Tickets",
-		"openWorktree": "Abrir o worktree",
-		"localTracking": "acompanhado localmente",
-		"yes": "sim",
-		"no": "não",
-		"noLocalWorktree": "Nenhum worktree local para esta branch.",
-		"emptyHint": "Os tokens ausentes são sinalizados em Configurações."
-	},
 	"docs": {
 		"title": "Documentos",
 		"subtitle": "Entregáveis dos agentes: planos, revisões, QA, wiki — em todos os worktrees.",
@@ -360,16 +350,11 @@
 		}
 	},
 	"infra": {
-		"title": "Servidores e contêineres",
-		"subtitle": "O que está rodando nesta máquina: servidores de desenvolvimento e contêineres.",
+		"title": "Servidores",
+		"subtitle": "Os servidores de desenvolvimento escutando nesta máquina, e o worktree de onde cada um veio.",
 		"portFreed": "Porta {{port}} liberada.",
-		"runningContainers": "Contêineres rodando",
-		"stoppedContainers": "Contêineres parados",
 		"devPorts": "Portas de dev",
 		"worktrees": "Worktrees",
-		"noContainers": "Nenhum contêiner",
-		"viewLogs": "Ver os logs",
-		"logs": "Logs",
 		"listening": "Servidores escutando",
 		"noServers": "Nenhum servidor de desenvolvimento rodando",
 		"unknownFolder": "pasta desconhecida",
@@ -456,8 +441,6 @@
 		"more": {
 			"tickets_one": "Mais {{count}} ticket",
 			"tickets_other": "Mais {{count}} tickets",
-			"errors_one": "Mais {{count}} erro",
-			"errors_other": "Mais {{count}} erros",
 			"prs_one": "Mais {{count}} PR",
 			"prs_other": "Mais {{count}} PRs"
 		},
@@ -469,8 +452,6 @@
 		"summary": {
 			"tickets_one": "{{count}} ticket",
 			"tickets_other": "{{count}} tickets",
-			"errorsToTriage_one": "{{count}} erro a triar",
-			"errorsToTriage_other": "{{count}} erros a triar",
 			"agents_one": "{{count}} agente",
 			"agents_other": "{{count}} agentes",
 			"collisions_one": "{{count}} colisão",
@@ -482,10 +463,7 @@
 			"prs_one": "{{count}} PR",
 			"prs_other": "{{count}} PRs",
 			"redCi_one": "{{count}} CI falhando",
-			"redCi_other": "{{count}} CIs falhando",
-			"down_one": "{{count}} fora do ar",
-			"down_other": "{{count}} fora do ar",
-			"online": "no ar"
+			"redCi_other": "{{count}} CIs falhando"
 		},
 		"waiting": "Esperando por você",
 		"waitingDismiss": "Dispensar — volta se mudar",
@@ -502,23 +480,15 @@
 			"calm": "tranquilo",
 			"openProject": "Abrir este projeto →",
 			"thingsWaiting_one": "{{count}} coisa esperando por você",
-			"thingsWaiting_other": "{{count}} coisas esperando por você",
-			"prodErrors_one": "{{count}} erro em produção",
-			"prodErrors_other": "{{count}} erros em produção"
+			"thingsWaiting_other": "{{count}} coisas esperando por você"
 		},
 		"region": {
 			"frame": "Enquadrar esta região",
 			"empty": {
-				"arrive": "Nenhum ticket para você, nenhum erro a triar.",
+				"arrive": "Nenhum ticket para você.",
 				"encours": "Nada está rodando. Inicie um agente ou uma missão a partir de um ticket.",
-				"livrer": "Nenhum PR aberto.",
-				"prod": "Conecte o monitoramento (Better Stack) em Configurações para ver a produção aqui."
+				"livrer": "Nenhum PR aberto."
 			}
-		},
-		"card": {
-			"sentry": "Sentry · a triar",
-			"deploy": "Deploy",
-			"monitor": "Monitoramento"
 		},
 		"ticket": {
 			"inMission": "em uma missão"
@@ -778,22 +748,6 @@
 			"failed": "verificações falharam"
 		}
 	},
-	"observability": {
-		"title": "Observabilidade",
-		"subtitle": "Sentry e Better Stack",
-		"ticket": "Ticket",
-		"ticketTitle": "Criar o ticket no Linear e anotá-lo no Sentry",
-		"ticketCreated": "Ticket do Linear criado.",
-		"resolve": "Resolver",
-		"resolved": "Issue resolvida.",
-		"ignore": "Ignorar",
-		"ignored": "Issue ignorada.",
-		"regressions": "Regressões",
-		"incidents": "Incidentes",
-		"monitors": "Monitores",
-		"errorsAndIncidents": "Erros e incidentes",
-		"emptyHint": "Verifique o token e a organização em Configurações se você esperava resultados."
-	},
 	"permanence": {
 		"title": "Permanence",
 		"resume": "Retomar",
@@ -1024,21 +978,6 @@
 			"add": "Adicionar",
 			"name": "Nome"
 		},
-		"sentry": {
-			"unavailable": "Lista indisponível ({{error}}) — informe os slugs à mão."
-		},
-		"trigger": {
-			"saved": "Ambiente “{{name}}” salvo.",
-			"removeTitle": "Remover o ambiente “{{name}}”?",
-			"removed": "Ambiente “{{name}}” removido.",
-			"defaultProject": "projeto padrão",
-			"mainKey": "chave principal",
-			"namePlaceholder": "Produção",
-			"secretKey": "Chave secreta",
-			"project": "Projeto",
-			"projectHint": "Vazio = o de cima.",
-			"help": "Uma chave secreta só vale para um projeto e um ambiente: adicione uma entrada por ambiente a acompanhar (Produção, Staging, Teste…). Cada uma vira uma aba em Entrega."
-		},
 		"projects": {
 			"added": "Projeto “{{name}}” adicionado.",
 			"removeTitle": "Remover o projeto “{{name}}”?",
@@ -1064,7 +1003,7 @@
 			"thisProject": "este projeto",
 			"globalTitle": "As configurações abaixo são os padrões, herdados por todos os projetos",
 			"projectHintIsolated": "Aqui você só vê o que este projeto declara. Um campo vazio não está configurado para ele: assim que há vários projetos, nenhum toma emprestado o repositório ou a equipe de outro. Só os tokens de acesso continuam compartilhados.",
-			"projectHint": "Um campo deixado vazio herda os padrões. Preencha-o para dar a este projeto um valor próprio — outra conta do GitHub, outra chave do Sentry.",
+			"projectHint": "Um campo deixado vazio herda os padrões. Preencha-o para dar a este projeto um valor próprio — outra conta do GitHub, outra chave do Linear.",
 			"globalHintIsolated": "Estes valores são o recurso padrão para os tokens de acesso. Repositórios e equipes são declarados projeto a projeto.",
 			"globalHint": "Estes valores se aplicam onde um projeto não diz nada. Mude para o projeto para dar a ele configurações próprias.",
 			"project": "Projeto",
@@ -1096,7 +1035,6 @@
 			"dock": "Lembrete de workspaces",
 			"workstation": "Estação de trabalho",
 			"identifiers": "Identificadores do projeto",
-			"triggerEnvironments": "Ambientes do Trigger.dev",
 			"secrets": "Tokens de acesso",
 			"links": "Links úteis"
 		},
@@ -1115,9 +1053,6 @@
 		},
 		"services": {
 			"githubRepo": "Repositório GitHub",
-			"sentryOrg": "Organização do Sentry",
-			"sentryProjects": "Projetos do Sentry",
-			"sentryProjectsHint": "Nenhum marcado = a organização inteira.",
 			"ticketKey": "Chave de ticket",
 			"ticketKeyHint": "Prefixo do Linear, ex.: ABC — serve para reconhecer números de ticket em branches e títulos",
 			"linearTeamId": "Equipe no Linear",
@@ -1127,9 +1062,7 @@
 			"gitlabProjectPlaceholder": "grupo/produto",
 			"gitlabHost": "Instância do GitLab",
 			"gitlabHostHint": "vazio = gitlab.com; senão a raiz da sua",
-			"gitlabHostPlaceholder": "https://gitlab.example.com",
-			"triggerProject": "Projeto Trigger.dev",
-			"railwayProject": "Projeto Railway"
+			"gitlabHostPlaceholder": "https://gitlab.example.com"
 		},
 		"secrets": {
 			"override": "próprio do projeto",
@@ -1138,7 +1071,7 @@
 			"missing": "ausente",
 			"keepPlaceholder": "•••••••• — deixe vazio para manter",
 			"pastePlaceholder": "Cole o token",
-			"storage": "Os tokens são gravados em {{path}} com permissões 600 e nunca voltam para a interface. Cada valor também pode ser fornecido por uma variável de ambiente (COCKPIT_SENTRY_TOKEN, COCKPIT_LINEAR_TOKEN…), que então tem prioridade sobre o arquivo."
+			"storage": "Os tokens são gravados em {{path}} com permissões 600 e nunca voltam para a interface. Cada valor também pode ser fornecido por uma variável de ambiente (COCKPIT_GITHUB_TOKEN, COCKPIT_LINEAR_TOKEN…), que então tem prioridade sobre o arquivo."
 		},
 		"theme": {
 			"dark": "Escuro",

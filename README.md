@@ -122,7 +122,7 @@ installed on the machine.
 | `git`                  | Worktrees, Git screen, diffs, commits                       | nothing works                                   |
 | `claude`               | AI Agents screen, launching and resuming missions           | no more agents, the rest still works            |
 | authenticated `gh`     | Fallback when no GitHub token is configured                 | `COCKPIT_GITHUB_TOKEN` must be provided         |
-| `docker` or `orb`      | Local Infra screen, ntfy server for mobile access, agent isolation | the container list stays empty, isolation refuses to start when enabled |
+| `docker` or `orb`      | ntfy server for mobile access, agent isolation             | isolation refuses to start when enabled         |
 | `zed`, `cursor`, `code`| Opening a file in the editor                                | editor links do nothing                         |
 | Tailscale              | `pnpm setup:mobile` only                                    | no mobile access                                |
 
@@ -269,12 +269,9 @@ the file:
 | Service      | Variable                    | Expected token                                         |
 | ------------ | --------------------------- | ------------------------------------------------------ |
 | GitHub       | `COCKPIT_GITHUB_TOKEN`      | optional — automatic fallback to `gh auth token`        |
-| Sentry       | `COCKPIT_SENTRY_TOKEN`      | user auth token (`project:read`, `event:write`)         |
 | Linear       | `COCKPIT_LINEAR_TOKEN`      | personal API key                                        |
-| Trigger.dev  | `COCKPIT_TRIGGER_TOKEN`     | environment secret key (`tr_prod_…`, `tr_staging_…`)    |
-| Railway      | `COCKPIT_RAILWAY_TOKEN`     | account or project token                                |
-| Better Stack | `COCKPIT_BETTERSTACK_TOKEN` | Uptime API token                                        |
-| Stripe       | `COCKPIT_STRIPE_TOKEN`      | read-only restricted key                                |
+| Better Stack | `COCKPIT_BETTERSTACK_TOKEN` | API token, for the MCP server of isolated agents        |
+| Stripe       | `COCKPIT_STRIPE_TOKEN`      | restricted key, for the MCP server of isolated agents   |
 
 ## Screens
 
@@ -283,13 +280,13 @@ The top bar holds the screens you use all day; the others are in the
 
 | Screen            | What it shows                                                                                                                    |
 | ----------------- | -------------------------------------------------------------------------------------------------------------------------------- |
-| **Map**           | Each project as four columns — incoming, in progress, ship, in production — with its tickets, missions, workspaces and pull requests, and the "Waiting on you" bar above (a cross sets an item aside until it changes). |
+| **Map**           | Each project as three columns — incoming, in progress, ship — with its tickets, missions, workspaces and pull requests, and the "Waiting on you" bar above (a cross sets an item aside until it changes). |
 | **Workspaces**    | A worktree, its agents and its terminals, side by side (see "The work panel").                                                    |
 | **Free agents**   | Agents launched outside any project, in a folder of your choice.                                                                  |
 | **Decisions**     | Everything waiting for your answer: permissions, questions, plans to approve.                                                     |
 | **Recap**         | What happened over the past hour, three hours or day, told visually.                                                              |
 | **Missions**      | One ticket, one plan, several workers: you confirm what the lead agent understood, its approach, its breakdown; each worker gets its own branch and worktree; repository checks gate every delivery; the pull request carries a delivery dossier. |
-| *Workshop*        | **Today**, **Permanence** (an agent on call, within hours and budgets you set), **AI agents** (every Claude Code session, its timeline, its tools), **Documents**, **Flow** (tickets, PRs, CI, deployments), **Impact** (what each change in flight implies), **Observability** (Sentry, Better Stack), **Worktrees**, **Git**, **Scripts**, **Servers & containers**, **Settings**. |
+| *Workshop*        | **Today**, **Permanence** (an agent on call, within hours and budgets you set), **AI agents** (every Claude Code session, its timeline, its tools), **Documents**, **Impact** (what each change in flight implies), **Worktrees**, **Git**, **Scripts**, **Servers** (development servers listening, and the worktree each one came from), **Settings**. |
 
 ## Shortcuts
 
@@ -331,7 +328,7 @@ repository's `.git` are watched by `notify`, and every write triggers a refresh
 Since worktree metadata lives under `.git/worktrees/`, a single watch covers
 them all.
 
-What comes from the network is polled: every few seconds for Docker and ports,
+What comes from the network is polled: every few seconds for ports,
 every two to three minutes for SaaS — enough to stay accurate, little enough
 not to eat into API quotas.
 
@@ -410,8 +407,8 @@ src-tauri/src/
   executions.rs    what each agent did: identity, turns, costs, timeline
   docs.rs          discovery of markdown deliverables
   runner.rs        command execution, line-by-line streaming, process groups
-  system.rs        editor, terminal, Finder/Explorer, Docker, ports
-  integrations.rs  Sentry, Better Stack, Linear, GitHub, Trigger, Railway, Stripe
+  system.rs        editor, terminal, Finder/Explorer, ports
+  integrations.rs  Linear, GitHub, GitLab
   monitor.rs       census of in-flight changes, across all forges
   impact.rs        factual file of a change, reading by an agent, report review
   lib.rs           IPC commands + file system watching
@@ -419,7 +416,7 @@ src-tauri/src/
 src/
   app/             shell, menu, ⌘K palette, global state
   views/           one file per screen
-  components/      component system, markdown, ANSI logs, diff, SaaS feeds
+  components/      component system, markdown, ANSI logs, diff
   lib/             mirror types, typed IPC, formatting, command catalog
 ```
 

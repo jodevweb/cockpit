@@ -11,8 +11,7 @@
 		"notify": {
 			"waitingReply": "Ждёт вашего ответа — {{title}}",
 			"ciFailed": "CI падает · #{{number}}",
-			"readyToMerge": "Готово к слиянию · #{{number}}",
-			"prodError": "Ошибка в продакшене · {{project}}"
+			"readyToMerge": "Готово к слиянию · #{{number}}"
 		}
 	},
 	"commandPalette": {
@@ -28,9 +27,7 @@
 			"git": "Git",
 			"scripts": "Скрипты",
 			"docs": "Документы",
-			"observability": "Наблюдаемость",
-			"delivery": "Поток · Linear, PR, CI, деплои",
-			"infra": "Серверы и контейнеры · что запущено на этой машине",
+			"infra": "Серверы · что запущено на этой машине",
 			"settings": "Настройки",
 			"replay": "Повтор · оценить настройку агентов на прошлых PR",
 			"methods": "Методы · плагины для проекта, прочитанные до установки"
@@ -182,13 +179,11 @@
 			"libres": "Свободные агенты",
 			"agents": "ИИ-агенты",
 			"docs": "Документы",
-			"delivery": "Поток",
 			"impact": "Влияние",
-			"observability": "Наблюдаемость",
 			"worktrees": "Worktrees",
 			"git": "Git",
 			"scripts": "Скрипты",
-			"infra": "Серверы и контейнеры",
+			"infra": "Серверы",
 			"settings": "Настройки",
 			"replay": "Повтор",
 			"methods": "Методы"

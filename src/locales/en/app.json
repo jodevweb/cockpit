@@ -11,8 +11,7 @@
 		"notify": {
 			"waitingReply": "Waiting for your reply — {{title}}",
 			"ciFailed": "CI failing · #{{number}}",
-			"readyToMerge": "Ready to merge · #{{number}}",
-			"prodError": "Production error · {{project}}"
+			"readyToMerge": "Ready to merge · #{{number}}"
 		}
 	},
 	"commandPalette": {
@@ -28,9 +27,7 @@
 			"git": "Git",
 			"scripts": "Scripts",
 			"docs": "Documents",
-			"observability": "Observability",
-			"delivery": "Flow · Linear, PRs, CI, deployments",
-			"infra": "Servers & containers · what's running on this machine",
+			"infra": "Servers · what's running on this machine",
 			"settings": "Settings",
 			"replay": "Replay · judge an agent setup on past PRs",
 			"methods": "Methods · plugins this project can adopt, read before installing"
@@ -174,13 +171,11 @@
 			"libres": "Free agents",
 			"agents": "AI agents",
 			"docs": "Documents",
-			"delivery": "Flow",
 			"impact": "Impact",
-			"observability": "Observability",
 			"worktrees": "Worktrees",
 			"git": "Git",
 			"scripts": "Scripts",
-			"infra": "Servers & containers",
+			"infra": "Servers",
 			"settings": "Settings",
 			"replay": "Replay",
 			"methods": "Methods"

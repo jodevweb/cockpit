@@ -767,26 +767,6 @@
 		"whyAgent": "written by an agent",
 		"whyChanged": "modified"
 	},
-	"feedPanel": {
-		"sort": {
-			"recent": "Newest",
-			"oldest": "Oldest",
-			"severity": "Severity",
-			"status": "Status",
-			"title": "Title"
-		},
-		"severity": {
-			"critical": "Critical",
-			"warning": "Warning",
-			"info": "Info",
-			"success": "OK"
-		},
-		"sortHint": "Display order",
-		"filters": "Filters",
-		"clearAll": "Clear all",
-		"empty": "Nothing to show",
-		"selectItem": "Select an item"
-	},
 	"illustration": {
 		"genre": {
 			"frise": "The chain of events",

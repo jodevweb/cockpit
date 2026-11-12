@@ -153,16 +153,6 @@
 			"send": "Rispondi"
 		}
 	},
-	"delivery": {
-		"title": "Flussi",
-		"tickets": "Ticket",
-		"openWorktree": "Apri il worktree",
-		"localTracking": "tracciato in locale",
-		"yes": "sì",
-		"no": "no",
-		"noLocalWorktree": "Nessun worktree locale per questo branch.",
-		"emptyHint": "I token mancanti sono segnalati nelle Impostazioni."
-	},
 	"docs": {
 		"title": "Documenti",
 		"subtitle": "I prodotti degli agenti: piani, revisioni, QA, wiki — su tutti i worktree.",
@@ -360,16 +350,11 @@
 		}
 	},
 	"infra": {
-		"title": "Server e container",
-		"subtitle": "Cosa gira su questa macchina: server di sviluppo e container.",
+		"title": "Server",
+		"subtitle": "I server di sviluppo in ascolto su questa macchina, e il worktree da cui proviene ciascuno.",
 		"portFreed": "Porta {{port}} liberata.",
-		"runningContainers": "Container attivi",
-		"stoppedContainers": "Container fermi",
 		"devPorts": "Porte di sviluppo",
 		"worktrees": "Worktree",
-		"noContainers": "Nessun container",
-		"viewLogs": "Vedi i log",
-		"logs": "Log",
 		"listening": "Server in ascolto",
 		"noServers": "Nessun server di sviluppo attivo",
 		"unknownFolder": "cartella sconosciuta",
@@ -456,8 +441,6 @@
 		"more": {
 			"tickets_one": "{{count}} ticket in più",
 			"tickets_other": "{{count}} ticket in più",
-			"errors_one": "{{count}} errore in più",
-			"errors_other": "{{count}} errori in più",
 			"prs_one": "{{count}} PR in più",
 			"prs_other": "{{count}} PR in più"
 		},
@@ -469,8 +452,6 @@
 		"summary": {
 			"tickets_one": "{{count}} ticket",
 			"tickets_other": "{{count}} ticket",
-			"errorsToTriage_one": "{{count}} errore da smistare",
-			"errorsToTriage_other": "{{count}} errori da smistare",
 			"agents_one": "{{count}} agente",
 			"agents_other": "{{count}} agenti",
 			"collisions_one": "{{count}} collisione",
@@ -482,10 +463,7 @@
 			"prs_one": "{{count}} PR",
 			"prs_other": "{{count}} PR",
 			"redCi_one": "{{count}} CI in errore",
-			"redCi_other": "{{count}} CI in errore",
-			"down_one": "{{count}} giù",
-			"down_other": "{{count}} giù",
-			"online": "online"
+			"redCi_other": "{{count}} CI in errore"
 		},
 		"waiting": "Aspetta te",
 		"waitingDismiss": "Ignora — torna se cambia",
@@ -502,23 +480,15 @@
 			"calm": "tranquillo",
 			"openProject": "Apri questo progetto →",
 			"thingsWaiting_one": "{{count}} cosa aspetta te",
-			"thingsWaiting_other": "{{count}} cose aspettano te",
-			"prodErrors_one": "{{count}} errore in prod",
-			"prodErrors_other": "{{count}} errori in prod"
+			"thingsWaiting_other": "{{count}} cose aspettano te"
 		},
 		"region": {
 			"frame": "Inquadra questa regione",
 			"empty": {
-				"arrive": "Nessun ticket per te, nessun errore da smistare.",
+				"arrive": "Nessun ticket per te.",
 				"encours": "Non gira niente. Avvia un agente o una missione da un ticket.",
-				"livrer": "Nessuna PR aperta.",
-				"prod": "Collega il monitoraggio (Better Stack) nelle Impostazioni per vedere la prod qui."
+				"livrer": "Nessuna PR aperta."
 			}
-		},
-		"card": {
-			"sentry": "Sentry · da smistare",
-			"deploy": "Deploy",
-			"monitor": "Monitoraggio"
 		},
 		"ticket": {
 			"inMission": "in una missione"
@@ -778,22 +748,6 @@
 			"failed": "controlli falliti"
 		}
 	},
-	"observability": {
-		"title": "Osservabilità",
-		"subtitle": "Sentry e Better Stack",
-		"ticket": "Ticket",
-		"ticketTitle": "Crea il ticket Linear e annotalo in Sentry",
-		"ticketCreated": "Ticket Linear creato.",
-		"resolve": "Risolvi",
-		"resolved": "Issue risolta.",
-		"ignore": "Ignora",
-		"ignored": "Issue ignorata.",
-		"regressions": "Regressioni",
-		"incidents": "Incidenti",
-		"monitors": "Monitor",
-		"errorsAndIncidents": "Errori e incidenti",
-		"emptyHint": "Controlla il token e l'organizzazione nelle Impostazioni se ti aspettavi dei risultati."
-	},
 	"permanence": {
 		"title": "Permanence",
 		"resume": "Riprendi",
@@ -1024,21 +978,6 @@
 			"add": "Aggiungi",
 			"name": "Nome"
 		},
-		"sentry": {
-			"unavailable": "Elenco non disponibile ({{error}}) — inserisci gli slug a mano."
-		},
-		"trigger": {
-			"saved": "Ambiente «{{name}}» salvato.",
-			"removeTitle": "Rimuovere l'ambiente «{{name}}»?",
-			"removed": "Ambiente «{{name}}» rimosso.",
-			"defaultProject": "progetto predefinito",
-			"mainKey": "chiave principale",
-			"namePlaceholder": "Production",
-			"secretKey": "Chiave segreta",
-			"project": "Progetto",
-			"projectHint": "Vuoto = quello sopra.",
-			"help": "Una chiave segreta vale per un solo progetto e un solo ambiente: aggiungi una voce per ogni ambiente da seguire (Production, Staging, Test…). Ognuna diventa una scheda in Consegna."
-		},
 		"projects": {
 			"added": "Progetto «{{name}}» aggiunto.",
 			"removeTitle": "Rimuovere il progetto «{{name}}»?",
@@ -1064,7 +1003,7 @@
 			"thisProject": "questo progetto",
 			"globalTitle": "Le impostazioni qui sotto sono i valori predefiniti, ereditati da ogni progetto",
 			"projectHintIsolated": "Qui vedi solo ciò che questo progetto dichiara. Un campo vuoto non è configurato per lui: appena ci sono più progetti, nessuno prende in prestito il repository o il team di un altro. Solo i token di accesso restano condivisi.",
-			"projectHint": "Un campo lasciato vuoto eredita i valori predefiniti. Compilalo per dare a questo progetto i suoi — un altro account GitHub, un'altra chiave Sentry.",
+			"projectHint": "Un campo lasciato vuoto eredita i valori predefiniti. Compilalo per dare a questo progetto i suoi — un altro account GitHub, un'altra chiave Linear.",
 			"globalHintIsolated": "Questi valori fanno da ripiego per i token di accesso. Repository e team si dichiarano progetto per progetto.",
 			"globalHint": "Questi valori valgono ovunque un progetto non dica nulla. Passa al progetto per dargli le sue impostazioni.",
 			"project": "Progetto",
@@ -1096,7 +1035,6 @@
 			"dock": "Promemoria dei workspace",
 			"workstation": "Postazione",
 			"identifiers": "Identificativi del progetto",
-			"triggerEnvironments": "Ambienti Trigger.dev",
 			"secrets": "Token di accesso",
 			"links": "Link utili"
 		},
@@ -1115,9 +1053,6 @@
 		},
 		"services": {
 			"githubRepo": "Repository GitHub",
-			"sentryOrg": "Organizzazione Sentry",
-			"sentryProjects": "Progetti Sentry",
-			"sentryProjectsHint": "Nessuno spuntato = tutta l'organizzazione.",
 			"ticketKey": "Chiave dei ticket",
 			"ticketKeyHint": "Prefisso Linear, es. ABC — serve a riconoscere i numeri di ticket nei branch e nei titoli",
 			"linearTeamId": "Team Linear",
@@ -1127,9 +1062,7 @@
 			"gitlabProjectPlaceholder": "gruppo/prodotto",
 			"gitlabHost": "Istanza GitLab",
 			"gitlabHostHint": "vuoto = gitlab.com; altrimenti la radice della tua",
-			"gitlabHostPlaceholder": "https://gitlab.example.com",
-			"triggerProject": "Progetto Trigger.dev",
-			"railwayProject": "Progetto Railway"
+			"gitlabHostPlaceholder": "https://gitlab.example.com"
 		},
 		"secrets": {
 			"override": "specifico del progetto",
@@ -1138,7 +1071,7 @@
 			"missing": "mancante",
 			"keepPlaceholder": "•••••••• — lascia vuoto per mantenerlo",
 			"pastePlaceholder": "Incolla il token",
-			"storage": "I token vengono scritti in {{path}} con permessi 600 e non tornano mai all'interfaccia. Ogni valore può anche essere fornito tramite una variabile d'ambiente (COCKPIT_SENTRY_TOKEN, COCKPIT_LINEAR_TOKEN…), che allora ha la precedenza sul file."
+			"storage": "I token vengono scritti in {{path}} con permessi 600 e non tornano mai all'interfaccia. Ogni valore può anche essere fornito tramite una variabile d'ambiente (COCKPIT_GITHUB_TOKEN, COCKPIT_LINEAR_TOKEN…), che allora ha la precedenza sul file."
 		},
 		"theme": {
 			"dark": "Scuro",

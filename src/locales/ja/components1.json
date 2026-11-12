@@ -453,21 +453,6 @@
 		},
 		"save": "保存"
 	},
-	"kpiBoard": {
-		"noSection": "セクションなし",
-		"filter": "指標を絞り込む…",
-		"dashboards_other": "ダッシュボード {{count}} 件",
-		"indicators_other": "指標 {{count}} 件",
-		"empty": {
-			"message": "ダッシュボードはありません",
-			"hint": "KPI ダッシュボードは Better Stack Telemetry から取得します。"
-		},
-		"hide": "隠す",
-		"show": "値を表示",
-		"hours_other": "{{count}} 時間",
-		"days_other": "{{count}} 日",
-		"openExternal": "Better Stack で開く"
-	},
 	"libreLauncher": {
 		"places": {
 			"ici": {
@@ -612,7 +597,7 @@
 		"memory": "{{mb}} MB",
 		"open": "{{url}} を開く",
 		"stop": "このサーバーを停止",
-		"footer": "この worktree から起動したサーバーのみ表示されます。それ以外と Docker コンテナは「サーバーとコンテナ」に表示されます。"
+		"footer": "この worktree から起動したサーバーのみ表示されます。それ以外は「サーバー」に表示されます。"
 	},
 	"producedFiles": {
 		"count_other": "変更したファイル {{count}} 個",

@@ -18,10 +18,6 @@
 			"livrer": {
 				"label": "Entregar",
 				"hint": "revisar y fusionar"
-			},
-			"prod": {
-				"label": "En producción",
-				"hint": "qué cambia"
 			}
 		}
 	},

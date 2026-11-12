@@ -18,10 +18,6 @@
 			"livrer": {
 				"label": "Ship",
 				"hint": "review and merge"
-			},
-			"prod": {
-				"label": "In production",
-				"hint": "what it changes"
 			}
 		}
 	},

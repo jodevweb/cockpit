@@ -1,7 +1,6 @@
 import clsx from "clsx";
 import { AnimatePresence, motion } from "motion/react";
 import {
-	Activity,
 	Check,
 	ChevronRight,
 	ChevronsUpDown,
@@ -18,7 +17,6 @@ import {
 	Search,
 	ListChecks,
 	Radar,
-	Rocket,
 	ScanEye,
 	Settings,
 	Sun,
@@ -66,15 +64,9 @@ interface Entry {
  * et qu'elle réapparaisse d'elle-même dès la clé renseignée.
  */
 const NEEDS: Partial<Record<ViewId, string>> = {
-	observability: "monitoring",
-	// Sans suivi de tâches ni dépôt GitHub, l'écran des flux n'a ni tickets ni
-	// pull requests à montrer : il ne reste que ses onglets vides.
-	delivery: "tickets",
-	// L'infra locale a longtemps été masquée sans Docker — elle ne listait que
-	// des conteneurs. Elle montre aussi les serveurs de développement en écoute,
-	// leur worktree d'origine et ce qu'ils retiennent en mémoire, ce qui ne doit
-	// rien à Docker : la masquer rendait introuvable le seul endroit d'où l'on
-	// pouvait arrêter un serveur oublié.
+	// L'écran des serveurs n'a besoin de rien : il a longtemps été masqué sans
+	// Docker, du temps où il listait aussi des conteneurs, et cela rendait
+	// introuvable le seul endroit d'où l'on pouvait arrêter un serveur oublié.
 	// Les agents et les missions supposent le CLI installé. L'entrée revient dès
 	// qu'il l'est — c'est la même règle que pour une clé d'API.
 	agents: "agents",
@@ -127,9 +119,7 @@ const GROUPS: Array<{ id: string; entries: Entry[] }> = [
 	{
 		id: "deliver",
 		entries: [
-			{ id: "delivery", icon: Rocket, shortcut: "6" },
 			{ id: "impact", icon: ScanEye, shortcut: "⇧I" },
-			{ id: "observability", icon: Activity, shortcut: "7" },
 		],
 	},
 	{

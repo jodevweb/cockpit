@@ -453,21 +453,6 @@
 		},
 		"save": "저장"
 	},
-	"kpiBoard": {
-		"noSection": "섹션 없음",
-		"filter": "지표 필터…",
-		"dashboards_other": "대시보드 {{count}}개",
-		"indicators_other": "지표 {{count}}개",
-		"empty": {
-			"message": "대시보드 없음",
-			"hint": "KPI 대시보드는 Better Stack Telemetry에서 가져옵니다."
-		},
-		"hide": "숨기기",
-		"show": "값 보기",
-		"hours_other": "{{count}}시간",
-		"days_other": "{{count}}일",
-		"openExternal": "Better Stack에서 열기"
-	},
 	"libreLauncher": {
 		"places": {
 			"ici": {
@@ -612,7 +597,7 @@
 		"memory": "{{mb}} MB",
 		"open": "{{url}} 열기",
 		"stop": "이 서버 중지",
-		"footer": "이 worktree에서 시작한 서버만 표시됩니다. 나머지와 Docker 컨테이너는 “서버 및 컨테이너”에 있습니다."
+		"footer": "이 worktree에서 시작한 서버만 표시됩니다. 나머지는 “서버”에 있습니다."
 	},
 	"producedFiles": {
 		"count_other": "수정된 파일 {{count}}개",

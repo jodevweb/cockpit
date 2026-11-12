@@ -153,16 +153,6 @@
 			"send": "Reply"
 		}
 	},
-	"delivery": {
-		"title": "Feeds",
-		"tickets": "Tickets",
-		"openWorktree": "Open worktree",
-		"localTracking": "tracked locally",
-		"yes": "yes",
-		"no": "no",
-		"noLocalWorktree": "No local worktree for this branch.",
-		"emptyHint": "Missing tokens are flagged in Settings."
-	},
 	"docs": {
 		"title": "Documents",
 		"subtitle": "Agent deliverables: plans, reviews, QA, wiki — across all worktrees.",
@@ -360,16 +350,11 @@
 		}
 	},
 	"infra": {
-		"title": "Servers & containers",
-		"subtitle": "What's running on this machine: development servers and containers.",
+		"title": "Servers",
+		"subtitle": "Development servers listening on this machine, and the worktree each one came from.",
 		"portFreed": "Port {{port}} freed.",
-		"runningContainers": "Running containers",
-		"stoppedContainers": "Stopped containers",
 		"devPorts": "Dev ports",
 		"worktrees": "Worktrees",
-		"noContainers": "No containers",
-		"viewLogs": "View logs",
-		"logs": "Logs",
 		"listening": "Listening servers",
 		"noServers": "No development server running",
 		"unknownFolder": "unknown folder",
@@ -456,8 +441,6 @@
 		"more": {
 			"tickets_one": "{{count}} more ticket",
 			"tickets_other": "{{count}} more tickets",
-			"errors_one": "{{count}} more error",
-			"errors_other": "{{count}} more errors",
 			"prs_one": "{{count}} more PR",
 			"prs_other": "{{count}} more PRs"
 		},
@@ -469,8 +452,6 @@
 		"summary": {
 			"tickets_one": "{{count}} ticket",
 			"tickets_other": "{{count}} tickets",
-			"errorsToTriage_one": "{{count}} error to triage",
-			"errorsToTriage_other": "{{count}} errors to triage",
 			"agents_one": "{{count}} agent",
 			"agents_other": "{{count}} agents",
 			"collisions_one": "{{count}} collision",
@@ -482,10 +463,7 @@
 			"prs_one": "{{count}} PR",
 			"prs_other": "{{count}} PRs",
 			"redCi_one": "{{count}} failing CI",
-			"redCi_other": "{{count}} failing CIs",
-			"down_one": "{{count}} down",
-			"down_other": "{{count}} down",
-			"online": "online"
+			"redCi_other": "{{count}} failing CIs"
 		},
 		"waiting": "Waiting on you",
 		"waitingDismiss": "Dismiss — it comes back if it changes",
@@ -502,23 +480,15 @@
 			"calm": "quiet",
 			"openProject": "Open this project →",
 			"thingsWaiting_one": "{{count}} thing waiting on you",
-			"thingsWaiting_other": "{{count}} things waiting on you",
-			"prodErrors_one": "{{count}} error in prod",
-			"prodErrors_other": "{{count}} errors in prod"
+			"thingsWaiting_other": "{{count}} things waiting on you"
 		},
 		"region": {
 			"frame": "Frame this region",
 			"empty": {
-				"arrive": "No tickets for you, no errors to triage.",
+				"arrive": "No tickets for you.",
 				"encours": "Nothing is running. Start an agent or a mission from a ticket.",
-				"livrer": "No open PRs.",
-				"prod": "Connect monitoring (Better Stack) in Settings to see prod here."
+				"livrer": "No open PRs."
 			}
-		},
-		"card": {
-			"sentry": "Sentry · to triage",
-			"deploy": "Deployment",
-			"monitor": "Monitoring"
 		},
 		"ticket": {
 			"inMission": "in a mission"
@@ -778,22 +748,6 @@
 			"failed": "checks fail"
 		}
 	},
-	"observability": {
-		"title": "Observability",
-		"subtitle": "Sentry and Better Stack",
-		"ticket": "Ticket",
-		"ticketTitle": "Create the Linear ticket and note it in Sentry",
-		"ticketCreated": "Linear ticket created.",
-		"resolve": "Resolve",
-		"resolved": "Issue resolved.",
-		"ignore": "Ignore",
-		"ignored": "Issue ignored.",
-		"regressions": "Regressions",
-		"incidents": "Incidents",
-		"monitors": "Monitors",
-		"errorsAndIncidents": "Errors & incidents",
-		"emptyHint": "Check the token and organization in Settings if you expected results."
-	},
 	"permanence": {
 		"title": "Permanence",
 		"resume": "Resume",
@@ -1024,21 +978,6 @@
 			"add": "Add",
 			"name": "Name"
 		},
-		"sentry": {
-			"unavailable": "List unavailable ({{error}}) — enter the slugs by hand."
-		},
-		"trigger": {
-			"saved": "Environment “{{name}}” saved.",
-			"removeTitle": "Remove the “{{name}}” environment?",
-			"removed": "Environment “{{name}}” removed.",
-			"defaultProject": "default project",
-			"mainKey": "main key",
-			"namePlaceholder": "Production",
-			"secretKey": "Secret key",
-			"project": "Project",
-			"projectHint": "Empty = the one above.",
-			"help": "A secret key only works for one project and one environment: add one entry per environment to follow (Production, Staging, Test…). Each one becomes a tab in Delivery."
-		},
 		"projects": {
 			"added": "Project “{{name}}” added.",
 			"removeTitle": "Remove the “{{name}}” project?",
@@ -1064,7 +1003,7 @@
 			"thisProject": "this project",
 			"globalTitle": "The settings below are the defaults, inherited by every project",
 			"projectHintIsolated": "You only see what this project declares here. An empty field is not configured for it: as soon as there are several projects, none borrows another's repository or team. Only access tokens stay shared.",
-			"projectHint": "A field left empty inherits the defaults. Fill it in to give this project its own — another GitHub account, another Sentry key.",
+			"projectHint": "A field left empty inherits the defaults. Fill it in to give this project its own — another GitHub account, another Linear key.",
 			"globalHintIsolated": "These values are the fallback for access tokens. Repositories and teams are declared project by project.",
 			"globalHint": "These values apply wherever a project says nothing. Switch to the project to give it its own settings.",
 			"project": "Project",
@@ -1096,7 +1035,6 @@
 			"dock": "Workspace reminder",
 			"workstation": "Workstation",
 			"identifiers": "Project identifiers",
-			"triggerEnvironments": "Trigger.dev environments",
 			"secrets": "Access tokens",
 			"links": "Useful links"
 		},
@@ -1115,9 +1053,6 @@
 		},
 		"services": {
 			"githubRepo": "GitHub repository",
-			"sentryOrg": "Sentry organization",
-			"sentryProjects": "Sentry projects",
-			"sentryProjectsHint": "None checked = the whole organization.",
 			"ticketKey": "Ticket key",
 			"ticketKeyHint": "Linear prefix, e.g. ABC — used to recognize ticket numbers in branches and titles",
 			"linearTeamId": "Linear team",
@@ -1127,9 +1062,7 @@
 			"gitlabProjectPlaceholder": "group/product",
 			"gitlabHost": "GitLab instance",
 			"gitlabHostHint": "empty = gitlab.com; otherwise the root of yours",
-			"gitlabHostPlaceholder": "https://gitlab.example.com",
-			"triggerProject": "Trigger.dev project",
-			"railwayProject": "Railway project"
+			"gitlabHostPlaceholder": "https://gitlab.example.com"
 		},
 		"secrets": {
 			"override": "project-specific",
@@ -1138,7 +1071,7 @@
 			"missing": "missing",
 			"keepPlaceholder": "•••••••• — leave empty to keep",
 			"pastePlaceholder": "Paste the token",
-			"storage": "Tokens are written to {{path}} with 600 permissions and never come back down to the interface. Each value can also be provided through an environment variable (COCKPIT_SENTRY_TOKEN, COCKPIT_LINEAR_TOKEN…), which then takes precedence over the file."
+			"storage": "Tokens are written to {{path}} with 600 permissions and never come back down to the interface. Each value can also be provided through an environment variable (COCKPIT_GITHUB_TOKEN, COCKPIT_LINEAR_TOKEN…), which then takes precedence over the file."
 		},
 		"theme": {
 			"dark": "Dark",

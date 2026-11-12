@@ -57,12 +57,10 @@ const VIEWS: Array<{ id: ViewId; label: string }> = [
 	{ id: "agents", label: "AI agents, session history" },
 	{ id: "worktrees", label: "Worktrees" },
 	{ id: "git", label: "Git, branches" },
-	{ id: "delivery", label: "Flow: Linear, PRs, CI, deployments" },
 	{ id: "impact", label: "Impact" },
-	{ id: "observability", label: "Observability" },
 	{ id: "docs", label: "Documents" },
 	{ id: "scripts", label: "Scripts" },
-	{ id: "infra", label: "Servers and containers" },
+	{ id: "infra", label: "Development servers" },
 	{ id: "permanence", label: "Permanence" },
 	{ id: "settings", label: "Settings" },
 ];

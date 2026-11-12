@@ -77,8 +77,6 @@ const VIEWS: ViewId[] = [
 	"git",
 	"scripts",
 	"docs",
-	"observability",
-	"delivery",
 	"infra",
 	"settings",
 ];

@@ -90,8 +90,8 @@ fn connectors_list() -> Vec<config::Connector> {
 	let mut list = cfg().connectors();
 
 	// Les outils du poste comptent autant que les clés d'API : un écran qui
-	// dépend de Docker ou du CLI `claude` est aussi vide sans eux qu'un écran
-	// Sentry sans jeton. Les déclarer ici permet à l'interface de masquer ce qui
+	// dépend du CLI `claude` est aussi vide sans lui qu'un écran GitHub sans
+	// jeton. Les déclarer ici permet à l'interface de masquer ce qui
 	// ne peut pas répondre, au lieu de laisser cliquer vers une erreur.
 	//
 	// C'est aussi ce qui manquait pour voir qu'un poste n'avait pas Node : le
@@ -118,13 +118,6 @@ fn connectors_list() -> Vec<config::Connector> {
 		"orchestration",
 		agent::node_binary().is_some(),
 		&i18n::t("lib.connectorMissing.node"),
-	));
-	list.push(local(
-		"docker",
-		"Docker",
-		"containers",
-		system::has_docker(),
-		&i18n::t("lib.connectorMissing.docker"),
 	));
 	list
 }
@@ -182,53 +175,6 @@ fn accounts_save(entries: Vec<config::AccountConfig>) -> Result<ConfigView> {
 #[tauri::command]
 fn accounts_refresh() {
 	accounts::forget_cache();
-}
-
-/// Ajoute ou met à jour un environnement Trigger.dev.
-///
-/// Commande dédiée plutôt qu'un patch de configuration : les jetons ne
-/// redescendant jamais dans le webview, celui-ci ne peut pas renvoyer la liste
-/// complète sans les effacer. Un `token` absent ou vide conserve donc l'existant.
-#[tauri::command]
-fn trigger_env_save(name: String, token: Option<String>, project_ref: Option<String>) -> Result<ConfigView> {
-	let name = name.trim().to_string();
-	if name.is_empty() {
-		return Err(CockpitError::msg(i18n::t("lib.trigger.envNameRequired")));
-	}
-
-	let mut config = Config::load();
-	let token = token.unwrap_or_default().trim().to_string();
-	let project_ref = project_ref.unwrap_or_default().trim().to_string();
-
-	match config.trigger.environments.iter_mut().find(|env| env.name == name) {
-		Some(existing) => {
-			if !token.is_empty() {
-				existing.token = token;
-			}
-			existing.project_ref = project_ref;
-		}
-		None => {
-			if token.is_empty() {
-				return Err(CockpitError::msg(i18n::t("lib.trigger.envKeyRequired")));
-			}
-			config.trigger.environments.push(config::TriggerEnvironment {
-				name,
-				token,
-				project_ref,
-			});
-		}
-	}
-
-	config.save()?;
-	Ok(config.view())
-}
-
-#[tauri::command]
-fn trigger_env_remove(name: String) -> Result<ConfigView> {
-	let mut config = Config::load();
-	config.trigger.environments.retain(|env| env.name != name);
-	config.save()?;
-	Ok(config.view())
 }
 
 // ────────────────────────────── Tâches personnelles ──────────────────────────────
@@ -1466,60 +1412,6 @@ fn worktree_command(action: String, branch: String, path: Option<String>) -> Wor
 	WorktreeCommand { command, by_agent }
 }
 
-/// Fusionne une pull request.
-///
-/// Action irréversible et visible de toute l'équipe : le front demande
-/// confirmation, et on refuse ici tout ce que GitHub refuserait de toute façon,
-/// pour que l'erreur soit lisible plutôt qu'un 405 brut.
-#[tauri::command]
-async fn pull_request_merge(number: i64, method: Option<String>) -> Result<()> {
-	let config = cfg();
-	let token = integrations::github_token(&config).await?;
-	let method = method.unwrap_or_else(|| "squash".into());
-
-	let response = reqwest::Client::builder()
-		.user_agent("cockpit/0.1")
-		.build()
-		.map_err(CockpitError::from)?
-		.put(format!(
-			"https://api.github.com/repos/{}/pulls/{number}/merge",
-			config.github.repo
-		))
-		.header("Authorization", format!("Bearer {token}"))
-		.header("Accept", "application/vnd.github+json")
-		.json(&serde_json::json!({ "merge_method": method }))
-		.send()
-		.await?;
-
-	if !response.status().is_success() {
-		let code = response.status();
-		let body = response.text().await.unwrap_or_default();
-		let message = serde_json::from_str::<Value>(&body)
-			.ok()
-			.and_then(|v| v.get("message").and_then(|m| m.as_str()).map(String::from))
-			.unwrap_or(body);
-		let error = i18n::tf("lib.github.mergeRefused", &[("status", &code), ("message", &message)]);
-		journal::record(
-			"github",
-			&i18n::t("lib.github.prMerge"),
-			&format!("#{number}"),
-			false,
-			&error,
-		);
-		return Err(CockpitError::msg(error));
-	}
-	// Irréversible et visible de toute l'équipe : c'est le premier geste qu'on
-	// veut retrouver dans le carnet de bord.
-	journal::record(
-		"github",
-		&i18n::t("lib.github.prMerge"),
-		&format!("#{number}"),
-		true,
-		"",
-	);
-	Ok(())
-}
-
 // ─────────────────────────── Agents pilotés ───────────────────────────
 
 /// Démarre un agent — consigné : il va écrire dans le dépôt.
@@ -2675,11 +2567,6 @@ async fn remote_wake(title: String, body: String) {
 }
 
 #[tauri::command]
-async fn docker_containers() -> Result<Vec<system::Container>> {
-	system::docker_containers().await
-}
-
-#[tauri::command]
 async fn listening_ports() -> Result<Vec<system::ListeningPort>> {
 	system::listening_ports().await
 }
@@ -2692,77 +2579,6 @@ async fn stop_process(pid: u32) -> Result<()> {
 }
 
 // ──────────────────────────── Intégrations SaaS ────────────────────────────
-
-#[tauri::command]
-async fn feed_sentry(query: Option<String>) -> Result<Vec<integrations::FeedItem>> {
-	integrations::sentry_issues(&cfg(), &query.unwrap_or_else(|| "is:unresolved".into())).await
-}
-
-#[tauri::command]
-async fn sentry_projects() -> Result<Vec<integrations::SentryProject>> {
-	integrations::sentry_projects(&cfg()).await
-}
-
-/// Crée le ticket Linear correspondant à une issue Sentry, et laisse une note
-/// sur l'issue pour ne pas le recréer au prochain triage.
-#[tauri::command]
-async fn sentry_to_linear(
-	issue_id: String,
-	title: String,
-	permalink: String,
-	project: String,
-	culprit: String,
-	users: String,
-	events: String,
-) -> Result<String> {
-	let config = cfg();
-	let team_id = config.linear.team_id.clone();
-
-	let description = i18n::tf(
-		"lib.sentryIssue.description",
-		&[
-			("project", &project),
-			("culprit", &culprit),
-			("events", &events),
-			("users", &users),
-			("permalink", &permalink),
-		],
-	);
-
-	let (identifier, url) = integrations::linear_create_issue(&config, &team_id, &title, &description).await?;
-
-	// La note est un confort, pas une condition : si elle échoue, le ticket
-	// existe quand même et on ne veut pas faire croire à un échec.
-	let note = i18n::tf("lib.sentryIssue.note", &[("identifier", &identifier), ("url", &url)]);
-	let _ = integrations::sentry_add_comment(&config, &issue_id, &note).await;
-
-	Ok(url)
-}
-
-#[tauri::command]
-async fn sentry_set_status(issue_id: String, status: String) -> Result<()> {
-	integrations::sentry_update_issue(&cfg(), &issue_id, &status).await
-}
-
-#[tauri::command]
-async fn betterstack_dashboards() -> Result<Vec<integrations::KpiDashboard>> {
-	integrations::betterstack_dashboards(&cfg()).await
-}
-
-#[tauri::command]
-async fn betterstack_kpi_values(dashboard_id: String, hours: Option<i64>) -> Result<Vec<integrations::KpiValue>> {
-	integrations::betterstack_kpi_values(&cfg(), &dashboard_id, hours.unwrap_or(24)).await
-}
-
-#[tauri::command]
-async fn feed_betterstack_monitors() -> Result<Vec<integrations::FeedItem>> {
-	integrations::betterstack_monitors(&cfg()).await
-}
-
-#[tauri::command]
-async fn feed_betterstack_incidents() -> Result<Vec<integrations::FeedItem>> {
-	integrations::betterstack_incidents(&cfg()).await
-}
 
 /// Ce que sait faire le suivi de tâches configuré, et comment il s'appelle.
 ///
@@ -2808,31 +2624,6 @@ async fn linear_options() -> Result<tickets::Options> {
 async fn linear_update(id: String, patch: Value) -> Result<()> {
 	let config = cfg();
 	tickets::provider(&config)?.update(&id, patch).await
-}
-
-#[tauri::command]
-async fn feed_github_pulls() -> Result<Vec<integrations::FeedItem>> {
-	integrations::github_pulls(&cfg()).await
-}
-
-#[tauri::command]
-async fn feed_github_runs() -> Result<Vec<integrations::FeedItem>> {
-	integrations::github_runs(&cfg()).await
-}
-
-#[tauri::command]
-async fn feed_trigger(environment: Option<String>) -> Result<Vec<integrations::FeedItem>> {
-	integrations::trigger_runs(&cfg(), environment.as_deref()).await
-}
-
-#[tauri::command]
-async fn feed_railway() -> Result<Vec<integrations::FeedItem>> {
-	integrations::railway_deployments(&cfg()).await
-}
-
-#[tauri::command]
-async fn feed_stripe() -> Result<Vec<integrations::FeedItem>> {
-	integrations::stripe_events(&cfg()).await
 }
 
 // ───────────────────────── Surveillance des sessions ─────────────────────────
@@ -3007,8 +2798,6 @@ pub fn run() {
 			project_prepare,
 			project_remove,
 			feeds_invalidate,
-			trigger_env_save,
-			trigger_env_remove,
 			worktrees_list,
 			repos_of,
 			git_branches,
@@ -3065,7 +2854,6 @@ pub fn run() {
 			properties_calibrations,
 			properties_calibrate,
 			properties_suggest,
-			pull_request_merge,
 			permissions_pending,
 			permission_answer,
 			permissions_discard,
@@ -3222,27 +3010,13 @@ pub fn run() {
 			remote_test,
 			remote_revoke,
 			remote_wake,
-			docker_containers,
 			listening_ports,
 			stop_process,
-			feed_sentry,
-			sentry_projects,
-			sentry_set_status,
-			sentry_to_linear,
-			betterstack_dashboards,
-			betterstack_kpi_values,
-			feed_betterstack_monitors,
-			feed_betterstack_incidents,
 			feed_linear,
 			ticket_provider,
 			linear_issue,
 			linear_options,
 			linear_update,
-			feed_github_pulls,
-			feed_github_runs,
-			feed_trigger,
-			feed_railway,
-			feed_stripe,
 		])
 		.build(tauri::generate_context!())
 		.expect("Le cockpit n'a pas pu démarrer")

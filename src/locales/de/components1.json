@@ -474,25 +474,6 @@
 		},
 		"save": "Speichern"
 	},
-	"kpiBoard": {
-		"noSection": "Kein Abschnitt",
-		"filter": "Indikatoren filtern…",
-		"dashboards_one": "{{count}} Dashboard",
-		"dashboards_other": "{{count}} Dashboards",
-		"indicators_one": "{{count}} Indikator",
-		"indicators_other": "{{count}} Indikatoren",
-		"empty": {
-			"message": "Keine Dashboards",
-			"hint": "KPI-Dashboards kommen aus Better Stack Telemetry."
-		},
-		"hide": "ausblenden",
-		"show": "Werte zeigen",
-		"hours_one": "{{count}} Std.",
-		"hours_other": "{{count}} Std.",
-		"days_one": "{{count}} T.",
-		"days_other": "{{count}} T.",
-		"openExternal": "In Better Stack öffnen"
-	},
 	"libreLauncher": {
 		"places": {
 			"ici": {
@@ -640,7 +621,7 @@
 		"memory": "{{mb}} MB",
 		"open": "{{url}} öffnen",
 		"stop": "Diesen Server stoppen",
-		"footer": "Nur aus diesem Worktree gestartete Server werden aufgelistet. Die anderen — und Docker-Container — bleiben unter „Server & Container“."
+		"footer": "Nur aus diesem Worktree gestartete Server werden aufgelistet. Die anderen bleiben unter „Server“."
 	},
 	"producedFiles": {
 		"count_one": "{{count}} Datei berührt",

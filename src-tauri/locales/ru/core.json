@@ -159,7 +159,6 @@
 		"packageJsonMissing": "package.json не найден в этом репозитории.",
 		"packageJsonUnreadable": "Не удаётся прочитать package.json: {{error}}",
 		"generalGroup": "общее",
-		"dockerDown": "Docker не отвечает — демон запущен?",
 		"unknownProcess": "Неизвестный процесс."
 	},
 	"notebook": {
@@ -221,33 +220,20 @@
 		"connectorMissing": {
 			"github": "репозиторий (`github.repo`) и токен или сессия `gh`",
 			"linear": "токен Linear",
-			"gitlab": "токен GitLab (область `api`) и путь к проекту",
-			"sentry": "токен Sentry",
-			"betterstack": "токен Better Stack",
-			"trigger": "секретный ключ Trigger.dev",
-			"railway": "токен Railway",
-			"stripe": "ключ Stripe"
+			"gitlab": "токен GitLab (область `api`) и путь к проекту"
 		},
 		"secretHint": {
 			"github": "Классический токен `repo` — или оставьте пустым, Cockpit использует `gh auth token`.",
-			"sentry": "User auth token с областями `project:read`, `event:read`, `event:write`.",
 			"linear": "Личный API-ключ (Settings → API → Personal API keys).",
 			"gitlab": "Личный токен с областью `api` — `read_api` достаточно для чтения, но не для изменения состояния задачи.",
-			"trigger": "Секретный ключ окружения — `tr_dev_…`, `tr_prod_…`, `tr_staging_…` в зависимости от окружения (проект → API keys), а не Personal Access Token `tr_pat_…` от CLI.",
-			"railway": "Токен аккаунта или рабочего пространства (Account Settings → Tokens) — для токена уровня проекта нужно также указать идентификатор проекта.",
-			"betterstack": "API-токен Uptime (мониторы и инциденты).",
-			"betterstackTelemetry": "«Global API token» (Better Stack → API tokens → Global API tokens). Токен команды может перечислять дашборды, но не может открыть доступ к данным: значения останутся пустыми.",
-			"betterstackClickhouseHost": "Необязательно: заполняйте, только если токен KPI не может сам открыть доступ. Better Stack → Integrations → SQL API (например, eu-nbg-2-connect.betterstackdata.com).",
-			"betterstackClickhouseUsername": "Имя пользователя SQL API, рядом с хостом.",
-			"betterstackClickhousePassword": "Пароль SQL API — Better Stack больше не показывает его после создания.",
-			"stripe": "Ограниченный ключ только для чтения `rk_…` (Developers → API keys → Restricted keys): публикуемый ключ `pk_…` серверный API отклоняет.",
+			"betterstack": "API-токен, который Cockpit передаёт MCP-серверу Better Stack в контейнере изолированного агента.",
+			"stripe": "Ограниченный ключ `rk_…`, который Cockpit передаёт MCP-серверу Stripe в контейнере изолированного агента.",
 			"sandboxOauthToken": "Выполните `claude setup-token` из Настройки → Изоляция и вставьте показанный токен — один раз, он действует год. Никогда не используйте токен хоста: контейнер не может читать связку ключей macOS."
 		},
 		"secretLabel": {
 			"sandboxOauthToken": "Изолированный аккаунт (Claude)"
 		},
 		"homeAccount": "Аккаунт этой машины",
-		"defaultEnvironment": "По умолчанию",
 		"worktreeHostileValue": "Значение отклонено в команде worktree (символ оболочки): {{value}}",
 		"roles": {
 			"master": "Ведущий агент",
@@ -259,19 +245,8 @@
 	},
 	"integrations": {
 		"githubRepoMissing": "`github.repo` не настроен.",
-		"telemetryTokenMissing": "Нет токена телеметрии.",
 		"unreadableResponse": "Не удаётся прочитать ответ: {{error}}",
 		"unreadableResponseBody": "Не удаётся прочитать ответ ({{error}}): {{body}}",
-		"sentryNoOrg": "Этот токен Sentry не даёт доступа ни к одной организации.",
-		"sentrySeveralOrgs": "Доступно несколько организаций Sentry ({{orgs}}) — выберите одну в Настройки → Организация Sentry.",
-		"linearNotCreated": "Linear не создал задачу.",
-		"sentryInvalidIssue": "Недопустимый идентификатор задачи Sentry: {{id}}",
-		"kpiTokenMissing": "Дашборды KPI находятся на telemetry.betterstack.com, который токен Uptime не покрывает. Добавьте токен «Better Stack · KPI» в настройках.",
-		"telemetryTeamToken": "Этот токен Telemetry — токен команды: он перечисляет дашборды, но не может открыть доступ к данным. Нужен «Global API token» (Better Stack → API tokens → Global API tokens) с правом записи.",
-		"telemetryReadOnly": "Этот глобальный токен только для чтения: открытие доступа к данным считается записью. Два варианта — пересоздайте токен без флажка «read-only» или вставьте существующие учётные данные SQL API (Better Stack → Integrations → SQL API) в три поля ClickHouse в настройках.",
-		"betterstackConnection": "Подключение Better Stack {{status}} — {{body}}",
-		"betterstackNoCredentials": "Better Stack ответил без пригодных учётных данных для подключения.",
-		"chartNoQuery": "Этот график не предоставляет запроса.",
 		"issueNotFound": "Задача {{id}} не найдена.",
 		"linearUpdateRefused": "Linear отклонил изменение.",
 		"priority": {
@@ -282,13 +257,7 @@
 			"none": "Без приоритета"
 		},
 		"githubNoLogin": "GitHub не сообщает, кто вошёл в систему.",
-		"githubRepoSet": "Укажите `github.repo` (например, acme/monorepo) в настройках.",
 		"githubRepoFormat": "Укажите `github.repo` (например, acme/monorepo).",
-		"triggerUnknownEnv": "Неизвестное окружение Trigger.dev: {{name}}",
-		"triggerPatToken": "Trigger.dev ожидает секретный ключ окружения, а не Personal Access Token `tr_pat_…` (от CLI). Dashboard → ваш проект → окружение → API keys.",
-		"railwayNoProject": "Этот токен Railway не перечисляет ни одного проекта (так бывает с токенами уровня проекта). Откройте проект в дашборде и вставьте идентификатор из URL `railway.com/project/<идентификатор>` в Настройки → Проект Railway.",
-		"railwaySeveralProjects": "Доступно несколько проектов Railway ({{projects}}) — выберите один в Настройки → Проект Railway.",
-		"stripePublishableKey": "Stripe отклоняет публикуемые ключи (`pk_…`): серверному API нужен секретный ключ. Создайте ограниченный ключ только для чтения (`rk_…`) в Developers → API keys → Restricted keys с доступом `read` к Events.",
 		"githubUpdateRefused": "GitHub отклонил изменение ({{status}}).",
 		"gitlabProjectSet": "Укажите путь к проекту GitLab (например, group/project) в настройках.",
 		"gitlabUpdateRefused": "GitLab отклонил изменение ({{status}}).",
@@ -306,16 +275,11 @@
 	"lib": {
 		"connectorMissing": {
 			"claude": "CLI `claude` на этой машине",
-			"node": "Node — от него зависят мосты разрешений и инструментов миссий",
-			"docker": "Docker на этой машине"
+			"node": "Node — от него зависят мосты разрешений и инструментов миссий"
 		},
 		"config": {
 			"serialize": "Сериализация конфигурации: {{error}}",
 			"invalid": "Недопустимая конфигурация: {{error}}"
-		},
-		"trigger": {
-			"envNameRequired": "Дайте окружению название.",
-			"envKeyRequired": "Новому окружению нужен секретный ключ (`tr_prod_…` / `tr_dev_…`)."
 		},
 		"project": {
 			"unknown": "Неизвестный проект: {{id}}",
@@ -353,8 +317,6 @@
 			"prFromBase": "`{{branch}}` — базовая ветка: создайте отдельную ветку, прежде чем открывать PR.",
 			"prRefused": "PR отклонён ({{status}}): {{message}}",
 			"prCreation": "Создание PR",
-			"mergeRefused": "Слияние отклонено ({{status}}): {{message}}",
-			"prMerge": "Слияние PR",
 			"prTitleRequired": "У pull request должно быть название."
 		},
 		"permanence": {
@@ -452,11 +414,7 @@
 			"localMergeMessage": "Миссия «{{title}}»"
 		},
 		"quoted": "«{{text}}»",
-		"tailscaleDown": "Tailscale не отвечает.",
-		"sentryIssue": {
-			"description": "Ошибка, о которой сообщил Sentry.\n\n**Проект**: {{project}}\n**Источник**: {{culprit}}\n**Влияние**: вхождений — {{events}}, пользователей — {{users}}\n\n[Открыть в Sentry]({{permalink}})\n\n_Задача создана из Cockpit._",
-			"note": "Задача Linear {{identifier}} — {{url}}"
-		}
+		"tailscaleDown": "Tailscale не отвечает."
 	},
 	"delivery": {
 		"title": "Отчёт о поставке — Cockpit",

@@ -61,8 +61,6 @@ export type ViewId =
 	| "git"
 	| "scripts"
 	| "docs"
-	| "observability"
-	| "delivery"
 	// Ce qui bouge sur tous les dépôts, et ce que chaque changement implique.
 	| "impact"
 	| "infra"
@@ -351,17 +349,12 @@ export function CockpitProvider({ children }: { children: ReactNode }) {
 
 	// ── Veille : les changements d'état qui méritent qu'on soit prévenu ──
 	//
-	// Ces deux flux ne servent qu'à ça ; les écrans qui les affichent les
-	// rechargent de leur côté, et la mémoire courte côté Rust évite l'appel en
-	// double. On ne notifie que les transitions, jamais l'état initial.
+	// Ce flux ne sert qu'à ça ; les écrans qui l'affichent le rechargent de leur
+	// côté, et la mémoire courte côté Rust évite l'appel en double. On ne
+	// notifie que les transitions, jamais l'état initial.
 	const watchedPrs = useAsync(() => api.git.pullRequests().catch(() => []), [], {
 		pollMs: 180_000,
 	});
-	const watchedIssues = useAsync(
-		() => api.feeds.sentry("is:unresolved").catch(() => []),
-		[],
-		{ pollMs: 300_000 },
-	);
 
 	const seenCiRed = useRef<Set<number> | null>(null);
 	const seenMergeable = useRef<Set<number> | null>(null);
@@ -414,31 +407,6 @@ export function CockpitProvider({ children }: { children: ReactNode }) {
 		seenCiRed.current = red;
 		seenMergeable.current = mergeable;
 	}, [watchedPrs.data, worktreeState.data]);
-
-	const seenIssues = useRef<Set<string> | null>(null);
-	useEffect(() => {
-		const critical = (watchedIssues.data ?? []).filter(
-			(issue) => issue.severity === "critical",
-		);
-		const ids = new Set(critical.map((issue) => issue.id));
-
-		if (seenIssues.current === null) {
-			seenIssues.current = ids;
-			return;
-		}
-		for (const issue of critical) {
-			if (seenIssues.current.has(issue.id)) continue;
-			void api.system
-				.notify(
-					t("app:store.notify.prodError", {
-						project: issue.meta.find((field) => field.label === "projet")?.value ?? "",
-					}),
-					issue.title,
-				)
-				.catch(() => undefined);
-		}
-		seenIssues.current = ids;
-	}, [watchedIssues.data]);
 
 	// Chaque annonce passe par la pile de notifications. `toast` reste tenu
 	// pour les écrans qui le lisent encore, mais c'est la pile qui s'affiche.

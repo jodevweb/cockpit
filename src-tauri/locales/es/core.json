@@ -159,7 +159,6 @@
 		"packageJsonMissing": "No se encuentra package.json en este repositorio.",
 		"packageJsonUnreadable": "package.json ilegible: {{error}}",
 		"generalGroup": "general",
-		"dockerDown": "Docker no responde: ¿está en marcha el daemon?",
 		"unknownProcess": "Proceso desconocido."
 	},
 	"notebook": {
@@ -221,33 +220,20 @@
 		"connectorMissing": {
 			"github": "el repositorio (`github.repo`) y un token o una sesión de `gh`",
 			"linear": "un token de Linear",
-			"gitlab": "un token de GitLab (scope `api`) y la ruta del proyecto",
-			"sentry": "un token de Sentry",
-			"betterstack": "un token de Better Stack",
-			"trigger": "una clave secreta de Trigger.dev",
-			"railway": "un token de Railway",
-			"stripe": "una clave de Stripe"
+			"gitlab": "un token de GitLab (scope `api`) y la ruta del proyecto"
 		},
 		"secretHint": {
 			"github": "Token clásico `repo`, o déjalo vacío y Cockpit usará `gh auth token`.",
-			"sentry": "User auth token con los scopes `project:read`, `event:read`, `event:write`.",
 			"linear": "Clave de API personal (Settings → API → Personal API keys).",
 			"gitlab": "Token personal con scope `api`; `read_api` basta para leer, no para cambiar el estado de un ticket.",
-			"trigger": "La clave secreta de un entorno: `tr_dev_…`, `tr_prod_…`, `tr_staging_…` según el entorno (proyecto → API keys), no el Personal Access Token `tr_pat_…` de la CLI.",
-			"railway": "Token de cuenta o de workspace (Account Settings → Tokens); un token limitado a un proyecto obliga a indicar también el identificador del proyecto.",
-			"betterstack": "Token de la API Uptime (monitores e incidentes).",
-			"betterstackTelemetry": "«Global API token» (Better Stack → API tokens → Global API tokens). Un token de equipo puede listar los dashboards pero no abrir el acceso a los datos: los valores se quedarían vacíos.",
-			"betterstackClickhouseHost": "Opcional: rellénalo solo si el token KPI no puede abrir el acceso por sí mismo. Better Stack → Integrations → SQL API (p. ej. eu-nbg-2-connect.betterstackdata.com).",
-			"betterstackClickhouseUsername": "Usuario de la SQL API, junto al host.",
-			"betterstackClickhousePassword": "Contraseña de la SQL API; Better Stack no vuelve a mostrarla tras crearla.",
-			"stripe": "Clave restringida de solo lectura `rk_…` (Developers → API keys → Restricted keys): la API de servidor rechaza una clave publicable `pk_…`.",
+			"betterstack": "Token de API que Cockpit entrega al servidor MCP de Better Stack en el contenedor de un agente aislado.",
+			"stripe": "Clave restringida `rk_…` que Cockpit entrega al servidor MCP de Stripe en el contenedor de un agente aislado.",
 			"sandboxOauthToken": "Ejecuta `claude setup-token` desde Ajustes → Aislamiento y pega el token que aparece; una sola vez, dura un año. Nunca el del host: un contenedor no puede leer el llavero de macOS."
 		},
 		"secretLabel": {
 			"sandboxOauthToken": "Cuenta aislada (Claude)"
 		},
 		"homeAccount": "La cuenta de esta máquina",
-		"defaultEnvironment": "Predeterminado",
 		"worktreeHostileValue": "Valor rechazado en el comando del worktree (carácter de shell): {{value}}",
 		"roles": {
 			"master": "Agente principal",
@@ -259,19 +245,8 @@
 	},
 	"integrations": {
 		"githubRepoMissing": "`github.repo` no está configurado.",
-		"telemetryTokenMissing": "Falta el token de Telemetry.",
 		"unreadableResponse": "Respuesta ilegible: {{error}}",
 		"unreadableResponseBody": "Respuesta ilegible ({{error}}): {{body}}",
-		"sentryNoOrg": "Este token de Sentry no da acceso a ninguna organización.",
-		"sentrySeveralOrgs": "Hay varias organizaciones de Sentry accesibles ({{orgs}}): elige una en Ajustes → Organización de Sentry.",
-		"linearNotCreated": "Linear no creó el ticket.",
-		"sentryInvalidIssue": "Identificador de issue de Sentry no válido: {{id}}",
-		"kpiTokenMissing": "Los dashboards KPI viven en telemetry.betterstack.com, que el token Uptime no cubre. Añade el token «Better Stack · KPI» en Ajustes.",
-		"telemetryTeamToken": "Este token de Telemetry es un token de equipo: lista los dashboards pero no puede abrir el acceso a los datos. Necesitas un «Global API token» (Better Stack → API tokens → Global API tokens), con acceso de escritura.",
-		"telemetryReadOnly": "Este token global es de solo lectura: abrir el acceso a los datos cuenta como escritura. Dos opciones: vuelve a crear el token sin la casilla «read-only», o pega credenciales existentes de la SQL API (Better Stack → Integrations → SQL API) en los tres campos ClickHouse de Ajustes.",
-		"betterstackConnection": "Conexión con Better Stack {{status}}: {{body}}",
-		"betterstackNoCredentials": "Better Stack respondió sin credenciales de conexión utilizables.",
-		"chartNoQuery": "Este gráfico no expone ninguna consulta.",
 		"issueNotFound": "Ticket {{id}} no encontrado.",
 		"linearUpdateRefused": "Linear rechazó el cambio.",
 		"priority": {
@@ -282,13 +257,7 @@
 			"none": "Sin prioridad"
 		},
 		"githubNoLogin": "GitHub no indica quién ha iniciado sesión.",
-		"githubRepoSet": "Define `github.repo` (p. ej. acme/monorepo) en Ajustes.",
 		"githubRepoFormat": "Define `github.repo` (p. ej. acme/monorepo).",
-		"triggerUnknownEnv": "Entorno de Trigger.dev desconocido: {{name}}",
-		"triggerPatToken": "Trigger.dev espera la clave secreta de un entorno, no un Personal Access Token `tr_pat_…` (el de la CLI). Dashboard → tu proyecto → el entorno → API keys.",
-		"railwayNoProject": "Este token de Railway no lista ningún proyecto (es el caso de los tokens limitados a un proyecto). Abre el proyecto en el dashboard y pega el identificador de la URL `railway.com/project/<identificador>` en Ajustes → Proyecto de Railway.",
-		"railwaySeveralProjects": "Hay varios proyectos de Railway accesibles ({{projects}}): elige uno en Ajustes → Proyecto de Railway.",
-		"stripePublishableKey": "Stripe rechaza las claves publicables (`pk_…`): la API de servidor exige una clave secreta. Crea una clave restringida de solo lectura (`rk_…`) en Developers → API keys → Restricted keys, con acceso `read` sobre Events.",
 		"githubUpdateRefused": "GitHub rechazó el cambio ({{status}}).",
 		"gitlabProjectSet": "Define la ruta del proyecto de GitLab (p. ej. grupo/proyecto) en Ajustes.",
 		"gitlabUpdateRefused": "GitLab rechazó el cambio ({{status}}).",
@@ -306,16 +275,11 @@
 	"lib": {
 		"connectorMissing": {
 			"claude": "la CLI `claude` en esta máquina",
-			"node": "Node: los puentes de permisos y herramientas de las misiones dependen de él",
-			"docker": "Docker en esta máquina"
+			"node": "Node: los puentes de permisos y herramientas de las misiones dependen de él"
 		},
 		"config": {
 			"serialize": "Serializando la configuración: {{error}}",
 			"invalid": "Configuración no válida: {{error}}"
-		},
-		"trigger": {
-			"envNameRequired": "Ponle un nombre al entorno.",
-			"envKeyRequired": "Un entorno nuevo necesita su clave secreta (`tr_prod_…` / `tr_dev_…`)."
 		},
 		"project": {
 			"unknown": "Proyecto desconocido: {{id}}",
@@ -353,8 +317,6 @@
 			"prFromBase": "`{{branch}}` es la rama base: crea una rama dedicada antes de abrir una PR.",
 			"prRefused": "PR rechazada ({{status}}): {{message}}",
 			"prCreation": "Creación de la PR",
-			"mergeRefused": "Merge rechazado ({{status}}): {{message}}",
-			"prMerge": "Fusión de la PR",
 			"prTitleRequired": "Una pull request necesita un título."
 		},
 		"permanence": {
@@ -452,11 +414,7 @@
 			"localMergeMessage": "Misión «{{title}}»"
 		},
 		"quoted": "«{{text}}»",
-		"tailscaleDown": "Tailscale no responde.",
-		"sentryIssue": {
-			"description": "Error reportado por Sentry.\n\n**Proyecto**: {{project}}\n**Origen**: {{culprit}}\n**Impacto**: {{events}} ocurrencia(s), {{users}} usuario(s)\n\n[Abrir en Sentry]({{permalink}})\n\n_Ticket creado desde Cockpit._",
-			"note": "Ticket de Linear {{identifier}} — {{url}}"
-		}
+		"tailscaleDown": "Tailscale no responde."
 	},
 	"delivery": {
 		"title": "Expediente de entrega — Cockpit",

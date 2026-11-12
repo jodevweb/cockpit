@@ -24,7 +24,7 @@ function belongsTo(port: ListeningPort, cwd: string): boolean {
 /**
  * Les serveurs de ce workspace, et rien d'autre.
  *
- * L'écran Infra les montre tous ensemble, conteneurs Docker compris — utile
+ * L'écran Serveurs les montre tous ensemble, tous worktrees confondus — utile
  * pour faire le ménage, illisible quand on cherche « sur quel port tourne *ce*
  * chantier ». La question se pose depuis le workspace, la réponse doit y être :
  * ce qui écoute ici, ouvrable d'un clic, arrêtable du même endroit.

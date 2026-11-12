@@ -767,26 +767,6 @@
 		"whyAgent": "écrit par un agent",
 		"whyChanged": "modifié"
 	},
-	"feedPanel": {
-		"sort": {
-			"recent": "Plus récent",
-			"oldest": "Plus ancien",
-			"severity": "Gravité",
-			"status": "Statut",
-			"title": "Titre"
-		},
-		"severity": {
-			"critical": "Critique",
-			"warning": "Avertissement",
-			"info": "Info",
-			"success": "OK"
-		},
-		"sortHint": "Ordre d'affichage",
-		"filters": "Filtres",
-		"clearAll": "Tout effacer",
-		"empty": "Rien à afficher",
-		"selectItem": "Sélectionne un élément"
-	},
 	"illustration": {
 		"genre": {
 			"frise": "La chaîne d'événements",

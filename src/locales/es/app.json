@@ -11,8 +11,7 @@
 		"notify": {
 			"waitingReply": "Espera tu respuesta · {{title}}",
 			"ciFailed": "CI en rojo · #{{number}}",
-			"readyToMerge": "Lista para fusionar · #{{number}}",
-			"prodError": "Error en producción · {{project}}"
+			"readyToMerge": "Lista para fusionar · #{{number}}"
 		}
 	},
 	"commandPalette": {
@@ -28,9 +27,7 @@
 			"git": "Git",
 			"scripts": "Scripts",
 			"docs": "Documentos",
-			"observability": "Observabilidad",
-			"delivery": "Flujo · Linear, PR, CI, despliegues",
-			"infra": "Servidores y contenedores · lo que corre en esta máquina",
+			"infra": "Servidores · lo que corre en esta máquina",
 			"settings": "Ajustes",
 			"replay": "Repetición · juzgar una configuración de agentes con PR pasadas",
 			"methods": "Métodos · plugins que este proyecto puede adoptar, leídos antes de instalarlos"
@@ -174,13 +171,11 @@
 			"libres": "Agentes libres",
 			"agents": "Agentes IA",
 			"docs": "Documentos",
-			"delivery": "Flujo",
 			"impact": "Impacto",
-			"observability": "Observabilidad",
 			"worktrees": "Worktrees",
 			"git": "Git",
 			"scripts": "Scripts",
-			"infra": "Servidores y contenedores",
+			"infra": "Servidores",
 			"settings": "Ajustes",
 			"replay": "Repetición",
 			"methods": "Métodos"
