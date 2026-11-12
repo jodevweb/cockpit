@@ -278,10 +278,8 @@ fichier :
 | ------------ | --------------------------- | ------------------------------------------------------ |
 | GitHub       | `COCKPIT_GITHUB_TOKEN`      | facultatif — repli automatique sur `gh auth token`     |
 | Linear       | `COCKPIT_LINEAR_TOKEN`      | clé API personnelle                                     |
-| Trigger.dev  | `COCKPIT_TRIGGER_TOKEN`     | secret key d'environnement (`tr_prod_…`, `tr_staging_…`) |
-| Railway      | `COCKPIT_RAILWAY_TOKEN`     | token de compte ou de projet                            |
 | Better Stack | `COCKPIT_BETTERSTACK_TOKEN` | jeton d'API, pour le serveur MCP des agents isolés      |
-| Stripe       | `COCKPIT_STRIPE_TOKEN`      | clé restreinte en lecture seule                         |
+| Stripe       | `COCKPIT_STRIPE_TOKEN`      | clé restreinte, pour le serveur MCP des agents isolés   |
 
 ## Les écrans
 
@@ -296,7 +294,7 @@ tiroir **Atelier**, à droite de la barre.
 | **Décisions**     | Tout ce qui attend ta réponse : autorisations, questions, plans à approuver.                                                     |
 | **Récap en images** | Ce qui s'est passé dans l'heure, les trois heures ou la journée, raconté en images.                                            |
 | **Missions**      | Un ticket, un plan, plusieurs exécutants : tu valides ce que le maître a compris, son approche, son découpage ; chaque exécutant a sa branche et son worktree ; les vérifications du dépôt filtrent chaque livraison ; la pull request porte un dossier de livraison. |
-| *Atelier*         | **Aujourd'hui**, **Permanence** (un agent de garde, dans les horaires et budgets que tu fixes), **Agents IA** (chaque session Claude Code, sa timeline, ses outils), **Documents**, **Flux** (tickets, PR, CI, déploiements), **Impact** (ce qu'implique chaque changement en cours), **Worktrees**, **Git**, **Scripts**, **Serveurs & conteneurs**, **Réglages**. |
+| *Atelier*         | **Aujourd'hui**, **Permanence** (un agent de garde, dans les horaires et budgets que tu fixes), **Agents IA** (chaque session Claude Code, sa timeline, ses outils), **Documents**, **Impact** (ce qu'implique chaque changement en cours), **Worktrees**, **Git**, **Scripts**, **Serveurs & conteneurs**, **Réglages**. |
 
 ## Raccourcis
 
@@ -423,7 +421,7 @@ src-tauri/src/
   docs.rs          découverte des livrables markdown
   runner.rs        exécution de commandes, streaming ligne à ligne, groupes de processus
   system.rs        éditeur, terminal, Finder/Explorateur, Docker, ports
-  integrations.rs  Linear, GitHub, Trigger, Railway, Stripe
+  integrations.rs  Linear, GitHub, GitLab
   monitor.rs       recensement des changements en vol, toutes forges confondues
   impact.rs        dossier factuel d'un changement, lecture par agent, relecture du rapport
   lib.rs           commandes IPC + surveillance du système de fichiers
@@ -431,7 +429,7 @@ src-tauri/src/
 src/
   app/             shell, menu, palette ⌘K, état global
   views/           un fichier par écran
-  components/      système de composants, markdown, logs ANSI, diff, flux SaaS
+  components/      système de composants, markdown, logs ANSI, diff
   lib/             types miroir, IPC typée, formatage, catalogue de commandes
 ```
 

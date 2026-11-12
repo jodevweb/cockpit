@@ -220,26 +220,20 @@
 		"connectorMissing": {
 			"github": "the repository (`github.repo`), and a token or a `gh` session",
 			"linear": "a Linear token",
-			"gitlab": "a GitLab token (`api` scope) and the project path",
-			"trigger": "a Trigger.dev secret key",
-			"railway": "a Railway token",
-			"stripe": "a Stripe key"
+			"gitlab": "a GitLab token (`api` scope) and the project path"
 		},
 		"secretHint": {
 			"github": "Classic `repo` token — or leave empty, Cockpit will use `gh auth token`.",
 			"linear": "Personal API key (Settings → API → Personal API keys).",
 			"gitlab": "Personal token with `api` scope — `read_api` is enough to read, not to change an issue's state.",
-			"trigger": "An environment's secret key — `tr_dev_…`, `tr_prod_…`, `tr_staging_…` depending on the environment (project → API keys), not the CLI's `tr_pat_…` Personal Access Token.",
-			"railway": "Account or workspace token (Account Settings → Tokens) — a project-scoped token requires entering the project identifier alongside.",
 			"betterstack": "API token Cockpit hands to the Better Stack MCP server inside an isolated agent's container.",
-			"stripe": "Read-only restricted key `rk_…` (Developers → API keys → Restricted keys): a publishable `pk_…` key is rejected by the server API.",
+			"stripe": "Restricted key `rk_…` Cockpit hands to the Stripe MCP server inside an isolated agent's container.",
 			"sandboxOauthToken": "Run `claude setup-token` from Settings → Isolation and paste the token shown — once, it lasts a year. Never the host's: a container cannot read the macOS keychain."
 		},
 		"secretLabel": {
 			"sandboxOauthToken": "Isolated account (Claude)"
 		},
 		"homeAccount": "This machine's account",
-		"defaultEnvironment": "Default",
 		"worktreeHostileValue": "Value refused in the worktree command (shell character): {{value}}",
 		"roles": {
 			"master": "Lead agent",
@@ -263,13 +257,7 @@
 			"none": "No priority"
 		},
 		"githubNoLogin": "GitHub does not say who is signed in.",
-		"githubRepoSet": "Set `github.repo` (e.g. acme/monorepo) in Settings.",
 		"githubRepoFormat": "Set `github.repo` (e.g. acme/monorepo).",
-		"triggerUnknownEnv": "Unknown Trigger.dev environment: {{name}}",
-		"triggerPatToken": "Trigger.dev expects an environment's secret key, not a `tr_pat_…` Personal Access Token (the CLI's). Dashboard → your project → the environment → API keys.",
-		"railwayNoProject": "This Railway token lists no project (as is the case for project-scoped tokens). Open the project in the dashboard and paste the identifier from the URL `railway.com/project/<identifier>` into Settings → Railway project.",
-		"railwaySeveralProjects": "Several Railway projects are accessible ({{projects}}) — pick one in Settings → Railway project.",
-		"stripePublishableKey": "Stripe rejects publishable keys (`pk_…`): the server API requires a secret key. Create a read-only restricted key (`rk_…`) in Developers → API keys → Restricted keys, with `read` access on Events.",
 		"githubUpdateRefused": "GitHub refused the change ({{status}}).",
 		"gitlabProjectSet": "Set the GitLab project path (e.g. group/project) in Settings.",
 		"gitlabUpdateRefused": "GitLab refused the change ({{status}}).",
@@ -293,10 +281,6 @@
 		"config": {
 			"serialize": "Serializing config: {{error}}",
 			"invalid": "Invalid config: {{error}}"
-		},
-		"trigger": {
-			"envNameRequired": "Give the environment a name.",
-			"envKeyRequired": "A new environment needs its secret key (`tr_prod_…` / `tr_dev_…`)."
 		},
 		"project": {
 			"unknown": "Unknown project: {{id}}",
@@ -334,8 +318,6 @@
 			"prFromBase": "`{{branch}}` is the base branch: create a dedicated branch before opening a PR.",
 			"prRefused": "PR refused ({{status}}): {{message}}",
 			"prCreation": "PR creation",
-			"mergeRefused": "Merge refused ({{status}}): {{message}}",
-			"prMerge": "PR merge",
 			"prTitleRequired": "A pull request needs a title."
 		},
 		"permanence": {

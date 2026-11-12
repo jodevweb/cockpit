@@ -148,11 +148,6 @@ export const api = {
 		updateProject: (patch: Record<string, unknown>, project?: string) =>
 			call<ConfigView>("project_update", { patch, project }),
 		removeProject: (id: string) => call<ConfigView>("project_remove", { id }),
-		// Les jetons ne redescendant pas dans le webview, un environnement se
-		// modifie par une commande dédiée : un token vide conserve l'existant.
-		saveTriggerEnv: (name: string, token?: string, projectRef?: string) =>
-			call<ConfigView>("trigger_env_save", { name, token, projectRef }),
-		removeTriggerEnv: (name: string) => call<ConfigView>("trigger_env_remove", { name }),
 		/** Ce qui est branché sur ce projet, et ce qui manque. */
 		connectors: () => call<Connector[]>("connectors_list"),
 	},
@@ -260,8 +255,6 @@ export const api = {
 		 */
 		worktreeCommand: (action: "create" | "remove", branch: string, path?: string) =>
 			call<WorktreeCommand>("worktree_command", { action, branch, path }),
-		mergePullRequest: (number: number, method = "squash") =>
-			call<void>("pull_request_merge", { number, method }),
 	},
 
 	agents: {
@@ -868,11 +861,6 @@ export const api = {
 		linearOptions: () => call<LinearOptions>("linear_options"),
 		linearUpdate: (id: string, patch: Record<string, unknown>) =>
 			call<void>("linear_update", { id, patch }),
-		githubPulls: () => call<FeedItem[]>("feed_github_pulls"),
-		githubRuns: () => call<FeedItem[]>("feed_github_runs"),
-		trigger: (environment?: string) => call<FeedItem[]>("feed_trigger", { environment }),
-		railway: () => call<FeedItem[]>("feed_railway"),
-		stripe: () => call<FeedItem[]>("feed_stripe"),
 	},
 };
 

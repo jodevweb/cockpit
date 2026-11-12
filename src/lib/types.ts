@@ -821,13 +821,6 @@ export interface LinearOptions {
 	labels: NamedRef[];
 }
 
-export interface TriggerEnvironmentView {
-	name: string;
-	projectRef: string;
-	/** Issu du champ « Trigger.dev » des jetons, pas de la liste d'environnements. */
-	fromDefaultKey: boolean;
-}
-
 /**
  * Un projet piloté par le cockpit.
  *
@@ -877,8 +870,6 @@ export interface ProjectView {
 	mainRepo: string;
 	githubRepo: string;
 	linearTeamKey: string;
-	railwayProjectId: string;
-	triggerProjectRef: string;
 	/** Le compte sous lequel il fait travailler ses agents, héritage appliqué. */
 	account: string;
 	/** Clés que ce projet définit lui-même ; les autres sont héritées. */
@@ -912,8 +903,6 @@ export interface DeclaredSettings {
 	linearTeamKey: string;
 	/** Identifiant (UUID) de l'équipe Linear, pour les options d'édition d'un ticket. */
 	linearTeamId: string;
-	triggerProjectRef: string;
-	railwayProjectId: string;
 	/** Ce que fait ce produit, tel que cette portée le déclare. */
 	impactBrief: string;
 	/** Chemin du projet GitLab (`groupe/projet`) et instance qui le sert. */
@@ -935,9 +924,6 @@ export interface ConfigView {
 	linearTeamKey: string;
 	/** Identifiant (UUID) de l'équipe Linear, pour les options d'édition d'un ticket. */
 	linearTeamId: string;
-	triggerProjectRef: string;
-	triggerEnvironments: TriggerEnvironmentView[];
-	railwayProjectId: string;
 	configPath: string;
 	secrets: SecretStatus[];
 	/** Colonnes, branches et commandes : la façon de travailler de l'équipe. */

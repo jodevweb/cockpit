@@ -220,26 +220,20 @@
 		"connectorMissing": {
 			"github": "仓库（`github.repo`），以及令牌或 `gh` 会话",
 			"linear": "Linear 令牌",
-			"gitlab": "GitLab 令牌（`api` 权限范围）以及项目路径",
-			"trigger": "Trigger.dev 密钥",
-			"railway": "Railway 令牌",
-			"stripe": "Stripe 密钥"
+			"gitlab": "GitLab 令牌（`api` 权限范围）以及项目路径"
 		},
 		"secretHint": {
 			"github": "经典 `repo` 令牌 — 或留空，Cockpit 将使用 `gh auth token`。",
 			"linear": "个人 API 密钥（Settings → API → Personal API keys）。",
 			"gitlab": "具有 `api` 权限范围的个人令牌 — `read_api` 足以读取，但不能更改工单状态。",
-			"trigger": "某个环境的密钥 — 根据环境为 `tr_dev_…`、`tr_prod_…`、`tr_staging_…`（项目 → API keys），而不是 CLI 使用的 `tr_pat_…` 个人访问令牌。",
-			"railway": "账户或工作区令牌（Account Settings → Tokens）— 项目范围的令牌需要同时填写项目标识符。",
 			"betterstack": "Cockpit 在隔离代理的容器中交给 Better Stack MCP 服务器的 API 令牌。",
-			"stripe": "只读受限密钥 `rk_…`（Developers → API keys → Restricted keys）：服务器 API 会拒绝可发布的 `pk_…` 密钥。",
+			"stripe": "Cockpit 在隔离代理的容器中交给 Stripe MCP 服务器的受限密钥 `rk_…`。",
 			"sandboxOauthToken": "在“设置 → 隔离”中运行 `claude setup-token`，并粘贴显示的令牌 — 只需一次，有效期一年。切勿使用主机的令牌：容器无法读取 macOS 钥匙串。"
 		},
 		"secretLabel": {
 			"sandboxOauthToken": "隔离账户（Claude）"
 		},
 		"homeAccount": "本机账户",
-		"defaultEnvironment": "默认",
 		"worktreeHostileValue": "worktree 命令中的值被拒绝（含 shell 字符）：{{value}}",
 		"roles": {
 			"master": "主智能体",
@@ -263,13 +257,7 @@
 			"none": "无优先级"
 		},
 		"githubNoLogin": "GitHub 未告知当前登录的是谁。",
-		"githubRepoSet": "请在设置中设置 `github.repo`（例如 acme/monorepo）。",
 		"githubRepoFormat": "请设置 `github.repo`（例如 acme/monorepo）。",
-		"triggerUnknownEnv": "未知的 Trigger.dev 环境：{{name}}",
-		"triggerPatToken": "Trigger.dev 需要的是某个环境的密钥，而不是 `tr_pat_…` 个人访问令牌（CLI 使用的）。仪表板 → 你的项目 → 环境 → API keys。",
-		"railwayNoProject": "此 Railway 令牌未列出任何项目（项目范围的令牌就是如此）。请在仪表板中打开项目，并将 URL `railway.com/project/<标识符>` 中的标识符粘贴到“设置 → Railway 项目”中。",
-		"railwaySeveralProjects": "可访问多个 Railway 项目（{{projects}}）— 请在“设置 → Railway 项目”中选择一个。",
-		"stripePublishableKey": "Stripe 拒绝可发布密钥（`pk_…`）：服务器 API 需要密钥。请在 Developers → API keys → Restricted keys 中创建一个只读受限密钥（`rk_…`），并授予 Events 的 `read` 权限。",
 		"githubUpdateRefused": "GitHub 拒绝了该更改（{{status}}）。",
 		"gitlabProjectSet": "请在设置中设置 GitLab 项目路径（例如 group/project）。",
 		"gitlabUpdateRefused": "GitLab 拒绝了该更改（{{status}}）。",
@@ -293,10 +281,6 @@
 		"config": {
 			"serialize": "序列化配置：{{error}}",
 			"invalid": "无效的配置：{{error}}"
-		},
-		"trigger": {
-			"envNameRequired": "请为该环境命名。",
-			"envKeyRequired": "新环境需要其密钥（`tr_prod_…` / `tr_dev_…`）。"
 		},
 		"project": {
 			"unknown": "未知项目：{{id}}",
@@ -334,8 +318,6 @@
 			"prFromBase": "`{{branch}}` 是基础分支：请先创建专用分支，再创建 PR。",
 			"prRefused": "PR 被拒绝（{{status}}）：{{message}}",
 			"prCreation": "创建 PR",
-			"mergeRefused": "合并被拒绝（{{status}}）：{{message}}",
-			"prMerge": "合并 PR",
 			"prTitleRequired": "pull request 需要一个标题。"
 		},
 		"permanence": {

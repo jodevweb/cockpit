@@ -717,26 +717,6 @@
 		"whyAgent": "エージェントが書き込み",
 		"whyChanged": "変更済み"
 	},
-	"feedPanel": {
-		"sort": {
-			"recent": "新しい順",
-			"oldest": "古い順",
-			"severity": "重大度",
-			"status": "状態",
-			"title": "タイトル"
-		},
-		"severity": {
-			"critical": "重大",
-			"warning": "警告",
-			"info": "情報",
-			"success": "OK"
-		},
-		"sortHint": "表示順",
-		"filters": "フィルター",
-		"clearAll": "すべてクリア",
-		"empty": "表示するものはありません",
-		"selectItem": "項目を選択してください"
-	},
 	"illustration": {
 		"genre": {
 			"frise": "出来事の流れ",

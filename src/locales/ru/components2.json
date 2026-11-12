@@ -867,26 +867,6 @@
 		"whyAgent": "записан агентом",
 		"whyChanged": "изменён"
 	},
-	"feedPanel": {
-		"sort": {
-			"recent": "Сначала новые",
-			"oldest": "Сначала старые",
-			"severity": "Серьёзность",
-			"status": "Статус",
-			"title": "Название"
-		},
-		"severity": {
-			"critical": "Критично",
-			"warning": "Предупреждение",
-			"info": "Инфо",
-			"success": "ОК"
-		},
-		"sortHint": "Порядок отображения",
-		"filters": "Фильтры",
-		"clearAll": "Сбросить всё",
-		"empty": "Нечего показать",
-		"selectItem": "Выберите элемент"
-	},
 	"illustration": {
 		"genre": {
 			"frise": "Цепочка событий",

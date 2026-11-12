@@ -37,7 +37,6 @@ export type CardKind =
 	| "mission"
 	| "chantier"
 	| "pr"
-	| "deploy"
 	| "more";
 
 /**
@@ -52,7 +51,6 @@ export const CARD_HEIGHT: Record<CardKind, number> = {
 	mission: 150,
 	chantier: 168,
 	pr: 122,
-	deploy: 84,
 	more: 52,
 };
 

@@ -153,16 +153,6 @@
 			"send": "Responder"
 		}
 	},
-	"delivery": {
-		"title": "Feeds",
-		"tickets": "Tickets",
-		"openWorktree": "Abrir o worktree",
-		"localTracking": "acompanhado localmente",
-		"yes": "sim",
-		"no": "não",
-		"noLocalWorktree": "Nenhum worktree local para esta branch.",
-		"emptyHint": "Os tokens ausentes são sinalizados em Configurações."
-	},
 	"docs": {
 		"title": "Documentos",
 		"subtitle": "Entregáveis dos agentes: planos, revisões, QA, wiki — em todos os worktrees.",
@@ -504,9 +494,6 @@
 				"encours": "Nada está rodando. Inicie um agente ou uma missão a partir de um ticket.",
 				"livrer": "Nenhum PR aberto."
 			}
-		},
-		"card": {
-			"deploy": "Deploy"
 		},
 		"ticket": {
 			"inMission": "em uma missão"
@@ -990,18 +977,6 @@
 			"add": "Adicionar",
 			"name": "Nome"
 		},
-		"trigger": {
-			"saved": "Ambiente “{{name}}” salvo.",
-			"removeTitle": "Remover o ambiente “{{name}}”?",
-			"removed": "Ambiente “{{name}}” removido.",
-			"defaultProject": "projeto padrão",
-			"mainKey": "chave principal",
-			"namePlaceholder": "Produção",
-			"secretKey": "Chave secreta",
-			"project": "Projeto",
-			"projectHint": "Vazio = o de cima.",
-			"help": "Uma chave secreta só vale para um projeto e um ambiente: adicione uma entrada por ambiente a acompanhar (Produção, Staging, Teste…). Cada uma vira uma aba em Entrega."
-		},
 		"projects": {
 			"added": "Projeto “{{name}}” adicionado.",
 			"removeTitle": "Remover o projeto “{{name}}”?",
@@ -1059,7 +1034,6 @@
 			"dock": "Lembrete de workspaces",
 			"workstation": "Estação de trabalho",
 			"identifiers": "Identificadores do projeto",
-			"triggerEnvironments": "Ambientes do Trigger.dev",
 			"secrets": "Tokens de acesso",
 			"links": "Links úteis"
 		},
@@ -1087,9 +1061,7 @@
 			"gitlabProjectPlaceholder": "grupo/produto",
 			"gitlabHost": "Instância do GitLab",
 			"gitlabHostHint": "vazio = gitlab.com; senão a raiz da sua",
-			"gitlabHostPlaceholder": "https://gitlab.example.com",
-			"triggerProject": "Projeto Trigger.dev",
-			"railwayProject": "Projeto Railway"
+			"gitlabHostPlaceholder": "https://gitlab.example.com"
 		},
 		"secrets": {
 			"override": "próprio do projeto",

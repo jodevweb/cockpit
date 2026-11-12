@@ -4,8 +4,7 @@
 # référence et permet de garder la config sous la main (ou dans un gestionnaire
 # de secrets). Chaque jeton peut aussi venir d'une variable d'environnement,
 # qui prime alors sur la valeur écrite ici :
-#   COCKPIT_GITHUB_TOKEN, COCKPIT_LINEAR_TOKEN,
-#   COCKPIT_TRIGGER_TOKEN, COCKPIT_RAILWAY_TOKEN, COCKPIT_BETTERSTACK_TOKEN,
+#   COCKPIT_GITHUB_TOKEN, COCKPIT_LINEAR_TOKEN, COCKPIT_BETTERSTACK_TOKEN,
 #   COCKPIT_STRIPE_TOKEN
 
 [general]
@@ -38,43 +37,14 @@ host = "https://gitlab.com"
 # l'état d'un ticket.
 token = ""
 
-[trigger]
-project_ref = "proj_xxxxxxxxxxxxxxxxxxxx"
-# Secret key d'environnement (tr_prod_… / tr_dev_…) pour la Management API.
-# Un Personal Access Token `tr_pat_…` est refusé par `/api/v1/runs`.
-token = ""
-api_url = "https://api.trigger.dev"
-
-# Une clé ne vaut que pour un projet ET un environnement : en déclarer
-# plusieurs donne un onglet par environnement dans l'écran Delivery.
-# `project_ref` vide reprend celui ci-dessus ; le renseigner permet de suivre
-# plusieurs projets Trigger à la fois.
-# [[trigger.environments]]
-# name = "Production"
-# token = "tr_prod_…"
-# project_ref = "proj_xxxxxxxxxxxxxxxxxxxx"
-# [[trigger.environments]]
-# name = "Staging"
-# token = "tr_dev_…"
-# [[trigger.environments]]
-# name = "Render farm · prod"
-# token = "tr_prod_…"
-# project_ref = "proj_yyyyyyyyyyyyyyyyyyyy"
-
-[railway]
-# Visible dans l'URL du dashboard : railway.com/project/<project_id>.
-# Vide = déduit du token quand celui-ci sait énumérer les projets.
-project_id = ""
-token = ""
-
 [betterstack]
 # Jeton d'API remis au serveur MCP de Better Stack dans le conteneur d'un agent
 # isolé. Vide = l'agent isolé n'a pas cet outil.
 token = ""
 
 [stripe]
-# Clé restreinte en lecture seule `rk_…` (Développeurs → Clés API → Clés
-# restreintes). Une clé publiable `pk_…` est rejetée par l'API serveur.
+# Clé restreinte `rk_…` remise au serveur MCP de Stripe dans le conteneur d'un
+# agent isolé. Vide = l'agent isolé n'a pas cet outil.
 token = ""
 
 # Lecture des changements en vol — l'écran Impact.

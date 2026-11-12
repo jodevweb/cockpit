@@ -82,8 +82,6 @@ const SECRET_PATHS: Record<string, [string, string]> = {
 	github: ["github", "token"],
 	linear: ["linear", "token"],
 	gitlab: ["gitlab", "token"],
-	trigger: ["trigger", "token"],
-	railway: ["railway", "token"],
 	betterstack: ["betterstack", "token"],
 	stripe: ["stripe", "token"],
 	// `SandboxConfig` sérialise en camelCase (`memoryMb`…), à la différence
@@ -91,109 +89,6 @@ const SECRET_PATHS: Record<string, [string, string]> = {
 	// pas celle du reste de cette table.
 	sandbox_oauth_token: ["sandbox", "oauthToken"],
 };
-
-/**
- * Liste des environnements Trigger.dev — un par secret key, puisqu'une clé ne
- * donne accès qu'à un couple projet + environnement. Chacun devient un onglet
- * dans l'écran Delivery.
- */
-function TriggerEnvironments() {
-	const { t } = useTranslation("views");
-	const { config, reloadConfig, notify } = useCockpit();
-	const { confirm } = useConfirm();
-	const [draft, setDraft] = useState({ name: "", token: "", projectRef: "" });
-	const [busy, setBusy] = useState(false);
-
-	const environments = config?.triggerEnvironments ?? [];
-
-	const save = async (name: string, token: string, projectRef: string) => {
-		setBusy(true);
-		try {
-			await api.config.saveTriggerEnv(name, token, projectRef);
-			setDraft({ name: "", token: "", projectRef: "" });
-			reloadConfig();
-			notify(t("settings.trigger.saved", { name }));
-		} catch (error) {
-			notify(String(error));
-		} finally {
-			setBusy(false);
-		}
-	};
-
-	const remove = async (name: string) => {
-		const ok = await confirm({
-			title: t("settings.trigger.removeTitle", { name }),
-			confirmLabel: t("settings.common.remove"),
-			danger: true,
-		});
-		if (!ok) return;
-		try {
-			await api.config.removeTriggerEnv(name);
-			reloadConfig();
-			notify(t("settings.trigger.removed", { name }));
-		} catch (error) {
-			notify(String(error));
-		}
-	};
-
-	return (
-		<div className="panel flex flex-col divide-y divide-line-soft">
-			{environments.map((environment) => (
-				<div key={environment.name} className="flex items-center gap-2 p-2.5">
-					<Dot tone="success" />
-					<span className="w-32 shrink-0 truncate text-[11px] font-medium text-ink">
-						{environment.name}
-					</span>
-					<span className="min-w-0 flex-1 truncate font-mono text-[10px] text-ink-faint">
-						{environment.projectRef || t("settings.trigger.defaultProject")}
-					</span>
-					{environment.fromDefaultKey ? (
-						<Badge>{t("settings.trigger.mainKey")}</Badge>
-					) : (
-						<Button size="sm" onClick={() => void remove(environment.name)}>
-							{t("settings.common.remove")}
-						</Button>
-					)}
-				</div>
-			))}
-
-			<div className="flex items-end gap-2 p-2.5">
-				<Field label={t("settings.common.name")}>
-					<TextInput
-						value={draft.name}
-						onChange={(value) => setDraft((current) => ({ ...current, name: value }))}
-						placeholder={t("settings.trigger.namePlaceholder")}
-					/>
-				</Field>
-				<Field label={t("settings.trigger.secretKey")}>
-					<TextInput
-						type="password"
-						value={draft.token}
-						onChange={(value) => setDraft((current) => ({ ...current, token: value }))}
-						placeholder="tr_prod_…"
-						mono
-					/>
-				</Field>
-				<Field label={t("settings.trigger.project")} hint={t("settings.trigger.projectHint")}>
-					<TextInput
-						value={draft.projectRef}
-						onChange={(value) => setDraft((current) => ({ ...current, projectRef: value }))}
-						placeholder="proj_…"
-						mono
-					/>
-				</Field>
-				<Button
-					variant="solid"
-					icon={Plus}
-					disabled={busy || !draft.name.trim() || !draft.token.trim()}
-					onClick={() => void save(draft.name, draft.token, draft.projectRef)}
-				>
-					{t("settings.common.add")}
-				</Button>
-			</div>
-		</div>
-	);
-}
 
 /**
  * Projets pilotés par le cockpit.
@@ -360,8 +255,6 @@ type SettingsDraft = {
 	githubRepo: string;
 	linearTeamKey: string;
 	linearTeamId: string;
-	triggerProjectRef: string;
-	railwayProjectId: string;
 	gitlabProject: string;
 	gitlabHost: string;
 };
@@ -423,8 +316,6 @@ function useSettingsForm(scope: SettingsScope) {
 		githubRepo: "",
 		linearTeamKey: "",
 		linearTeamId: "",
-		triggerProjectRef: "",
-		railwayProjectId: "",
 		gitlabProject: "",
 		gitlabHost: "",
 	});
@@ -452,8 +343,6 @@ function useSettingsForm(scope: SettingsScope) {
 			githubRepo: declared.githubRepo,
 			linearTeamKey: declared.linearTeamKey,
 			linearTeamId: declared.linearTeamId,
-			triggerProjectRef: declared.triggerProjectRef,
-			railwayProjectId: declared.railwayProjectId,
 			gitlabProject: declared.gitlabProject,
 			gitlabHost: declared.gitlabHost,
 		});
@@ -470,8 +359,6 @@ function useSettingsForm(scope: SettingsScope) {
 			github: { repo: draft.githubRepo },
 			linear: { team_key: draft.linearTeamKey, team_id: draft.linearTeamId },
 			gitlab: { project: draft.gitlabProject, host: draft.gitlabHost },
-			trigger: { project_ref: draft.triggerProjectRef },
-			railway: { project_id: draft.railwayProjectId },
 		};
 
 		// Un champ secret vide veut dire « ne touche pas » : on n'écrase jamais
@@ -932,17 +819,9 @@ function ServicesTab({
 	setSecrets: Dispatch<SetStateAction<Record<string, string>>>;
 	scope: SettingsScope;
 }) {
-	const { t } = useTranslation("views");
 	return (
 		<>
 			<ServiceIdentifiers draft={draft} setDraft={setDraft} />
-
-			<Section title={t("settings.sections.triggerEnvironments")}>
-				<TriggerEnvironments />
-				<p className="mt-1.5 px-1 text-[10px] leading-relaxed text-ink-faint">
-					{t("settings.trigger.help")}
-				</p>
-			</Section>
 
 			<ServiceSecrets secrets={secrets} setSecrets={setSecrets} scope={scope} />
 
@@ -1023,25 +902,6 @@ function ServiceIdentifiers({ draft, setDraft }: { draft: SettingsDraft; setDraf
 							setDraft((current) => ({ ...current, gitlabHost: value }))
 						}
 						placeholder={t("settings.services.gitlabHostPlaceholder")}
-						mono
-					/>
-				</Field>
-				<Field label={t("settings.services.triggerProject")}>
-					<TextInput
-						value={draft.triggerProjectRef}
-						onChange={(value) =>
-							setDraft((current) => ({ ...current, triggerProjectRef: value }))
-						}
-						placeholder="proj_…"
-						mono
-					/>
-				</Field>
-				<Field label={t("settings.services.railwayProject")}>
-					<TextInput
-						value={draft.railwayProjectId}
-						onChange={(value) =>
-							setDraft((current) => ({ ...current, railwayProjectId: value }))
-						}
 						mono
 					/>
 				</Field>
@@ -1127,8 +987,6 @@ function ServiceLinks() {
 				{[
 					["Linear", "https://linear.app/settings/api"],
 					["GitLab", "https://gitlab.com/-/user_settings/personal_access_tokens"],
-					["Trigger.dev", "https://cloud.trigger.dev"],
-					["Railway", "https://railway.app/account/tokens"],
 					["Better Stack", "https://uptime.betterstack.com/team/api-tokens"],
 					["Stripe", "https://dashboard.stripe.com/apikeys"],
 				].map(([label, url]) => (

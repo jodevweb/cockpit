@@ -61,7 +61,6 @@ export type ViewId =
 	| "git"
 	| "scripts"
 	| "docs"
-	| "delivery"
 	// Ce qui bouge sur tous les dépôts, et ce que chaque changement implique.
 	| "impact"
 	| "infra"

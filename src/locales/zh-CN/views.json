@@ -145,16 +145,6 @@
 			"send": "回复"
 		}
 	},
-	"delivery": {
-		"title": "信息流",
-		"tickets": "工单",
-		"openWorktree": "打开 worktree",
-		"localTracking": "本地跟踪",
-		"yes": "是",
-		"no": "否",
-		"noLocalWorktree": "此分支没有本地 worktree。",
-		"emptyHint": "缺少的令牌会在设置中标出。"
-	},
 	"docs": {
 		"title": "文档",
 		"subtitle": "智能体的交付物：计划、代码审查、QA、wiki — 来自所有 worktree。",
@@ -465,9 +455,6 @@
 				"encours": "没有正在运行的内容。从工单启动一个智能体或任务。",
 				"livrer": "没有打开的 PR。"
 			}
-		},
-		"card": {
-			"deploy": "部署"
 		},
 		"ticket": {
 			"inMission": "在任务中"
@@ -918,18 +905,6 @@
 			"add": "添加",
 			"name": "名称"
 		},
-		"trigger": {
-			"saved": "环境“{{name}}”已保存。",
-			"removeTitle": "移除环境“{{name}}”？",
-			"removed": "环境“{{name}}”已移除。",
-			"defaultProject": "默认项目",
-			"mainKey": "主密钥",
-			"namePlaceholder": "Production",
-			"secretKey": "密钥",
-			"project": "项目",
-			"projectHint": "留空 = 上方的项目。",
-			"help": "一个密钥只适用于一个项目和一个环境：请为每个要跟踪的环境添加一项（Production、Staging、Test…）。每一项都会成为“交付”中的一个标签页。"
-		},
 		"projects": {
 			"added": "项目“{{name}}”已添加。",
 			"removeTitle": "移除项目“{{name}}”？",
@@ -987,7 +962,6 @@
 			"dock": "工作区提示",
 			"workstation": "工作站",
 			"identifiers": "项目标识符",
-			"triggerEnvironments": "Trigger.dev 环境",
 			"secrets": "访问令牌",
 			"links": "实用链接"
 		},
@@ -1015,9 +989,7 @@
 			"gitlabProjectPlaceholder": "group/product",
 			"gitlabHost": "GitLab 实例",
 			"gitlabHostHint": "留空 = gitlab.com；否则填写你的实例根地址",
-			"gitlabHostPlaceholder": "https://gitlab.example.com",
-			"triggerProject": "Trigger.dev 项目",
-			"railwayProject": "Railway 项目"
+			"gitlabHostPlaceholder": "https://gitlab.example.com"
 		},
 		"secrets": {
 			"override": "项目专用",

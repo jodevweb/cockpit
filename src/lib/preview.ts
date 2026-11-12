@@ -745,21 +745,6 @@ const REPONSES: Record<string, unknown> = {
 			state: "running",
 		},
 	],
-	feed_railway: [
-		{
-			id: "dep-1",
-			source: "railway",
-			title: "main → staging",
-			subtitle: "storefront-web · 12 min ago",
-			status: "up",
-			severity: "success",
-			url: "https://railway.app",
-			timestamp: ago(12),
-			meta: [],
-			tags: [],
-			payload: {},
-		},
-	],
 	chantier_territory: ({ cwd }: Record<string, unknown>) => ({
 		root: String(cwd),
 		files: territoireExemple(),
@@ -1207,8 +1192,6 @@ const REPONSES: Record<string, unknown> = {
 				mainRepo: "/Users/demo/code/storefront",
 				githubRepo: "northwind/storefront",
 				linearTeamKey: "NW",
-				railwayProjectId: "",
-				triggerProjectRef: "",
 				account: "travail",
 				overrides: ["account"],
 				declared: {
@@ -1218,8 +1201,6 @@ const REPONSES: Record<string, unknown> = {
 					githubRepo: "northwind/storefront",
 					linearTeamKey: "NW",
 					linearTeamId: "",
-					triggerProjectRef: "",
-					railwayProjectId: "",
 					impactBrief:
 						"An online store: customers browse products, fill a cart and check out.",
 					gitlabProject: "",
@@ -1236,8 +1217,6 @@ const REPONSES: Record<string, unknown> = {
 				mainRepo: "/Users/demo/code/cockpit",
 				githubRepo: "northwind/storefront",
 				linearTeamKey: "NW",
-				railwayProjectId: "",
-				triggerProjectRef: "",
 				account: "travail",
 				overrides: ["account"],
 				declared: {
@@ -1247,8 +1226,6 @@ const REPONSES: Record<string, unknown> = {
 					githubRepo: "northwind/storefront",
 					linearTeamKey: "NW",
 					linearTeamId: "",
-					triggerProjectRef: "",
-					railwayProjectId: "",
 					impactBrief:
 						"An online store: customers browse products, fill a cart and check out.",
 					gitlabProject: "",
@@ -1265,8 +1242,6 @@ const REPONSES: Record<string, unknown> = {
 				mainRepo: "/Users/demo/code/marketing-site",
 				githubRepo: "northwind/storefront",
 				linearTeamKey: "NW",
-				railwayProjectId: "",
-				triggerProjectRef: "",
 				account: "travail",
 				overrides: ["account"],
 				declared: {
@@ -1276,8 +1251,6 @@ const REPONSES: Record<string, unknown> = {
 					githubRepo: "northwind/storefront",
 					linearTeamKey: "NW",
 					linearTeamId: "",
-					triggerProjectRef: "",
-					railwayProjectId: "",
 					impactBrief:
 						"An online store: customers browse products, fill a cart and check out.",
 					gitlabProject: "",
@@ -1296,8 +1269,6 @@ const REPONSES: Record<string, unknown> = {
 			githubRepo: "",
 			linearTeamKey: "",
 			linearTeamId: "",
-			triggerProjectRef: "",
-			railwayProjectId: "",
 			impactBrief: "",
 			gitlabProject: "",
 			gitlabHost: "https://gitlab.com",
@@ -1309,9 +1280,6 @@ const REPONSES: Record<string, unknown> = {
 		githubRepo: "northwind/storefront",
 		linearTeamKey: "NW",
 		linearTeamId: "eq-1",
-		triggerProjectRef: "",
-		triggerEnvironments: [],
-		railwayProjectId: "",
 		configPath: "~/.config/cockpit/config.toml",
 		secrets: [],
 		workflow: {

@@ -767,26 +767,6 @@
 		"whyAgent": "von einem Agenten geschrieben",
 		"whyChanged": "geändert"
 	},
-	"feedPanel": {
-		"sort": {
-			"recent": "Neueste",
-			"oldest": "Älteste",
-			"severity": "Schweregrad",
-			"status": "Status",
-			"title": "Titel"
-		},
-		"severity": {
-			"critical": "Kritisch",
-			"warning": "Warnung",
-			"info": "Info",
-			"success": "OK"
-		},
-		"sortHint": "Anzeigereihenfolge",
-		"filters": "Filter",
-		"clearAll": "Alle löschen",
-		"empty": "Nichts anzuzeigen",
-		"selectItem": "Wähle ein Element"
-	},
 	"illustration": {
 		"genre": {
 			"frise": "Die Kette der Ereignisse",

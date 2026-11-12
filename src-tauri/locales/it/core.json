@@ -220,26 +220,20 @@
 		"connectorMissing": {
 			"github": "il repository (`github.repo`), e un token o una sessione `gh`",
 			"linear": "un token Linear",
-			"gitlab": "un token GitLab (ambito `api`) e il percorso del progetto",
-			"trigger": "una chiave segreta Trigger.dev",
-			"railway": "un token Railway",
-			"stripe": "una chiave Stripe"
+			"gitlab": "un token GitLab (ambito `api`) e il percorso del progetto"
 		},
 		"secretHint": {
 			"github": "Token classico `repo` — oppure lascia vuoto, Cockpit userà `gh auth token`.",
 			"linear": "Chiave API personale (Settings → API → Personal API keys).",
 			"gitlab": "Token personale con ambito `api` — `read_api` basta per leggere, non per cambiare lo stato di un ticket.",
-			"trigger": "La chiave segreta di un ambiente — `tr_dev_…`, `tr_prod_…`, `tr_staging_…` a seconda dell'ambiente (progetto → API keys), non il Personal Access Token `tr_pat_…` della CLI.",
-			"railway": "Token di account o di workspace (Account Settings → Tokens) — un token limitato a un progetto richiede di inserire anche l'identificatore del progetto.",
 			"betterstack": "Token API che Cockpit affida al server MCP di Better Stack nel container di un agente isolato.",
-			"stripe": "Chiave limitata in sola lettura `rk_…` (Developers → API keys → Restricted keys): una chiave pubblicabile `pk_…` viene rifiutata dall'API server.",
+			"stripe": "Chiave con restrizioni `rk_…` che Cockpit affida al server MCP di Stripe nel container di un agente isolato.",
 			"sandboxOauthToken": "Esegui `claude setup-token` da Impostazioni → Isolamento e incolla il token mostrato — una volta sola, dura un anno. Mai quello dell'host: un container non può leggere il portachiavi di macOS."
 		},
 		"secretLabel": {
 			"sandboxOauthToken": "Account isolato (Claude)"
 		},
 		"homeAccount": "Account di questa macchina",
-		"defaultEnvironment": "Predefinito",
 		"worktreeHostileValue": "Valore rifiutato nel comando del worktree (carattere di shell): {{value}}",
 		"roles": {
 			"master": "Agente principale",
@@ -263,13 +257,7 @@
 			"none": "Nessuna priorità"
 		},
 		"githubNoLogin": "GitHub non dice chi ha effettuato l'accesso.",
-		"githubRepoSet": "Imposta `github.repo` (es. acme/monorepo) nelle Impostazioni.",
 		"githubRepoFormat": "Imposta `github.repo` (es. acme/monorepo).",
-		"triggerUnknownEnv": "Ambiente Trigger.dev sconosciuto: {{name}}",
-		"triggerPatToken": "Trigger.dev si aspetta la chiave segreta di un ambiente, non un Personal Access Token `tr_pat_…` (quello della CLI). Dashboard → il tuo progetto → l'ambiente → API keys.",
-		"railwayNoProject": "Questo token Railway non elenca alcun progetto (come accade per i token limitati a un progetto). Apri il progetto nella dashboard e incolla l'identificatore dall'URL `railway.com/project/<identificatore>` in Impostazioni → Progetto Railway.",
-		"railwaySeveralProjects": "Sono accessibili più progetti Railway ({{projects}}) — scegline uno in Impostazioni → Progetto Railway.",
-		"stripePublishableKey": "Stripe rifiuta le chiavi pubblicabili (`pk_…`): l'API server richiede una chiave segreta. Crea una chiave limitata in sola lettura (`rk_…`) in Developers → API keys → Restricted keys, con accesso `read` su Events.",
 		"githubUpdateRefused": "GitHub ha rifiutato la modifica ({{status}}).",
 		"gitlabProjectSet": "Imposta il percorso del progetto GitLab (es. gruppo/progetto) nelle Impostazioni.",
 		"gitlabUpdateRefused": "GitLab ha rifiutato la modifica ({{status}}).",
@@ -293,10 +281,6 @@
 		"config": {
 			"serialize": "Serializzazione della configurazione: {{error}}",
 			"invalid": "Configurazione non valida: {{error}}"
-		},
-		"trigger": {
-			"envNameRequired": "Dai un nome all'ambiente.",
-			"envKeyRequired": "Un nuovo ambiente ha bisogno della sua chiave segreta (`tr_prod_…` / `tr_dev_…`)."
 		},
 		"project": {
 			"unknown": "Progetto sconosciuto: {{id}}",
@@ -334,8 +318,6 @@
 			"prFromBase": "`{{branch}}` è il branch di base: crea un branch dedicato prima di aprire una PR.",
 			"prRefused": "PR rifiutata ({{status}}): {{message}}",
 			"prCreation": "Creazione della PR",
-			"mergeRefused": "Merge rifiutato ({{status}}): {{message}}",
-			"prMerge": "Merge della PR",
 			"prTitleRequired": "Una pull request ha bisogno di un titolo."
 		},
 		"permanence": {

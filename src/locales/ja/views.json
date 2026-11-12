@@ -145,16 +145,6 @@
 			"send": "返答"
 		}
 	},
-	"delivery": {
-		"title": "フィード",
-		"tickets": "チケット",
-		"openWorktree": "worktree を開く",
-		"localTracking": "ローカルで追跡",
-		"yes": "はい",
-		"no": "いいえ",
-		"noLocalWorktree": "このブランチのローカル worktree はありません。",
-		"emptyHint": "不足しているトークンは設定で示されます。"
-	},
 	"docs": {
 		"title": "ドキュメント",
 		"subtitle": "エージェントの成果物：計画、レビュー、QA、wiki — すべての worktree から。",
@@ -465,9 +455,6 @@
 				"encours": "実行中のものはありません。チケットからエージェントかミッションを開始してください。",
 				"livrer": "オープン中の PR はありません。"
 			}
-		},
-		"card": {
-			"deploy": "デプロイ"
 		},
 		"ticket": {
 			"inMission": "ミッション中"
@@ -918,18 +905,6 @@
 			"add": "追加",
 			"name": "名前"
 		},
-		"trigger": {
-			"saved": "環境「{{name}}」を保存しました。",
-			"removeTitle": "環境「{{name}}」を削除しますか？",
-			"removed": "環境「{{name}}」を削除しました。",
-			"defaultProject": "デフォルトのプロジェクト",
-			"mainKey": "メインキー",
-			"namePlaceholder": "Production",
-			"secretKey": "シークレットキー",
-			"project": "プロジェクト",
-			"projectHint": "空欄 = 上のもの。",
-			"help": "シークレットキーは 1 つのプロジェクトの 1 つの環境でのみ使えます：追跡する環境ごとに 1 項目ずつ追加してください（Production、Staging、Test…）。それぞれがデリバリーのタブになります。"
-		},
 		"projects": {
 			"added": "プロジェクト「{{name}}」を追加しました。",
 			"removeTitle": "プロジェクト「{{name}}」を削除しますか？",
@@ -987,7 +962,6 @@
 			"dock": "ワークスペースの表示",
 			"workstation": "ワークステーション",
 			"identifiers": "プロジェクトの識別子",
-			"triggerEnvironments": "Trigger.dev の環境",
 			"secrets": "アクセストークン",
 			"links": "便利なリンク"
 		},
@@ -1015,9 +989,7 @@
 			"gitlabProjectPlaceholder": "group/product",
 			"gitlabHost": "GitLab インスタンス",
 			"gitlabHostHint": "空欄 = gitlab.com。それ以外はあなたのインスタンスのルート",
-			"gitlabHostPlaceholder": "https://gitlab.example.com",
-			"triggerProject": "Trigger.dev プロジェクト",
-			"railwayProject": "Railway プロジェクト"
+			"gitlabHostPlaceholder": "https://gitlab.example.com"
 		},
 		"secrets": {
 			"override": "プロジェクト固有",

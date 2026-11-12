@@ -153,16 +153,6 @@
 			"send": "Reply"
 		}
 	},
-	"delivery": {
-		"title": "Feeds",
-		"tickets": "Tickets",
-		"openWorktree": "Open worktree",
-		"localTracking": "tracked locally",
-		"yes": "yes",
-		"no": "no",
-		"noLocalWorktree": "No local worktree for this branch.",
-		"emptyHint": "Missing tokens are flagged in Settings."
-	},
 	"docs": {
 		"title": "Documents",
 		"subtitle": "Agent deliverables: plans, reviews, QA, wiki — across all worktrees.",
@@ -504,9 +494,6 @@
 				"encours": "Nothing is running. Start an agent or a mission from a ticket.",
 				"livrer": "No open PRs."
 			}
-		},
-		"card": {
-			"deploy": "Deployment"
 		},
 		"ticket": {
 			"inMission": "in a mission"
@@ -990,18 +977,6 @@
 			"add": "Add",
 			"name": "Name"
 		},
-		"trigger": {
-			"saved": "Environment “{{name}}” saved.",
-			"removeTitle": "Remove the “{{name}}” environment?",
-			"removed": "Environment “{{name}}” removed.",
-			"defaultProject": "default project",
-			"mainKey": "main key",
-			"namePlaceholder": "Production",
-			"secretKey": "Secret key",
-			"project": "Project",
-			"projectHint": "Empty = the one above.",
-			"help": "A secret key only works for one project and one environment: add one entry per environment to follow (Production, Staging, Test…). Each one becomes a tab in Delivery."
-		},
 		"projects": {
 			"added": "Project “{{name}}” added.",
 			"removeTitle": "Remove the “{{name}}” project?",
@@ -1059,7 +1034,6 @@
 			"dock": "Workspace reminder",
 			"workstation": "Workstation",
 			"identifiers": "Project identifiers",
-			"triggerEnvironments": "Trigger.dev environments",
 			"secrets": "Access tokens",
 			"links": "Useful links"
 		},
@@ -1087,9 +1061,7 @@
 			"gitlabProjectPlaceholder": "group/product",
 			"gitlabHost": "GitLab instance",
 			"gitlabHostHint": "empty = gitlab.com; otherwise the root of yours",
-			"gitlabHostPlaceholder": "https://gitlab.example.com",
-			"triggerProject": "Trigger.dev project",
-			"railwayProject": "Railway project"
+			"gitlabHostPlaceholder": "https://gitlab.example.com"
 		},
 		"secrets": {
 			"override": "project-specific",
