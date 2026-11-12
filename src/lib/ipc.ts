@@ -700,6 +700,11 @@ export const api = {
 		get: (id: string) => call<Mission>("mission_get", { id }),
 		/** L'historique de la mission, événement par événement, dans l'ordre. */
 		events: (id: string) => call<MissionEvent[]>("mission_events", { id }),
+		/** Ce que la tâche avait changé au commit jugé par une porte, depuis sa base, dans le dépôt de la mission. */
+		commitDiff: (id: string, task: string, commit: string) =>
+			call<BranchDiff>("mission_commit_diff", { id, task, commit }),
+		commitFileDiff: (id: string, task: string, commit: string, file: string) =>
+			call<string>("mission_commit_file_diff", { id, task, commit, file }),
 		create: (
 			title: string,
 			options: { ticket?: string; ticketUrl?: string; cwd?: string; branch?: string } = {},
@@ -717,6 +722,12 @@ export const api = {
 			call<{ mission: Mission; started: boolean; message: string; session?: string }>(
 				"mission_start_from_ticket",
 				{ reference },
+			),
+		/** Ouvre une mission sur une demande écrite ici, sans suivi de tâches, et lance son maître. */
+		startFromBrief: (title: string, brief: string) =>
+			call<{ mission: Mission; started: boolean; message: string; session?: string }>(
+				"mission_start_from_brief",
+				{ title, brief },
 			),
 		/** Ce que le maître et les exécutants fabriquent à cet instant. */
 		activity: (id: string) => call<MissionActivity>("mission_activity", { id }),

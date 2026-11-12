@@ -833,6 +833,10 @@
 		"fromTo": "{{from}} → {{to}}",
 		"note": "メモ",
 		"questions": "未解決の質問: {{count}}",
+		"proposal": "提案された内容",
+		"questionsList": "出された質問",
+		"answers": "あなたの回答",
+		"noAnswer": "回答なし",
 		"feedback": "あなたのコメント",
 		"role": "ロール: {{role}}",
 		"attempt": "{{max}} 回中 {{attempt}} 回目のやり直し",
@@ -885,6 +889,14 @@
 			"checks": "リポジトリのチェック",
 			"waitingForYou": "あなた待ち",
 			"role": "{{role}}"
+		},
+		"diff": {
+			"show": "その時点の差分を見る",
+			"hide": "差分を隠す",
+			"files": "タスクのベースから変更されたファイル",
+			"loading": "差分を読み込み中…",
+			"none": "タスクのベースから変更はありません。",
+			"pick": "ファイルを選ぶと差分が表示されます。"
 		}
 	},
 	"viewBoundary": {

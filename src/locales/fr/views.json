@@ -693,6 +693,18 @@
 			"submit": "Ouvrir",
 			"hint": "Le titre et la branche d'intégration viennent du ticket : rien d'autre à saisir."
 		},
+		"request": {
+			"title": "Décrire une mission",
+			"titlePlaceholder": "Ce qu'il faut faire, en une ligne",
+			"briefLabel": "Détails",
+			"briefPlaceholder": "Le contexte, ce qu'on attend, ce qu'il ne faut pas toucher… Le maître le lit comme son ticket.",
+			"hint": "Pour ce qui n'a pas de ticket : le maître lit ce texte comme il lirait un ticket.",
+			"hintNoTracker": "Pas besoin de suivi de tâches : le maître lit ce texte comme son ticket. Linear, GitLab ou GitHub se branchent dans les Réglages.",
+			"connect": "Brancher un suivi",
+			"submit": "Lancer",
+			"confirmMessage": "L'agent maître démarre tout de suite et lit ta demande. Rien d'autre ne part avant ton accord.",
+			"firstStep": "J'enregistre la demande et je lance l'agent maître…"
+		},
 		"remove": {
 			"confirmTitle": "Tout supprimer pour « {{title}} » ?",
 			"confirmMessage_one": "Les agents sont coupés, puis {{count}} worktree(s), les branches de la mission — branche d'intégration comprise — et les conversations des exécutants sont effacés. Le travail non poussé sera perdu.",
@@ -700,15 +712,6 @@
 			"confirmLabel": "Tout supprimer",
 			"done_one": "Mission supprimée — {{count}} élément(s) effacé(s).",
 			"done_other": "Mission supprimée — {{count}} élément(s) effacé(s)."
-		},
-		"intro": {
-			"title": "Ce que fait une mission",
-			"how": "Tu donnes un ticket. Un agent maître le lit, propose un découpage en tâches, et attend ton accord — rien ne part avant. Une fois le plan approuvé, chaque tâche reçoit son exécutant, sa branche et son worktree ; le maître recompose leur travail à la fin et ouvre la pull request.",
-			"why": "C'est la différence avec un agent lancé à la main : ici le cockpit tient le lien entre le ticket, le plan, les branches et ce qui a été livré — et le retrouve entier même s'il redémarre au milieu.",
-			"missingTitle": "Ce qu'il manque ici",
-			"missing": "Un suivi de tâches, pour lire le ticket d'origine : {{missing}}. Les rôles des exécutants ont déjà des valeurs par défaut — tu pourras les ajuster ensuite dans « Rôles des agents ».",
-			"missingDefault": "un jeton Linear, GitLab ou GitHub",
-			"openSettings": "Ouvrir les Réglages"
 		},
 		"empty": {
 			"title": "Aucune mission en cours",

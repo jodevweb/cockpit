@@ -1774,6 +1774,16 @@ const REPONSES: Record<string, unknown> = {
 			// d'une recette renvoyée et celle d'une porte rouge.
 			guided: true,
 			plan: "Three tasks: back end, front end, QA.",
+			understanding: [],
+			approach: [],
+			split: [
+				{
+					text: "Three tasks: back end, front end, QA.\nThe API rounds each line first; the cart reads its total from there.",
+					questions: ["Should QA wait for both the API and the cart, or start on the API alone?"],
+					submittedAt: ago(226),
+					review: { approved: true, feedback: "Keep the QA last.", answers: ["Wait for both."], at: ago(220) },
+				},
+			],
 			prUrl: "",
 			summary: "",
 			note: "",
@@ -2502,6 +2512,20 @@ const REPONSES: Record<string, unknown> = {
 	// La fiche demandée, pas toujours la même : c'est ce que relit le parcours.
 	mission_get: ({ id }: Record<string, unknown>) =>
 		(REPONSES.missions_list as Array<{ id: string }>).find((mission) => mission.id === id),
+	// Une demande écrite dans Cockpit, sans suivi de tâches : la mission rendue
+	// n'est pas guidée, pour que l'aperçu reste sur la liste et y affiche le message.
+	mission_start_from_brief: ({ title }: Record<string, unknown>) => ({
+		mission: {
+			...(REPONSES.missions_list as Array<Record<string, unknown>>)[0],
+			id: "m-brief",
+			title,
+			ticket: "",
+			guided: false,
+		},
+		started: true,
+		session: "agent-9",
+		message: `Mission opened on ${String(title)}, the lead is analysing the issue.`,
+	}),
 	mission_activity: {
 		master: {
 			sessionId: "agent-4",
@@ -2526,7 +2550,7 @@ const REPONSES: Record<string, unknown> = {
 		return [
 			{ at: ago(240), change: { kind: "opened", guided: true } },
 			{ at: ago(226), change: { kind: "state", from: "planning", to: "awaitingApproval", note: "" } },
-			{ at: ago(226), change: { kind: "draft", step: "split", version: 1, questions: 0 } },
+			{ at: ago(226), change: { kind: "draft", step: "split", version: 1, questions: 1 } },
 			{ at: ago(226), change: { kind: "taskAdded", task: "t1", title: "Per-line rounding in the API", role: "backend" } },
 			{ at: ago(226), change: { kind: "taskAdded", task: "t2", title: "Cart totals", role: "frontend" } },
 			{ at: ago(226), change: { kind: "taskAdded", task: "t3", title: "Functional QA", role: "qa" } },
@@ -2576,6 +2600,35 @@ const REPONSES: Record<string, unknown> = {
 			{ at: ago(35), change: { kind: "task", task: "t2", from: "planned", to: "running", note: "" } },
 		];
 	},
+	// Ce que l'API avait changé quand sa porte a échoué : le test de l'arrondi
+	// par ligne, et le calcul qu'il juge.
+	mission_commit_diff: ({ commit }: Record<string, unknown>) => ({
+		branch: commit,
+		base: "fix-cart-rounding-nw-3044",
+		mergeBase: "3e1a9c0b7d2f4e6a8c0b1d3f5a7c9e1b3d5f7a90",
+		files: [
+			{ path: "apps/api/cart/total.ts", added: 18, removed: 6, state: "modified" },
+			{ path: "apps/api/cart/total.test.ts", added: 31, removed: 0, state: "added" },
+		],
+		commits: [],
+		additions: 49,
+		deletions: 6,
+	}),
+	mission_commit_file_diff: ({ file }: Record<string, unknown>) =>
+		[
+			`diff --git a/${file} b/${file}`,
+			`--- a/${file}`,
+			`+++ b/${file}`,
+			"@@ -12,9 +12,15 @@ export function cartTotal(lines: CartLine[], currency: Currency) {",
+			"-  const raw = lines.reduce((sum, line) => sum + line.price * line.quantity, 0);",
+			"-  return round(raw, currency.decimals);",
+			"+  // Each line is rounded on its own, as the invoice shows it.",
+			"+  return lines.reduce(",
+			"+    (sum, line) => sum + round(line.price * line.quantity, currency.decimals),",
+			"+    0,",
+			"+  );",
+			" }",
+		].join("\n"),
 	// Un poste d'exemple déjà prêt : la carte « prêt à démarrer » ne s'affiche
 	// pas sur les captures du README.
 	readiness_check: {

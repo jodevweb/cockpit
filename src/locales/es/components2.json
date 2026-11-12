@@ -885,6 +885,10 @@
 		"fromTo": "{{from}} → {{to}}",
 		"note": "Nota",
 		"questions": "Preguntas abiertas: {{count}}",
+		"proposal": "Lo que se propuso",
+		"questionsList": "Preguntas planteadas",
+		"answers": "Tus respuestas",
+		"noAnswer": "Sin respuesta",
 		"feedback": "Tu comentario",
 		"role": "Rol: {{role}}",
 		"attempt": "Intento {{attempt}} de {{max}}",
@@ -937,6 +941,14 @@
 			"checks": "comprobaciones del repositorio",
 			"waitingForYou": "te espera",
 			"role": "{{role}}"
+		},
+		"diff": {
+			"show": "Ver el diff en ese momento",
+			"hide": "Ocultar el diff",
+			"files": "Archivos cambiados desde la base de la tarea",
+			"loading": "leyendo el diff…",
+			"none": "Ningún cambio desde la base de la tarea.",
+			"pick": "Elige un archivo para ver su diff."
 		}
 	},
 	"viewBoundary": {

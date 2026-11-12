@@ -397,6 +397,7 @@
 		"automationNotFound": "Автоматизация не найдена.",
 		"mission": {
 			"ticketReferenceRequired": "Вставьте URL или идентификатор задачи.",
+			"titleRequired": "Дай миссии название.",
 			"unknownTask": "Неизвестная задача.",
 			"fullReviewRequested": "Запрошено полное ревью.",
 			"workerStopped": "Исполнитель остановлен: задача перезапустится, когда миссия возобновится.",

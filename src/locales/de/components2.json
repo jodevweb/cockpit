@@ -885,6 +885,10 @@
 		"fromTo": "{{from}} → {{to}}",
 		"note": "Notiz",
 		"questions": "Offene Fragen: {{count}}",
+		"proposal": "Was vorgeschlagen wurde",
+		"questionsList": "Gestellte Fragen",
+		"answers": "Deine Antworten",
+		"noAnswer": "Keine Antwort",
 		"feedback": "Deine Anmerkung",
 		"role": "Rolle: {{role}}",
 		"attempt": "Versuch {{attempt}} von {{max}}",
@@ -937,6 +941,14 @@
 			"checks": "Repository-Prüfungen",
 			"waitingForYou": "wartet auf dich",
 			"role": "{{role}}"
+		},
+		"diff": {
+			"show": "Den Diff zu diesem Zeitpunkt ansehen",
+			"hide": "Diff ausblenden",
+			"files": "Seit der Basis der Aufgabe geänderte Dateien",
+			"loading": "Diff wird gelesen…",
+			"none": "Keine Änderung seit der Basis der Aufgabe.",
+			"pick": "Wähle eine Datei, um ihren Diff zu sehen."
 		}
 	},
 	"viewBoundary": {
