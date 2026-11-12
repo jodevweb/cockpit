@@ -21,7 +21,6 @@
 			"today": "Hoy",
 			"decisions": "Decisiones · lo que espera tu respuesta",
 			"recap": "Resumen visual · lo que ha pasado",
-			"automations": "Automatizaciones · reuniones que se preparan solas",
 			"overview": "Vista general",
 			"team": "Daily · equipo",
 			"agents": "Agentes IA",
@@ -171,7 +170,6 @@
 			"today": "Hoy",
 			"decisions": "Decisiones",
 			"recap": "Resumen visual",
-			"automations": "Automatizaciones",
 			"permanence": "Permanence",
 			"overview": "Vista general",
 			"team": "Daily",
@@ -200,10 +198,6 @@
 		"project": "Proyecto",
 		"recapFresh_one": "{{count}} novedad desde tu última visita",
 		"recapFresh_other": "{{count}} novedades desde tu última visita",
-		"automations": {
-			"running": "Una automatización está preparando su resultado",
-			"nextToday": "Próximo resultado listo hoy"
-		},
 		"launch": {
 			"placeHere": "aquí mismo",
 			"placeBranch": "nueva rama",
@@ -221,8 +215,7 @@
 			"libresTitle": "Agentes lanzados fuera de un proyecto, como en una terminal",
 			"decisionsTitle": "Lo que espera tu decisión, ordenado por lo que desbloquea ({{mod}}{{shift}}D)",
 			"recapTitle": "Lo que ha pasado, en imágenes: una historia por turno de agente ({{mod}}{{shift}}J)",
-			"recap": "Resumen",
-			"automationsTitle": "Reuniones que se preparan solas, como la daily ({{mod}}{{shift}}R)"
+			"recap": "Resumen"
 		},
 		"search": "Ir a, lanzar, preguntar…",
 		"atelier": {

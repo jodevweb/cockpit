@@ -178,54 +178,6 @@
 			"idleStale": "aucune PR ouverte et tickets actifs sans activité récente — dispo ? bloqué ?"
 		}
 	},
-	"automations": {
-		"errors": {
-			"serialize": "Automatisations : {{error}}",
-			"noName": "Donne-lui un nom.",
-			"badTime": "L'heure s'écrit HH:MM, par exemple 14:00.",
-			"unreadableAnswer": "La réponse de l'agent n'était pas lisible.",
-			"alreadyRunning": "Elle tourne déjà.",
-			"emptyCorrection": "La correction est vide.",
-			"notFound": "Automatisation introuvable.",
-			"runNotFound": "Exécution introuvable.",
-			"noOutput": "Cette exécution n'a pas de rendu.",
-			"noChromium": "Il faut Chrome (ou un navigateur Chromium) pour produire le PDF. Le Markdown, lui, se copie toujours.",
-			"pdfTimeout": "Le navigateur n'a pas rendu le PDF en une minute.",
-			"pdfNotProduced": "PDF non produit. {{detail}}",
-			"noSlackWebhook": "Renseigne le webhook Slack de cette automatisation dans son réglage.",
-			"slack": "Slack : {{error}}",
-			"slackRefused": "Slack a refusé : {{status}}"
-		},
-		"missed": {
-			"closedNoCatchUp": "Le cockpit était fermé à l'heure prévue, et le rattrapage est coupé.",
-			"closedUntilAfter": "Le cockpit était fermé jusqu'après le rendez-vous."
-		},
-		"items": {
-			"draft": "brouillon",
-			"agentsIn": "Agents dans {{name}}",
-			"turns_one": "{{count}} tour",
-			"turns_other": "{{count}} tours",
-			"minutes": "{{count}} min"
-		},
-		"sources": {
-			"noLinearToken": "aucun jeton Linear dans les réglages",
-			"noSentryToken": "aucun jeton Sentry dans les réglages",
-			"tracker": "suivi de tâches"
-		},
-		"nothingFound": "Rien trouvé sur la période dans les sources lues.",
-		"notify": {
-			"linesReady_one": "{{count}} ligne prête.",
-			"linesReady_other": "{{count}} lignes prêtes.",
-			"silent": "Sans réponse : {{sources}}.",
-			"ready": "{{name}} est prêt",
-			"failed": "{{name}} n'a pas abouti"
-		},
-		"render": {
-			"silent": "Sans réponse cette fois : {{sources}}.",
-			"period": "Du {{from}} au {{to}}",
-			"slackPeriod": "du {{from}} au {{to}}"
-		}
-	},
 	"permanence": {
 		"closed": {
 			"disabled": "Désactivée dans les réglages.",

@@ -38,9 +38,6 @@ export type ViewId =
 	// La journée en images : ce que chaque agent a fait, à regarder plutôt
 	// qu'à lire.
 	| "recap"
-	// Des rendez-vous qui se préparent seuls : une consigne, un rythme, un
-	// rendu, en lecture seule. Le daily en est le premier.
-	| "automations"
 	| "overview"
 	| "team"
 	| "agents"

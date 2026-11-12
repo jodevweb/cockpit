@@ -21,7 +21,6 @@
 			"today": "Oggi",
 			"decisions": "Decisioni · cosa aspetta la tua risposta",
 			"recap": "Riepilogo visivo · cosa è successo",
-			"automations": "Automazioni · riunioni preparate da sole",
 			"overview": "Panoramica",
 			"team": "Daily · team",
 			"agents": "Agenti IA",
@@ -171,7 +170,6 @@
 			"today": "Oggi",
 			"decisions": "Decisioni",
 			"recap": "Riepilogo visivo",
-			"automations": "Automazioni",
 			"permanence": "Permanence",
 			"overview": "Panoramica",
 			"team": "Daily",
@@ -200,10 +198,6 @@
 		"project": "Progetto",
 		"recapFresh_one": "{{count}} novità dalla tua ultima visita",
 		"recapFresh_other": "{{count}} novità dalla tua ultima visita",
-		"automations": {
-			"running": "Un'automazione sta preparando il suo output",
-			"nextToday": "Prossimo output pronto oggi"
-		},
 		"launch": {
 			"placeHere": "sul posto",
 			"placeBranch": "nuovo branch",
@@ -221,8 +215,7 @@
 			"libresTitle": "Agenti lanciati fuori da un progetto, come in un terminale",
 			"decisionsTitle": "Cosa aspetta una tua decisione, ordinato per ciò che sblocca ({{mod}}{{shift}}D)",
 			"recapTitle": "Cosa è successo, per immagini: una storia per turno dell'agente ({{mod}}{{shift}}J)",
-			"recap": "Riepilogo",
-			"automationsTitle": "Riunioni che si preparano da sole, come il daily ({{mod}}{{shift}}R)"
+			"recap": "Riepilogo"
 		},
 		"search": "Vai a, lancia, chiedi…",
 		"atelier": {

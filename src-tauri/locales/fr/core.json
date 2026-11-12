@@ -394,7 +394,6 @@
 			"reason": "{{total}} jetons consommés, au-delà du plafond de {{budget}}. La mission est en pause : son travail est intact, reprends-la si le dépassement était attendu.",
 			"paused": "Mission suspendue — plafond atteint"
 		},
-		"automationNotFound": "Automatisation introuvable.",
 		"mission": {
 			"ticketReferenceRequired": "Colle l'adresse ou l'identifiant d'un ticket.",
 			"titleRequired": "Donne un titre à la mission.",

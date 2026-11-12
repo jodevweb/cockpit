@@ -202,7 +202,6 @@
 			"postponed": "Reporté"
 		},
 		"parts": {
-			"nothing": "Rien.",
 			"shipped": "Livré",
 			"shippedEmpty": "Rien de fusionné depuis le dernier daily.",
 			"openedSince_one": "{{count}} PR ouverte depuis",
@@ -215,7 +214,6 @@
 		},
 		"recap": {
 			"heading": "# Daily — depuis le {{date}}",
-			"part": "- {{title}} : {{lines}}",
 			"shipped": "- Livré : {{items}}",
 			"commitment": "- Engagement : {{text}}",
 			"commitmentWithStatus": "- Engagement : {{text}} ({{status}})",
@@ -237,11 +235,8 @@
 		"speakers": "Tour de parole",
 		"speaker": {
 			"speaking": "parle",
-			"done": "fait",
-			"ready": "prêt"
+			"done": "fait"
 		},
-		"preparedByAutomation": "Sa partie · préparée par son automatisation",
-		"silentSources": "Sans réponse cette fois : {{sources}}.",
 		"timeLeft": "Temps de parole restant",
 		"pause": "Pause (p)",
 		"partsLabel": "Parties",

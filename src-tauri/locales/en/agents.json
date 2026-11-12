@@ -178,54 +178,6 @@
 			"idleStale": "no open PR and active tickets with no recent activity — available? blocked?"
 		}
 	},
-	"automations": {
-		"errors": {
-			"serialize": "Automations: {{error}}",
-			"noName": "Give it a name.",
-			"badTime": "The time is written HH:MM, for example 14:00.",
-			"unreadableAnswer": "The agent's answer was not readable.",
-			"alreadyRunning": "It is already running.",
-			"emptyCorrection": "The correction is empty.",
-			"notFound": "Automation not found.",
-			"runNotFound": "Run not found.",
-			"noOutput": "This run has no output.",
-			"noChromium": "Chrome (or a Chromium browser) is needed to produce the PDF. The Markdown can always be copied.",
-			"pdfTimeout": "The browser did not render the PDF within a minute.",
-			"pdfNotProduced": "PDF not produced. {{detail}}",
-			"noSlackWebhook": "Fill in this automation's Slack webhook in its settings.",
-			"slack": "Slack: {{error}}",
-			"slackRefused": "Slack refused: {{status}}"
-		},
-		"missed": {
-			"closedNoCatchUp": "The cockpit was closed at the scheduled time, and catch-up is turned off.",
-			"closedUntilAfter": "The cockpit was closed until after the meeting."
-		},
-		"items": {
-			"draft": "draft",
-			"agentsIn": "Agents in {{name}}",
-			"turns_one": "{{count}} turn",
-			"turns_other": "{{count}} turns",
-			"minutes": "{{count}} min"
-		},
-		"sources": {
-			"noLinearToken": "no Linear token in the settings",
-			"noSentryToken": "no Sentry token in the settings",
-			"tracker": "task tracker"
-		},
-		"nothingFound": "Nothing found over the period in the sources read.",
-		"notify": {
-			"linesReady_one": "{{count}} line ready.",
-			"linesReady_other": "{{count}} lines ready.",
-			"silent": "No answer: {{sources}}.",
-			"ready": "{{name}} is ready",
-			"failed": "{{name}} did not complete"
-		},
-		"render": {
-			"silent": "No answer this time: {{sources}}.",
-			"period": "From {{from}} to {{to}}",
-			"slackPeriod": "from {{from}} to {{to}}"
-		}
-	},
 	"permanence": {
 		"closed": {
 			"disabled": "Disabled in the settings.",

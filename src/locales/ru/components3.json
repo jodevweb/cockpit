@@ -224,7 +224,6 @@
 			"postponed": "Отложено"
 		},
 		"parts": {
-			"nothing": "Ничего.",
 			"shipped": "Поставлено",
 			"shippedEmpty": "С прошлого дейли ничего не слито.",
 			"openedSince_one": "С тех пор открыт {{count}} PR",
@@ -239,7 +238,6 @@
 		},
 		"recap": {
 			"heading": "# Дейли — с {{date}}",
-			"part": "- {{title}}: {{lines}}",
 			"shipped": "- Поставлено: {{items}}",
 			"commitment": "- Обязательство: {{text}}",
 			"commitmentWithStatus": "- Обязательство: {{text}} ({{status}})",
@@ -263,11 +261,8 @@
 		"speakers": "Порядок выступлений",
 		"speaker": {
 			"speaking": "выступает",
-			"done": "выступил",
-			"ready": "готов"
+			"done": "выступил"
 		},
-		"preparedByAutomation": "Их часть · подготовлена их автоматизацией",
-		"silentSources": "На этот раз нет ответа: {{sources}}.",
 		"timeLeft": "Оставшееся время выступления",
 		"pause": "Пауза (p)",
 		"partsLabel": "Части",

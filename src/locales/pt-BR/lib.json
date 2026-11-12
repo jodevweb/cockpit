@@ -5,43 +5,6 @@
 		"kilobytes": "{{value}} KB",
 		"megabytes": "{{value}} MB"
 	},
-	"automations": {
-		"days": {
-			"mon": "Seg",
-			"tue": "Ter",
-			"wed": "Qua",
-			"thu": "Qui",
-			"fri": "Sex",
-			"sat": "Sáb",
-			"sun": "Dom"
-		},
-		"stamp": {
-			"today": "hoje {{time}}",
-			"tomorrow": "amanhã {{time}}",
-			"yesterday": "ontem {{time}}"
-		},
-		"rhythm": {
-			"none": "Nenhum dia selecionado",
-			"weekdays": "De segunda a sexta às {{time}}",
-			"everyDay": "Todos os dias às {{time}}",
-			"days": "{{days}} às {{time}}"
-		},
-		"run": {
-			"running": "Em execução",
-			"partial": "Parcial",
-			"failed": "Falhou",
-			"missed": "Perdida",
-			"caughtUp": "Recuperada",
-			"manual": "Manual",
-			"onTime": "No horário"
-		},
-		"source": {
-			"tracker": "Gerenciador de tarefas"
-		},
-		"markdown": {
-			"silent": "Sem resposta desta vez: {{sources}}."
-		}
-	},
 	"world": {
 		"regions": {
 			"arrive": {

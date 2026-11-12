@@ -4,10 +4,9 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { Badge, Button, PriorityBadge } from "@/components/ui";
 import { t as translate } from "@/i18n";
-import { SOURCE_LABEL } from "@/lib/automations";
 import { api } from "@/lib/ipc";
-import type { AutomationRun, Flag, MemberBoard } from "@/lib/types";
-import { useAsync, usePersistentState } from "@/lib/useAsync";
+import type { Flag, MemberBoard } from "@/lib/types";
+import { usePersistentState } from "@/lib/useAsync";
 
 /** Budget de parole par personne. Dépassé, le chrono passe au rouge. */
 const SPEAKING_BUDGET = 90;
@@ -49,29 +48,8 @@ interface Part {
 	empty: string;
 }
 
-/**
- * Les parties d'une personne : celles de son automatisation de daily quand elle
- * en a une prête aujourd'hui, celles du tableau d'équipe sinon.
- */
-function partsOf(member: MemberBoard, flags: Flag[], run: AutomationRun | null): Part[] {
-	if (run) {
-		const items = new Map(run.items.map((item) => [item.id, item]));
-		return run.parts.map((part) => ({
-			title: part.title,
-			empty: translate("components3:dailyPresenter.parts.nothing"),
-			lines: part.lines
-				.filter((line) => !run.dropped.includes(line.id))
-				.map((line) => ({
-					key: line.id,
-					title: line.title,
-					detail: line.detail,
-					links: line.refs
-						.map((ref) => items.get(ref))
-						.filter((item) => item?.url)
-						.map((item) => ({ label: item!.id.replace(/^gh:[^#]*#/, "PR #").replace(/^\w+:/, ""), url: item!.url })),
-				})),
-		}));
-	}
+/** Les parties d'une personne, tirées du tableau d'équipe. */
+function partsOf(member: MemberBoard, flags: Flag[]): Part[] {
 	const merged = member.delta.filter((item) => item.kind === "merged");
 	const opened = member.delta.filter((item) => item.kind === "opened");
 	return [
@@ -155,7 +133,6 @@ export function DailyPresenter({
 		};
 		return [...devs].sort((a, b) => rank(a.name) - rank(b.name));
 	}, [members, order]);
-	const prepared = useAsync(() => api.automations.latestDaily().catch(() => null), []);
 
 	const [index, setIndex] = useState(0);
 	const [part, setPart] = useState(0);
@@ -172,11 +149,8 @@ export function DailyPresenter({
 	const pledgeRef = useRef<HTMLInputElement>(null);
 
 	const current = speakers[index] ?? null;
-	const run = prepared.data ?? null;
-	const ownsRun = (member: MemberBoard | null) =>
-		Boolean(run && member?.github && run.viewer && member.github.toLowerCase() === run.viewer.toLowerCase());
 	const currentFlags = flags.filter((flag) => flag.member === current?.name);
-	const parts = current ? partsOf(current, currentFlags, ownsRun(current) ? run : null) : [];
+	const parts = current ? partsOf(current, currentFlags) : [];
 	const shown = parts[Math.min(part, parts.length - 1)] ?? null;
 
 	// Chrono : remis à zéro à chaque changement de personne, cumulé pour le daily.
@@ -251,17 +225,10 @@ export function DailyPresenter({
 		for (const member of speakers) {
 			const memberFlags = flags.filter((flag) => flag.member === member.name);
 			lines.push(`## ${member.name}`);
-			if (ownsRun(member) && run) {
-				for (const entry of partsOf(member, memberFlags, run)) {
-					if (entry.lines.length === 0) continue;
-					lines.push(t("dailyPresenter.recap.part", { title: entry.title, lines: entry.lines.map((line) => line.title).join(" · ") }));
-				}
-			} else {
-				lines.push(member.narrative.text);
-				const merged = member.delta.filter((item) => item.kind === "merged");
-				if (merged.length > 0) lines.push(t("dailyPresenter.recap.shipped", { items: merged.map((item) => item.label).join(" · ") }));
-				for (const flag of memberFlags.filter((entry) => entry.severity === "red")) lines.push(`- ⚠︎ ${flag.question}`);
-			}
+			lines.push(member.narrative.text);
+			const merged = member.delta.filter((item) => item.kind === "merged");
+			if (merged.length > 0) lines.push(t("dailyPresenter.recap.shipped", { items: merged.map((item) => item.label).join(" · ") }));
+			for (const flag of memberFlags.filter((entry) => entry.severity === "red")) lines.push(`- ⚠︎ ${flag.question}`);
 			const own = commitments[member.name];
 			if (own?.text) {
 				lines.push(
@@ -288,7 +255,6 @@ export function DailyPresenter({
 	const over = elapsed > SPEAKING_BUDGET;
 	const ring = 2 * Math.PI * 27;
 	const left = Math.max(0, SPEAKING_BUDGET - elapsed) / SPEAKING_BUDGET;
-	const silent = run?.sources.filter((source) => source.state === "silent") ?? [];
 
 	return (
 		<div className="fixed inset-0 z-50 flex flex-col bg-void">
@@ -375,8 +341,6 @@ export function DailyPresenter({
 										<span className="rounded-full bg-accent-dim px-2 py-0.5 text-[11px] font-semibold text-accent">{t("dailyPresenter.speaker.speaking")}</span>
 									) : past ? (
 										<span className="text-[11px] text-ink-muted">{t("dailyPresenter.speaker.done")}</span>
-									) : ownsRun(member) ? (
-										<span className="rounded-full bg-info/12 px-2 py-0.5 text-[11px] font-semibold text-info">{t("dailyPresenter.speaker.ready")}</span>
 									) : null}
 								</button>
 							);
@@ -387,19 +351,12 @@ export function DailyPresenter({
 						<div className="flex flex-wrap items-center justify-between gap-4">
 							<div className="min-w-0">
 								<span className="text-[11px] font-semibold tracking-[0.06em] text-ink-muted uppercase">
-									{ownsRun(current) ? t("dailyPresenter.preparedByAutomation") : current.roleLabel}
+									{current.roleLabel}
 								</span>
 								<h1 className="mt-1 text-[28px] leading-tight font-semibold text-ink">{current.name}</h1>
 								<p className="mt-1.5 max-w-3xl text-[15px] leading-relaxed text-ink-muted">
-									{ownsRun(current) && run?.headline ? run.headline : current.narrative.text}
+									{current.narrative.text}
 								</p>
-								{ownsRun(current) && silent.length > 0 ? (
-									<p className="mt-1 text-[12.5px] text-warning">
-										{t("dailyPresenter.silentSources", {
-											sources: silent.map((source) => SOURCE_LABEL[source.source] ?? source.source).join(", "),
-										})}
-									</p>
-								) : null}
 							</div>
 							<div className="flex items-center gap-3">
 								<div className="relative size-16">
@@ -478,7 +435,8 @@ export function DailyPresenter({
 									) : null}
 								</div>
 							))}
-							{!ownsRun(current) && part === 1 && current.activeTickets.length > 0 ? (
+							{part === 1
+ && current.activeTickets.length > 0 ? (
 								<div className="flex flex-wrap gap-1.5">
 									{current.activeTickets.slice(0, 6).map((ticket) => (
 										<PriorityBadge key={ticket.identifier} priority={ticket.priority} label={ticket.priorityLabel} />

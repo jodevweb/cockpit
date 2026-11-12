@@ -394,7 +394,6 @@
 			"reason": "{{total}} tokens consumidos, por encima del límite de {{budget}}. La misión está en pausa: su trabajo está intacto, reanúdala si el exceso era previsible.",
 			"paused": "Misión en pausa: límite alcanzado"
 		},
-		"automationNotFound": "Automatización no encontrada.",
 		"mission": {
 			"ticketReferenceRequired": "Pega la URL o el identificador de un ticket.",
 			"titleRequired": "Dale un título a la misión.",

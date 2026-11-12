@@ -192,7 +192,6 @@
 			"postponed": "연기됨"
 		},
 		"parts": {
-			"nothing": "없음.",
 			"shipped": "배포됨",
 			"shippedEmpty": "지난 데일리 이후 병합된 것이 없습니다.",
 			"openedSince_other": "이후 연 PR {{count}}개",
@@ -204,7 +203,6 @@
 		},
 		"recap": {
 			"heading": "# 데일리 — {{date}} 이후",
-			"part": "- {{title}}: {{lines}}",
 			"shipped": "- 배포됨: {{items}}",
 			"commitment": "- 약속: {{text}}",
 			"commitmentWithStatus": "- 약속: {{text}} ({{status}})",
@@ -225,11 +223,8 @@
 		"speakers": "발언 순서",
 		"speaker": {
 			"speaking": "발언 중",
-			"done": "완료",
-			"ready": "준비됨"
+			"done": "완료"
 		},
-		"preparedByAutomation": "본인 부분 · 자동화가 준비함",
-		"silentSources": "이번에는 응답 없음: {{sources}}.",
 		"timeLeft": "남은 발언 시간",
 		"pause": "일시 정지 (p)",
 		"partsLabel": "부분",

@@ -1,6 +1,5 @@
 pub mod accounts;
 pub mod agent;
-pub mod automations;
 pub mod brief;
 pub mod browser;
 pub mod chantier;
@@ -2574,77 +2573,6 @@ async fn reveal_in_finder(path: String) -> Result<()> {
 	system::reveal_in_finder(&path).await
 }
 
-// ───────────────────────────── Automatisations ─────────────────────────────
-
-#[tauri::command]
-fn automations_overview() -> Vec<automations::Overview> {
-	automations::overview()
-}
-
-#[tauri::command]
-fn automation_save(automation: automations::Automation) -> Result<automations::Automation> {
-	automations::save(automation)
-}
-
-#[tauri::command]
-fn automation_remove(id: String) -> Result<()> {
-	automations::remove(&id)
-}
-
-/// « Lancer maintenant » : une exécution à la main, qui ne déplace pas le point
-/// de départ de la suivante — voir `automations::Trigger::Manual`.
-#[tauri::command]
-fn automation_run_now(app: AppHandle, id: String) -> Result<String> {
-	let automation = automations::list()
-		.into_iter()
-		.find(|entry| entry.id == id)
-		.ok_or_else(|| CockpitError::msg(i18n::t("lib.automationNotFound")))?;
-	let occurrence = format!("manual-{}", chrono::Utc::now().timestamp_millis());
-	automations::start(app, automation, occurrence, automations::Trigger::Manual)
-}
-
-#[tauri::command]
-fn automation_drop_line(id: String, run: String, line: String, dropped: bool) {
-	automations::drop_line(&id, &run, &line, dropped);
-}
-
-#[tauri::command]
-fn automation_latest_daily() -> Option<automations::Run> {
-	automations::latest_daily()
-}
-
-/// Un essai à blanc : rien n'est rangé, rien n'est envoyé.
-#[tauri::command]
-async fn automation_try(automation: automations::Automation) -> Result<automations::Run> {
-	automations::try_once(automation).await
-}
-
-#[tauri::command]
-fn automation_correct(id: String, text: String) -> Result<automations::Automation> {
-	automations::add_correction(&id, &text)
-}
-
-/// Met le rendu en PDF et l'ouvre.
-#[tauri::command]
-async fn automation_export_pdf(id: String, run: String) -> Result<String> {
-	let path = automations::export_pdf(&id, &run).await?;
-	system::open_file(&path).await?;
-	Ok(path)
-}
-
-#[tauri::command]
-async fn automation_post_slack(id: String, run: String) -> Result<()> {
-	automations::post_slack(&id, &run).await
-}
-
-/// Le dossier des PDF d'une automatisation, dans le Finder.
-#[tauri::command]
-async fn automation_reveal_exports(id: String) -> Result<()> {
-	let dir = automations::exports_dir(&id);
-	std::fs::create_dir_all(&dir)?;
-	system::reveal_in_finder(&dir.display().to_string()).await
-}
-
 /// Notification du centre de notifications.
 ///
 /// Passe par le plugin plutôt que par `osascript` : une notification émise par
@@ -3158,9 +3086,6 @@ pub fn run() {
 			watch_orchestrator(app.handle().clone());
 			watch_sessions(app.handle().clone());
 			watch_git(app.handle().clone());
-			// Les rendez-vous : un premier tour tout de suite, qui rattrape ce que le
-			// cockpit fermé a laissé passer. Voir `automations.rs`.
-			automations::watch(app.handle().clone());
 			// L'accès mobile ne se rallume qu'à la demande : s'il a été activé,
 			// on le remonte au démarrage, en silence si le terrain n'est pas sûr.
 			let handle = app.handle().clone();
@@ -3359,17 +3284,6 @@ pub fn run() {
 			git_create_branch,
 			open_external,
 			notify_desktop,
-			automations_overview,
-			automation_save,
-			automation_remove,
-			automation_run_now,
-			automation_drop_line,
-			automation_latest_daily,
-			automation_try,
-			automation_correct,
-			automation_export_pdf,
-			automation_post_slack,
-			automation_reveal_exports,
 			window_zoom_toggle,
 			missions_list,
 			missions_everywhere,

@@ -1,4 +1,3 @@
-import { previewAutomations, previewLatestDaily } from "./previewAutomations";
 /**
  * L'app dans un navigateur, avec des données pour la regarder.
  *
@@ -701,23 +700,6 @@ function territoireExemple(): Array<{ path: string; bytes: number }> {
 }
 
 const REPONSES: Record<string, unknown> = {
-	// Un daily et une revue du matin, avec un historique qui montre chaque état.
-	automations_overview: () => previewAutomations(),
-	automation_save: ({ automation }: Record<string, unknown>) => ({
-		...(automation as object),
-		id: (automation as { id?: string }).id || "auto-nouvelle",
-		createdAt: new Date().toISOString(),
-	}),
-	automation_remove: null,
-	automation_run_now: "run-apercu",
-	automation_drop_line: null,
-	automation_latest_daily: () => previewLatestDaily(),
-	automation_try: () => ({ ...previewLatestDaily(), id: "essai", occurrence: "essai", trigger: "manual" }),
-	automation_correct: ({ id }: Record<string, unknown>) =>
-		previewAutomations().find((entry) => entry.automation.id === id)?.automation ?? null,
-	automation_export_pdf: "/Users/demo/.config/cockpit/automations/auto-daily/2026-10-26-13h30.pdf",
-	automation_post_slack: null,
-	automation_reveal_exports: null,
 	// Un dossier quelconque : dépôt git s'il ressemble à un projet, simple
 	// dossier sinon — de quoi voir les deux visages du lanceur.
 	libre_inspect: ({ path }: Record<string, unknown>) => {

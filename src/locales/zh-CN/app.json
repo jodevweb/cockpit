@@ -21,7 +21,6 @@
 			"today": "今日",
 			"decisions": "决策 · 等待你答复的事项",
 			"recap": "图像回顾 · 发生了什么",
-			"automations": "自动化 · 自动准备的会议",
 			"overview": "概览",
 			"team": "每日站会 · 团队",
 			"agents": "AI 智能体",
@@ -167,7 +166,6 @@
 			"today": "今日",
 			"decisions": "决策",
 			"recap": "图像回顾",
-			"automations": "自动化",
 			"permanence": "Permanence",
 			"overview": "概览",
 			"team": "每日站会",
@@ -195,10 +193,6 @@
 		},
 		"project": "项目",
 		"recapFresh_other": "自上次访问以来有 {{count}} 条新内容",
-		"automations": {
-			"running": "有一个自动化正在准备输出",
-			"nextToday": "下一份输出今天就绪"
-		},
 		"launch": {
 			"placeHere": "原地",
 			"placeBranch": "新分支",
@@ -216,8 +210,7 @@
 			"libresTitle": "在项目之外启动的智能体，就像在终端中一样",
 			"decisionsTitle": "等待你决定的事项，按其解除阻塞的影响排序（{{mod}}{{shift}}D）",
 			"recapTitle": "以图像呈现发生的事：每个智能体回合一个故事（{{mod}}{{shift}}J）",
-			"recap": "回顾",
-			"automationsTitle": "自动准备的会议，例如每日站会（{{mod}}{{shift}}R）"
+			"recap": "回顾"
 		},
 		"search": "前往、启动、提问…",
 		"atelier": {

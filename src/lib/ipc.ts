@@ -5,9 +5,6 @@ import { t } from "@/i18n";
 import type {
 	Account,
 	Readiness,
-	Automation,
-	AutomationOverview,
-	AutomationRun,
 	LibreInspection,
 	LibrePrepared,
 	AccountStatus,
@@ -179,31 +176,6 @@ export const api = {
 		save: (entries: Account[]) => call<ConfigView>("accounts_save", { entries }),
 		/** Après une connexion faite au terminal : oublie la réponse d'avant. */
 		refresh: () => call<void>("accounts_refresh"),
-	},
-
-	/**
-	 * Les rendez-vous qui se préparent seuls : une consigne, un rythme, un rendu.
-	 * Lecture seule par construction — voir `automations.rs`.
-	 */
-	automations: {
-		overview: () => call<AutomationOverview[]>("automations_overview"),
-		save: (automation: Automation) => call<Automation>("automation_save", { automation }),
-		remove: (id: string) => call<void>("automation_remove", { id }),
-		/** Rend l'identifiant de l'exécution ; le travail s'annonce ensuite par événement. */
-		runNow: (id: string) => call<string>("automation_run_now", { id }),
-		dropLine: (id: string, run: string, line: string, dropped: boolean) =>
-			call<void>("automation_drop_line", { id, run, line, dropped }),
-		/** Le rendu de daily prêt aujourd'hui, s'il y en a un. */
-		latestDaily: () => call<AutomationRun | null>("automation_latest_daily"),
-		/** Un essai à blanc sur la période qu'elle couvrirait maintenant : rien n'est rangé. */
-		tryOnce: (automation: Automation) => call<AutomationRun>("automation_try", { automation }),
-		/** Ajoute une correction datée à la consigne. */
-		correct: (id: string, text: string) => call<Automation>("automation_correct", { id, text }),
-		/** Met le rendu en PDF, l'ouvre, et rend son chemin. */
-		exportPdf: (id: string, run: string) => call<string>("automation_export_pdf", { id, run }),
-		/** Publie le rendu sur Slack — sur un clic seulement. */
-		postSlack: (id: string, run: string) => call<void>("automation_post_slack", { id, run }),
-		revealExports: (id: string) => call<void>("automation_reveal_exports", { id }),
 	},
 
 	/** Les agents libres : un dossier, un agent, sans chantier ni mission. */
@@ -966,8 +938,6 @@ export const events = {
 	onSessionsChanged: (handler: () => void) => subscribe("sessions://changed", () => handler()),
 	/** Mouvement dans le `.git` du dépôt principal : commit, checkout, fetch… */
 	onGitChanged: (handler: () => void) => subscribe("git://changed", () => handler()),
-	/** Une exécution d'automatisation a commencé, avancé ou fini. */
-	onAutomationRun: (handler: () => void) => subscribe("automation://run", () => handler()),
 	/** L'oreille de l'assistant : j'écoute, je transcris, ce qui a été entendu. */
 	onAssistantVoice: (handler: (event: AssistantVoice) => void) =>
 		subscribe<AssistantVoice>("assistant-voice", (event) => handler(event.payload)),

@@ -10,7 +10,6 @@ import { MapView } from "@/views/MapView";
 import { TodayView } from "@/views/TodayView";
 import { DecisionsView } from "@/views/DecisionsView";
 import { RecapView } from "@/views/RecapView";
-import { AutomationsView } from "@/views/AutomationsView";
 import { DeliveryView } from "@/views/DeliveryView";
 import { ImpactView } from "@/views/ImpactView";
 import { DocsView } from "@/views/DocsView";
@@ -82,7 +81,7 @@ function Shortcuts({ onTogglePalette }: { onTogglePalette: () => void }) {
 	// Impact, Missions : y aller et en revenir doit ramener sur ce qu'on lisait,
 	// pas sur un écran d'accueil. Les trois partagent la même mémoire, puisqu'on
 	// ne peut pas être dans deux à la fois.
-	const VISITES: ViewId[] = ["workspace", "impact", "missions", "permanence", "automations"];
+	const VISITES: ViewId[] = ["workspace", "impact", "missions", "permanence"];
 	const origin = useRef<ViewId>("map");
 	if (!VISITES.includes(view)) origin.current = view;
 
@@ -130,12 +129,6 @@ function Shortcuts({ onTogglePalette }: { onTogglePalette: () => void }) {
 			if (event.shiftKey && event.key.toLowerCase() === "j") {
 				event.preventDefault();
 				go(view === "recap" ? origin.current : "recap");
-				return;
-			}
-			// ⌘⇧R : les rendez-vous, et retour à ce qu'on lisait.
-			if (event.shiftKey && event.key.toLowerCase() === "r") {
-				event.preventDefault();
-				go(view === "automations" ? origin.current : "automations");
 				return;
 			}
 			// ⌘⇧C : la carte, d'où que l'on soit.
@@ -211,7 +204,6 @@ function Shell() {
 					{view === "today" ? <TodayView /> : null}
 					{view === "decisions" ? <DecisionsView /> : null}
 					{view === "recap" ? <RecapView /> : null}
-					{view === "automations" ? <AutomationsView /> : null}
 					{view === "overview" ? <OverviewView /> : null}
 					{view === "team" ? <TeamView /> : null}
 					{view === "agents" ? <AgentsView /> : null}

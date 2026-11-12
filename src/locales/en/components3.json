@@ -202,7 +202,6 @@
 			"postponed": "Postponed"
 		},
 		"parts": {
-			"nothing": "Nothing.",
 			"shipped": "Shipped",
 			"shippedEmpty": "Nothing merged since the last daily.",
 			"openedSince_one": "{{count}} PR opened since",
@@ -215,7 +214,6 @@
 		},
 		"recap": {
 			"heading": "# Daily — since {{date}}",
-			"part": "- {{title}}: {{lines}}",
 			"shipped": "- Shipped: {{items}}",
 			"commitment": "- Commitment: {{text}}",
 			"commitmentWithStatus": "- Commitment: {{text}} ({{status}})",
@@ -237,11 +235,8 @@
 		"speakers": "Speaking order",
 		"speaker": {
 			"speaking": "speaking",
-			"done": "done",
-			"ready": "ready"
+			"done": "done"
 		},
-		"preparedByAutomation": "Their part · prepared by their automation",
-		"silentSources": "No response this time: {{sources}}.",
 		"timeLeft": "Speaking time left",
 		"pause": "Pause (p)",
 		"partsLabel": "Parts",

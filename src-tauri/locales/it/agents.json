@@ -178,54 +178,6 @@
 			"idleStale": "nessuna PR aperta e ticket attivi senza attività recente — disponibile? bloccato?"
 		}
 	},
-	"automations": {
-		"errors": {
-			"serialize": "Automazioni: {{error}}",
-			"noName": "Dagli un nome.",
-			"badTime": "L'orario si scrive HH:MM, per esempio 14:00.",
-			"unreadableAnswer": "La risposta dell'agente non era leggibile.",
-			"alreadyRunning": "È già in esecuzione.",
-			"emptyCorrection": "La correzione è vuota.",
-			"notFound": "Automazione non trovata.",
-			"runNotFound": "Esecuzione non trovata.",
-			"noOutput": "Questa esecuzione non ha output.",
-			"noChromium": "Serve Chrome (o un browser Chromium) per produrre il PDF. Il Markdown si può sempre copiare.",
-			"pdfTimeout": "Il browser non ha generato il PDF entro un minuto.",
-			"pdfNotProduced": "PDF non prodotto. {{detail}}",
-			"noSlackWebhook": "Compila il webhook Slack di questa automazione nelle sue impostazioni.",
-			"slack": "Slack: {{error}}",
-			"slackRefused": "Slack ha rifiutato: {{status}}"
-		},
-		"missed": {
-			"closedNoCatchUp": "Il cockpit era chiuso all'orario previsto e il recupero è disattivato.",
-			"closedUntilAfter": "Il cockpit è rimasto chiuso fino a dopo l'appuntamento."
-		},
-		"items": {
-			"draft": "bozza",
-			"agentsIn": "Agenti in {{name}}",
-			"turns_one": "{{count}} turno",
-			"turns_other": "{{count}} turni",
-			"minutes": "{{count}} min"
-		},
-		"sources": {
-			"noLinearToken": "nessun token Linear nelle impostazioni",
-			"noSentryToken": "nessun token Sentry nelle impostazioni",
-			"tracker": "tracker dei task"
-		},
-		"nothingFound": "Nulla trovato nel periodo nelle fonti lette.",
-		"notify": {
-			"linesReady_one": "{{count}} riga pronta.",
-			"linesReady_other": "{{count}} righe pronte.",
-			"silent": "Nessuna risposta: {{sources}}.",
-			"ready": "{{name}} è pronto",
-			"failed": "{{name}} non è stato completato"
-		},
-		"render": {
-			"silent": "Nessuna risposta questa volta: {{sources}}.",
-			"period": "Dal {{from}} al {{to}}",
-			"slackPeriod": "dal {{from}} al {{to}}"
-		}
-	},
 	"permanence": {
 		"closed": {
 			"disabled": "Disattivata nelle impostazioni.",

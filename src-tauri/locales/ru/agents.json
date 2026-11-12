@@ -200,58 +200,6 @@
 			"idleStale": "нет открытых PR, а у активных тикетов нет недавней активности — свободны? заблокированы?"
 		}
 	},
-	"automations": {
-		"errors": {
-			"serialize": "Автоматизации: {{error}}",
-			"noName": "Дайте ей название.",
-			"badTime": "Время записывается как ЧЧ:ММ, например 14:00.",
-			"unreadableAnswer": "Ответ агента не удалось прочитать.",
-			"alreadyRunning": "Она уже выполняется.",
-			"emptyCorrection": "Исправление пустое.",
-			"notFound": "Автоматизация не найдена.",
-			"runNotFound": "Запуск не найден.",
-			"noOutput": "У этого запуска нет результата.",
-			"noChromium": "Для создания PDF нужен Chrome (или браузер на Chromium). Markdown всегда можно скопировать.",
-			"pdfTimeout": "Браузер не отрисовал PDF за минуту.",
-			"pdfNotProduced": "PDF не создан. {{detail}}",
-			"noSlackWebhook": "Укажите Slack webhook этой автоматизации в её настройках.",
-			"slack": "Slack: {{error}}",
-			"slackRefused": "Slack отказал: {{status}}"
-		},
-		"missed": {
-			"closedNoCatchUp": "Cockpit был закрыт в запланированное время, а догоняющий запуск отключён.",
-			"closedUntilAfter": "Cockpit был закрыт до окончания встречи."
-		},
-		"items": {
-			"draft": "черновик",
-			"agentsIn": "Агенты в {{name}}",
-			"turns_one": "{{count}} ход",
-			"turns_few": "{{count}} хода",
-			"turns_many": "{{count}} ходов",
-			"turns_other": "{{count}} хода",
-			"minutes": "{{count}} мин"
-		},
-		"sources": {
-			"noLinearToken": "в настройках нет токена Linear",
-			"noSentryToken": "в настройках нет токена Sentry",
-			"tracker": "трекер задач"
-		},
-		"nothingFound": "В прочитанных источниках за период ничего не найдено.",
-		"notify": {
-			"linesReady_one": "Готова {{count}} строка.",
-			"linesReady_few": "Готовы {{count}} строки.",
-			"linesReady_many": "Готово {{count}} строк.",
-			"linesReady_other": "Готово {{count}} строки.",
-			"silent": "Нет ответа: {{sources}}.",
-			"ready": "{{name}} готова",
-			"failed": "{{name}} не завершилась"
-		},
-		"render": {
-			"silent": "На этот раз нет ответа: {{sources}}.",
-			"period": "С {{from}} по {{to}}",
-			"slackPeriod": "с {{from}} по {{to}}"
-		}
-	},
 	"permanence": {
 		"closed": {
 			"disabled": "Отключено в настройках.",

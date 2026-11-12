@@ -21,7 +21,6 @@
 			"today": "Heute",
 			"decisions": "Entscheidungen · was auf deine Antwort wartet",
 			"recap": "Visueller Rückblick · was passiert ist",
-			"automations": "Automatisierungen · Termine, die sich selbst vorbereiten",
 			"overview": "Übersicht",
 			"team": "Daily · Team",
 			"agents": "KI-Agenten",
@@ -171,7 +170,6 @@
 			"today": "Heute",
 			"decisions": "Entscheidungen",
 			"recap": "Visueller Rückblick",
-			"automations": "Automatisierungen",
 			"permanence": "Permanence",
 			"overview": "Übersicht",
 			"team": "Daily",
@@ -200,10 +198,6 @@
 		"project": "Projekt",
 		"recapFresh_one": "{{count}} neu seit deinem letzten Besuch",
 		"recapFresh_other": "{{count}} neu seit deinem letzten Besuch",
-		"automations": {
-			"running": "Eine Automatisierung bereitet ihr Ergebnis vor",
-			"nextToday": "Nächstes Ergebnis heute fertig"
-		},
 		"launch": {
 			"placeHere": "vor Ort",
 			"placeBranch": "neuer Branch",
@@ -221,8 +215,7 @@
 			"libresTitle": "Außerhalb eines Projekts gestartete Agenten, wie in einem Terminal",
 			"decisionsTitle": "Was auf deine Entscheidung wartet, sortiert nach dem, was es freigibt ({{mod}}{{shift}}D)",
 			"recapTitle": "Was passiert ist, in Bildern: eine Geschichte pro Agenten-Runde ({{mod}}{{shift}}J)",
-			"recap": "Rückblick",
-			"automationsTitle": "Termine, die sich selbst vorbereiten, wie das Daily ({{mod}}{{shift}}R)"
+			"recap": "Rückblick"
 		},
 		"search": "Gehe zu, starte, frage…",
 		"atelier": {

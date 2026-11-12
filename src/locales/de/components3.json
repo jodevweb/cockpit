@@ -202,7 +202,6 @@
 			"postponed": "Verschoben"
 		},
 		"parts": {
-			"nothing": "Nichts.",
 			"shipped": "Ausgeliefert",
 			"shippedEmpty": "Seit dem letzten Daily nichts gemergt.",
 			"openedSince_one": "{{count}} PR seitdem geöffnet",
@@ -215,7 +214,6 @@
 		},
 		"recap": {
 			"heading": "# Daily — seit {{date}}",
-			"part": "- {{title}}: {{lines}}",
 			"shipped": "- Ausgeliefert: {{items}}",
 			"commitment": "- Zusage: {{text}}",
 			"commitmentWithStatus": "- Zusage: {{text}} ({{status}})",
@@ -237,11 +235,8 @@
 		"speakers": "Redereihenfolge",
 		"speaker": {
 			"speaking": "spricht",
-			"done": "fertig",
-			"ready": "bereit"
+			"done": "fertig"
 		},
-		"preparedByAutomation": "Ihr Teil · vorbereitet von ihrer Automatisierung",
-		"silentSources": "Diesmal keine Antwort: {{sources}}.",
 		"timeLeft": "Verbleibende Redezeit",
 		"pause": "Pause (p)",
 		"partsLabel": "Teile",

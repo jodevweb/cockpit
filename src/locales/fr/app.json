@@ -21,7 +21,6 @@
 			"today": "Aujourd'hui",
 			"decisions": "Décisions · ce qui attend ta réponse",
 			"recap": "Récap en images · ce qui s'est passé",
-			"automations": "Automatisations · rendez-vous préparés seuls",
 			"overview": "Vue d'ensemble",
 			"team": "Daily · équipe",
 			"agents": "Agents IA",
@@ -171,7 +170,6 @@
 			"today": "Aujourd'hui",
 			"decisions": "Décisions",
 			"recap": "Récap en images",
-			"automations": "Automatisations",
 			"permanence": "Permanence",
 			"overview": "Vue d'ensemble",
 			"team": "Daily",
@@ -200,10 +198,6 @@
 		"project": "Projet",
 		"recapFresh_one": "{{count}} nouveau depuis ta dernière visite",
 		"recapFresh_other": "{{count}} nouveaux depuis ta dernière visite",
-		"automations": {
-			"running": "Une automatisation prépare son rendu",
-			"nextToday": "Prochain rendu prêt aujourd'hui"
-		},
 		"launch": {
 			"placeHere": "sur place",
 			"placeBranch": "branche neuve",
@@ -221,8 +215,7 @@
 			"libresTitle": "Les agents lancés hors chantier, comme au terminal",
 			"decisionsTitle": "Ce qui attend ta décision, rangé par ce que ça débloque ({{mod}}{{shift}}D)",
 			"recapTitle": "Ce qui s'est passé, en images : une histoire par tour d'agent ({{mod}}{{shift}}J)",
-			"recap": "Récap",
-			"automationsTitle": "Les rendez-vous qui se préparent seuls, comme le daily ({{mod}}{{shift}}R)"
+			"recap": "Récap"
 		},
 		"search": "Aller à, lancer, demander…",
 		"atelier": {

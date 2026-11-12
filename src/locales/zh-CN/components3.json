@@ -192,7 +192,6 @@
 			"postponed": "已推迟"
 		},
 		"parts": {
-			"nothing": "无。",
 			"shipped": "已交付",
 			"shippedEmpty": "自上次站会以来没有合并任何内容。",
 			"openedSince_other": "此后新建了 {{count}} 个 PR",
@@ -204,7 +203,6 @@
 		},
 		"recap": {
 			"heading": "# 每日站会 — 自 {{date}} 以来",
-			"part": "- {{title}}：{{lines}}",
 			"shipped": "- 已交付：{{items}}",
 			"commitment": "- 承诺：{{text}}",
 			"commitmentWithStatus": "- 承诺：{{text}}（{{status}}）",
@@ -225,11 +223,8 @@
 		"speakers": "发言顺序",
 		"speaker": {
 			"speaking": "发言中",
-			"done": "已完成",
-			"ready": "就绪"
+			"done": "已完成"
 		},
-		"preparedByAutomation": "其部分 · 由其自动化准备",
-		"silentSources": "本次没有回应：{{sources}}。",
 		"timeLeft": "剩余发言时间",
 		"pause": "暂停（p）",
 		"partsLabel": "部分",
