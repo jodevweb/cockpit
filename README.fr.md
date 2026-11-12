@@ -86,7 +86,7 @@ livrent sans tout relire**.
 <sub>Ces quatre-là viennent des données d'aperçu de l'application, interface en anglais.</sub>
 
 <p align="center">
-  <img alt="Un ticket GitHub devient une mission : tu valides ce que le maître a compris, son approche, son découpage, et tu reçois une pull request avec son dossier de livraison" src="docs/images/demo.gif" width="800">
+  <img alt="Un ticket écrit dans Cockpit devient une mission : tu réponds au maître et valides son plan, une vérification échoue et la tâche repart, l’historique la rejoue, et une pull request sort avec son dossier de livraison" src="docs/images/demo.gif" width="800">
 </p>
 
 <table>
