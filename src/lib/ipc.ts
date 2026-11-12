@@ -69,6 +69,7 @@ import type {
 	Prompt,
 	Mission,
 	MissionActivity,
+	MissionEvent,
 	MissionEstimate,
 	MissionExposure,
 	RepoRoles,
@@ -697,6 +698,8 @@ export const api = {
 		/** Le publie sur la pull request : section de description et statut de commit. */
 		publishDossier: (id: string) => call<string>("mission_dossier_publish", { id }),
 		get: (id: string) => call<Mission>("mission_get", { id }),
+		/** L'historique de la mission, événement par événement, dans l'ordre. */
+		events: (id: string) => call<MissionEvent[]>("mission_events", { id }),
 		create: (
 			title: string,
 			options: { ticket?: string; ticketUrl?: string; cwd?: string; branch?: string } = {},

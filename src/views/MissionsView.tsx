@@ -39,6 +39,7 @@ import {
 } from "@/components/ui";
 import { QuestionForm } from "@/components/AgentChat";
 import { MissionHistory, totalSpend } from "@/components/MissionHistory";
+import { MissionTimelineButton } from "@/components/MissionTimeline";
 import { JourneyDots, MissionJourney } from "@/components/MissionJourney";
 import { QuickMenu } from "@/components/QuickMenu";
 import { useConfirm } from "@/components/Confirm";
@@ -709,6 +710,7 @@ function MissionCardHeader({
 					{awaitsHuman(mission) ? t("missions.card.yourTurn") : t("missions.card.journey")}
 				</Button>
 			) : null}
+			<MissionTimelineButton mission={mission} />
 			<Button size="sm" icon={Trash2} title={t("missions.card.remove")} onClick={onRemove} />
 		</div>
 	);

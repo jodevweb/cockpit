@@ -2509,6 +2509,66 @@ const REPONSES: Record<string, unknown> = {
 		},
 		tasks: [],
 	},
+	// L'historique de la mission « Fix cart total rounding » : une recette
+	// renvoyée, puis une porte rouge sur l'API. Les autres n'ont pas d'historique,
+	// comme une mission ouverte avant qu'il existe.
+	mission_events: ({ id }: Record<string, unknown>) => {
+		if (id !== "m1") return [];
+		const output = [
+			"$ pnpm test",
+			"exit 1",
+			" FAIL  api/cart.test.ts > rounds each line",
+			"   expected 10.01 to be 10",
+		].join("\n");
+		return [
+			{ at: ago(240), change: { kind: "opened", guided: false } },
+			{ at: ago(226), change: { kind: "state", from: "planning", to: "awaitingApproval", note: "" } },
+			{ at: ago(226), change: { kind: "plan", tasks: 3 } },
+			{ at: ago(226), change: { kind: "taskAdded", task: "t1", title: "Per-line rounding in the API", role: "backend" } },
+			{ at: ago(226), change: { kind: "taskAdded", task: "t2", title: "Cart totals", role: "frontend" } },
+			{ at: ago(226), change: { kind: "taskAdded", task: "t3", title: "Functional QA", role: "qa" } },
+			{ at: ago(180), change: { kind: "state", from: "awaitingApproval", to: "running", note: "" } },
+			{ at: ago(150), change: { kind: "task", task: "t1", from: "planned", to: "running", note: "" } },
+			{ at: ago(120), change: { kind: "task", task: "t3", from: "planned", to: "running", note: "" } },
+			{
+				at: ago(100),
+				change: {
+					kind: "task",
+					task: "t3",
+					from: "running",
+					to: "delivered",
+					note: "Verdict: blocking — the API still rounds on the order total.",
+				},
+			},
+			{
+				at: ago(96),
+				change: {
+					kind: "rework",
+					task: "t3",
+					attempt: 1,
+					reason: "Re-run QA once the per-line rounding is delivered.",
+				},
+			},
+			{ at: ago(96), change: { kind: "task", task: "t3", from: "delivered", to: "planned", note: "" } },
+			{ at: ago(90), change: { kind: "task", task: "t3", from: "planned", to: "running", note: "" } },
+			{
+				at: ago(40),
+				change: { kind: "task", task: "t1", from: "running", to: "delivered", note: "Worker finished — 3 commits." },
+			},
+			{ at: ago(39), change: { kind: "gate", task: "t1", gate: "running", output: "pnpm test", commit: "" } },
+			{
+				at: ago(37),
+				change: {
+					kind: "gate",
+					task: "t1",
+					gate: "failed",
+					output,
+					commit: "4d81b7e2c09a51f3e6b8d0c7a2f19e5b3c6d8a01",
+				},
+			},
+			{ at: ago(35), change: { kind: "task", task: "t2", from: "planned", to: "running", note: "" } },
+		];
+	},
 	// Un poste d'exemple déjà prêt : la carte « prêt à démarrer » ne s'affiche
 	// pas sur les captures du README.
 	readiness_check: {

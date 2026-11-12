@@ -29,6 +29,7 @@ import { useConfirm } from "@/components/Confirm";
 import { Markdown } from "@/components/Markdown";
 import { IsolationNotice } from "@/components/IsolationNotice";
 import { MissionGraph } from "@/components/MissionGraph";
+import { MissionTimelineButton } from "@/components/MissionTimeline";
 import { Badge, Button, ErrorNote, PriorityBadge } from "@/components/ui";
 import { useCockpit } from "@/app/store";
 import { duration, fromIso } from "@/lib/format";
@@ -239,6 +240,7 @@ export function MissionJourney({
 						{mission.branch || t("missionJourney.noBranch")}
 					</div>
 				</div>
+				<MissionTimelineButton mission={mission} />
 				{current < 3 && mission.state !== "failed" ? (
 					<Button variant="danger" icon={StopCircle} onClick={() => void stop()}>
 						{t("missionJourney.stop.confirm")}

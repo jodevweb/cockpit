@@ -84,6 +84,30 @@ test.describe("missions", () => {
 		await expect(badge).toHaveAttribute("title", /pnpm test/);
 	});
 
+	test("l'historique garde chaque passage et ce qu'il disait", async ({ page }) => {
+		const errors = watchErrors(page);
+		const card = page
+			.getByRole("heading", { name: "Fix cart total rounding on multi-currency orders" })
+			.locator("xpath=ancestor::div[contains(@class,'items-start')][1]");
+		await card.getByRole("button", { name: "History" }).click();
+		const dialog = page.getByRole("dialog", { name: /^History · Fix cart total/ });
+		await expect(dialog).toBeVisible();
+		// Rien de choisi : on suit le dernier événement.
+		await expect(dialog.getByText("Event 16 of 16")).toBeVisible();
+
+		const events = dialog.getByRole("list", { name: "Events" });
+		await events.getByRole("button", { name: /Checks fail · Per-line rounding/ }).click();
+		await expect(dialog.getByText("expected 10.01 to be 10")).toBeVisible();
+		await expect(dialog.getByText("4d81b7e2c09a")).toBeVisible();
+
+		// Une reprise : son motif, et l'état des branches à cet instant-là.
+		await events.getByRole("button", { name: /Functional QA sent back/ }).click();
+		await expect(dialog.getByText("Attempt 1 of 3")).toBeVisible();
+		await expect(dialog.getByText("Re-run QA once the per-line rounding is delivered.")).toBeVisible();
+		await expect(dialog.getByText("4d81b7e2c09a")).toHaveCount(0);
+		expect(errors).toEqual([]);
+	});
+
 	test("l'approbation d'un plan nomme les exécutants sans filet", async ({ page }) => {
 		await expect(page.getByText("No container for backend, frontend, qa.")).toBeVisible();
 		await expect(page.getByText(/Agents → Agent isolation/)).toBeVisible();
