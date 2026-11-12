@@ -1830,6 +1830,7 @@ const REPONSES: Record<string, unknown> = {
 					workedSeconds: 2100,
 					gate: "none",
 					gateOutput: "",
+					gateCommit: "",
 				},
 				{
 					id: "t3",
@@ -1853,6 +1854,7 @@ const REPONSES: Record<string, unknown> = {
 					workedSeconds: 300,
 					gate: "none",
 					gateOutput: "",
+					gateCommit: "",
 				},
 			],
 		},
@@ -1927,6 +1929,7 @@ const REPONSES: Record<string, unknown> = {
 				workedSeconds: 0,
 				gate: "none",
 				gateOutput: "",
+				gateCommit: "",
 			})),
 		},
 
@@ -1974,6 +1977,7 @@ const REPONSES: Record<string, unknown> = {
 				workedSeconds: 4200,
 				gate: "none",
 				gateOutput: "",
+				gateCommit: "",
 			})),
 		},
 	],
