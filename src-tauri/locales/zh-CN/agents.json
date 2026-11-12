@@ -108,63 +108,10 @@
 			"broken": "{{count}} 个被破坏"
 		}
 	},
-	"team": {
-		"priority": {
-			"urgent": "紧急",
-			"high": "高",
-			"medium": "中",
-			"low": "低"
-		},
+	"pulls": {
 		"errors": {
 			"unknown": "错误",
-			"linear": "Linear：{{message}}",
-			"github": "GitHub：{{message}}",
-			"noMembers": "未声明任何成员：请在“设置 → 团队”中添加团队。每个人都需要其任务跟踪工具的标识符，以便关联其工单，以及其 GitHub 登录名，以便关联其 pull request。",
-			"githubRepoMissing": "请在设置中填写 `github.repo`（例如 acme/monorepo）。"
-		},
-		"narrative": {
-			"theirTopics": "其负责的主题",
-			"and": "{{list}}和{{last}}",
-			"activeTickets_other": "{{count}} 个活跃工单",
-			"reviewTickets_other": "{{count}} 个审查中的工单",
-			"openPrs_other": "{{count}} 个打开的 PR",
-			"newOpenPrs_other": "新创建了 {{count}} 个 PR",
-			"prs_other": "{{count}} 个 PR",
-			"blockingPoints_other": "{{count}} 个阻塞问题",
-			"nothingActiveDev": "{{name}} 目前没有活跃的工作，也没有打开的 PR。",
-			"nothingActive": "{{name}} 在此没有被跟踪的活跃主题。",
-			"variedTopics": "{{name}} 正在推进多个不同主题{{load}}。",
-			"alsoOn": "，同时还有{{themes}}",
-			"mostlyOn": "{{name}} 主要在做{{theme}}{{tail}}{{load}}。",
-			"workingOn": "{{name}} 正在做{{themes}}{{load}}。",
-			"nothingMerged": "自上次站会以来没有合并任何内容。",
-			"openedNothingMerged": "自上次站会以来{{opened}}，尚未合并任何内容。",
-			"shippedOn": "，涉及{{themes}}",
-			"andOpened": "，并且{{opened}}",
-			"shipped": "自上次站会以来交付了 {{prs}}{{themes}}{{opened}}。",
-			"toChallenge": "{{count}} 项待质询",
-			"toReview": "{{prs}} 待为他人审查",
-			"nothingStuck": "其这边没有卡住的事项。",
-			"toWatch": "需关注：{{items}}。"
-		},
-		"days": "{{count}}天",
-		"flags": {
-			"blockedOne": "{{id}} 被标记为“已阻塞” — 怎样才能解除阻塞？",
-			"blockedMany": "{{count}} 个工单被标记为“已阻塞”（{{ids}}）— 怎样才能解除阻塞？",
-			"stacked": "PR #{{number}} 基于 `{{base}}`（而非 dev）— 先合并基础分支？",
-			"ciFailing": "PR #{{number}} 的 CI 失败 — 请在审查/合并前修复。",
-			"approved": "PR #{{number}} 已批准但未合并 — 是什么阻碍了合并？",
-			"changesRequested": "PR #{{number}}：被要求修改 — 待作者处理。",
-			"reviewStaleOne": "PR #{{number}} 已等待审查 {{age}} 天 — 能否安排时间审查？",
-			"reviewStaleMany": "{{count}} 个 PR 等待审查超过 {{days}} 天（{{numbers}}，最久 {{age}} 天）— 安排一次审查？",
-			"draftStale": "{{count}} 个 PR 处于草稿状态超过 {{days}} 天（{{numbers}}）— 是否仍然需要？",
-			"inProgressNoPrOne": "{{id}} 处于“进行中”超过 {{days}} 天且没有 PR — 进展如何？",
-			"inProgressNoPrMany": "{{count}} 个工单处于“进行中”超过 {{days}} 天且没有 PR（{{ids}}）— 进展如何？",
-			"reviewStale": "{{count}} 个工单处于审查中超过 {{days}} 天（{{ids}}）— 在等谁？",
-			"wip": "{{count}} 个工单同时处于“进行中” — 需要排优先级 / 重新聚焦吗？",
-			"assigneeMismatch": "{{issue}} 分配给了 {{name}}，但由 @{{author}} 编写代码（PR #{{number}}）— 是否重新分配？",
-			"idleNothing": "没有打开的 PR，也没有活跃工单 — 你在做什么？",
-			"idleStale": "没有打开的 PR，活跃工单近期也没有动态 — 有空吗？被阻塞了吗？"
+			"github": "GitHub：{{message}}"
 		}
 	},
 	"permanence": {

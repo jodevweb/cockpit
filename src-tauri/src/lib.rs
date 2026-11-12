@@ -40,6 +40,7 @@ pub mod prompts;
 pub mod proof;
 pub mod properties;
 pub mod protocol;
+pub mod pulls;
 pub mod qa;
 pub mod readiness;
 pub mod relay;
@@ -56,7 +57,6 @@ pub mod speech;
 pub mod strays;
 pub mod system;
 pub mod tasks;
-pub mod team;
 pub mod terminal;
 pub mod tickets;
 pub mod tour;
@@ -1338,18 +1338,11 @@ async fn worktree_commits(path: String, limit: usize) -> Result<Vec<git::Commit>
 	git::recent_commits(Path::new(&path), limit.clamp(1, 100)).await
 }
 
-// ─────────────────────────────── Team board ───────────────────────────────
-
-#[tauri::command]
-async fn team_board(cycle_only: Option<bool>) -> Result<team::TeamBoard> {
-	team::build_board(&cfg(), cycle_only.unwrap_or(true)).await
-}
-
 // ─────────────────────────── Pull requests ───────────────────────────
 
 /// PR ouvertes du dépôt, avec CI et décision de review.
 #[tauri::command]
-async fn pull_requests() -> Result<Vec<team::PullRequest>> {
+async fn pull_requests() -> Result<Vec<pulls::PullRequest>> {
 	let config = cfg();
 	let token = integrations::github_token(&config).await?;
 	let (owner, name) = config
@@ -1357,7 +1350,7 @@ async fn pull_requests() -> Result<Vec<team::PullRequest>> {
 		.repo
 		.split_once('/')
 		.ok_or_else(|| CockpitError::msg(i18n::t("lib.github.repoFormat")))?;
-	team::fetch_open_prs(&token, owner, name, &config.linear.team_key).await
+	pulls::fetch_open_prs(&token, owner, name, &config.linear.team_key).await
 }
 
 // ──────────────────────────── Impact ────────────────────────────
@@ -1471,104 +1464,6 @@ fn worktree_command(action: String, branch: String, path: Option<String>) -> Wor
 		_ => config.workflow.worktree_creation(&branch, &path),
 	};
 	WorktreeCommand { command, by_agent }
-}
-
-/// État de santé d'un projet, tel qu'on veut le lire d'un coup d'œil.
-#[derive(serde::Serialize)]
-#[serde(rename_all = "camelCase")]
-struct ProjectHealth {
-	id: String,
-	name: String,
-	color: String,
-	main_repo: String,
-	github_repo: String,
-	worktrees: usize,
-	/// Worktrees avec du travail non commité.
-	dirty: usize,
-	/// Worktrees en avance sur leur amont : du travail non publié.
-	unpushed: usize,
-	open_prs: usize,
-	ci_failing: usize,
-	ready_to_merge: usize,
-	/// Renseigné quand une source n'a pas répondu : le projet reste affiché
-	/// avec ce qu'on a pu lire, plutôt que de disparaître de la liste.
-	error: Option<String>,
-}
-
-/// Santé de tous les projets déclarés, pas seulement de l'actif.
-///
-/// Chaque projet est résolu avec ses propres réglages — un projet perso
-/// interroge donc son compte GitHub et non celui de l'entreprise. Le local
-/// (worktrees) est toujours lu ; le distant échoue proprement, projet par
-/// projet, sans faire tomber la vue entière.
-#[tauri::command]
-async fn projects_health() -> Result<Vec<ProjectHealth>> {
-	let base = Config::load();
-	let mut out = Vec::new();
-
-	let cloisonne = base.projects.len() > 1;
-	for project in &base.projects {
-		let mut resolved = base.clone();
-		project.merge_into(&mut resolved, cloisonne);
-
-		let repo = PathBuf::from(&resolved.general.main_repo);
-		let trees = if repo.join(".git").exists() {
-			git::list_worktrees(&repo).await.unwrap_or_default()
-		} else {
-			Vec::new()
-		};
-		let dirty = trees
-			.iter()
-			.filter(|tree| tree.status.modified + tree.status.staged + tree.status.untracked > 0)
-			.count();
-		let unpushed = trees.iter().filter(|tree| tree.status.ahead > 0).count();
-
-		let mut open_prs = 0;
-		let mut ci_failing = 0;
-		let mut ready_to_merge = 0;
-		let mut error = None;
-
-		if !resolved.github.repo.trim().is_empty() {
-			match integrations::github_token(&resolved).await {
-				Ok(token) => match resolved.github.repo.split_once('/') {
-					Some((owner, name)) => {
-						match team::fetch_open_prs(&token, owner, name, &resolved.linear.team_key).await {
-							Ok(prs) => {
-								open_prs = prs.len();
-								ci_failing = prs.iter().filter(|pr| pr.ci_state == "failing").count();
-								ready_to_merge = prs
-									.iter()
-									.filter(|pr| {
-										!pr.is_draft && pr.review_decision == "APPROVED" && pr.ci_state == "success"
-									})
-									.count();
-							}
-							Err(e) => error = Some(e.to_string()),
-						}
-					}
-					None => error = Some(i18n::t("lib.github.repoOwnerFormat")),
-				},
-				Err(e) => error = Some(e.to_string()),
-			}
-		}
-
-		out.push(ProjectHealth {
-			id: project.id.clone(),
-			name: project.display_name(),
-			color: project.color.clone(),
-			main_repo: resolved.general.main_repo.clone(),
-			github_repo: resolved.github.repo.clone(),
-			worktrees: trees.len(),
-			dirty,
-			unpushed,
-			open_prs,
-			ci_failing,
-			ready_to_merge,
-			error,
-		});
-	}
-
-	Ok(out)
 }
 
 /// Fusionne une pull request.
@@ -2821,11 +2716,7 @@ async fn sentry_to_linear(
 	events: String,
 ) -> Result<String> {
 	let config = cfg();
-	let team_id = if config.team.linear_team_id.trim().is_empty() {
-		team::default_linear_team_id()
-	} else {
-		config.team.linear_team_id.clone()
-	};
+	let team_id = config.linear.team_id.clone();
 
 	let description = i18n::tf(
 		"lib.sentryIssue.description",
@@ -3159,7 +3050,6 @@ pub fn run() {
 			worktree_commits,
 			worktree_qa,
 			file_data_url,
-			team_board,
 			pull_requests,
 			worktree_command,
 			impact_scan,
@@ -3175,7 +3065,6 @@ pub fn run() {
 			properties_calibrations,
 			properties_calibrate,
 			properties_suggest,
-			projects_health,
 			pull_request_merge,
 			permissions_pending,
 			permission_answer,

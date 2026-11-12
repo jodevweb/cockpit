@@ -70,8 +70,6 @@ const VIEWS: ViewId[] = [
 	"today",
 	"decisions",
 	"recap",
-	"overview",
-	"team",
 	"agents",
 	"workspace",
 	"libres",

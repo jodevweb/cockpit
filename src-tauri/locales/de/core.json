@@ -59,7 +59,7 @@
 	},
 	"tickets": {
 		"noTracker": "Kein Issue-Tracker konfiguriert: Gib ein Linear-Token, ein GitLab-Projekt oder ein GitHub-Repository an.",
-		"linearTeamMissing": "Die Linear-Team-Kennung fehlt: Gib sie unter Einstellungen → Team ein. Es ist die UUID in der URL der Team-Einstellungen, nicht der Schlüssel, der den Issues vorangestellt ist."
+		"linearTeamMissing": "Die Linear-Team-Kennung fehlt: Gib sie unter Einstellungen → Dienste ein. Es ist die UUID in der URL der Team-Einstellungen, nicht der Schlüssel, der den Issues vorangestellt ist."
 	},
 	"relay": {
 		"settingUnreadable": "Einstellung unlesbar: {{error}}",
@@ -353,7 +353,6 @@
 			"prFromBase": "`{{branch}}` ist der Basis-Branch: Lege einen eigenen Branch an, bevor du einen PR öffnest.",
 			"prRefused": "PR abgelehnt ({{status}}): {{message}}",
 			"prCreation": "PR-Erstellung",
-			"repoOwnerFormat": "`github.repo` muss die Form owner/repo haben.",
 			"mergeRefused": "Merge abgelehnt ({{status}}): {{message}}",
 			"prMerge": "PR-Merge",
 			"prTitleRequired": "Ein Pull Request braucht einen Titel."

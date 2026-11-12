@@ -794,83 +794,6 @@
 		"errorsAndIncidents": "Errores e incidentes",
 		"emptyHint": "Revisa el token y la organización en Ajustes si esperabas resultados."
 	},
-	"overview": {
-		"prSegments": {
-			"ready": "listas",
-			"ciFailing": "CI ✗",
-			"stacked": "apiladas",
-			"inReview": "en revisión",
-			"drafts": "borradores"
-		},
-		"title": "Vista general",
-		"subtitle": "El estado del producto, la flota y las misiones",
-		"refreshing": "actualizando…",
-		"sourcesLoading_one": "{{count}} fuente cargando…",
-		"sourcesLoading_other": "{{count}} fuentes cargando…",
-		"waitingBanner_one": "{{count}} agente espera tu respuesta",
-		"waitingBanner_other": "{{count}} agentes esperan tu respuesta",
-		"tiles": {
-			"liveAgents": "Agentes activos",
-			"waiting": "{{count}} en espera",
-			"readyToMerge": "Listas para fusionar",
-			"ciFailing": "CI en rojo",
-			"dailyBlockers": "Bloqueos del daily",
-			"prodErrors": "Errores en producción",
-			"activeWorktrees": "Worktrees activos",
-			"total": "{{count}} en total"
-		},
-		"usage": {
-			"title": "Consumo de Claude",
-			"dayLabel": "{{day}}: {{tokens}} tokens",
-			"summary": "{{today}} hoy · {{week}} en 7 días · últimos 21 días",
-			"none": "Aún no hay mediciones."
-		},
-		"prState": "Estado de las PR",
-		"cycle": {
-			"title": "Ciclo actual",
-			"ticketsDone": "tickets terminados",
-			"reviewLoad": "PR por revisar",
-			"none": "Ningún ciclo activo."
-		},
-		"missions": {
-			"title": "Misiones",
-			"none": "Ninguna misión en curso. Una misión divide un ticket en tareas confiadas a agentes.",
-			"delivered": "{{done}}/{{total}} entregadas",
-			"splitting": "en desglose",
-			"running": "{{count}} en curso"
-		},
-		"production": {
-			"title": "Producción",
-			"none": "Ningún error crítico en 14 días."
-		},
-		"prFlow": {
-			"title": "Flujo de PR",
-			"see": "Ver",
-			"stackedOn": "apilada sobre {{base}}",
-			"ready_one": "{{count}} PR lista para fusionar, nada roto.",
-			"ready_other": "{{count}} PR listas para fusionar, nada roto.",
-			"noneFailing": "Ninguna PR en rojo."
-		},
-		"fleet": {
-			"title": "Flota",
-			"allClean": "Todos los árboles están limpios.",
-			"changes_one": "{{count}} cambio",
-			"changes_other": "{{count}} cambios"
-		},
-		"daily": {
-			"title": "Bloqueos del daily",
-			"button": "Daily"
-		},
-		"docs": {
-			"title": "Últimos entregables",
-			"none": "Ningún documento reciente."
-		},
-		"githubError": "GitHub: {{error}}",
-		"empty": {
-			"message": "Nada que mostrar",
-			"hint": "Revisa `general.main_repo` en Ajustes."
-		}
-	},
 	"permanence": {
 		"title": "Permanence",
 		"resume": "Reanudar",
@@ -1121,7 +1044,6 @@
 			"removeTitle": "¿Quitar el proyecto «{{name}}»?",
 			"removeMessage": "Solo cambia la configuración de Cockpit; el repositorio no se toca.",
 			"activate": "Activar este proyecto",
-			"soloBadge": "solo",
 			"new": "Nuevo",
 			"namePlaceholder": "Proyecto paralelo",
 			"folder": "Carpeta",
@@ -1129,8 +1051,6 @@
 			"folderPlaceholder": "~/Sites/mi-proyecto",
 			"githubHint": "Vacío = deducido del repositorio, si tiene uno.",
 			"githubPlaceholder": "yo/mi-proyecto",
-			"solo": "Solo",
-			"soloTitle": "Proyecto sin equipo: oculta el daily",
 			"prepareFirst": "Prepara primero el terreno: el bloque de abajo se encarga de ello"
 		},
 		"saved": "Configuración guardada.",
@@ -1154,7 +1074,6 @@
 			"projects": "Proyectos",
 			"services": "Servicios conectados",
 			"workflow": "Flujo de trabajo",
-			"team": "Equipo",
 			"accounts": "Cuentas",
 			"engines": "Motores de agentes",
 			"mcp": "Herramientas del repositorio (MCP)",
@@ -1200,7 +1119,9 @@
 			"sentryProjects": "Proyectos de Sentry",
 			"sentryProjectsHint": "Ninguno marcado = toda la organización.",
 			"ticketKey": "Clave de ticket",
-			"ticketKeyHint": "Prefijo de Linear, p. ej. ABC; el equipo del daily se fija más abajo",
+			"ticketKeyHint": "Prefijo de Linear, p. ej. ABC — sirve para reconocer los números de ticket en ramas y títulos",
+			"linearTeamId": "Equipo de Linear",
+			"linearTeamIdHint": "UUID del equipo de Linear, visible en la URL de sus ajustes: sus estados, miembros y etiquetas se ofrecen al editar un ticket.",
 			"gitlabProject": "Proyecto de GitLab",
 			"gitlabProjectHint": "ruta con su grupo, p. ej. grupo/producto",
 			"gitlabProjectPlaceholder": "grupo/producto",
@@ -1254,75 +1175,6 @@
 			"showHelp": "Los workspaces en marcha quedan fijados abajo a la derecha, fuera de su pantalla: es su único rastro cuando miras otra cosa.",
 			"hideHelp": "Nada se muestra por encima de las otras pantallas. Lo que está en marcha sigue visible en la pantalla Workspaces, y las notificaciones te siguen avisando."
 		}
-	},
-	"team": {
-		"title": "Daily",
-		"loading": "Cargando…",
-		"subtitle": "desde el daily del {{since}}",
-		"subtitleCycle": "Ciclo {{number}} · desde el daily del {{since}}",
-		"present": "Hacer el daily a pantalla completa",
-		"currentCycle": "Ciclo actual",
-		"all": "Todos",
-		"githubError": "En GitHub: {{error}}. Los tickets de Linear se siguen mostrando.",
-		"wholeTeam": "Todo el equipo",
-		"draft": "borrador",
-		"ageDays_one": "{{count}} d",
-		"ageDays_other": "{{count}} d",
-		"decision": {
-			"approved": "aprobada",
-			"changesRequested": "cambios solicitados",
-			"reviewRequired": "por revisar"
-		},
-		"chip": {
-			"wip": "WIP",
-			"review": "revisión",
-			"prs": "PR",
-			"toReview": "por revisar",
-			"merged": "fusionadas",
-			"blocking": "bloqueante",
-			"toChallenge": "por cuestionar",
-			"inReview": "en revisión",
-			"readyToMerge": "lista para fusionar"
-		},
-		"member": {
-			"cycle": "ciclo {{done}}/{{total}}",
-			"more_one": "+{{count}} más",
-			"more_other": "+{{count}} más",
-			"openPrs": "Sus PR abiertas",
-			"reviewInbox": "Por revisar para otros",
-			"reviewFrom": "de {{author}} · {{age}}",
-			"shipped": "Entregado desde el último daily",
-			"next": "A continuación"
-		},
-		"noTracker": {
-			"subtitle": "Gestor de tareas no conectado",
-			"service": "El gestor de tareas",
-			"token": "un token"
-		},
-		"noTeam": {
-			"subtitle": "Equipo no declarado",
-			"title": "El daily necesita saber quién está en el equipo",
-			"missingId": "Falta el ID del equipo: es el UUID del equipo de Linear, visible en la URL de sus ajustes, no la clave que prefija los tickets.",
-			"noMembers": "No hay ningún miembro declarado: cada uno necesita su ID de Linear para asociarle sus tickets, y su usuario de GitHub para sus pull requests.",
-			"open": "Abrir Ajustes → Equipo"
-		},
-		"flags": {
-			"title": "Para tratar en el daily",
-			"urgentOnly": "Solo bloqueantes",
-			"empty": "Nada que señalar",
-			"emptyHint": "Ninguna cuestión abierta en este ámbito."
-		},
-		"flow": {
-			"title": "Flujo de PR",
-			"ready": "Listas para fusionar ({{count}})",
-			"ciFailing": "CI en rojo ({{count}})",
-			"stacked": "PR apiladas ({{count}})",
-			"blockedBy": "bloqueada por #{{number}}"
-		},
-		"focus": "Foco del equipo",
-		"product": "Producto · seguimiento en Linear",
-		"noMember": "Ningún miembro",
-		"noMemberHint": "Rellena `[team]` en la configuración."
 	},
 	"today": {
 		"title": "Hoy",

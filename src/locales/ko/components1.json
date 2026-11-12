@@ -760,64 +760,6 @@
 			"label": "미션으로 시작"
 		}
 	},
-	"teamWorkGrid": {
-		"view": {
-			"all": {
-				"label": "전체",
-				"hint": "사이클 티켓과 열린 PR"
-			},
-			"blocked": {
-				"label": "막힘",
-				"hint": "CI 실패, 변경 요청, 스택된 PR"
-			},
-			"review": {
-				"label": "리뷰 대기",
-				"hint": "승인도 초안도 아님: 리뷰어 차례"
-			},
-			"ready": {
-				"label": "병합 준비 완료",
-				"hint": "승인됨, CI 통과, 베이스 브랜치 기준"
-			}
-		},
-		"prState": {
-			"ciFailing": "CI 실패",
-			"changesRequested": "변경 요청됨",
-			"stacked": "{{base}} 위에 스택됨",
-			"ready": "병합 준비 완료",
-			"ciPending": "CI 실행 중",
-			"draft": "초안",
-			"awaitingReview": "리뷰 대기"
-		},
-		"noWorktree": "이 브랜치의 로컬 worktree가 없습니다.",
-		"wholeTeam": "팀 전체",
-		"everyone": "모두",
-		"memberTitle_other": "{{name}} — PR {{prs}}개, 진행 중인 티켓 {{count}}개",
-		"cycleTitle": "현재 사이클의 티켓으로 제한",
-		"cycle": "사이클",
-		"emptyFor": "“{{view}}”에 {{name}}의 항목이 없습니다",
-		"empty": "“{{view}}”에 항목이 없습니다",
-		"seeAll": "전체 보기",
-		"days_other": "{{count}}일",
-		"openAgent": "이 브랜치에서 에이전트 열기",
-		"openWorktree": "worktree 열기",
-		"activeTickets": "진행 중인 티켓",
-		"wip_other": "WIP {{count}}개",
-		"openPrs": "열린 PR",
-		"prs_other": "PR {{count}}개",
-		"toReviewTitle": "리뷰할 다른 사람의 PR",
-		"toReview_other": "리뷰할 것 {{count}}개",
-		"mergedTitle": "지난 데일리 이후 병합됨",
-		"merged_other": "{{count}}개 배포",
-		"now": "지금",
-		"next": "다음",
-		"nothingNext": "다음에 시작할 준비된 것이 없습니다.",
-		"pullRequests": "풀 리퀘스트 · {{count}}",
-		"noOpenPr": "열린 PR이 없습니다.",
-		"reviewInbox": "다른 사람을 위해 리뷰할 것",
-		"onlyMember": "{{name}}만 보기",
-		"blocked_other": "{{count}}개 막힘",
-		"nothingInProgress": "진행 중인 것이 없습니다."
-	},
 	"toolCall": {
 		"tool": "도구",
 		"verb": {

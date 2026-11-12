@@ -931,10 +931,6 @@
 		"loadImageFrom": "<host>{{host}}</host> から画像を読み込む",
 		"enlarge": "原寸で表示"
 	},
-	"charts": {
-		"trend_other": "{{count}} 点の推移",
-		"segment": "{{label}}：{{value}}"
-	},
 	"narration": {
 		"waitingForYou": "あなたの返答を待っています。",
 		"stopped": "停止しています。",

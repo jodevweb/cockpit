@@ -59,7 +59,7 @@
 	},
 	"tickets": {
 		"noTracker": "No issue tracker configured: enter a Linear token, a GitLab project or a GitHub repository.",
-		"linearTeamMissing": "The Linear team identifier is missing: enter it in Settings → Team. It is the UUID visible in the URL of the team's settings, not the key that prefixes issues."
+		"linearTeamMissing": "The Linear team identifier is missing: enter it in Settings → Services. It is the UUID visible in the URL of the team's settings, not the key that prefixes issues."
 	},
 	"relay": {
 		"settingUnreadable": "Unreadable setting: {{error}}",
@@ -353,7 +353,6 @@
 			"prFromBase": "`{{branch}}` is the base branch: create a dedicated branch before opening a PR.",
 			"prRefused": "PR refused ({{status}}): {{message}}",
 			"prCreation": "PR creation",
-			"repoOwnerFormat": "`github.repo` must be in the form owner/repo.",
 			"mergeRefused": "Merge refused ({{status}}): {{message}}",
 			"prMerge": "PR merge",
 			"prTitleRequired": "A pull request needs a title."

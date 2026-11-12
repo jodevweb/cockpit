@@ -195,72 +195,6 @@
 		"validate": "OK",
 		"cancel": "Cancelar"
 	},
-	"dailyPresenter": {
-		"status": {
-			"done": "Feito",
-			"ongoing": "Em andamento",
-			"postponed": "Adiado"
-		},
-		"parts": {
-			"shipped": "Entregue",
-			"shippedEmpty": "Nada com merge desde a última daily.",
-			"openedSince_one": "{{count}} PR aberto desde então",
-			"openedSince_other": "{{count}} PRs abertos desde então",
-			"ongoing": "Em andamento",
-			"ongoingEmpty": "Nenhum ticket ativo.",
-			"ticketDetail": "{{id}} · {{progress}}% · {{days}} d",
-			"toHandle": "A tratar",
-			"toHandleEmpty": "Nada travado."
-		},
-		"recap": {
-			"heading": "# Daily — desde {{date}}",
-			"shipped": "- Entregue: {{items}}",
-			"commitment": "- Compromisso: {{text}}",
-			"commitmentWithStatus": "- Compromisso: {{text}} ({{status}})",
-			"parked": "## Assuntos estacionados"
-		},
-		"title": "Daily",
-		"since": "desde {{date}}",
-		"total": "total {{time}}",
-		"quit": "Sair (Esc)",
-		"done": {
-			"title": "Daily concluída",
-			"duration_one": "{{time}} para {{count}} pessoa",
-			"duration_other": "{{time}} para {{count}} pessoas",
-			"parked": "A retomar agora · {{count}}",
-			"noParked": "Nenhum assunto estacionado.",
-			"copyRecap": "Copiar o resumo",
-			"close": "Fechar"
-		},
-		"speakers": "Ordem de fala",
-		"speaker": {
-			"speaking": "falando",
-			"done": "concluído"
-		},
-		"timeLeft": "Tempo de fala restante",
-		"pause": "Pausar (p)",
-		"partsLabel": "Partes",
-		"nav": {
-			"previous": "Anterior",
-			"nextPart": "Próxima parte",
-			"nextSpeaker": "Próxima pessoa",
-			"finish": "Concluir"
-		},
-		"sideLabel": "Compromissos e assuntos",
-		"pledge": {
-			"title": "O que {{name}} disse da última vez",
-			"status": "Status",
-			"none": "Nenhum compromisso na última daily.",
-			"placeholder": "Compromisso para a próxima daily…"
-		},
-		"parked": {
-			"title": "Estacionados",
-			"placeholder": "Assunto para retomar depois…",
-			"add": "Estacionar"
-		},
-		"shortcuts": "→ próximo · ← voltar · p pausar · Esc sair",
-		"noDevelopers": "Nenhum desenvolvedor para apresentar."
-	},
 	"diagram": {
 		"unreadable": "diagrama ilegível — aqui está o texto dele",
 		"caption": "diagrama conforme declarado pelo agente"
@@ -329,24 +263,6 @@
 		"correct": "Corrigir",
 		"edit": "Editar",
 		"forget": "Esquecer"
-	},
-	"nowFeed": {
-		"state": {
-			"ciFailing": "CI falhando",
-			"changesRequested": "alterações solicitadas",
-			"stacked": "PR empilhado",
-			"ready": "pronto para merge",
-			"draft": "draft",
-			"inReview": "em revisão"
-		},
-		"empty": "Nada em andamento",
-		"emptyHint": "Nenhum ticket ativo nem pull request aberto. O que vem a seguir está listado abaixo.",
-		"noTicket": "sem ticket",
-		"lastActivity": "Última atividade {{when}}",
-		"today": "hoje",
-		"yesterday": "ontem",
-		"days_one": "{{count}} d",
-		"days_other": "{{count}} d"
 	},
 	"permanenceSettings": {
 		"intro": "Um operador que mantém o ecossistema funcionando enquanto você faz outra coisa. Ele não decide o que construir: corrige, tenta de novo, atualiza — e consegue provar que deu certo, porque a operação tem oráculos que o produto não tem. Só roda enquanto o cockpit está aberto. <strong>Tudo se aplica sem botão</strong>: o que você muda é salvo ao sair do campo.",
@@ -528,22 +444,6 @@
 		},
 		"nothingToPrepare": "Nada a preparar"
 	},
-	"projectsHealth": {
-		"title": "Projetos",
-		"openWorktrees": "Abrir os worktrees",
-		"switch": "Mudar para este projeto",
-		"active": "ativo",
-		"liveAgents": "agentes ativos",
-		"ciFailing": "CI falhando",
-		"readyToMerge": "prontos para merge",
-		"openPrs": "PRs abertos",
-		"worktrees": "worktrees",
-		"dirtyHint": "worktrees com trabalho sem commit",
-		"dirty_one": "{{count}} com alterações",
-		"dirty_other": "{{count}} com alterações",
-		"unpushed": "worktrees com commits sem push",
-		"partial": "parcial"
-	},
 	"propertiesReport": {
 		"verdict": {
 			"broken": "quebrada",
@@ -690,29 +590,13 @@
 		},
 		"workflow": {
 			"saved": "Fluxo de trabalho salvo.",
-			"intro": "As colunas do seu gerenciador de tarefas, com os nomes que sua equipe usa. Elas decidem o quanto um ticket avançou e onde ele aparece na daily.",
-			"active": {
-				"label": "Em andamento",
-				"hint": "colunas de trabalho ativo"
-			},
-			"review": {
-				"label": "Em revisão",
-				"hint": "revisão, QA"
-			},
+			"intro": "Como este projeto trabalha: os estados do gerenciador que significam concluído, as branches onde os pull requests são mesclados e os comandos que criam worktrees, abrem pull requests e validam as entregas.",
 			"done": {
 				"label": "Concluído"
-			},
-			"blocked": {
-				"label": "Bloqueado",
-				"hint": "a coluna que sinaliza um bloqueio"
 			},
 			"baseBranches": {
 				"label": "Branches base",
 				"hint": "um PR que mira qualquer outra conta como empilhado"
-			},
-			"dailyWeekdays": {
-				"label": "Dias de daily",
-				"hint": "1 = segunda, 5 = sexta"
 			},
 			"prCommand": {
 				"label": "Comando de abertura de PR",
@@ -755,9 +639,6 @@
 				"title": "O agente de revisão é somente leitura",
 				"detail": "Marcado: nenhuma edição, e nada além de leituras (git diff, git log, gh pr view…) — todo o resto é recusado. Desmarcado: ele pode rodar testes ou modificar arquivos; as instruções ainda dizem para não corrigir o PR, mas nada o impede."
 			},
-			"themes_one": "{{count}} assunto de negócio declarado — ele permite à daily dizer \"ela está no faturamento\" em vez de listar identificadores. Os assuntos são editados no arquivo de configuração.",
-			"themes_other": "{{count}} assuntos de negócio declarados — eles permitem à daily dizer \"ela está no faturamento\" em vez de listar identificadores. Os assuntos são editados no arquivo de configuração.",
-			"noThemes": "Nenhum assunto de negócio: a narrativa da daily vai se basear nos próprios títulos.",
 			"gateCommands": {
 				"label": "Verificações antes da integração",
 				"hint": "comandos de shell, separados por vírgulas, executados no worktree de uma tarefa de missão quando ela entrega código; só é mesclada se todos passarem, senão o agente principal recebe a saída para devolvê-la"
@@ -820,47 +701,6 @@
 			"newLabel": "Novo papel",
 			"add": "Adicionar um papel",
 			"save": "Salvar os papéis"
-		},
-		"team": {
-			"saved": "Equipe salva.",
-			"intro": "Quem está na equipe, e quais contas identificam cada pessoa em cada ferramenta. Esses mapeamentos alimentam a daily e o painel da equipe: um membro sem o login do GitHub não vai aparecer em nenhum pull request.",
-			"soloWarning": "Este projeto está marcado como <strong>solo</strong>: a equipe dele é ignorada e a daily fica oculta. Desmarque \"solo\" nas configurações do projeto para que o que segue tenha alguma utilidade.",
-			"linearTeam": {
-				"label": "Equipe no Linear",
-				"hint": "UUID da equipe cujo ciclo atual é lido — vazio = sem daily"
-			},
-			"empty": "Nenhum membro declarado: a daily e o painel da equipe vão ficar vazios. O Cockpit não sugere ninguém por padrão — uma equipe não se adivinha.",
-			"name": "Nome",
-			"role": {
-				"label": "Papel",
-				"hint": "dev ou produto"
-			},
-			"roleLabel": {
-				"label": "Cargo exibido",
-				"hint": "como aparece na tela",
-				"placeholder": "Desenvolvedor back-end"
-			},
-			"github": {
-				"hint": "login principal"
-			},
-			"linearId": {
-				"label": "ID no Linear",
-				"hint": "UUID, visível na URL do perfil"
-			},
-			"githubAliases": {
-				"label": "Outros logins do GitHub",
-				"hint": "contas antigas, separadas por vírgula"
-			},
-			"sentryEmails": {
-				"label": "E-mails no Sentry",
-				"hint": "os das contas da pessoa, separados por vírgula"
-			},
-			"sentryNames": {
-				"label": "Nomes no Sentry",
-				"hint": "quando o e-mail está ausente do evento"
-			},
-			"add": "Adicionar um membro",
-			"save": "Salvar a equipe"
 		},
 		"engines": {
 			"saved": "Motores salvos.",

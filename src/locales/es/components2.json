@@ -984,11 +984,6 @@
 		"loadImageFrom": "Cargar la imagen desde <host>{{host}}</host>",
 		"enlarge": "Ver a tamaño completo"
 	},
-	"charts": {
-		"trend_one": "Tendencia sobre {{count}} punto",
-		"trend_other": "Tendencia sobre {{count}} puntos",
-		"segment": "{{label}}: {{value}}"
-	},
 	"narration": {
 		"waitingForYou": "Espera tu respuesta.",
 		"stopped": "Está detenido.",

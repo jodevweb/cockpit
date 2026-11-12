@@ -760,64 +760,6 @@
 			"label": "ミッションとして開始"
 		}
 	},
-	"teamWorkGrid": {
-		"view": {
-			"all": {
-				"label": "すべて",
-				"hint": "サイクルのチケットとオープン中の PR"
-			},
-			"blocked": {
-				"label": "ブロック中",
-				"hint": "CI 失敗、修正依頼、スタックされた PR"
-			},
-			"review": {
-				"label": "レビュー待ち",
-				"hint": "承認済みでもドラフトでもない：レビュアー側の対応待ち"
-			},
-			"ready": {
-				"label": "マージ可能",
-				"hint": "承認済み、CI 成功、ベースブランチ上"
-			}
-		},
-		"prState": {
-			"ciFailing": "CI 失敗",
-			"changesRequested": "修正依頼",
-			"stacked": "{{base}} にスタック",
-			"ready": "マージ可能",
-			"ciPending": "CI 実行中",
-			"draft": "ドラフト",
-			"awaitingReview": "レビュー待ち"
-		},
-		"noWorktree": "このブランチのローカル worktree はありません。",
-		"wholeTeam": "チーム全体",
-		"everyone": "全員",
-		"memberTitle_other": "{{name}} — PR {{prs}} 件、アクティブなチケット {{count}} 件",
-		"cycleTitle": "現在のサイクルのチケットに限定",
-		"cycle": "サイクル",
-		"emptyFor": "「{{view}}」に {{name}} のものはありません",
-		"empty": "「{{view}}」には何もありません",
-		"seeAll": "すべて表示",
-		"days_other": "{{count}} 日",
-		"openAgent": "このブランチでエージェントを開く",
-		"openWorktree": "worktree を開く",
-		"activeTickets": "アクティブなチケット",
-		"wip_other": "{{count}} 件 WIP",
-		"openPrs": "オープン中の PR",
-		"prs_other": "PR {{count}} 件",
-		"toReviewTitle": "レビューすべき他メンバーの PR",
-		"toReview_other": "{{count}} 件レビュー待ち",
-		"mergedTitle": "前回のデイリー以降にマージ",
-		"merged_other": "{{count}} 件出荷",
-		"now": "現在",
-		"next": "次",
-		"nothingNext": "次に開始できるものはありません。",
-		"pullRequests": "プルリクエスト · {{count}}",
-		"noOpenPr": "オープン中の PR はありません。",
-		"reviewInbox": "他メンバーのレビューが必要",
-		"onlyMember": "{{name}} のみ表示",
-		"blocked_other": "{{count}} 件ブロック中",
-		"nothingInProgress": "進行中のものはありません。"
-	},
 	"toolCall": {
 		"tool": "ツール",
 		"verb": {

@@ -1090,13 +1090,6 @@
 		"loadImageFrom": "Загрузить изображение с <host>{{host}}</host>",
 		"enlarge": "Посмотреть в полном размере"
 	},
-	"charts": {
-		"trend_one": "Тренд по {{count}} точке",
-		"trend_few": "Тренд по {{count}} точкам",
-		"trend_many": "Тренд по {{count}} точкам",
-		"trend_other": "Тренд по {{count}} точки",
-		"segment": "{{label}}: {{value}}"
-	},
 	"narration": {
 		"waitingForYou": "Он ждёт вашего ответа.",
 		"stopped": "Он остановлен.",

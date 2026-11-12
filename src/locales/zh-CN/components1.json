@@ -760,64 +760,6 @@
 			"label": "作为任务开始"
 		}
 	},
-	"teamWorkGrid": {
-		"view": {
-			"all": {
-				"label": "全部",
-				"hint": "迭代中的工单和打开的 PR"
-			},
-			"blocked": {
-				"label": "受阻",
-				"hint": "CI 失败、被要求修改、堆叠的 PR"
-			},
-			"review": {
-				"label": "等待审查",
-				"hint": "既未批准也非草稿：轮到审查者了"
-			},
-			"ready": {
-				"label": "可以合并",
-				"hint": "已批准、CI 通过、位于基础分支上"
-			}
-		},
-		"prState": {
-			"ciFailing": "CI 失败",
-			"changesRequested": "被要求修改",
-			"stacked": "堆叠在 {{base}} 上",
-			"ready": "可以合并",
-			"ciPending": "CI 运行中",
-			"draft": "草稿",
-			"awaitingReview": "等待审查"
-		},
-		"noWorktree": "此分支没有本地 worktree。",
-		"wholeTeam": "整个团队",
-		"everyone": "所有人",
-		"memberTitle_other": "{{name}} — {{prs}} 个 PR，{{count}} 个活跃工单",
-		"cycleTitle": "仅限当前迭代中的工单",
-		"cycle": "迭代",
-		"emptyFor": "{{name}} 在“{{view}}”中没有内容",
-		"empty": "“{{view}}”中没有内容",
-		"seeAll": "查看全部",
-		"days_other": "{{count}} 天",
-		"openAgent": "在此分支上打开智能体",
-		"openWorktree": "打开 worktree",
-		"activeTickets": "活跃工单",
-		"wip_other": "{{count}} 个进行中",
-		"openPrs": "打开的 PR",
-		"prs_other": "{{count}} 个 PR",
-		"toReviewTitle": "待审查的他人 PR",
-		"toReview_other": "{{count}} 个待审查",
-		"mergedTitle": "自上次站会以来已合并",
-		"merged_other": "已交付 {{count}} 个",
-		"now": "当前",
-		"next": "接下来",
-		"nothingNext": "没有准备好接下来开始的工作。",
-		"pullRequests": "Pull request · {{count}}",
-		"noOpenPr": "没有打开的 PR。",
-		"reviewInbox": "需要为他人审查",
-		"onlyMember": "只显示 {{name}}",
-		"blocked_other": "{{count}} 个受阻",
-		"nothingInProgress": "没有进行中的工作。"
-	},
 	"toolCall": {
 		"tool": "工具",
 		"verb": {

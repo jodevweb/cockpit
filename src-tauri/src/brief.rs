@@ -519,7 +519,7 @@ pub(crate) async fn ticket_markdown(config: &Config, branch: &str) -> Result<Opt
 	if branch.trim().is_empty() {
 		return Ok(None);
 	}
-	let ids = crate::team::extract_ticket_ids(&[branch], config.linear.team_key.trim());
+	let ids = crate::pulls::extract_ticket_ids(&[branch], config.linear.team_key.trim());
 	let Some(id) = ids.first() else {
 		return Ok(None);
 	};

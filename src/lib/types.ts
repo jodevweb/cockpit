@@ -176,177 +176,6 @@ export interface BranchDiff {
 	deletions: number;
 }
 
-// ───────────────────────────── Team board (daily) ─────────────────────────────
-
-export interface FlagItem {
-	label: string;
-	url: string;
-	meta: string;
-}
-
-export interface Flag {
-	severity: "red" | "orange";
-	member: string;
-	category: string;
-	question: string;
-	ticketId: string | null;
-	ticketUrl: string | null;
-	prNumber: number | null;
-	prUrl: string | null;
-	items: FlagItem[];
-	key: string;
-}
-
-export interface TicketCard {
-	identifier: string;
-	title: string;
-	description: string;
-	url: string;
-	stateName: string;
-	phase: string;
-	progress: number;
-	ageDays: number;
-	/** Dernière activité, telle que le suivi la donne. */
-	updatedAt: string;
-	prNumbers: number[];
-	/** Échelle Linear : 0 = non définie, 1 = urgent … 4 = basse. */
-	priority: number;
-	priorityLabel: string;
-}
-
-export interface MemberPr {
-	number: number;
-	url: string;
-	title: string;
-	/** Branche de la PR — sert à retrouver le worktree local. */
-	headRef: string;
-	baseRef: string;
-	ciState: string;
-	reviewDecision: string;
-	isDraft: boolean;
-	stacked: boolean;
-	ageDays: number;
-	/** Jours ouvrés sans activité : c'est lui qui dit si c'est le sujet du moment. */
-	idleDays: number;
-	updatedAt: string;
-	ticketId: string | null;
-	labels: PrLabel[];
-}
-
-export interface ReviewInboxItem {
-	number: number;
-	url: string;
-	title: string;
-	author: string;
-	ageDays: number;
-	labels: PrLabel[];
-}
-
-export interface DeltaItem {
-	kind: "merged" | "opened";
-	label: string;
-	url: string;
-	ticketId: string | null;
-	labels: PrLabel[];
-}
-
-export interface NextTicket {
-	identifier: string;
-	title: string;
-	url: string;
-	priorityLabel: string;
-}
-
-export interface ThemeCount {
-	label: string;
-	count: number;
-}
-
-export interface Narrative {
-	text: string;
-	current: ThemeCount[];
-	shipped: ThemeCount[];
-}
-
-export interface MemberMetrics {
-	activeWip: number;
-	inReview: number;
-	openPrs: number;
-	prsToReview: number;
-	oldestReviewDays: number;
-	mergedSinceDaily: number;
-	reviewPending: number;
-	upcoming: number;
-	cycleDone: number;
-	cycleTotal: number;
-	cycleProgress: number;
-}
-
-export interface MemberBoard {
-	name: string;
-	role: string;
-	roleLabel: string;
-	github: string | null;
-	narrative: Narrative;
-	activeTickets: TicketCard[];
-	reviewTickets: TicketCard[];
-	next: NextTicket[];
-	prs: MemberPr[];
-	reviewInbox: ReviewInboxItem[];
-	delta: DeltaItem[];
-	metrics: MemberMetrics;
-}
-
-export interface PrFlowItem {
-	number: number;
-	url: string;
-	title: string;
-	author: string;
-	ticketId: string | null;
-	blockedBy: number | null;
-	base: string;
-	labels: PrLabel[];
-}
-
-export interface PrFlow {
-	readyToMerge: PrFlowItem[];
-	ciFailing: PrFlowItem[];
-	stacked: PrFlowItem[];
-	ciPending: number;
-	ciSuccess: number;
-}
-
-export interface BoardTotals {
-	activeWip: number;
-	inReview: number;
-	openPrs: number;
-	mergedSinceDaily: number;
-	blocked: number;
-	readyToMerge: number;
-	ciFailing: number;
-	redFlags: number;
-	orangeFlags: number;
-}
-
-export interface Cycle {
-	number: number;
-	startsAt: string;
-	endsAt: string;
-}
-
-export interface TeamBoard {
-	generatedAt: string;
-	cycle: Cycle | null;
-	sinceDaily: string;
-	cycleOnly: boolean;
-	repo: string;
-	flags: Flag[];
-	members: MemberBoard[];
-	prFlow: PrFlow;
-	totals: BoardTotals;
-	githubError: string | null;
-}
-
 export interface TokenUsage {
 	input: number;
 	output: number;
@@ -1035,22 +864,6 @@ export interface TriggerEnvironmentView {
  * Les `has*` disent ce qui est réellement joignable : un écran sans intégration
  * derrière doit s'effacer, pas s'afficher vide.
  */
-/** État de santé d'un projet, pour la vue d'ensemble multi-projets. */
-export interface ProjectHealth {
-	id: string;
-	name: string;
-	color: string;
-	mainRepo: string;
-	githubRepo: string;
-	worktrees: number;
-	dirty: number;
-	unpushed: number;
-	openPrs: number;
-	ciFailing: number;
-	readyToMerge: number;
-	error: string | null;
-}
-
 /** Une action faite par le cockpit, à ta demande ou non. */
 export interface JournalEntry {
 	at: number;
@@ -1097,7 +910,6 @@ export interface ProjectView {
 	sentryProjects: string[];
 	railwayProjectId: string;
 	triggerProjectRef: string;
-	solo: boolean;
 	/** Le compte sous lequel il fait travailler ses agents, héritage appliqué. */
 	account: string;
 	/** Clés que ce projet définit lui-même ; les autres sont héritées. */
@@ -1106,7 +918,6 @@ export interface ProjectView {
 	declared: DeclaredSettings;
 	hasGithub: boolean;
 	hasLinear: boolean;
-	hasTeam: boolean;
 }
 
 /**
@@ -1119,7 +930,6 @@ export interface ProjectInput {
 	id: string;
 	name: string;
 	color: string;
-	solo: boolean;
 	main_repo: string;
 	github: { repo: string; token: string };
 }
@@ -1133,6 +943,8 @@ export interface DeclaredSettings {
 	sentryOrg: string;
 	sentryProjects: string[];
 	linearTeamKey: string;
+	/** Identifiant (UUID) de l'équipe Linear, pour les options d'édition d'un ticket. */
+	linearTeamId: string;
 	triggerProjectRef: string;
 	railwayProjectId: string;
 	/** Ce que fait ce produit, tel que cette portée le déclare. */
@@ -1156,20 +968,18 @@ export interface ConfigView {
 	sentryOrg: string;
 	sentryProjects: string[];
 	linearTeamKey: string;
+	/** Identifiant (UUID) de l'équipe Linear, pour les options d'édition d'un ticket. */
+	linearTeamId: string;
 	triggerProjectRef: string;
 	triggerEnvironments: TriggerEnvironmentView[];
 	railwayProjectId: string;
 	configPath: string;
 	secrets: SecretStatus[];
-	/** Colonnes, branches et sujets : la façon de travailler de l'équipe. */
+	/** Colonnes, branches et commandes : la façon de travailler de l'équipe. */
 	workflow: {
 		baseBranches: string[];
-		activeStates: string[];
-		reviewStates: string[];
+		/** États du suivi qui valent « terminé ». */
 		doneStates: string[];
-		blockedState: string;
-		dailyWeekdays: number[];
-		themes: Array<{ label: string; phrase: string; keywords: string[] }>;
 		/**
 		 * Commande d'équipe qui ouvre une pull request — `/pull-request-creation`,
 		 * typiquement. Vide : le cockpit ouvre la PR par la forge.
@@ -1228,11 +1038,6 @@ export interface ConfigView {
 	accounts: Account[];
 	/** Celui sous lequel le projet actif travaille, héritage appliqué. */
 	account: string;
-	/** L'équipe du projet : qui la compose, et sous quels comptes. */
-	team: {
-		linearTeamId: string;
-		members: TeamMember[];
-	};
 }
 
 /**
@@ -1829,26 +1634,6 @@ export interface Role {
 	scope: string[];
 }
 
-/**
- * Un membre de l'équipe, tel qu'il faut le reconnaître dans chaque outil.
- *
- * Trois services, trois identités : Linear par un UUID, GitHub par un login (et
- * ses anciens comptes), Sentry par l'email ou le nom du compte. Sans ces
- * correspondances, un ticket réassigné ou une erreur de prod ne se rattachent à
- * personne.
- */
-export interface TeamMember {
-	name: string;
-	/** `dev` ou `product` : seuls les devs sont attendus sur des PR. */
-	role: string;
-	roleLabel: string;
-	linearId: string;
-	github: string;
-	githubAliases: string[];
-	sentryEmails: string[];
-	sentryNames: string[];
-}
-
 /** Un service branché sur le cockpit, et ce qui lui manque le cas échéant. */
 export interface Connector {
 	id: string;
@@ -1869,8 +1654,6 @@ export interface TicketProviderInfo {
 		richStates: boolean;
 		estimate: boolean;
 		branchName: boolean;
-		/** Des cycles ou sprints : sans eux, pas d'identifiant d'équipe à réclamer. */
-		cycles: boolean;
 	};
 }
 

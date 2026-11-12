@@ -108,63 +108,10 @@
 			"broken": "{{count}} 件が不成立"
 		}
 	},
-	"team": {
-		"priority": {
-			"urgent": "緊急",
-			"high": "高",
-			"medium": "中",
-			"low": "低"
-		},
+	"pulls": {
 		"errors": {
 			"unknown": "エラー",
-			"linear": "Linear：{{message}}",
-			"github": "GitHub：{{message}}",
-			"noMembers": "メンバーが宣言されていません：「設定 → チーム」でチームを追加してください。各メンバーには、チケットを紐づけるためのタスクトラッカーの識別子と、プルリクエスト用の GitHub ログインが必要です。",
-			"githubRepoMissing": "設定で `github.repo`（例：acme/monorepo）を入力してください。"
-		},
-		"narrative": {
-			"theirTopics": "担当トピック",
-			"and": "{{list}}と{{last}}",
-			"activeTickets_other": "アクティブなチケット {{count}} 件",
-			"reviewTickets_other": "レビュー中のチケット {{count}} 件",
-			"openPrs_other": "オープン中の PR {{count}} 件",
-			"newOpenPrs_other": "新しい PR {{count}} 件を作成",
-			"prs_other": "PR {{count}} 件",
-			"blockingPoints_other": "ブロッカー {{count}} 件",
-			"nothingActiveDev": "{{name}} には現在、アクティブなものもオープン中の PR もありません。",
-			"nothingActive": "{{name}} にはここで追跡しているアクティブなトピックがありません。",
-			"variedTopics": "{{name}} はさまざまなトピックを進めています{{load}}。",
-			"alsoOn": "（ほかに{{themes}}も）",
-			"mostlyOn": "{{name}} は主に{{theme}}{{tail}}に取り組んでいます{{load}}。",
-			"workingOn": "{{name}} は{{themes}}に取り組んでいます{{load}}。",
-			"nothingMerged": "前回のデイリー以降、マージされたものはありません。",
-			"openedNothingMerged": "前回のデイリー以降、{{opened}}。まだマージはありません。",
-			"shippedOn": "{{themes}}の",
-			"andOpened": "。さらに{{opened}}",
-			"shipped": "前回のデイリー以降、{{themes}}{{prs}}を出荷しました{{opened}}。",
-			"toChallenge": "{{count}} 件を要確認",
-			"toReview": "他のメンバーのレビュー待ち {{prs}}",
-			"nothingStuck": "本人側で止まっているものはありません。",
-			"toWatch": "注意点：{{items}}。"
-		},
-		"days": "{{count}}日",
-		"flags": {
-			"blockedOne": "{{id}} が Blocked になっています — 何があれば解除できますか？",
-			"blockedMany": "{{count}} 件のチケットが Blocked になっています（{{ids}}）— 何があれば解除できますか？",
-			"stacked": "PR #{{number}} は（dev ではなく）`{{base}}` をベースにしています — 先にベースをマージしますか？",
-			"ciFailing": "PR #{{number}} は CI が失敗しています — レビュー／マージの前に修正してください。",
-			"approved": "PR #{{number}} は承認済みですがマージされていません — 何がマージを妨げていますか？",
-			"changesRequested": "PR #{{number}}：修正が求められています — 作成者の対応待ちです。",
-			"reviewStaleOne": "PR #{{number}} が {{age}} 日間レビュー待ちです — レビューの時間を取れますか？",
-			"reviewStaleMany": "{{count}} 件の PR が {{days}} 日以上レビュー待ちです（{{numbers}}、最長 {{age}} 日）— レビューを計画しますか？",
-			"draftStale": "{{count}} 件の PR が {{days}} 日以上ドラフトのままです（{{numbers}}）— まだ必要ですか？",
-			"inProgressNoPrOne": "{{id}} は PR がないまま {{days}} 日以上 In Progress です — 状況はどうですか？",
-			"inProgressNoPrMany": "{{count}} 件のチケットが PR のないまま {{days}} 日以上 In Progress です（{{ids}}）— 状況はどうですか？",
-			"reviewStale": "{{count}} 件のチケットが {{days}} 日以上レビュー中です（{{ids}}）— 誰待ちですか？",
-			"wip": "{{count}} 件のチケットが並行して In Progress です — 優先順位をつけて絞りますか？",
-			"assigneeMismatch": "{{issue}} は {{name}} に割り当てられていますが、コードは @{{author}} が書いています（PR #{{number}}）— 割り当て直しますか？",
-			"idleNothing": "オープン中の PR もアクティブなチケットもありません — 何に取り組んでいますか？",
-			"idleStale": "オープン中の PR がなく、アクティブなチケットにも最近の動きがありません — 手が空いていますか？ブロックされていますか？"
+			"github": "GitHub：{{message}}"
 		}
 	},
 	"permanence": {

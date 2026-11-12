@@ -931,10 +931,6 @@
 		"loadImageFrom": "从 <host>{{host}}</host> 加载图片",
 		"enlarge": "查看大图"
 	},
-	"charts": {
-		"trend_other": "{{count}} 个数据点的趋势",
-		"segment": "{{label}}：{{value}}"
-	},
 	"narration": {
 		"waitingForYou": "它在等待你的回复。",
 		"stopped": "它已停止。",

@@ -59,7 +59,7 @@
 	},
 	"tickets": {
 		"noTracker": "課題トラッカーが設定されていません：Linear トークン、GitLab プロジェクト、または GitHub リポジトリを入力してください。",
-		"linearTeamMissing": "Linear チームの識別子がありません：「設定 → チーム」で入力してください。課題の接頭辞のキーではなく、チーム設定の URL に表示される UUID です。"
+		"linearTeamMissing": "Linear チームの識別子がありません：「設定 → サービス」で入力してください。課題の接頭辞のキーではなく、チーム設定の URL に表示される UUID です。"
 	},
 	"relay": {
 		"settingUnreadable": "設定を読み取れません：{{error}}",
@@ -353,7 +353,6 @@
 			"prFromBase": "`{{branch}}` はベースブランチです：PR を作成する前に専用のブランチを作ってください。",
 			"prRefused": "PR が拒否されました（{{status}}）：{{message}}",
 			"prCreation": "PR の作成",
-			"repoOwnerFormat": "`github.repo` は owner/repo の形式である必要があります。",
 			"mergeRefused": "マージが拒否されました（{{status}}）：{{message}}",
 			"prMerge": "PR のマージ",
 			"prTitleRequired": "プルリクエストにはタイトルが必要です。"

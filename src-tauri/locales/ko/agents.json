@@ -108,63 +108,10 @@
 			"broken": "{{count}}개 위반"
 		}
 	},
-	"team": {
-		"priority": {
-			"urgent": "긴급",
-			"high": "높음",
-			"medium": "보통",
-			"low": "낮음"
-		},
+	"pulls": {
 		"errors": {
 			"unknown": "오류",
-			"linear": "Linear: {{message}}",
-			"github": "GitHub: {{message}}",
-			"noMembers": "선언된 멤버가 없습니다: 설정 → 팀에서 팀을 추가하세요. 티켓을 연결하려면 각 사람의 작업 트래커 식별자가, 풀 리퀘스트를 연결하려면 GitHub 로그인이 필요합니다.",
-			"githubRepoMissing": "설정에서 `github.repo`(예: acme/monorepo)를 입력하세요."
-		},
-		"narrative": {
-			"theirTopics": "맡은 주제",
-			"and": "{{list}} 및 {{last}}",
-			"activeTickets_other": "진행 중인 티켓 {{count}}개",
-			"reviewTickets_other": "리뷰 중인 티켓 {{count}}개",
-			"openPrs_other": "열린 PR {{count}}개",
-			"newOpenPrs_other": "새로 연 PR {{count}}개",
-			"prs_other": "PR {{count}}개",
-			"blockingPoints_other": "차단 이슈 {{count}}개",
-			"nothingActiveDev": "{{name}}님은 현재 진행 중인 작업도 열린 PR도 없습니다.",
-			"nothingActive": "{{name}}님은 여기서 추적 중인 진행 주제가 없습니다.",
-			"variedTopics": "{{name}}님은 여러 주제를 진행하고 있습니다{{load}}.",
-			"alsoOn": ", 그리고 {{themes}}",
-			"mostlyOn": "{{name}}님은 주로 {{theme}} 작업 중입니다{{tail}}{{load}}.",
-			"workingOn": "{{name}}님은 {{themes}} 작업 중입니다{{load}}.",
-			"nothingMerged": "지난 데일리 이후 병합된 것이 없습니다.",
-			"openedNothingMerged": "지난 데일리 이후 {{opened}}, 아직 병합된 것은 없습니다.",
-			"shippedOn": " ({{themes}})",
-			"andOpened": ", 그리고 {{opened}}",
-			"shipped": "지난 데일리 이후 {{prs}} 배포{{themes}}{{opened}}.",
-			"toChallenge": "{{count}}개 점검 필요",
-			"toReview": "다른 사람을 위해 리뷰할 {{prs}}",
-			"nothingStuck": "이쪽에서 막힌 것은 없습니다.",
-			"toWatch": "지켜볼 것: {{items}}."
-		},
-		"days": "{{count}}일",
-		"flags": {
-			"blockedOne": "{{id}}이(가) Blocked로 표시됨 — 무엇이 있으면 풀릴까요?",
-			"blockedMany": "티켓 {{count}}개가 Blocked로 표시됨 ({{ids}}) — 무엇이 있으면 풀릴까요?",
-			"stacked": "PR #{{number}}이(가) `{{base}}` 기반 (dev 아님) — 베이스를 먼저 병합할까요?",
-			"ciFailing": "PR #{{number}} CI 실패 — 리뷰/병합 전에 수정하세요.",
-			"approved": "PR #{{number}} 승인되었지만 병합되지 않음 — 병합을 막는 것은 무엇인가요?",
-			"changesRequested": "PR #{{number}}: 변경 요청됨 — 작성자가 처리해야 합니다.",
-			"reviewStaleOne": "PR #{{number}}이(가) {{age}}일째 리뷰 대기 중 — 리뷰 시간을 잡을까요?",
-			"reviewStaleMany": "PR {{count}}개가 {{days}}일 넘게 리뷰 대기 중 ({{numbers}}, 가장 오래된 것 {{age}}일) — 리뷰를 계획할까요?",
-			"draftStale": "PR {{count}}개가 {{days}}일 넘게 초안 상태 ({{numbers}}) — 아직 유효한가요?",
-			"inProgressNoPrOne": "{{id}}이(가) {{days}}일 넘게 PR 없이 In Progress 상태 — 어디까지 진행됐나요?",
-			"inProgressNoPrMany": "티켓 {{count}}개가 {{days}}일 넘게 PR 없이 In Progress 상태 ({{ids}}) — 어디까지 진행됐나요?",
-			"reviewStale": "티켓 {{count}}개가 {{days}}일 넘게 리뷰 중 ({{ids}}) — 누구를 기다리나요?",
-			"wip": "티켓 {{count}}개가 동시에 In Progress — 우선순위를 정하거나 집중할까요?",
-			"assigneeMismatch": "{{issue}}은(는) {{name}}님에게 할당되었지만 코드는 @{{author}}님이 작성 (PR #{{number}}) — 재할당할까요?",
-			"idleNothing": "열린 PR도 진행 중인 티켓도 없음 — 무엇을 작업하고 있나요?",
-			"idleStale": "열린 PR이 없고 진행 중인 티켓에 최근 활동이 없음 — 여유가 있나요? 막혔나요?"
+			"github": "GitHub: {{message}}"
 		}
 	},
 	"permanence": {

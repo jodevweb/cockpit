@@ -912,91 +912,6 @@
 		"errorsAndIncidents": "Ошибки и инциденты",
 		"emptyHint": "Проверьте токен и организацию в настройках, если ожидали результаты."
 	},
-	"overview": {
-		"prSegments": {
-			"ready": "готовы",
-			"ciFailing": "CI ✗",
-			"stacked": "в стеке",
-			"inReview": "на ревью",
-			"drafts": "черновики"
-		},
-		"title": "Обзор",
-		"subtitle": "Состояние продукта, флота и миссий",
-		"refreshing": "обновление…",
-		"sourcesLoading_one": "Загружается {{count}} источник…",
-		"sourcesLoading_few": "Загружаются {{count}} источника…",
-		"sourcesLoading_many": "Загружаются {{count}} источников…",
-		"sourcesLoading_other": "Загружаются {{count}} источника…",
-		"waitingBanner_one": "{{count}} агент ждёт вашего ответа",
-		"waitingBanner_few": "{{count}} агента ждут вашего ответа",
-		"waitingBanner_many": "{{count}} агентов ждут вашего ответа",
-		"waitingBanner_other": "{{count}} агента ждут вашего ответа",
-		"tiles": {
-			"liveAgents": "Активные агенты",
-			"waiting": "ждут: {{count}}",
-			"readyToMerge": "Готово к слиянию",
-			"ciFailing": "Падающий CI",
-			"dailyBlockers": "Блокеры дейли",
-			"prodErrors": "Ошибки в продакшене",
-			"activeWorktrees": "Активные worktrees",
-			"total": "всего {{count}}"
-		},
-		"usage": {
-			"title": "Использование Claude",
-			"dayLabel": "{{day}}: {{tokens}} токенов",
-			"summary": "{{today}} сегодня · {{week}} за 7 дней · последние 21 день",
-			"none": "Измерений пока нет."
-		},
-		"prState": "Статус PR",
-		"cycle": {
-			"title": "Текущий цикл",
-			"ticketsDone": "тикетов выполнено",
-			"reviewLoad": "PR на ревью",
-			"none": "Нет активного цикла."
-		},
-		"missions": {
-			"title": "Миссии",
-			"none": "Нет миссий в работе. Миссия разбивает тикет на задачи, переданные агентам.",
-			"delivered": "{{done}}/{{total}} сдано",
-			"splitting": "декомпозиция",
-			"running": "в работе: {{count}}"
-		},
-		"production": {
-			"title": "Продакшен",
-			"none": "Нет критических ошибок за 14 дней."
-		},
-		"prFlow": {
-			"title": "Поток PR",
-			"see": "Открыть",
-			"stackedOn": "в стеке на {{base}}",
-			"ready_one": "{{count}} PR готов к слиянию, ничего не сломано.",
-			"ready_few": "{{count}} PR готовы к слиянию, ничего не сломано.",
-			"ready_many": "{{count}} PR готовы к слиянию, ничего не сломано.",
-			"ready_other": "{{count}} PR готовы к слиянию, ничего не сломано.",
-			"noneFailing": "Нет падающих PR."
-		},
-		"fleet": {
-			"title": "Флот",
-			"allClean": "Все деревья чистые.",
-			"changes_one": "{{count}} изменение",
-			"changes_few": "{{count}} изменения",
-			"changes_many": "{{count}} изменений",
-			"changes_other": "{{count}} изменения"
-		},
-		"daily": {
-			"title": "Блокеры дейли",
-			"button": "Дейли"
-		},
-		"docs": {
-			"title": "Последние результаты",
-			"none": "Нет недавних документов."
-		},
-		"githubError": "GitHub: {{error}}",
-		"empty": {
-			"message": "Нечего показать",
-			"hint": "Проверьте `general.main_repo` в настройках."
-		}
-	},
 	"permanence": {
 		"title": "Permanence",
 		"resume": "Возобновить",
@@ -1281,7 +1196,6 @@
 			"removeTitle": "Удалить проект «{{name}}»?",
 			"removeMessage": "Меняется только конфигурация Cockpit — репозиторий остаётся нетронутым.",
 			"activate": "Сделать этот проект активным",
-			"soloBadge": "solo",
 			"new": "Новый",
 			"namePlaceholder": "Сторонний проект",
 			"folder": "Папка",
@@ -1289,8 +1203,6 @@
 			"folderPlaceholder": "~/Sites/my-project",
 			"githubHint": "Пусто = определяется по репозиторию, если он есть.",
 			"githubPlaceholder": "me/my-project",
-			"solo": "Solo",
-			"soloTitle": "Проект без команды: скрывает дейли",
 			"prepareFirst": "Сначала подготовьте почву — блок ниже позаботится об этом"
 		},
 		"saved": "Конфигурация сохранена.",
@@ -1314,7 +1226,6 @@
 			"projects": "Проекты",
 			"services": "Подключённые сервисы",
 			"workflow": "Рабочий процесс",
-			"team": "Команда",
 			"accounts": "Аккаунты",
 			"engines": "Движки агентов",
 			"mcp": "Инструменты репозитория (MCP)",
@@ -1360,7 +1271,9 @@
 			"sentryProjects": "Проекты Sentry",
 			"sentryProjectsHint": "Ни один не отмечен = вся организация.",
 			"ticketKey": "Ключ тикетов",
-			"ticketKeyHint": "Префикс Linear, например ABC — команда дейли задаётся ниже",
+			"ticketKeyHint": "Префикс Linear, например ABC, — по нему распознаются номера тикетов в ветках и заголовках",
+			"linearTeamId": "Команда Linear",
+			"linearTeamIdHint": "UUID команды Linear, виден в URL её настроек: её статусы, участники и метки предлагаются при редактировании тикета.",
 			"gitlabProject": "Проект GitLab",
 			"gitlabProjectHint": "путь с группой, например group/product",
 			"gitlabProjectPlaceholder": "group/product",
@@ -1414,79 +1327,6 @@
 			"showHelp": "Работающие рабочие пространства остаются закреплёнными в правом нижнем углу, вне своего экрана: это их единственный след, когда вы смотрите в другое место.",
 			"hideHelp": "Поверх других экранов ничего не отображается. Работающее остаётся видимым на экране «Рабочие пространства», а уведомления продолжают вас оповещать."
 		}
-	},
-	"team": {
-		"title": "Дейли",
-		"loading": "Загрузка…",
-		"subtitle": "с дейли {{since}}",
-		"subtitleCycle": "Цикл {{number}} · с дейли {{since}}",
-		"present": "Провести дейли на весь экран",
-		"currentCycle": "Текущий цикл",
-		"all": "Все",
-		"githubError": "Со стороны GitHub: {{error}} — тикеты Linear по-прежнему показаны.",
-		"wholeTeam": "Вся команда",
-		"draft": "черновик",
-		"ageDays_one": "{{count}} дн.",
-		"ageDays_few": "{{count}} дн.",
-		"ageDays_many": "{{count}} дн.",
-		"ageDays_other": "{{count}} дн.",
-		"decision": {
-			"approved": "одобрен",
-			"changesRequested": "запрошены правки",
-			"reviewRequired": "на ревью"
-		},
-		"chip": {
-			"wip": "WIP",
-			"review": "ревью",
-			"prs": "PR",
-			"toReview": "на ревью",
-			"merged": "слито",
-			"blocking": "блокирует",
-			"toChallenge": "обсудить",
-			"inReview": "на ревью",
-			"readyToMerge": "готово к слиянию"
-		},
-		"member": {
-			"cycle": "цикл {{done}}/{{total}}",
-			"more_one": "+ещё {{count}}",
-			"more_few": "+ещё {{count}}",
-			"more_many": "+ещё {{count}}",
-			"more_other": "+ещё {{count}}",
-			"openPrs": "Их открытые PR",
-			"reviewInbox": "На ревью для других",
-			"reviewFrom": "от {{author}} · {{age}}",
-			"shipped": "Поставлено с прошлого дейли",
-			"next": "Дальше"
-		},
-		"noTracker": {
-			"subtitle": "Трекер задач не подключён",
-			"service": "Трекер задач",
-			"token": "токен"
-		},
-		"noTeam": {
-			"subtitle": "Команда не объявлена",
-			"title": "Дейли нужно знать, кто в команде",
-			"missingId": "Не указан ID команды: это UUID команды Linear, виден в URL её настроек, — а не ключ-префикс тикетов.",
-			"noMembers": "Ни один участник не объявлен: каждому нужен ID в Linear, чтобы к нему можно было привязать его тикеты, и логин GitHub для его pull requests.",
-			"open": "Открыть Настройки → Команда"
-		},
-		"flags": {
-			"title": "Обсудить на дейли",
-			"urgentOnly": "Только блокирующее",
-			"empty": "Сообщать нечего",
-			"emptyHint": "В этих рамках нет открытых вопросов."
-		},
-		"flow": {
-			"title": "Поток PR",
-			"ready": "Готово к слиянию ({{count}})",
-			"ciFailing": "CI падает ({{count}})",
-			"stacked": "PR в стеке ({{count}})",
-			"blockedBy": "заблокирован #{{number}}"
-		},
-		"focus": "Фокус команды",
-		"product": "Продукт · отслеживание Linear",
-		"noMember": "Нет участников",
-		"noMemberHint": "Заполните `[team]` в конфигурации."
 	},
 	"today": {
 		"title": "Сегодня",

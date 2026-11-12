@@ -185,70 +185,6 @@
 		"validate": "OK",
 		"cancel": "キャンセル"
 	},
-	"dailyPresenter": {
-		"status": {
-			"done": "完了",
-			"ongoing": "進行中",
-			"postponed": "延期"
-		},
-		"parts": {
-			"shipped": "出荷済み",
-			"shippedEmpty": "前回のデイリー以降、マージされたものはありません。",
-			"openedSince_other": "以降に作成された PR {{count}} 件",
-			"ongoing": "進行中",
-			"ongoingEmpty": "アクティブなチケットはありません。",
-			"ticketDetail": "{{id}} · {{progress}}% · {{days}} 日",
-			"toHandle": "対応が必要",
-			"toHandleEmpty": "止まっているものはありません。"
-		},
-		"recap": {
-			"heading": "# デイリー — {{date}} 以降",
-			"shipped": "- 出荷済み：{{items}}",
-			"commitment": "- 約束：{{text}}",
-			"commitmentWithStatus": "- 約束：{{text}}（{{status}}）",
-			"parked": "## 保留トピック"
-		},
-		"title": "デイリー",
-		"since": "{{date}} 以降",
-		"total": "合計 {{time}}",
-		"quit": "終了（Esc）",
-		"done": {
-			"title": "デイリー完了",
-			"duration_other": "{{count}} 人で {{time}}",
-			"parked": "これから取り上げる · {{count}}",
-			"noParked": "保留トピックはありません。",
-			"copyRecap": "まとめをコピー",
-			"close": "閉じる"
-		},
-		"speakers": "発言順",
-		"speaker": {
-			"speaking": "発言中",
-			"done": "完了"
-		},
-		"timeLeft": "残りの発言時間",
-		"pause": "一時停止（p）",
-		"partsLabel": "パート",
-		"nav": {
-			"previous": "前へ",
-			"nextPart": "次のパート",
-			"nextSpeaker": "次の発言者",
-			"finish": "完了"
-		},
-		"sideLabel": "約束とトピック",
-		"pledge": {
-			"title": "{{name}} が前回言ったこと",
-			"status": "状態",
-			"none": "前回のデイリーでの約束はありません。",
-			"placeholder": "次のデイリーまでの約束…"
-		},
-		"parked": {
-			"title": "保留",
-			"placeholder": "後で取り上げるトピック…",
-			"add": "保留にする"
-		},
-		"shortcuts": "→ 次へ · ← 戻る · p 一時停止 · Esc 終了",
-		"noDevelopers": "発表する開発者がいません。"
-	},
 	"diagram": {
 		"unreadable": "図を読み取れません — テキストを表示します",
 		"caption": "エージェントが記述した図"
@@ -315,23 +251,6 @@
 		"correct": "修正",
 		"edit": "編集",
 		"forget": "破棄"
-	},
-	"nowFeed": {
-		"state": {
-			"ciFailing": "CI 失敗",
-			"changesRequested": "修正依頼",
-			"stacked": "スタックされた PR",
-			"ready": "マージ可能",
-			"draft": "ドラフト",
-			"inReview": "レビュー中"
-		},
-		"empty": "進行中のものはありません",
-		"emptyHint": "アクティブなチケットもオープン中のプルリクエストもありません。今後の予定は下に表示されます。",
-		"noTicket": "チケットなし",
-		"lastActivity": "最後のアクティビティ：{{when}}",
-		"today": "今日",
-		"yesterday": "昨日",
-		"days_other": "{{count}} 日"
 	},
 	"permanenceSettings": {
 		"intro": "あなたが他のことをしている間、エコシステムを動かし続けるオペレーターです。何を作るかは決めません：修正し、再試行し、更新します — そして成功を証明できます。運用にはプロダクトにはないオラクルがあるからです。Cockpit が開いている間だけ動作します。<strong>すべてボタンなしで適用されます</strong>：変更した内容はフィールドを離れたときに保存されます。",
@@ -509,21 +428,6 @@
 		},
 		"nothingToPrepare": "準備するものはありません"
 	},
-	"projectsHealth": {
-		"title": "プロジェクト",
-		"openWorktrees": "worktree を開く",
-		"switch": "このプロジェクトに切り替え",
-		"active": "アクティブ",
-		"liveAgents": "アクティブなエージェント",
-		"ciFailing": "CI 失敗",
-		"readyToMerge": "マージ可能",
-		"openPrs": "オープン中の PR",
-		"worktrees": "worktree",
-		"dirtyHint": "未コミットの作業がある worktree",
-		"dirty_other": "未コミット {{count}} 件",
-		"unpushed": "未プッシュのコミットがある worktree",
-		"partial": "一部のみ"
-	},
 	"propertiesReport": {
 		"verdict": {
 			"broken": "不成立",
@@ -663,29 +567,13 @@
 		},
 		"workflow": {
 			"saved": "ワークフローを保存しました。",
-			"intro": "タスクトラッカーの列を、チームでの呼び方どおりに指定します。チケットの進み具合と、デイリーでの位置づけを決めます。",
-			"active": {
-				"label": "進行中",
-				"hint": "作業中の列"
-			},
-			"review": {
-				"label": "レビュー中",
-				"hint": "レビュー、QA"
-			},
+			"intro": "このプロジェクトの進め方：完了を意味するトラッカーのステータス、プルリクエストのマージ先ブランチ、そして worktree の作成、プルリクエストの作成、納品のゲートを担うコマンド。",
 			"done": {
 				"label": "完了"
-			},
-			"blocked": {
-				"label": "ブロック中",
-				"hint": "ブロッカーを示す列"
 			},
 			"baseBranches": {
 				"label": "ベースブランチ",
 				"hint": "これ以外を対象とする PR はスタックとみなされます"
-			},
-			"dailyWeekdays": {
-				"label": "デイリーの曜日",
-				"hint": "1 = 月曜、5 = 金曜"
 			},
 			"prCommand": {
 				"label": "PR 作成コマンド",
@@ -728,8 +616,6 @@
 				"title": "レビューエージェントは読み取り専用",
 				"detail": "オン：編集不可で、読み取り（git diff、git log、gh pr view…）のみ — それ以外はすべて拒否されます。オフ：テストの実行やファイルの変更が可能です。指示では PR を修正しないよう伝えますが、それを止めるものはありません。"
 			},
-			"themes_other": "{{count}} 件の業務トピックを宣言済み — デイリーで識別子を並べる代わりに「彼女は請求を担当」と言えるようになります。トピックは設定ファイルで編集します。",
-			"noThemes": "業務トピックはありません：デイリーの説明はタイトルそのものに頼ります。",
 			"gateCommands": {
 				"label": "統合前のチェック",
 				"hint": "カンマ区切りのシェルコマンド。ミッションのタスクがコードを渡すと、その worktree で実行されます。すべて通った場合のみマージされ、失敗すると出力がマスターに渡り差し戻されます"
@@ -791,47 +677,6 @@
 			"newLabel": "新しいロール",
 			"add": "ロールを追加",
 			"save": "ロールを保存"
-		},
-		"team": {
-			"saved": "チームを保存しました。",
-			"intro": "チームのメンバーと、各ツールでメンバーを識別するアカウント。この対応付けがデイリーとチームボードを動かします：GitHub ログインのないメンバーは、どのプルリクエストにも表示されません。",
-			"soloWarning": "このプロジェクトは<strong>ソロ</strong>に設定されています：チームは無視され、デイリーは非表示のままです。以下を役立てるには、プロジェクト設定で「ソロ」のチェックを外してください。",
-			"linearTeam": {
-				"label": "Linear チーム",
-				"hint": "現在のサイクルを読み取るチームの UUID — 空欄 = デイリーなし"
-			},
-			"empty": "メンバーが宣言されていません：デイリーとチームボードは空のままです。Cockpit はデフォルトで誰も提案しません — チームは推測できないからです。",
-			"name": "名前",
-			"role": {
-				"label": "ロール",
-				"hint": "dev または product"
-			},
-			"roleLabel": {
-				"label": "表示する肩書き",
-				"hint": "画面に表示されるもの",
-				"placeholder": "バックエンド開発者"
-			},
-			"github": {
-				"hint": "メインのログイン"
-			},
-			"linearId": {
-				"label": "Linear ID",
-				"hint": "UUID。プロフィールの URL に表示されます"
-			},
-			"githubAliases": {
-				"label": "その他の GitHub ログイン",
-				"hint": "以前のアカウント、カンマ区切り"
-			},
-			"sentryEmails": {
-				"label": "Sentry のメールアドレス",
-				"hint": "そのメンバーのアカウントのもの、カンマ区切り"
-			},
-			"sentryNames": {
-				"label": "Sentry の名前",
-				"hint": "イベントにメールアドレスがない場合"
-			},
-			"add": "メンバーを追加",
-			"save": "チームを保存"
 		},
 		"engines": {
 			"saved": "エンジンを保存しました。",

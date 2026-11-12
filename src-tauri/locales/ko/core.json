@@ -59,7 +59,7 @@
 	},
 	"tickets": {
 		"noTracker": "설정된 이슈 트래커가 없습니다: Linear 토큰, GitLab 프로젝트 또는 GitHub 저장소를 입력하세요.",
-		"linearTeamMissing": "Linear 팀 식별자가 없습니다: 설정 → 팀에서 입력하세요. 이슈 앞에 붙는 키가 아니라, 팀 설정 URL에 보이는 UUID입니다."
+		"linearTeamMissing": "Linear 팀 식별자가 없습니다: 설정 → 서비스에서 입력하세요. 이슈 앞에 붙는 키가 아니라, 팀 설정 URL에 보이는 UUID입니다."
 	},
 	"relay": {
 		"settingUnreadable": "읽을 수 없는 설정: {{error}}",
@@ -353,7 +353,6 @@
 			"prFromBase": "`{{branch}}`은(는) 베이스 브랜치입니다: PR을 열기 전에 전용 브랜치를 만드세요.",
 			"prRefused": "PR 거부됨 ({{status}}): {{message}}",
 			"prCreation": "PR 생성",
-			"repoOwnerFormat": "`github.repo`는 owner/repo 형식이어야 합니다.",
 			"mergeRefused": "병합 거부됨 ({{status}}): {{message}}",
 			"prMerge": "PR 병합",
 			"prTitleRequired": "풀 리퀘스트에는 제목이 필요합니다."

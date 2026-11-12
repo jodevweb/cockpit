@@ -2,7 +2,7 @@
  * « Ceci vient de changer » — dit une fois, entendu partout.
  *
  * Un même objet s'affiche à plusieurs endroits : un ticket dans sa fiche et dans
- * la liste qui l'a ouverte, dans le daily, sur l'accueil. Quand on le modifie
+ * la liste qui l'a ouverte, sur la carte, sur l'accueil. Quand on le modifie
  * depuis l'un d'eux, seul celui-là se rechargeait : on passait un ticket en
  * revue, sa fiche l'affichait, et la liste juste à côté continuait d'annoncer
  * l'état d'avant. On finissait par douter de ce qu'on venait de faire.

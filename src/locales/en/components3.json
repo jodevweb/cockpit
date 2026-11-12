@@ -195,72 +195,6 @@
 		"validate": "OK",
 		"cancel": "Cancel"
 	},
-	"dailyPresenter": {
-		"status": {
-			"done": "Done",
-			"ongoing": "In progress",
-			"postponed": "Postponed"
-		},
-		"parts": {
-			"shipped": "Shipped",
-			"shippedEmpty": "Nothing merged since the last daily.",
-			"openedSince_one": "{{count}} PR opened since",
-			"openedSince_other": "{{count}} PRs opened since",
-			"ongoing": "In progress",
-			"ongoingEmpty": "No active ticket.",
-			"ticketDetail": "{{id}} · {{progress}}% · {{days}} d",
-			"toHandle": "To handle",
-			"toHandleEmpty": "Nothing stuck."
-		},
-		"recap": {
-			"heading": "# Daily — since {{date}}",
-			"shipped": "- Shipped: {{items}}",
-			"commitment": "- Commitment: {{text}}",
-			"commitmentWithStatus": "- Commitment: {{text}} ({{status}})",
-			"parked": "## Parked topics"
-		},
-		"title": "Daily",
-		"since": "since {{date}}",
-		"total": "total {{time}}",
-		"quit": "Quit (Esc)",
-		"done": {
-			"title": "Daily done",
-			"duration_one": "{{time}} for {{count}} person",
-			"duration_other": "{{time}} for {{count}} people",
-			"parked": "To pick up now · {{count}}",
-			"noParked": "No parked topics.",
-			"copyRecap": "Copy recap",
-			"close": "Close"
-		},
-		"speakers": "Speaking order",
-		"speaker": {
-			"speaking": "speaking",
-			"done": "done"
-		},
-		"timeLeft": "Speaking time left",
-		"pause": "Pause (p)",
-		"partsLabel": "Parts",
-		"nav": {
-			"previous": "Previous",
-			"nextPart": "Next part",
-			"nextSpeaker": "Next speaker",
-			"finish": "Finish"
-		},
-		"sideLabel": "Commitments and topics",
-		"pledge": {
-			"title": "What {{name}} said last time",
-			"status": "Status",
-			"none": "No commitment at the last daily.",
-			"placeholder": "Commitment for the next daily…"
-		},
-		"parked": {
-			"title": "Parked",
-			"placeholder": "Topic to pick up afterwards…",
-			"add": "Park"
-		},
-		"shortcuts": "→ next · ← back · p pause · Esc quit",
-		"noDevelopers": "No developers to present."
-	},
 	"diagram": {
 		"unreadable": "unreadable diagram — here is its text",
 		"caption": "diagram as stated by the agent"
@@ -329,24 +263,6 @@
 		"correct": "Correct",
 		"edit": "Edit",
 		"forget": "Forget"
-	},
-	"nowFeed": {
-		"state": {
-			"ciFailing": "CI failing",
-			"changesRequested": "changes requested",
-			"stacked": "stacked PR",
-			"ready": "ready to merge",
-			"draft": "draft",
-			"inReview": "in review"
-		},
-		"empty": "Nothing in progress",
-		"emptyHint": "No active ticket or open pull request. What's coming up is listed below.",
-		"noTicket": "no ticket",
-		"lastActivity": "Last activity {{when}}",
-		"today": "today",
-		"yesterday": "yesterday",
-		"days_one": "{{count}} d",
-		"days_other": "{{count}} d"
 	},
 	"permanenceSettings": {
 		"intro": "An operator who keeps the ecosystem running while you do something else. It doesn't decide what to build: it fixes, retries, updates — and it can prove it succeeded, because operations have oracles that the product doesn't. It only runs while the cockpit is open. <strong>Everything applies without a button</strong>: what you change is saved when you leave the field.",
@@ -528,22 +444,6 @@
 		},
 		"nothingToPrepare": "Nothing to prepare"
 	},
-	"projectsHealth": {
-		"title": "Projects",
-		"openWorktrees": "Open worktrees",
-		"switch": "Switch to this project",
-		"active": "active",
-		"liveAgents": "active agents",
-		"ciFailing": "CI failing",
-		"readyToMerge": "ready to merge",
-		"openPrs": "open PRs",
-		"worktrees": "worktrees",
-		"dirtyHint": "worktrees with uncommitted work",
-		"dirty_one": "{{count}} dirty",
-		"dirty_other": "{{count}} dirty",
-		"unpushed": "worktrees with unpushed commits",
-		"partial": "partial"
-	},
 	"propertiesReport": {
 		"verdict": {
 			"broken": "broken",
@@ -690,29 +590,13 @@
 		},
 		"workflow": {
 			"saved": "Workflow saved.",
-			"intro": "The columns of your task tracker, named the way your team names them. They decide how far along a ticket is and where it sits in the daily.",
-			"active": {
-				"label": "In progress",
-				"hint": "active work columns"
-			},
-			"review": {
-				"label": "In review",
-				"hint": "review, QA"
-			},
+			"intro": "How this project works: the tracker states that mean done, the branches pull requests merge into, and the commands that create worktrees, open pull requests and gate deliveries.",
 			"done": {
 				"label": "Done"
-			},
-			"blocked": {
-				"label": "Blocked",
-				"hint": "the column that signals a blocker"
 			},
 			"baseBranches": {
 				"label": "Base branches",
 				"hint": "a PR targeting anything else counts as stacked"
-			},
-			"dailyWeekdays": {
-				"label": "Daily days",
-				"hint": "1 = Monday, 5 = Friday"
 			},
 			"prCommand": {
 				"label": "PR opening command",
@@ -755,9 +639,6 @@
 				"title": "The review agent is read-only",
 				"detail": "Checked: no editing, and nothing but reads (git diff, git log, gh pr view…) — everything else is refused. Unchecked: it can run tests or modify files; its instructions still tell it not to fix the PR, but nothing stops it."
 			},
-			"themes_one": "{{count}} business topic declared — it lets the daily say \"she's on billing\" rather than list identifiers. Topics are edited in the configuration file.",
-			"themes_other": "{{count}} business topics declared — they let the daily say \"she's on billing\" rather than list identifiers. Topics are edited in the configuration file.",
-			"noThemes": "No business topics: the daily narrative will rely on the titles themselves.",
 			"gateCommands": {
 				"label": "Checks before integration",
 				"hint": "shell commands, comma-separated, run in a mission task's worktree once it hands back code; a task is only merged when they all pass, otherwise its master gets the output to send it back"
@@ -820,47 +701,6 @@
 			"newLabel": "New role",
 			"add": "Add a role",
 			"save": "Save roles"
-		},
-		"team": {
-			"saved": "Team saved.",
-			"intro": "Who's on the team, and which accounts identify them in each tool. These mappings drive the daily and the team board: a member without their GitHub login won't show up on any pull request.",
-			"soloWarning": "This project is marked <strong>solo</strong>: its team is ignored and the daily stays hidden. Untick \"solo\" in the project settings for what follows to be of any use.",
-			"linearTeam": {
-				"label": "Linear team",
-				"hint": "UUID of the team whose current cycle is read — empty = no daily"
-			},
-			"empty": "No members declared: the daily and the team board will stay empty. Cockpit suggests no one by default — a team can't be guessed.",
-			"name": "Name",
-			"role": {
-				"label": "Role",
-				"hint": "dev or product"
-			},
-			"roleLabel": {
-				"label": "Displayed title",
-				"hint": "as shown on screen",
-				"placeholder": "Back-end developer"
-			},
-			"github": {
-				"hint": "main login"
-			},
-			"linearId": {
-				"label": "Linear ID",
-				"hint": "UUID, visible in their profile URL"
-			},
-			"githubAliases": {
-				"label": "Other GitHub logins",
-				"hint": "former accounts, comma-separated"
-			},
-			"sentryEmails": {
-				"label": "Sentry emails",
-				"hint": "those of their accounts, comma-separated"
-			},
-			"sentryNames": {
-				"label": "Sentry names",
-				"hint": "when the email is missing from the event"
-			},
-			"add": "Add a member",
-			"save": "Save team"
 		},
 		"engines": {
 			"saved": "Engines saved.",

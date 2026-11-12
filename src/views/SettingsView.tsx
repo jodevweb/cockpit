@@ -30,7 +30,6 @@ import {
 	ConnectorsSettings,
 	EnginesSettings,
 	RolesSettings,
-	TeamSettings,
 	MissionBudgetSettings,
 	MissionModeSettings,
 	SandboxSettings,
@@ -283,7 +282,6 @@ function Projects() {
 		name: "",
 		mainRepo: "",
 		githubRepo: "",
-		solo: false,
 	});
 	const [busy, setBusy] = useState(false);
 	// Ce que le cockpit trouve à l'emplacement saisi : c'est lui qui décide si
@@ -299,14 +297,13 @@ function Projects() {
 				id: "",
 				name: draft.name,
 				color: "",
-				solo: draft.solo,
 				main_repo: draft.mainRepo,
 				// Le dépôt déduit du serveur quand on ne l'a pas saisi : il est
 				// déjà sous les yeux dans le bloc de préparation, le retaper
 				// n'ajoute qu'une occasion de se tromper.
 				github: { repo: draft.githubRepo || ground?.slug || "", token: "" },
 			});
-			setDraft({ name: "", mainRepo: "", githubRepo: "", solo: false });
+			setDraft({ name: "", mainRepo: "", githubRepo: "" });
 			reloadConfig();
 			notify(t("settings.projects.added", { name: draft.name || draft.mainRepo }));
 		} catch (error) {
@@ -351,7 +348,6 @@ function Projects() {
 						</span>
 					</button>
 					{project.githubRepo ? <Badge>{project.githubRepo}</Badge> : null}
-					{project.solo ? <Badge>{t("settings.projects.soloBadge")}</Badge> : null}
 					{projects.length > 1 ? (
 						<Button size="sm" onClick={() => void remove(project.id, project.name)}>
 							{t("settings.common.remove")}
@@ -395,15 +391,6 @@ function Projects() {
 					/>
 				</Field>
 				<Button
-					size="sm"
-					active={draft.solo}
-					onClick={() => setDraft((current) => ({ ...current, solo: !current.solo }))}
-					title={t("settings.projects.soloTitle")}
-					className="h-7"
-				>
-					{t("settings.projects.solo")}
-				</Button>
-				<Button
 					variant="solid"
 					icon={Plus}
 					// Un dossier qui n'est pas encore un dépôt ne peut pas devenir un
@@ -445,6 +432,7 @@ type SettingsDraft = {
 	sentryOrg: string;
 	sentryProjects: string;
 	linearTeamKey: string;
+	linearTeamId: string;
 	triggerProjectRef: string;
 	railwayProjectId: string;
 	gitlabProject: string;
@@ -509,6 +497,7 @@ function useSettingsForm(scope: SettingsScope) {
 		sentryOrg: "",
 		sentryProjects: "",
 		linearTeamKey: "",
+		linearTeamId: "",
 		triggerProjectRef: "",
 		railwayProjectId: "",
 		gitlabProject: "",
@@ -539,6 +528,7 @@ function useSettingsForm(scope: SettingsScope) {
 			sentryOrg: declared.sentryOrg,
 			sentryProjects: declared.sentryProjects.join(", "),
 			linearTeamKey: declared.linearTeamKey,
+			linearTeamId: declared.linearTeamId,
 			triggerProjectRef: declared.triggerProjectRef,
 			railwayProjectId: declared.railwayProjectId,
 			gitlabProject: declared.gitlabProject,
@@ -562,7 +552,7 @@ function useSettingsForm(scope: SettingsScope) {
 					.map((value) => value.trim())
 					.filter(Boolean),
 			},
-			linear: { team_key: draft.linearTeamKey },
+			linear: { team_key: draft.linearTeamKey, team_id: draft.linearTeamId },
 			gitlab: { project: draft.gitlabProject, host: draft.gitlabHost },
 			trigger: { project_ref: draft.triggerProjectRef },
 			railway: { project_id: draft.railwayProjectId },
@@ -831,13 +821,6 @@ function TeamTab() {
 			<Section title={t("settings.sections.workflow")}>
 				<WorkflowSettings />
 			</Section>
-
-			{/* L'équipe juste après le flux de travail : les deux décrivent
-			    la même chose — comment ce projet travaille — et se règlent
-			    au même moment, quand on branche un nouveau dépôt. */}
-			<Section title={t("settings.sections.team")}>
-				<TeamSettings />
-			</Section>
 		</>
 	);
 }
@@ -1088,10 +1071,10 @@ function ServiceIdentifiers({ draft, setDraft }: { draft: SettingsDraft; setDraf
 						}
 					/>
 				</Field>
-				{/* Ce champ ne désigne pas l'équipe du daily : il sert à lire un
-				    numéro de ticket (ABC-3044). Nommé « Équipe Linear », il
-				    passait pour le réglage qui manquait au daily — lequel
-				    attend un UUID et des membres, dans la section Équipe. */}
+				{/* La clé sert à lire un numéro de ticket (ABC-3044) ; l'UUID, à
+				    demander à Linear les états, membres et labels de l'équipe.
+				    Deux réglages distincts, côte à côte pour qu'on ne prenne pas
+				    l'un pour l'autre. */}
 				<Field
 					label={t("settings.services.ticketKey")}
 					hint={t("settings.services.ticketKeyHint")}
@@ -1101,6 +1084,19 @@ function ServiceIdentifiers({ draft, setDraft }: { draft: SettingsDraft; setDraf
 						onChange={(value) =>
 							setDraft((current) => ({ ...current, linearTeamKey: value }))
 						}
+						mono
+					/>
+				</Field>
+				<Field
+					label={t("settings.services.linearTeamId")}
+					hint={t("settings.services.linearTeamIdHint")}
+				>
+					<TextInput
+						value={draft.linearTeamId}
+						onChange={(value) =>
+							setDraft((current) => ({ ...current, linearTeamId: value }))
+						}
+						placeholder="11111111-1111-1111-1111-111111111111"
 						mono
 					/>
 				</Field>

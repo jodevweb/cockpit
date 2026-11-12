@@ -185,70 +185,6 @@
 		"validate": "好",
 		"cancel": "取消"
 	},
-	"dailyPresenter": {
-		"status": {
-			"done": "已完成",
-			"ongoing": "进行中",
-			"postponed": "已推迟"
-		},
-		"parts": {
-			"shipped": "已交付",
-			"shippedEmpty": "自上次站会以来没有合并任何内容。",
-			"openedSince_other": "此后新建了 {{count}} 个 PR",
-			"ongoing": "进行中",
-			"ongoingEmpty": "没有活跃工单。",
-			"ticketDetail": "{{id}} · {{progress}}% · {{days}} 天",
-			"toHandle": "待处理",
-			"toHandleEmpty": "没有卡住的事项。"
-		},
-		"recap": {
-			"heading": "# 每日站会 — 自 {{date}} 以来",
-			"shipped": "- 已交付：{{items}}",
-			"commitment": "- 承诺：{{text}}",
-			"commitmentWithStatus": "- 承诺：{{text}}（{{status}}）",
-			"parked": "## 搁置的议题"
-		},
-		"title": "每日站会",
-		"since": "自 {{date}} 以来",
-		"total": "总计 {{time}}",
-		"quit": "退出（Esc）",
-		"done": {
-			"title": "每日站会结束",
-			"duration_other": "{{count}} 人用时 {{time}}",
-			"parked": "现在需跟进 · {{count}}",
-			"noParked": "没有搁置的议题。",
-			"copyRecap": "复制总结",
-			"close": "关闭"
-		},
-		"speakers": "发言顺序",
-		"speaker": {
-			"speaking": "发言中",
-			"done": "已完成"
-		},
-		"timeLeft": "剩余发言时间",
-		"pause": "暂停（p）",
-		"partsLabel": "部分",
-		"nav": {
-			"previous": "上一个",
-			"nextPart": "下一部分",
-			"nextSpeaker": "下一位发言人",
-			"finish": "结束"
-		},
-		"sideLabel": "承诺与议题",
-		"pledge": {
-			"title": "{{name}} 上次说的",
-			"status": "状态",
-			"none": "上次站会没有承诺。",
-			"placeholder": "下次站会前的承诺…"
-		},
-		"parked": {
-			"title": "已搁置",
-			"placeholder": "会后跟进的议题…",
-			"add": "搁置"
-		},
-		"shortcuts": "→ 下一个 · ← 返回 · p 暂停 · Esc 退出",
-		"noDevelopers": "没有需要汇报的开发者。"
-	},
 	"diagram": {
 		"unreadable": "无法读取的图表 — 以下是其文本",
 		"caption": "智能体所述的图表"
@@ -315,23 +251,6 @@
 		"correct": "修正",
 		"edit": "编辑",
 		"forget": "忘记"
-	},
-	"nowFeed": {
-		"state": {
-			"ciFailing": "CI 失败",
-			"changesRequested": "被要求修改",
-			"stacked": "堆叠的 PR",
-			"ready": "可以合并",
-			"draft": "草稿",
-			"inReview": "审查中"
-		},
-		"empty": "没有进行中的工作",
-		"emptyHint": "没有活跃工单或打开的 pull request。接下来的工作列在下方。",
-		"noTicket": "无工单",
-		"lastActivity": "最后活动 {{when}}",
-		"today": "今天",
-		"yesterday": "昨天",
-		"days_other": "{{count}} 天"
 	},
 	"permanenceSettings": {
 		"intro": "一个在你做其他事情时维持生态系统运转的值守者。它不决定要构建什么：它负责修复、重试、更新 — 并且能证明自己成功了，因为运维有判定依据，而产品没有。它只在 Cockpit 打开时运行。<strong>所有设置无需按钮即可生效</strong>：你修改的内容在离开字段时即会保存。",
@@ -509,21 +428,6 @@
 		},
 		"nothingToPrepare": "无需准备"
 	},
-	"projectsHealth": {
-		"title": "项目",
-		"openWorktrees": "打开 worktree",
-		"switch": "切换到此项目",
-		"active": "当前",
-		"liveAgents": "活跃的智能体",
-		"ciFailing": "CI 失败",
-		"readyToMerge": "可以合并",
-		"openPrs": "打开的 PR",
-		"worktrees": "worktree",
-		"dirtyHint": "有未提交工作的 worktree",
-		"dirty_other": "{{count}} 个有改动",
-		"unpushed": "有未推送提交的 worktree",
-		"partial": "部分"
-	},
 	"propertiesReport": {
 		"verdict": {
 			"broken": "被破坏",
@@ -663,29 +567,13 @@
 		},
 		"workflow": {
 			"saved": "工作流已保存。",
-			"intro": "你的任务跟踪工具中的列，按你的团队的叫法命名。它们决定工单的进展程度以及它在每日站会中的位置。",
-			"active": {
-				"label": "进行中",
-				"hint": "活跃的工作列"
-			},
-			"review": {
-				"label": "审查中",
-				"hint": "代码审查、QA"
-			},
+			"intro": "此项目的工作方式：表示完成的跟踪器状态、拉取请求合并到的分支，以及创建 worktree、打开拉取请求和把关交付的命令。",
 			"done": {
 				"label": "已完成"
-			},
-			"blocked": {
-				"label": "受阻",
-				"hint": "表示阻塞的列"
 			},
 			"baseBranches": {
 				"label": "基础分支",
 				"hint": "指向其他分支的 PR 会被视为堆叠的 PR"
-			},
-			"dailyWeekdays": {
-				"label": "站会日期",
-				"hint": "1 = 周一，5 = 周五"
 			},
 			"prCommand": {
 				"label": "创建 PR 的命令",
@@ -728,8 +616,6 @@
 				"title": "代码审查智能体为只读",
 				"detail": "勾选后：不能编辑，只能读取（git diff、git log、gh pr view…）— 其他一切都会被拒绝。取消勾选后：它可以运行测试或修改文件；它的指令仍会告诉它不要修复 PR，但没有任何东西阻止它这样做。"
 			},
-			"themes_other": "已声明 {{count}} 个业务主题 — 它们让每日站会可以说“她在做计费”，而不是列出一串标识符。主题在配置文件中编辑。",
-			"noThemes": "没有业务主题：每日站会的叙述将直接依赖标题本身。",
 			"gateCommands": {
 				"label": "集成前检查",
 				"hint": "以逗号分隔的 shell 命令，在任务交付代码后于其 worktree 中运行；全部通过才会合并，否则主控会收到输出并将任务退回修改"
@@ -791,47 +677,6 @@
 			"newLabel": "新角色",
 			"add": "添加角色",
 			"save": "保存角色"
-		},
-		"team": {
-			"saved": "团队已保存。",
-			"intro": "团队中有谁，以及在每个工具中识别他们的账户。这些映射驱动每日站会和团队看板：没有填写 GitHub 登录名的成员不会出现在任何 pull request 上。",
-			"soloWarning": "该项目被标记为<strong>单人</strong>：其团队会被忽略，每日站会保持隐藏。请在项目设置中取消勾选“单人”，以下内容才会有用。",
-			"linearTeam": {
-				"label": "Linear 团队",
-				"hint": "读取其当前迭代的团队 UUID — 留空 = 无每日站会"
-			},
-			"empty": "未声明任何成员：每日站会和团队看板将保持为空。Cockpit 默认不会推荐任何人 — 团队是猜不出来的。",
-			"name": "姓名",
-			"role": {
-				"label": "角色",
-				"hint": "dev 或 product"
-			},
-			"roleLabel": {
-				"label": "显示头衔",
-				"hint": "在屏幕上显示的样子",
-				"placeholder": "后端开发者"
-			},
-			"github": {
-				"hint": "主登录名"
-			},
-			"linearId": {
-				"label": "Linear ID",
-				"hint": "UUID，可在其个人资料 URL 中看到"
-			},
-			"githubAliases": {
-				"label": "其他 GitHub 登录名",
-				"hint": "以前的账户，以逗号分隔"
-			},
-			"sentryEmails": {
-				"label": "Sentry 邮箱",
-				"hint": "其账户的邮箱，以逗号分隔"
-			},
-			"sentryNames": {
-				"label": "Sentry 名称",
-				"hint": "当事件中缺少邮箱时使用"
-			},
-			"add": "添加成员",
-			"save": "保存团队"
 		},
 		"engines": {
 			"saved": "引擎已保存。",
