@@ -241,7 +241,7 @@ function ProjectSwitcher() {
  * compteur de la colonne qui se lit dans l'état des agents, lequel change à
  * chaque phrase reçue. Isolé ici, il ne fait rendre à nouveau que lui-même.
  */
-function WorkspaceTail({ shortcut }: { shortcut: string }) {
+function WorkspaceTail() {
 	const groups = useWorkGroups();
 	const { pendingFor } = useAgentRuns();
 
@@ -257,13 +257,10 @@ function WorkspaceTail({ shortcut }: { shortcut: string }) {
 			group.terminals.filter((terminal) => terminal.running).length,
 		0,
 	);
-	if (count === 0) {
-		return (
-			<span className="font-mono text-[10px] text-ink-faint/0 group-hover:text-ink-faint/60">
-				{formatShortcut(`⌘${shortcut}`)}
-			</span>
-		);
-	}
+	// Rien qui tourne, rien à montrer. Le raccourci s'affichait ici au survol,
+	// mais en texte transparent le reste du temps : il réservait sa largeur, et
+	// l'onglet en paraissait deux fois trop grand. Il est dans l'infobulle.
+	if (count === 0) return null;
 
 	// Un agent qui attend une autorisation expire au bout de cinq minutes : c'est
 	// le seul état que la colonne doit signaler sans qu'on ouvre l'écran.
@@ -540,7 +537,7 @@ export function Sidebar({ onOpenPalette }: { onOpenPalette: () => void }) {
 					title={t("sidebar.top.workspaceTitle")}
 					label={t("sidebar.views.workspace")}
 				>
-					<WorkspaceTail shortcut="⇧A" />
+					<WorkspaceTail />
 				</TopTab>
 				<TopTab
 					active={view === "libres"}
@@ -847,7 +844,7 @@ function Atelier({ onClose }: { onClose: () => void }) {
 											<entry.icon size={14} className={active ? "text-accent" : "text-ink-faint"} />
 											<span className="flex-1 text-left">{viewLabel(entry.id)}</span>
 											{entry.id === "workspace" ? (
-												<WorkspaceTail shortcut={entry.shortcut} />
+												<WorkspaceTail />
 											) : badge !== null ? (
 												<span className="flex items-center gap-1 font-mono text-[10px] text-accent-soft">
 													{entry.id === "agents" ? <Dot tone="success" pulse /> : null}
