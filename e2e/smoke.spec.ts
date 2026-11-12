@@ -99,12 +99,24 @@ test.describe("missions", () => {
 		await events.getByRole("button", { name: /Checks fail · Per-line rounding/ }).click();
 		await expect(dialog.getByText("expected 10.01 to be 10")).toBeVisible();
 		await expect(dialog.getByText("4d81b7e2c09a")).toBeVisible();
+		// Ce que la tâche avait changé à cet instant, fichier par fichier.
+		await dialog.getByRole("button", { name: "See the diff at that moment" }).click();
+		await dialog.getByRole("button", { name: /apps\/api\/cart\/total\.ts/ }).click();
+		await expect(dialog.getByText("Each line is rounded on its own", { exact: false })).toBeVisible();
 
 		// Une reprise : son motif, et l'état des branches à cet instant-là.
 		await events.getByRole("button", { name: /Functional QA sent back/ }).click();
 		await expect(dialog.getByText("Attempt 1 of 3")).toBeVisible();
 		await expect(dialog.getByText("Re-run QA once the per-line rounding is delivered.")).toBeVisible();
 		await expect(dialog.getByText("4d81b7e2c09a")).toHaveCount(0);
+
+		// Une étape guidée : ce que le maître proposait, ce qu'il demandait, et
+		// ce qu'on lui a répondu.
+		await events.getByRole("button", { name: /Breakdown approved/ }).click();
+		await expect(dialog.getByText("Your answers")).toBeVisible();
+		await expect(dialog.getByText("Should QA wait for both the API and the cart")).toBeVisible();
+		await expect(dialog.getByText("Wait for both.")).toBeVisible();
+		await expect(dialog.getByText("Keep the QA last.")).toBeVisible();
 		expect(errors).toEqual([]);
 	});
 
@@ -126,6 +138,20 @@ test.describe("missions", () => {
 		const dialog = page.getByRole("dialog", { name: /^History · Fix cart total/ });
 		// Ouvert sur la reprise de cette tâche, pas sur le dernier événement.
 		await expect(dialog.getByText("Attempt 1 of 3")).toBeVisible();
+		expect(errors).toEqual([]);
+	});
+
+	test("une mission se lance sur une demande écrite, sans ticket", async ({ page }) => {
+		const errors = watchErrors(page);
+		const form = page.getByRole("region", { name: "Describe a mission" });
+		const launch = form.getByRole("button", { name: "Launch" });
+		await expect(launch).toBeDisabled();
+		await form.getByPlaceholder("What needs doing, in one line").fill("Round each cart line");
+		await form.getByRole("textbox", { name: "Details" }).fill("The invoice rounds each line.");
+		await launch.click();
+		await page.getByRole("button", { name: "Start the mission" }).click();
+		await expect(page.getByText("Mission opened on Round each cart line").first()).toBeVisible();
+		await expect(form.getByPlaceholder("What needs doing, in one line")).toHaveValue("");
 		expect(errors).toEqual([]);
 	});
 

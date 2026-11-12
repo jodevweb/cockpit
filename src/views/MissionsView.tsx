@@ -12,7 +12,6 @@ import {
 	GitMerge,
 	GitPullRequest,
 	Hourglass,
-	ListChecks,
 	MessageSquare,
 	Route,
 	PauseCircle,
@@ -193,7 +192,7 @@ const TASK_LABELS: Record<string, { tone: string }> = {
 };
 
 export function MissionsView() {
-	const { notify, activeProject, hasConnector, connectors, go, focus, clearFocus } =
+	const { notify, activeProject, hasConnector, go, focus, clearFocus } =
 		useCockpit();
 	const { t } = useTranslation("views");
 	const { confirm } = useConfirm();
@@ -209,6 +208,7 @@ export function MissionsView() {
 	const overruns = useAsync(() => api.missions.overruns(), [], { pollMs: 120_000 });
 	const [reference, setReference] = useState("");
 	const [opening, setOpening] = useState(false);
+	const [request, setRequest] = useState({ title: "", brief: "" });
 
 	const open = async (picked?: string) => {
 		const source = (picked ?? reference).trim();
@@ -243,6 +243,39 @@ export function MissionsView() {
 			notify(String(error));
 			// La mission peut exister sans son maître — Node absent, worktree
 			// refusé : elle doit paraître dans la liste, d'où on la relancera.
+			missions.reload();
+		} finally {
+			setOpening(false);
+		}
+	};
+
+	// Une demande écrite ici tient lieu de ticket. Même confirmation, même suite
+	// qu'un ticket : le maître démarre, et une mission guidée s'ouvre sur son
+	// parcours.
+	const openFromRequest = async () => {
+		const title = request.title.trim();
+		if (!title) return;
+		const ok = await confirm({
+			title: t("missions.open.confirmTitle", { source: title }),
+			message: t("missions.request.confirmMessage"),
+			confirmLabel: t("missions.open.confirmLabel"),
+		});
+		if (!ok) return;
+		setOpening(true);
+		try {
+			const { mission } = await withActivity(
+				t("missions.open.activity", { source: title }),
+				() => api.missions.startFromBrief(title, request.brief),
+				{
+					firstStep: t("missions.request.firstStep"),
+					result: (value) => value.message,
+				},
+			);
+			setRequest({ title: "", brief: "" });
+			missions.reload();
+			if (mission.guided) setOpenId(mission.id);
+		} catch (error) {
+			notify(String(error));
 			missions.reload();
 		} finally {
 			setOpening(false);
@@ -286,7 +319,7 @@ export function MissionsView() {
 	};
 
 	const opened = openId ? list.find((mission) => mission.id === openId) : undefined;
-	if (openId && hasTickets) {
+	if (openId) {
 		if (!opened) {
 			return (
 				<div className="flex min-h-0 flex-1 items-center justify-center">
@@ -311,48 +344,6 @@ export function MissionsView() {
 		);
 	}
 
-	// Une mission part d'un ticket : sans suivi de tâches, le champ ci-dessous
-	// n'a rien à lire et l'écran se réduisait à un formulaire qui échoue. Dire
-	// à quoi sert la fonctionnalité, et ce qu'il lui manque, vaut mieux qu'un
-	// message d'erreur au premier essai. Seulement tant qu'il n'y a rien à
-	// montrer : une mission ouverte autrement (par la Permanence, sans ticket)
-	// restait sinon introuvable derrière cette présentation.
-	if (!hasTickets && (missions.data ?? []).length === 0) {
-		const tickets = connectors.find((entry) => entry.kind === "tickets");
-		return (
-			<>
-				<ViewHeader title={t("missions.title")} subtitle={t("missions.subtitle")} />
-				<div className="flex min-h-0 flex-1 items-center justify-center p-8">
-					<div className="panel flex max-w-lg flex-col gap-3 p-6">
-						<div className="flex items-center gap-2">
-							<ListChecks size={16} className="shrink-0 text-accent-soft" />
-							<h2 className="text-[13px] font-semibold text-ink">
-								{t("missions.intro.title")}
-							</h2>
-						</div>
-						<p className="text-[11.5px] leading-relaxed text-ink-muted">
-							{t("missions.intro.how")}
-						</p>
-						<p className="text-[11.5px] leading-relaxed text-ink-muted">
-							{t("missions.intro.why")}
-						</p>
-						<div className="rounded-lg border border-line-soft bg-surface/60 p-3">
-							<p className="text-[11px] font-medium text-ink">{t("missions.intro.missingTitle")}</p>
-							<p className="mt-1 text-[11px] leading-relaxed text-ink-faint">
-								{t("missions.intro.missing", {
-									missing: tickets?.missing ?? t("missions.intro.missingDefault"),
-								})}
-							</p>
-						</div>
-						<Button variant="solid" className="self-start" onClick={() => go("settings")}>
-							{t("missions.intro.openSettings")}
-						</Button>
-					</div>
-				</div>
-			</>
-		);
-	}
-
 	return (
 		<>
 			<ViewHeader
@@ -371,6 +362,7 @@ export function MissionsView() {
 					    chercher son adresse ailleurs pour la recoller ici. Le collage
 					    reste accepté : c'est le geste de qui arrive du navigateur, et le
 					    lui interdire ne rendrait service à personne. */}
+					{hasTickets ? (
 					<section className="panel flex flex-col gap-2 p-4">
 						<span className="text-[11px] font-medium text-ink-muted">
 							{t("missions.open.title")}
@@ -398,6 +390,53 @@ export function MissionsView() {
 						<span className="text-[10px] leading-relaxed text-ink-faint">
 							{t("missions.open.hint")}
 						</span>
+					</section>
+					) : null}
+
+					{/* Sans outil externe : la demande s'écrit ici et devient le
+					    ticket du maître. Sur un projet suivi dans Linear ou GitHub,
+					    elle reste là pour ce qui n'a pas mérité de ticket. */}
+					<section className="panel flex flex-col gap-2 p-4" aria-label={t("missions.request.title")}>
+						<span className="text-[11px] font-medium text-ink-muted">
+							{t("missions.request.title")}
+						</span>
+						<TextInput
+							value={request.title}
+							onChange={(title) => setRequest({ ...request, title })}
+							placeholder={t("missions.request.titlePlaceholder")}
+						/>
+						<textarea
+							value={request.brief}
+							onChange={(event) => setRequest({ ...request, brief: event.target.value })}
+							onKeyDown={(event) => {
+								if (event.key === "Enter" && (event.metaKey || event.ctrlKey)) {
+									event.preventDefault();
+									void openFromRequest();
+								}
+							}}
+							rows={5}
+							aria-label={t("missions.request.briefLabel")}
+							placeholder={t("missions.request.briefPlaceholder")}
+							className="focus-ring min-w-0 resize-y rounded-lg bg-raised px-3 py-2 text-[12.5px] text-ink outline-none placeholder:text-ink-faint"
+						/>
+						<div className="flex items-center gap-3">
+							<span className="min-w-0 flex-1 text-[10px] leading-relaxed text-ink-faint">
+								{hasTickets ? t("missions.request.hint") : t("missions.request.hintNoTracker")}
+							</span>
+							{hasTickets ? null : (
+								<Button variant="ghost" onClick={() => go("settings")}>
+									{t("missions.request.connect")}
+								</Button>
+							)}
+							<Button
+								variant="solid"
+								icon={Plus}
+								disabled={!request.title.trim() || opening}
+								onClick={() => void openFromRequest()}
+							>
+								{t("missions.request.submit")}
+							</Button>
+						</div>
 					</section>
 
 					{list.length === 0 && !missions.loading ? (

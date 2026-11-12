@@ -61,7 +61,8 @@
 			"launchFailed": "Prüfung konnte nicht gestartet werden: {{error}}",
 			"noWorktree": "Die Prüfungen konnten nicht laufen: Der Worktree der Aufgabe existiert nicht mehr ({{path}}).",
 			"noRuntime": "Die Agenten-Isolation ist aktiv, aber weder Docker noch OrbStack wurde gefunden: Die Prüfungen laufen nicht stattdessen auf dem Rechner."
-		}
+		},
+		"badCommit": "„{{commit}}“ ist keine Commit-Kennung."
 	},
 	"panel": {
 		"lens": {

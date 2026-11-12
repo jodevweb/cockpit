@@ -833,6 +833,10 @@
 		"fromTo": "{{from}} → {{to}}",
 		"note": "메모",
 		"questions": "열린 질문: {{count}}",
+		"proposal": "제안된 내용",
+		"questionsList": "받은 질문",
+		"answers": "내 답변",
+		"noAnswer": "답변 없음",
 		"feedback": "내 의견",
 		"role": "역할: {{role}}",
 		"attempt": "{{max}}번 중 {{attempt}}번째 재작업",
@@ -885,6 +889,14 @@
 			"checks": "저장소 검사",
 			"waitingForYou": "응답 대기",
 			"role": "{{role}}"
+		},
+		"diff": {
+			"show": "그 시점의 diff 보기",
+			"hide": "diff 숨기기",
+			"files": "작업 기준 이후 변경된 파일",
+			"loading": "diff 읽는 중…",
+			"none": "작업 기준 이후 변경 사항이 없습니다.",
+			"pick": "파일을 선택하면 diff가 표시됩니다."
 		}
 	},
 	"viewBoundary": {

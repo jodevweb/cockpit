@@ -59,6 +59,74 @@ pub(crate) fn mission_events(id: String) -> Vec<crate::mission_events::MissionEv
 	crate::mission_events::list(&id)
 }
 
+/// Ce qu'une tâche avait changé au commit qu'une porte a jugé, depuis sa base.
+///
+/// Dans le dépôt de la mission, pas dans celui du projet actif : `git_branch_diff`
+/// lit le second, et une mission ouverte sur un autre dépôt y aurait comparé un
+/// commit inconnu — au mieux une erreur, au pire le diff d'un homonyme.
+#[tauri::command]
+pub(crate) async fn mission_commit_diff(id: String, task: String, commit: String) -> Result<git::BranchDiff> {
+	let (repo, base) = commit_context(&id, &task, &commit)?;
+	git::branch_diff(&repo, &commit, &base).await
+}
+
+/// Le diff d'un fichier, au même instant que [`mission_commit_diff`].
+#[tauri::command]
+pub(crate) async fn mission_commit_file_diff(id: String, task: String, commit: String, file: String) -> Result<String> {
+	let (repo, base) = commit_context(&id, &task, &commit)?;
+	git::branch_file_diff(&repo, &commit, &base, &file).await
+}
+
+/// Le dépôt de la mission et la base de la tâche : celle qu'elle a déclarée
+/// (une sœur dont elle dépend), sinon la branche d'intégration.
+fn commit_context(id: &str, task: &str, commit: &str) -> Result<(std::path::PathBuf, String)> {
+	if !is_commit(commit) {
+		return Err(CockpitError::msg(i18n::tf("mission.badCommit", &[("commit", &commit)])));
+	}
+	let mission = mission::get(id)?;
+	let base = mission
+		.tasks
+		.iter()
+		.find(|candidate| candidate.id == task)
+		.map(|candidate| candidate.base.trim().to_string())
+		.filter(|base| !base.is_empty())
+		.unwrap_or_else(|| mission.branch.trim().to_string());
+	if base.is_empty() {
+		return Err(CockpitError::msg(i18n::t("orchestrator.noIntegrationBranch")));
+	}
+	Ok((std::path::PathBuf::from(mission.cwd), base))
+}
+
+/// Un identifiant de commit tel que les portes le notent : de l'hexadécimal, rien
+/// d'autre. Il vient de l'historique, donc d'un fichier sur le disque ; on ne le
+/// passe à git qu'une fois sûr qu'il ne peut pas être lu comme une option ou une
+/// plage (`HEAD~3`, `a..b`).
+fn is_commit(raw: &str) -> bool {
+	(7..=64).contains(&raw.len()) && raw.chars().all(|c| c.is_ascii_hexdigit())
+}
+
+#[cfg(test)]
+mod commit_tests {
+	use super::is_commit;
+
+	#[test]
+	fn seul_un_identifiant_hexadecimal_passe() {
+		assert!(is_commit("4d81b7e"));
+		assert!(is_commit("4d81b7e2c09a51f3e6b8d0c7a2f19e5b3c6d8a01"));
+		for refuse in [
+			"",
+			"4d81b7",
+			"HEAD",
+			"--output=x",
+			"a1b2c3d..e4f5a6b",
+			"4d81b7e~1",
+			"4d81b7é",
+		] {
+			assert!(!is_commit(refuse), "{refuse}");
+		}
+	}
+}
+
 #[tauri::command]
 pub(crate) fn mission_create(
 	title: String,
@@ -905,6 +973,50 @@ pub(crate) async fn mission_start_from_ticket(app: AppHandle, reference: String)
 		i18n::tf("lib.mission.openedGuided", &[("identifier", &identifier)])
 	} else {
 		i18n::tf("lib.mission.opened", &[("identifier", &identifier)])
+	};
+	Ok(serde_json::json!({
+		"mission": mission::get(&mission.id).unwrap_or(mission),
+		"started": true,
+		"session": session,
+		"message": message,
+	}))
+}
+
+/// Ouvre une mission sur une demande écrite dans Cockpit, et lance son maître.
+///
+/// Les missions ne partaient que d'un ticket Linear, GitLab ou GitHub : sur un
+/// projet sans suivi de tâches, l'écran restait fermé et il fallait ouvrir un
+/// compte ailleurs pour essayer la fonctionnalité. Le texte écrit ici tient lieu
+/// de ticket : il devient le brief du maître, gardé avec la mission, et c'est
+/// lui qu'on relit au redémarrage (`original_brief`).
+#[tauri::command]
+pub(crate) async fn mission_start_from_brief(app: AppHandle, title: String, brief: String) -> Result<Value> {
+	let title = title.trim().to_string();
+	if title.is_empty() {
+		return Err(CockpitError::msg(i18n::t("lib.mission.titleRequired")));
+	}
+	let config = cfg();
+	let mission = mission::create(
+		&title,
+		"",
+		"",
+		&config.general.main_repo,
+		&mission::branch_from("", &title),
+		!config.missions.autonomous,
+	)?;
+	let guided = mission.guided;
+	// Le titre en tête : le maître lit un ticket, et un ticket commence par son
+	// titre. Sans description, le titre seul reste une demande lisible.
+	let brief = match brief.trim() {
+		"" => format!("# {title}"),
+		body => format!("# {title}\n\n{body}"),
+	};
+	let _ = mission::keep_brief(&mission.id, &brief);
+	let session = launch_master(app, mission.id.clone(), Some(brief), executions::Origin::human()).await?;
+	let message = if guided {
+		i18n::tf("lib.mission.openedGuided", &[("identifier", &title)])
+	} else {
+		i18n::tf("lib.mission.opened", &[("identifier", &title)])
 	};
 	Ok(serde_json::json!({
 		"mission": mission::get(&mission.id).unwrap_or(mission),

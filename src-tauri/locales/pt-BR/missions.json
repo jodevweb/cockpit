@@ -61,7 +61,8 @@
 			"launchFailed": "Não foi possível iniciar a verificação: {{error}}",
 			"noWorktree": "As verificações não puderam ser executadas: o worktree da tarefa não existe mais ({{path}}).",
 			"noRuntime": "O isolamento de agentes está ativo, mas nem Docker nem OrbStack foi encontrado: as verificações não rodam na máquina no lugar deles."
-		}
+		},
+		"badCommit": "\"{{commit}}\" não é um identificador de commit."
 	},
 	"panel": {
 		"lens": {

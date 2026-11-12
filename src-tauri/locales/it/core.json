@@ -397,6 +397,7 @@
 		"automationNotFound": "Automazione non trovata.",
 		"mission": {
 			"ticketReferenceRequired": "Incolla l'URL o l'identificatore di un ticket.",
+			"titleRequired": "Dai un titolo alla missione.",
 			"unknownTask": "Compito sconosciuto.",
 			"fullReviewRequested": "Revisione completa richiesta.",
 			"workerStopped": "Esecutore fermato: il compito ripartirà quando la missione riprende.",

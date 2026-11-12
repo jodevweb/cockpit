@@ -397,6 +397,7 @@
 		"automationNotFound": "自動化が見つかりません。",
 		"mission": {
 			"ticketReferenceRequired": "課題の URL または識別子を貼り付けてください。",
+			"titleRequired": "ミッションにタイトルを付けてください。",
 			"unknownTask": "不明なタスク。",
 			"fullReviewRequested": "全体レビューをリクエストしました。",
 			"workerStopped": "実行役を停止しました：ミッションを再開するとタスクも再開します。",
