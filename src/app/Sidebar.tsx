@@ -2,7 +2,6 @@ import clsx from "clsx";
 import { AnimatePresence, motion } from "motion/react";
 import {
 	Activity,
-	AlarmClock,
 	Check,
 	ChevronRight,
 	ChevronsUpDown,
@@ -43,8 +42,6 @@ import { shortPath } from "@/lib/format";
 import { Logo } from "@/components/Logo";
 import { ActivityChip } from "@/components/ActivityCenter";
 import { hasTauri } from "@/lib/preview";
-import { api, events } from "@/lib/ipc";
-import { useAsync } from "@/lib/useAsync";
 import { useAgentRuns } from "./agents";
 import { freezes, useDecisions } from "./decisions";
 import { useRecapSeen } from "@/lib/recapSeen";
@@ -109,7 +106,6 @@ const GROUPS: Array<{ id: string; entries: Entry[] }> = [
 			// travaillent.
 			{ id: "decisions", icon: Inbox, shortcut: "⇧D" },
 			{ id: "recap", icon: Clapperboard, shortcut: "⇧J" },
-			{ id: "automations", icon: AlarmClock, shortcut: "⇧R" },
 			// Juste après « Aujourd'hui » : c'est un poste de pilotage, pas une
 			// chose qu'on produit.
 			{ id: "permanence", icon: Radar, shortcut: "⇧P" },
@@ -327,41 +323,6 @@ function RecapTail() {
 	);
 }
 
-/**
- * Le prochain rendu attendu aujourd'hui, ou ce qui tourne en ce moment.
- *
- * Une minute de retard suffit : l'heure d'un rendez-vous ne bouge pas, et ce
- * témoin n'a qu'à dire « 13:30 » le matin d'un daily.
- */
-function AutomationsTail() {
-	const { t } = useTranslation("app");
-	const overview = useAsync(() => api.automations.overview(), [], {
-		pollMs: 60_000,
-		subscribe: (onChange) => events.onAutomationRun(onChange),
-	});
-	const list = overview.data ?? [];
-	if (list.some((entry) => entry.running)) {
-		return (
-			<span className="flex items-center gap-1 font-mono text-[10px] text-info" title={t("sidebar.automations.running")}>
-				<Dot tone="info" pulse />
-			</span>
-		);
-	}
-	const today = new Date();
-	const key = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, "0")}-${String(today.getDate()).padStart(2, "0")}`;
-	const next = list
-		.filter((entry) => entry.automation.enabled)
-		.map((entry) => entry.upcoming[0]?.ready)
-		.filter((ready): ready is string => Boolean(ready) && ready.startsWith(key))
-		.sort()[0];
-	if (!next) return null;
-	return (
-		<span className="font-mono text-[10px] text-ink-faint" title={t("sidebar.automations.nextToday")}>
-			{next.slice(11)}
-		</span>
-	);
-}
-
 /** Les agents libres qui attendent une réponse — sinon combien sont ouverts. */
 function LibresTail() {
 	const { open, waiting } = useLibresWaiting();
@@ -510,7 +471,7 @@ export function Sidebar({ onOpenPalette }: { onOpenPalette: () => void }) {
 	const [usage, setUsage] = useState(false);
 	const live = useLiveTabs();
 	const current =
-		view === "map" || view === "workspace" || view === "libres" || view === "decisions" || view === "recap" || view === "automations" || live.some((tab) => tab.entry.id === view) ? null : entryOf(view);
+		view === "map" || view === "workspace" || view === "libres" || view === "decisions" || view === "recap" || live.some((tab) => tab.entry.id === view) ? null : entryOf(view);
 
 	return (
 		<>
@@ -565,15 +526,6 @@ export function Sidebar({ onOpenPalette }: { onOpenPalette: () => void }) {
 					label={t("sidebar.top.recap")}
 				>
 					<RecapTail />
-				</TopTab>
-				<TopTab
-					active={view === "automations"}
-					onClick={() => go("automations")}
-					icon={AlarmClock}
-					title={t("sidebar.top.automationsTitle")}
-					label={t("sidebar.views.automations")}
-				>
-					<AutomationsTail />
 				</TopTab>
 				{live.map((tab) => (
 					<TopTab

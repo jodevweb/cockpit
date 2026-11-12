@@ -21,7 +21,6 @@
 			"today": "오늘",
 			"decisions": "결정 · 답변을 기다리는 항목",
 			"recap": "시각적 요약 · 지금까지 일어난 일",
-			"automations": "자동화 · 스스로 준비되는 회의",
 			"overview": "개요",
 			"team": "데일리 · 팀",
 			"agents": "AI 에이전트",
@@ -167,7 +166,6 @@
 			"today": "오늘",
 			"decisions": "결정",
 			"recap": "시각적 요약",
-			"automations": "자동화",
 			"permanence": "Permanence",
 			"overview": "개요",
 			"team": "데일리",
@@ -195,10 +193,6 @@
 		},
 		"project": "프로젝트",
 		"recapFresh_other": "마지막 방문 이후 새 항목 {{count}}개",
-		"automations": {
-			"running": "자동화가 결과물을 준비하고 있습니다",
-			"nextToday": "다음 결과물이 오늘 준비됩니다"
-		},
 		"launch": {
 			"placeHere": "현재 위치",
 			"placeBranch": "새 브랜치",
@@ -216,8 +210,7 @@
 			"libresTitle": "터미널에서처럼 프로젝트 밖에서 실행한 에이전트",
 			"decisionsTitle": "결정을 기다리는 항목, 해소되는 영향 순 정렬 ({{mod}}{{shift}}D)",
 			"recapTitle": "그림으로 보는 지금까지의 일: 에이전트 턴마다 하나의 이야기 ({{mod}}{{shift}}J)",
-			"recap": "요약",
-			"automationsTitle": "데일리처럼 스스로 준비되는 회의 ({{mod}}{{shift}}R)"
+			"recap": "요약"
 		},
 		"search": "이동, 실행, 질문…",
 		"atelier": {

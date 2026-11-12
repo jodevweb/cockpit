@@ -167,52 +167,6 @@
 			"idleStale": "没有打开的 PR，活跃工单近期也没有动态 — 有空吗？被阻塞了吗？"
 		}
 	},
-	"automations": {
-		"errors": {
-			"serialize": "自动化：{{error}}",
-			"noName": "请为其命名。",
-			"badTime": "时间格式为 HH:MM，例如 14:00。",
-			"unreadableAnswer": "无法读取智能体的回答。",
-			"alreadyRunning": "它已在运行。",
-			"emptyCorrection": "修正内容为空。",
-			"notFound": "找不到该自动化。",
-			"runNotFound": "找不到该次运行。",
-			"noOutput": "该次运行没有输出。",
-			"noChromium": "生成 PDF 需要 Chrome（或基于 Chromium 的浏览器）。Markdown 始终可以复制。",
-			"pdfTimeout": "浏览器在一分钟内未能生成 PDF。",
-			"pdfNotProduced": "未生成 PDF。{{detail}}",
-			"noSlackWebhook": "请在此自动化的设置中填写 Slack webhook。",
-			"slack": "Slack：{{error}}",
-			"slackRefused": "Slack 拒绝：{{status}}"
-		},
-		"missed": {
-			"closedNoCatchUp": "预定时间时 Cockpit 处于关闭状态，且补跑已关闭。",
-			"closedUntilAfter": "Cockpit 一直关闭到会议结束之后。"
-		},
-		"items": {
-			"draft": "草稿",
-			"agentsIn": "{{name}} 中的智能体",
-			"turns_other": "{{count}} 个回合",
-			"minutes": "{{count}} 分钟"
-		},
-		"sources": {
-			"noLinearToken": "设置中没有 Linear 令牌",
-			"noSentryToken": "设置中没有 Sentry 令牌",
-			"tracker": "任务跟踪工具"
-		},
-		"nothingFound": "在所读取的来源中，该时段内没有发现任何内容。",
-		"notify": {
-			"linesReady_other": "{{count}} 行已就绪。",
-			"silent": "没有回应：{{sources}}。",
-			"ready": "{{name}} 已就绪",
-			"failed": "{{name}} 未能完成"
-		},
-		"render": {
-			"silent": "本次没有回应：{{sources}}。",
-			"period": "从 {{from}} 到 {{to}}",
-			"slackPeriod": "从 {{from}} 到 {{to}}"
-		}
-	},
 	"permanence": {
 		"closed": {
 			"disabled": "已在设置中禁用。",

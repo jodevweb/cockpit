@@ -31,7 +31,7 @@ test("la carte s'ouvre sur le projet d'exemple, sans erreur", async ({ page }) =
 test("chaque onglet de la barre du haut s'ouvre sans erreur", async ({ page }) => {
 	const errors = watchErrors(page);
 	await page.goto("/");
-	for (const label of ["Workspaces", "Free agents", "Decisions", "Recap", "Automations", "Missions", "Map"]) {
+	for (const label of ["Workspaces", "Free agents", "Decisions", "Recap", "Missions", "Map"]) {
 		await topTab(page, label).click();
 		// Laisse aux données d'aperçu, servies avec un léger délai, le temps
 		// d'arriver et de se dessiner.

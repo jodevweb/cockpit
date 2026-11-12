@@ -167,52 +167,6 @@
 			"idleStale": "オープン中の PR がなく、アクティブなチケットにも最近の動きがありません — 手が空いていますか？ブロックされていますか？"
 		}
 	},
-	"automations": {
-		"errors": {
-			"serialize": "自動化：{{error}}",
-			"noName": "名前を付けてください。",
-			"badTime": "時刻は HH:MM の形式で書きます（例：14:00）。",
-			"unreadableAnswer": "エージェントの回答を読み取れませんでした。",
-			"alreadyRunning": "すでに実行中です。",
-			"emptyCorrection": "修正内容が空です。",
-			"notFound": "自動化が見つかりません。",
-			"runNotFound": "実行が見つかりません。",
-			"noOutput": "この実行には出力がありません。",
-			"noChromium": "PDF を作成するには Chrome（または Chromium 系ブラウザ）が必要です。Markdown はいつでもコピーできます。",
-			"pdfTimeout": "ブラウザが 1 分以内に PDF をレンダリングしませんでした。",
-			"pdfNotProduced": "PDF が作成されませんでした。{{detail}}",
-			"noSlackWebhook": "この自動化の設定で Slack webhook を入力してください。",
-			"slack": "Slack：{{error}}",
-			"slackRefused": "Slack に拒否されました：{{status}}"
-		},
-		"missed": {
-			"closedNoCatchUp": "予定時刻に Cockpit が閉じられており、後からの実行はオフになっています。",
-			"closedUntilAfter": "ミーティングの時刻を過ぎるまで Cockpit が閉じられていました。"
-		},
-		"items": {
-			"draft": "ドラフト",
-			"agentsIn": "{{name}} のエージェント",
-			"turns_other": "{{count}} ターン",
-			"minutes": "{{count}} 分"
-		},
-		"sources": {
-			"noLinearToken": "設定に Linear トークンがありません",
-			"noSentryToken": "設定に Sentry トークンがありません",
-			"tracker": "タスクトラッカー"
-		},
-		"nothingFound": "読み取ったソースでは、期間中に何も見つかりませんでした。",
-		"notify": {
-			"linesReady_other": "{{count}} 行の準備ができました。",
-			"silent": "応答なし：{{sources}}。",
-			"ready": "{{name}} の準備ができました",
-			"failed": "{{name}} が完了しませんでした"
-		},
-		"render": {
-			"silent": "今回は応答がありませんでした：{{sources}}。",
-			"period": "{{from}} から {{to}} まで",
-			"slackPeriod": "{{from}} から {{to}} まで"
-		}
-	},
 	"permanence": {
 		"closed": {
 			"disabled": "設定で無効になっています。",

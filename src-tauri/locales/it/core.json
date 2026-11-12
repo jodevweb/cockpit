@@ -395,7 +395,6 @@
 			"reason": "{{total}} token consumati, oltre il tetto di {{budget}}. La missione è in pausa: il suo lavoro è intatto, riprendila se il superamento era previsto.",
 			"paused": "Missione in pausa — tetto raggiunto"
 		},
-		"automationNotFound": "Automazione non trovata.",
 		"mission": {
 			"ticketReferenceRequired": "Incolla l'URL o l'identificatore di un ticket.",
 			"titleRequired": "Dai un titolo alla missione.",

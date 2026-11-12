@@ -942,17 +942,6 @@ pub fn env_dir(name: &str) -> Option<PathBuf> {
 		.map(PathBuf::from)
 }
 
-/// L'adresse `file://` d'un fichier local, lisible par un navigateur sur
-/// chaque système (`file:///C:/…` sous Windows).
-pub fn file_url(path: &std::path::Path) -> String {
-	let text = display_path(path);
-	if text.starts_with('/') {
-		format!("file://{text}")
-	} else {
-		format!("file:///{text}")
-	}
-}
-
 #[cfg(test)]
 mod agents_tests {
 	#[test]
@@ -1009,14 +998,5 @@ MemAvailable:    8192000 kB
 	fn un_nom_qui_n_est_pas_un_programme_n_est_pas_joue() {
 		assert_eq!(locate("x; rm -rf ~"), None);
 		assert_eq!(locate(""), None);
-	}
-
-	#[test]
-	fn une_adresse_de_fichier_a_trois_barres() {
-		if cfg!(windows) {
-			assert_eq!(file_url(std::path::Path::new(r"C:\a\b.html")), "file:///C:/a/b.html");
-		} else {
-			assert_eq!(file_url(std::path::Path::new("/a/b.html")), "file:///a/b.html");
-		}
 	}
 }

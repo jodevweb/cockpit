@@ -21,7 +21,6 @@
 			"today": "Today",
 			"decisions": "Decisions · what's waiting for your answer",
 			"recap": "Visual recap · what happened",
-			"automations": "Automations · meetings prepared on their own",
 			"overview": "Overview",
 			"team": "Daily · team",
 			"agents": "AI agents",
@@ -171,7 +170,6 @@
 			"today": "Today",
 			"decisions": "Decisions",
 			"recap": "Visual recap",
-			"automations": "Automations",
 			"permanence": "Permanence",
 			"overview": "Overview",
 			"team": "Daily",
@@ -200,10 +198,6 @@
 		"project": "Project",
 		"recapFresh_one": "{{count}} new since your last visit",
 		"recapFresh_other": "{{count}} new since your last visit",
-		"automations": {
-			"running": "An automation is preparing its output",
-			"nextToday": "Next output ready today"
-		},
 		"launch": {
 			"placeHere": "in place",
 			"placeBranch": "new branch",
@@ -221,8 +215,7 @@
 			"libresTitle": "Agents launched outside a project, like in a terminal",
 			"decisionsTitle": "What's waiting for your decision, sorted by what it unblocks ({{mod}}{{shift}}D)",
 			"recapTitle": "What happened, in pictures: one story per agent turn ({{mod}}{{shift}}J)",
-			"recap": "Recap",
-			"automationsTitle": "Meetings that prepare themselves, like the daily ({{mod}}{{shift}}R)"
+			"recap": "Recap"
 		},
 		"search": "Go to, launch, ask…",
 		"atelier": {

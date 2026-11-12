@@ -178,54 +178,6 @@
 			"idleStale": "nenhum PR aberto e tickets ativos sem atividade recente — disponível? bloqueado?"
 		}
 	},
-	"automations": {
-		"errors": {
-			"serialize": "Automações: {{error}}",
-			"noName": "Dê um nome a ela.",
-			"badTime": "O horário é escrito HH:MM, por exemplo 14:00.",
-			"unreadableAnswer": "A resposta do agente não estava legível.",
-			"alreadyRunning": "Ela já está em execução.",
-			"emptyCorrection": "A correção está vazia.",
-			"notFound": "Automação não encontrada.",
-			"runNotFound": "Execução não encontrada.",
-			"noOutput": "Esta execução não tem resultado.",
-			"noChromium": "O Chrome (ou um navegador Chromium) é necessário para gerar o PDF. O Markdown sempre pode ser copiado.",
-			"pdfTimeout": "O navegador não renderizou o PDF em um minuto.",
-			"pdfNotProduced": "PDF não gerado. {{detail}}",
-			"noSlackWebhook": "Preencha o webhook do Slack desta automação nas configurações dela.",
-			"slack": "Slack: {{error}}",
-			"slackRefused": "O Slack recusou: {{status}}"
-		},
-		"missed": {
-			"closedNoCatchUp": "O cockpit estava fechado no horário previsto e a recuperação está desativada.",
-			"closedUntilAfter": "O cockpit ficou fechado até depois da reunião."
-		},
-		"items": {
-			"draft": "draft",
-			"agentsIn": "Agentes em {{name}}",
-			"turns_one": "{{count}} turno",
-			"turns_other": "{{count}} turnos",
-			"minutes": "{{count}} min"
-		},
-		"sources": {
-			"noLinearToken": "nenhum token do Linear nas configurações",
-			"noSentryToken": "nenhum token do Sentry nas configurações",
-			"tracker": "gerenciador de tarefas"
-		},
-		"nothingFound": "Nada encontrado no período nas fontes lidas.",
-		"notify": {
-			"linesReady_one": "{{count}} linha pronta.",
-			"linesReady_other": "{{count}} linhas prontas.",
-			"silent": "Sem resposta: {{sources}}.",
-			"ready": "{{name}} está pronta",
-			"failed": "{{name}} não foi concluída"
-		},
-		"render": {
-			"silent": "Sem resposta desta vez: {{sources}}.",
-			"period": "De {{from}} a {{to}}",
-			"slackPeriod": "de {{from}} a {{to}}"
-		}
-	},
 	"permanence": {
 		"closed": {
 			"disabled": "Desativada nas configurações.",

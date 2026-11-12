@@ -5,43 +5,6 @@
 		"kilobytes": "{{value}} KB",
 		"megabytes": "{{value}} MB"
 	},
-	"automations": {
-		"days": {
-			"mon": "Lun",
-			"tue": "Mar",
-			"wed": "Mer",
-			"thu": "Gio",
-			"fri": "Ven",
-			"sat": "Sab",
-			"sun": "Dom"
-		},
-		"stamp": {
-			"today": "oggi {{time}}",
-			"tomorrow": "domani {{time}}",
-			"yesterday": "ieri {{time}}"
-		},
-		"rhythm": {
-			"none": "Nessun giorno selezionato",
-			"weekdays": "Dal lunedì al venerdì alle {{time}}",
-			"everyDay": "Ogni giorno alle {{time}}",
-			"days": "{{days}} alle {{time}}"
-		},
-		"run": {
-			"running": "In corso",
-			"partial": "Parziale",
-			"failed": "Fallito",
-			"missed": "Saltato",
-			"caughtUp": "Recuperato",
-			"manual": "Manuale",
-			"onTime": "Puntuale"
-		},
-		"source": {
-			"tracker": "Gestore dei ticket"
-		},
-		"markdown": {
-			"silent": "Nessuna risposta questa volta: {{sources}}."
-		}
-	},
 	"world": {
 		"regions": {
 			"arrive": {

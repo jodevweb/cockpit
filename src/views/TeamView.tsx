@@ -27,7 +27,6 @@ import {
 import { api } from "@/lib/ipc";
 import type { Flag, MemberBoard, MemberPr, PrFlowItem } from "@/lib/types";
 import { DailyPresenter } from "@/components/DailyPresenter";
-import { consumeDailyPresentation } from "@/lib/dailyHandoff";
 import { TeamWorkGrid } from "@/components/TeamWorkGrid";
 import { useAsync, usePersistentState } from "@/lib/useAsync";
 import { useCockpit } from "@/app/store";
@@ -429,9 +428,7 @@ export function TeamView() {
 	const [cycleOnly, setCycleOnly] = usePersistentState("team.cycleOnly", true);
 	const [focused, setFocused] = useState<string | null>(null);
 	const [urgentOnly, setUrgentOnly] = useState(false);
-	// Venu de « Présenter au daily » sur le rendu d'une automatisation : le mode
-	// présentation s'ouvre dès que l'équipe est chargée.
-	const [presenting, setPresenting] = useState(() => consumeDailyPresentation());
+	const [presenting, setPresenting] = useState(false);
 
 	// Deux minutes : le daily dure moins longtemps que ça, et Linear comme
 	// GitHub n'aiment pas être sondés en boucle.

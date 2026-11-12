@@ -395,7 +395,6 @@
 			"reason": "토큰 {{total}}개를 사용해 상한 {{budget}}을(를) 넘었습니다. 미션이 일시 중지되었습니다: 작업은 그대로이니, 초과가 예상된 것이었다면 재개하세요.",
 			"paused": "미션 일시 중지 — 상한 도달"
 		},
-		"automationNotFound": "자동화를 찾을 수 없습니다.",
 		"mission": {
 			"ticketReferenceRequired": "이슈의 URL이나 식별자를 붙여 넣으세요.",
 			"titleRequired": "미션에 제목을 붙여 주세요.",

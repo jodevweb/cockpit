@@ -5,43 +5,6 @@
 		"kilobytes": "{{value}} KB",
 		"megabytes": "{{value}} MB"
 	},
-	"automations": {
-		"days": {
-			"mon": "月",
-			"tue": "火",
-			"wed": "水",
-			"thu": "木",
-			"fri": "金",
-			"sat": "土",
-			"sun": "日"
-		},
-		"stamp": {
-			"today": "今日 {{time}}",
-			"tomorrow": "明日 {{time}}",
-			"yesterday": "昨日 {{time}}"
-		},
-		"rhythm": {
-			"none": "曜日が選択されていません",
-			"weekdays": "月曜〜金曜の {{time}}",
-			"everyDay": "毎日 {{time}}",
-			"days": "{{days}} の {{time}}"
-		},
-		"run": {
-			"running": "実行中",
-			"partial": "一部のみ",
-			"failed": "失敗",
-			"missed": "未実行",
-			"caughtUp": "後から実行",
-			"manual": "手動",
-			"onTime": "定刻"
-		},
-		"source": {
-			"tracker": "タスク管理"
-		},
-		"markdown": {
-			"silent": "今回は応答がありませんでした：{{sources}}。"
-		}
-	},
 	"world": {
 		"regions": {
 			"arrive": {

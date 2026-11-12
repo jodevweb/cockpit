@@ -395,7 +395,6 @@
 			"reason": "{{total}} tokens consumed, beyond the {{budget}} cap. The mission is paused: its work is intact, resume it if the overrun was expected.",
 			"paused": "Mission paused — cap reached"
 		},
-		"automationNotFound": "Automation not found.",
 		"mission": {
 			"ticketReferenceRequired": "Paste an issue's URL or identifier.",
 			"titleRequired": "Give the mission a title.",

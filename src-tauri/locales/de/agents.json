@@ -178,54 +178,6 @@
 			"idleStale": "kein offener PR und aktive Tickets ohne jüngste Aktivität — verfügbar? blockiert?"
 		}
 	},
-	"automations": {
-		"errors": {
-			"serialize": "Automatisierungen: {{error}}",
-			"noName": "Gib ihr einen Namen.",
-			"badTime": "Die Uhrzeit wird HH:MM geschrieben, zum Beispiel 14:00.",
-			"unreadableAnswer": "Die Antwort des Agenten war nicht lesbar.",
-			"alreadyRunning": "Sie läuft bereits.",
-			"emptyCorrection": "Die Korrektur ist leer.",
-			"notFound": "Automatisierung nicht gefunden.",
-			"runNotFound": "Lauf nicht gefunden.",
-			"noOutput": "Dieser Lauf hat kein Ergebnis.",
-			"noChromium": "Für das PDF wird Chrome (oder ein Chromium-Browser) benötigt. Das Markdown lässt sich immer kopieren.",
-			"pdfTimeout": "Der Browser hat das PDF nicht innerhalb einer Minute gerendert.",
-			"pdfNotProduced": "PDF nicht erzeugt. {{detail}}",
-			"noSlackWebhook": "Trage den Slack-Webhook dieser Automatisierung in ihren Einstellungen ein.",
-			"slack": "Slack: {{error}}",
-			"slackRefused": "Slack hat abgelehnt: {{status}}"
-		},
-		"missed": {
-			"closedNoCatchUp": "Das Cockpit war zum geplanten Zeitpunkt geschlossen, und das Nachholen ist ausgeschaltet.",
-			"closedUntilAfter": "Das Cockpit war bis nach dem Termin geschlossen."
-		},
-		"items": {
-			"draft": "Entwurf",
-			"agentsIn": "Agenten in {{name}}",
-			"turns_one": "{{count}} Runde",
-			"turns_other": "{{count}} Runden",
-			"minutes": "{{count}} Min."
-		},
-		"sources": {
-			"noLinearToken": "kein Linear-Token in den Einstellungen",
-			"noSentryToken": "kein Sentry-Token in den Einstellungen",
-			"tracker": "Aufgaben-Tracker"
-		},
-		"nothingFound": "Im Zeitraum in den gelesenen Quellen nichts gefunden.",
-		"notify": {
-			"linesReady_one": "{{count}} Zeile fertig.",
-			"linesReady_other": "{{count}} Zeilen fertig.",
-			"silent": "Keine Antwort: {{sources}}.",
-			"ready": "{{name}} ist fertig",
-			"failed": "{{name}} wurde nicht abgeschlossen"
-		},
-		"render": {
-			"silent": "Diesmal keine Antwort: {{sources}}.",
-			"period": "Vom {{from}} bis {{to}}",
-			"slackPeriod": "vom {{from}} bis {{to}}"
-		}
-	},
 	"permanence": {
 		"closed": {
 			"disabled": "In den Einstellungen deaktiviert.",

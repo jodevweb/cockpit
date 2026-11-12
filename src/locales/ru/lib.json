@@ -5,43 +5,6 @@
 		"kilobytes": "{{value}} КБ",
 		"megabytes": "{{value}} МБ"
 	},
-	"automations": {
-		"days": {
-			"mon": "Пн",
-			"tue": "Вт",
-			"wed": "Ср",
-			"thu": "Чт",
-			"fri": "Пт",
-			"sat": "Сб",
-			"sun": "Вс"
-		},
-		"stamp": {
-			"today": "сегодня {{time}}",
-			"tomorrow": "завтра {{time}}",
-			"yesterday": "вчера {{time}}"
-		},
-		"rhythm": {
-			"none": "Не выбран ни один день",
-			"weekdays": "С понедельника по пятницу в {{time}}",
-			"everyDay": "Каждый день в {{time}}",
-			"days": "{{days}} в {{time}}"
-		},
-		"run": {
-			"running": "Выполняется",
-			"partial": "Частично",
-			"failed": "Ошибка",
-			"missed": "Пропущено",
-			"caughtUp": "Наверстано",
-			"manual": "Вручную",
-			"onTime": "Вовремя"
-		},
-		"source": {
-			"tracker": "Трекер задач"
-		},
-		"markdown": {
-			"silent": "На этот раз нет ответа: {{sources}}."
-		}
-	},
 	"world": {
 		"regions": {
 			"arrive": {

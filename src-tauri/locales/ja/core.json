@@ -395,7 +395,6 @@
 			"reason": "{{total}} トークンを消費し、上限 {{budget}} を超えました。ミッションは一時停止されました：作業内容はそのまま残っています。超過が想定どおりであれば再開してください。",
 			"paused": "ミッションを一時停止 — 上限に到達"
 		},
-		"automationNotFound": "自動化が見つかりません。",
 		"mission": {
 			"ticketReferenceRequired": "課題の URL または識別子を貼り付けてください。",
 			"titleRequired": "ミッションにタイトルを付けてください。",

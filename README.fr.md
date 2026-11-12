@@ -296,7 +296,6 @@ tiroir **Atelier**, à droite de la barre.
 | **Agents libres** | Les agents lancés hors projet, dans le dossier de ton choix.                                                                     |
 | **Décisions**     | Tout ce qui attend ta réponse : autorisations, questions, plans à approuver.                                                     |
 | **Récap en images** | Ce qui s'est passé dans l'heure, les trois heures ou la journée, raconté en images.                                            |
-| **Automatisations** | Les rendez-vous et comptes rendus préparés seuls, à heure fixe, tant que Cockpit est ouvert.                                   |
 | **Missions**      | Un ticket, un plan, plusieurs exécutants : tu valides ce que le maître a compris, son approche, son découpage ; chaque exécutant a sa branche et son worktree ; les vérifications du dépôt filtrent chaque livraison ; la pull request porte un dossier de livraison. |
 | *Atelier*         | **Aujourd'hui**, **Permanence** (un agent de garde, dans les horaires et budgets que tu fixes), **Vue d'ensemble**, **Daily**, **Agents IA** (chaque session Claude Code, sa timeline, ses outils), **Documents**, **Flux** (tickets, PR, CI, déploiements), **Impact** (ce qu'implique chaque changement en cours), **Observabilité** (Sentry, Better Stack), **Worktrees**, **Git**, **Scripts**, **Serveurs & conteneurs**, **Réglages**. |
 

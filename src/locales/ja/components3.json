@@ -192,7 +192,6 @@
 			"postponed": "延期"
 		},
 		"parts": {
-			"nothing": "なし。",
 			"shipped": "出荷済み",
 			"shippedEmpty": "前回のデイリー以降、マージされたものはありません。",
 			"openedSince_other": "以降に作成された PR {{count}} 件",
@@ -204,7 +203,6 @@
 		},
 		"recap": {
 			"heading": "# デイリー — {{date}} 以降",
-			"part": "- {{title}}：{{lines}}",
 			"shipped": "- 出荷済み：{{items}}",
 			"commitment": "- 約束：{{text}}",
 			"commitmentWithStatus": "- 約束：{{text}}（{{status}}）",
@@ -225,11 +223,8 @@
 		"speakers": "発言順",
 		"speaker": {
 			"speaking": "発言中",
-			"done": "完了",
-			"ready": "準備完了"
+			"done": "完了"
 		},
-		"preparedByAutomation": "本人のパート · 自動化で準備",
-		"silentSources": "今回は応答がありませんでした：{{sources}}。",
 		"timeLeft": "残りの発言時間",
 		"pause": "一時停止（p）",
 		"partsLabel": "パート",

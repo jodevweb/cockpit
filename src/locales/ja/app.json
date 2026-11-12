@@ -21,7 +21,6 @@
 			"today": "今日",
 			"decisions": "判断待ち · あなたの回答を待っているもの",
 			"recap": "ビジュアル振り返り · 起きたこと",
-			"automations": "自動化 · 自動で準備されるミーティング",
 			"overview": "概要",
 			"team": "デイリー · チーム",
 			"agents": "AI エージェント",
@@ -167,7 +166,6 @@
 			"today": "今日",
 			"decisions": "判断待ち",
 			"recap": "ビジュアル振り返り",
-			"automations": "自動化",
 			"permanence": "Permanence",
 			"overview": "概要",
 			"team": "デイリー",
@@ -195,10 +193,6 @@
 		},
 		"project": "プロジェクト",
 		"recapFresh_other": "前回の訪問以降の新着 {{count}} 件",
-		"automations": {
-			"running": "自動化が出力を準備しています",
-			"nextToday": "次の出力は今日準備されます"
-		},
 		"launch": {
 			"placeHere": "その場で",
 			"placeBranch": "新しいブランチ",
@@ -216,8 +210,7 @@
 			"libresTitle": "ターミナルのように、プロジェクト外で起動したエージェント",
 			"decisionsTitle": "あなたの判断を待っているもの。解除されるものの大きさ順（{{mod}}{{shift}}D）",
 			"recapTitle": "起きたことを画像で：エージェントのターンごとに 1 つのストーリー（{{mod}}{{shift}}J）",
-			"recap": "振り返り",
-			"automationsTitle": "デイリーのように、自動で準備されるミーティング（{{mod}}{{shift}}R）"
+			"recap": "振り返り"
 		},
 		"search": "移動、起動、質問…",
 		"atelier": {

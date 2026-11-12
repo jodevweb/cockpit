@@ -5,43 +5,6 @@
 		"kilobytes": "{{value}} KB",
 		"megabytes": "{{value}} MB"
 	},
-	"automations": {
-		"days": {
-			"mon": "월",
-			"tue": "화",
-			"wed": "수",
-			"thu": "목",
-			"fri": "금",
-			"sat": "토",
-			"sun": "일"
-		},
-		"stamp": {
-			"today": "오늘 {{time}}",
-			"tomorrow": "내일 {{time}}",
-			"yesterday": "어제 {{time}}"
-		},
-		"rhythm": {
-			"none": "선택한 요일 없음",
-			"weekdays": "월요일~금요일 {{time}}",
-			"everyDay": "매일 {{time}}",
-			"days": "{{days}} {{time}}"
-		},
-		"run": {
-			"running": "실행 중",
-			"partial": "부분 완료",
-			"failed": "실패",
-			"missed": "놓침",
-			"caughtUp": "만회함",
-			"manual": "수동",
-			"onTime": "정시"
-		},
-		"source": {
-			"tracker": "작업 트래커"
-		},
-		"markdown": {
-			"silent": "이번에는 응답 없음: {{sources}}."
-		}
-	},
 	"world": {
 		"regions": {
 			"arrive": {

@@ -395,7 +395,6 @@
 			"reason": "{{total}} Tokens verbraucht, über der Grenze von {{budget}}. Die Mission ist pausiert: Ihre Arbeit ist intakt, setze sie fort, wenn die Überschreitung erwartet war.",
 			"paused": "Mission pausiert — Grenze erreicht"
 		},
-		"automationNotFound": "Automatisierung nicht gefunden.",
 		"mission": {
 			"ticketReferenceRequired": "Füge die URL oder Kennung eines Issues ein.",
 			"titleRequired": "Gib der Mission einen Titel.",

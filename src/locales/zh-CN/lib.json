@@ -5,43 +5,6 @@
 		"kilobytes": "{{value}} KB",
 		"megabytes": "{{value}} MB"
 	},
-	"automations": {
-		"days": {
-			"mon": "周一",
-			"tue": "周二",
-			"wed": "周三",
-			"thu": "周四",
-			"fri": "周五",
-			"sat": "周六",
-			"sun": "周日"
-		},
-		"stamp": {
-			"today": "今天 {{time}}",
-			"tomorrow": "明天 {{time}}",
-			"yesterday": "昨天 {{time}}"
-		},
-		"rhythm": {
-			"none": "未选择任何一天",
-			"weekdays": "周一至周五 {{time}}",
-			"everyDay": "每天 {{time}}",
-			"days": "{{days}} {{time}}"
-		},
-		"run": {
-			"running": "运行中",
-			"partial": "部分完成",
-			"failed": "失败",
-			"missed": "已错过",
-			"caughtUp": "已补跑",
-			"manual": "手动",
-			"onTime": "准时"
-		},
-		"source": {
-			"tracker": "任务跟踪工具"
-		},
-		"markdown": {
-			"silent": "本次没有回应：{{sources}}。"
-		}
-	},
 	"world": {
 		"regions": {
 			"arrive": {

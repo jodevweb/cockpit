@@ -1281,30 +1281,9 @@ pub async fn linear_issues(config: &Config, only_mine: bool) -> Result<Vec<FeedI
 		.collect())
 }
 
-/// Mes tickets qui ont bougé depuis `since`, quel que soit leur état.
-///
-/// `linear_issues` écarte les tickets terminés, ce qui est juste pour une liste
-/// de travail et faux pour un bilan : ce qui s'est fermé sur la période est
-/// précisément ce qu'on vient raconter. Voir `automations.rs`.
-pub async fn linear_mine_since(config: &Config, since: &str) -> Result<Vec<Value>> {
-	let mut filter = json!({
-		"assignee": { "isMe": { "eq": true } },
-		"updatedAt": { "gte": since }
-	});
-	if !config.linear.team_key.is_empty() {
-		filter["team"] = json!({ "key": { "eq": config.linear.team_key } });
-	}
-	let body = linear_graphql(config, LINEAR_ISSUES_QUERY, json!({ "filter": filter })).await?;
-	Ok(body
-		.pointer("/data/issues/nodes")
-		.and_then(|v| v.as_array())
-		.cloned()
-		.unwrap_or_default())
-}
-
 // ──────────────────────────────── GitHub ────────────────────────────────
 
-/// Le compte GitHub au nom duquel le cockpit lit — « moi », pour un bilan.
+/// Le compte GitHub au nom duquel le cockpit lit — « moi », pour « les miens ».
 pub async fn github_viewer(config: &Config) -> Result<String> {
 	let token = github_token(config).await?;
 	let value = json_get("https://api.github.com/user", &token, "Bearer").await?;
@@ -1313,38 +1292,6 @@ pub async fn github_viewer(config: &Config) -> Result<String> {
 		return Err(CockpitError::msg(crate::i18n::t("integrations.githubNoLogin")));
 	}
 	Ok(login)
-}
-
-/// Une recherche de PR, tous dépôts confondus.
-///
-/// Sans cache : un bilan se fait une fois, et une réponse vieille d'une minute
-/// pourrait manquer la PR fusionnée juste avant le daily.
-pub async fn github_search_prs(config: &Config, query: &str) -> Result<Vec<Value>> {
-	let token = github_token(config).await?;
-	let url = format!(
-		"https://api.github.com/search/issues?q={}&sort=updated&order=desc&per_page=50",
-		urlencoding_query(query)
-	);
-	let value = json_get_uncached(&url, &token, "Bearer").await?;
-	Ok(value
-		.get("items")
-		.and_then(|v| v.as_array())
-		.cloned()
-		.unwrap_or_default())
-}
-
-/// Les qualificatifs de recherche GitHub tiennent des `:`, des `>` et des
-/// espaces : seuls ces derniers et ce qui casserait l'URL sont encodés.
-fn urlencoding_query(query: &str) -> String {
-	let mut out = String::new();
-	for byte in query.bytes() {
-		match byte {
-			b'A'..=b'Z' | b'a'..=b'z' | b'0'..=b'9' | b'-' | b'_' | b'.' | b':' | b'@' | b'/' => out.push(byte as char),
-			b' ' => out.push('+'),
-			other => out.push_str(&format!("%{other:02X}")),
-		}
-	}
-	out
 }
 
 pub async fn github_token(config: &Config) -> Result<String> {
