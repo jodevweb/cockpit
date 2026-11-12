@@ -53,6 +53,12 @@ pub(crate) fn mission_get(id: String) -> Result<mission::Mission> {
 	mission::get(&id)
 }
 
+/// L'historique d'une mission, dans l'ordre où il s'est écrit. Voir `mission_events`.
+#[tauri::command(async)]
+pub(crate) fn mission_events(id: String) -> Vec<crate::mission_events::MissionEvent> {
+	crate::mission_events::list(&id)
+}
+
 #[tauri::command]
 pub(crate) fn mission_create(
 	title: String,

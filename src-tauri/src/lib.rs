@@ -3376,6 +3376,7 @@ pub fn run() {
 			mission_estimate,
 			mission_overruns,
 			mission_get,
+			mission_events,
 			mission_create,
 			mission_from_ticket,
 			mission_start_from_ticket,

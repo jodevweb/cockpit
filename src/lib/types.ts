@@ -2496,6 +2496,8 @@ export type { MissionStep } from "./generated/MissionStep";
 export type { MissionDraft } from "./generated/MissionDraft";
 export type { MissionReview } from "./generated/MissionReview";
 export type { Mission } from "./generated/Mission";
+export type { MissionEvent } from "./generated/MissionEvent";
+export type { MissionChange } from "./generated/MissionChange";
 export type { MissionExposure } from "./generated/MissionExposure";
 export type { RepoRoles } from "./generated/RepoRoles";
 export type { MissionEstimate } from "./generated/MissionEstimate";
