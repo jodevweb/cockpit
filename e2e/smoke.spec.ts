@@ -40,6 +40,22 @@ test("chaque onglet de la barre du haut s'ouvre sans erreur", async ({ page }) =
 	}
 });
 
+test("fenêtrée, la barre du haut garde l'Atelier et les témoins à l'écran", async ({ page }) => {
+	// Tout y était `shrink-0` : sous 1 721 px, l'Atelier sortait de l'écran.
+	for (const width of [1366, 1100]) {
+		await page.setViewportSize({ width, height: 800 });
+		await page.goto("/");
+		const atelier = topTab(page, "Workshop");
+		await expect(atelier).toBeInViewport({ ratio: 1 });
+		const header = page.locator("header");
+		expect(await header.evaluate((el) => el.scrollWidth - el.clientWidth)).toBe(0);
+		// Replié en icône, un onglet garde son nom pour qui le cherche.
+		await expect(topTab(page, "Decisions")).toBeVisible();
+	}
+	await topTab(page, "Workshop").click();
+	await expect(atelierNav(page)).toBeVisible();
+});
+
 test("chaque écran de l'atelier s'ouvre sans erreur", async ({ page }) => {
 	// Une vingtaine d'écrans à ouvrir l'un après l'autre : les 30 s par défaut
 	// passaient seul, et cédaient quand les autres tests tournaient en même temps.

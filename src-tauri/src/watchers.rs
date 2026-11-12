@@ -386,8 +386,16 @@ pub(crate) async fn collect_finished_tasks(app: &AppHandle, id: &str) -> bool {
 			},
 		);
 		// Un rendu qui porte du code passe les portes du dépôt avant d'être
-		// intégrable. Une vérification ne commite rien : rien à juger chez elle.
-		if !verifiers.contains(&task.role) && (commits > 0 || !derive.is_empty()) {
+		// intégrable. Une vérification aussi, dès qu'elle commite : une recette
+		// qui ajoute ses tests apporte du code. Seuls ses commits à elle
+		// comptent, pas le travail de ses sœurs reçu avant son lancement
+		// (`sync_verifier_worktree`), qui ne lui donne rien à faire juger.
+		let brings_code = if verifiers.contains(&task.role) {
+			crate::orchestrator::authored_commits(&mission, task, |role| verifiers.contains(role)).await
+		} else {
+			commits > 0 || !derive.is_empty()
+		};
+		if brings_code {
 			let _ = gates::start(id, &task.id);
 		}
 		// Capturé maintenant, tant que l'agent est encore vivant : une fois
