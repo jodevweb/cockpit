@@ -189,6 +189,7 @@
 	},
 	"git": {
 		"commandFailed": "git {{args}} fehlgeschlagen: {{error}}",
+		"mergeBaseDirty": "`{{base}}` hat nicht committete Änderungen in {{path}}: committe oder stashe sie vor dem Mergen.",
 		"detachedHead": "Detached HEAD: kein Branch, der aus diesem Ordner veröffentlicht werden kann.",
 		"commitMessageRequired": "Ein Commit braucht eine Nachricht.",
 		"noWorktree": "git meldet keinen Worktree.",
@@ -407,7 +408,10 @@
 			"integrationNotResumed": "Integration nicht fortgesetzt",
 			"outOfScopeRefused": "Schreiben außerhalb des Bereichs abgelehnt",
 			"revivalsExhausted": "Mission pausiert: Die Integration dreht sich im Kreis",
-			"revivalsExhaustedDetail": "Der Leitagent wurde {{count}}-mal neu gestartet, ohne dass sich etwas bewegt hat (Aufgaben, Prüfungen, Pull Request). Sieh nach, was ihn blockiert – ein Pull Request, der sich nicht öffnen lässt, ein Konflikt – und setze die Mission dann fort."
+			"revivalsExhaustedDetail": "Der Leitagent wurde {{count}}-mal neu gestartet, ohne dass sich etwas bewegt hat (Aufgaben, Prüfungen, Pull Request). Sieh nach, was ihn blockiert – ein Pull Request, der sich nicht öffnen lässt, ein Konflikt – und setze die Mission dann fort.",
+			"noRemote": "Mission pausiert: kein Remote für den Pull Request",
+			"noRemoteDetail": "Alle Aufgaben sind integriert, aber das Repository hat kein Remote: Es kann kein Pull Request geöffnet werden. Schließe die Mission über ihre Karte lokal ab.",
+			"localMergeMessage": "Mission „{{title}}“"
 		},
 		"quoted": "„{{text}}“",
 		"tailscaleDown": "Tailscale antwortet nicht."

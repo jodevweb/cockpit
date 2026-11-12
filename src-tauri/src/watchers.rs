@@ -609,6 +609,15 @@ pub(crate) const MASTER_TURN_TIMEOUT: std::time::Duration = std::time::Duration:
 /// Relances d'un maître d'intégration tolérées sans que rien n'avance.
 const MAX_FRUITLESS_REVIVALS: u32 = 3;
 
+/// Le dépôt a-t-il un remote où pousser ? Dans le doute, oui : c'est le
+/// comportement d'avant, qui relance le maître.
+async fn has_remote(repo: &str) -> bool {
+	git::run_git(std::path::Path::new(repo), &["remote"])
+		.await
+		.map(|out| !out.trim().is_empty())
+		.unwrap_or(true)
+}
+
 pub(crate) async fn revive_integration(app: &AppHandle, mission: &mission::Mission) {
 	use tauri::Manager;
 	if mission::idle_seconds(mission) < INTEGRATION_STALL_SECONDS {
@@ -644,6 +653,23 @@ pub(crate) async fn revive_integration(app: &AppHandle, mission: &mission::Missi
 					"lib.mission.revivalsExhaustedDetail",
 					&[("count", &MAX_FRUITLESS_REVIVALS)],
 				),
+			);
+		}
+		return;
+	}
+
+	// Tout est intégré et le dépôt n'a pas de remote : aucune pull request ne
+	// peut s'ouvrir, et un maître relancé échouerait au même endroit, trois fois,
+	// avant la pause. On s'arrête tout de suite et on dit quoi faire : la
+	// mission se termine en local, d'un bouton.
+	if mission::unintegrated(mission).is_empty() && !has_remote(&mission.cwd).await {
+		if mission::set_paused(&mission.id, true).is_ok() {
+			journal::record(
+				"mission",
+				&i18n::t("lib.mission.noRemote"),
+				&mission.title,
+				false,
+				&i18n::t("lib.mission.noRemoteDetail"),
 			);
 		}
 		return;

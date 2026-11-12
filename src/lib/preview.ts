@@ -2332,6 +2332,11 @@ const REPONSES: Record<string, unknown> = {
 		(REPONSES.missions_list as Array<{ id: string }>).find((mission) => mission.id === id),
 	// Une demande écrite dans Cockpit, sans suivi de tâches : la mission rendue
 	// n'est pas guidée, pour que l'aperçu reste sur la liste et y affiche le message.
+	// Terminer sans pull request : la mission rendue est close.
+	mission_finish_local: ({ id }: Record<string, unknown>) => ({
+		...(REPONSES.missions_list as Array<{ id: string }>).find((mission) => mission.id === id),
+		state: "done",
+	}),
 	mission_start_from_brief: ({ title }: Record<string, unknown>) => ({
 		mission: {
 			...(REPONSES.missions_list as Array<Record<string, unknown>>)[0],

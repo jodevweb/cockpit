@@ -189,6 +189,7 @@
 	},
 	"git": {
 		"commandFailed": "git {{args}} завершился с ошибкой: {{error}}",
+		"mergeBaseDirty": "В `{{base}}` есть незакоммиченные изменения в {{path}}: закоммить или отложи их перед слиянием.",
 		"detachedHead": "Detached HEAD: из этой папки нечего публиковать — нет ветки.",
 		"commitMessageRequired": "Коммиту нужно сообщение.",
 		"noWorktree": "git не сообщает ни одного worktree.",
@@ -407,7 +408,10 @@
 			"integrationNotResumed": "Интеграция не возобновлена",
 			"outOfScopeRefused": "Запись за пределами области отклонена",
 			"revivalsExhausted": "Миссия приостановлена: интеграция ходит по кругу",
-			"revivalsExhaustedDetail": "Ведущий агент перезапускался {{count}} раз(а), но ничего не сдвинулось (задачи, проверки, pull request). Посмотрите, что его блокирует — pull request, который не открывается, конфликт, — и затем возобновите миссию."
+			"revivalsExhaustedDetail": "Ведущий агент перезапускался {{count}} раз(а), но ничего не сдвинулось (задачи, проверки, pull request). Посмотрите, что его блокирует — pull request, который не открывается, конфликт, — и затем возобновите миссию.",
+			"noRemote": "Миссия на паузе: нет remote для pull request",
+			"noRemoteDetail": "Все задачи интегрированы, но у репозитория нет remote: pull request открыть нельзя. Заверши миссию локально из её карточки.",
+			"localMergeMessage": "Миссия «{{title}}»"
 		},
 		"quoted": "«{{text}}»",
 		"tailscaleDown": "Tailscale не отвечает."

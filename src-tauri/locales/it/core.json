@@ -189,6 +189,7 @@
 	},
 	"git": {
 		"commandFailed": "git {{args}} non riuscito: {{error}}",
+		"mergeBaseDirty": "`{{base}}` ha modifiche non committate in {{path}}: committale o mettile da parte prima di unire.",
 		"detachedHead": "HEAD distaccato: nessun branch da pubblicare da questa cartella.",
 		"commitMessageRequired": "Un commit ha bisogno di un messaggio.",
 		"noWorktree": "git non segnala alcun worktree.",
@@ -407,7 +408,10 @@
 			"integrationNotResumed": "Integrazione non ripresa",
 			"outOfScopeRefused": "Scrittura fuori ambito rifiutata",
 			"revivalsExhausted": "Missione in pausa: l'integrazione gira a vuoto",
-			"revivalsExhaustedDetail": "Il master è stato riavviato {{count}} volte senza che nulla si muovesse (attività, controlli, pull request). Guarda cosa lo blocca — una pull request che non si apre, un conflitto — poi riprendi la missione."
+			"revivalsExhaustedDetail": "Il master è stato riavviato {{count}} volte senza che nulla si muovesse (attività, controlli, pull request). Guarda cosa lo blocca — una pull request che non si apre, un conflitto — poi riprendi la missione.",
+			"noRemote": "Missione in pausa: nessun remote per aprire la pull request",
+			"noRemoteDetail": "Tutti i compiti sono integrati, ma il repository non ha remote: nessuna pull request può aprirsi. Concludi la missione in locale dalla sua scheda.",
+			"localMergeMessage": "Missione «{{title}}»"
 		},
 		"quoted": "“{{text}}”",
 		"tailscaleDown": "Tailscale non risponde."

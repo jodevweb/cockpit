@@ -189,6 +189,7 @@
 	},
 	"git": {
 		"commandFailed": "git {{args}} が失敗しました：{{error}}",
+		"mergeBaseDirty": "`{{base}}` には {{path}} に未コミットの変更があります。マージ前にコミットするか退避してください。",
 		"detachedHead": "HEAD が切り離されています：このフォルダから公開するブランチがありません。",
 		"commitMessageRequired": "コミットにはメッセージが必要です。",
 		"noWorktree": "git は worktree を報告していません。",
@@ -407,7 +408,10 @@
 			"integrationNotResumed": "統合は再開されていません",
 			"outOfScopeRefused": "範囲外への書き込みを拒否しました",
 			"revivalsExhausted": "ミッションを一時停止：統合が堂々巡りしています",
-			"revivalsExhaustedDetail": "マスターを {{count}} 回再起動しましたが、何も進みませんでした（タスク、チェック、プルリクエスト）。妨げているもの（開けないプルリクエスト、コンフリクトなど）を確認してから、ミッションを再開してください。"
+			"revivalsExhaustedDetail": "マスターを {{count}} 回再起動しましたが、何も進みませんでした（タスク、チェック、プルリクエスト）。妨げているもの（開けないプルリクエスト、コンフリクトなど）を確認してから、ミッションを再開してください。",
+			"noRemote": "ミッション一時停止：プルリクエストを開くリモートがありません",
+			"noRemoteDetail": "すべてのタスクは統合済みですが、リポジトリにリモートがないためプルリクエストを開けません。カードからローカルで完了してください。",
+			"localMergeMessage": "ミッション「{{title}}」"
 		},
 		"quoted": "「{{text}}」",
 		"tailscaleDown": "Tailscale が応答しません。"

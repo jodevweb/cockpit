@@ -728,6 +728,8 @@ export const api = {
 		/** Ouvre la PR d'intégration, clôt la mission et range les worktrees. */
 		openPr: (id: string, title?: string, body?: string) =>
 			call<Mission>("mission_pr", { id, title, body }),
+		/** Clôt la mission sans pull request : sa branche d'intégration est fusionnée dans sa base, sur ce poste. */
+		finishLocal: (id: string) => call<Mission>("mission_finish_local", { id }),
 		/** Range les worktrees des tâches intégrées. */
 		cleanup: (id: string) => call<string[]>("mission_cleanup", { id }),
 		roles: () => call<Role[]>("roles_list"),

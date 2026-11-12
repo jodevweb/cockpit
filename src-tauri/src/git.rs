@@ -47,6 +47,65 @@ pub struct Worktree {
 	pub last_activity: Option<i64>,
 }
 
+/// Fusionne `branch` dans `base`, sans toucher à ce qui est extrait ailleurs.
+///
+/// Si `base` est extraite dans un worktree du dépôt (le dossier principal, le
+/// plus souvent), on y fusionne, mais seulement s'il ne porte aucune
+/// modification suivie : une fusion par-dessus du travail en cours le mêlerait
+/// au résultat. Sinon, un worktree temporaire le temps de la fusion. Un conflit
+/// annule tout : la base reste telle qu'elle était.
+pub async fn merge_into(repo: &Path, base: &str, branch: &str, message: &str) -> Result<()> {
+	let listing = run_git(repo, &["worktree", "list", "--porcelain"]).await?;
+	let wanted = format!("branch refs/heads/{base}");
+	let mut current = None;
+	let mut found = None;
+	for line in listing.lines() {
+		if let Some(path) = line.strip_prefix("worktree ") {
+			current = Some(path.to_string());
+		} else if line.trim() == wanted {
+			found = current.clone();
+		}
+	}
+
+	let (dir, temporary) = match found {
+		Some(path) => {
+			let dir = std::path::PathBuf::from(path);
+			let dirty = run_git(&dir, &["status", "--porcelain", "--untracked-files=no"]).await?;
+			if !dirty.trim().is_empty() {
+				return Err(CockpitError::msg(crate::i18n::tf(
+					"git.mergeBaseDirty",
+					&[
+						("base", &base.to_string()),
+						("path", &dir.to_string_lossy().to_string()),
+					],
+				)));
+			}
+			(dir, false)
+		}
+		None => {
+			let dir = std::env::temp_dir().join(format!(
+				"cockpit-merge-{}-{}",
+				std::process::id(),
+				std::time::SystemTime::now()
+					.duration_since(std::time::UNIX_EPOCH)
+					.map(|d| d.as_millis())
+					.unwrap_or(0)
+			));
+			run_git(repo, &["worktree", "add", &dir.to_string_lossy(), base]).await?;
+			(dir, true)
+		}
+	};
+
+	let merged = run_git(&dir, &["merge", "--no-ff", "--no-edit", "-m", message, branch]).await;
+	if merged.is_err() {
+		let _ = run_git(&dir, &["merge", "--abort"]).await;
+	}
+	if temporary {
+		let _ = run_git(repo, &["worktree", "remove", "--force", &dir.to_string_lossy()]).await;
+	}
+	merged.map(|_| ())
+}
+
 pub async fn run_git(cwd: &Path, args: &[&str]) -> Result<String> {
 	let output = crate::platform::quiet_async(&mut Command::new("git"))
 		.args(args)
@@ -1208,5 +1267,126 @@ mod usage_tests {
 		purge_rebuildable(&p, true).await.unwrap();
 		assert!(!p.join("node_modules").exists());
 		assert!(p.join(".git").exists(), "l'historique reste, toujours");
+	}
+}
+
+#[cfg(test)]
+mod merge_into_tests {
+	use super::*;
+
+	fn git(dir: &Path, args: &[&str]) {
+		let sortie = std::process::Command::new("git")
+			.args(args)
+			.current_dir(dir)
+			.output()
+			.expect("git est installé sur ce poste");
+		assert!(
+			sortie.status.success(),
+			"git {args:?} : {}",
+			String::from_utf8_lossy(&sortie.stderr)
+		);
+	}
+
+	/// Un dépôt sur `main`, et une branche de mission qui ajoute un fichier.
+	fn depot(nom: &str) -> PathBuf {
+		let dir = std::env::temp_dir().join(format!("cockpit-merge-test-{}-{nom}", std::process::id()));
+		let _ = std::fs::remove_dir_all(&dir);
+		std::fs::create_dir_all(&dir).unwrap();
+		git(&dir, &["init", "--quiet", "--initial-branch=main"]);
+		git(&dir, &["config", "user.email", "test@example.invalid"]);
+		git(&dir, &["config", "user.name", "Test"]);
+		std::fs::write(
+			dir.join("total.mjs"),
+			"socle
+",
+		)
+		.unwrap();
+		git(&dir, &["add", "."]);
+		git(&dir, &["commit", "--quiet", "-m", "Socle"]);
+		git(&dir, &["checkout", "--quiet", "-b", "feat/m"]);
+		std::fs::write(
+			dir.join("remise.mjs"),
+			"remise
+",
+		)
+		.unwrap();
+		git(&dir, &["add", "."]);
+		git(&dir, &["commit", "--quiet", "-m", "Remise"]);
+		dir
+	}
+
+	#[tokio::test]
+	async fn la_base_extraite_recoit_la_fusion() {
+		let dir = depot("extraite");
+		git(&dir, &["checkout", "--quiet", "main"]);
+		merge_into(&dir, "main", "feat/m", "Mission « remise »").await.unwrap();
+		assert!(dir.join("remise.mjs").exists());
+		let log = run_git(&dir, &["log", "-1", "--format=%s"]).await.unwrap();
+		assert_eq!(log.trim(), "Mission « remise »");
+		std::fs::remove_dir_all(&dir).ok();
+	}
+
+	#[tokio::test]
+	async fn une_base_non_extraite_passe_par_un_worktree_temporaire() {
+		let dir = depot("ailleurs");
+		// Le dossier principal reste sur la branche de mission : `main` n'est
+		// extraite nulle part.
+		merge_into(&dir, "main", "feat/m", "Mission").await.unwrap();
+		let fichiers = run_git(&dir, &["ls-tree", "--name-only", "main"]).await.unwrap();
+		assert!(fichiers.contains("remise.mjs"), "{fichiers}");
+		let worktrees = run_git(&dir, &["worktree", "list"]).await.unwrap();
+		assert_eq!(
+			worktrees.lines().count(),
+			1,
+			"le worktree temporaire est rangé : {worktrees}"
+		);
+		std::fs::remove_dir_all(&dir).ok();
+	}
+
+	#[tokio::test]
+	async fn une_base_modifiee_refuse_la_fusion() {
+		let dir = depot("sale");
+		git(&dir, &["checkout", "--quiet", "main"]);
+		std::fs::write(
+			dir.join("total.mjs"),
+			"en cours
+",
+		)
+		.unwrap();
+		assert!(merge_into(&dir, "main", "feat/m", "Mission").await.is_err());
+		assert!(!dir.join("remise.mjs").exists());
+		assert_eq!(
+			std::fs::read_to_string(dir.join("total.mjs")).unwrap(),
+			"en cours
+"
+		);
+		std::fs::remove_dir_all(&dir).ok();
+	}
+
+	#[tokio::test]
+	async fn un_conflit_laisse_la_base_intacte() {
+		let dir = depot("conflit");
+		git(&dir, &["checkout", "--quiet", "feat/m"]);
+		std::fs::write(
+			dir.join("total.mjs"),
+			"mission
+",
+		)
+		.unwrap();
+		git(&dir, &["commit", "--quiet", "-am", "Mission touche le total"]);
+		git(&dir, &["checkout", "--quiet", "main"]);
+		std::fs::write(
+			dir.join("total.mjs"),
+			"base
+",
+		)
+		.unwrap();
+		git(&dir, &["commit", "--quiet", "-am", "La base aussi"]);
+		let avant = run_git(&dir, &["rev-parse", "HEAD"]).await.unwrap();
+		assert!(merge_into(&dir, "main", "feat/m", "Mission").await.is_err());
+		assert_eq!(run_git(&dir, &["rev-parse", "HEAD"]).await.unwrap(), avant);
+		let etat = run_git(&dir, &["status", "--porcelain"]).await.unwrap();
+		assert!(etat.trim().is_empty(), "la fusion est annulée : {etat}");
+		std::fs::remove_dir_all(&dir).ok();
 	}
 }
