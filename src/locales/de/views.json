@@ -693,6 +693,18 @@
 			"submit": "Öffnen",
 			"hint": "Titel und Integrations-Branch kommen aus dem Ticket: Sonst ist nichts auszufüllen."
 		},
+		"request": {
+			"title": "Eine Mission beschreiben",
+			"titlePlaceholder": "Was zu tun ist, in einer Zeile",
+			"briefLabel": "Details",
+			"briefPlaceholder": "Der Kontext, was erwartet wird, was unangetastet bleiben soll… Der Leiter liest dies als sein Ticket.",
+			"hint": "Für alles ohne Ticket: Der Leiter liest diesen Text wie ein Ticket.",
+			"hintNoTracker": "Kein Tracker nötig: Der Leiter liest diesen Text als sein Ticket. Linear, GitLab oder GitHub lassen sich in den Einstellungen verbinden.",
+			"connect": "Tracker verbinden",
+			"submit": "Starten",
+			"confirmMessage": "Der Leiter-Agent startet sofort und liest deine Anfrage. Nichts anderes startet vor deiner Zustimmung.",
+			"firstStep": "Ich halte die Anfrage fest und starte den Leiter-Agenten…"
+		},
 		"remove": {
 			"confirmTitle": "Alles zu „{{title}}“ löschen?",
 			"confirmMessage_one": "Die Agenten werden gestoppt, dann werden {{count}} Worktree, die Branches der Mission — inklusive Integrations-Branch — und die Unterhaltungen der Ausführer gelöscht. Nicht gepushte Arbeit geht verloren.",
@@ -700,15 +712,6 @@
 			"confirmLabel": "Alles löschen",
 			"done_one": "Mission gelöscht — {{count}} Element entfernt.",
 			"done_other": "Mission gelöscht — {{count}} Elemente entfernt."
-		},
-		"intro": {
-			"title": "Was eine Mission tut",
-			"how": "Du übergibst ein Ticket. Ein Hauptagent liest es, schlägt eine Aufteilung in Aufgaben vor und wartet auf deine Freigabe — vorher startet nichts. Ist der Plan freigegeben, bekommt jede Aufgabe ihren eigenen Ausführer, Branch und Worktree; am Ende führt der Hauptagent ihre Arbeit zusammen und öffnet den Pull Request.",
-			"why": "Das ist der Unterschied zu einem Agenten, den du von Hand startest: Hier behält das Cockpit das Ticket, den Plan, die Branches und das Gelieferte im Blick — und findet alles intakt wieder, selbst wenn es mittendrin neu startet.",
-			"missingTitle": "Was hier fehlt",
-			"missing": "Ein Aufgaben-Tracker, um das ursprüngliche Ticket zu lesen: {{missing}}. Die Rollen der Ausführer haben bereits Standardwerte — du kannst sie später unter „Agentenrollen“ anpassen.",
-			"missingDefault": "ein Linear-, GitLab- oder GitHub-Token",
-			"openSettings": "Einstellungen öffnen"
 		},
 		"empty": {
 			"title": "Keine laufende Mission",

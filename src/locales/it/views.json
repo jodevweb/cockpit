@@ -693,6 +693,18 @@
 			"submit": "Apri",
 			"hint": "Il titolo e il branch di integrazione vengono dal ticket: nient'altro da compilare."
 		},
+		"request": {
+			"title": "Descrivere una missione",
+			"titlePlaceholder": "Cosa c'è da fare, in una riga",
+			"briefLabel": "Dettagli",
+			"briefPlaceholder": "Il contesto, cosa ci si aspetta, cosa non toccare… Il capo lo legge come il suo ticket.",
+			"hint": "Per ciò che non ha un ticket: il capo legge questo testo come leggerebbe un ticket.",
+			"hintNoTracker": "Nessun tracker necessario: il capo legge questo testo come il suo ticket. Linear, GitLab o GitHub si collegano nelle Impostazioni.",
+			"connect": "Collega un tracker",
+			"submit": "Avvia",
+			"confirmMessage": "L'agente capo parte subito e legge la tua richiesta. Nient'altro parte prima del tuo accordo.",
+			"firstStep": "Registro la richiesta e avvio l'agente capo…"
+		},
 		"remove": {
 			"confirmTitle": "Eliminare tutto per «{{title}}»?",
 			"confirmMessage_one": "Gli agenti vengono fermati, poi vengono eliminati {{count}} worktree, i branch della missione — branch di integrazione compreso — e le conversazioni degli esecutori. Il lavoro non pushato andrà perso.",
@@ -700,15 +712,6 @@
 			"confirmLabel": "Elimina tutto",
 			"done_one": "Missione eliminata — {{count}} elemento rimosso.",
 			"done_other": "Missione eliminata — {{count}} elementi rimossi."
-		},
-		"intro": {
-			"title": "Cosa fa una missione",
-			"how": "Consegni un ticket. Un agente principale lo legge, propone una suddivisione in attività e aspetta la tua approvazione — nulla parte prima. Una volta approvato il piano, ogni attività ha il suo esecutore, il suo branch e il suo worktree; alla fine l'agente principale rimette insieme il loro lavoro e apre la pull request.",
-			"why": "È questa la differenza con un agente avviato a mano: qui il cockpit tiene traccia del ticket, del piano, dei branch e di ciò che è stato consegnato — e ritrova tutto intatto anche se si riavvia a metà strada.",
-			"missingTitle": "Cosa manca qui",
-			"missing": "Un gestore di ticket, per leggere il ticket originale: {{missing}}. I ruoli degli esecutori hanno già valori predefiniti — puoi modificarli più tardi in «Ruoli degli agenti».",
-			"missingDefault": "un token Linear, GitLab o GitHub",
-			"openSettings": "Apri le Impostazioni"
 		},
 		"empty": {
 			"title": "Nessuna missione in corso",

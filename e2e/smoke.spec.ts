@@ -133,6 +133,20 @@ test.describe("missions", () => {
 		expect(errors).toEqual([]);
 	});
 
+	test("une mission se lance sur une demande écrite, sans ticket", async ({ page }) => {
+		const errors = watchErrors(page);
+		const form = page.getByRole("region", { name: "Describe a mission" });
+		const launch = form.getByRole("button", { name: "Launch" });
+		await expect(launch).toBeDisabled();
+		await form.getByPlaceholder("What needs doing, in one line").fill("Round each cart line");
+		await form.getByRole("textbox", { name: "Details" }).fill("The invoice rounds each line.");
+		await launch.click();
+		await page.getByRole("button", { name: "Start the mission" }).click();
+		await expect(page.getByText("Mission opened on Round each cart line").first()).toBeVisible();
+		await expect(form.getByPlaceholder("What needs doing, in one line")).toHaveValue("");
+		expect(errors).toEqual([]);
+	});
+
 	test("l'approbation d'un plan nomme les exécutants sans filet", async ({ page }) => {
 		await expect(page.getByText("No container for backend, frontend, qa.")).toBeVisible();
 		await expect(page.getByText(/Agents → Agent isolation/)).toBeVisible();

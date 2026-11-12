@@ -723,6 +723,12 @@ export const api = {
 				"mission_start_from_ticket",
 				{ reference },
 			),
+		/** Ouvre une mission sur une demande écrite ici, sans suivi de tâches, et lance son maître. */
+		startFromBrief: (title: string, brief: string) =>
+			call<{ mission: Mission; started: boolean; message: string; session?: string }>(
+				"mission_start_from_brief",
+				{ title, brief },
+			),
 		/** Ce que le maître et les exécutants fabriquent à cet instant. */
 		activity: (id: string) => call<MissionActivity>("mission_activity", { id }),
 		remove: (id: string) => call<void>("mission_remove", { id }),

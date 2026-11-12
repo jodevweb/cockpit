@@ -644,20 +644,23 @@
 			"submit": "创建",
 			"hint": "标题和集成分支来自工单：无需填写其他内容。"
 		},
+		"request": {
+			"title": "描述一个任务",
+			"titlePlaceholder": "要做什么，一句话说清",
+			"briefLabel": "详情",
+			"briefPlaceholder": "背景、期望、不要动的地方…… 主控会把它当作自己的工单来读。",
+			"hint": "用于没有工单的工作：主控会像读工单一样读这段文字。",
+			"hintNoTracker": "无需任务跟踪工具：主控会把这段文字当作工单来读。Linear、GitLab 或 GitHub 可在设置中连接。",
+			"connect": "连接跟踪工具",
+			"submit": "启动",
+			"confirmMessage": "主控代理会立即启动并阅读你的请求。在你同意之前不会启动其他任何东西。",
+			"firstStep": "正在记录请求并启动主控代理……"
+		},
 		"remove": {
 			"confirmTitle": "删除“{{title}}”的所有内容？",
 			"confirmMessage_other": "智能体会被停止，然后删除 {{count}} 个 worktree、任务的分支（包括集成分支）以及执行者的对话。未推送的工作将会丢失。",
 			"confirmLabel": "全部删除",
 			"done_other": "任务已删除 — 移除了 {{count}} 项。"
-		},
-		"intro": {
-			"title": "任务的作用",
-			"how": "你交出一个工单。主智能体会阅读它，提出拆分为子任务的方案，并等待你批准 — 在此之前不会开始任何工作。计划批准后，每个子任务都有自己的执行者、分支和 worktree；最后由主智能体将它们的工作重新整合，并创建 pull request。",
-			"why": "这就是与手动启动的智能体的区别：在这里，Cockpit 会跟踪工单、计划、分支以及已交付的内容 — 即使中途重启，也能完好无损地找回一切。",
-			"missingTitle": "这里还缺少什么",
-			"missing": "一个任务跟踪工具，用于读取原始工单：{{missing}}。执行者角色已有默认值 — 你可以稍后在“智能体角色”中调整。",
-			"missingDefault": "Linear、GitLab 或 GitHub 令牌",
-			"openSettings": "打开设置"
 		},
 		"empty": {
 			"title": "没有进行中的任务",

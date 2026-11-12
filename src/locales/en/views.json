@@ -693,6 +693,18 @@
 			"submit": "Open",
 			"hint": "The title and integration branch come from the ticket: nothing else to fill in."
 		},
+		"request": {
+			"title": "Describe a mission",
+			"titlePlaceholder": "What needs doing, in one line",
+			"briefLabel": "Details",
+			"briefPlaceholder": "The context, what is expected, what to leave alone… The lead reads this as its issue.",
+			"hint": "For what doesn't have an issue: the lead reads this text as it would read one.",
+			"hintNoTracker": "No tracker needed: the lead reads this text as its issue. Linear, GitLab or GitHub can be connected in Settings.",
+			"connect": "Connect a tracker",
+			"submit": "Launch",
+			"confirmMessage": "The lead agent starts right away and reads your request. Nothing else starts before you agree.",
+			"firstStep": "I write the request down and launch the lead agent…"
+		},
 		"remove": {
 			"confirmTitle": "Delete everything for “{{title}}”?",
 			"confirmMessage_one": "The agents are stopped, then {{count}} worktree, the mission's branches — integration branch included — and the runners' conversations are deleted. Unpushed work will be lost.",
@@ -700,15 +712,6 @@
 			"confirmLabel": "Delete everything",
 			"done_one": "Mission deleted — {{count}} item removed.",
 			"done_other": "Mission deleted — {{count}} items removed."
-		},
-		"intro": {
-			"title": "What a mission does",
-			"how": "You hand over a ticket. A lead agent reads it, proposes a breakdown into tasks, and waits for your approval — nothing starts before that. Once the plan is approved, each task gets its own runner, branch and worktree; at the end the lead agent puts their work back together and opens the pull request.",
-			"why": "That's the difference with an agent you start by hand: here the cockpit keeps track of the ticket, the plan, the branches and what was delivered — and finds it all intact even if it restarts halfway through.",
-			"missingTitle": "What's missing here",
-			"missing": "A task tracker, to read the original ticket: {{missing}}. Runner roles already have default values — you can adjust them later in “Agent roles”.",
-			"missingDefault": "a Linear, GitLab or GitHub token",
-			"openSettings": "Open Settings"
 		},
 		"empty": {
 			"title": "No mission in progress",

@@ -397,6 +397,7 @@
 		"automationNotFound": "找不到该自动化。",
 		"mission": {
 			"ticketReferenceRequired": "请粘贴工单的 URL 或标识符。",
+			"titleRequired": "请给任务起个标题。",
 			"unknownTask": "未知子任务。",
 			"fullReviewRequested": "已请求完整审查。",
 			"workerStopped": "执行者已停止：任务恢复时该子任务会重新开始。",

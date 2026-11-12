@@ -397,6 +397,7 @@
 		"automationNotFound": "Automation not found.",
 		"mission": {
 			"ticketReferenceRequired": "Paste an issue's URL or identifier.",
+			"titleRequired": "Give the mission a title.",
 			"unknownTask": "Unknown task.",
 			"fullReviewRequested": "Full review requested.",
 			"workerStopped": "Worker stopped: the task restarts when the mission resumes.",
