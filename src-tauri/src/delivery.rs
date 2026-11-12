@@ -446,7 +446,11 @@ pub async fn compose(mission_id: &str) -> Result<Dossier> {
 				verdict: task.verdict.clone(),
 				delivered: matches!(task.state, TaskState::Delivered | TaskState::Integrated),
 			});
-		} else if !gate_commands.is_empty() {
+		}
+		// Une vérification qui a commité est passée par les portes : son
+		// verdict ne dit rien de ce que ses tests ont donné.
+		let judged = !verifiers.contains(&task.role) || task.gate != mission::Gate::None;
+		if judged && !gate_commands.is_empty() {
 			gates.push(GateLine {
 				task: task.title.clone(),
 				gate: task.gate,

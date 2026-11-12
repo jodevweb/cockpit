@@ -401,7 +401,9 @@ pub enum GateDecision {
 /// La règle, à part de tout effet pour qu'elle se vérifie en entier.
 ///
 /// `declared` : le dépôt déclare des portes. `verifies` : la tâche est une
-/// vérification, qui ne commite rien et n'a donc rien à faire juger.
+/// vérification qui n'apporte aucun commit à elle, donc rien à faire juger.
+/// Une vérification qui commite (des tests ajoutés par la recette) passe les
+/// portes comme une autre : c'est à l'appelant de ne pas la déclarer ici.
 pub fn gate_decision(gate: Gate, declared: bool, verifies: bool) -> GateDecision {
 	if !declared || verifies {
 		// Une porte retirée des réglages ne retient plus rien, même notée en
