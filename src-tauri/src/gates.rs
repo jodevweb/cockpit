@@ -338,7 +338,7 @@ pub fn start(mission_id: &str, task_id: &str) -> Gate {
 		return Gate::None;
 	}
 	let refuse = |reason: String| {
-		let _ = mission::set_task_gate(mission_id, task_id, Gate::Failed, &reason);
+		let _ = mission::set_task_gate(mission_id, task_id, Gate::Failed, &reason, "");
 		Gate::Failed
 	};
 	if !std::path::Path::new(task.worktree.trim()).is_dir() {
@@ -359,6 +359,7 @@ pub fn start(mission_id: &str, task_id: &str) -> Gate {
 		task_id,
 		Gate::Running,
 		&crate::i18n::tf("mission.gate.running", &[("commands", &commands.join(" · "))]),
+		"",
 	);
 
 	let mission_id = mission_id.to_string();
@@ -366,6 +367,13 @@ pub fn start(mission_id: &str, task_id: &str) -> Gate {
 	let worktree = task.worktree.clone();
 	let title = task.title.clone();
 	tauri::async_runtime::spawn(async move {
+		// Le code jugé, lu avant de jouer les commandes : c'est celui-là que le
+		// verdict concerne, et l'historique s'en sert pour dire lequel a échoué
+		// et le rouvrir. Une lecture ratée laisse le verdict intact.
+		let commit = crate::git::run_git(std::path::Path::new(&worktree), &["rev-parse", "HEAD"])
+			.await
+			.map(|sha| sha.trim().to_string())
+			.unwrap_or_default();
 		let outcome = run_with(&runner, &worktree, &commands, TIMEOUT).await;
 		if !is_current(&marker, generation) {
 			return;
@@ -381,7 +389,7 @@ pub fn start(mission_id: &str, task_id: &str) -> Gate {
 			return;
 		}
 		if outcome.passed {
-			let _ = mission::set_task_gate(&mission_id, &task_id, Gate::Passed, "");
+			let _ = mission::set_task_gate(&mission_id, &task_id, Gate::Passed, "", &commit);
 			crate::journal::record(
 				"mission",
 				&crate::i18n::t("mission.journal.gatePassed"),
@@ -391,7 +399,7 @@ pub fn start(mission_id: &str, task_id: &str) -> Gate {
 			);
 		} else {
 			let detail = format!("$ {}\n{}", outcome.failed, outcome.output);
-			let _ = mission::set_task_gate(&mission_id, &task_id, Gate::Failed, &detail);
+			let _ = mission::set_task_gate(&mission_id, &task_id, Gate::Failed, &detail, &commit);
 			crate::journal::record(
 				"mission",
 				&crate::i18n::t("mission.journal.gateFailed"),
@@ -432,7 +440,7 @@ pub fn ensure(mission: &mission::Mission) {
 		if orphan && start(&mission.id, &task.id) == Gate::None {
 			// Plus rien à jouer (les commandes ont été retirées des réglages) :
 			// la porte ne retient plus.
-			let _ = mission::set_task_gate(&mission.id, &task.id, Gate::None, "");
+			let _ = mission::set_task_gate(&mission.id, &task.id, Gate::None, "", "");
 		}
 	}
 }

@@ -852,6 +852,7 @@ fn read_tasks(input: &Value, integration: &str) -> Result<Vec<Task>> {
 				worked_seconds: 0,
 				gate: crate::mission::Gate::None,
 				gate_output: String::new(),
+				gate_commit: String::new(),
 			}
 		})
 		.collect())
@@ -1128,6 +1129,7 @@ pub async fn integration_worktree(mission: &mission::Mission) -> Result<String> 
 		worked_seconds: 0,
 		gate: crate::mission::Gate::None,
 		gate_output: String::new(),
+		gate_commit: String::new(),
 	};
 	prepare_worktree(mission, &task).await
 }
@@ -1355,6 +1357,7 @@ mod tests {
 			worked_seconds: 0,
 			gate: crate::mission::Gate::None,
 			gate_output: String::new(),
+			gate_commit: String::new(),
 		}
 	}
 

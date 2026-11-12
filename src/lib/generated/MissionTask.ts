@@ -117,4 +117,12 @@ gate: TaskGate,
 /**
  * La fin de la sortie de la porte qui a échoué, pour le maître et pour toi.
  */
-gateOutput: string, };
+gateOutput: string, 
+/**
+ * Le commit que la dernière porte a jugé.
+ *
+ * Une porte rouge puis une porte verte sur la même branche ne parlent pas
+ * du même code ; sans lui, l'historique ne pouvait pas dire lequel avait
+ * échoué, ni le rouvrir. Vide quand il n'a pas pu être lu.
+ */
+gateCommit: string, };

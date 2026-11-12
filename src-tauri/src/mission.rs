@@ -171,6 +171,13 @@ pub struct Task {
 	/// La fin de la sortie de la porte qui a échoué, pour le maître et pour toi.
 	#[serde(default)]
 	pub gate_output: String,
+	/// Le commit que la dernière porte a jugé.
+	///
+	/// Une porte rouge puis une porte verte sur la même branche ne parlent pas
+	/// du même code ; sans lui, l'historique ne pouvait pas dire lequel avait
+	/// échoué, ni le rouvrir. Vide quand il n'a pas pu être lu.
+	#[serde(default)]
+	pub gate_commit: String,
 }
 
 /// L'état des portes de vérification d'une tâche.
@@ -457,12 +464,14 @@ mod gate_tests {
 	}
 }
 
-/// Pose l'état des portes d'une tâche, et la sortie qui l'explique.
-pub fn set_task_gate(id: &str, task_id: &str, gate: Gate, output: &str) -> Result<Mission> {
+/// Pose l'état des portes d'une tâche, la sortie qui l'explique et le commit
+/// jugé (vide s'il n'est pas connu).
+pub fn set_task_gate(id: &str, task_id: &str, gate: Gate, output: &str, commit: &str) -> Result<Mission> {
 	update(id, |mission| {
 		if let Some(task) = mission.tasks.iter_mut().find(|task| task.id == task_id) {
 			task.gate = gate;
 			task.gate_output = output.to_string();
+			task.gate_commit = commit.to_string();
 		}
 	})
 }
@@ -747,7 +756,7 @@ impl Mission {
 
 // ─────────────────────────────── Persistance ───────────────────────────────
 
-fn missions_dir() -> std::path::PathBuf {
+pub(crate) fn missions_dir() -> std::path::PathBuf {
 	crate::config::config_dir().join("missions")
 }
 
@@ -856,6 +865,11 @@ pub fn create(title: &str, ticket: &str, ticket_url: &str, cwd: &str, branch: &s
 		updated_at: now(),
 	};
 	save(&mission)?;
+	crate::mission_events::append(
+		&mission.id,
+		&mission.created_at,
+		vec![crate::mission_events::Change::Opened { guided }],
+	);
 	crate::journal::record(
 		"mission",
 		&crate::i18n::t("mission.journal.opened"),
@@ -876,6 +890,7 @@ pub fn remove(id: &str) -> Result<()> {
 	// recréer la fiche juste après sa suppression.
 	let _guard = write_lock();
 	let path = path_of(id);
+	crate::mission_events::forget(id);
 	match std::fs::remove_file(&path) {
 		Ok(()) => Ok(()),
 		Err(error) if error.kind() == std::io::ErrorKind::NotFound => Ok(()),
@@ -948,6 +963,7 @@ pub fn rework(id: &str, task_id: &str, reproche: &str, verifies: impl Fn(&str) -
 				// Une correction se rejuge : la porte d'avant parlait d'un autre code.
 				entry.gate = Gate::None;
 				entry.gate_output.clear();
+				entry.gate_commit.clear();
 				entry.note = crate::i18n::tf(
 					"mission.note.rework",
 					&[("count", &entry.attempts), ("reason", &reproche)],
@@ -1090,13 +1106,23 @@ fn write_lock() -> std::sync::MutexGuard<'static, ()> {
 		.unwrap_or_else(|poisoned| poisoned.into_inner())
 }
 
-/// Applique un changement et horodate la mission.
+/// Applique un changement, horodate la mission et note dans son historique ce
+/// qui a bougé.
+///
+/// L'historique s'écrit sous le même verrou que la fiche : deux mises à jour
+/// concurrentes y paraissent dans l'ordre où elles ont touché la fiche.
 fn update(id: &str, change: impl FnOnce(&mut Mission)) -> Result<Mission> {
 	let _guard = write_lock();
 	let mut mission = get(id)?;
+	let before = mission.clone();
 	change(&mut mission);
 	mission.updated_at = now();
 	save(&mission)?;
+	crate::mission_events::append(
+		id,
+		&mission.updated_at,
+		crate::mission_events::between(&before, &mission),
+	);
 	Ok(mission)
 }
 
@@ -1929,6 +1955,7 @@ mod tests {
 			worked_seconds: 0,
 			gate: Gate::None,
 			gate_output: String::new(),
+			gate_commit: String::new(),
 		}
 	}
 
@@ -2508,6 +2535,7 @@ pub(crate) mod blocking_tests {
 			worked_seconds: 0,
 			gate: Gate::None,
 			gate_output: String::new(),
+			gate_commit: String::new(),
 		}
 	}
 

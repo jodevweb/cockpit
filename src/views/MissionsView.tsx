@@ -1674,6 +1674,7 @@ function TaskForm({ mission, onDone }: { mission: Mission; onDone: () => void })
 				checkpoint: "",
 				gate: "none",
 				gateOutput: "",
+				gateCommit: "",
 			});
 			onDone();
 		} catch (error) {

@@ -26,6 +26,7 @@ pub mod methods;
 pub mod metrics;
 pub mod mission;
 mod mission_commands;
+pub mod mission_events;
 pub mod platform;
 use mission_commands::*;
 mod watchers;
