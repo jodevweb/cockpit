@@ -1,12 +1,13 @@
-# Cockpit
+# Cockpit — des missions pour les agents de code
 
 *[English](README.md) · Français*
 
-Poste de pilotage pour les agents de code — Claude Code, Codex, Gemini — sur
-macOS, Windows et Linux.
-On lance des agents sur des worktrees, on suit ce qu'ils font, on répond quand
-ils ont besoin de toi, et on relit ce qu'ils livrent, dans une seule fenêtre
-native.
+**Un ticket devient une pull request digne de confiance**, avec les agents de
+code déjà installés sur ton poste — Claude Code, Codex, Gemini. Tu valides le
+plan, les agents travaillent dans des worktrees git isolés, les vérifications
+du dépôt décident de ce qui est intégré, et chaque aller-retour reste dans
+l'historique de la mission. Une application native pour macOS, Windows et
+Linux ; locale, sans serveur.
 
 [![Licence MIT](https://img.shields.io/badge/licence-MIT-blue.svg)](LICENSE)
 ![macOS 13+](https://img.shields.io/badge/macOS-13%2B-lightgrey.svg)
@@ -43,6 +44,25 @@ livrent sans tout relire**.
   retrouvés et arrêtés.
 - **Local et ouvert.** Licence MIT, aucun serveur : les jetons et le code
   restent sur ton poste.
+
+## Le déroulé d'une mission
+
+1. **Un ticket.** Depuis GitHub, GitLab ou Linear — ou écrit directement dans
+   Cockpit, sans suivi de tâches.
+2. **Rien ne part sans ton accord.** Le maître dit ce qu'il a compris, puis son
+   approche, puis son découpage en tâches. Il pose ses questions ; tes réponses
+   sont gardées.
+3. **Chaque tâche dans son worktree.** Un exécutant par tâche, sur sa propre
+   branche. Rien ne touche à ta copie de travail.
+4. **Tes vérifications décident, pas l'agent.** Une tâche n'est intégrée que si
+   les vérifications du dépôt passent, sur un code de sortie. Quand elles
+   échouent, le maître renvoie la tâche avec leur sortie — jusqu'à trois
+   tentatives — et le graphe de la mission montre la boucle.
+5. **Tout se relit.** L'historique de la mission garde chaque étape : ce qui a
+   été proposé et répondu, la sortie de chaque vérification, et le diff tel
+   qu'il était à cet instant.
+6. **Une pull request**, avec son dossier de livraison — ou, pour un dépôt sans
+   remote, une fusion en local.
 
 <p align="center">
   <img alt="Un ticket GitHub devient une mission : tu valides ce que le maître a compris, son approche, son découpage, et tu reçois une pull request avec son dossier de livraison" src="docs/images/demo.gif" width="800">

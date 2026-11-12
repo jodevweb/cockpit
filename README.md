@@ -1,10 +1,12 @@
-# Cockpit
+# Cockpit — missions for coding agents
 
 *English · [Français](README.fr.md)*
 
-A cockpit for coding agents — Claude Code, Codex, Gemini — on macOS,
-Windows and Linux. Launch agents on worktrees, follow what they do, answer when they
-need you, and review what they deliver, all in one native window.
+**Turn a ticket into a pull request you can trust**, with the coding agents
+already on your machine — Claude Code, Codex, Gemini. You approve the plan,
+agents work in isolated git worktrees, your repository's checks decide what
+gets merged, and every round trip stays in the mission's history. A native
+app for macOS, Windows and Linux; local, no server.
 
 [![MIT License](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
 ![macOS 13+](https://img.shields.io/badge/macOS-13%2B-lightgrey.svg)
@@ -40,6 +42,25 @@ of it**.
   operations forbidden to workers), and orphan processes found and stopped.
 - **Local and open.** MIT license, no server: tokens and code stay on your
   machine.
+
+## How a mission goes
+
+1. **A ticket.** From GitHub, GitLab or Linear — or written right in Cockpit,
+   no tracker needed.
+2. **You agree before anything starts.** The lead agent says what it
+   understood, then its approach, then its breakdown into tasks. It asks its
+   questions; your answers are kept.
+3. **Each task in its own worktree.** One worker per task, on its own branch.
+   Nothing touches your working copy.
+4. **Your checks decide, not the agent.** A task is integrated only once the
+   repository's checks pass, on an exit code. When they fail, the lead sends
+   the task back with their output — up to three attempts — and the mission
+   graph shows the loop.
+5. **Everything is replayable.** The mission's history keeps every step: what
+   was proposed and answered, each check's output, and the diff as it was at
+   that moment.
+6. **A pull request**, with its delivery dossier — or, for a repository with
+   no remote, a local merge.
 
 <p align="center">
   <img alt="A GitHub issue becomes a mission: you confirm what the lead agent understood, its approach, its breakdown, and get a pull request with its delivery dossier" src="docs/images/demo.gif" width="800">
