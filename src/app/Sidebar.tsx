@@ -17,7 +17,6 @@ import {
 	Search,
 	ListChecks,
 	Radar,
-	Rocket,
 	ScanEye,
 	Settings,
 	Sun,
@@ -65,9 +64,6 @@ interface Entry {
  * et qu'elle réapparaisse d'elle-même dès la clé renseignée.
  */
 const NEEDS: Partial<Record<ViewId, string>> = {
-	// Sans suivi de tâches ni dépôt GitHub, l'écran des flux n'a ni tickets ni
-	// pull requests à montrer : il ne reste que ses onglets vides.
-	delivery: "tickets",
 	// L'infra locale a longtemps été masquée sans Docker — elle ne listait que
 	// des conteneurs. Elle montre aussi les serveurs de développement en écoute,
 	// leur worktree d'origine et ce qu'ils retiennent en mémoire, ce qui ne doit
@@ -125,7 +121,6 @@ const GROUPS: Array<{ id: string; entries: Entry[] }> = [
 	{
 		id: "deliver",
 		entries: [
-			{ id: "delivery", icon: Rocket, shortcut: "6" },
 			{ id: "impact", icon: ScanEye, shortcut: "⇧I" },
 		],
 	},

@@ -220,26 +220,20 @@
 		"connectorMissing": {
 			"github": "o repositório (`github.repo`), e um token ou uma sessão `gh`",
 			"linear": "um token do Linear",
-			"gitlab": "um token do GitLab (escopo `api`) e o caminho do projeto",
-			"trigger": "uma chave secreta do Trigger.dev",
-			"railway": "um token do Railway",
-			"stripe": "uma chave do Stripe"
+			"gitlab": "um token do GitLab (escopo `api`) e o caminho do projeto"
 		},
 		"secretHint": {
 			"github": "Token clássico `repo` — ou deixe vazio, o Cockpit usará `gh auth token`.",
 			"linear": "Chave de API pessoal (Settings → API → Personal API keys).",
 			"gitlab": "Token pessoal com escopo `api` — `read_api` basta para ler, não para mudar o estado de um ticket.",
-			"trigger": "A chave secreta de um ambiente — `tr_dev_…`, `tr_prod_…`, `tr_staging_…` conforme o ambiente (projeto → API keys), não o Personal Access Token `tr_pat_…` da CLI.",
-			"railway": "Token de conta ou de workspace (Account Settings → Tokens) — um token restrito a um projeto exige informar o identificador do projeto ao lado.",
 			"betterstack": "Token de API que o Cockpit entrega ao servidor MCP da Better Stack no contêiner de um agente isolado.",
-			"stripe": "Chave restrita somente leitura `rk_…` (Developers → API keys → Restricted keys): uma chave publicável `pk_…` é rejeitada pela API do servidor.",
+			"stripe": "Chave restrita `rk_…` que o Cockpit entrega ao servidor MCP da Stripe no contêiner de um agente isolado.",
 			"sandboxOauthToken": "Execute `claude setup-token` em Configurações → Isolamento e cole o token exibido — uma vez só, ele dura um ano. Nunca o do host: um contêiner não consegue ler o keychain do macOS."
 		},
 		"secretLabel": {
 			"sandboxOauthToken": "Conta isolada (Claude)"
 		},
 		"homeAccount": "A conta desta máquina",
-		"defaultEnvironment": "Padrão",
 		"worktreeHostileValue": "Valor recusado no comando de worktree (caractere de shell): {{value}}",
 		"roles": {
 			"master": "Agente principal",
@@ -263,13 +257,7 @@
 			"none": "Sem prioridade"
 		},
 		"githubNoLogin": "O GitHub não diz quem está conectado.",
-		"githubRepoSet": "Defina `github.repo` (ex.: acme/monorepo) em Configurações.",
 		"githubRepoFormat": "Defina `github.repo` (ex.: acme/monorepo).",
-		"triggerUnknownEnv": "Ambiente do Trigger.dev desconhecido: {{name}}",
-		"triggerPatToken": "O Trigger.dev espera a chave secreta de um ambiente, não um Personal Access Token `tr_pat_…` (o da CLI). Dashboard → seu projeto → o ambiente → API keys.",
-		"railwayNoProject": "Este token do Railway não lista nenhum projeto (como acontece com tokens restritos a um projeto). Abra o projeto no dashboard e cole o identificador da URL `railway.com/project/<identificador>` em Configurações → Projeto Railway.",
-		"railwaySeveralProjects": "Vários projetos do Railway estão acessíveis ({{projects}}) — escolha um em Configurações → Projeto Railway.",
-		"stripePublishableKey": "O Stripe rejeita chaves publicáveis (`pk_…`): a API do servidor exige uma chave secreta. Crie uma chave restrita somente leitura (`rk_…`) em Developers → API keys → Restricted keys, com acesso `read` em Events.",
 		"githubUpdateRefused": "O GitHub recusou a alteração ({{status}}).",
 		"gitlabProjectSet": "Defina o caminho do projeto GitLab (ex.: grupo/projeto) em Configurações.",
 		"gitlabUpdateRefused": "O GitLab recusou a alteração ({{status}}).",
@@ -293,10 +281,6 @@
 		"config": {
 			"serialize": "Serializando a config: {{error}}",
 			"invalid": "Config inválida: {{error}}"
-		},
-		"trigger": {
-			"envNameRequired": "Dê um nome ao ambiente.",
-			"envKeyRequired": "Um novo ambiente precisa da sua chave secreta (`tr_prod_…` / `tr_dev_…`)."
 		},
 		"project": {
 			"unknown": "Projeto desconhecido: {{id}}",
@@ -334,8 +318,6 @@
 			"prFromBase": "`{{branch}}` é a branch base: crie uma branch dedicada antes de abrir um PR.",
 			"prRefused": "PR recusado ({{status}}): {{message}}",
 			"prCreation": "Criação de PR",
-			"mergeRefused": "Merge recusado ({{status}}): {{message}}",
-			"prMerge": "Merge de PR",
 			"prTitleRequired": "Um pull request precisa de um título."
 		},
 		"permanence": {

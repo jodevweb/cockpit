@@ -145,16 +145,6 @@
 			"send": "답변"
 		}
 	},
-	"delivery": {
-		"title": "피드",
-		"tickets": "티켓",
-		"openWorktree": "worktree 열기",
-		"localTracking": "로컬에서 추적 중",
-		"yes": "예",
-		"no": "아니요",
-		"noLocalWorktree": "이 브랜치의 로컬 worktree가 없습니다.",
-		"emptyHint": "누락된 토큰은 설정에 표시됩니다."
-	},
 	"docs": {
 		"title": "문서",
 		"subtitle": "에이전트 결과물: 계획, 리뷰, QA, 위키 — 모든 worktree에서.",
@@ -465,9 +455,6 @@
 				"encours": "실행 중인 것이 없습니다. 티켓에서 에이전트나 미션을 시작하세요.",
 				"livrer": "열린 PR이 없습니다."
 			}
-		},
-		"card": {
-			"deploy": "배포"
 		},
 		"ticket": {
 			"inMission": "미션 진행 중"
@@ -918,18 +905,6 @@
 			"add": "추가",
 			"name": "이름"
 		},
-		"trigger": {
-			"saved": "환경 “{{name}}”을(를) 저장했습니다.",
-			"removeTitle": "환경 “{{name}}”을(를) 삭제할까요?",
-			"removed": "환경 “{{name}}”을(를) 삭제했습니다.",
-			"defaultProject": "기본 프로젝트",
-			"mainKey": "주 키",
-			"namePlaceholder": "Production",
-			"secretKey": "비밀 키",
-			"project": "프로젝트",
-			"projectHint": "비워 두면 = 위의 프로젝트.",
-			"help": "비밀 키는 프로젝트 하나와 환경 하나에서만 작동합니다: 추적할 환경(Production, Staging, Test…)마다 항목을 하나씩 추가하세요. 각각이 배포 화면의 탭이 됩니다."
-		},
 		"projects": {
 			"added": "프로젝트 “{{name}}”을(를) 추가했습니다.",
 			"removeTitle": "프로젝트 “{{name}}”을(를) 삭제할까요?",
@@ -987,7 +962,6 @@
 			"dock": "워크스페이스 표시",
 			"workstation": "작업 환경",
 			"identifiers": "프로젝트 식별자",
-			"triggerEnvironments": "Trigger.dev 환경",
 			"secrets": "액세스 토큰",
 			"links": "유용한 링크"
 		},
@@ -1015,9 +989,7 @@
 			"gitlabProjectPlaceholder": "group/product",
 			"gitlabHost": "GitLab 인스턴스",
 			"gitlabHostHint": "비워 두면 = gitlab.com, 아니면 자체 인스턴스의 루트",
-			"gitlabHostPlaceholder": "https://gitlab.example.com",
-			"triggerProject": "Trigger.dev 프로젝트",
-			"railwayProject": "Railway 프로젝트"
+			"gitlabHostPlaceholder": "https://gitlab.example.com"
 		},
 		"secrets": {
 			"override": "프로젝트 전용",

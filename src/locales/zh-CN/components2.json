@@ -717,26 +717,6 @@
 		"whyAgent": "由智能体写入",
 		"whyChanged": "已修改"
 	},
-	"feedPanel": {
-		"sort": {
-			"recent": "最新",
-			"oldest": "最早",
-			"severity": "严重程度",
-			"status": "状态",
-			"title": "标题"
-		},
-		"severity": {
-			"critical": "严重",
-			"warning": "警告",
-			"info": "信息",
-			"success": "正常"
-		},
-		"sortHint": "显示顺序",
-		"filters": "筛选",
-		"clearAll": "全部清除",
-		"empty": "没有可显示的内容",
-		"selectItem": "选择一项"
-	},
 	"illustration": {
 		"genre": {
 			"frise": "事件链",

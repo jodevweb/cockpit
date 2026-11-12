@@ -220,26 +220,20 @@
 		"connectorMissing": {
 			"github": "el repositorio (`github.repo`) y un token o una sesión de `gh`",
 			"linear": "un token de Linear",
-			"gitlab": "un token de GitLab (scope `api`) y la ruta del proyecto",
-			"trigger": "una clave secreta de Trigger.dev",
-			"railway": "un token de Railway",
-			"stripe": "una clave de Stripe"
+			"gitlab": "un token de GitLab (scope `api`) y la ruta del proyecto"
 		},
 		"secretHint": {
 			"github": "Token clásico `repo`, o déjalo vacío y Cockpit usará `gh auth token`.",
 			"linear": "Clave de API personal (Settings → API → Personal API keys).",
 			"gitlab": "Token personal con scope `api`; `read_api` basta para leer, no para cambiar el estado de un ticket.",
-			"trigger": "La clave secreta de un entorno: `tr_dev_…`, `tr_prod_…`, `tr_staging_…` según el entorno (proyecto → API keys), no el Personal Access Token `tr_pat_…` de la CLI.",
-			"railway": "Token de cuenta o de workspace (Account Settings → Tokens); un token limitado a un proyecto obliga a indicar también el identificador del proyecto.",
 			"betterstack": "Token de API que Cockpit entrega al servidor MCP de Better Stack en el contenedor de un agente aislado.",
-			"stripe": "Clave restringida de solo lectura `rk_…` (Developers → API keys → Restricted keys): la API de servidor rechaza una clave publicable `pk_…`.",
+			"stripe": "Clave restringida `rk_…` que Cockpit entrega al servidor MCP de Stripe en el contenedor de un agente aislado.",
 			"sandboxOauthToken": "Ejecuta `claude setup-token` desde Ajustes → Aislamiento y pega el token que aparece; una sola vez, dura un año. Nunca el del host: un contenedor no puede leer el llavero de macOS."
 		},
 		"secretLabel": {
 			"sandboxOauthToken": "Cuenta aislada (Claude)"
 		},
 		"homeAccount": "La cuenta de esta máquina",
-		"defaultEnvironment": "Predeterminado",
 		"worktreeHostileValue": "Valor rechazado en el comando del worktree (carácter de shell): {{value}}",
 		"roles": {
 			"master": "Agente principal",
@@ -263,13 +257,7 @@
 			"none": "Sin prioridad"
 		},
 		"githubNoLogin": "GitHub no indica quién ha iniciado sesión.",
-		"githubRepoSet": "Define `github.repo` (p. ej. acme/monorepo) en Ajustes.",
 		"githubRepoFormat": "Define `github.repo` (p. ej. acme/monorepo).",
-		"triggerUnknownEnv": "Entorno de Trigger.dev desconocido: {{name}}",
-		"triggerPatToken": "Trigger.dev espera la clave secreta de un entorno, no un Personal Access Token `tr_pat_…` (el de la CLI). Dashboard → tu proyecto → el entorno → API keys.",
-		"railwayNoProject": "Este token de Railway no lista ningún proyecto (es el caso de los tokens limitados a un proyecto). Abre el proyecto en el dashboard y pega el identificador de la URL `railway.com/project/<identificador>` en Ajustes → Proyecto de Railway.",
-		"railwaySeveralProjects": "Hay varios proyectos de Railway accesibles ({{projects}}): elige uno en Ajustes → Proyecto de Railway.",
-		"stripePublishableKey": "Stripe rechaza las claves publicables (`pk_…`): la API de servidor exige una clave secreta. Crea una clave restringida de solo lectura (`rk_…`) en Developers → API keys → Restricted keys, con acceso `read` sobre Events.",
 		"githubUpdateRefused": "GitHub rechazó el cambio ({{status}}).",
 		"gitlabProjectSet": "Define la ruta del proyecto de GitLab (p. ej. grupo/proyecto) en Ajustes.",
 		"gitlabUpdateRefused": "GitLab rechazó el cambio ({{status}}).",
@@ -293,10 +281,6 @@
 		"config": {
 			"serialize": "Serializando la configuración: {{error}}",
 			"invalid": "Configuración no válida: {{error}}"
-		},
-		"trigger": {
-			"envNameRequired": "Ponle un nombre al entorno.",
-			"envKeyRequired": "Un entorno nuevo necesita su clave secreta (`tr_prod_…` / `tr_dev_…`)."
 		},
 		"project": {
 			"unknown": "Proyecto desconocido: {{id}}",
@@ -334,8 +318,6 @@
 			"prFromBase": "`{{branch}}` es la rama base: crea una rama dedicada antes de abrir una PR.",
 			"prRefused": "PR rechazada ({{status}}): {{message}}",
 			"prCreation": "Creación de la PR",
-			"mergeRefused": "Merge rechazado ({{status}}): {{message}}",
-			"prMerge": "Fusión de la PR",
 			"prTitleRequired": "Una pull request necesita un título."
 		},
 		"permanence": {

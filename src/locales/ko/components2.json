@@ -717,26 +717,6 @@
 		"whyAgent": "에이전트가 작성함",
 		"whyChanged": "수정됨"
 	},
-	"feedPanel": {
-		"sort": {
-			"recent": "최신순",
-			"oldest": "오래된순",
-			"severity": "심각도",
-			"status": "상태",
-			"title": "제목"
-		},
-		"severity": {
-			"critical": "치명적",
-			"warning": "경고",
-			"info": "정보",
-			"success": "정상"
-		},
-		"sortHint": "표시 순서",
-		"filters": "필터",
-		"clearAll": "모두 지우기",
-		"empty": "표시할 항목 없음",
-		"selectItem": "항목을 선택하세요"
-	},
 	"illustration": {
 		"genre": {
 			"frise": "사건의 흐름",

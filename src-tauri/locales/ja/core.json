@@ -220,26 +220,20 @@
 		"connectorMissing": {
 			"github": "リポジトリ（`github.repo`）と、トークンまたは `gh` セッション",
 			"linear": "Linear トークン",
-			"gitlab": "GitLab トークン（`api` スコープ）とプロジェクトのパス",
-			"trigger": "Trigger.dev のシークレットキー",
-			"railway": "Railway トークン",
-			"stripe": "Stripe キー"
+			"gitlab": "GitLab トークン（`api` スコープ）とプロジェクトのパス"
 		},
 		"secretHint": {
 			"github": "クラシックの `repo` トークン — または空のままにすると、Cockpit が `gh auth token` を使います。",
 			"linear": "個人 API キー（Settings → API → Personal API keys）。",
 			"gitlab": "`api` スコープの個人トークン — `read_api` は読み取りには十分ですが、課題の状態は変更できません。",
-			"trigger": "環境のシークレットキー — 環境に応じて `tr_dev_…`、`tr_prod_…`、`tr_staging_…`（project → API keys）。CLI の `tr_pat_…` Personal Access Token ではありません。",
-			"railway": "アカウントまたはワークスペースのトークン（Account Settings → Tokens）— プロジェクトスコープのトークンの場合は、プロジェクトの識別子も併せて入力する必要があります。",
 			"betterstack": "隔離されたエージェントのコンテナ内で、Cockpit が Better Stack の MCP サーバーに渡す API トークン。",
-			"stripe": "読み取り専用の制限付きキー `rk_…`（Developers → API keys → Restricted keys）：公開可能キー `pk_…` はサーバー API で拒否されます。",
+			"stripe": "隔離されたエージェントのコンテナ内で、Cockpit が Stripe の MCP サーバーに渡す制限付きキー `rk_…`。",
 			"sandboxOauthToken": "「設定 → 分離」から `claude setup-token` を実行し、表示されたトークンを貼り付けてください — 一度だけで、1 年間有効です。ホストのトークンは使えません：コンテナは macOS のキーチェーンを読めません。"
 		},
 		"secretLabel": {
 			"sandboxOauthToken": "分離アカウント（Claude）"
 		},
 		"homeAccount": "このマシンのアカウント",
-		"defaultEnvironment": "デフォルト",
 		"worktreeHostileValue": "worktree コマンドで拒否された値（シェル文字）：{{value}}",
 		"roles": {
 			"master": "リードエージェント",
@@ -263,13 +257,7 @@
 			"none": "優先度なし"
 		},
 		"githubNoLogin": "GitHub が誰がサインインしているかを返しません。",
-		"githubRepoSet": "設定で `github.repo`（例：acme/monorepo）を設定してください。",
 		"githubRepoFormat": "`github.repo` を設定してください（例：acme/monorepo）。",
-		"triggerUnknownEnv": "不明な Trigger.dev 環境：{{name}}",
-		"triggerPatToken": "Trigger.dev は環境のシークレットキーを必要とします。`tr_pat_…` の Personal Access Token（CLI 用）ではありません。Dashboard → プロジェクト → 環境 → API keys。",
-		"railwayNoProject": "この Railway トークンではプロジェクトが一覧に出ません（プロジェクトスコープのトークンの場合）。ダッシュボードでプロジェクトを開き、URL `railway.com/project/<識別子>` の識別子を「設定 → Railway プロジェクト」に貼り付けてください。",
-		"railwaySeveralProjects": "複数の Railway プロジェクトにアクセスできます（{{projects}}）— 「設定 → Railway プロジェクト」で 1 つ選んでください。",
-		"stripePublishableKey": "Stripe は公開可能キー（`pk_…`）を拒否します：サーバー API にはシークレットキーが必要です。Developers → API keys → Restricted keys で、Events に `read` 権限を持つ読み取り専用の制限付きキー（`rk_…`）を作成してください。",
 		"githubUpdateRefused": "GitHub が変更を拒否しました（{{status}}）。",
 		"gitlabProjectSet": "設定で GitLab プロジェクトのパス（例：group/project）を設定してください。",
 		"gitlabUpdateRefused": "GitLab が変更を拒否しました（{{status}}）。",
@@ -293,10 +281,6 @@
 		"config": {
 			"serialize": "設定のシリアライズ：{{error}}",
 			"invalid": "無効な設定：{{error}}"
-		},
-		"trigger": {
-			"envNameRequired": "環境に名前を付けてください。",
-			"envKeyRequired": "新しい環境にはシークレットキーが必要です（`tr_prod_…` / `tr_dev_…`）。"
 		},
 		"project": {
 			"unknown": "不明なプロジェクト：{{id}}",
@@ -334,8 +318,6 @@
 			"prFromBase": "`{{branch}}` はベースブランチです：PR を作成する前に専用のブランチを作ってください。",
 			"prRefused": "PR が拒否されました（{{status}}）：{{message}}",
 			"prCreation": "PR の作成",
-			"mergeRefused": "マージが拒否されました（{{status}}）：{{message}}",
-			"prMerge": "PR のマージ",
 			"prTitleRequired": "プルリクエストにはタイトルが必要です。"
 		},
 		"permanence": {

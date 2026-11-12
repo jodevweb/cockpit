@@ -767,26 +767,6 @@
 		"whyAgent": "escrito por un agente",
 		"whyChanged": "modificado"
 	},
-	"feedPanel": {
-		"sort": {
-			"recent": "Más recientes",
-			"oldest": "Más antiguos",
-			"severity": "Gravedad",
-			"status": "Estado",
-			"title": "Título"
-		},
-		"severity": {
-			"critical": "Crítico",
-			"warning": "Aviso",
-			"info": "Info",
-			"success": "OK"
-		},
-		"sortHint": "Orden de visualización",
-		"filters": "Filtros",
-		"clearAll": "Borrar todo",
-		"empty": "Nada que mostrar",
-		"selectItem": "Selecciona un elemento"
-	},
 	"illustration": {
 		"genre": {
 			"frise": "La cadena de acontecimientos",

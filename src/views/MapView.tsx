@@ -25,7 +25,6 @@ import {
 	ListChecks,
 	Map as MapIcon,
 	ScanSearch,
-	Rocket,
 	Ticket,
 	X,
 } from "lucide-react";
@@ -44,7 +43,7 @@ import { Button, LoadingBar } from "@/components/ui";
 import { useWorkGroups, type WorkGroup } from "@/components/WorkspacePanel";
 import { agentColor, collisions } from "@/lib/chantier";
 import { useNodeSizes } from "@/lib/flowSizes";
-import { fromIso, fromSeconds } from "@/lib/format";
+import { fromSeconds } from "@/lib/format";
 import { api } from "@/lib/ipc";
 import { awaitsHuman, MISSION_STATE_LABELS } from "@/lib/missions";
 import type { FeedItem, Mission, ProjectView, PullRequest, Review } from "@/lib/types";
@@ -97,7 +96,6 @@ type CardPayload =
 	| { kind: "mission"; mission: Mission }
 	| { kind: "chantier"; group: WorkGroup }
 	| { kind: "pr"; pr: PullRequest; mine: boolean; review: Review | null }
-	| { kind: "deploy"; item: FeedItem }
 	| { kind: "more"; label: string; view: Parameters<ReturnType<typeof useCockpit>["go"]>[0] };
 
 /** Ce qu'une île repliée résume : ce qu'on sait sans ouvrir son projet. */
@@ -161,9 +159,6 @@ function World() {
 	});
 	const tickets = useAsync(() => api.feeds.linear(true).catch(() => []), [activeProject?.id], {
 		pollMs: 180_000,
-	});
-	const deploys = useAsync(() => api.feeds.railway().catch(() => []), [activeProject?.id], {
-		pollMs: 300_000,
 	});
 	const everywhere = useAsync(() => api.missions.everywhere().catch(() => []), [], { pollMs: 30_000 });
 	// À quel dépôt appartient chaque agent, pour le compter sous son île.
@@ -243,12 +238,9 @@ function World() {
 				url: pr.url,
 			});
 		}
-		if (all.length > 6) card("more:prs", "more", "livrer", { kind: "more", label: t("map.more.prs", { count: all.length - 6 }), view: "delivery" }, { tickets: [], branches: [] });
-		for (const item of (deploys.data ?? []).slice(0, 2)) {
-			card(`deploy:${item.id}`, "deploy", "livrer", { kind: "deploy", item }, { tickets: [], branches: [] });
-		}
+		if (all.length > 6) card("more:prs", "more", "livrer", { kind: "more", label: t("map.more.prs", { count: all.length - 6 }), view: "today" }, { tickets: [], branches: [] });
 		return out;
-	}, [tickets.data, missions, groups, prs.data, deploys.data, doneStates, activeProject?.linearTeamKey, reviews, t]);
+	}, [tickets.data, missions, groups, prs.data, doneStates, activeProject?.linearTeamKey, reviews, t]);
 
 	// ── Les îles ────────────────────────────────────────────────────────
 	const pulses = useMemo(() => {
@@ -768,7 +760,6 @@ function RegionNode({ data }: NodeProps<Node<RegionData>>) {
 }
 
 function CardNode({ data }: NodeProps<Node<CardData>>) {
-	const { t } = useTranslation("views");
 	const band = useBand();
 	const payload = data.payload;
 	return (
@@ -785,7 +776,6 @@ function CardNode({ data }: NodeProps<Node<CardData>>) {
 			{payload.kind === "mission" ? <MissionCard mission={payload.mission} /> : null}
 			{payload.kind === "chantier" ? <ChantierCard group={payload.group} /> : null}
 			{payload.kind === "pr" ? <PrCard pr={payload.pr} mine={payload.mine} review={payload.review} /> : null}
-			{payload.kind === "deploy" ? <FeedCard item={payload.item} icon={Rocket} eyebrow={t("map.card.deploy")} /> : null}
 			{payload.kind === "more" ? <MoreCard label={payload.label} view={payload.view} /> : null}
 			<Handle type="source" position={Position.Right} className="!size-1.5 !border-0 !bg-line" />
 		</div>
@@ -837,35 +827,6 @@ function TicketCard({ item, taken }: { item: FeedItem; taken: boolean }) {
 				<TicketActions identifier={item.id} title={item.title} url={item.url} />
 			</div>
 		</div>
-	);
-}
-
-function FeedCard({
-	item,
-	icon: Icon,
-	eyebrow,
-}: {
-	item: FeedItem;
-	icon: React.ComponentType<{ size?: number; className?: string }>;
-	eyebrow: string;
-}) {
-	const severe = item.severity === "critical";
-	return (
-		<button
-			type="button"
-			onClick={() => item.url && void api.system.openUrl(item.url).catch(() => undefined)}
-			className="focus-ring flex h-full flex-col gap-1.5 px-3.5 py-3 text-left"
-		>
-			<span className="flex w-full items-center gap-2">
-				<Icon size={12} className={clsx("shrink-0", severe ? "text-critical" : "text-ink-faint")} />
-				<Eyebrow tone={severe ? "text-critical" : undefined}>{eyebrow}</Eyebrow>
-				{item.status ? <span className="ml-auto truncate font-mono text-[10px] text-ink-faint">{item.status}</span> : null}
-			</span>
-			<span className="line-clamp-2 text-[12.5px] leading-snug font-semibold text-ink">{item.title}</span>
-			<span className="mt-auto truncate font-mono text-[10.5px] text-ink-faint">
-				{item.subtitle || (item.timestamp ? fromIso(item.timestamp) : "")}
-			</span>
-		</button>
 	);
 }
 
