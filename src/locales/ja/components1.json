@@ -198,12 +198,14 @@
 		"summary": {
 			"none": "ここ数時間、実行されたエージェントはありません。",
 			"busy_other": "現在 {{busy}} 件が作業中 · 今朝から {{count}} 件",
-			"idle_other": "ここ数時間で {{count}} 件のエージェント、作業中のものはなし"
+			"idle_other": "ここ数時間で {{count}} 件のエージェント、作業中のものはなし",
+			"resting_other": "{{count}} 件が待機中"
 		},
 		"legend": {
 			"working": "作業中",
 			"done": "完了",
-			"failed": "失敗"
+			"failed": "失敗",
+			"resting": "待機中"
 		},
 		"now": "現在",
 		"turns_other": "{{count}} ターン",
@@ -380,7 +382,18 @@
 			"recent": "最近",
 			"resting": "休止中"
 		},
-		"empty": "worktree はありません。"
+		"empty": "worktree はありません。",
+		"agent": "エージェント",
+		"stats": {
+			"trees": "Worktree",
+			"agents": "稼働中のエージェント",
+			"dirty": "未コミットの変更",
+			"ahead": "プッシュ待ちのコミット"
+		},
+		"invite": {
+			"title": "新しい worktree",
+			"body": "専用フォルダーの独立したブランチ。エージェントは main に触れずにそこで作業します。"
+		}
 	},
 	"impactReport": {
 		"ago": {

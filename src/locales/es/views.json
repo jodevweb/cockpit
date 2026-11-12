@@ -1132,8 +1132,27 @@
 			"add": "Añadir",
 			"reopen": "Reabrir",
 			"complete": "Completar",
-			"delete": "Eliminar"
-		}
+			"delete": "Eliminar",
+			"empty": "Sin notas",
+			"emptyHint": "Apunta lo que no quieres olvidar — Intro lo añade."
+		},
+		"stats": {
+			"waiting": "Te espera",
+			"waitingNone": "Nada está bloqueado",
+			"working": "Agentes trabajando",
+			"resting_one": "{{count}} abierto, inactivo",
+			"resting_other": "{{count}} abiertos, inactivos",
+			"missions": "Misiones en curso",
+			"missionsWaiting_one": "{{count}} espera tu visto bueno",
+			"missionsWaiting_other": "{{count}} esperan tu visto bueno",
+			"pullRequests": "PR listas para fusionar",
+			"toReview_one": "{{count}} por revisar",
+			"toReview_other": "{{count}} por revisar",
+			"cleanup": "Worktrees por limpiar",
+			"trees_one": "{{count}} worktree en total",
+			"trees_other": "{{count}} worktrees en total"
+		},
+		"activityNone": "El cockpit aún no ha hecho nada en tu nombre."
 	},
 	"worktrees": {
 		"row": {

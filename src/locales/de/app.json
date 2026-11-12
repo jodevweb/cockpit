@@ -223,6 +223,25 @@
 			"missionsWaiting_other": "{{missions}} laufend, {{count}} warten auf deine Freigabe ({{mod}}{{shift}}M)",
 			"scripts_one": "{{count}} Skript läuft",
 			"scripts_other": "{{count}} Skripte laufen"
+		},
+		"blurb": {
+			"map": "Alle Projekte und Agenten auf einen Blick",
+			"today": "Was wartet, was heute lief",
+			"decisions": "Fragen, die auf deine Antwort warten",
+			"recap": "Der Tag in Bildern",
+			"permanence": "Was läuft, während du weg bist",
+			"missions": "Vom Ticket zum Pull Request",
+			"workspace": "Offene Agenten und Terminals",
+			"libres": "Agenten außerhalb einer Mission",
+			"agents": "Alle Sitzungen, laufend und vergangen",
+			"methods": "Plugins, die ein Projekt übernehmen kann",
+			"replay": "Agenten-Setup an alten PRs prüfen",
+			"docs": "Die Dokumente des Projekts",
+			"impact": "Was eine Änderung vor dem Merge berührt",
+			"worktrees": "Isolierte Branches, einer pro Agent",
+			"git": "Branches, Commits und Diffs",
+			"scripts": "Projektbefehle und ihre Ausgabe",
+			"infra": "Server, die auf diesem Rechner laufen"
 		}
 	},
 	"agents": {

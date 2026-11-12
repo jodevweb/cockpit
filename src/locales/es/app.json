@@ -223,6 +223,25 @@
 			"missionsWaiting_other": "{{missions}} en curso, {{count}} esperan tu aprobación ({{mod}}{{shift}}M)",
 			"scripts_one": "{{count}} script en ejecución",
 			"scripts_other": "{{count}} scripts en ejecución"
+		},
+		"blurb": {
+			"map": "Todos los proyectos y agentes de un vistazo",
+			"today": "Lo que espera, lo que se ejecutó hoy",
+			"decisions": "Preguntas que esperan tu respuesta",
+			"recap": "El día repasado en imágenes",
+			"permanence": "Lo que corre mientras no estás",
+			"missions": "De un ticket a una pull request",
+			"workspace": "Agentes y terminales abiertos",
+			"libres": "Agentes lanzados fuera de una misión",
+			"agents": "Todas las sesiones, activas y pasadas",
+			"methods": "Plugins que un proyecto puede adoptar",
+			"replay": "Probar una config de agentes con PR pasadas",
+			"docs": "Los documentos del proyecto",
+			"impact": "Lo que toca un cambio antes de fusionar",
+			"worktrees": "Ramas aisladas, una por agente",
+			"git": "Ramas, commits y diffs",
+			"scripts": "Los comandos del proyecto y su salida",
+			"infra": "Los servidores que corren en este equipo"
 		}
 	},
 	"agents": {

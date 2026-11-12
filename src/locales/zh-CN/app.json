@@ -215,6 +215,25 @@
 			"missionsOngoing": "{{missions}}进行中（{{mod}}{{shift}}M）",
 			"missionsWaiting_other": "{{missions}}进行中，{{count}} 个等待你批准（{{mod}}{{shift}}M）",
 			"scripts_other": "{{count}} 个脚本正在运行"
+		},
+		"blurb": {
+			"map": "一眼看清所有项目和智能体",
+			"today": "待处理的事，今天运行过的",
+			"decisions": "等待你回答的问题",
+			"recap": "用图片回顾这一天",
+			"permanence": "你不在时运行的内容",
+			"missions": "从工单到拉取请求",
+			"workspace": "打开的智能体和终端",
+			"libres": "任务之外启动的智能体",
+			"agents": "所有会话，进行中和过去的",
+			"methods": "项目可采用的插件",
+			"replay": "用过去的 PR 检验智能体配置",
+			"docs": "项目文档",
+			"impact": "合并前查看改动影响的范围",
+			"worktrees": "隔离的分支，每个智能体一个",
+			"git": "分支、提交和差异",
+			"scripts": "项目命令及其输出",
+			"infra": "本机正在运行的服务器"
 		}
 	},
 	"agents": {

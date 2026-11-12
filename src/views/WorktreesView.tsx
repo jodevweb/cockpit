@@ -440,6 +440,31 @@ export function WorktreesView() {
 
 	const mainRepo = config?.mainRepo ?? "";
 
+	// Un seul geste pour l'en-tête et pour la carte d'invitation de la flotte.
+	const create = () => {
+		void promptText({
+			title: t("worktrees.create.title"),
+			message: t("worktrees.create.message"),
+			placeholder: t("worktrees.create.placeholder"),
+		}).then((branch) => {
+			if (!branch) return;
+			// Créer un worktree n'est jamais le but : on vient y
+			// travailler. La création suivie l'annonce dans le centre
+			// d'activité, puis ouvre le workspace — sans changer
+			// d'écran : on est passé à autre chose entre-temps.
+			void createWorktreeTracked(
+				branch,
+				{ mainRepo, runJob, openAgent: openWorkspaceAgent },
+				{
+					onReady: (path) => {
+						reloadWorktrees();
+						openWorkspaceAgent(path, "", undefined, undefined, true);
+					},
+				},
+			).catch(() => undefined);
+		});
+	};
+
 	return (
 		<>
 			<ViewHeader
@@ -475,29 +500,7 @@ export function WorktreesView() {
 						</Button>
 						<Button
 							icon={GitBranch}
-							onClick={() => {
-								void promptText({
-									title: t("worktrees.create.title"),
-									message: t("worktrees.create.message"),
-									placeholder: t("worktrees.create.placeholder"),
-								}).then((branch) => {
-									if (!branch) return;
-									// Créer un worktree n'est jamais le but : on vient y
-									// travailler. La création suivie l'annonce dans le centre
-									// d'activité, puis ouvre le workspace — sans changer
-									// d'écran : on est passé à autre chose entre-temps.
-									void createWorktreeTracked(
-										branch,
-										{ mainRepo, runJob, openAgent: openWorkspaceAgent },
-										{
-											onReady: (path) => {
-												reloadWorktrees();
-												openWorkspaceAgent(path, "", undefined, undefined, true);
-											},
-										},
-									).catch(() => undefined);
-								});
-							}}
+							onClick={create}
 							title={t("worktrees.create.hint")}
 						>
 							{t("worktrees.create.button")}
@@ -514,6 +517,7 @@ export function WorktreesView() {
 
 			{mode === "fleet" && !selectedPath ? (
 				<FleetGrid
+					onCreate={create}
 					onOpen={(path) => {
 						setSelectedPath(path);
 						setMode("list");

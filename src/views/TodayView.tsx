@@ -1,9 +1,13 @@
 import clsx from "clsx";
 import {
+	Bot,
 	Check,
 	CornerDownLeft,
 	GitMerge,
 	GitPullRequest,
+	Hand,
+	ListChecks,
+	NotebookPen,
 	Plus,
 	Ticket,
 	Trash2,
@@ -18,8 +22,10 @@ import {
 	Empty,
 	PrLabels,
 	SkeletonRows,
+	StatTile,
 	ViewHeader,
 } from "@/components/ui";
+import { useAgentRuns } from "@/app/agents";
 import { PrActions, TicketActions } from "@/components/actions";
 import { fromTimestamp, shortPath } from "@/lib/format";
 import { api } from "@/lib/ipc";
@@ -61,7 +67,8 @@ const TONES = {
  */
 export function TodayView() {
 	const { t } = useTranslation("views");
-	const { go, activeProject, config, worktrees } = useCockpit();
+	const { go, activeProject, config, worktrees, missions } = useCockpit();
+	const { runs, pendingFor } = useAgentRuns();
 
 	const tasks = useAsync(() => api.tasks.list(), [activeProject?.id]);
 	const prs = useAsync(() => api.git.pullRequests().catch(() => []), [activeProject?.id], {
@@ -115,12 +122,18 @@ export function TodayView() {
 
 	const blockers = useBlockers(prs.data ?? []);
 
-	const nothing =
-		blockers.length === 0 &&
-		readyToMerge.length === 0 &&
-		toReview.length === 0 &&
-		removable.length === 0 &&
-		pending.length === 0;
+	// Un agent ouvert n'est pas un agent qui travaille : celui qui a rendu son
+	// tour reste en vie, conversation intacte, en attendant la suite. Les
+	// compter ensemble affichait « 7 au travail » sur un poste où rien ne
+	// bougeait — on les sépare.
+	const open = runs.filter((run) => run.running);
+	const working = open.filter((run) => run.thinking || pendingFor(run.id).length > 0).length;
+	const resting = open.length - working;
+
+	const ongoing = missions.filter((mission) => mission.state !== "done" && mission.state !== "failed");
+	const awaitingYou = ongoing.filter((mission) =>
+		["awaitingUnderstanding", "awaitingApproach", "awaitingApproval"].includes(mission.state),
+	).length;
 
 
 	return (
@@ -144,13 +157,50 @@ export function TodayView() {
 
 			<div className="min-h-0 flex-1 overflow-y-auto px-5 py-4">
 				<div className="flex flex-col gap-4">
-					{nothing && !tasks.initial ? (
-						<Empty
-							icon={Check}
-							message={t("today.nothing")}
-							hint={t("today.nothingHint")}
+					{/* L'état du poste en une rangée, avant toute liste. L'écran s'ouvrait
+					    sur « Rien ne t'attend » centré dans un grand vide, alors que la
+					    barre du haut affichait au même moment sept agents ouverts : les
+					    deux disaient vrai, aucun ne disait tout. */}
+					<div className="grid grid-cols-[repeat(auto-fit,minmax(190px,1fr))] gap-3">
+						<StatTile
+							icon={Hand}
+							label={t("today.stats.waiting")}
+							value={blockers.length}
+							hint={blockers.length === 0 ? t("today.stats.waitingNone") : undefined}
+							tone={blockers.some((item) => item.tone === "critical") ? "critical" : "warning"}
 						/>
-					) : null}
+						<StatTile
+							icon={Bot}
+							label={t("today.stats.working")}
+							value={working}
+							hint={resting > 0 ? t("today.stats.resting", { count: resting }) : undefined}
+							tone="accent"
+							onClick={open.length > 0 ? () => go("workspace") : undefined}
+						/>
+						<StatTile
+							icon={ListChecks}
+							label={t("today.stats.missions")}
+							value={ongoing.length}
+							hint={awaitingYou > 0 ? t("today.stats.missionsWaiting", { count: awaitingYou }) : undefined}
+							tone={awaitingYou > 0 ? "warning" : "accent"}
+							onClick={() => go("missions")}
+						/>
+						<StatTile
+							icon={GitMerge}
+							label={t("today.stats.pullRequests")}
+							value={readyToMerge.length}
+							hint={toReview.length > 0 ? t("today.stats.toReview", { count: toReview.length }) : undefined}
+							tone="success"
+						/>
+						<StatTile
+							icon={Trash2}
+							label={t("today.stats.cleanup")}
+							value={removable.length}
+							hint={t("today.stats.trees", { count: worktrees.length })}
+							tone="info"
+							onClick={() => go("worktrees")}
+						/>
+					</div>
 
 					{/* Ce qui arrête une machine se lit avant tout le reste, et sans
 					    défiler : le bandeau prend toute la largeur et se place au-dessus
@@ -161,17 +211,18 @@ export function TodayView() {
 					    quand, et qui a coincé. */}
 					<AgentDay />
 
-					{/* Le reste tient côte à côte. Chaque carte est bornée en hauteur et
-					    défile chez elle : une liste longue ne repousse plus les autres
-					    hors de l'écran. */}
-					{/* `items-start` : sans lui, une carte d'une seule ligne s'étire sur
-					    toute la hauteur de sa rangée et n'affiche que du vide. */}
-					<div className="grid grid-cols-1 items-start gap-4 lg:grid-cols-2 2xl:grid-cols-3">
-						{/* Ce qui t'est assigné, avec de quoi s'y mettre : c'est ici qu'on
-						    décide de commencer, pas dans un tableau de bord qu'on lit. */}
-						{openTickets.length > 0 ? (
-							<Card title={t("today.myTickets")} count={openTickets.length}>
-								{openTickets.map((ticket) => (
+					{/* Deux colonnes qui finissent à la même hauteur. Dans une grille à
+					    trois places, deux cartes laissaient un trou à droite, et la note
+					    d'une ligne flottait au-dessus d'un vide pendant que le journal
+					    descendait d'un écran. À gauche ce qu'on fait, à droite ce qui
+					    s'est fait. */}
+					<div className="grid grid-cols-1 gap-4 xl:grid-cols-2">
+						<div className="flex min-w-0 flex-col gap-4">
+							{/* Ce qui t'est assigné, avec de quoi s'y mettre : c'est ici qu'on
+							    décide de commencer, pas dans un tableau de bord qu'on lit. */}
+							{openTickets.length > 0 ? (
+								<Card title={t("today.myTickets")} count={openTickets.length}>
+									{openTickets.map((ticket) => (
 										<div
 											key={ticket.id}
 											className="group relative flex items-start gap-2 p-2.5"
@@ -210,73 +261,83 @@ export function TodayView() {
 											</span>
 										</div>
 									))}
+								</Card>
+							) : null}
+
+							{readyToMerge.length > 0 ? (
+								<PrCard
+									title={t("today.readyToMerge")}
+									tone="success"
+									icon={GitMerge}
+									items={readyToMerge}
+								/>
+							) : null}
+
+							{toReview.length > 0 ? (
+								<PrCard title={t("today.toReview")} tone="info" icon={GitPullRequest} items={toReview} />
+							) : null}
+
+							{removable.length > 0 ? (
+								<Card title={t("today.worktreesToClean")} count={removable.length}>
+									<button
+										type="button"
+										onClick={() => go("worktrees")}
+										className="flex w-full items-center gap-2 p-2.5 text-left hover:bg-hover"
+									>
+										<Trash2 size={13} className="shrink-0 text-ink-faint" />
+										<span className="min-w-0 flex-1 truncate text-[11px] text-ink-muted">
+											{removable
+												.slice(0, 4)
+												.map((entry) => entry.branch ?? entry.folderName)
+												.join(", ")}
+											{removable.length > 4 ? `, +${removable.length - 4}` : ""}
+										</span>
+										<Badge>{removable.length}</Badge>
+									</button>
+								</Card>
+							) : null}
+
+							{/* Les notes viennent après ce qui bloque : elles n'engagent que
+							    toi, et rien ne t'attend dessus. Elles prennent la hauteur qui
+							    reste, pour que la colonne finisse avec le journal d'en face. */}
+							<Card title={t("today.todo")} count={pending.length} grow>
+								<TaskList tasks={tasks} pending={pending} done={done} />
 							</Card>
-						) : null}
-
-						{/* Les notes viennent après ce qui bloque : elles n'engagent que
-						    toi, et rien ne t'attend dessus. */}
-						<Card title={t("today.todo")} count={pending.length}>
-							<TaskList tasks={tasks} pending={pending} done={done} />
-						</Card>
-
-						{readyToMerge.length > 0 ? (
-							<PrCard
-								title={t("today.readyToMerge")}
-								tone="success"
-								icon={GitMerge}
-								items={readyToMerge}
-							/>
-						) : null}
-
-						{toReview.length > 0 ? (
-							<PrCard title={t("today.toReview")} tone="info" icon={GitPullRequest} items={toReview} />
-						) : null}
+						</div>
 
 						{/* Ce que le cockpit a fait en ton nom : une app qui pousse et
-						    fusionne doit pouvoir rendre des comptes. */}
-						{(journal.data ?? []).length > 0 ? (
-							<Card title={t("today.activity")} count={journal.data?.length}>
-								{(journal.data ?? []).map((entry, index) => (
-									<div
-										key={`${entry.at}-${index}`}
-										className="flex items-center gap-2 px-2.5 py-1.5"
-									>
-										<Dot tone={entry.ok ? "success" : "critical"} />
-										<span className="shrink-0 text-[11px] text-ink">{entry.label}</span>
-										{/* Ce que tu n'as pas demandé se distingue de ce que tu as
-										    demandé, ligne par ligne : c'est la seule question à
-										    laquelle ce carnet doit savoir répondre. */}
-										{entry.actor !== "me" ? <Badge>{t("today.permanence")}</Badge> : null}
-										<span className="min-w-0 flex-1 truncate font-mono text-[10px] text-ink-faint">
-											{entry.detail || shortPath(entry.target, 1)}
-										</span>
-										<span className="shrink-0 font-mono text-[10px] text-ink-faint">
-											{fromTimestamp(entry.at)}
-										</span>
-									</div>
-								))}
-							</Card>
-						) : null}
-
-						{removable.length > 0 ? (
-							<Card title={t("today.worktreesToClean")} count={removable.length}>
-								<button
-									type="button"
-									onClick={() => go("worktrees")}
-									className="flex w-full items-center gap-2 p-2.5 text-left hover:bg-hover"
+						    fusionne doit pouvoir rendre des comptes. Posé en absolu dans son
+						    cadre : le journal compte quarante lignes, et s'il dictait la
+						    hauteur de la rangée, la note d'en face s'étirait sur un écran vide.
+						    C'est la colonne de gauche qui la fixe, avec un plancher. */}
+						<div className="relative min-h-[26rem]">
+						<div className="absolute inset-0 flex flex-col">
+						<Card title={t("today.activity")} count={journal.data?.length} tall>
+							{(journal.data ?? []).length === 0 ? (
+								<Empty icon={NotebookPen} message={t("today.activityNone")} />
+							) : null}
+							{(journal.data ?? []).map((entry, index) => (
+								<div
+									key={`${entry.at}-${index}`}
+									className="flex items-center gap-2 px-3 py-2"
 								>
-									<Trash2 size={13} className="shrink-0 text-ink-faint" />
-									<span className="min-w-0 flex-1 truncate text-[11px] text-ink-muted">
-										{removable
-											.slice(0, 4)
-											.map((entry) => entry.branch ?? entry.folderName)
-											.join(", ")}
-										{removable.length > 4 ? `, +${removable.length - 4}` : ""}
+									<Dot tone={entry.ok ? "success" : "critical"} />
+									<span className="shrink-0 text-[11.5px] text-ink">{entry.label}</span>
+									{/* Ce que tu n'as pas demandé se distingue de ce que tu as
+									    demandé, ligne par ligne : c'est la seule question à
+									    laquelle ce carnet doit savoir répondre. */}
+									{entry.actor !== "me" ? <Badge>{t("today.permanence")}</Badge> : null}
+									<span className="min-w-0 flex-1 truncate font-mono text-[10px] text-ink-faint">
+										{entry.detail || shortPath(entry.target, 1)}
 									</span>
-									<Badge>{removable.length}</Badge>
-								</button>
-							</Card>
-						) : null}
+									<span className="shrink-0 font-mono text-[10px] text-ink-faint">
+										{fromTimestamp(entry.at)}
+									</span>
+								</div>
+							))}
+						</Card>
+						</div>
+						</div>
 					</div>
 				</div>
 			</div>
@@ -397,20 +458,33 @@ function Fix({ item }: { item: Blocker }) {
 function Card({
 	title,
 	count,
+	grow,
+	tall,
 	children,
 }: {
 	title: string;
 	count?: number;
+	/** Prend la hauteur qui reste dans sa colonne. */
+	grow?: boolean;
+	/** Le journal : il remplit le cadre que lui donne la rangée (voir plus haut). */
+	tall?: boolean;
 	children: ReactNode;
 }) {
 	return (
-		<section className="panel flex max-h-[22rem] min-h-0 flex-col overflow-hidden">
-			<header className="flex h-8 shrink-0 items-center gap-1.5 border-b border-line-soft px-3">
+		<section
+			className={clsx(
+				"panel flex min-h-0 flex-col overflow-hidden",
+				grow ? "min-h-[10rem] flex-1" : tall ? "h-full" : "max-h-[22rem]",
+			)}
+		>
+			<header className="flex h-9 shrink-0 items-center gap-2 border-b border-line-soft px-3">
 				<h2 className="text-[11px] font-semibold tracking-[0.06em] text-ink-muted uppercase">
 					{title}
 				</h2>
 				{count !== undefined ? (
-					<span className="font-mono text-[10px] text-ink-faint">{count}</span>
+					<span className="rounded-full bg-raised px-1.5 font-mono text-[10px] text-ink-faint tabular-nums">
+						{count}
+					</span>
 				) : null}
 			</header>
 			<div className="min-h-0 flex-1 divide-y divide-line-soft overflow-y-auto">{children}</div>
@@ -532,6 +606,12 @@ function TaskList({
 			</div>
 
 			{tasks.initial && tasks.loading ? <SkeletonRows rows={3} className="p-2.5" /> : null}
+
+			{/* La carte prend la hauteur de sa colonne : vide, elle doit dire à quoi
+			    elle sert plutôt que d'aligner du blanc sous la saisie. */}
+			{!tasks.initial && pending.length + done.length === 0 ? (
+				<Empty icon={NotebookPen} message={t("today.task.empty")} hint={t("today.task.emptyHint")} />
+			) : null}
 
 			{[...pending, ...done].map((task) => (
 				<div
