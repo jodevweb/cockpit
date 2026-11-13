@@ -672,7 +672,7 @@ dependencies = [
 
 [[package]]
 name = "cockpit"
-version = "0.89.1"
+version = "0.89.2"
 dependencies = [
  "anyhow",
  "async-trait",
