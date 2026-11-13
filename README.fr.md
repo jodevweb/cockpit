@@ -15,6 +15,8 @@ Linux ; locale, sans serveur.
 ![Linux x64](https://img.shields.io/badge/Linux-x64-lightgrey.svg)
 ![Tauri 2](https://img.shields.io/badge/Tauri-2-24C8DB.svg)
 
+**[Télécharger la dernière version](https://github.com/jodevweb/cockpit-releases/releases/latest)** : [macOS](#installer-sans-compiler-macos) · [Windows](#windows) · [Linux](#linux). Il faut `git` et une CLI d'agent déjà installée et connectée : [Claude Code](https://docs.anthropic.com/fr/docs/claude-code), Codex ou Gemini (voir [Prérequis](#prérequis)).
+
 <img alt="La carte d'un projet : ses tickets ouverts, une mission livrée par trois exécutants, sa pull request prête à fusionner, CI verte" src="docs/images/carte.webp">
 
 Application Tauri 2 — binaire natif, aucun serveur. Rust pour tout ce qui
