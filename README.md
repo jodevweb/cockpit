@@ -14,6 +14,8 @@ app for macOS, Windows and Linux; local, no server.
 ![Linux x64](https://img.shields.io/badge/Linux-x64-lightgrey.svg)
 ![Tauri 2](https://img.shields.io/badge/Tauri-2-24C8DB.svg)
 
+**[Download the latest version](https://github.com/jodevweb/cockpit-releases/releases/latest)**: [macOS](#installing-without-building-macos) · [Windows](#windows) · [Linux](#linux). It needs `git` and an agent CLI already installed and signed in: [Claude Code](https://docs.anthropic.com/en/docs/claude-code), Codex or Gemini (see [Requirements](#requirements)).
+
 <img alt="The map of a project: its open issues, a mission delivered by three workers, its pull request ready to merge with CI green" src="docs/images/carte.webp">
 
 A Tauri 2 application — a native binary, no server. Rust for everything that
