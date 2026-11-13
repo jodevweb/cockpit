@@ -8,6 +8,7 @@ import { api } from "@/lib/ipc";
 import type { NamedUsage, ResourceReport } from "@/lib/types";
 import { useAsync } from "@/lib/useAsync";
 import { basename } from "@/lib/paths";
+import { compactNumber } from "@/lib/format";
 import { platformContext } from "@/lib/platform";
 
 /**
@@ -253,7 +254,7 @@ export function SpendTicker({ onOpen }: { onOpen: () => void }) {
 					tight ? "text-critical" : low ? "text-warning" : "text-ink-faint",
 				)}
 			/>
-			<span className="font-mono text-ink-faint tabular-nums">{compact(data.today)}</span>
+			<span className="font-mono text-ink-faint tabular-nums">{compactNumber(data.today)}</span>
 			{/* Ce qui reste prime sur ce qui a été pris : c'est la question qu'on se
 			    pose en jetant un œil. */}
 			<span
@@ -268,13 +269,6 @@ export function SpendTicker({ onOpen }: { onOpen: () => void }) {
 	);
 }
 
-/** `1,2 M` plutôt que `1 204 883` : un témoin se lit d'un coup d'œil. Séparateur décimal de la langue. */
-function compact(tokens: number): string {
-	if (tokens >= 1_000_000)
-		return `${(tokens / 1_000_000).toLocaleString(locale(), { minimumFractionDigits: 1, maximumFractionDigits: 1 })} M`;
-	if (tokens >= 1_000) return `${Math.round(tokens / 1000)} k`;
-	return String(tokens);
-}
 
 export function ResourcesTicker({ onOpen }: { onOpen: () => void }) {
 	// Cinq secondes : c'est un témoin, pas un moniteur. Le panneau ouvert, lui,
