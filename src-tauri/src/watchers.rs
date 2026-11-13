@@ -470,7 +470,8 @@ pub(crate) fn reap_stray_agents(app: &AppHandle) -> usize {
 	let agents = agents.inner().clone();
 
 	let mut reaped = 0;
-	for mission in mission::list() {
+	let missions = mission::list();
+	for mission in &missions {
 		let close = mission.state == mission::MissionState::Done || mission.state == mission::MissionState::Failed;
 
 		if let Some(session) = &mission.master_session {
@@ -509,6 +510,29 @@ pub(crate) fn reap_stray_agents(app: &AppHandle) -> usize {
 			let _ = agent::stop(&agents, session);
 			reaped += 1;
 		}
+	}
+
+	// Ce que plus aucune mission ne désigne : l'ancienne session d'un maître
+	// remplacé ou d'un exécutant relancé, ou l'agent d'une mission purgée. Il
+	// a rendu son tour et personne ne lui écrira plus. En plein tour, on le
+	// laisse finir — c'est peut-être un lancement dont la mission n'a pas
+	// encore noté la session.
+	let designated: std::collections::HashSet<&str> = missions
+		.iter()
+		.flat_map(|mission| {
+			mission
+				.master_session
+				.as_deref()
+				.into_iter()
+				.chain(mission.tasks.iter().filter_map(|task| task.session_id.as_deref()))
+		})
+		.collect();
+	for (session, _, working) in agent::mission_agents(&agents) {
+		if working || designated.contains(session.as_str()) {
+			continue;
+		}
+		let _ = agent::stop(&agents, &session);
+		reaped += 1;
 	}
 	reaped
 }

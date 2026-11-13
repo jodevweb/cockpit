@@ -494,6 +494,15 @@ pub(crate) fn stop_mission_agents(app: &AppHandle, id: &str) -> usize {
 			);
 		}
 	}
+	// Puis ce que la mission ne désigne plus mais qui vit encore : un maître
+	// remplacé, un exécutant relancé. Purgée, la mission ne les retrouverait
+	// jamais plus — ils tiendraient jusqu'à ce qu'on les tue à la main.
+	for (session, owner, _) in agent::mission_agents(&agents) {
+		if owner == id {
+			let _ = agent::stop(&agents, &session);
+			stopped += 1;
+		}
+	}
 	let _ = mission::update_master_session(id, None);
 	stopped
 }

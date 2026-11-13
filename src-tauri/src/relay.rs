@@ -49,6 +49,10 @@ pub struct Meta {
 	/// L'exécution que cet agent alimente : c'est la même qui continue après un
 	/// redémarrage, pas une nouvelle — un agent qui a survécu n'a pas été relancé.
 	pub execution: String,
+	/// La mission qui l'a lancé — vide pour un agent ouvert à la main. Retenue
+	/// ici pour qu'un agent retrouvé au démarrage reste rattaché à sa mission :
+	/// sans elle, plus rien ne savait l'arrêter quand la mission se refermait.
+	pub mission: String,
 	pub claude_session_id: Option<String>,
 	/// Le groupe de processus du relais : le shell, `tail`, le CLI et ce qu'il
 	/// lance. On le tue en entier, jamais seulement le CLI — un `tail -f` laissé
@@ -268,6 +272,7 @@ pub fn spawn_in(
 			session_id: session_id.to_string(),
 			cwd: cwd.to_string(),
 			execution: execution.to_string(),
+			mission: String::new(),
 			claude_session_id: None,
 			pgid,
 			at: chrono::Utc::now().to_rfc3339(),
@@ -526,6 +531,17 @@ pub fn survivors() -> Vec<String> {
 #[cfg(test)]
 mod tests {
 	use super::*;
+
+	/// Une fiche écrite par une version qui ne retenait pas la mission doit se
+	/// relire : c'est précisément le relais survivant d'avant la mise à jour
+	/// qu'il faut pouvoir rattacher à sa mission, puis arrêter.
+	#[test]
+	fn fiche_sans_mission_se_relit() {
+		let raw = r#"{"sessionId":"s1","cwd":"/tmp/x","execution":"e1","pgid":42,"at":"2026-11-12T00:00:00Z"}"#;
+		let meta: Meta = serde_json::from_str(raw).unwrap();
+		assert_eq!(meta.execution, "e1");
+		assert!(meta.mission.is_empty());
+	}
 
 	fn base() -> PathBuf {
 		// Un compteur en plus de l'heure : deux tests lancés en parallèle dans la
