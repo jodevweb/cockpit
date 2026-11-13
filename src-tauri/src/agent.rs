@@ -118,6 +118,14 @@ struct Running {
 	/// le process sans pour autant en ouvrir une seconde. C'est donc ici qu'elle
 	/// se retient, plutôt que d'être redéduite à chaque tour.
 	execution: String,
+	/// La mission qui a lancé cet agent — vide pour un agent ouvert à la main.
+	///
+	/// La mission ne retient que ses sessions *actuelles* : un maître remplacé,
+	/// un exécutant relancé, et l'ancienne session sortait de son champ de
+	/// vision. Arrêter ou purger la mission la laissait alors vivante — sept
+	/// agents d'une mission de démonstration tenaient encore, des heures après,
+	/// le compteur « au travail ». C'est donc l'agent qui dit à qui il est.
+	mission: String,
 	/// Absent entre deux tours d'un agent dont le process ne reste pas
 	/// ouvert (`codex-exec`) : il s'est terminé de lui-même, par conception —
 	/// voir `per_turn`.
@@ -1192,6 +1200,7 @@ async fn start_inner(
 			Running {
 				cwd,
 				execution,
+				mission: mission.clone().unwrap_or_default(),
 				stdin: None,
 				child: None,
 				relay: None,
@@ -1289,7 +1298,10 @@ async fn start_inner(
 	// La fiche du relais apprend son exécution : c'est la même qui continuera
 	// si le cockpit se ferme, pas une nouvelle au redémarrage.
 	if let Some(relay) = &relay {
-		crate::relay::update_meta(&relay.dir, |meta| meta.execution = execution.clone());
+		crate::relay::update_meta(&relay.dir, |meta| {
+			meta.execution = execution.clone();
+			meta.mission = mission.clone().unwrap_or_default();
+		});
 	}
 
 	// Ce qu'on a demandé ne revient pas par la sortie du moteur : sans cette
@@ -1347,6 +1359,7 @@ async fn start_inner(
 		Running {
 			cwd: cwd.clone(),
 			execution: execution.clone(),
+			mission: mission.clone().unwrap_or_default(),
 			stdin,
 			child,
 			relay,
@@ -2522,6 +2535,19 @@ pub fn turn_age(agents: &SharedAgents, session_id: &str) -> Option<std::time::Du
 		.map(|running| running.turn_started_at.elapsed())
 }
 
+/// Les agents vivants lancés par une mission, avec la mission de chacun et
+/// s'ils sont en plein tour. Les agents ouverts à la main n'y figurent pas.
+pub fn mission_agents(agents: &SharedAgents) -> Vec<(String, String, bool)> {
+	agents
+		.sessions
+		.lock()
+		.unwrap()
+		.iter()
+		.filter(|(_, running)| !running.mission.is_empty())
+		.map(|(session, running)| (session.clone(), running.mission.clone(), !running.turn_done))
+		.collect()
+}
+
 pub fn stop(agents: &SharedAgents, session_id: &str) -> Result<()> {
 	let mut sessions = agents.sessions.lock().unwrap();
 	let Some(mut running) = sessions.remove(session_id) else {
@@ -2672,8 +2698,31 @@ pub fn adopt_relays(app: &AppHandle, agents: &SharedAgents) -> Adopted {
 		let _ = std::fs::remove_dir_all(&found.dir);
 	}
 
+	// Un relais lancé avant que sa fiche ne retienne la mission : on la relit
+	// dans le relevé des exécutions, une fois pour tous, et seulement s'il en
+	// reste un — le relevé entier se parcourt, ce n'est pas gratuit.
+	let missions_of: std::collections::HashMap<String, String> = if living
+		.iter()
+		.any(|found| found.meta.mission.is_empty() && !found.meta.execution.is_empty())
+	{
+		crate::executions::fold()
+			.into_iter()
+			.filter(|exec| !exec.opening.mission.is_empty())
+			.map(|exec| (exec.id, exec.opening.mission))
+			.collect()
+	} else {
+		Default::default()
+	};
+
 	for found in living {
-		let meta = found.meta;
+		let mut meta = found.meta;
+		if meta.mission.is_empty() {
+			if let Some(mission) = missions_of.get(&meta.execution) {
+				meta.mission = mission.clone();
+				let mission = mission.clone();
+				crate::relay::update_meta(&found.dir, |meta| meta.mission = mission);
+			}
+		}
 		let handle = crate::relay::Handle {
 			dir: found.dir.clone(),
 			pgid: meta.pgid,
@@ -2684,6 +2733,7 @@ pub fn adopt_relays(app: &AppHandle, agents: &SharedAgents) -> Adopted {
 			Running {
 				cwd: meta.cwd.clone(),
 				execution: meta.execution.clone(),
+				mission: meta.mission.clone(),
 				stdin: Some(Input::Relay(handle.clone())),
 				child: None,
 				relay: Some(handle),
