@@ -82,7 +82,13 @@ pub struct UsageReport {
 #[derive(Debug, Clone, Serialize, Default)]
 #[serde(rename_all = "camelCase")]
 pub struct Spend {
-	/// Jetons consommés aujourd'hui, entrée et sortie confondues.
+	/// Jetons facturés aujourd'hui : entrée, sortie et écriture du cache.
+	///
+	/// Sans la lecture du cache. Elle pèse l'essentiel du volume — un agent
+	/// relit tout son contexte à chaque tour — pour une fraction du prix : le
+	/// témoin affichait 1,8 milliard de jetons sur une journée ordinaire, un
+	/// chiffre qui ne disait plus rien. C'est le même compte que celui du
+	/// panneau d'usage (`billable`).
 	///
 	/// Des jetons et non des euros : sur un abonnement, rien n'est débité et un
 	/// montant en dollars ferait croire à une facture qui n'existe pas. Ce qui
@@ -148,7 +154,8 @@ pub fn spend(roots: &[String], last_limits: Option<&Limits>) -> Spend {
 		Ok(report) => report,
 		Err(_) => return Spend::default(),
 	};
-	let today = report.today.input + report.today.output + report.today.cache_read + report.today.cache_write;
+	let billable = |totals: &Totals| totals.input + totals.output + totals.cache_write;
+	let today = billable(&report.today);
 
 	// La contrainte qui mordra la première, jamais une moyenne : c'est elle qui
 	// décidera, et c'est donc elle qu'on veut sous les yeux.
@@ -158,7 +165,7 @@ pub fn spend(roots: &[String], last_limits: Option<&Limits>) -> Spend {
 
 	Spend {
 		today,
-		window: report.last_5h.input + report.last_5h.output + report.last_5h.cache_read + report.last_5h.cache_write,
+		window: billable(&report.last_5h),
 		remaining: tightest.map(|limit| 100u32.saturating_sub(limit.percent)),
 		tightest: tightest.map(|limit| limit.label.clone()).unwrap_or_default(),
 		resets_at: tightest.map(|limit| limit.resets_at.clone()).unwrap_or_default(),
