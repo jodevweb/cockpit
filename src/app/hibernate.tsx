@@ -7,7 +7,7 @@ import {
 	useRef,
 	type ReactNode,
 } from "react";
-import { useWorkGroups } from "@/components/WorkspacePanel";
+import { useAllWorkGroups } from "@/components/WorkspacePanel";
 import { api } from "@/lib/ipc";
 import { replyDirective } from "@/lib/language";
 import { hasTauri } from "@/lib/preview";
@@ -119,7 +119,7 @@ interface HibernateStore {
 const Context = createContext<HibernateStore | null>(null);
 
 export function HibernateProvider({ children }: { children: ReactNode }) {
-	const groups = useWorkGroups();
+	const groups = useAllWorkGroups();
 	const agents = useAgentActions();
 	const terminals = useTerminalActions();
 	const sessions = useAllSessions();

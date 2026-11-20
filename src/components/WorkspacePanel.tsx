@@ -53,6 +53,7 @@ import { useHibernate, type SleepingGroup } from "@/app/hibernate";
 import { useWorkspace, type TabRef } from "@/app/workspace";
 import { dragRegion, formatShortcut } from "@/lib/platform";
 import { basename } from "@/lib/paths";
+import { belongsToProject, useRepoOrigins } from "@/lib/repoOrigins";
 
 /**
  * Un workspace : un worktree, ses agents, ses terminaux.
@@ -156,6 +157,25 @@ function tabTitle(group: WorkGroup, detail?: string): string {
  * worktree quand on la connaît — « feat/auth » dit plus que « monorepo-feat-auth ».
  */
 export function useWorkGroups(): WorkGroup[] {
+	const all = useAllWorkGroups();
+	const { config } = useCockpit();
+	const origines = useRepoOrigins(all.map((group) => group.cwd));
+	// Ce qui relève d'un autre projet sort de l'écran.
+	return useMemo(
+		() => all.filter((group) => belongsToProject(origines[group.cwd], config?.mainRepo)),
+		[all, origines, config?.mainRepo],
+	);
+}
+
+/**
+ * Les groupes de travail de tous les projets.
+ *
+ * L'écran n'en montre qu'une partie, mais ce qui tourne dans l'autre projet
+ * tourne toujours : l'empreinte de session doit le garder, sans quoi passer
+ * sur Atelier Notice faisait oublier au prochain lancement les workspaces
+ * d'Agence HQ.
+ */
+export function useAllWorkGroups(): WorkGroup[] {
 	const { runs: all } = useAgentRuns();
 	// Les agents libres ont leur écran : un workspace ne se forme pas autour
 	// d'eux. Relu à chaque changement du registre, pour qu'un agent revenu de
@@ -164,23 +184,8 @@ export function useWorkGroups(): WorkGroup[] {
 	// eslint-disable-next-line react-hooks/exhaustive-deps
 	const runs = useMemo(() => all.filter((run) => !isLibreRun(run)), [all, registry]);
 	const { tabs: terminals } = useTerminals();
-	const { worktrees, missions, config } = useCockpit();
+	const { worktrees, missions } = useCockpit();
 	const { t } = useTranslation("components3");
-
-	// À quel dépôt appartient chaque dossier ouvert. Un workspace n'est qu'un
-	// dossier avec des agents dedans : rien n'y disait de quel projet il
-	// relevait, et changer de projet laissait donc les mêmes onglets à l'écran,
-	// venus d'un autre dépôt.
-	const dossiers = useMemo(
-		() =>
-			[...new Set([...runs.map((run) => run.cwd), ...terminals.map((t) => t.cwd)])].sort(),
-		[runs, terminals],
-	);
-	const origines = useAsync(
-		(): Promise<Record<string, string>> =>
-			dossiers.length > 0 ? api.worktrees.reposOf(dossiers) : Promise.resolve({}),
-		[dossiers.join("|")],
-	);
 
 	// À quelle mission appartient chaque dossier — celui du maître comme ceux
 	// des exécutants. Le rôle sert de nom court : dans une mission, « backend »
@@ -246,18 +251,8 @@ export function useWorkGroups(): WorkGroup[] {
 			];
 		}
 
-		// Ce qui relève d'un autre projet sort de l'écran. On ne masque que ce
-		// qu'on sait classer ailleurs : un dossier hors dépôt, ou un dépôt qu'on
-		// n'a pas encore résolu, reste visible plutôt que de disparaître sans
-		// que rien ne l'explique.
-		const repo = (config?.mainRepo ?? "").replace(/\/+$/, "");
-		const table = origines.data ?? {};
-		return [...groups.values()].filter((group) => {
-			if (!repo) return true;
-			const origine = (table[group.cwd] ?? "").replace(/\/+$/, "");
-			return origine === "" || origine === repo;
-		});
-	}, [runs, terminals, worktrees, belongsTo, origines.data, config?.mainRepo]);
+		return [...groups.values()];
+	}, [runs, terminals, worktrees, belongsTo]);
 }
 
 /** Ce qu'un groupe donne à voir de loin, sans l'ouvrir. */
@@ -1112,7 +1107,15 @@ export function WorkspacePanel() {
 	const terminals = useTerminals();
 	const { confirm } = useConfirm();
 	const { t } = useTranslation("components3");
-	const { sleeping, sleep, wake, forget } = useHibernate();
+	const { sleeping: allSleeping, sleep, wake, forget } = useHibernate();
+	// Les workspaces endormis se trient comme les vivants : ceux d'Agence HQ
+	// n'ont rien à faire dans le rail d'Atelier Notice.
+	const mainRepo = useCockpit().config?.mainRepo;
+	const sleepingOrigins = useRepoOrigins(allSleeping.map((entry) => entry.cwd));
+	const sleeping = useMemo(
+		() => allSleeping.filter((entry) => belongsToProject(sleepingOrigins[entry.cwd], mainRepo)),
+		[allSleeping, sleepingOrigins, mainRepo],
+	);
 
 	const owned = groups.find((entry) => entry.cwd === workspace.cwd) ?? null;
 	// Un workspace qui se ferme ne doit pas laisser l'écran nu le temps que

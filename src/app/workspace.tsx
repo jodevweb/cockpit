@@ -74,7 +74,7 @@ interface WorkspaceStore {
 const Context = createContext<WorkspaceStore | null>(null);
 
 export function WorkspaceProvider({ children }: { children: ReactNode }) {
-	const { view } = useCockpit();
+	const { view, activeProject } = useCockpit();
 	// Hors Tauri, l'écran s'ouvre déjà sur le workspace d'exemple : personne ne
 	// peut en ouvrir un puisque personne ne lance d'agent.
 	const [cwd, setCwd] = useState<string | null>(
@@ -83,6 +83,23 @@ export function WorkspaceProvider({ children }: { children: ReactNode }) {
 	// Dernier onglet regardé par groupe : rouvrir un workspace doit retomber sur
 	// ce qu'on y faisait, pas sur son premier onglet.
 	const [tabs, setTabs] = useState<Record<string, TabRef>>({});
+
+	// Le workspace choisi l'est dans un projet. Changer de projet le laissait
+	// désigné : l'écran d'Atelier Notice restait sur un dossier d'Agence HQ, et
+	// un terminal ouvert au raccourci partait dans le mauvais dépôt. Chaque
+	// projet retrouve donc le sien en revenant ; un projet jamais visité
+	// n'en a pas, et l'écran retombe sur son dernier workspace ouvert.
+	const projectId = activeProject?.id ?? null;
+	const [cwdOfProject, setCwdOfProject] = useState<Record<string, string | null>>({});
+	const [shownProject, setShownProject] = useState(projectId);
+	if (shownProject !== projectId) {
+		setShownProject(projectId);
+		// Le premier chargement de la config n'est pas un changement de projet.
+		if (shownProject !== null) {
+			setCwdOfProject((state) => ({ ...state, [shownProject]: cwd }));
+			setCwd(projectId !== null ? (cwdOfProject[projectId] ?? null) : null);
+		}
+	}
 
 	// Le workspace reste choisi quand on va lire autre chose — il n'est
 	// simplement plus à l'écran. La distinction n'existe que pour `visible`.
