@@ -22,6 +22,7 @@ import type {
 	Worktree,
 } from "@/lib/types";
 import { bumpProjectEpoch } from "@/lib/projectScope";
+import { belongsToProject, useRepoOrigins } from "@/lib/repoOrigins";
 import { useAsync } from "@/lib/useAsync";
 import { toast as sonner } from "sonner";
 import { t } from "@/i18n";
@@ -455,24 +456,15 @@ export function CockpitProvider({ children }: { children: ReactNode }) {
 	// workspaces — un dossier qu'on ne sait pas classer reste visible plutôt que
 	// de disparaître sans que rien ne l'explique.
 	const sessionCwds = useMemo(
-		() => (sessionState.data ?? []).map((project) => project.cwd).sort(),
+		() => (sessionState.data ?? []).map((project) => project.cwd),
 		[sessionState.data],
 	);
-	const sessionRepos = useAsync(
-		(): Promise<Record<string, string>> =>
-			sessionCwds.length > 0 ? api.worktrees.reposOf(sessionCwds) : Promise.resolve({}),
-		[sessionCwds.join("|")],
-	);
+	const sessionRepos = useRepoOrigins(sessionCwds);
 	const sessionsOfProject = useMemo(() => {
 		const all = sessionState.data ?? [];
-		const repo = (configState.data?.mainRepo ?? "").replace(/\/+$/, "");
-		if (!repo) return all;
-		const table = sessionRepos.data ?? {};
-		return all.filter((project) => {
-			const origine = (table[project.cwd] ?? "").replace(/\/+$/, "");
-			return origine === "" || origine === repo;
-		});
-	}, [sessionState.data, sessionRepos.data, configState.data?.mainRepo]);
+		const repo = configState.data?.mainRepo;
+		return all.filter((project) => belongsToProject(sessionRepos[project.cwd], repo));
+	}, [sessionState.data, sessionRepos, configState.data?.mainRepo]);
 
 	const switchProject = useCallback(
 		(id: string) => {
