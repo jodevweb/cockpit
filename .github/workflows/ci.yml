@@ -116,7 +116,10 @@ jobs:
   # restent visibles. Linux suffit : l'aperçu ne touche à aucun binaire natif.
   interface:
     name: Interface (Playwright)
-    runs-on: ubuntu-latest
+    # Version d'Ubuntu fixée : `ubuntu-latest` est passé en 26.04, où Playwright
+    # 1.56 n'installe pas Chromium (« does not support chromium on ubuntu26.04 »),
+    # et le job tombait avant le premier test, sur toutes les PR.
+    runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
 
